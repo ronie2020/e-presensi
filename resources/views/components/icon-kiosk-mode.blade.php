@@ -1,0 +1,3 @@
+<svg {{ $attributes->merge(['class' => '']) }} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21M9 17.25v-1.007a3 3 0 00-.879-2.122L7.5 15M9 17.25H7.5m1.5 0H15M2.25 8.25c0-2.828 2.22-5.09 5.007-5.09H16.74a5.006 5.006 0 015.006 5.007v5.006A5.006 5.006 0 0116.74 18.25H7.257a5.007 5.007 0 01-5.006-5.006V8.25z" />
+</svg>

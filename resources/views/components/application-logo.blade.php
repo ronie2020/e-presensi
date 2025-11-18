@@ -1,0 +1,1 @@
+<img {{ $attributes }} src="{{ asset('images/logo_smp3.png') }}" alt="{{ config('app.name') }} Logo" />
