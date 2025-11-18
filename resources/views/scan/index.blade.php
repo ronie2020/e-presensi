@@ -197,10 +197,11 @@
             // Minta daftar kamera yang tersedia
             Html5Qrcode.getCameras().then(cameras => {
                 if (cameras && cameras.length) {
-                    // Jika ada kamera, gunakan kamera pertama (biasanya webcam)
                     console.log("Kamera ditemukan:", cameras);
                     scanStatus.textContent = "Memulai kamera...";
-                    startScanner(cameras[0].id); // Mulai scanner dengan kamera pertama
+                    
+                    // Ganti baris ini untuk memaksa kamera belakang
+                    startScanner({ facingMode: "environment" }); 
                 } else {
                     console.error("Tidak ada kamera ditemukan.");
                     scanStatus.textContent = "Tidak ada kamera yang terdeteksi.";
