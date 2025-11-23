@@ -15,7 +15,7 @@
             </div>
             
             <div class="flex flex-col sm:flex-row gap-3 items-center">
-                {{-- Switcher Kegiatan (Segmented Control Style) --}}
+                {{-- Switcher Kegiatan --}}
                 <div class="bg-white p-1.5 rounded-2xl flex items-center shadow-sm border border-gray-100">
                     <a href="{{ route('reports.religious', ['activity' => 'Dhuha', 'date' => $selectedDate_db->format('Y-m-d')]) }}" 
                        class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ $selectedActivity == 'Dhuha' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
@@ -27,7 +27,7 @@
                     </a>
                 </div>
 
-                {{-- Filter Tanggal Modern --}}
+                {{-- Filter Tanggal --}}
                 <form action="{{ route('reports.religious') }}" method="GET" class="flex items-center gap-2 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
                     <input type="hidden" name="activity" value="{{ $selectedActivity }}">
                     <input type="date" name="date" 
@@ -51,7 +51,7 @@
             </div>
         @endif
 
-        {{-- STATISTIK (Modern Cards) --}}
+        {{-- STATISTIK --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all">
                 <div class="h-12 w-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
@@ -60,7 +60,6 @@
                 <h3 class="text-3xl font-extrabold text-gray-800">{{ $hadirCount }}</h3>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Sudah Absen</p>
             </div>
-            
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all">
                 <div class="h-12 w-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -68,7 +67,6 @@
                 <h3 class="text-3xl font-extrabold text-gray-800">{{ $izinUzurCount }}</h3>
                 <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Izin / Uzur</p>
             </div>
-
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all">
                 <div class="h-12 w-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -82,26 +80,26 @@
         <div x-data="{ activeTab: 'hadir' }" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
             
             {{-- Tabs Modern --}}
-            <div class="flex border-b border-gray-100 overflow-x-auto bg-gray-50/50 p-2 gap-2">
+            <div class="flex border-b border-gray-100 overflow-x-auto bg-gray-50/50 p-2 gap-2 flex-nowrap no-scrollbar">
                 <button @click="activeTab = 'hadir'" 
                         :class="activeTab === 'hadir' ? 'bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-100' : 'text-gray-500 hover:bg-white/60'" 
-                        class="flex-1 py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">
+                        class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">
                     ✅ Sudah Absen
                 </button>
                 <button @click="activeTab = 'belum'" 
                         :class="activeTab === 'belum' ? 'bg-white text-red-600 shadow-sm ring-1 ring-red-100' : 'text-gray-500 hover:bg-white/60'" 
-                        class="flex-1 py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">
+                        class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">
                     ❌ Belum Absen
                 </button>
                 <button @click="activeTab = 'uzur'" 
                         :class="activeTab === 'uzur' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-blue-100' : 'text-gray-500 hover:bg-white/60'" 
-                        class="flex-1 py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">
+                        class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">
                     ℹ️ Izin / Uzur
                 </button>
             </div>
 
             {{-- Container Tabel --}}
-            <div class="w-full overflow-hidden relative min-h-[300px]">
+            <div class="w-full relative min-h-[300px]"> {{-- Hapus overflow-hidden di sini --}}
                 
                 {{-- TAB 1: HADIR --}}
                 <div x-show="activeTab === 'hadir'" x-transition:enter.duration.300ms class="w-full">
@@ -117,14 +115,14 @@
                             </button>
                         </form>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-left border-collapse">
+                    <div class="overflow-x-auto w-full pb-4">
+                        <table class="min-w-[1000px] w-full text-left border-collapse">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Nama Siswa</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Kelas</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Waktu</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap text-right">Aksi</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3">Nama Siswa</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4">Kelas</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4">Waktu</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap text-right w-1/6">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
@@ -166,13 +164,13 @@
 
                 {{-- TAB 2: BELUM ABSEN --}}
                 <div x-show="activeTab === 'belum'" x-transition:enter.duration.300ms style="display: none;" class="w-full">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-left border-collapse">
+                    <div class="overflow-x-auto w-full pb-4">
+                        <table class="min-w-[1000px] w-full text-left border-collapse">
                             <thead class="bg-gray-50 border-b border-gray-100">
                                 <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Nama Siswa</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Kelas</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap text-right">Aksi</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3">Nama Siswa</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3">Kelas</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap text-right w-1/3">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
@@ -207,14 +205,14 @@
 
                 {{-- TAB 3: UZUR / IZIN --}}
                 <div x-show="activeTab === 'uzur'" x-transition:enter.duration.300ms style="display: none;" class="w-full">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full text-left border-collapse">
+                    <div class="overflow-x-auto w-full pb-4">
+                        <table class="min-w-[1000px] w-full text-left border-collapse">
                             <thead class="bg-gray-50 border-b border-gray-100">
                                 <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Nama Siswa</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Kelas</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Keterangan</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap text-right">Aksi</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3">Nama Siswa</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4">Kelas</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4">Keterangan</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap text-right w-1/6">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
@@ -252,20 +250,18 @@
         </div>
     </div>
 
-    {{-- MODAL INPUT MANUAL --}}
+    {{-- MODAL INPUT MANUAL, EDIT & SCRIPT (Tetap Sama) --}}
     <div id="manualInputModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">
                 <h3 class="font-bold text-white">Input Keterangan Manual</h3>
                 <button onclick="closeManualModal()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>
             </div>
-
             <form action="{{ route('reports.storeManual') }}" method="POST" class="p-6">
                 @csrf
                 <input type="hidden" name="attendance_type" value="Keagamaan">
                 <input type="hidden" name="activity" value="{{ $selectedActivity }}">
                 <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
-                
                 <div class="space-y-4">
                     <div>
                         <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Nama Siswa</label>
@@ -289,23 +285,19 @@
         </div>
     </div>
 
-    {{-- MODAL EDIT --}}
     <div id="editReligiousModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="bg-gray-800 px-6 py-4 flex justify-between items-center">
                 <h3 class="font-bold text-white">Edit Data Keagamaan</h3>
                 <button onclick="closeEditModalReligious()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>
             </div>
-            
             <form id="editReligiousForm" method="POST" class="p-6">
                 @csrf @method('PUT')
                 <div class="mb-4">
                     <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Nama Siswa</label>
                     <p id="modal-religious-student-name" class="text-xl font-bold text-gray-800"></p>
                 </div>
-                
                 <input type="hidden" name="activity" id="modal-religious-activity">
-                
                 <div class="mb-4">
                     <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Status</label>
                     <select name="status" id="modal-religious-status" class="w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500">
@@ -313,12 +305,10 @@
                         <option value="Uzur Syar'i">Uzur Syar'i</option>
                     </select>
                 </div>
-
                 <div class="mb-6">
                     <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Catatan</label>
                     <textarea name="notes" id="modal-religious-notes" class="w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500" rows="3"></textarea>
                 </div>
-
                 <div class="flex justify-end gap-3">
                     <button type="button" onclick="closeEditModalReligious()" class="px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200">Batal</button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-md">Update</button>
@@ -328,7 +318,6 @@
     </div>
 
     <script>
-        // Script Modal "Beri Keterangan"
         function openManualModalForStudent(id, name) {
             document.getElementById('manual-student-id').value = id;
             document.getElementById('manual-student-name-display').value = name;
@@ -337,15 +326,12 @@
         function closeManualModal() {
             document.getElementById('manualInputModal').classList.add('hidden');
         }
-
-        // Script Modal Edit
         const religiousModal = document.getElementById('editReligiousModal');
         const religiousForm = document.getElementById('editReligiousForm');
         const religiousStudentNameDisplay = document.getElementById('modal-religious-student-name');
         const religiousActivitySelect = document.getElementById('modal-religious-activity');
         const religiousStatusSelect = document.getElementById('modal-religious-status');
         const religiousNotesInput = document.getElementById('modal-religious-notes');
-        
         function openEditModalReligious(id, name, status, notes, activity) {
             const updateRoute = '{{ route('reports.update', ['attendance' => '__ID__']) }}'.replace('__ID__', id);
             religiousForm.action = updateRoute;
