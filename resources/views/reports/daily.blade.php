@@ -1,279 +1,258 @@
 {{-- Halaman ini adalah tampilan untuk resources/views/reports/daily.blade.php --}}
 <x-app-layout>
+    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
+
     {{-- Header Page --}}
     <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-            <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight">
-                Rekapitulasi Absensi Harian
-            </h1>
-            <p class="text-sm text-gray-500 mt-1">
-                Data kehadiran siswa pada tanggal <span class="font-bold text-blue-600">{{ $selectedDate_db->translatedFormat('d F Y') }}</span>.
-            </p>
+            <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight">Rekap Absensi Harian</h1>
+            <p class="text-sm text-gray-500 mt-1">Tanggal <span class="font-bold text-blue-600">{{ $selectedDate_db->translatedFormat('d F Y') }}</span>.</p>
         </div>
-        
-        {{-- Filter Tanggal --}}
-        <div class="flex items-center gap-2">
-            <form action="{{ route('reports.daily') }}" method="GET" class="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-gray-100">
-                <input type="date" name="date" 
-                       value="{{ $selectedDate_db->format('Y-m-d') }}" 
-                       class="border-0 focus:ring-0 text-sm font-semibold text-gray-600 bg-transparent rounded-lg cursor-pointer">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition-colors shadow-sm">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </button>
-            </form>
-        </div>
+        <form action="{{ route('reports.daily') }}" method="GET" class="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border">
+            <input type="date" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}" class="border-0 text-sm font-bold text-gray-600 rounded-lg">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
+        </form>
     </div>
 
     {{-- Pesan Flash --}}
     @if (session('success'))
-        <div class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-xl flex items-center gap-3 shadow-sm">
-            <span class="font-medium">{{ session('success') }}</span>
-        </div>
+        <div class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-xl font-medium text-sm">{{ session('success') }}</div>
     @endif
 
-    {{-- 
-        =========================================
-        BAGIAN 1: KARTU RINGKASAN (DATA REAL DARI CONTROLLER)
-        =========================================
-    --}}
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <!-- Hadir -->
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center group hover:shadow-md transition-all">
-            <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-            </div>
-            {{-- PERBAIKAN: Gunakan variabel count langsung --}}
-            <h3 class="text-2xl font-extrabold text-gray-800">{{ $hadirCount }}</h3>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Hadir</p>
+    {{-- Kartu Ringkas --}}
+    <div class="grid grid-cols-3 gap-3 mb-6">
+        <div class="bg-white p-4 rounded-xl shadow-sm border text-center"><h3 class="text-2xl font-bold text-emerald-600">{{ $hadirCount }}</h3><p class="text-[10px] font-bold text-gray-400 uppercase">Hadir</p></div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border text-center"><h3 class="text-2xl font-bold text-amber-500">{{ $sakitCount + $izinCount + $alfaCount }}</h3><p class="text-[10px] font-bold text-gray-400 uppercase">Ket. Lain</p></div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border text-center"><h3 class="text-2xl font-bold text-gray-400">{{ $belumAbsenList->count() }}</h3><p class="text-[10px] font-bold text-gray-400 uppercase">Belum Absen</p></div>
+    </div>
+
+    {{-- TABEL UTAMA --}}
+    <div x-data="{ activeTab: 'hadir' }" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        
+        {{-- Tabs --}}
+        <div class="flex border-b border-gray-100 overflow-x-auto">
+            <button @click="activeTab = 'hadir'" :class="activeTab === 'hadir' ? 'border-b-2 border-emerald-500 text-emerald-600 bg-emerald-50/50' : 'text-gray-500'" class="flex-1 py-4 px-6 text-sm font-bold whitespace-nowrap transition-colors">✅ Hadir</button>
+            <button @click="activeTab = 'belum'" :class="activeTab === 'belum' ? 'border-b-2 border-gray-500 text-gray-700 bg-gray-50/50' : 'text-gray-500'" class="flex-1 py-4 px-6 text-sm font-bold whitespace-nowrap transition-colors">⚪ Belum Absen</button>
+            <button @click="activeTab = 'lain'" :class="activeTab === 'lain' ? 'border-b-2 border-amber-500 text-amber-600 bg-amber-50/50' : 'text-gray-500'" class="flex-1 py-4 px-6 text-sm font-bold whitespace-nowrap transition-colors">⚠️ Sakit / Izin / Alfa</button>
         </div>
 
-        <!-- Sakit/Izin -->
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center group hover:shadow-md transition-all">
-            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        {{-- Content --}}
+        <div class="w-full overflow-x-auto pb-4">
+            
+            {{-- TAB HADIR --}}
+            <div x-show="activeTab === 'hadir'" x-transition:enter.duration.300ms>
+                <table class="min-w-full text-left border-collapse">
+                    <thead class="bg-gray-50"><tr><th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Siswa</th><th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Masuk</th><th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Pulang</th><th class="px-6 py-3 text-right">Aksi</th></tr></thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach ($todayAttendances as $att)
+                            @if($att->status_final == 'Hadir')
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $att->student->name }} <br> <span class="text-xs text-gray-400">{{ $att->student->schoolClass->name }}</span></td>
+                                    <td class="px-6 py-4 whitespace-nowrap font-mono text-emerald-600">{{ $att->time_in_final ? \Carbon\Carbon::parse($att->time_in_final)->format('H:i') : '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap font-mono text-indigo-600">{{ $att->time_out_final ? \Carbon\Carbon::parse($att->time_out_final)->format('H:i') : '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right"><button onclick="openEditModal({{ $att->id }}, '{{ $att->student->name }}', '{{ $att->status_final }}', `{{ $att->notes_final }}`, '{{ $att->time_in_final }}', '{{ $att->time_out_final }}')" class="text-blue-600 font-bold text-xs">Edit</button></td>
+                                </tr>
+                            @endif
+                        @endforeach
+                    </tbody>
+                </table>
+                <div class="p-4">{{ $todayAttendances->appends(request()->query())->links() }}</div>
             </div>
-            {{-- PERBAIKAN: Gunakan variabel count langsung --}}
-            <h3 class="text-2xl font-extrabold text-gray-800">{{ $sakitCount + $izinCount }}</h3>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Sakit / Izin</p>
-        </div>
 
-        <!-- Alfa -->
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center group hover:shadow-md transition-all">
-            <div class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            {{-- TAB BELUM ABSEN --}}
+            <div x-show="activeTab === 'belum'" x-transition:enter.duration.300ms style="display: none;">
+                <table class="min-w-full text-left border-collapse">
+                    <thead class="bg-gray-50"><tr><th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Siswa</th><th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Kelas</th><th class="px-6 py-3 text-right">Aksi</th></tr></thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach ($belumAbsenList as $student)
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $student->name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $student->schoolClass->name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right">
+                                    <button onclick="openManualModalDaily({{ $student->id }}, '{{ $student->name }}')" class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-100 border border-blue-200">Input Manual</button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-            {{-- PERBAIKAN: Gunakan variabel count langsung --}}
-            <h3 class="text-2xl font-extrabold text-gray-800">{{ $alfaCount }}</h3>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Tanpa Keterangan</p>
-        </div>
 
-        <!-- Belum Absen -->
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center group hover:shadow-md transition-all">
-            <div class="w-10 h-10 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            {{-- TAB KET. LAIN --}}
+            <div x-show="activeTab === 'lain'" x-transition:enter.duration.300ms style="display: none;">
+                <table class="min-w-full text-left border-collapse">
+                    <thead class="bg-gray-50"><tr><th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Siswa</th><th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Status</th><th class="px-6 py-3 text-xs font-bold text-gray-500 uppercase whitespace-nowrap">Keterangan</th><th class="px-6 py-3 text-right">Aksi</th></tr></thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @foreach ($todayAttendances as $att)
+                            @if($att->status_final != 'Hadir')
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $att->student->name }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 rounded text-xs font-bold {{ $att->status_final == 'Alfa' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700' }}">{{ $att->status_final }}</span></td>
+                                    <td class="px-6 py-4 text-sm text-gray-500 min-w-[200px]">{{ $att->notes_final }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right"><button onclick="openEditModal({{ $att->id }}, '{{ $att->student->name }}', '{{ $att->status_final }}', `{{ $att->notes_final }}`, '', '')" class="text-blue-600 font-bold text-xs">Edit</button></td>
+                                </tr>
+                            @endif
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
-            <h3 class="text-2xl font-extrabold text-gray-800">{{ $belumAbsenList->count() }}</h3>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Belum Absen</p>
         </div>
     </div>
 
-    {{-- BAGIAN INPUT MANUAL (Sama seperti sebelumnya) --}}
-    <div x-data="{ openInput: false }" class="mb-8">
-        {{-- ... (Kode Accordion Input Manual tidak berubah) ... --}}
-        <button @click="openInput = !openInput" class="flex items-center justify-between w-full px-6 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all text-left">
-            <div class="flex items-center gap-3">
-                <h3 class="text-lg font-bold text-gray-800">Input Absensi Manual</h3>
-            </div>
-             <svg :class="{'rotate-180': openInput}" class="w-5 h-5 text-gray-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-        </button>
-        <div x-show="openInput" x-collapse class="mt-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <form action="{{ route('reports.storeManual') }}" method="POST">
-                @csrf
-                <input type="hidden" name="attendance_type" value="Harian">
-                <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
-                {{-- Form fields sama --}}
-                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {{-- 
+        ===================================================================
+        MODAL INPUT MANUAL
+        ===================================================================
+    --}}
+    <div id="manualModalDaily" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Siswa</label>
-                        <select name="student_id" required class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2.5">
-                            <option value="">-- Cari Siswa --</option>
-                            @foreach ($belumAbsenList as $student)
-                                <option value="{{ $student->id }}">{{ $student->name }}</option>
-                            @endforeach
-                        </select>
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Absensi Manual / Keterangan</h3>
+                        <p class="text-sm text-gray-500" id="daily-manual-name-display">Nama Siswa</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
-                        <select name="status" required class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2.5">
-                            <option value="Hadir">Hadir</option>
-                            <option value="Sakit">Sakit</option>
-                            <option value="Izin">Izin</option>
-                            <option value="Alfa">Alfa</option>
-                        </select>
-                    </div>
-                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Catatan</label>
-                        <input type="text" name="notes" class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2.5">
-                    </div>
+                    <button onclick="closeManualModalDaily()" class="text-gray-400 hover:text-gray-600">&times;</button>
                 </div>
-                <button type="submit" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-xl">Simpan</button>
-            </form>
-        </div>
-    </div>
 
-    {{-- 
-        =========================================
-        BAGIAN 3: TABEL LOG ABSENSI (UPDATED VARIABLES)
-        =========================================
-    --}}
-    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h3 class="text-lg font-bold text-gray-800">Log Kehadiran</h3>
-             <form method="POST" action="{{ route('reports.destroyDaily') }}" onsubmit="return confirm('Yakin hapus SEMUA data?')">
-                @csrf @method('DELETE')
-                <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
-                <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-600 text-xs font-bold rounded-lg">Reset Harian</button>
-            </form>
-        </div>
+                <form action="{{ route('reports.storeManual') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="attendance_type" value="Harian">
+                    <input type="hidden" name="student_id" id="daily-manual-id">
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-gray-50/50">
-                    <tr>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Siswa</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Kelas</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Jam Masuk</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Jam Pulang</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Keterangan</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    @forelse ($todayAttendances as $attendance)
-                        <tr class="hover:bg-gray-50/80 transition-colors group">
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">
-                                        {{ substr($attendance->student->name ?? 'X', 0, 1) }}
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-bold text-gray-800">{{ $attendance->student->name ?? 'Siswa Dihapus' }}</p>
-                                        <p class="text-xs text-gray-400">{{ $attendance->student->student_id ?? '-' }}</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-600 font-medium">
-                                {{ $attendance->student->schoolClass->name ?? '-' }}
-                            </td>
-                            <td class="px-6 py-4">
-                                @php
-                                    // GUNAKAN status_final HASIL GROUPING
-                                    $statusColor = match($attendance->status_final) {
-                                        'Hadir' => 'bg-emerald-100 text-emerald-700',
-                                        'Sakit' => 'bg-blue-100 text-blue-700',
-                                        'Izin' => 'bg-amber-100 text-amber-700',
-                                        'Alfa' => 'bg-red-100 text-red-700',
-                                        default => 'bg-gray-100 text-gray-700'
-                                    };
-                                @endphp
-                                <span class="px-3 py-1 rounded-full text-xs font-bold {{ $statusColor }}">
-                                    {{ $attendance->status_final }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-700 font-mono">
-                                {{-- GUNAKAN time_in_final --}}
-                                {{ $attendance->time_in_final ? \Carbon\Carbon::parse($attendance->time_in_final)->format('H:i') : '--:--' }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-700 font-mono">
-                                {{-- GUNAKAN time_out_final --}}
-                                {{ $attendance->time_out_final ? \Carbon\Carbon::parse($attendance->time_out_final)->format('H:i') : '--:--' }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-500 italic max-w-xs truncate">
-                                {{ $attendance->notes_final }}
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onclick="openEditModal(
-                                            {{ $attendance->id }}, 
-                                            '{{ $attendance->student->name ?? 'Siswa' }}', 
-                                            '{{ $attendance->status_final }}', 
-                                            `{{ $attendance->notes_final }}`,
-                                            '{{ $attendance->time_in_final ? \Carbon\Carbon::parse($attendance->time_in_final)->format('H:i') : '' }}',
-                                            '{{ $attendance->time_out_final ? \Carbon\Carbon::parse($attendance->time_out_final)->format('H:i') : '' }}'
-                                        )" 
-                                        class="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                    </button>
-                                    <form action="{{ route('reports.delete', $attendance->id) }}" method="POST" onsubmit="return confirm('Hapus data ini?')">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center justify-center">
-                                    <p class="text-gray-500 font-medium">Belum ada data absensi pada tanggal ini.</p>
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-    
-    {{-- Modal Edit tetap sama, pastikan ID element sesuai dengan javascript --}}
-    <div id="editAttendanceModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        {{-- ... Content Modal sama ... --}}
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-            <div class="flex justify-between mb-4">
-                <h3 class="font-bold">Edit Absensi</h3>
-                <button onclick="closeEditModal()">X</button>
+                    <div class="space-y-4">
+                        {{-- Input Tanggal --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Tanggal</label>
+                            <input type="date" name="date" id="daily-manual-date" value="{{ $selectedDate_db->format('Y-m-d') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" readonly>
+                        </div>
+                        
+                        {{-- Dropdown Status (Ada ID untuk Javascript) --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Status</label>
+                            <select name="status" id="daily-manual-status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" onchange="toggleTimeInput()">
+                                <option value="Hadir">Hadir (Manual)</option>
+                                <option value="Sakit">Sakit</option>
+                                <option value="Izin">Izin</option>
+                                <option value="Alfa">Alfa</option>
+                            </select>
+                        </div>
+
+                        {{-- Grid Jam Masuk & Pulang (Ada ID Container) --}}
+                        <div class="grid grid-cols-2 gap-4" id="time-input-container">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Waktu Masuk</label>
+                                <input type="time" name="time_in" id="daily-manual-time-in" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Waktu Pulang</label>
+                                <input type="time" name="time_out" id="daily-manual-time-out" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            </div>
+                        </div>
+
+                        {{-- Textarea Keterangan --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Keterangan Tambahan</label>
+                            <textarea name="notes" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" onclick="closeManualModalDaily()" class="bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300">Batal</button>
+                        <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Simpan</button>
+                    </div>
+                </form>
             </div>
+        </div>
+    </div>
+
+    {{-- MODAL EDIT --}}
+    <div id="editAttendanceModal" class="fixed inset-0 bg-gray-900/50 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <div class="flex justify-between mb-4"><h3 class="font-bold">Edit Data</h3><button onclick="closeEditModal()">x</button></div>
             <form id="editForm" method="POST">
                 @csrf @method('PUT')
-                <p id="modal-student-name" class="text-blue-800 font-bold mb-4"></p>
-                <select name="status" id="modal-status" class="w-full border rounded mb-4">
+                <p id="modal-student-name" class="font-bold text-blue-600 mb-3"></p>
+                
+                {{-- Status Edit (Juga ada toggle) --}}
+                <select name="status" id="modal-status" class="w-full border rounded mb-2" onchange="toggleEditTimeInput()">
                     <option value="Hadir">Hadir</option>
                     <option value="Sakit">Sakit</option>
                     <option value="Izin">Izin</option>
                     <option value="Alfa">Alfa</option>
                 </select>
-                <input type="time" name="time_in" id="modal-time_in" class="w-full border rounded mb-2" placeholder="Masuk">
-                <input type="time" name="time_out" id="modal-time_out" class="w-full border rounded mb-2" placeholder="Pulang">
-                <textarea name="notes" id="modal-notes" class="w-full border rounded mb-4" placeholder="Catatan"></textarea>
-                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded">Simpan</button>
+                
+                {{-- Waktu Edit --}}
+                <div class="grid grid-cols-2 gap-2 mb-2" id="edit-time-container">
+                    <input type="time" name="time_in" id="modal-time_in" class="border rounded">
+                    <input type="time" name="time_out" id="modal-time_out" class="border rounded">
+                </div>
+                
+                <textarea name="notes" id="modal-notes" class="w-full border rounded mb-3"></textarea>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded font-bold">Update</button>
             </form>
         </div>
     </div>
 
     <script>
+        // --- LOGIKA TOGGLE WAKTU (MODAL INPUT MANUAL) ---
+        function toggleTimeInput() {
+            const status = document.getElementById('daily-manual-status').value;
+            const timeContainer = document.getElementById('time-input-container');
+            
+            // Jika Hadir, Tampilkan. Jika Sakit/Izin/Alfa, Sembunyikan.
+            if (status === 'Hadir') {
+                timeContainer.classList.remove('hidden');
+            } else {
+                timeContainer.classList.add('hidden');
+            }
+        }
+
+        // --- LOGIKA TOGGLE WAKTU (MODAL EDIT) ---
+        function toggleEditTimeInput() {
+            const status = document.getElementById('modal-status').value;
+            const timeContainer = document.getElementById('edit-time-container');
+            
+            if (status === 'Hadir') {
+                timeContainer.classList.remove('hidden');
+            } else {
+                timeContainer.classList.add('hidden');
+            }
+        }
+
+        function openManualModalDaily(id, name) { 
+            document.getElementById('daily-manual-id').value = id; 
+            document.getElementById('daily-manual-name-display').textContent = name; 
+            
+            // Set Default
+            document.getElementById('daily-manual-status').value = 'Hadir';
+            toggleTimeInput(); // Pastikan waktu muncul saat buka pertama kali
+
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('daily-manual-time-in').value = `${hours}:${minutes}`;
+            
+            document.getElementById('manualModalDaily').classList.remove('hidden'); 
+        }
+        
+        function closeManualModalDaily() { 
+            document.getElementById('manualModalDaily').classList.add('hidden'); 
+        }
+        
+        // Modal Edit Logic
         const modal = document.getElementById('editAttendanceModal');
         const form = document.getElementById('editForm');
-        const studentNameDisplay = document.getElementById('modal-student-name');
-        const statusSelect = document.getElementById('modal-status');
-        const notesInput = document.getElementById('modal-notes');
-        const timeInInput = document.getElementById('modal-time_in');
-        const timeOutInput = document.getElementById('modal-time_out');
-        
         function openEditModal(id, name, status, notes, timeIn, timeOut) {
-            const updateRoute = '{{ route('reports.update', ['attendance' => '__ID__']) }}'.replace('__ID__', id);
-            form.action = updateRoute;
-            studentNameDisplay.textContent = name;
-            statusSelect.value = status;
-            notesInput.value = notes;
-            timeInInput.value = timeIn;
-            timeOutInput.value = timeOut;
+            form.action = '{{ route('reports.update', ['attendance' => '__ID__']) }}'.replace('__ID__', id);
+            document.getElementById('modal-student-name').textContent = name;
+            document.getElementById('modal-status').value = status;
+            document.getElementById('modal-notes').value = notes;
+            document.getElementById('modal-time_in').value = timeIn ? timeIn.substring(0,5) : '';
+            document.getElementById('modal-time_out').value = timeOut ? timeOut.substring(0,5) : '';
+            
+            toggleEditTimeInput(); // Cek status saat modal edit dibuka
             modal.classList.remove('hidden');
         }
-        function closeEditModal() {
-            modal.classList.add('hidden');
-        }
+        function closeEditModal() { modal.classList.add('hidden'); }
     </script>
 </x-app-layout>

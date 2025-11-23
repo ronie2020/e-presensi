@@ -9,25 +9,35 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use App\Jobs\SendWaManualNotificationJob; 
+use Illuminate\Pagination\LengthAwarePaginator; 
+use Illuminate\Pagination\Paginator; 
 
 class ReportController extends Controller
 {
-    // ... (Code Bagian Daily Report Tidak Berubah) ...
+    /**
+     * =========================================================================
+     * BAGIAN 1: LAPORAN HARIAN
+     * =========================================================================
+     */
     public function dailyReport(Request $request)
     {
         $request->validate(['date' => 'nullable|date']);
         $selectedDate = $request->has('date') ? Carbon::parse($request->date)->startOfDay() : Carbon::today()->startOfDay();
 
+        // 1. Ambil Data Mentah (Urutan waktu scan tetap diambil untuk history, tapi nanti disort ulang)
         $rawAttendances = AttendanceSiswa::with('student.schoolClass')
             ->whereDate('attendance_date', $selectedDate)
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+            ->get(); // Hapus orderBy created_at di sini agar kita sort manual nanti
 
+        // 2. Grouping Data & Menentukan Status Final
         $processedAttendances = $rawAttendances->groupBy('student_id')->map(function ($logs) {
-            $firstLog = $logs->first();
+            // Ambil log pertama (biasanya masuk) atau log terakhir tergantung kebutuhan
+            // Kita ambil log dengan created_at paling awal sebagai referensi data siswa
+            $firstLog = $logs->sortBy('created_at')->first();
+            
             $timeIn = $logs->whereNotNull('time_in')->pluck('time_in')->sort()->first(); 
+            
             $scanPulang = $logs->where('type', 'Pulang')->first();
             $timeOut = null;
             if ($scanPulang) {
@@ -40,8 +50,8 @@ class ReportController extends Controller
 
             $allNotes = $logs->pluck('notes')->filter()->unique()->implode(' | ');
             $statuses = $logs->pluck('status')->toArray();
-            $finalStatus = $firstLog->status; 
             
+            $finalStatus = $firstLog->status; 
             if (in_array('Hadir', $statuses)) $finalStatus = 'Hadir';
             elseif (in_array('Sakit', $statuses)) $finalStatus = 'Sakit';
             elseif (in_array('Izin', $statuses)) $finalStatus = 'Izin';
@@ -55,11 +65,31 @@ class ReportController extends Controller
             return $firstLog;
         });
 
+        // --- [BARU] SORTING LOGIC: KELAS (ASC) -> NAMA (ASC) ---
+        $processedAttendances = $processedAttendances->sort(function ($a, $b) {
+            // Ambil Nama Kelas, jika kosong kasih 'ZZZ' biar di bawah
+            $classA = $a->student->schoolClass->name ?? 'ZZZ';
+            $classB = $b->student->schoolClass->name ?? 'ZZZ';
+            
+            // Bandingkan Kelas (Natural Sort agar 9A tidak dianggap lebih besar dari 10A secara string biasa)
+            $classComparison = strnatcmp($classA, $classB);
+            
+            if ($classComparison === 0) {
+                // Jika kelas sama, urutkan berdasarkan Nama Siswa
+                return strcasecmp($a->student->name, $b->student->name);
+            }
+            
+            return $classComparison;
+        });
+        // -------------------------------------------------------
+
+        // 3. Hitung Statistik
         $hadirCount = $processedAttendances->where('status_final', 'Hadir')->count();
         $sakitCount = $processedAttendances->where('status_final', 'Sakit')->count();
         $izinCount = $processedAttendances->where('status_final', 'Izin')->count();
         $alfaCount = $processedAttendances->where('status_final', 'Alfa')->count();
 
+        // 4. Ambil Siswa (Query ini sudah sorted by Class & Name dari database)
         $allStudents = Student::with('schoolClass')
             ->select('students.*')
             ->join('classes', 'students.class_id', '=', 'classes.id')
@@ -68,11 +98,25 @@ class ReportController extends Controller
             ->get();
 
         $attendedIds = $processedAttendances->pluck('student_id');
-        $belumAbsenList = $allStudents->whereNotIn('id', $attendedIds);
+        $belumAbsenList = $allStudents->whereNotIn('id', $attendedIds); 
+        // Note: $belumAbsenList otomatis sudah terurut karena $allStudents sudah terurut
+
+        // 5. PAGINATION MANUAL
+        $perPage = 20;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentItems = $processedAttendances->slice(($currentPage - 1) * $perPage, $perPage)->all();
+        
+        $paginatedAttendances = new LengthAwarePaginator(
+            $currentItems,
+            $processedAttendances->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         return view('reports.daily', [
             'selectedDate_db' => $selectedDate,
-            'todayAttendances' => $processedAttendances,
+            'todayAttendances' => $paginatedAttendances,
             'allStudents' => $allStudents,
             'hadirCount' => $hadirCount,
             'sakitCount' => $sakitCount,
@@ -82,6 +126,104 @@ class ReportController extends Controller
         ]);
     }
 
+    /**
+     * =========================================================================
+     * BAGIAN 2: LAPORAN KEAGAMAAN
+     * =========================================================================
+     */
+    public function religiousReport(Request $request)
+    {
+        $request->validate([
+            'date' => 'nullable|date',
+            'activity' => 'nullable|string|in:Dhuha,Dhuhur' 
+        ]);
+
+        $selectedDate = $request->has('date') ? Carbon::parse($request->date)->startOfDay() : Carbon::today()->startOfDay();
+        $selectedActivity = $request->input('activity', 'Dhuha');
+
+        $rawAttendances = AttendanceSiswa::with('student.schoolClass')
+            ->whereDate('attendance_date', $selectedDate)
+            ->where('type', 'Keagamaan')
+            ->where('activity', $selectedActivity)
+            ->get(); // Hapus default sorting DB, kita sort manual
+            
+        $processedAttendances = $rawAttendances->groupBy('student_id')->map(function ($logs) {
+            $firstLog = $logs->sortBy('created_at')->first(); // Ambil log pertama
+            $allNotes = $logs->pluck('notes')->filter()->unique()->implode(' | ');
+            $statuses = $logs->pluck('status')->toArray();
+            
+            $finalStatus = $firstLog->status;
+            // Prioritas status
+            if (in_array('Hadir', $statuses)) {
+                $finalStatus = 'Hadir';
+            } elseif (in_array("Uzur Syar'i", $statuses)) {
+                $finalStatus = "Uzur Syar'i";
+            }
+            
+            $firstLog->status_final = $finalStatus;
+            $firstLog->notes_final = $allNotes;
+            return $firstLog;
+        });
+
+        // --- [BARU] SORTING LOGIC: KELAS (ASC) -> NAMA (ASC) ---
+        $processedAttendances = $processedAttendances->sort(function ($a, $b) {
+            $classA = $a->student->schoolClass->name ?? 'ZZZ';
+            $classB = $b->student->schoolClass->name ?? 'ZZZ';
+            
+            $classComparison = strnatcmp($classA, $classB);
+            
+            if ($classComparison === 0) {
+                return strcasecmp($a->student->name, $b->student->name);
+            }
+            
+            return $classComparison;
+        });
+        // -------------------------------------------------------
+
+        $hadirCount = $processedAttendances->where('status_final', 'Hadir')->count();
+        $izinUzurCount = $processedAttendances->where('status_final', "Uzur Syar'i")->count();
+        
+        // Ambil Siswa (Query sudah sorted)
+        $allStudents = Student::with('schoolClass')
+            ->join('classes', 'students.class_id', '=', 'classes.id')
+            ->orderBy('classes.name', 'asc')
+            ->orderBy('students.name', 'asc')
+            ->select('students.*')
+            ->get();
+
+        $attendedIds = $processedAttendances->pluck('student_id');
+        $belumAbsenList = $allStudents->whereNotIn('id', $attendedIds);
+
+        $totalStudents = $allStudents->count();
+        $kehadiranPercentage = $totalStudents > 0 ? round((($hadirCount + $izinUzurCount) / $totalStudents) * 100, 1) : 0;
+
+        // PAGINATION MANUAL
+        $perPage = 20;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentItems = $processedAttendances->slice(($currentPage - 1) * $perPage, $perPage)->all();
+        
+        $paginatedAttendances = new LengthAwarePaginator(
+            $currentItems,
+            $processedAttendances->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('reports.religious', [
+            'todayAttendances' => $paginatedAttendances,
+            'belumAbsenList' => $belumAbsenList,
+            'allStudents' => $allStudents,
+            'selectedDate_db' => $selectedDate,
+            'selectedActivity' => $selectedActivity,
+            'hadirCount' => $hadirCount,
+            'izinUzurCount' => $izinUzurCount,
+            'belumAbsenCount' => $belumAbsenList->count(),
+            'kehadiranPercentage' => $kehadiranPercentage
+        ]);
+    }
+
+    // ... (Sisa method tidak perlu diubah) ...
     public function destroyDaily(Request $request)
     {
         $request->validate(['date' => 'required|date']);
@@ -123,9 +265,20 @@ class ReportController extends Controller
                 'notes' => $allNotes
             ];
         });
+        
+        // SORTING UNTUK EXPORT JUGA (Biar rapi di Excel)
+        $processedAttendances = $processedAttendances->sort(function ($a, $b) {
+            $classA = $a['class'] ?? 'ZZZ';
+            $classB = $b['class'] ?? 'ZZZ';
+            $classComparison = strnatcmp($classA, $classB);
+            if ($classComparison === 0) {
+                return strcasecmp($a['name'], $b['name']);
+            }
+            return $classComparison;
+        });
 
         $fileName = 'rekap_harian_' . $date->format('Ymd') . '.csv';
-        $headers = ["Content-type" => "text/csv", "Content-Disposition" => "attachment; filename=$fileName", "Pragma" => "no-cache", "Cache-Control" => "must-revalidate, post-check=0, pre-check=0", "Expires" => "0"];
+        $headers = ["Content-type" => "text/csv", "Content-Disposition" => "attachment; filename=$fileName", "Pragma" => "no-cache", "Cache-Control" => "must-revalidate", "post-check=0, pre-check=0", "Expires" => "0"];
         $columns = ['Tanggal', 'Nama Siswa', 'Kelas', 'Jam Masuk', 'Jam Pulang', 'Status', 'Keterangan'];
 
         $callback = function() use ($processedAttendances, $columns) {
@@ -137,80 +290,6 @@ class ReportController extends Controller
             fclose($file);
         };
         return response()->stream($callback, 200, $headers);
-    }
-
-    /**
-     * =========================================================================
-     * BAGIAN 2: LAPORAN KEAGAMAAN (PERBAIKAN TYPO "Duhur" -> "Dhuhur")
-     * =========================================================================
-     */
-
-    public function religiousReport(Request $request)
-    {
-        $request->validate([
-            'date' => 'nullable|date',
-            // VALIDASI: Izinkan Dhuhur
-            'activity' => 'nullable|string|in:Dhuha,Dhuhur' 
-        ]);
-
-        $selectedDate = $request->has('date') ? Carbon::parse($request->date)->startOfDay() : Carbon::today()->startOfDay();
-        $selectedActivity = $request->input('activity', 'Dhuha');
-
-        // 1. AMBIL DATA
-        $rawAttendances = AttendanceSiswa::with('student.schoolClass')
-            ->whereDate('attendance_date', $selectedDate)
-            ->where('type', 'Keagamaan')
-            ->where('activity', $selectedActivity)
-            ->orderBy('created_at', 'desc')
-            ->get();
-            
-        // 2. GROUPING
-        $processedAttendances = $rawAttendances->groupBy('student_id')->map(function ($logs) {
-            $firstLog = $logs->first();
-            $allNotes = $logs->pluck('notes')->filter()->unique()->implode(' | ');
-            $statuses = $logs->pluck('status')->toArray();
-            $finalStatus = $firstLog->status;
-            
-            if (in_array('Hadir', $statuses)) {
-                $finalStatus = 'Hadir';
-            } elseif (in_array("Uzur Syar'i", $statuses)) {
-                $finalStatus = "Uzur Syar'i";
-            }
-            
-            $firstLog->status_final = $finalStatus;
-            $firstLog->notes_final = $allNotes;
-            return $firstLog;
-        });
-
-        // 3. STATISTIK
-        $hadirCount = $processedAttendances->where('status_final', 'Hadir')->count();
-        $izinUzurCount = $processedAttendances->where('status_final', "Uzur Syar'i")->count();
-        
-        // 4. BELUM ABSEN (Kunci Masalah Rekap: Pencocokan ID)
-        $allStudents = Student::with('schoolClass')
-            ->join('classes', 'students.class_id', '=', 'classes.id')
-            ->orderBy('classes.name', 'asc')
-            ->orderBy('students.name', 'asc')
-            ->select('students.*')
-            ->get();
-
-        $attendedIds = $processedAttendances->pluck('student_id');
-        $belumAbsenList = $allStudents->whereNotIn('id', $attendedIds);
-
-        $totalStudents = $allStudents->count();
-        $kehadiranPercentage = $totalStudents > 0 ? round((($hadirCount + $izinUzurCount) / $totalStudents) * 100, 1) : 0;
-
-        return view('reports.religious', [
-            'todayAttendances' => $processedAttendances,
-            'belumAbsenList' => $belumAbsenList,
-            'allStudents' => $allStudents,
-            'selectedDate_db' => $selectedDate,
-            'selectedActivity' => $selectedActivity,
-            'hadirCount' => $hadirCount,
-            'izinUzurCount' => $izinUzurCount,
-            'belumAbsenCount' => $belumAbsenList->count(),
-            'kehadiranPercentage' => $kehadiranPercentage
-        ]);
     }
 
     public function destroyReligious(Request $request)
@@ -237,10 +316,22 @@ class ReportController extends Controller
 
         $attendances = AttendanceSiswa::with('student.schoolClass')
             ->whereDate('attendance_date', $date)
-            ->where('type', 'Keagamaan')->where('activity', $activity)->get();
+            ->where('type', 'Keagamaan')->where('activity', $activity)
+            ->get(); // Ambil semua data
+
+        // Sorting Manual untuk Export
+        $attendances = $attendances->sort(function($a, $b) {
+            $classA = $a->student->schoolClass->name ?? 'ZZZ';
+            $classB = $b->student->schoolClass->name ?? 'ZZZ';
+            $cmp = strnatcmp($classA, $classB);
+            if ($cmp === 0) {
+                return strcasecmp($a->student->name ?? '', $b->student->name ?? '');
+            }
+            return $cmp;
+        });
 
         $fileName = 'rekap_' . $activity . '_' . $date->format('Ymd') . '.csv';
-        $headers = ["Content-type" => "text/csv", "Content-Disposition" => "attachment; filename=$fileName", "Pragma" => "no-cache", "Cache-Control" => "must-revalidate", "Expires" => "0"];
+        $headers = ["Content-type" => "text/csv", "Content-Disposition" => "attachment; filename=$fileName", "Pragma" => "no-cache", "Cache-Control" => "must-revalidate", "post-check=0, pre-check=0", "Expires" => "0"];
         $columns = ['Tanggal', 'Kegiatan', 'Nama', 'Kelas', 'Status', 'Keterangan', 'Waktu'];
 
         $callback = function() use ($attendances, $columns) {

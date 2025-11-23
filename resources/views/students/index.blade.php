@@ -96,7 +96,7 @@
                                 </button>
                             </form>
 
-                            {{-- 1. TAMBAHKAN FORM IMPOR BARU DI SINI --}}
+                            {{-- FORM IMPOR --}}
                             <div class="mt-8 pt-6 border-t">
                                 <h3 class="text-lg font-medium mb-4">Impor Data Siswa (CSV/Excel)</h3>
                                 <form action="{{ route('students.import') }}" method="POST" enctype="multipart/form-data">
@@ -123,7 +123,6 @@
 
                         {{-- Kolom 2: Daftar Siswa --}}
                         <div class="md:col-span-2">
-                              {{-- 1. TAMBAHKAN TOMBOL DOWNLOAD DAN SEARCH/FILTER DI SINI --}}
                             <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-4">
                                 {{-- Tombol Download --}}
                                 <a href="{{ route('students.export') }}" 
@@ -131,16 +130,15 @@
                                     Download Data Siswa (Excel)
                                 </a>
 
-                                {{-- Form Search (Belum berfungsi) --}}
+                                {{-- Form Search --}}
                                 <form action="{{ route('students.index') }}" method="GET" class="flex gap-2">
                                     <input type="text" name="search" placeholder="Cari nama siswa..." 
-                                           value="{{ request('search') }}" {{-- Buat input 'sticky' --}}
+                                           value="{{ request('search') }}"
                                            class="block w-full rounded-md border-gray-300 shadow-sm sm:text-sm">
                                     
                                     <select name="filter_class_id" class="block rounded-md border-gray-300 shadow-sm sm:text-sm">
                                         <option value="">Semua Kelas</option>
                                         @foreach ($classes as $class)
-                                            {{-- Buat dropdown 'sticky' --}}
                                             <option value="{{ $class->id }}" {{ request('filter_class_id') == $class->id ? 'selected' : '' }}>
                                                 {{ $class->name }}
                                             </option>
@@ -153,8 +151,6 @@
                                 </form>
                             </div>
                                                       
-                            {{-- (Fitur Search & Filter bisa ditambahkan di sini nanti) --}}
-
                             <div class="overflow-x-auto border rounded-lg">
                                 <table class="min-w-full divide-y divide-gray-200">
                                     <thead class="bg-gray-50">
@@ -172,7 +168,6 @@
                                                     <div class="text-sm text-gray-500">{{ $student->student_id }}</div>
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
-                                                    {{-- Kita gunakan relasi 'schoolClass' yang sudah kita buat --}}
                                                     <div class="text-sm text-gray-900">{{ $student->schoolClass->name ?? 'N/A' }}</div>
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -186,9 +181,7 @@
                                                         <button type="submit" class="text-red-600 hover:text-red-900 ml-4">Hapus</button>
                                                     </form>
                                                     
-                                                    {{-- === TOMBOL BARU (Diubah menjadi Button pemicu Modal) === --}}
-                                                    
-                                                    {{-- 1. Tombol Absen Manual --}}
+                                                    {{-- Tombol Absen Manual --}}
                                                     <button type="button"
                                                        data-student-id="{{ $student->id }}"
                                                        data-student-name="{{ $student->name }}"
@@ -196,14 +189,13 @@
                                                         Absen Manual
                                                     </button>
                                                     
-                                                    {{-- 2. Tombol QR Code --}}
+                                                    {{-- Tombol QR Code --}}
                                                     <button type="button"
-                                                       data-student-id="{{ $student->student_id }}" {{-- QR Code biasanya berisi student_id (NISN) --}}
+                                                       data-student-id="{{ $student->student_id }}"
                                                        data-student-name="{{ $student->name }}"
                                                        class="text-green-600 hover:text-green-900 ml-4 open-qr-modal">
                                                         QR Code
                                                     </button>
-                                                    {{-- === AKHIR TOMBOL BARU === --}}
                                                 </td>
                                             </tr>
                                         @empty
@@ -212,13 +204,12 @@
                                                     Belum ada data siswa.
                                                 </td>
                                             </tr>
-                                        @endforelse {{-- <-- DIPERBAIKI: 'F' diubah menjadi 'f' --}}
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
-                            {{-- Pagination Links --}}
+                            {{-- Pagination --}}
                             <div class="mt-4">
-                                {{-- 2. TAMBAHKAN .appends() AGAR FILTER TETAP BERJALAN SAAT PINDAH HALAMAN --}}
                                 {{ $students->appends(request()->query())->links() }}
                             </div>
 
@@ -231,7 +222,7 @@
     </div>
 
     {{-- =================================================================== --}}
-    {{-- MODAL UNTUK ABSENSI MANUAL (Sesuai image_30cd41.png)                 --}}
+    {{-- MODAL UNTUK ABSENSI MANUAL (STYLE REKAP HARIAN)                     --}}
     {{-- =================================================================== --}}
     <div id="absen-manual-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
         <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
@@ -250,17 +241,19 @@
                     @csrf
                     {{-- Input tersembunyi untuk ID siswa --}}
                     <input type="hidden" name="student_id" id="absen-modal-student-id">
+                    {{-- Karena di halaman siswa tidak ada filter "tipe absen", kita anggap default "Harian" --}}
+                    <input type="hidden" name="attendance_type" value="Harian">
 
                     <div class="space-y-4">
                         <div>
                             <label for="absen-tanggal" class="block text-sm font-medium text-gray-700">Tanggal</label>
-                            <input type="date" name="tanggal" id="absen-tanggal" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" readonly>
-                            <small class="text-gray-500">Tanggal di-set ke hari ini.</small>
+                            <input type="date" name="date" id="absen-tanggal" value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                         </div>
                         
                         <div>
                             <label for="absen-status" class="block text-sm font-medium text-gray-700">Status</label>
-                            <select name="status" id="absen-status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            {{-- PERBAIKAN: Tambah onchange="toggleTimeInput()" --}}
+                            <select name="status" id="absen-status" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" onchange="toggleTimeInput()">
                                 <option value="Hadir">Hadir (Manual)</option>
                                 <option value="Sakit">Sakit</option>
                                 <option value="Izin">Izin</option>
@@ -268,7 +261,8 @@
                             </select>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
+                        {{-- Grid Jam Masuk & Pulang (Dengan ID untuk Show/Hide) --}}
+                        <div class="grid grid-cols-2 gap-4" id="time-input-container">
                             <div>
                                 <label for="absen-time-in" class="block text-sm font-medium text-gray-700">Waktu Masuk</label>
                                 <input type="time" name="time_in" id="absen-time-in" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
@@ -300,36 +294,37 @@
     </div>
 
     {{-- =================================================================== --}}
-    {{-- MODAL UNTUK QR CODE (Sesuai image_30cd69.png)                      --}}
+    {{-- MODAL UNTUK QR CODE (Tidak Berubah)                                --}}
     {{-- =================================================================== --}}
     <div id="qr-code-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
         <div class="relative top-20 mx-auto p-5 border w-full max-w-sm shadow-lg rounded-md bg-white">
             <div class="mt-3 text-center">
                 <h3 class="text-lg leading-6 font-medium text-gray-900" id="qr-modal-student-name">QR Code untuk...</h3>
-                
                 <div class="mt-4 mb-6">
-                    {{-- Gambar QR Code akan dimuat di sini --}}
                     <img id="qr-modal-image" src="https://placehold.co/250x250?text=Loading..." alt="QR Code" class="mx-auto border">
                     <p class="text-xs text-gray-500 mt-2">Ini adalah QR Code unik siswa.</p>
                 </div>
-                
                 <div class="flex justify-center space-x-3">
-                    <button type="button" id="qr-modal-close" class="bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300">
-                        Tutup
-                    </button>
-                    <a id="qr-modal-download" href="#" download="qrcode.png" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
-                        Unduh
-                    </a>
+                    <button type="button" id="qr-modal-close" class="bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300">Tutup</button>
+                    <a id="qr-modal-download" href="#" download="qrcode.png" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">Unduh</a>
                 </div>
             </div>
         </div>
     </div>
 
-
-    {{-- =================================================================== --}}
-    {{-- JAVASCRIPT UNTUK MODAL                                            --}}
-    {{-- =================================================================== --}}
     <script>
+        // --- FUNGSI TOGGLE WAKTU ---
+        function toggleTimeInput() {
+            const status = document.getElementById('absen-status').value;
+            const timeContainer = document.getElementById('time-input-container');
+            
+            if (status === 'Hadir') {
+                timeContainer.classList.remove('hidden');
+            } else {
+                timeContainer.classList.add('hidden');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // === Logika Modal Absen Manual ===
             const absenModal = document.getElementById('absen-manual-modal');
@@ -345,22 +340,23 @@
                     const studentId = this.dataset.studentId;
                     const studentName = this.dataset.studentName;
 
-                    // Isi data siswa ke modal
                     absenModalName.textContent = studentName;
                     absenModalInputId.value = studentId;
 
-                    // Set Waktu Masuk default ke jam sekarang
+                    // Set Status Default & Tampilkan Waktu
+                    document.getElementById('absen-status').value = 'Hadir';
+                    toggleTimeInput();
+
+                    // Set Waktu Masuk ke Jam Sekarang
                     const now = new Date();
                     const hours = String(now.getHours()).padStart(2, '0');
                     const minutes = String(now.getMinutes()).padStart(2, '0');
                     absenModalTimeIn.value = `${hours}:${minutes}`;
 
-                    // Tampilkan modal
                     absenModal.classList.remove('hidden');
                 });
             });
 
-            // Logika menutup modal absen
             const closeAbsenModal = () => absenModal.classList.add('hidden');
             btnCloseAbsen.addEventListener('click', closeAbsenModal);
             btnCancelAbsen.addEventListener('click', closeAbsenModal);
@@ -375,24 +371,19 @@
 
             btnOpenQr.forEach(button => {
                 button.addEventListener('click', function() {
-                    const studentId = this.dataset.studentId; // Ini adalah NISN
+                    const studentId = this.dataset.studentId;
                     const studentName = this.dataset.studentName;
-
-                    // Buat URL QR Code menggunakan API eksternal
                     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(studentId)}`;
 
-                    // Isi data siswa ke modal
                     qrModalName.textContent = `QR Code untuk ${studentName}`;
                     qrModalImage.src = qrApiUrl;
-                    qrModalDownload.href = qrApiUrl; // Atur link download
+                    qrModalDownload.href = qrApiUrl;
                     qrModalDownload.download = `qrcode_${studentName.replace(/\s+/g, '_')}.png`;
 
-                    // Tampilkan modal
                     qrModal.classList.remove('hidden');
                 });
             });
 
-            // Logika menutup modal QR
             btnCloseQr.addEventListener('click', () => qrModal.classList.add('hidden'));
         });
     </script>
