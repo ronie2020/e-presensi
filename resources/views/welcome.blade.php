@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,24 +7,36 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    {{-- Load Chart.js --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="font-sans antialiased text-gray-900 bg-gray-50">
+<body class="font-sans antialiased text-gray-900 bg-gray-50" x-data="{ 
+    modalOpen: false, 
+    activeAnnouncement: null,
+    openAnnouncement(item) {
+        this.activeAnnouncement = item;
+        this.modalOpen = true;
+        document.body.style.overflow = 'hidden';
+    },
+    closeAnnouncement() {
+        this.modalOpen = false;
+        setTimeout(() => { this.activeAnnouncement = null }, 300); // Clear data after animation
+        document.body.style.overflow = 'auto';
+    }
+}">
 
-    <!-- NAVBAR -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+    <!-- NAVBAR (Tetap Sama) -->
+    <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-200 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <x-application-logo class="block h-10 w-auto fill-current text-blue-600" />
-                    <span class="ml-3 text-xl font-bold text-gray-800 tracking-tight hidden md:block">SMP NEGERI 3 LAKBOK</span>
+                    <x-application-logo class="block h-10 w-auto text-blue-600" />
+                    <span class="ml-3 text-xl font-extrabold text-gray-800 tracking-tight hidden md:block">SMP NEGERI 3 LAKBOK</span>
                 </div>
                 <div class="flex items-center space-x-4">
                     @auth
-                        <a href="{{ url('/dashboard') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600">Dashboard</a>
+                        <a href="{{ url('/dashboard') }}" class="text-sm font-bold text-gray-700 hover:text-blue-600 transition">Dashboard</a>
                     @else
-                        <a href="{{ route('login') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none transition shadow-sm">
+                        <a href="{{ route('login') }}" class="inline-flex items-center px-5 py-2.5 rounded-full text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
                             Login Guru/Staf
                         </a>
                     @endauth
@@ -33,183 +45,251 @@
         </div>
     </nav>
 
-    <!-- HERO SECTION -->
-    <div class="relative bg-gradient-to-br from-blue-700 to-blue-900 overflow-hidden text-white">
-        <div class="absolute inset-0 opacity-10">
-             <svg class="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" /></svg>
-        </div>
-        <div class="relative max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center">
-            <div class="md:w-1/2 mb-8 md:mb-0 text-center md:text-left">
-                <span class="inline-block py-1 px-3 rounded-full bg-blue-500/30 text-blue-100 text-sm font-semibold mb-4 border border-blue-400/30">Sistem Informasi Terpadu</span>
-                <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl mb-4">Transparansi & <br>Kedisiplinan</h1>
-                <p class="text-blue-100 text-lg mb-8">Memantau perkembangan akademik dan aktivitas siswa secara real-time untuk kemajuan bersama.</p>
+    <!-- HERO SECTION (Improved Contrast) -->
+    <div class="relative bg-blue-800 overflow-hidden text-white">
+        <!-- Abstract Background -->
+        <div class="absolute inset-0 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 z-0"></div>
+        <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] z-0"></div>
+        
+        <div class="relative max-w-7xl mx-auto py-20 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center z-10">
+            <div class="md:w-1/2 mb-12 md:mb-0 text-center md:text-left">
+                <span class="inline-flex items-center py-1 px-3 rounded-full bg-blue-500/20 text-blue-100 text-xs font-bold uppercase tracking-wider mb-6 border border-blue-400/30">
+                    <span class="w-2 h-2 rounded-full bg-green-400 mr-2 animate-pulse"></span>
+                    Sistem Informasi Terpadu
+                </span>
+                <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-6 leading-tight">
+                    Wujudkan <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">Generasi Disiplin</span>
+                </h1>
+                <p class="text-blue-100/90 text-lg mb-8 max-w-lg mx-auto md:mx-0 leading-relaxed font-medium">
+                    Platform digital SMPN 3 Lakbok untuk memantau kehadiran, aktivitas, dan perkembangan akademik siswa secara real-time.
+                </p>
                 
                 <!-- Statistik Mini -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-white/10 backdrop-blur p-3 rounded-lg border border-white/10">
-                        <div class="text-2xl font-bold">{{ $stats['hadir'] ?? 0 }}</div>
-                        <div class="text-xs uppercase opacity-70">Siswa Hadir Hari Ini</div>
+                <div class="flex flex-wrap justify-center md:justify-start gap-4">
+                    <div class="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 shadow-lg min-w-[140px]">
+                        <div class="text-3xl font-bold">{{ $stats['hadir'] ?? 0 }}</div>
+                        <div class="text-xs uppercase font-semibold text-blue-200 tracking-wider mt-1">Siswa Hadir</div>
                     </div>
-                     <div class="bg-white/10 backdrop-blur p-3 rounded-lg border border-white/10">
-                        <div class="text-2xl font-bold text-yellow-300">{{ $stats['terlambat'] ?? 0 }}</div>
-                        <div class="text-xs uppercase opacity-70">Terlambat</div>
+                     <div class="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 shadow-lg min-w-[140px]">
+                        <div class="text-3xl font-bold text-yellow-300">{{ $stats['terlambat'] ?? 0 }}</div>
+                        <div class="text-xs uppercase font-semibold text-yellow-100 tracking-wider mt-1">Terlambat</div>
                     </div>
                 </div>
             </div>
 
             <!-- GRAFIK PUBLIK -->
             <div class="md:w-1/2 w-full pl-0 md:pl-10">
-                <div class="bg-white rounded-xl shadow-2xl p-6 text-gray-800">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-bold text-lg text-gray-700">Grafik Kehadiran Minggu Ini</h3>
-                        <span class="text-xs font-semibold bg-green-100 text-green-800 px-2 py-1 rounded">Live Data</span>
+                <div class="bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-6 text-gray-800 border border-gray-100/50 transform rotate-1 hover:rotate-0 transition duration-500">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="font-bold text-lg text-gray-800 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            Statistik Mingguan
+                        </h3>
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 px-2 py-1 rounded-full flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Live
+                        </span>
                     </div>
                     <div class="h-64">
                          <canvas id="publicWeeklyChart"></canvas>
                     </div>
-                    <p class="text-center text-xs text-gray-400 mt-4">*Data diperbarui secara otomatis setiap hari.</p>
                 </div>
             </div>
         </div>
+        
+        <!-- Wave Separator -->
+        <div class="absolute bottom-0 w-full text-gray-50">
+             <svg class="w-full h-12 md:h-24" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                 <path fill="currentColor" fill-opacity="1" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+             </svg>
+        </div>
     </div>
 
-    <!-- MENU AKSES (Portal & Kiosk) -->
-    <div class="bg-gray-50 py-12 border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative -mt-24 z-10">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- MENU AKSES -->
+    <div class="bg-gray-50 pb-20 pt-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-20">
+                <!-- Card 1 -->
+                <a href="{{ route('portal.index') }}" class="group bg-white p-8 rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:shadow-2xl hover:shadow-blue-200/50 transition-all duration-300 transform hover:-translate-y-2">
+                    <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">Portal Siswa</h3>
+                    <p class="text-gray-500 leading-relaxed">Akses data kehadiran pribadi dan catatan kedisiplinan siswa secara mandiri.</p>
+                </a>
                 
-                <!-- Card 1: Portal Siswa -->
-                <a href="{{ route('portal.index') }}" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl transition transform hover:-translate-y-1 group flex flex-col items-center text-center">
-                    <div class="bg-blue-100 p-4 rounded-full text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition mb-4">
-                        {{-- Ikon User (SVG Manual - PERBAIKAN) --}}
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
-                        </svg>
+                <!-- Card 2 -->
+                <a href="{{ route('kiosk.show') }}" class="group bg-white p-8 rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:shadow-2xl hover:shadow-purple-200/50 transition-all duration-300 transform hover:-translate-y-2">
+                    <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4h2v-4zM6 19v-4H4v4h2zM6 12V7a1 1 0 011-1h10a1 1 0 011 1v5m-4 0h4"/></svg>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900">Portal Siswa</h3>
-                    <p class="text-sm text-gray-500 mt-2">Cek riwayat kehadiran dan poin pelanggaran siswa.</p>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">Mesin Absensi</h3>
+                    <p class="text-gray-500 leading-relaxed">Mode Kiosk untuk pemindaian kartu atau QR Code kehadiran harian siswa.</p>
                 </a>
 
-                <!-- Card 2: Mesin Absensi -->
-                <a href="{{ route('kiosk.show') }}" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl transition transform hover:-translate-y-1 group flex flex-col items-center text-center">
-                    <div class="bg-purple-100 p-4 rounded-full text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition mb-4">
-                        {{-- Ikon QR Code (SVG Manual - PERBAIKAN) --}}
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z"></path>
-                        </svg>
+                <!-- Card 3 -->
+                <a href="{{ route('login') }}" class="group bg-white p-8 rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:shadow-2xl hover:shadow-green-200/50 transition-all duration-300 transform hover:-translate-y-2">
+                    <div class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 mb-6 group-hover:scale-110 group-hover:bg-green-600 group-hover:text-white transition-all duration-300">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900">Mesin Absensi</h3>
-                    <p class="text-sm text-gray-500 mt-2">Mode Kiosk untuk scan kehadiran harian.</p>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">Login Guru</h3>
+                    <p class="text-gray-500 leading-relaxed">Area administratif untuk Guru dan Staf mengelola data dan laporan.</p>
                 </a>
-
-                <!-- Card 3: Login Guru -->
-                <a href="{{ route('login') }}" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl transition transform hover:-translate-y-1 group flex flex-col items-center text-center">
-                    <div class="bg-green-100 p-4 rounded-full text-green-600 group-hover:bg-green-600 group-hover:text-white transition mb-4">
-                        {{-- Ikon Gembok (SVG Manual - PERBAIKAN) --}}
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900">Login Guru</h3>
-                    <p class="text-sm text-gray-500 mt-2">Akses Dashboard Admin dan Manajemen.</p>
-                </a>
-
             </div>
         </div>
     </div>
 
-    <!-- PENGUMUMAN -->
-    <div class="py-16 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-10">
-                <h2 class="text-3xl font-extrabold text-gray-900">Pengumuman Terbaru</h2>
-                <p class="mt-2 text-gray-500">Informasi terkini untuk siswa dan wali murid.</p>
+    <!-- PENGUMUMAN (AlpineJS Powered) -->
+    <div class="py-20 bg-white relative overflow-hidden">
+        {{-- Background blobs --}}
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-purple-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12">
+                <div class="max-w-2xl">
+                    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Papan Pengumuman</h2>
+                    <p class="mt-4 text-lg text-gray-500">Informasi resmi terkini untuk siswa, orang tua, dan warga sekolah.</p>
+                </div>
+                <a href="#" class="hidden md:inline-flex items-center font-bold text-blue-600 hover:text-blue-700 mt-4 md:mt-0 group">
+                    Lihat Semua Arsip
+                    <svg class="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                </a>
             </div>
 
-            <div class="grid gap-6 md:grid-cols-3">
+            <div class="grid gap-8 md:grid-cols-3">
                 @forelse ($announcements as $item)
-                    <div class="flex flex-col bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition">
-                        <div class="text-xs text-blue-600 font-bold uppercase mb-2">{{ $item->created_at->format('d M Y') }}</div>
-                        <h3 class="text-lg font-bold text-gray-900 mb-2">
-                            <a href="#" onclick="openModal('{{ $item->id }}')" class="hover:text-blue-600">{{ $item->title }}</a>
-                        </h3>
-                        <p class="text-gray-600 text-sm line-clamp-3 mb-4">{{ Str::limit(strip_tags($item->content), 100) }}</p>
-                        <button onclick="openModal('{{ $item->id }}')" class="text-blue-600 text-sm font-medium mt-auto self-start hover:underline">Baca Selengkapnya &rarr;</button>
-                    </div>
-
-                    <!-- Modal -->
-                    <div id="modal-{{ $item->id }}" class="fixed inset-0 z-[60] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-                        <div class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity" onclick="closeModal('{{ $item->id }}')"></div>
-                        <div class="flex items-center justify-center min-h-screen p-4 text-center sm:p-0">
-                            <div class="relative bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-2xl w-full">
-                                <div class="bg-white px-6 pt-5 pb-4 sm:p-6">
-                                    <div class="flex justify-between items-start mb-4">
-                                        <h3 class="text-2xl font-bold text-gray-900">{{ $item->title }}</h3>
-                                        <button onclick="closeModal('{{ $item->id }}')" class="text-gray-400 hover:text-gray-500"><span class="sr-only">Close</span>✕</button>
-                                    </div>
-                                    <div class="text-sm text-gray-500 mb-6 pb-4 border-b border-gray-100">Diposting pada {{ $item->created_at->format('d F Y, H:i') }}</div>
-                                    <div class="prose max-w-none text-gray-700">{!! nl2br(e($item->content)) !!}</div>
-                                </div>
-                                <div class="bg-gray-50 px-4 py-3 sm:px-6 flex justify-end">
-                                    <button type="button" class="inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:text-sm" onclick="closeModal('{{ $item->id }}')">Tutup</button>
-                                </div>
-                            </div>
+                    <article class="flex flex-col bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wide">Info</span>
+                            <span class="text-xs text-gray-400 font-medium">{{ $item->created_at->format('d M Y') }}</span>
                         </div>
-                    </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+                            <a href="#" @click.prevent='openAnnouncement(@json($item))' class="hover:text-blue-600 transition-colors">{{ $item->title }}</a>
+                        </h3>
+                        <p class="text-gray-500 text-sm leading-relaxed line-clamp-3 mb-6 flex-1">
+                            {{ Str::limit(strip_tags($item->content), 120) }}
+                        </p>
+                        <button 
+                            @click='openAnnouncement(@json($item))' 
+                            class="text-blue-600 text-sm font-bold flex items-center group mt-auto pt-4 border-t border-gray-50">
+                            Baca Selengkapnya
+                            <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </button>
+                    </article>
                 @empty
-                    <div class="col-span-3 text-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-300 text-gray-500">Belum ada pengumuman.</div>
+                    <div class="col-span-3 text-center py-16 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 text-gray-400">
+                        <svg class="w-12 h-12 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+                        <p class="font-medium">Belum ada pengumuman terbaru.</p>
+                    </div>
                 @endforelse
             </div>
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="bg-gray-900 text-white border-t border-gray-800">
-        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
-            <div class="flex items-center mb-4 md:mb-0">
-                <x-application-logo class="h-6 w-auto fill-current text-blue-500" />
-                <span class="ml-2 font-bold tracking-wider">SMPN 3 LAKBOK</span>
+    <!-- MODAL (AlpineJS Driven) -->
+    <div x-show="modalOpen" 
+         style="display: none;"
+         class="fixed inset-0 z-[100] overflow-y-auto" 
+         aria-labelledby="modal-title" 
+         role="dialog" 
+         aria-modal="true">
+        
+        <!-- Backdrop -->
+        <div x-show="modalOpen"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" 
+             @click="closeAnnouncement()">
+        </div>
+
+        <!-- Panel -->
+        <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+            <div x-show="modalOpen"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-gray-100">
+                
+                <div class="bg-white px-6 py-6 sm:p-8">
+                    <div class="flex items-start justify-between mb-6">
+                        <h3 class="text-2xl font-black text-gray-900 leading-tight" x-text="activeAnnouncement?.title"></h3>
+                        <button @click="closeAnnouncement()" class="ml-4 rounded-full p-1 bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center gap-3 text-sm text-gray-500 mb-6 pb-6 border-b border-gray-100">
+                        <span class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span x-text="new Date(activeAnnouncement?.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })"></span>
+                        </span>
+                        <span>&bull;</span>
+                        <span class="text-blue-600 font-semibold">Admin Sekolah</span>
+                    </div>
+
+                    <div class="prose prose-blue max-w-none text-gray-700 leading-relaxed">
+                         <!-- Note: x-html can be dangerous with user input. Ensure content is sanitized on backend -->
+                        <div x-html="activeAnnouncement?.content.replace(/\n/g, '<br>')"></div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 px-6 py-4 flex justify-end">
+                    <button type="button" class="inline-flex w-full justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-blue-700 sm:w-auto transition-colors" @click="closeAnnouncement()">
+                        Tutup
+                    </button>
+                </div>
             </div>
-            <p class="text-gray-400 text-sm">&copy; {{ date('Y') }} Hak Cipta Dilindungi. @Ri..</p>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center">
+                <x-application-logo class="h-8 w-auto text-blue-600" />
+                <div class="ml-3">
+                    <span class="block text-sm font-bold text-gray-900">SMP NEGERI 3 LAKBOK</span>
+                    <span class="block text-xs text-gray-500">Sistem Informasi Presensi & Akademik</span>
+                </div>
+            </div>
+            <p class="text-gray-400 text-sm font-medium">&copy; {{ date('Y') }} Tim IT & Pengembang.</p>
         </div>
     </footer>
 
-    {{-- Script --}}
     <script>
-        // Modal Functions
-        function openModal(id) {
-            document.getElementById('modal-' + id).classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-        function closeModal(id) {
-            document.getElementById('modal-' + id).classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        // Chart.js Initialization
+        // Chart Script (Sama, tapi pastikan data tersedia)
         document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('publicWeeklyChart').getContext('2d');
-            const chartData = @json($barChartData); // Data dari Controller
-
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: chartData.labels,
-                    datasets: chartData.datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, stacked: true, grid: { display: false } },
-                        x: { stacked: true, grid: { display: false } }
+            const ctx = document.getElementById('publicWeeklyChart');
+            if(ctx) {
+                const chartData = @json($barChartData); 
+                new Chart(ctx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: chartData.datasets
                     },
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 10 } }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        borderRadius: 4,
+                        scales: {
+                            y: { beginAtZero: true, stacked: true, grid: { display: false } },
+                            x: { stacked: true, grid: { display: false } }
+                        },
+                        plugins: {
+                            legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } }
+                        }
                     }
-                }
-            });
+                });
+            }
         });
     </script>
 </body>

@@ -1,209 +1,216 @@
 <x-app-layout>
-    {{-- Header Khusus Dashboard dengan Sapaan --}}
-    <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight">
-                Dashboard Monitoring
-            </h1>
-            <p class="text-sm text-gray-500 mt-1">
-                Selamat Datang, <span class="text-blue-600 font-bold">{{ Auth::user()->name }}</span>! Berikut ringkasan hari ini.
-            </p>
-        </div>
+    {{-- Menggunakan AlpineJS untuk manajemen state filter sederhana --}}
+    <div x-data="{ period: 'today' }">
         
-        {{-- Filter Cepat (Opsional - visual saja untuk saat ini) --}}
-        <div class="flex items-center gap-2 bg-white p-1.5 rounded-xl shadow-sm border border-gray-100">
-            <button class="px-4 py-2 text-xs font-bold text-blue-700 bg-blue-50 rounded-lg transition">
-                Hari Ini
-            </button>
-            <button class="px-4 py-2 text-xs font-bold text-gray-500 hover:bg-gray-50 rounded-lg transition">
-                Minggu Ini
-            </button>
-        </div>
-    </div>
-
-    {{-- 
-        =========================================
-        BAGIAN 1: KARTU STATISTIK (STATS CARDS)
-        =========================================
-    --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        
-        <!-- Kartu 1: Total Siswa -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 group relative overflow-hidden">
-            <div class="absolute right-0 top-0 h-24 w-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+        {{-- Header Section --}}
+        <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight">
+                    Dashboard Monitoring
+                </h1>
+                <p class="text-sm text-gray-500 mt-1">
+                    Selamat Datang, <span class="text-blue-600 font-bold">{{ Auth::user()->name }}</span>!
+                    <span x-show="period === 'today'">Berikut ringkasan <span class="font-semibold text-gray-700">Hari Ini</span>.</span>
+                    <span x-show="period === 'week'" style="display: none;">Berikut ringkasan <span class="font-semibold text-gray-700">Minggu Ini</span>.</span>
+                </p>
+            </div>
             
-            <div class="relative flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-bold text-gray-400 uppercase tracking-wider">Total Siswa</p>
-                    <h3 class="text-3xl font-extrabold text-gray-800 mt-1 group-hover:text-blue-600 transition-colors">
-                        {{ $totalStudents }}
-                    </h3>
-                </div>
-                <div class="h-12 w-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl shadow-sm group-hover:rotate-12 transition-transform">
-                    <i class="fas fa-users"></i> <!-- Pastikan FontAwesome aktif, atau ganti SVG -->
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center text-xs text-gray-400">
-                <span class="text-green-500 font-bold flex items-center mr-1">
-                    <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-                    Aktif
-                </span>
-                <span class="truncate">Terdaftar di sistem</span>
-            </div>
-        </div>
-
-        <!-- Kartu 2: Hadir Hari Ini -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 group relative overflow-hidden">
-            <div class="absolute right-0 top-0 h-24 w-24 bg-emerald-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-            
-            <div class="relative flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-bold text-gray-400 uppercase tracking-wider">Hadir</p>
-                    <h3 class="text-3xl font-extrabold text-gray-800 mt-1 group-hover:text-emerald-600 transition-colors">
-                        {{ $presentCount }}
-                    </h3>
-                </div>
-                <div class="h-12 w-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-xl shadow-sm group-hover:rotate-12 transition-transform">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center text-xs text-gray-400">
-                <span class="text-emerald-600 font-bold mr-1">{{ $presentPercentage }}%</span>
-                <span>dari total siswa</span>
-            </div>
-        </div>
-
-        <!-- Kartu 3: Terlambat -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 group relative overflow-hidden">
-            <div class="absolute right-0 top-0 h-24 w-24 bg-amber-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-            
-            <div class="relative flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-bold text-gray-400 uppercase tracking-wider">Terlambat</p>
-                    <h3 class="text-3xl font-extrabold text-gray-800 mt-1 group-hover:text-amber-500 transition-colors">
-                        {{ $lateCount }}
-                    </h3>
-                </div>
-                <div class="h-12 w-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-xl shadow-sm group-hover:rotate-12 transition-transform">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-            </div>
-             <div class="mt-4 flex items-center text-xs text-gray-400">
-                <span class="text-amber-600 font-bold mr-1">Perlu Perhatian</span>
-            </div>
-        </div>
-
-        <!-- Kartu 4: Belum Hadir / Alpha -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 group relative overflow-hidden">
-            <div class="absolute right-0 top-0 h-24 w-24 bg-red-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-            
-            <div class="relative flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-bold text-gray-400 uppercase tracking-wider">Belum Hadir</p>
-                    <h3 class="text-3xl font-extrabold text-gray-800 mt-1 group-hover:text-red-500 transition-colors">
-                        {{ $absentCount }}
-                    </h3>
-                </div>
-                <div class="h-12 w-12 bg-red-100 text-red-500 rounded-xl flex items-center justify-center text-xl shadow-sm group-hover:rotate-12 transition-transform">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-            </div>
-             <div class="mt-4 flex items-center text-xs text-gray-400">
-                <span class="text-red-500 font-bold mr-1">Sakit: {{ $sickCount }} | Izin: {{ $permitCount }}</span>
-            </div>
-        </div>
-
-    </div>
-
-    {{-- 
-        =========================================
-        BAGIAN 2: GRAFIK & CHART (GRID 2 KOLOM)
-        =========================================
-    --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-        
-        <!-- Grafik Batang (Weekly Progress) - Mengambil 2 Kolom -->
-        <div class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-bold text-gray-800">Progres Mingguan</h3>
-                <button class="text-gray-400 hover:text-blue-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path></svg>
+            {{-- Filter Cepat dengan Interaksi AlpineJS --}}
+            <div class="flex items-center gap-2 bg-white p-1.5 rounded-xl shadow-sm border border-gray-100">
+                <button 
+                    @click="period = 'today'" 
+                    :class="period === 'today' ? 'bg-blue-50 text-blue-700 shadow-sm' : 'text-gray-500 hover:bg-gray-50'"
+                    class="px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200">
+                    Hari Ini
+                </button>
+                <button 
+                    @click="period = 'week'" 
+                    :class="period === 'week' ? 'bg-blue-50 text-blue-700 shadow-sm' : 'text-gray-500 hover:bg-gray-50'"
+                    class="px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200">
+                    Minggu Ini
                 </button>
             </div>
-            <!-- Container Grafik -->
-            <div class="relative h-72 w-full">
-                <canvas id="weeklyChart"></canvas>
+        </div>
+
+        {{-- 
+            =========================================
+            BAGIAN 1: KARTU STATISTIK (STATS CARDS)
+            =========================================
+            Catatan: Idealnya ini dibuat menjadi Blade Component terpisah: <x-stat-card />
+        --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            
+            {{-- Helper Component untuk Card agar kode tidak berulang (Inline untuk contoh) --}}
+            @php
+                $cards = [
+                    [
+                        'title' => 'Total Siswa',
+                        'value' => $totalStudents,
+                        'icon_bg' => 'bg-blue-100',
+                        'icon_text' => 'text-blue-600',
+                        'hover_text' => 'group-hover:text-blue-600',
+                        'bg_decor' => 'bg-blue-50',
+                        'icon_path' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+                        'footer_text' => 'Terdaftar di sistem',
+                        'footer_color' => 'text-blue-600'
+                    ],
+                    [
+                        'title' => 'Hadir',
+                        'value' => $presentCount,
+                        'icon_bg' => 'bg-emerald-100',
+                        'icon_text' => 'text-emerald-600',
+                        'hover_text' => 'group-hover:text-emerald-600',
+                        'bg_decor' => 'bg-emerald-50',
+                        'icon_path' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+                        'footer_text' => $presentPercentage . '% dari total siswa',
+                        'footer_color' => 'text-emerald-600'
+                    ],
+                    [
+                        'title' => 'Terlambat',
+                        'value' => $lateCount,
+                        'icon_bg' => 'bg-amber-100',
+                        'icon_text' => 'text-amber-600',
+                        'hover_text' => 'group-hover:text-amber-500',
+                        'bg_decor' => 'bg-amber-50',
+                        'icon_path' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+                        'footer_text' => 'Perlu Perhatian',
+                        'footer_color' => 'text-amber-600'
+                    ],
+                    [
+                        'title' => 'Belum Hadir',
+                        'value' => $absentCount,
+                        'icon_bg' => 'bg-red-100',
+                        'icon_text' => 'text-red-500',
+                        'hover_text' => 'group-hover:text-red-500',
+                        'bg_decor' => 'bg-red-50',
+                        'icon_path' => 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+                        'footer_text' => 'Sakit: '.$sickCount.' | Izin: '.$permitCount,
+                        'footer_color' => 'text-red-500'
+                    ]
+                ];
+            @endphp
+
+            @foreach($cards as $card)
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 group relative overflow-hidden">
+                <div class="absolute right-0 top-0 h-24 w-24 {{ $card['bg_decor'] }} rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                
+                <div class="relative flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ $card['title'] }}</p>
+                        <h3 class="text-3xl font-extrabold text-gray-800 mt-1 {{ $card['hover_text'] }} transition-colors">
+                            {{ $card['value'] }}
+                        </h3>
+                    </div>
+                    <div class="h-12 w-12 {{ $card['icon_bg'] }} {{ $card['icon_text'] }} rounded-xl flex items-center justify-center text-xl shadow-sm group-hover:rotate-12 transition-transform">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $card['icon_path'] }}"></path></svg>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-xs text-gray-400">
+                    <span class="{{ $card['footer_color'] }} font-bold mr-1 flex items-center">
+                        {{-- Dot Indicator --}}
+                        <span class="w-2 h-2 rounded-full bg-current mr-1.5 opacity-70"></span>
+                        {{ $card['footer_text'] }}
+                    </span>
+                </div>
+            </div>
+            @endforeach
+
+        </div>
+
+        {{-- 
+            =========================================
+            BAGIAN 2: GRAFIK & CHART
+            =========================================
+        --}}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            
+            <!-- Grafik Batang -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800">Analisis Kehadiran</h3>
+                        <p class="text-xs text-gray-400">Tren kehadiran siswa dalam satu minggu</p>
+                    </div>
+                    {{-- Export Button Example --}}
+                    <button class="inline-flex items-center gap-2 text-xs font-semibold text-gray-600 bg-gray-50 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-colors border border-gray-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Export PDF
+                    </button>
+                </div>
+                <div class="relative h-72 w-full">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Grafik Donat -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Komposisi Real-time</h3>
+                <p class="text-xs text-gray-400 mb-6">Persentase status siswa hari ini</p>
+                
+                <div class="relative h-64 w-full flex-1 flex items-center justify-center">
+                    <canvas id="dailyDonutChart"></canvas>
+                    {{-- Center Text untuk Donat --}}
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span class="text-3xl font-extrabold text-gray-800">{{ $totalStudents }}</span>
+                        <span class="text-xs text-gray-400 font-medium">Total Siswa</span>
+                    </div>
+                </div>
+                
+                <div class="mt-6 grid grid-cols-2 gap-3 text-xs text-gray-600">
+                    <div class="flex items-center p-2 rounded-lg bg-emerald-50/50 border border-emerald-100">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2"></span>Hadir Tepat
+                    </div>
+                    <div class="flex items-center p-2 rounded-lg bg-amber-50/50 border border-amber-100">
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 mr-2"></span>Terlambat
+                    </div>
+                    <div class="flex items-center p-2 rounded-lg bg-red-50/50 border border-red-100">
+                        <span class="w-2.5 h-2.5 rounded-full bg-red-500 mr-2"></span>Belum Hadir
+                    </div>
+                    <div class="flex items-center p-2 rounded-lg bg-blue-50/50 border border-blue-100">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-2"></span>Pulang Awal
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Grafik Donat (Daily Status) - Mengambil 1 Kolom -->
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col">
-            <h3 class="text-lg font-bold text-gray-800 mb-6">Komposisi Hari Ini</h3>
-            <div class="relative h-64 w-full flex-1 flex items-center justify-center">
-                <canvas id="dailyDonutChart"></canvas>
-            </div>
-            <!-- Legend Custom (Opsional, jika ingin lebih rapi) -->
-            <div class="mt-6 grid grid-cols-2 gap-2 text-xs text-gray-600">
-                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-emerald-500 mr-2"></span>Hadir Tepat</div>
-                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-amber-500 mr-2"></span>Terlambat</div>
-                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-red-500 mr-2"></span>Belum Hadir</div>
-                <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>Pulang Awal</div>
-            </div>
-        </div>
     </div>
 
-    {{-- Script Chart.js (Pastikan Anda sudah menginstall atau CDN chart.js di layout utama, atau panggil disini) --}}
+    {{-- Script Chart --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Konfigurasi Umum agar Chart terlihat modern
+        // Chart Config (Sama seperti sebelumnya, hanya dirapikan)
         Chart.defaults.font.family = "'Figtree', sans-serif";
-        Chart.defaults.color = '#64748b';
-        
+        Chart.defaults.color = '#94a3b8';
+
         // 1. Grafik Batang Mingguan
         const ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
+        
+        // Gradient untuk Bar
+        const gradientPresent = ctxWeekly.createLinearGradient(0, 0, 0, 300);
+        gradientPresent.addColorStop(0, '#10b981');
+        gradientPresent.addColorStop(1, '#059669');
+
         new Chart(ctxWeekly, {
             type: 'bar',
             data: {
                 labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
                 datasets: [
-                    {
-                        label: 'Hadir',
-                        data: @json($weeklyPresentData), // Data dari Controller
-                        backgroundColor: '#10b981', // Emerald 500
-                        borderRadius: 6,
-                        barThickness: 20,
-                    },
-                    {
-                        label: 'Terlambat',
-                        data: @json($weeklyLateData), // Data dari Controller
-                        backgroundColor: '#f59e0b', // Amber 500
-                        borderRadius: 6,
-                        barThickness: 20,
-                    },
-                    {
-                        label: 'Tidak Hadir',
-                        data: @json($weeklyAbsentData), // Data dari Controller
-                        backgroundColor: '#ef4444', // Red 500
-                        borderRadius: 6,
-                        barThickness: 20,
-                    }
+                    { label: 'Hadir', data: @json($weeklyPresentData), backgroundColor: gradientPresent, borderRadius: 4, barPercentage: 0.6 },
+                    { label: 'Terlambat', data: @json($weeklyLateData), backgroundColor: '#fbbf24', borderRadius: 4, barPercentage: 0.6 },
+                    { label: 'Tidak Hadir', data: @json($weeklyAbsentData), backgroundColor: '#f87171', borderRadius: 4, barPercentage: 0.6 }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
                 plugins: {
-                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                    legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8 } },
+                    tooltip: { backgroundColor: '#1e293b', padding: 12, cornerRadius: 8, displayColors: true }
                 },
                 scales: {
-                    y: { 
-                        beginAtZero: true, 
-                        grid: { borderDash: [2, 4], color: '#f1f5f9', drawBorder: false } 
-                    },
-                    x: { 
-                        grid: { display: false, drawBorder: false } 
-                    }
+                    y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f1f5f9', drawBorder: false } },
+                    x: { grid: { display: false } }
                 }
             }
         });
@@ -213,33 +220,23 @@
         new Chart(ctxDonut, {
             type: 'doughnut',
             data: {
-                labels: ['Hadir Tepat', 'Terlambat', 'Belum Hadir', 'Pulang Awal', 'Sakit/Izin'],
+                labels: ['Hadir Tepat', 'Terlambat', 'Belum Hadir', 'Pulang Awal', 'Lainnya'],
                 datasets: [{
                     data: [
-                        {{ $presentOnTimeCount }}, 
-                        {{ $lateCount }}, 
-                        {{ $absentCount }}, 
-                        {{ $earlyLeaveCount }},
+                        {{ $presentOnTimeCount }}, {{ $lateCount }}, {{ $absentCount }}, {{ $earlyLeaveCount }},
                         {{ $sickCount + $permitCount + $alphaCount }}
                     ],
-                    backgroundColor: [
-                        '#10b981', // Emerald
-                        '#f59e0b', // Amber
-                        '#ef4444', // Red
-                        '#3b82f6', // Blue
-                        '#8b5cf6'  // Violet
-                    ],
-                    borderWidth: 0,
-                    hoverOffset: 4
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '75%', // Membuat donat lebih tipis
-                plugins: {
-                    legend: { display: false } // Kita pakai legend custom HTML di bawahnya
-                }
+                cutout: '80%', 
+                plugins: { legend: { display: false } }
             }
         });
     </script>
