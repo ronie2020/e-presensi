@@ -88,7 +88,7 @@
 
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                         
-                        {{-- AREA KAMERA (KIRI - LEBIH KECIL DI DESKTOP) --}}
+                        {{-- AREA KAMERA (KIRI) --}}
                         <div class="lg:col-span-5 flex flex-col">
                             <div class="relative bg-gray-900 rounded-3xl overflow-hidden shadow-lg border-4 border-gray-100 aspect-square sm:aspect-auto sm:h-[400px]" id="camera-container">
                                 
@@ -122,7 +122,7 @@
                             </p>
                         </div>
 
-                        {{-- AREA TABEL RIWAYAT (KANAN - LEBIH LEBAR) --}}
+                        {{-- AREA TABEL RIWAYAT (KANAN) --}}
                         <div class="lg:col-span-7 flex flex-col h-full bg-gray-50/50 rounded-3xl border border-gray-100 p-1">
                             <div class="p-4 flex justify-between items-center border-b border-gray-100 bg-white rounded-t-[1.3rem]">
                                 <h3 class="font-bold text-gray-800 flex items-center gap-2">
@@ -217,12 +217,17 @@
             let selectedType = 'Harian'; 
             const csrfToken = '{{ csrf_token() }}';
             const scanProcessUrl = '{{ route('scan.process') }}';
+            
+            // DOM Elements
             const logTableBody = document.getElementById('scan-log');
-            let noLogEntry = document.getElementById('no-log-entry'); 
             const scanStatus = document.getElementById('scan-status');
             const scanResult = document.getElementById('scan-result');
             const modeIndicator = document.getElementById('mode-indicator');
             const cameraContainer = document.getElementById('camera-container');
+            
+            // VARIABLE PENTING
+            let resultTimeout; 
+            let isProcessing = false;
 
             // --- KONFIGURASI STYLE TAB & THEME ---
             const typeConfig = {
@@ -230,39 +235,35 @@
                     activeClass: 'bg-blue-600 text-white shadow-lg shadow-blue-200', 
                     inactiveClass: 'bg-white text-gray-500 hover:bg-gray-100',
                     indicatorClass: 'bg-blue-50 text-blue-600 border-blue-100',
-                    borderClass: 'border-blue-200'
                 },
                 'Dhuha': { 
                     activeClass: 'bg-emerald-600 text-white shadow-lg shadow-emerald-200', 
                     inactiveClass: 'bg-white text-gray-500 hover:bg-gray-100',
                     indicatorClass: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-                    borderClass: 'border-emerald-200'
                 },
                 'Dhuhur': { 
                     activeClass: 'bg-orange-500 text-white shadow-lg shadow-orange-200', 
                     inactiveClass: 'bg-white text-gray-500 hover:bg-gray-100',
                     indicatorClass: 'bg-orange-50 text-orange-600 border-orange-100',
-                    borderClass: 'border-orange-200'
                 }
             };
 
             // JAM DIGITAL
             const clockElement = document.getElementById('clock');
-            setInterval(() => {
-                clockElement.textContent = new Date().toLocaleTimeString('id-ID', { hour12: false });
-            }, 1000);
+            if(clockElement) {
+                setInterval(() => {
+                    clockElement.textContent = new Date().toLocaleTimeString('id-ID', { hour12: false });
+                }, 1000);
+            }
 
             // LOGIKA TAB
             const buttons = document.querySelectorAll('.scan-type-btn');
-            
             function setActiveTab(type) {
                 selectedType = type;
                 const config = typeConfig[type];
 
                 buttons.forEach(btn => {
-                    // Reset class dasar
                     btn.className = 'scan-type-btn relative group overflow-hidden rounded-xl py-3 px-4 transition-all duration-300 transform';
-                    
                     if (btn.getAttribute('data-type') === type) {
                         btn.classList.add(...config.activeClass.split(' '));
                         btn.classList.add('scale-105');
@@ -271,16 +272,10 @@
                     }
                 });
 
-                // Update Indikator & Warna Kamera
                 modeIndicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-current animate-pulse"></span> Mode Aktif: ${type === 'Harian' ? 'Absensi Harian' : 'Sholat ' + type}`;
                 modeIndicator.className = `mt-3 mx-1 p-2.5 rounded-lg text-center text-xs font-bold uppercase tracking-wide transition-all duration-300 flex items-center justify-center gap-2 ${config.indicatorClass}`;
                 
-                // Optional: Ubah border kamera sesuai mode
-                cameraContainer.classList.remove('border-blue-200', 'border-emerald-200', 'border-orange-200');
-                // cameraContainer.classList.add(config.borderClass); (Opsional, jika ingin border kamera berwarna)
-                
                 scanStatus.textContent = `Siap Scan: ${selectedType}`;
-                
                 updateTableLayout(selectedType);
                 filterLogs(selectedType);
             }
@@ -313,14 +308,13 @@
             const html5QrCode = new Html5Qrcode("qr-reader");
             
             const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+                if (isProcessing) return;
+                isProcessing = true;
+
                 html5QrCode.pause();
-                scanStatus.textContent = `Memproses...`;
+                scanStatus.textContent = `Memproses Data...`;
                 
-                // Hide result banner temporarily
-                scanResult.classList.add('opacity-0', 'scale-95');
-                setTimeout(() => scanResult.classList.add('hidden'), 300);
-                
-                if (decodedText.length < 3 || decodedText.length > 20) {
+                if (decodedText.length < 3 || decodedText.length > 50) {
                      showScanResult('error', 'Format QR Code tidak valid.');
                      resumeScanner();
                      return;
@@ -330,7 +324,6 @@
 
             const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
             
-            // Auto start camera
             Html5Qrcode.getCameras().then(cameras => {
                 if (cameras && cameras.length) {
                     const rearCamera = cameras.find(camera => camera.label.toLowerCase().includes('back')) || cameras[0];
@@ -348,7 +341,8 @@
                 setTimeout(() => {
                     html5QrCode.resume();
                     scanStatus.textContent = `Siap Scan: ${selectedType}`;
-                }, 2000);
+                    isProcessing = false; 
+                }, 1500); 
             }
 
             async function processScanData(studentId, scanType) {
@@ -360,8 +354,10 @@
                     });
                     const result = await response.json();
 
-                    if (response.ok || response.status === 409) {
-                        showScanResult(response.ok ? 'success' : 'warning', result.message);
+                    if (response.ok || response.status === 409 || response.status === 200) {
+                        const msgType = response.status === 409 ? 'warning' : 'success';
+                        showScanResult(msgType, result.message);
+                        
                         if (result.scan) {
                             const realType = result.scan.type === 'Harian' ? 'Harian' : (result.scan.activity || scanType);
                             updateOrCreateScanLog(result.scan, realType);
@@ -370,10 +366,47 @@
                         showScanResult('error', result.message || `Error ${response.status}`);
                     }
                 } catch (error) {
+                    console.error(error);
                     showScanResult('error', 'Gagal terhubung ke server.');
                 } finally {
                     resumeScanner();
                 }
+            }
+
+            function showScanResult(type, message) {
+                if (resultTimeout) clearTimeout(resultTimeout);
+
+                scanResult.className = 'mt-4 p-4 rounded-2xl font-bold text-sm text-center transition-all duration-500 shadow-md transform scale-100 opacity-100';
+                
+                if (type === 'success') {
+                    scanResult.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-200');
+                } else if (type === 'warning') {
+                    scanResult.classList.add('bg-yellow-50', 'text-yellow-700', 'border', 'border-yellow-200');
+                } else {
+                    scanResult.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-200');
+                }
+                
+                scanResult.innerHTML = `
+                    <div class="flex items-center justify-center gap-2">
+                        ${type === 'success' ? 
+                            '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' : 
+                            (type === 'warning' ? 
+                            '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>' :
+                            '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>')
+                        }
+                        <span>${message}</span>
+                    </div>
+                `;
+
+                scanResult.classList.remove('hidden');
+
+                resultTimeout = setTimeout(() => {
+                    scanResult.classList.remove('opacity-100', 'scale-100');
+                    scanResult.classList.add('opacity-0', 'scale-95');
+                    setTimeout(() => {
+                        scanResult.classList.add('hidden');
+                    }, 300);
+                }, 5000); 
             }
 
             function updateOrCreateScanLog(scan, scanTypeProcessed) { 
@@ -385,10 +418,9 @@
                 const rowId = `log-row-${scan.student.student_id}`; 
                 let row = document.getElementById(rowId);
 
-                // Buat row baru jika belum ada
                 if (!row) {
                     row = document.createElement('tr');
-                    row.className = 'log-entry group hover:bg-white transition-colors rounded-xl animate-pulse'; // Add animation for new entry
+                    row.className = 'log-entry group hover:bg-white transition-colors rounded-xl animate-pulse'; 
                     row.id = rowId;
                     row.innerHTML = `
                         <td class="px-4 py-3 whitespace-nowrap">
@@ -409,7 +441,6 @@
                     setTimeout(() => row.classList.remove('animate-pulse'), 1000);
                 }
 
-                // Update Data Attribute
                 if (scanTypeProcessed === 'Harian') row.setAttribute('data-harian', 'true');
                 else if (scanTypeProcessed === 'Dhuha') row.setAttribute('data-dhuha', 'true');
                 else if (scanTypeProcessed === 'Dhuhur' || scanTypeProcessed === 'Duhur') row.setAttribute('data-dhuhur', 'true');
@@ -419,7 +450,6 @@
                 const dhuhaSpan = row.querySelector('.time-dhuha');
                 const dhuhurSpan = row.querySelector('.time-dhuhur');
                 
-                // Logic Badge
                 if (scan.type === 'Harian') {
                     if (scan.status === 'Masuk') {
                         row.querySelector('.log-time-in').textContent = timeStr;
@@ -479,25 +509,6 @@
                     emptyRow.innerHTML = `<td colspan="5" class="px-6 py-8 text-center text-sm text-gray-400 italic">Belum ada data untuk ${type}</td>`;
                     logTableBody.appendChild(emptyRow);
                 }
-            }
-
-            function showScanResult(type, message) {
-                scanResult.classList.remove('hidden', 'opacity-0', 'scale-95', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-yellow-100', 'text-yellow-800');
-                
-                // Add Animation
-                void scanResult.offsetWidth; // Trigger reflow
-                scanResult.classList.add('transform', 'transition-all', 'duration-300', 'opacity-100', 'scale-100');
-
-                if (type === 'success') scanResult.classList.add('bg-green-100', 'text-green-800');
-                else if (type === 'warning') scanResult.classList.add('bg-yellow-100', 'text-yellow-800');
-                else scanResult.classList.add('bg-red-100', 'text-red-800');
-                
-                scanResult.innerHTML = `
-                    <div class="flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${type === 'success' ? 'M5 13l4 4L19 7' : 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'}"></path></svg>
-                        <span>${message}</span>
-                    </div>
-                `;
             }
         });
     </script>
