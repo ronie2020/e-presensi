@@ -8,9 +8,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Http; // Import HTTP Client Laravel
-use Illuminate\Support\Facades\Log;  // Import Log
-use Carbon\Carbon; // Import Carbon
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class SendWaScanNotificationJob implements ShouldQueue
 {
@@ -18,71 +18,89 @@ class SendWaScanNotificationJob implements ShouldQueue
 
     protected $attendance;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(AttendanceSiswa $attendance)
     {
         $this->attendance = $attendance;
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
-        // TAMBAHAN PENGAMAN: Cek apakah data student ada
+        // 1. Beri JEDA ACAK (Throttling) agar tidak "nembak" server WA terus menerus
+        // Untuk Scan Realtime, jeda pendek (1-3 detik) sudah cukup
+        sleep(rand(1, 3));
+
         if (!$this->attendance->student) {
-            Log::warning('Job WA Scan dibatalkan: Siswa untuk attendance ID ' . $this->attendance->id . ' tidak ditemukan (mungkin terhapus).');
-            return; // Hentikan job dengan aman
+            Log::warning('Job WA Scan dibatalkan: Siswa tidak ditemukan.');
+            return; 
         }
 
-        // 1. Ambil data yang kita butuhkan
+        // 2. Siapkan Data
         $student = $this->attendance->student;
         $nomorWA = $student->parent_wa_number;
         $namaSiswa = $student->name;
-        $jamMasuk = Carbon::parse($this->attendance->time_in)->format('H:i');
-        $statusAbsen = $this->attendance->notes; // "Tepat Waktu" atau "Terlambat X menit"
+        $jamScan = Carbon::parse($this->attendance->time_in)->format('H:i');
+        $tipeAbsen = $this->attendance->type; 
+        $catatan = $this->attendance->notes;
 
-        // 2. Siapkan template pesan
-        $message = "Info Absensi SMP NEGERI 3 LAKBOK:\n\n" .
-                   "Assalamualaikum, disampaiakan dengan Hormat bahwa Ananda *{$namaSiswa}* telah melakukan absensi Harian pada:\n" .
-                   "Jam: *{$jamMasuk} WIB*\n" .
-                   "Status: *{$statusAbsen}*\n\n" .
-                   "Terima kasih.";
+        // 3. TEKNIK ANTI-BAN: VARIASI SALAM (Spintax Sederhana)
+        // Agar pesan tidak terdeteksi sebagai broadcast identik oleh WA
+        $salamList = [
+            "Assalamualaikum", 
+            "Salam Hormat", 
+            "Halo Ayah/Bunda", 
+            "Info Sekolah", 
+            "Laporan Kehadiran"
+        ];
+        $salam = $salamList[array_rand($salamList)];
+
+        // 4. Template Pesan
+        $message = "";
+        if ($tipeAbsen == 'Masuk') {
+            $message = "*INFO PRESENSI SMPN 3 LAKBOK*\n\n" .
+                       "{$salam}, kami sampaikan bahwa Ananda:\n" .
+                       "Nama: *{$namaSiswa}*\n" .
+                       "Aktivitas: *ABSEN MASUK*\n" .
+                       "Pukul: *{$jamScan} WIB*\n" .
+                       "Status: _{$catatan}_\n\n" .
+                       "Terima kasih.";
+        } 
+        elseif ($tipeAbsen == 'Pulang') {
+            $message = "*INFO PRESENSI SMPN 3 LAKBOK*\n\n" .
+                       "{$salam}, kami sampaikan bahwa Ananda:\n" .
+                       "Nama: *{$namaSiswa}*\n" .
+                       "Aktivitas: *ABSEN PULANG*\n" .
+                       "Pukul: *{$jamScan} WIB*\n\n" .
+                       "Hati-hati di jalan. Terima kasih.";
+        }
+        else {
+            return;
+        }
         
-        
-        // 3. Tentukan kredensial WAPANELS Anda (BACA DARI .ENV - DIPERBARUI)
+        // 5. Rotasi AppKey (Sudah Benar)
         $apiUrl = 'https://app.wapanels.com/api/create-message';
-        
-        // Ambil Auth Key (Kunci Akun - Singular)
         $authKey = config('app.wapanels_authkey');
-        
-        // Ambil DAFTAR App Key (Kunci Perangkat - Plural)
         $appKeys = config('app.wapanels_appkeys');
 
-        // 4. PILIH SATU APPKEY SECARA ACAK DARI DAFTAR
         if (empty($appKeys) || empty($appKeys[0])) {
-            Log::error('WAPANELS_APP_KEYS tidak diatur di .env atau kosong.');
-            return; // Hentikan job jika tidak ada key
+            Log::error('WAPANELS_APP_KEYS kosong.');
+            return; 
         }
-        $appKey = $appKeys[array_rand($appKeys)]; // Ambil 1 appkey acak
+        $appKey = $appKeys[array_rand($appKeys)]; 
 
-        // 5. Kirim pesan menggunakan Laravel HTTP Client (menerjemahkan cURL)
         try {
             $response = Http::post($apiUrl, [
-                'appkey' => $appKey,     // Gunakan appkey yang dipilih acak
-                'authkey' => $authKey,   // Gunakan authkey akun yang sama
+                'appkey' => $appKey,
+                'authkey' => $authKey,
                 'to' => $nomorWA,
                 'message' => $message,
                 'sandbox' => 'false'
             ]);
             
-            Log::info('Notifikasi WA (Scan) terkirim ke: ' . $nomorWA . ' via AppKey ' . substr($appKey, 0, 5) . '... Respon: ' . $response->body());
+            // Log sukses (Opsional: Matikan log ini jika server penuh)
+            // Log::info("WA {$tipeAbsen} -> {$namaSiswa} (Key: " . substr($appKey, 0, 4) . "...)");
 
         } catch (\Exception $e) {
-            // Catat error jika pengiriman gagal
-            Log::error('Gagal kirim WA notifikasi (Scan) ke ' . $nomorWA . ': ' . $e->getMessage());
+            Log::error("Gagal kirim WA Scan: " . $e->getMessage());
         }
     }
 }

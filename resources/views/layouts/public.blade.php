@@ -47,24 +47,15 @@
         @stack('styles')
     </head>
     <body class="font-sans text-gray-900 antialiased">
-        <!-- 
-          PERBAIKAN RESPONSIF: 
-          'flex-col' (tumpuk di HP) 
-          'md:flex-row' (sampingan di Desktop)
-        -->
         <div class="min-h-screen flex flex-col md:flex-row bg-gray-100">
             
-            <!-- 
-              Kolom Sidebar Biru (Responsif) 
-              PERBAIKAN RESPONSIF: 
-              'w-full' (lebar penuh di HP) 
-              'md:w-64' (lebar normal di Desktop)
-              'md:flex-shrink-0' (agar tidak menciut)
-            -->
+            <!-- Kolom Sidebar Biru -->
             <aside class="w-full md:w-64 md:flex-shrink-0 bg-blue-800 text-white p-6 shadow-lg" style="background-color: #1e40af;">
                 <div class="flex items-center gap-3 mb-8">
-                    <!-- Ganti 'placehold.co' dengan logo sekolah Anda -->
-                    <img src="{{ asset('images/logo_smp3.png') }}" alt="Logo Sekolah" class="h-10 w-10 bg-white rounded-full p-1">
+                    <!-- Logo Sekolah -->
+                    <div class="h-10 w-10 bg-white/10 rounded-full p-2 flex items-center justify-center text-white">
+                         <x-application-logo class="h-full w-full fill-current" />
+                    </div>
                     <div>
                         <h2 class="text-sm font-semibold text-white">SMP NEGERI 3 LAKBOK</h2>
                         <p class="text-xs text-blue-200">Sistem Manajemen Kehadiran</p>
@@ -72,40 +63,30 @@
                 </div>
 
                 <nav class="space-y-2">
-                    <span class="px-6 text-xs font-semibold uppercase text-blue-300">Akses Publik Tersedia</span>
+                    <span class="px-6 text-xs font-semibold uppercase text-blue-300">Menu</span>
                     
+                    <!-- Hanya Menu Portal Siswa yang tersisa -->
                     <a href="{{ route('portal.index') }}" 
                        class="sidebar-link {{ request()->routeIs('portal.*') ? 'active' : '' }}">
                         <i class="ph-fill ph-student"></i>
                         Portal Siswa
                     </a>
                     
-                    <a href="{{ route('kiosk.show') }}" 
-                       class="sidebar-link {{ request()->routeIs('kiosk.show') ? 'active' : '' }}">
-                        <i class="ph-fill ph-identification-card"></i>
-                        Mode Kiosk
-                    </a>
-
-                    <a href="{{ route('login') }}" 
-                       class="sidebar-link {{ request()->routeIs('login') ? 'active' : '' }}">
-                        <i class="ph-fill ph-house"></i>
-                        Halaman Utama
-                    </a>
+                    <!-- Menu Kiosk dan Halaman Utama SUDAH DIHAPUS dari sini -->
                 </nav>
+                
+                <!-- Footer Kecil di Bawah Sidebar -->
+                <div class="mt-auto pt-10 px-6">
+                    <p class="text-xs text-blue-300 opacity-70">&copy; {{ date('Y') }} SMPN 3 Lakbok</p>
+                </div>
             </aside>
 
             <!-- Kolom Konten Putih -->
-            <main class="flex-1 p-6 lg:p-10 overflow-y-auto">
-                <!-- 
-                  PERBAIKAN ERROR '$student':
-                  Kotak "Selamat Datang" sudah dihapus dari sini 
-                  dan dipindahkan ke 'portal.show.blade.php'.
-                -->
+            <main class="flex-1 p-6 lg:p-10 overflow-y-auto flex flex-col justify-center">
                 @yield('content')
             </main>
         </div>
 
-        <!-- Stack untuk script khusus per halaman -->
         @stack('scripts')
     </body>
 </html>

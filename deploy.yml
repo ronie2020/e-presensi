@@ -1,0 +1,38 @@
+name: Auto Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - main  # Deploy hanya jika push ke branch main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            # 1. Masuk ke folder project (Sesuaikan path ini jika beda)
+            cd domains/e-presensi.smpn3lakbok.sch.id/public_html
+            
+            # 2. Tarik kode terbaru dari GitHub
+            git pull origin main
+            
+            # 3. Install/Update Vendor (Pakai Path PHP 8.2 Khusus Hostinger)
+            /opt/alt/php82/usr/bin/php /usr/bin/composer install --no-interaction --prefer-dist --optimize-autoloader
+            
+            # 4. Jalankan Migrasi Database (Jika ada perubahan tabel)
+            /opt/alt/php82/usr/bin/php artisan migrate --force
+            
+            # 5. Bersihkan dan Cache Ulang Konfigurasi
+            /opt/alt/php82/usr/bin/php artisan optimize:clear
+            /opt/alt/php82/usr/bin/php artisan config:cache
+            /opt/alt/php82/usr/bin/php artisan route:cache
+            /opt/alt/php82/usr/bin/php artisan view:cache
+            
+            echo "Deployment Berhasil! 🚀"

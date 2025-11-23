@@ -6,101 +6,116 @@ use App\Models\DisciplineRecord;
 use App\Models\DisciplineType;
 use App\Models\Student;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // Untuk mengambil ID user yang login
-use Carbon\Carbon; // Untuk tanggal
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class DisciplineController extends Controller
 {
     /**
      * Menampilkan halaman utama Catatan Disiplin.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // 1. Ambil data untuk dropdown
-        $students = Student::orderBy('name', 'asc')->get();
+        // 1. Ambil data untuk dropdown form
+        // --- PERBAIKAN URUTAN ---
+        // Ambil semua siswa beserta kelasnya, lalu urutkan koleksinya:
+        // Prioritas 1: Nama Kelas (7A, 7B, dst)
+        // Prioritas 2: Nama Siswa
+        $students = Student::with('schoolClass')
+            ->get()
+            ->sortBy(function ($student) {
+                // Kita gabungkan Nama Kelas dan Nama Siswa untuk menjadi kunci pengurutan
+                // Contoh hasil: "7A - Ahmad", "7A - Budi", "7B - Caca"
+                $className = $student->schoolClass->name ?? 'ZZZ'; // 'ZZZ' agar siswa tanpa kelas ada di paling bawah
+                return $className . $student->name;
+            });
         
-        // 2. Pisahkan data Tipe Disiplin
         $violationTypes = DisciplineType::where('type', 'Pelanggaran')->orderBy('name', 'asc')->get();
         $meritTypes = DisciplineType::where('type', 'Kebaikan')->orderBy('name', 'asc')->get();
 
-        // 3. Ambil data log/catatan terakhir
-        $records = DisciplineRecord::with(['student.schoolClass', 'disciplineType', 'recorder'])
-            ->latest() // Urutkan dari yang terbaru
-            ->paginate(10); // Tampilkan 10 per halaman
+        // 2. LOGIKA RINGKASAN POIN (Summary)
+        $studentSummaries = Student::with(['schoolClass', 'disciplineRecords.disciplineType'])
+            ->get()
+            ->map(function ($student) {
+                // Hitung Poin Pelanggaran
+                $violationPoints = $student->disciplineRecords->filter(function ($record) {
+                    return optional($record->disciplineType)->type == 'Pelanggaran';
+                })->sum(function ($record) {
+                    return optional($record->disciplineType)->point_value;
+                });
+
+                // Hitung Poin Kebaikan
+                $meritPoints = $student->disciplineRecords->filter(function ($record) {
+                    return optional($record->disciplineType)->type == 'Kebaikan';
+                })->sum(function ($record) {
+                    return optional($record->disciplineType)->point_value;
+                });
+
+                return (object) [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'class' => $student->schoolClass->name ?? '-',
+                    'total_violation' => $violationPoints,
+                    'total_merit' => $meritPoints,
+                ];
+            })
+            ->filter(function ($summary) {
+                return $summary->total_violation > 0 || $summary->total_merit > 0;
+            })
+            ->sortByDesc('total_violation') 
+            ->take(10); 
+
+        // 3. LOGIKA RIWAYAT (History) dengan FILTER
+        $query = DisciplineRecord::with(['student.schoolClass', 'disciplineType', 'recorder'])
+            ->latest(); 
+
+        if ($request->has('search') && $request->search != '') {
+            $query->whereHas('student', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->has('filter_date') && $request->filter_date != '') {
+            $query->whereDate('date', $request->filter_date);
+        }
+
+        $historyRecords = $query->paginate(10)->withQueryString();
 
         // 4. Kirim semua data ke view
         return view('discipline.index', [
             'students' => $students,
             'violationTypes' => $violationTypes,
             'meritTypes' => $meritTypes,
-            'records' => $records,
+            'studentSummaries' => $studentSummaries, 
+            'historyRecords' => $historyRecords,     
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * Kita tidak pakai ini karena form ada di 'index'
-     */
     public function create()
     {
         return redirect()->route('discipline.index');
     }
 
-    /**
-     * Menyimpan catatan baru (baik Pelanggaran maupun Kebaikan).
-     */
     public function store(Request $request)
     {
-        // 1. Validasi data
-        $validatedData = $request->validate([
+        $request->validate([
             'student_id' => 'required|integer|exists:students,id',
             'discipline_type_id' => 'required|integer|exists:discipline_types,id',
             'notes' => 'nullable|string',
             'date' => 'required|date',
         ]);
 
-        // 2. Tambahkan siapa yang mencatat (user yang sedang login)
-        $validatedData['recorded_by_user_id'] = Auth::id();
+        $data = $request->all();
+        $data['recorded_by_user_id'] = Auth::id();
 
-        // 3. Simpan ke database
-        DisciplineRecord::create($validatedData);
+        DisciplineRecord::create($data);
 
-        // 4. Redirect kembali dengan pesan sukses
         return redirect()->route('discipline.index')->with('success', 'Catatan disiplin berhasil disimpan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(DisciplineRecord $disciplineRecord)
-    {
-        // Tidak kita gunakan
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(DisciplineRecord $disciplineRecord)
-    {
-        // Tidak kita gunakan
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, DisciplineRecord $disciplineRecord)
-    {
-        // Tidak kita gunakan
-    }
-
-    /**
-     * Menghapus catatan disiplin.
-     */
     public function destroy(DisciplineRecord $discipline)
     {
-        // $discipline didapat dari Route-Model Binding
         $discipline->delete();
-        
         return redirect()->route('discipline.index')->with('success', 'Catatan disiplin berhasil dihapus.');
     }
 }

@@ -12,19 +12,21 @@ class AttendanceSiswa extends Model
 
     /**
      * PENTING: Memberi tahu Laravel agar model ini menggunakan tabel 'attendances_siswa'
-     * (Karena nama model 'AttendanceSiswa' tidak jamak menjadi 'AttendanceSiswas')
      */
     protected $table = 'attendances_siswa';
     
     /**
-     * Kolom yang boleh diisi secara massal.
+     * Kolom yang boleh diisi secara massal (Mass Assignment).
+     * activity WAJIB ada di sini agar filter Dhuha/Dhuhur berfungsi.
      */
     protected $fillable = [
         'student_id',
         'attendance_date',
         'type',
+        'activity', // <--- INI YANG TADINYA HILANG
         'status',
         'time_in',
+        'time_out', // <--- Tambahkan ini juga untuk jam pulang
         'notes',
     ];
 

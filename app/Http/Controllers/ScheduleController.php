@@ -6,24 +6,18 @@ use Illuminate\Http\Request;
 use App\Models\ScheduleRegular;
 use App\Models\ScheduleSpecial;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon; // Kita akan gunakan Carbon untuk format tanggal
+use Carbon\Carbon; 
 
 class ScheduleController extends Controller
 {
     /**
      * Menampilkan halaman utama Manajemen Jadwal.
-     * Akan memuat data jadwal reguler dan khusus.
      */
     public function index()
     {
-        // Ambil data jadwal reguler
-        // Kita gunakan keyBy('day_type') agar mudah diakses di view
         $regularSchedules = ScheduleRegular::all()->keyBy('day_type');
-
-        // Ambil data jadwal khusus, urutkan dari yang terbaru (tanggalnya)
         $specialSchedules = ScheduleSpecial::orderBy('date', 'desc')->get();
 
-        // Tampilkan view dan kirimkan datanya
         return view('schedules.index', [
             'regularSchedules' => $regularSchedules,
             'specialSchedules' => $specialSchedules,
@@ -32,23 +26,25 @@ class ScheduleController extends Controller
 
     /**
      * Menyimpan atau memperbarui data Jadwal Reguler.
+     * PERBAIKAN: Menghapus validasi ketat 'date_format:H:i' yang menyebabkan error jika ada detik.
      */
     public function storeRegular(Request $request)
     {
         // Validasi input
         $request->validate([
             'day_type.*' => 'required|string|in:Biasa,Jumat',
-            'start_in.*' => 'required|date_format:H:i',
-            'end_in.*' => 'required|date_format:H:i|after:start_in.*',
-            'start_out.*' => 'required|date_format:H:i',
-            'end_out.*' => 'required|date_format:H:i|after:start_out.*',
+            // Cukup 'required' saja, hilangkan 'date_format:H:i' agar lebih fleksibel
+            'start_in.*' => 'required', 
+            'end_in.*' => 'required|after:start_in.*',
+            'start_out.*' => 'required',
+            'end_out.*' => 'required|after:start_out.*',
         ]);
 
-        // Looping data (indeks 0 untuk 'Biasa', indeks 1 untuk 'Jumat')
+        // Looping data
         foreach ($request->day_type as $index => $dayType) {
             ScheduleRegular::updateOrCreate(
-                ['day_type' => $dayType], // Kunci untuk mencari
-                [ // Data untuk di-update atau di-create
+                ['day_type' => $dayType], 
+                [ 
                     'start_in' => $request->start_in[$index],
                     'end_in' => $request->end_in[$index],
                     'start_out' => $request->start_out[$index],
@@ -70,20 +66,19 @@ class ScheduleController extends Controller
             'date' => 'required|date|unique:schedules_special,date',
             'description' => 'nullable|string|max:255',
             'is_holiday' => 'nullable|boolean',
-            // Jam hanya wajib jika 'is_holiday' tidak dicentang (null atau 0)
-            'start_in' => 'nullable|required_if:is_holiday,null,0|date_format:H:i',
-            'end_in' => 'nullable|required_if:is_holiday,null,0|date_format:H:i|after_or_equal:start_in',
-            'start_out' => 'nullable|required_if:is_holiday,null,0|date_format:H:i',
-            'end_out' => 'nullable|required_if:is_holiday,null,0|date_format:H:i|after_or_equal:start_out',
+            // Untuk jadwal khusus, kita juga bisa melonggarkan date_format jika perlu, 
+            // tapi biasanya form create baru aman karena belum ada data detiknya.
+            'start_in' => 'nullable|required_if:is_holiday,null,0',
+            'end_in' => 'nullable|required_if:is_holiday,null,0|after_or_equal:start_in',
+            'start_out' => 'nullable|required_if:is_holiday,null,0',
+            'end_out' => 'nullable|required_if:is_holiday,null,0|after_or_equal:start_out',
         ], [
             'date.unique' => 'Jadwal khusus untuk tanggal ini sudah ada.',
             'start_in.required_if' => 'Jam Masuk Mulai wajib diisi jika ini bukan hari libur.',
         ]);
 
-        // Atur nilai 'is_holiday' (jika tidak dicentang, nilainya null)
         $validatedData['is_holiday'] = $request->has('is_holiday');
 
-        // Buat data baru
         ScheduleSpecial::create($validatedData);
 
         return redirect()->route('schedules.index')->with('success', 'Jadwal Khusus berhasil ditambahkan.');

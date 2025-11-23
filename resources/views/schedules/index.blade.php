@@ -19,7 +19,7 @@
             {{-- Tampilkan error validasi jika ada --}}
             @if ($errors->any())
                 <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
-                    <ul>
+                    <ul class="list-disc list-inside">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
                         @endforeach
@@ -41,19 +41,28 @@
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                                     <div>
                                         <label class="block text-sm">Masuk Mulai</label>
-                                        <input type="time" name="start_in[]" value="{{ $regularSchedules['Biasa']->start_in ?? '05:30' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                        {{-- PERBAIKAN: Format H:i --}}
+                                        <input type="time" name="start_in[]" 
+                                            value="{{ isset($regularSchedules['Biasa']->start_in) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->start_in)->format('H:i') : '05:30' }}" 
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                     <div>
                                         <label class="block text-sm">Masuk Akhir</label>
-                                        <input type="time" name="end_in[]" value="{{ $regularSchedules['Biasa']->end_in ?? '07:00' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                        <input type="time" name="end_in[]" 
+                                            value="{{ isset($regularSchedules['Biasa']->end_in) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->end_in)->format('H:i') : '07:00' }}" 
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                     <div>
                                         <label class="block text-sm">Pulang Mulai</label>
-                                        <input type="time" name="start_out[]" value="{{ $regularSchedules['Biasa']->start_out ?? '14:20' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                        <input type="time" name="start_out[]" 
+                                            value="{{ isset($regularSchedules['Biasa']->start_out) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->start_out)->format('H:i') : '14:20' }}" 
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                     <div>
                                         <label class="block text-sm">Pulang Akhir</label>
-                                        <input type="time" name="end_out[]" value="{{ $regularSchedules['Biasa']->end_out ?? '17:00' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                        <input type="time" name="end_out[]" 
+                                            value="{{ isset($regularSchedules['Biasa']->end_out) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->end_out)->format('H:i') : '17:00' }}" 
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                 </div>
                             </div>
@@ -65,19 +74,27 @@
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
                                     <div>
                                         <label class="block text-sm">Masuk Mulai</label>
-                                        <input type="time" name="start_in[]" value="{{ $regularSchedules['Jumat']->start_in ?? '05:30' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                        <input type="time" name="start_in[]" 
+                                            value="{{ isset($regularSchedules['Jumat']->start_in) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->start_in)->format('H:i') : '05:30' }}" 
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                     <div>
                                         <label class="block text-sm">Masuk Akhir</label>
-                                        <input type="time" name="end_in[]" value="{{ $regularSchedules['Jumat']->end_in ?? '07:00' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                        <input type="time" name="end_in[]" 
+                                            value="{{ isset($regularSchedules['Jumat']->end_in) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->end_in)->format('H:i') : '07:00' }}" 
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                     <div>
                                         <label class="block text-sm">Pulang Mulai</label>
-                                        <input type="time" name="start_out[]" value="{{ $regularSchedules['Jumat']->start_out ?? '11:00' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                        <input type="time" name="start_out[]" 
+                                            value="{{ isset($regularSchedules['Jumat']->start_out) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->start_out)->format('H:i') : '11:00' }}" 
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                     <div>
                                         <label class="block text-sm">Pulang Akhir</label>
-                                        <input type="time" name="end_out[]" value="{{ $regularSchedules['Jumat']->end_out ?? '15:00' }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                        <input type="time" name="end_out[]" 
+                                            value="{{ isset($regularSchedules['Jumat']->end_out) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->end_out)->format('H:i') : '15:00' }}" 
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                 </div>
                             </div>

@@ -13,30 +13,75 @@ use App\Jobs\SendWaScanNotificationJob; // <-- IMPORT JOB
 
 class AttendanceSiswaController extends Controller
 {
-    /**
-     * Menampilkan halaman scanner.
-     */
+    // ... (showScanner function biarkan seperti sebelumnya) ...
     public function showScanner()
     {
-        // Ambil data 5 scan terakhir HARI INI untuk ditampilkan di log
-        $recentScans = AttendanceSiswa::with('student') // Eager loading relasi student
-            ->whereDate('attendance_date', Carbon::today())
-            ->latest('created_at') // Urutkan berdasarkan waktu input terbaru
-            ->take(5)
+        // ... (Isi function showScanner sama persis dengan file aslimu, tidak diubah)
+        // ... (Hanya copy paste bagian processScan yang penting di bawah ini)
+        
+        $today = Carbon::today();
+        $logs = AttendanceSiswa::with('student')
+            ->whereDate('attendance_date', $today)
+            ->latest('created_at')
             ->get();
+            
+        $recentScans = [];
 
+        foreach ($logs as $log) {
+            $studentId = $log->student?->student_id;
+            
+            if (!$studentId) continue;
+
+            if (!isset($recentScans[$studentId])) {
+                $recentScans[$studentId] = [
+                    'student_id' => $studentId,
+                    'student_name' => $log->student->name,
+                    'is_manual' => in_array($log->status, ['Sakit', 'Izin', 'Alfa']),
+                    'data_harian' => false,
+                    'data_dhuha' => false,
+                    'data_dhuhur' => false,
+                    'time_in' => null,
+                    'time_out' => null,
+                    'dhuha_time' => null,
+                    'dhuhur_time' => null,
+                    'status' => 'Belum Absen',
+                    'notes' => $log->notes,
+                ];
+            }
+            
+            $scan = &$recentScans[$studentId];
+
+            if ($log->type == 'Harian') {
+                $scan['data_harian'] = true;
+                if ($log->time_in) $scan['time_in'] = $log->time_in;
+                if ($log->time_out) $scan['time_out'] = $log->time_out;
+                
+                if ($scan['time_in'] && $scan['time_out']) {
+                    $scan['status'] = 'Pulang';
+                } elseif ($scan['time_in']) {
+                    $scan['status'] = 'Masuk';
+                }
+                if ($scan['is_manual']) $scan['status'] = $log->status;
+
+            } elseif ($log->type == 'Keagamaan') {
+                $scanTime = $log->time_in;
+                if ($log->activity == 'Dhuha') {
+                    $scan['data_dhuha'] = true;
+                    $scan['dhuha_time'] = $scanTime; 
+                } elseif ($log->activity == 'Dhuhur') {
+                    $scan['data_dhuhur'] = true;
+                    $scan['dhuhur_time'] = $scanTime;
+                }
+            }
+        }
+        
         return view('scan.index', [
-            'recentScans' => $recentScans
+            'recentScans' => array_values($recentScans),
         ]);
     }
-
+    
     /**
-     * Memproses data scan yang masuk dari JavaScript (AJAX).
-     *
-     * === LOGIKA DIPERBARUI ===
-     * Menerapkan Time Windows (Jendela Waktu) dinamis dari Database.
-     * Memecah 'Harian' menjadi 'Masuk' dan 'Pulang'.
-     * Mempertahankan logika 'Dhuha' dan 'Dhuhur'.
+     * Memproses data scan QR Code dari frontend.
      */
     public function processScan(Request $request)
     {
@@ -46,149 +91,186 @@ class AttendanceSiswaController extends Controller
             'type' => 'required|string|in:Harian,Dhuha,Dhuhur',
         ]);
 
-        $studentIdFromScan = $request->student_id;
-        $scanType = $request->type; // Tipe dari tombol (Harian, Dhuha, Dhuhur)
+        $studentIdNisn = $request->student_id;
+        $scanType = $request->type;
         $now = Carbon::now();
         $today = $now->toDateString();
-        $timeNow = $now->toTimeString();
+        // Gunakan format string yang konsisten untuk perbandingan dengan database
+        $timeNow = $now->toTimeString(); 
 
-        // 1. Cari siswa berdasarkan student_id (NISN)
-        $student = Student::where('student_id', $studentIdFromScan)->first();
-        
-        // JIKA SISWA TIDAK DITEMUKAN
+        // 1. Cari siswa berdasarkan NISN
+        $student = Student::where('student_id', $studentIdNisn)->first();
         if (!$student) {
-            return response()->json(['message' => 'Siswa dengan ID ' . $studentIdFromScan . ' tidak ditemukan.'], 404);
+            return response()->json(['message' => 'Siswa dengan ID ' . $studentIdNisn . ' tidak ditemukan.'], 404);
         }
 
-        // 2. LOGIKA BARU BERDASARKAN TIPE SCAN
-        $attendanceType = $scanType; // Default (akan berisi Dhuha/Dhuhur)
-        $finalNotes = $scanType . ' Tepat Waktu';
-        $finalStatus = 'Hadir';
-
-        // HANYA JIKA TIPE ADALAH 'HARIAN', KITA CEK JAM MASUK/PULANG
+        // --- Logika Absensi Harian ---
         if ($scanType == 'Harian') {
             
-            // A. TENTUKAN JADWAL HARI INI
             $schedule = $this->getTodaysSchedule($now);
 
-            // JIKA TIDAK ADA JADWAL (Libur, Minggu, atau belum diset)
+            // Cek Jadwal
             if (!$schedule) {
-                return response()->json([
-                    'message' => 'Hari Libur / Tidak Ada Jadwal'
-                ], 400); // 400 = Bad Request
+                return response()->json(['message' => 'Hari Libur / Tidak Ada Jadwal Absen Harian'], 400);
             }
 
-            // B. TENTUKAN WAKTU SCAN (MASUK / PULANG / DITOLAK)
+            // === PERBAIKAN LOGIKA WAKTU (SAMA DENGAN KIOSK) ===
             
-            // Cek Jam Masuk (DINAMIS DARI DATABASE)
-            $isMasukTime = ($timeNow >= $schedule->start_in && $timeNow <= $schedule->end_in);
-            
-            // Cek Jam Pulang (DINAMIS DARI DATABASE)
+            // Cek Waktu Pulang (Prioritas 1)
+            // Siswa bisa pulang jika >= start_out (14:00) DAN <= end_out (17:00)
             $isPulangTime = ($timeNow >= $schedule->start_out && $timeNow <= $schedule->end_out);
 
-            // C. Eksekusi Logika Berdasarkan Waktu
-            if ($isMasukTime) {
-                $attendanceType = 'Masuk';
-                
-                // Logika cek keterlambatan
-                if ($timeNow > $schedule->end_in) {
-                    $endTime = Carbon::parse($schedule->end_in);
-                    $minutesLate = $now->diffInMinutes($endTime);
-                    $finalNotes = 'Terlambat ' . $minutesLate . ' menit';
-                } else {
-                    $finalNotes = 'Masuk Tepat Waktu';
+            // Cek Waktu Masuk (Prioritas 2)
+            // Siswa bisa masuk jika >= start_in (05:30) DAN < start_out (14:00)
+            // Artinya jam 07:05, 08:00, 12:00 masih dianggap MASUK (tapi terlambat)
+            $isMasukTime = ($timeNow >= $schedule->start_in && $timeNow < $schedule->start_out);
+
+            // Cari record Harian siswa hari ini
+            $attendance = AttendanceSiswa::where('student_id', $student->id)
+                                         ->where('attendance_date', $today)
+                                         ->where('type', 'Harian')
+                                         ->first();
+            
+            // JIKA SUDAH ADA RECORD SAKIT/IZIN/ALFA (MANUAL)
+            if ($attendance && in_array($attendance->status, ['Sakit', 'Izin', 'Alfa'])) {
+                return response()->json([
+                    'message' => "KONFLIK: Absensi sudah tercatat sebagai {$attendance->status} (Manual)."
+                ], 409);
+            }
+
+            // --- EKSEKUSI LOGIKA ---
+            
+            // A. LOGIKA PULANG
+            if ($isPulangTime) {
+                if (!$attendance || !$attendance->time_in) {
+                    // Konflik: Belum ada record Masuk
+                    // Jika kebijakan sekolah memperbolehkan pulang tanpa scan masuk, hapus validasi ini.
+                    return response()->json([
+                        'message' => "GAGAL: {$student->name} Belum Absen Masuk hari ini. Tidak bisa absen Pulang."
+                    ], 409);
                 }
                 
-                // Cek apakah sudah absen MASUK hari ini
-                $alreadyScanned = AttendanceSiswa::where('student_id', $student->id)
-                    ->where('attendance_date', $today)
-                    ->where('type', 'Masuk') // Cek spesifik tipe Masuk
-                    ->first();
-                
-                if ($alreadyScanned) {
+                if ($attendance->time_out) {
+                    // Konflik: Sudah Pulang
                     return response()->json([
-                        'message' => $student->name . ' sudah absen (Masuk) jam ' . $alreadyScanned->time_in
-                    ], 409); // 409 = Conflict
+                        'message' => "KONFLIK: Absensi Pulang sudah lengkap jam {$attendance->time_out}."
+                    ], 409);
+                }
+                
+                // Update record Pulang
+                try {
+                    $attendance->update([
+                        'time_out' => $timeNow,
+                        'notes' => $attendance->notes . ' | Pulang Sekolah',
+                    ]);
+    
+                    SendWaScanNotificationJob::dispatch($attendance);
+                    return response()->json([
+                        'message' => "{$student->name} berhasil Absen Pulang jam {$timeNow}.",
+                        'scan' => $attendance->load('student')
+                    ], 200);
+                } catch (\Exception $e) {
+                     Log::error("Error saat mencatat Absen Pulang: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+                     return response()->json(['message' => 'Gagal mencatat Absen Pulang. Cek log server.'], 500);
                 }
 
-            } elseif ($isPulangTime) {
-                $attendanceType = 'Pulang';
-                $finalNotes = 'Pulang Sekolah';
+            } 
+            // B. LOGIKA MASUK (TEPAT WAKTU & TERLAMBAT)
+            elseif ($isMasukTime) {
                 
-                // Cek apakah sudah absen PULANG hari ini
-                $alreadyScanned = AttendanceSiswa::where('student_id', $student->id)
-                    ->where('attendance_date', $today)
-                    ->where('type', 'Pulang')
-                    ->first();
-
-                if ($alreadyScanned) {
+                if ($attendance && $attendance->time_in) {
+                    // Konflik: Sudah Masuk
                     return response()->json([
-                        'message' => $student->name . ' sudah absen (Pulang) jam ' . $alreadyScanned->time_in
+                        'message' => "KONFLIK: {$student->name} sudah Absen Masuk jam {$attendance->time_in}."
                     ], 409);
                 }
 
-            } else {
-                // D. Jika Scan DI LUAR Jam Masuk maupun Jam Pulang
+                $finalNotes = 'Masuk Tepat Waktu';
+                
+                // LOGIKA TERLAMBAT (Jika waktu sekarang > batas masuk normal jam 07:00)
+                if ($timeNow > $schedule->end_in) { 
+                    $endCarbon = Carbon::parse($schedule->end_in);
+                    $nowCarbon = Carbon::parse($timeNow);
+                    $minutesLate = $endCarbon->diffInMinutes($nowCarbon); 
+                    $finalNotes = 'Terlambat ' . $minutesLate . ' menit';
+                }
+                
+                // Buat/Update record
+                try {
+                    $newAttendance = AttendanceSiswa::updateOrCreate(
+                        [
+                            'student_id' => $student->id,
+                            'attendance_date' => $today,
+                            'type' => 'Harian'
+                        ],
+                        [
+                            'status' => 'Hadir',
+                            'time_in' => $timeNow,
+                            'notes' => $finalNotes,
+                        ]
+                    );
+                    
+                    SendWaScanNotificationJob::dispatch($newAttendance);
+                    return response()->json([
+                        'message' => "{$student->name} berhasil Absen Masuk jam {$timeNow} ({$finalNotes}).",
+                        'scan' => $newAttendance->load('student')
+                    ], 200);
+
+                } catch (\Exception $e) {
+                     Log::error("Error saat mencatat Absen Masuk: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+                     return response()->json(['message' => 'Gagal mencatat Absen Masuk. Cek log server.'], 500);
+                }
+
+            } 
+            // Di luar Jam Absensi
+            else {
                 return response()->json([
-                    'message' => 'Di Luar Jam Absen Harian'
-                ], 400); // 400 = Bad Request
+                    'message' => 'Di Luar Jam Absen. (Masuk: '.$schedule->start_in.'-'.$schedule->start_out.', Pulang: '.$schedule->start_out.'-'.$schedule->end_out.')'
+                ], 400); 
             }
+        
+        // --- Logika Absensi Keagamaan (Dhuha / Dhuhur) ---
+        } else {
+            $activity = $scanType;
+            $attendance = AttendanceSiswa::where('student_id', $student->id)
+                                         ->where('attendance_date', $today)
+                                         ->where('type', 'Keagamaan')
+                                         ->where('activity', $activity)
+                                         ->first();
 
-        } 
-        // LOGIKA UNTUK DHUHA & DHUHUR (Tetap sama)
-        else {
-            // Cek apakah siswa sudah absen untuk tipe ini HARI INI
-            $alreadyScanned = AttendanceSiswa::where('student_id', $student->id)
-                ->where('attendance_date', $today)
-                ->where('type', $scanType) // Cek $scanType ('Dhuha' atau 'Dhuhur')
-                ->first();
-
-            // JIKA SUDAH PERNAH SCAN
-            if ($alreadyScanned) {
+            if ($attendance) {
+                // Konflik: Sudah Absen Keagamaan untuk aktivitas ini
                 return response()->json([
-                    'message' => $student->name . ' sudah absen (' . $scanType . ') jam ' . $alreadyScanned->time_in
-                ], 409); // 409 = Conflict
-            }
-            
-            // Catatan: $finalNotes dan $finalStatus sudah di-set di default atas
-        }
-
-
-        // 4. SIMPAN DATA ABSENSI BARU
-        try {
-            $newScan = AttendanceSiswa::create([
-                'student_id' => $student->id,
-                'attendance_date' => $today,
-                'type' => $attendanceType, // Akan berisi 'Masuk', 'Pulang', 'Dhuha', atau 'Dhuhur'
-                'status' => $finalStatus,
-                'time_in' => $timeNow,
-                'notes' => $finalNotes,
-            ]);
-
-            // 5. PANGGIL JOB NOTIFIKASI JIKA TIPE-NYA 'Masuk' atau 'Pulang'
-            if (in_array($attendanceType, ['Masuk', 'Pulang'])) {
-                SendWaScanNotificationJob::dispatch($newScan);
+                    'message' => "KONFLIK: {$student->name} sudah Absen {$activity} pada jam {$attendance->time_in}."
+                ], 409); 
             }
 
-            // Load relasi student agar bisa dikirim balik ke log
-            $newScan->load('student');
+            // Catat Absen Keagamaan
+            try {
+                $newAttendance = AttendanceSiswa::create([
+                    'student_id' => $student->id,
+                    'attendance_date' => $today,
+                    'status' => 'Hadir',
+                    'type' => 'Keagamaan',
+                    'activity' => $activity,
+                    'time_in' => $timeNow,
+                    'notes' => "Absen {$activity} otomatis.",
+                ]);
+                
+                SendWaScanNotificationJob::dispatch($newAttendance);
+                return response()->json([
+                    'message' => "{$student->name} berhasil Absen {$activity} jam {$timeNow}.",
+                    'scan' => $newAttendance->load('student')
+                ], 200);
 
-            // KIRIM RESPON SUKSES (JSON)
-            return response()->json([
-                'message' => $student->name . ' - Absensi ' . $attendanceType . ' berhasil dicatat!',
-                'scan' => $newScan // Kirim data scan baru untuk ditampilkan di log
-            ], 200);
-
-        } catch (\Exception $e) {
-            Log::error('Gagal menyimpan absensi: ' . $e->getMessage());
-            return response()->json(['message' => 'Terjadi kesalahan internal saat menyimpan data.'], 500);
+            } catch (\Exception $e) {
+                Log::error("Error saat mencatat Absen Keagamaan ($activity): " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+                return response()->json(['message' => "Gagal mencatat Absen {$activity}. Cek log server."], 500);
+            }
         }
     }
 
-    /**
-     * Fungsi helper untuk mencari jadwal hari ini.
-     * (Logika ini sama dengan di KioskController)
-     */
+    // ... (getTodaysSchedule function sama, tidak perlu dicopy jika tidak berubah) ...
     private function getTodaysSchedule(Carbon $now)
     {
         $today = $now->toDateString();
@@ -199,16 +281,35 @@ class AttendanceSiswaController extends Controller
             if ($special->is_holiday) {
                 return null; // Hari libur
             }
-            return $special; // Ada jadwal khusus
+            // Jadwal khusus harus memiliki start_in, end_in, start_out, end_out
+            return (object)[
+                'start_in' => $special->start_in,
+                'end_in' => $special->end_in,
+                'start_out' => $special->start_out,
+                'end_out' => $special->end_out,
+            ];
         }
 
         // 2. Cek Jadwal Reguler
         $dayOfWeek = $now->dayOfWeek; // 0=Minggu, 1=Senin, ..., 5=Jumat, 6=Sabtu
         
+        $dayType = null;
         if ($dayOfWeek == 5) { // Jumat
-            return ScheduleRegular::where('day_type', 'Jumat')->first();
+            $dayType = 'Jumat';
         } elseif ($dayOfWeek >= 1 && $dayOfWeek <= 4) { // Senin-Kamis
-            return ScheduleRegular::where('day_type', 'Biasa')->first();
+            $dayType = 'Biasa';
+        }
+        
+        if ($dayType) {
+            $regular = ScheduleRegular::where('day_type', $dayType)->first();
+            if ($regular) {
+                return (object)[
+                    'start_in' => $regular->start_in,
+                    'end_in' => $regular->end_in,
+                    'start_out' => $regular->start_out,
+                    'end_out' => $regular->end_out,
+                ];
+            }
         }
 
         return null; // Hari Minggu atau Sabtu (tidak ada jadwal reguler)

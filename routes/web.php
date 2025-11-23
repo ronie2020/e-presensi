@@ -11,76 +11,105 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\KioskController;
 use App\Http\Controllers\StudentPortalController;
+use App\Http\Controllers\LandingPageController; 
+use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\DisciplineTypeController;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
 */
 
-Route::get('/', function () {
-   // return view('welcome');
-    return redirect()->route('login');
-});
+// --- UTAMA: RUTE LANDING PAGE ---
+Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 
-// RUTE DASHBOARD 
+
+// RUTE DASHBOARD (Hanya bisa diakses setelah Login)
 Route::get('/dashboard', [DashboardController::class, 'index']) 
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-    // RUTE KIOSK (PUBLIK, TANPA AUTH)
+// RUTE KIOSK (Publik - Mesin Absensi)
 Route::get('/kiosk', [KioskController::class, 'showKiosk'])->name('kiosk.show');
 Route::post('/kiosk/process', [KioskController::class, 'processKioskScan'])->name('kiosk.process');
 
-// 2. TAMBAHKAN RUTE PORTAL SISWA DI SINI
+// RUTE PORTAL SISWA (Publik - Cek Poin/Absensi)
 Route::get('/portal', [StudentPortalController::class, 'index'])->name('portal.index');
 Route::post('/portal/search', [StudentPortalController::class, 'search'])->name('portal.search');
 Route::get('/portal/{student_id}', [StudentPortalController::class, 'show'])->name('portal.show');
 
 
+// --- GRUP RUTE YANG BUTUH LOGIN ---
 Route::middleware('auth')->group(function () {
+    
+    // Profil User
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Rute Manajemen Siswa
-    Route::resource('students', StudentController::class);
-    // 1. TAMBAHKAN RUTE Export dan IMPORT DI SINI
+    // Manajemen Siswa    
     Route::post('/students/import', [StudentController::class, 'import'])->name('students.import');
-    Route::post('/students/export',[StudentController::class,'export'])->name('students.export');
+    Route::get('/students/export', [StudentController::class, 'export'])->name('students.export'); 
+    
+    Route::resource('students', StudentController::class); 
 
-    // Rute Manajemen Kelas
+    // Manajemen Kelas
     Route::resource('classes', SchoolClassController::class);
 
-    // Rute Manajemen Jadwal
+    // Manajemen Jadwal
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
     Route::post('/schedules/regular', [ScheduleController::class, 'storeRegular'])->name('schedules.regular.store');
     Route::post('/schedules/special', [ScheduleController::class, 'storeSpecial'])->name('schedules.special.store');
     Route::delete('/schedules/special/{schedule}', [ScheduleController::class, 'destroySpecial'])->name('schedules.special.destroy');
 
-    // RUTE INI UNTUK SCAN ABSENSI
+    // Scan Absensi (Fitur Guru Piket)
     Route::get('/scan', [AttendanceSiswaController::class, 'showScanner'])->name('scan.show');
     Route::post('/scan', [AttendanceSiswaController::class, 'processScan'])->name('scan.process');
 
-     // RUTE INI UNTUK CATATAN DISIPLIN
+    // Catatan Disiplin (Input Pelanggaran/Kebaikan)
     Route::resource('discipline', DisciplineController::class)->only([
         'index', 'store', 'destroy'
     ]);
+    
+    // Manajemen Tipe Disiplin (Master Data Pelanggaran/Kebaikan)
+    Route::resource('discipline-types', DisciplineTypeController::class);
 
-     // RUTE INI UNTUK MANAJEMEN PENGGUNA
+    // Pengumuman & Notifikasi WA Broadcast
+    Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
+    Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
+    Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
+    Route::post('/announcements/send', [AnnouncementController::class, 'sendNotification'])->name('announcements.send');
+
+    // Manajemen Pengguna (Admin)
     Route::resource('users', UserController::class);
    
-    //  DUA RUTE INI UNTUK LAPORAN
-    // Rute untuk menampilkan halaman
+    // Laporan & Rekap
+    // Laporan Harian
     Route::get('/reports/daily', [ReportController::class, 'dailyReport'])->name('reports.daily');
-    // Rute untuk memproses form input manual
+    
+    // Input Manual
     Route::post('/reports/manual-entry', [ReportController::class, 'storeManualEntry'])->name('reports.storeManual');
+    
+    // Aksi 1: Proses Siswa Alpa (Mass Action)
+    Route::post('/reports/process-alpha', [ReportController::class, 'processAlpha'])->name('reports.processAlpha');
+    
+    // Aksi 2: Hapus Seluruh Rekap Harian (Mass Action)
+    Route::delete('/reports/daily', [ReportController::class, 'destroyDaily'])->name('reports.destroyDaily');
+
+    // Aksi 3: Ekspor Data
+    Route::get('/reports/export-daily', [ReportController::class, 'exportDaily'])->name('reports.exportDaily');
+    
+    // Aksi 4 & 5: Edit dan Hapus Per Baris
+    Route::get('/reports/attendance/{attendance}/edit', [ReportController::class, 'editAttendance'])->name('reports.edit');
+    Route::put('/reports/attendance/{attendance}', [ReportController::class, 'updateAttendance'])->name('reports.update');
+    Route::delete('/reports/attendance/{attendance}', [ReportController::class, 'deleteAttendance'])->name('reports.delete');
+
+    // Route Khusus untuk Absensi Keagamaan
+    Route::get('/reports/religious', [ReportController::class, 'religiousReport'])->name('reports.religious');
+    Route::delete('/reports/religious', [ReportController::class, 'destroyReligious'])->name('reports.destroyReligious');
+    Route::get('/reports/export-religious', [ReportController::class, 'exportReligious'])->name('reports.exportReligious');
 });
 
 require __DIR__.'/auth.php';

@@ -10,7 +10,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class SendWaManualNotificationJob implements ShouldQueue
 {
@@ -18,68 +17,55 @@ class SendWaManualNotificationJob implements ShouldQueue
 
     protected $attendance;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(AttendanceSiswa $attendance)
     {
         $this->attendance = $attendance;
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
-        // TAMBAHAN PENGAMAN: Cek apakah data student ada
+        // ANTI-BAN: Jeda 2-4 detik per pesan
+        sleep(rand(2, 4));
+
         if (!$this->attendance->student) {
-            Log::warning('Job WA Manual dibatalkan: Siswa untuk attendance ID ' . $this->attendance->id . ' tidak ditemukan (mungkin terhapus).');
-            return; // Hentikan job dengan aman
+            return; 
         }
 
-        // 1. Ambil data yang kita butuhkan
         $student = $this->attendance->student;
         $nomorWA = $student->parent_wa_number;
         $namaSiswa = $student->name;
-        $statusManual = $this->attendance->status; // "Sakit" atau "Izin"
+        $statusManual = $this->attendance->status;
         $catatan = $this->attendance->notes;
 
-        // 2. Siapkan template pesan
-       $message = "Info Absensi SMP NEGERI 3 LAKBOK:\n\n" .
-                   "Kami Informasi bahwa: Ananda, *{$namaSiswa}*, hari ini Tercatat *{$statusManual}* oleh pihak sekolah.\n\n" .
-                   "Catatan: {$catatan}\n\n" .
-                   "Terima kasih atas perhatiannya.";
+        // ANTI-BAN: Variasi Salam
+        $salamList = ["Assalamualaikum", "Selamat Pagi/Siang", "Pemberitahuan Sekolah", "Yth. Wali Murid"];
+        $salam = $salamList[array_rand($salamList)];
+
+        $message = "*Laporan Absensi SMPN 3 LAKBOK*\n\n" .
+                   "{$salam}, diinformasikan bahwa Ananda:\n" .
+                   "Nama: *{$namaSiswa}*\n" .
+                   "Status Hari Ini: *{$statusManual}*\n" .
+                   "Keterangan: {$catatan}\n\n" .
+                   "Terima kasih atas kerja samanya.";
         
-        // 3. Tentukan kredensial WAPANELS Anda (BACA DARI .ENV - DIPERBARUI)
         $apiUrl = 'https://app.wapanels.com/api/create-message';
-        
-        // Ambil Auth Key (Kunci Akun - Singular)
         $authKey = config('app.wapanels_authkey');
-        
-        // Ambil DAFTAR App Key (Kunci Perangkat - Plural)
         $appKeys = config('app.wapanels_appkeys');
 
-        // 4. PILIH SATU APPKEY SECARA ACAK DARI DAFTAR
-        if (empty($appKeys) || empty($appKeys[0])) {
-            Log::error('WAPANELS_APP_KEYS tidak diatur di .env atau kosong.');
-            return; // Hentikan job jika tidak ada key
-        }
-        $appKey = $appKeys[array_rand($appKeys)]; // Ambil 1 appkey acak
+        if (empty($appKeys) || empty($appKeys[0])) return;
+        
+        $appKey = $appKeys[array_rand($appKeys)];
 
-        // 5. Kirim pesan
         try {
-            $response = Http::post($apiUrl, [
-                'appkey' => $appKey,     // Gunakan appkey yang dipilih acak
-                'authkey' => $authKey,   // Gunakan authkey akun yang sama
+            Http::post($apiUrl, [
+                'appkey' => $appKey,
+                'authkey' => $authKey,
                 'to' => $nomorWA,
                 'message' => $message,
                 'sandbox' => 'false'
             ]);
-            
-            Log::info('Notifikasi WA (Manual) terkirim ke: ' . $nomorWA . ' via AppKey ' . substr($appKey, 0, 5) . '... Respon: ' . $response->body());
-
         } catch (\Exception $e) {
-            Log::error('Gagal kirim WA notifikasi (Manual) ke ' . $nomorWA . ': ' . $e->getMessage());
+            Log::error('Gagal kirim WA Manual: ' . $e->getMessage());
         }
     }
 }

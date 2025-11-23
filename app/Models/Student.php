@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes; // Impor SoftDeletes
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Student extends Model
 {
-    use HasFactory, SoftDeletes; // Gunakan SoftDeletes
+    use HasFactory, SoftDeletes;
 
     /**
      * Kolom yang boleh diisi secara massal.
@@ -18,7 +18,7 @@ class Student extends Model
     protected $fillable = [
         'student_id',
         'name',
-        'class_id',
+        'class_id', // Pastikan nama kolom di DB Anda 'class_id' atau 'school_class_id'
         'rfid_id',
         'parent_wa_number',
     ];
@@ -28,7 +28,7 @@ class Student extends Model
      */
     public function schoolClass(): BelongsTo
     {
-        // Kita gunakan nama 'schoolClass' karena 'class' adalah kata kunci PHP
+        // Perhatikan parameter kedua ('class_id' atau 'school_class_id') harus sesuai DB Anda
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
@@ -38,5 +38,14 @@ class Student extends Model
     public function attendances(): HasMany
     {
         return $this->hasMany(AttendanceSiswa::class, 'student_id');
+    }
+
+    /**
+     * --- BAGIAN INI YANG HILANG SEBELUMNYA ---
+     * Hubungan: Satu Siswa memiliki BANYAK Catatan Disiplin.
+     */
+    public function disciplineRecords(): HasMany
+    {
+        return $this->hasMany(DisciplineRecord::class, 'student_id');
     }
 }

@@ -1,19 +1,33 @@
-{{-- Halaman ini adalah tampilan untuk resources/views/reports/daily.blade.php --}}
+{{-- Halaman ini adalah tampilan untuk resources/views/reports/religious.blade.php --}}
 <x-app-layout>
-    {{-- Header Page --}}
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    {{-- Header Page & Filter --}}
+    <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight">
-                Rekapitulasi Absensi Harian
+                Rekapitulasi Keagamaan
             </h1>
             <p class="text-sm text-gray-500 mt-1">
-                Data kehadiran siswa pada tanggal <span class="font-bold text-blue-600">{{ $selectedDate_db->translatedFormat('d F Y') }}</span>.
+                Data pelaksanaan <span class="font-bold text-blue-600">{{ $selectedActivity }}</span> pada tanggal <span class="font-bold text-gray-700">{{ $selectedDate_db->translatedFormat('d F Y') }}</span>.
             </p>
         </div>
         
-        {{-- Filter Tanggal --}}
-        <div class="flex items-center gap-2">
-            <form action="{{ route('reports.daily') }}" method="GET" class="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex flex-col sm:flex-row gap-3 items-center">
+            {{-- Tab Switcher Kegiatan (Dhuha / Dhuhur) --}}
+            <div class="bg-gray-100 p-1 rounded-xl flex items-center">
+                <a href="{{ route('reports.religious', ['activity' => 'Dhuha', 'date' => $selectedDate_db->format('Y-m-d')]) }}" 
+                   class="px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 {{ $selectedActivity == 'Dhuha' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
+                    🌞 Dhuha
+                </a>
+                {{-- PERBAIKAN: activity='Dhuhur' (tambah huruf h) --}}
+                <a href="{{ route('reports.religious', ['activity' => 'Dhuhur', 'date' => $selectedDate_db->format('Y-m-d')]) }}" 
+                   class="px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 {{ $selectedActivity == 'Dhuhur' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
+                    🕌 Dhuhur
+                </a>
+            </div>
+
+            {{-- Filter Tanggal --}}
+            <form action="{{ route('reports.religious') }}" method="GET" class="flex items-center gap-2 bg-white p-1 rounded-xl shadow-sm border border-gray-100">
+                <input type="hidden" name="activity" value="{{ $selectedActivity }}">
                 <input type="date" name="date" 
                        value="{{ $selectedDate_db->format('Y-m-d') }}" 
                        class="border-0 focus:ring-0 text-sm font-semibold text-gray-600 bg-transparent rounded-lg cursor-pointer">
@@ -33,7 +47,7 @@
 
     {{-- 
         =========================================
-        BAGIAN 1: KARTU RINGKASAN (DATA REAL DARI CONTROLLER)
+        BAGIAN 1: KARTU RINGKASAN
         =========================================
     --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -42,97 +56,105 @@
             <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
             </div>
-            {{-- PERBAIKAN: Gunakan variabel count langsung --}}
+            {{-- DATA DARI CONTROLLER (INTEGER) --}}
             <h3 class="text-2xl font-extrabold text-gray-800">{{ $hadirCount }}</h3>
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Hadir</p>
         </div>
 
-        <!-- Sakit/Izin -->
+        <!-- Uzur Syar'i -->
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center group hover:shadow-md transition-all">
             <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
             </div>
-            {{-- PERBAIKAN: Gunakan variabel count langsung --}}
-            <h3 class="text-2xl font-extrabold text-gray-800">{{ $sakitCount + $izinCount }}</h3>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Sakit / Izin</p>
-        </div>
-
-        <!-- Alfa -->
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center group hover:shadow-md transition-all">
-            <div class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </div>
-            {{-- PERBAIKAN: Gunakan variabel count langsung --}}
-            <h3 class="text-2xl font-extrabold text-gray-800">{{ $alfaCount }}</h3>
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Tanpa Keterangan</p>
+            <h3 class="text-2xl font-extrabold text-gray-800">{{ $izinUzurCount }}</h3>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Uzur Syar'i</p>
         </div>
 
         <!-- Belum Absen -->
         <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center group hover:shadow-md transition-all">
-            <div class="w-10 h-10 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div class="w-10 h-10 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </div>
-            <h3 class="text-2xl font-extrabold text-gray-800">{{ $belumAbsenList->count() }}</h3>
+            <h3 class="text-2xl font-extrabold text-gray-800">{{ $belumAbsenCount }}</h3>
             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Belum Absen</p>
+        </div>
+
+        <!-- Persentase Total -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center group hover:shadow-md transition-all">
+            <div class="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+            </div>
+            <h3 class="text-2xl font-extrabold text-gray-800">{{ $kehadiranPercentage }}%</h3>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Partisipasi</p>
         </div>
     </div>
 
-    {{-- BAGIAN INPUT MANUAL (Sama seperti sebelumnya) --}}
+    {{-- 
+        =========================================
+        BAGIAN 2: FORM INPUT MANUAL (Sama)
+        =========================================
+    --}}
     <div x-data="{ openInput: false }" class="mb-8">
-        {{-- ... (Kode Accordion Input Manual tidak berubah) ... --}}
         <button @click="openInput = !openInput" class="flex items-center justify-between w-full px-6 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-all text-left">
             <div class="flex items-center gap-3">
-                <h3 class="text-lg font-bold text-gray-800">Input Absensi Manual</h3>
+                <div class="bg-blue-50 p-2 rounded-lg text-blue-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800">Input Keagamaan Manual</h3>
+                    <p class="text-xs text-gray-500">Input manual untuk siswa yang lupa bawa kartu atau uzur.</p>
+                </div>
             </div>
-             <svg :class="{'rotate-180': openInput}" class="w-5 h-5 text-gray-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            <svg :class="{'rotate-180': openInput}" class="w-5 h-5 text-gray-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
         </button>
+
         <div x-show="openInput" x-collapse class="mt-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <form action="{{ route('reports.storeManual') }}" method="POST">
                 @csrf
-                <input type="hidden" name="attendance_type" value="Harian">
+                <input type="hidden" name="attendance_type" value="Keagamaan">
+                <input type="hidden" name="activity" value="{{ $selectedActivity }}">
                 <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
-                {{-- Form fields sama --}}
-                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Pilih Siswa</label>
-                        <select name="student_id" required class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2.5">
-                            <option value="">-- Cari Siswa --</option>
+                        <label for="student_id" class="block text-sm font-bold text-gray-700 mb-2">Pilih Siswa</label>
+                        <select name="student_id" id="student_id" required class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2.5">
+                            <option value="">-- Siswa Belum Absen {{ $selectedActivity }} --</option>
                             @foreach ($belumAbsenList as $student)
                                 <option value="{{ $student->id }}">{{ $student->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Status</label>
-                        <select name="status" required class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2.5">
+                        <label for="status" class="block text-sm font-bold text-gray-700 mb-2">Status</label>
+                        <select name="status" id="status" required class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2.5">
                             <option value="Hadir">Hadir</option>
-                            <option value="Sakit">Sakit</option>
-                            <option value="Izin">Izin</option>
-                            <option value="Alfa">Alfa</option>
+                            <option value="Uzur Syar'i">Uzur Syar'i</option>
                         </select>
                     </div>
-                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Catatan</label>
-                        <input type="text" name="notes" class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2.5">
+                    <div>
+                        <label for="notes" class="block text-sm font-bold text-gray-700 mb-2">Catatan</label>
+                        <input type="text" name="notes" id="notes" class="w-full rounded-xl border-gray-300 shadow-sm text-sm py-2.5">
                     </div>
                 </div>
-                <button type="submit" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-xl">Simpan</button>
+                <button type="submit" class="mt-6 px-6 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl">Simpan</button>
             </form>
         </div>
     </div>
 
     {{-- 
         =========================================
-        BAGIAN 3: TABEL LOG ABSENSI (UPDATED VARIABLES)
+        BAGIAN 3: TABEL LOG KEAGAMAAN
         =========================================
     --}}
     <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h3 class="text-lg font-bold text-gray-800">Log Kehadiran</h3>
-             <form method="POST" action="{{ route('reports.destroyDaily') }}" onsubmit="return confirm('Yakin hapus SEMUA data?')">
+            <h3 class="text-lg font-bold text-gray-800">Log {{ $selectedActivity }}</h3>
+             <form method="POST" action="{{ route('reports.destroyReligious') }}" onsubmit="return confirm('Yakin hapus semua data?')">
                 @csrf @method('DELETE')
                 <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
-                <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-600 text-xs font-bold rounded-lg">Reset Harian</button>
+                <input type="hidden" name="activity" value="{{ $selectedActivity }}">
+                <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-600 text-xs font-bold rounded-lg">Reset Data</button>
             </form>
         </div>
 
@@ -140,11 +162,10 @@
             <table class="w-full text-left border-collapse">
                 <thead class="bg-gray-50/50">
                     <tr>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Siswa</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Nama Siswa</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Kelas</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Jam Masuk</th>
-                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Jam Pulang</th>
+                        <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Waktu Input</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Keterangan</th>
                         <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Aksi</th>
                     </tr>
@@ -171,10 +192,8 @@
                                     // GUNAKAN status_final HASIL GROUPING
                                     $statusColor = match($attendance->status_final) {
                                         'Hadir' => 'bg-emerald-100 text-emerald-700',
-                                        'Sakit' => 'bg-blue-100 text-blue-700',
-                                        'Izin' => 'bg-amber-100 text-amber-700',
-                                        'Alfa' => 'bg-red-100 text-red-700',
-                                        default => 'bg-gray-100 text-gray-700'
+                                        'Uzur Syar\'i' => 'bg-blue-100 text-blue-700',
+                                        default => 'bg-red-100 text-red-700'
                                     };
                                 @endphp
                                 <span class="px-3 py-1 rounded-full text-xs font-bold {{ $statusColor }}">
@@ -182,30 +201,25 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-700 font-mono">
-                                {{-- GUNAKAN time_in_final --}}
-                                {{ $attendance->time_in_final ? \Carbon\Carbon::parse($attendance->time_in_final)->format('H:i') : '--:--' }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-700 font-mono">
-                                {{-- GUNAKAN time_out_final --}}
-                                {{ $attendance->time_out_final ? \Carbon\Carbon::parse($attendance->time_out_final)->format('H:i') : '--:--' }}
+                                {{-- Waktu Input (bisa dari created_at record pertama atau time_in) --}}
+                                {{ $attendance->created_at ? $attendance->created_at->format('H:i') : '--:--' }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 italic max-w-xs truncate">
                                 {{ $attendance->notes_final }}
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onclick="openEditModal(
+                                    <button onclick="openEditModalReligious(
                                             {{ $attendance->id }}, 
                                             '{{ $attendance->student->name ?? 'Siswa' }}', 
                                             '{{ $attendance->status_final }}', 
                                             `{{ $attendance->notes_final }}`,
-                                            '{{ $attendance->time_in_final ? \Carbon\Carbon::parse($attendance->time_in_final)->format('H:i') : '' }}',
-                                            '{{ $attendance->time_out_final ? \Carbon\Carbon::parse($attendance->time_out_final)->format('H:i') : '' }}'
+                                            '{{ $attendance->activity }}'
                                         )" 
                                         class="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                     </button>
-                                    <form action="{{ route('reports.delete', $attendance->id) }}" method="POST" onsubmit="return confirm('Hapus data ini?')">
+                                    <form action="{{ route('reports.delete', $attendance->id) }}" method="POST" onsubmit="return confirm('Hapus data?')">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
@@ -216,10 +230,8 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center justify-center">
-                                    <p class="text-gray-500 font-medium">Belum ada data absensi pada tanggal ini.</p>
-                                </div>
+                            <td colspan="6" class="px-6 py-12 text-center">
+                                <p class="text-gray-500 font-medium">Belum ada data {{ $selectedActivity }} pada tanggal ini.</p>
                             </td>
                         </tr>
                     @endforelse
@@ -228,52 +240,48 @@
         </div>
     </div>
     
-    {{-- Modal Edit tetap sama, pastikan ID element sesuai dengan javascript --}}
-    <div id="editAttendanceModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        {{-- ... Content Modal sama ... --}}
+    {{-- MODAL EDIT KEAGAMAAN (SCRIPT) --}}
+    <div id="editReligiousModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
             <div class="flex justify-between mb-4">
-                <h3 class="font-bold">Edit Absensi</h3>
-                <button onclick="closeEditModal()">X</button>
+                <h3 class="font-bold">Edit Keagamaan</h3>
+                <button onclick="closeEditModalReligious()">X</button>
             </div>
-            <form id="editForm" method="POST">
+            <form id="editReligiousForm" method="POST">
                 @csrf @method('PUT')
-                <p id="modal-student-name" class="text-blue-800 font-bold mb-4"></p>
-                <select name="status" id="modal-status" class="w-full border rounded mb-4">
+                <p id="modal-religious-student-name" class="text-blue-800 font-bold mb-4"></p>
+                <input type="hidden" name="activity" id="modal-religious-activity">
+                
+                <select name="status" id="modal-religious-status" class="w-full border rounded mb-4">
                     <option value="Hadir">Hadir</option>
-                    <option value="Sakit">Sakit</option>
-                    <option value="Izin">Izin</option>
-                    <option value="Alfa">Alfa</option>
+                    <option value="Uzur Syar'i">Uzur Syar'i</option>
                 </select>
-                <input type="time" name="time_in" id="modal-time_in" class="w-full border rounded mb-2" placeholder="Masuk">
-                <input type="time" name="time_out" id="modal-time_out" class="w-full border rounded mb-2" placeholder="Pulang">
-                <textarea name="notes" id="modal-notes" class="w-full border rounded mb-4" placeholder="Catatan"></textarea>
+                <textarea name="notes" id="modal-religious-notes" class="w-full border rounded mb-4"></textarea>
                 <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded">Simpan</button>
             </form>
         </div>
     </div>
 
     <script>
-        const modal = document.getElementById('editAttendanceModal');
-        const form = document.getElementById('editForm');
-        const studentNameDisplay = document.getElementById('modal-student-name');
-        const statusSelect = document.getElementById('modal-status');
-        const notesInput = document.getElementById('modal-notes');
-        const timeInInput = document.getElementById('modal-time_in');
-        const timeOutInput = document.getElementById('modal-time_out');
+        const religiousModal = document.getElementById('editReligiousModal');
+        const religiousForm = document.getElementById('editReligiousForm');
+        const religiousStudentNameDisplay = document.getElementById('modal-religious-student-name');
+        const religiousActivitySelect = document.getElementById('modal-religious-activity');
+        const religiousStatusSelect = document.getElementById('modal-religious-status');
+        const religiousNotesInput = document.getElementById('modal-religious-notes');
         
-        function openEditModal(id, name, status, notes, timeIn, timeOut) {
-            const updateRoute = '{{ route('reports.update', ['attendance' => '__ID__']) }}'.replace('__ID__', id);
-            form.action = updateRoute;
-            studentNameDisplay.textContent = name;
-            statusSelect.value = status;
-            notesInput.value = notes;
-            timeInInput.value = timeIn;
-            timeOutInput.value = timeOut;
-            modal.classList.remove('hidden');
+        function openEditModalReligious(attendanceId, studentName, currentStatus, currentNotes, currentActivity) {
+            const updateRoute = '{{ route('reports.update', ['attendance' => '__ID__']) }}'.replace('__ID__', attendanceId);
+            religiousForm.action = updateRoute;
+            religiousStudentNameDisplay.textContent = studentName; 
+            religiousActivitySelect.value = currentActivity;
+            religiousStatusSelect.value = currentStatus;
+            religiousNotesInput.value = currentNotes;
+            religiousModal.classList.remove('hidden');
         }
-        function closeEditModal() {
-            modal.classList.add('hidden');
+
+        function closeEditModalReligious() {
+            religiousModal.classList.add('hidden');
         }
     </script>
 </x-app-layout>
