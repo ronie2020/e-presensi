@@ -9,7 +9,8 @@ use App\Models\ScheduleSpecial;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log; // Untuk debugging
-use App\Jobs\SendWaScanNotificationJob; // <-- IMPORT JOB
+use App\Jobs\SendWaScanNotificationJob; // <-- IMPORT JOB WA
+use App\Jobs\AddReligiousPointJob;      // <-- TAMBAHAN: IMPORT JOB POIN
 
 class AttendanceSiswaController extends Controller
 {
@@ -17,7 +18,6 @@ class AttendanceSiswaController extends Controller
     public function showScanner()
     {
         // ... (Isi function showScanner sama persis dengan file aslimu, tidak diubah)
-        // ... (Hanya copy paste bagian processScan yang penting di bawah ini)
         
         $today = Carbon::today();
         $logs = AttendanceSiswa::with('student')
@@ -257,7 +257,12 @@ class AttendanceSiswaController extends Controller
                     'notes' => "Absen {$activity} otomatis.",
                 ]);
                 
+                // 1. Jalankan Job Notifikasi WA (walaupun di jobnya kita matikan sementara)
                 SendWaScanNotificationJob::dispatch($newAttendance);
+
+                // 2. TAMBAHAN: Jalankan Job Poin Kebaikan
+                AddReligiousPointJob::dispatch($newAttendance);
+
                 return response()->json([
                     'message' => "{$student->name} berhasil Absen {$activity} jam {$timeNow}.",
                     'scan' => $newAttendance->load('student')
@@ -270,7 +275,7 @@ class AttendanceSiswaController extends Controller
         }
     }
 
-    // ... (getTodaysSchedule function sama, tidak perlu dicopy jika tidak berubah) ...
+    // ... (getTodaysSchedule function sama) ...
     private function getTodaysSchedule(Carbon $now)
     {
         $today = $now->toDateString();
