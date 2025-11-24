@@ -180,8 +180,8 @@
         <!-- Footer Info -->
         <div class="mt-8 px-4 text-center">
              <div class="bg-blue-800/30 rounded-lg p-3 border border-blue-700/30">
-                 <p class="text-[10px] text-blue-300 uppercase tracking-widest font-bold">Versi Sistem</p>
-                 <p class="text-xs text-white font-mono mt-1">v2.1.0 Beta</p>
+                 <p class="text-[10px] text-blue-300 uppercase tracking-widest font-bold">Ri..Versi Sistem</p>
+                 <p class="text-xs text-white font-mono mt-1">v2.2.0 Beta</p>
              </div>
         </div>
 
