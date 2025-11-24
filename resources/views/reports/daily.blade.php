@@ -78,31 +78,32 @@
         <div x-data="{ activeTab: 'hadir' }" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
             
             {{-- Tabs Modern --}}
-            <div class="flex border-b border-gray-100 overflow-x-auto bg-gray-50/50 p-2 gap-2 flex-nowrap">
+            <div class="flex border-b border-gray-100 overflow-x-auto bg-gray-50/50 p-2 gap-2 flex-nowrap no-scrollbar">
                 <button @click="activeTab = 'hadir'" 
                         :class="activeTab === 'hadir' ? 'bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-100' : 'text-gray-500 hover:bg-white/60'" 
                         class="flex-none py-3 px-6 rounded-xl text-sm font-bold whitespace-nowrap transition-all duration-200">
-                    ✅ Hadir
+                    Hadir
                 </button>
                 <button @click="activeTab = 'belum'" 
                         :class="activeTab === 'belum' ? 'bg-white text-gray-700 shadow-sm ring-1 ring-gray-200' : 'text-gray-500 hover:bg-white/60'" 
                         class="flex-none py-3 px-6 rounded-xl text-sm font-bold whitespace-nowrap transition-all duration-200">
-                    ⚪ Belum Absen
+                    Belum Absen
                 </button>
                 <button @click="activeTab = 'lain'" 
                         :class="activeTab === 'lain' ? 'bg-white text-amber-600 shadow-sm ring-1 ring-amber-100' : 'text-gray-500 hover:bg-white/60'" 
                         class="flex-none py-3 px-6 rounded-xl text-sm font-bold whitespace-nowrap transition-all duration-200">
-                    ⚠️ Ket. Lain
+                    Ket. Lain
                 </button>
             </div>
 
             {{-- Content --}}
-            <div class="w-full relative min-h-[300px]"> {{-- Dihapus overflow-hidden di sini agar tidak memotong scroll --}}
+            <div class="w-full relative min-h-[300px]">
                 
                 {{-- TAB HADIR --}}
                 <div x-show="activeTab === 'hadir'" x-transition:enter.duration.300ms class="w-full">
-                    <div class="overflow-x-auto w-full pb-4"> {{-- Container Scroll --}}
-                        <table class="min-w-[1000px] w-full text-left border-collapse"> {{-- Lebar Minimum 1000px memaksa scroll muncul --}}
+                    {{-- FIX: Added max-w-[calc(100vw-3rem)] for forced mobile scrolling --}}
+                    <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
+                        <table class="w-full text-left border-collapse" style="min-width: 800px;">
                             <thead class="bg-gray-50 border-b border-gray-100">
                                 <tr>
                                     <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3">Siswa</th>
@@ -152,13 +153,49 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="p-4 border-t border-gray-100">{{ $todayAttendances->appends(request()->query())->links() }}</div>
+                    
+                    {{-- CUSTOM PAGINATION RESPONSIVE --}}
+                    @if($todayAttendances->hasPages())
+                        <div class="p-4 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                            <div class="text-sm text-gray-500 text-center md:text-left">
+                                Showing <span class="font-bold text-gray-800">{{ $todayAttendances->firstItem() }}</span> to <span class="font-bold text-gray-800">{{ $todayAttendances->lastItem() }}</span> of <span class="font-bold text-gray-800">{{ $todayAttendances->total() }}</span> results
+                            </div>
+                            <div class="flex items-center rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+                                @if ($todayAttendances->onFirstPage())
+                                    <span class="px-3 py-2 text-gray-300 bg-gray-50 border-r border-gray-200 cursor-not-allowed">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                                    </span>
+                                @else
+                                    <a href="{{ $todayAttendances->previousPageUrl() }}" class="px-3 py-2 text-gray-600 bg-white hover:bg-gray-50 border-r border-gray-200 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                                    </a>
+                                @endif
+                                @foreach ($todayAttendances->getUrlRange(max($todayAttendances->currentPage() - 2, 1), min($todayAttendances->currentPage() + 2, $todayAttendances->lastPage())) as $page => $url)
+                                    @if ($page == $todayAttendances->currentPage())
+                                        <span class="px-4 py-2 text-sm font-bold text-blue-600 bg-blue-50 border-r border-gray-200">{{ $page }}</span>
+                                    @else
+                                        <a href="{{ $url }}" class="px-4 py-2 text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 border-r border-gray-200 transition-colors">{{ $page }}</a>
+                                    @endif
+                                @endforeach
+                                @if ($todayAttendances->hasMorePages())
+                                    <a href="{{ $todayAttendances->nextPageUrl() }}" class="px-3 py-2 text-gray-600 bg-white hover:bg-gray-50 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                    </a>
+                                @else
+                                    <span class="px-3 py-2 text-gray-300 bg-gray-50 cursor-not-allowed">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 {{-- TAB BELUM ABSEN --}}
                 <div x-show="activeTab === 'belum'" x-transition:enter.duration.300ms style="display: none;" class="w-full">
-                    <div class="overflow-x-auto w-full pb-4">
-                        <table class="min-w-[1000px] w-full text-left border-collapse">
+                    {{-- FIX: Force scroll mobile --}}
+                    <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full border rounded-lg">
+                        <table class="min-w-full divide-y" style="min-width: 800px;">
                             <thead class="bg-gray-50 border-b border-gray-100">
                                 <tr>
                                     <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3">Siswa</th>
@@ -198,8 +235,9 @@
 
                 {{-- TAB KET. LAIN --}}
                 <div x-show="activeTab === 'lain'" x-transition:enter.duration.300ms style="display: none;" class="w-full">
-                    <div class="overflow-x-auto w-full pb-4">
-                        <table class="min-w-[1000px] w-full text-left border-collapse">
+                    {{-- FIX: Force scroll mobile --}}
+                    <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full border rounded-lg">
+                        <table class="w-full text-left border-collapse" style="min-width: 800px;">
                             <thead class="bg-gray-50 border-b border-gray-100">
                                 <tr>
                                     <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/4">Siswa</th>
@@ -238,40 +276,43 @@
         </div>
     </div>
 
-    {{-- ... Bagian Modal & Script sama seperti sebelumnya ... --}}
-    
-    {{-- 
-        MODAL INPUT MANUAL, EDIT MODAL, DAN SCRIPT 
-        (Disertakan kembali agar file tetap lengkap)
-    --}}
-    
-    {{-- MODAL INPUT MANUAL --}}
+    {{-- MODAL INPUT MANUAL (MODERN STYLE) --}}
     <div id="manualModalDaily" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-opacity">
         <div class="relative top-10 mx-auto p-0 border-0 w-full max-w-lg shadow-2xl rounded-2xl bg-white overflow-hidden transform transition-all">
+            
+            {{-- Modal Header --}}
             <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">
                 <h3 class="text-lg font-bold text-white">Input Absensi Manual</h3>
                 <button onclick="closeManualModalDaily()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>
             </div>
+
             <div class="p-6">
                 <p class="text-sm text-gray-500 mb-4">Input data untuk siswa: <span id="daily-manual-name-display" class="font-bold text-gray-800 text-lg block">Nama Siswa</span></p>
+
                 <form action="{{ route('reports.storeManual') }}" method="POST">
                     @csrf
                     <input type="hidden" name="attendance_type" value="Harian">
                     <input type="hidden" name="student_id" id="daily-manual-id">
+
                     <div class="space-y-4">
+                        {{-- Input Tanggal --}}
                         <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
                             <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tanggal</label>
                             <input type="date" name="date" id="daily-manual-date" value="{{ $selectedDate_db->format('Y-m-d') }}" class="block w-full rounded-lg border-gray-300 shadow-sm text-sm font-semibold bg-white" readonly>
                         </div>
+                        
+                        {{-- Dropdown Status --}}
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status Kehadiran</label>
                             <select name="status" id="daily-manual-status" required class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" onchange="toggleTimeInput()">
-                                <option value="Hadir">✅ Hadir (Manual)</option>
-                                <option value="Sakit">🏥 Sakit</option>
-                                <option value="Izin">✉️ Izin</option>
-                                <option value="Alfa">❌ Alfa</option>
+                                <option value="Hadir">Hadir (Manual)</option>
+                                <option value="Sakit">Sakit</option>
+                                <option value="Izin">Izin</option>
+                                <option value="Alfa">Alfa</option>
                             </select>
                         </div>
+
+                        {{-- Grid Jam Masuk & Pulang --}}
                         <div class="grid grid-cols-2 gap-4 p-4 bg-blue-50 rounded-xl border border-blue-100" id="time-input-container">
                             <div>
                                 <label class="block text-xs font-bold text-blue-800 uppercase mb-1">Waktu Masuk</label>
@@ -282,11 +323,14 @@
                                 <input type="time" name="time_out" id="daily-manual-time-out" class="block w-full rounded-lg border-blue-200 shadow-sm focus:ring-blue-500">
                             </div>
                         </div>
+
+                        {{-- Textarea Keterangan --}}
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Keterangan Tambahan (Opsional)</label>
                             <textarea name="notes" rows="3" class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Contoh: Datang terlambat karena ban bocor..."></textarea>
                         </div>
                     </div>
+
                     <div class="mt-8 flex justify-end space-x-3 pt-4 border-t border-gray-100">
                         <button type="button" onclick="closeManualModalDaily()" class="bg-white text-gray-600 font-bold py-2.5 px-5 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors">Batal</button>
                         <button type="submit" class="bg-blue-600 text-white font-bold py-2.5 px-5 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-colors">Simpan Data</button>
@@ -296,19 +340,22 @@
         </div>
     </div>
 
-    {{-- MODAL EDIT --}}
+    {{-- MODAL EDIT (MODERN STYLE) --}}
     <div id="editAttendanceModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 transition-opacity">
         <div class="bg-white rounded-2xl p-0 w-full max-w-md shadow-2xl overflow-hidden">
             <div class="bg-gray-800 px-6 py-4 flex justify-between items-center">
                 <h3 class="font-bold text-white">Edit Data Presensi</h3>
                 <button onclick="closeEditModal()" class="text-white/60 hover:text-white">&times;</button>
             </div>
+            
             <form id="editForm" method="POST" class="p-6">
                 @csrf @method('PUT')
                 <div class="mb-4">
                     <label class="text-xs font-bold text-gray-400 uppercase">Nama Siswa</label>
                     <p id="modal-student-name" class="font-bold text-xl text-gray-800"></p>
                 </div>
+                
+                {{-- Status Edit --}}
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                     <select name="status" id="modal-status" class="w-full border-gray-300 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500" onchange="toggleEditTimeInput()">
@@ -318,6 +365,8 @@
                         <option value="Alfa">Alfa</option>
                     </select>
                 </div>
+                
+                {{-- Waktu Edit --}}
                 <div class="grid grid-cols-2 gap-3 mb-4 p-3 bg-gray-50 rounded-xl border border-gray-100" id="edit-time-container">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Masuk</label>
@@ -328,10 +377,12 @@
                         <input type="time" name="time_out" id="modal-time_out" class="w-full border-gray-300 rounded-lg">
                     </div>
                 </div>
+                
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
                     <textarea name="notes" id="modal-notes" class="w-full border-gray-300 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500" rows="3"></textarea>
                 </div>
+
                 <div class="flex justify-end gap-3">
                     <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200">Batal</button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-md">Update</button>
@@ -341,38 +392,51 @@
     </div>
 
     <script>
+        // --- LOGIKA TOGGLE WAKTU (MODAL INPUT MANUAL) ---
         function toggleTimeInput() {
             const status = document.getElementById('daily-manual-status').value;
             const timeContainer = document.getElementById('time-input-container');
+            
             if (status === 'Hadir') {
                 timeContainer.classList.remove('hidden', 'opacity-50', 'pointer-events-none');
             } else {
                 timeContainer.classList.add('hidden', 'opacity-50', 'pointer-events-none');
             }
         }
+
+        // --- LOGIKA TOGGLE WAKTU (MODAL EDIT) ---
         function toggleEditTimeInput() {
             const status = document.getElementById('modal-status').value;
             const timeContainer = document.getElementById('edit-time-container');
+            
             if (status === 'Hadir') {
                 timeContainer.classList.remove('hidden');
             } else {
                 timeContainer.classList.add('hidden');
             }
         }
+
         function openManualModalDaily(id, name) { 
             document.getElementById('daily-manual-id').value = id; 
             document.getElementById('daily-manual-name-display').textContent = name; 
+            
+            // Set Default
             document.getElementById('daily-manual-status').value = 'Hadir';
             toggleTimeInput(); 
+
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             document.getElementById('daily-manual-time-in').value = `${hours}:${minutes}`;
+            
             document.getElementById('manualModalDaily').classList.remove('hidden'); 
         }
+        
         function closeManualModalDaily() { 
             document.getElementById('manualModalDaily').classList.add('hidden'); 
         }
+        
+        // Modal Edit Logic
         const modal = document.getElementById('editAttendanceModal');
         const form = document.getElementById('editForm');
         function openEditModal(id, name, status, notes, timeIn, timeOut) {
@@ -382,6 +446,7 @@
             document.getElementById('modal-notes').value = notes;
             document.getElementById('modal-time_in').value = timeIn ? timeIn.substring(0,5) : '';
             document.getElementById('modal-time_out').value = timeOut ? timeOut.substring(0,5) : '';
+            
             toggleEditTimeInput(); 
             modal.classList.remove('hidden');
         }

@@ -148,8 +148,10 @@
                 </h3>
                 <p class="text-xs text-gray-500 mt-1 ml-10">10 Siswa dengan aktivitas tercatat terbanyak</p>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+            
+            {{-- FIX: Added max-w-[calc(100vw-3rem)] to force mobile scrolling --}}
+            <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full">
+                <table class="w-full text-left border-collapse" style="min-width: 800px;">
                     <thead>
                         <tr class="border-b border-gray-100 bg-white">
                             <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider w-16 text-center">Rank</th>
@@ -236,8 +238,9 @@
                 </form>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+            {{-- FIX: Added max-w-[calc(100vw-3rem)] to force mobile scrolling --}}
+            <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full">
+                <table class="w-full text-left border-collapse" style="min-width: 800px;">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Tanggal</th>
@@ -309,10 +312,41 @@
                 </table>
             </div>
             
-            {{-- Pagination --}}
-            <div class="p-6 border-t border-gray-100">
-                {{ $historyRecords->links() }}
-            </div>
+            {{-- Custom Pagination --}}
+            @if($historyRecords->hasPages())
+                <div class="p-4 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="text-sm text-gray-500 text-center md:text-left">
+                        Showing <span class="font-bold text-gray-800">{{ $historyRecords->firstItem() }}</span> to <span class="font-bold text-gray-800">{{ $historyRecords->lastItem() }}</span> of <span class="font-bold text-gray-800">{{ $historyRecords->total() }}</span> results
+                    </div>
+                    <div class="flex items-center rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+                        @if ($historyRecords->onFirstPage())
+                            <span class="px-3 py-2 text-gray-300 bg-gray-50 border-r border-gray-200 cursor-not-allowed">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            </span>
+                        @else
+                            <a href="{{ $historyRecords->previousPageUrl() }}" class="px-3 py-2 text-gray-600 bg-white hover:bg-gray-50 border-r border-gray-200 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            </a>
+                        @endif
+                        @foreach ($historyRecords->getUrlRange(max($historyRecords->currentPage() - 2, 1), min($historyRecords->currentPage() + 2, $historyRecords->lastPage())) as $page => $url)
+                            @if ($page == $historyRecords->currentPage())
+                                <span class="px-4 py-2 text-sm font-bold text-blue-600 bg-blue-50 border-r border-gray-200">{{ $page }}</span>
+                            @else
+                                <a href="{{ $url }}" class="px-4 py-2 text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 border-r border-gray-200 transition-colors">{{ $page }}</a>
+                            @endif
+                        @endforeach
+                        @if ($historyRecords->hasMorePages())
+                            <a href="{{ $historyRecords->nextPageUrl() }}" class="px-3 py-2 text-gray-600 bg-white hover:bg-gray-50 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </a>
+                        @else
+                            <span class="px-3 py-2 text-gray-300 bg-gray-50 cursor-not-allowed">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </span>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

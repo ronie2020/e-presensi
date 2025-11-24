@@ -27,7 +27,7 @@
             100% { top: 100%; opacity: 0; }
         }
         /* Custom Scrollbar untuk Table */
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; } /* Height added for horizontal scroll */
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
@@ -123,7 +123,7 @@
                         </div>
 
                         {{-- AREA TABEL RIWAYAT (KANAN) --}}
-                        <div class="lg:col-span-7 flex flex-col h-full bg-gray-50/50 rounded-3xl border border-gray-100 p-1">
+                        <div class="lg:col-span-7 flex flex-col h-full min-h-[400px] bg-gray-50/50 rounded-3xl border border-gray-100 p-1">
                             <div class="p-4 flex justify-between items-center border-b border-gray-100 bg-white rounded-t-[1.3rem]">
                                 <h3 class="font-bold text-gray-800 flex items-center gap-2">
                                     <div class="p-1.5 bg-blue-100 text-blue-600 rounded-lg">
@@ -141,8 +141,10 @@
                             </div>
                             
                             <div class="flex-1 overflow-hidden relative">
-                                <div class="absolute inset-0 overflow-y-auto custom-scrollbar p-2">
-                                    <table class="w-full border-collapse">
+                                {{-- FIX 2: overflow-auto (x dan y) agar bisa scroll horizontal di HP --}}
+                                <div class="absolute inset-0 overflow-auto custom-scrollbar p-2">
+                                    {{-- FIX 2: min-width agar kolom tidak gepeng di HP --}}
+                                    <table class="w-full border-collapse" style="min-width: 600px;">
                                         <thead class="bg-gray-100/50 text-gray-500 text-xs uppercase tracking-wider font-bold sticky top-0 z-10 backdrop-blur-sm">
                                             <tr>
                                                 <th class="px-4 py-3 text-left rounded-l-xl">Siswa</th>
@@ -218,6 +220,32 @@
             const csrfToken = '{{ csrf_token() }}';
             const scanProcessUrl = '{{ route('scan.process') }}';
             
+            // FIX 1: Audio Feedback
+            const beepSound = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"); // Simple placeholder sound/beep
+            // Anda bisa mengganti URL di atas dengan file audio beep asli, misal: '/sounds/beep.mp3'
+            // Fungsi helper untuk play sound
+            function playBeep() {
+                // Gunakan oscillator web audio API untuk beep yang lebih modern & tidak butuh file eksternal
+                try {
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    
+                    oscillator.type = 'sine'; // tipe suara
+                    oscillator.frequency.value = 1000; // frekuensi (Hz)
+                    
+                    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + 0.15); // durasi 150ms
+                } catch (e) {
+                    console.log("Audio context error", e);
+                }
+            }
+
             // DOM Elements
             const logTableBody = document.getElementById('scan-log');
             const scanStatus = document.getElementById('scan-status');
@@ -312,6 +340,7 @@
                 isProcessing = true;
 
                 html5QrCode.pause();
+                playBeep(); // FIX 1: Play Beep Sound
                 scanStatus.textContent = `Memproses Data...`;
                 
                 if (decodedText.length < 3 || decodedText.length > 50) {
@@ -410,7 +439,7 @@
             }
 
             function updateOrCreateScanLog(scan, scanTypeProcessed) { 
-                if (document.getElementById('no-log-entry')) document.getElementById('no-log-entry').remove(); 
+                if (document.getElementById('no-log-entry')) document.getElementById('no-log-entry').classList.add('hidden'); 
                 if (document.getElementById('empty-filter-msg')) document.getElementById('empty-filter-msg').remove();
 
                 if (!scan.student) return;
@@ -479,6 +508,10 @@
             }
 
             function filterLogs(type) {
+                // PERBAIKAN: Hapus pesan kosong sebelumnya jika ada untuk mencegah duplikasi
+                const existingMsg = document.getElementById('empty-filter-msg');
+                if (existingMsg) existingMsg.remove();
+
                 const rows = logTableBody.querySelectorAll('.log-entry');
                 let visibleCount = 0;
 
@@ -503,11 +536,29 @@
                     if (showRow) visibleCount++;
                 });
 
+                // Tampilkan pesan "Belum ada data..." HANYA jika ada data lain (rows > 0) tapi tidak ada yg match filter (visibleCount == 0)
                 if (rows.length > 0 && visibleCount === 0) {
                     const emptyRow = document.createElement('tr');
                     emptyRow.id = 'empty-filter-msg';
-                    emptyRow.innerHTML = `<td colspan="5" class="px-6 py-8 text-center text-sm text-gray-400 italic">Belum ada data untuk ${type}</td>`;
+                    emptyRow.innerHTML = `<td colspan="5" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                                <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
+                            <p class="text-sm text-gray-400 font-medium italic">Belum ada data untuk ${type === 'Harian' ? 'Absensi Harian' : 'Sholat ' + type}</p>
+                        </div>
+                    </td>`;
                     logTableBody.appendChild(emptyRow);
+                }
+                
+                // Handle empty state global (#no-log-entry)
+                const noLogEntry = document.getElementById('no-log-entry');
+                if (noLogEntry) {
+                    if (rows.length === 0) {
+                        noLogEntry.classList.remove('hidden');
+                    } else {
+                        noLogEntry.classList.add('hidden');
+                    }
                 }
             }
         });

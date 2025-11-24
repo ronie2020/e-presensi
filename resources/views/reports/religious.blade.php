@@ -19,15 +19,15 @@
                 <div class="bg-white p-1.5 rounded-2xl flex items-center shadow-sm border border-gray-100">
                     <a href="{{ route('reports.religious', ['activity' => 'Dhuha', 'date' => $selectedDate_db->format('Y-m-d')]) }}" 
                        class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ $selectedActivity == 'Dhuha' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
-                        🌞 Dhuha
+                    Shalat Dhuha
                     </a>
                     <a href="{{ route('reports.religious', ['activity' => 'Dhuhur', 'date' => $selectedDate_db->format('Y-m-d')]) }}" 
                        class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ $selectedActivity == 'Dhuhur' ? 'bg-orange-500 text-white shadow-lg shadow-orange-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
-                        🕌 Dhuhur
+                    Shalat Dhuhur
                     </a>
                 </div>
 
-                {{-- Filter Tanggal --}}
+                {{-- Filter Tanggal Modern --}}
                 <form action="{{ route('reports.religious') }}" method="GET" class="flex items-center gap-2 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
                     <input type="hidden" name="activity" value="{{ $selectedActivity }}">
                     <input type="date" name="date" 
@@ -84,22 +84,22 @@
                 <button @click="activeTab = 'hadir'" 
                         :class="activeTab === 'hadir' ? 'bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-100' : 'text-gray-500 hover:bg-white/60'" 
                         class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">
-                    ✅ Sudah Absen
+                    Sudah Absen
                 </button>
                 <button @click="activeTab = 'belum'" 
                         :class="activeTab === 'belum' ? 'bg-white text-red-600 shadow-sm ring-1 ring-red-100' : 'text-gray-500 hover:bg-white/60'" 
                         class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">
-                    ❌ Belum Absen
+                    Belum Absen
                 </button>
                 <button @click="activeTab = 'uzur'" 
                         :class="activeTab === 'uzur' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-blue-100' : 'text-gray-500 hover:bg-white/60'" 
                         class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">
-                    ℹ️ Izin / Uzur
+                    Izin / Uzur
                 </button>
             </div>
 
             {{-- Container Tabel --}}
-            <div class="w-full relative min-h-[300px]"> {{-- Hapus overflow-hidden di sini --}}
+            <div class="w-full relative min-h-[300px]">
                 
                 {{-- TAB 1: HADIR --}}
                 <div x-show="activeTab === 'hadir'" x-transition:enter.duration.300ms class="w-full">
@@ -115,8 +115,9 @@
                             </button>
                         </form>
                     </div>
-                    <div class="overflow-x-auto w-full pb-4">
-                        <table class="min-w-[1000px] w-full text-left border-collapse">
+                    {{-- FIX: Force scroll mobile --}}
+                    <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
+                        <table class="w-full text-left border-collapse" style="min-width: 800px;">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3">Nama Siswa</th>
@@ -164,13 +165,14 @@
 
                 {{-- TAB 2: BELUM ABSEN --}}
                 <div x-show="activeTab === 'belum'" x-transition:enter.duration.300ms style="display: none;" class="w-full">
-                    <div class="overflow-x-auto w-full pb-4">
-                        <table class="min-w-[1000px] w-full text-left border-collapse">
+                    {{-- FIX: Force scroll mobile --}}
+                    <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
+                        <table class="w-full text-left border-collapse" style="min-width: 800px;">
                             <thead class="bg-gray-50 border-b border-gray-100">
                                 <tr>
                                     <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3">Nama Siswa</th>
                                     <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3">Kelas</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap text-right w-1/3">Aksi</th>
+                                    <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
@@ -205,8 +207,9 @@
 
                 {{-- TAB 3: UZUR / IZIN --}}
                 <div x-show="activeTab === 'uzur'" x-transition:enter.duration.300ms style="display: none;" class="w-full">
-                    <div class="overflow-x-auto w-full pb-4">
-                        <table class="min-w-[1000px] w-full text-left border-collapse">
+                    {{-- FIX: Force scroll mobile --}}
+                    <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
+                        <table class="w-full text-left border-collapse" style="min-width: 800px;">
                             <thead class="bg-gray-50 border-b border-gray-100">
                                 <tr>
                                     <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3">Nama Siswa</th>
@@ -250,7 +253,7 @@
         </div>
     </div>
 
-    {{-- MODAL INPUT MANUAL, EDIT & SCRIPT (Tetap Sama) --}}
+    {{-- MODAL INPUT MANUAL, EDIT & SCRIPT (Sama) --}}
     <div id="manualInputModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">
