@@ -25,47 +25,60 @@ class SendWaScanNotificationJob implements ShouldQueue
 
     public function handle(): void
     {
-        // 1. Jeda untuk menghindari spamming server WA
+        // 1. Jeda anti-spam (1-3 detik)
         sleep(rand(1, 3));
 
         if (!$this->attendance->student) {
-            Log::warning('Job WA Scan dibatalkan: Siswa tidak ditemukan.');
             return; 
         }
 
-        // 2. Siapkan Data
+        // 2. Siapkan Data Dasar
         $student = $this->attendance->student;
         $nomorWA = $student->parent_wa_number;
         $namaSiswa = $student->name;
-        $jamScan = Carbon::parse($this->attendance->time_in)->format('H:i');
-        $tipeAbsen = $this->attendance->type; 
-        // Ambil activity jika tipe bukan Harian
-        $aktivitas = $this->attendance->activity ?? $tipeAbsen; 
         $catatan = $this->attendance->notes;
+        
+        // --- LOGIKA DETEKSI STATUS (MASUK / PULANG) ---
+        $tipeDB = $this->attendance->type; // 'Harian' atau 'Keagamaan'
+        
+        // Default awal
+        $statusNotif = $tipeDB; 
+        $waktuScan = $this->attendance->time_in;
+
+        // Jika tipe di database 'Harian', cek kolom time_out
+        if ($tipeDB == 'Harian') {
+            if (!empty($this->attendance->time_out)) {
+                $statusNotif = 'Pulang';
+                $waktuScan = $this->attendance->time_out;
+            } else {
+                $statusNotif = 'Masuk';
+                $waktuScan = $this->attendance->time_in;
+            }
+        }
+
+        // Format Tanggal & Jam
+        $tanggalObj = Carbon::parse($this->attendance->attendance_date);
+        $tanggalStr = $tanggalObj->translatedFormat('l, d F Y');
+        $jamScanStr = Carbon::parse($waktuScan)->format('H:i');
+        
+        $aktivitas = $this->attendance->activity ?? $statusNotif; 
 
         // 3. Variasi Salam
-        $salamList = [
-            "Assalamualaikum", 
-            "Salam Hormat", 
-            "Halo Ayah/Bunda", 
-            "Info Sekolah", 
-            "Laporan Aktivitas"
-        ];
+        $salamList = ["Assalamualaikum", "Salam Hormat", "Halo Orang Tua/Wali", "Info Sekolah", "Laporan Aktivitas"];
         $salam = $salamList[array_rand($salamList)];
 
         // 4. Template Pesan
         $message = "";
-
-        // Normalisasi string (huruf kecil semua) agar deteksi lebih akurat
-        $tipeCek = strtolower($tipeAbsen);
+        $tipeCek = strtolower($statusNotif); 
         $aktivitasCek = strtolower($aktivitas);
 
         if ($tipeCek == 'masuk') {
             $message = "*INFO PRESENSI SMPN 3 LAKBOK*\n\n" .
                        "{$salam}, kami sampaikan bahwa Ananda:\n" .
                        "Nama: *{$namaSiswa}*\n" .
+                       "Hari/Tgl: {$tanggalStr}\n" .
                        "Aktivitas: *ABSEN MASUK*\n" .
-                       "Pukul: *{$jamScan} WIB*\n" .
+                       "Pukul: *{$jamScanStr} WIB*\n" .
                        "Status: _{$catatan}_\n\n" .
                        "Terima kasih.";
         } 
@@ -73,40 +86,49 @@ class SendWaScanNotificationJob implements ShouldQueue
             $message = "*INFO PRESENSI SMPN 3 LAKBOK*\n\n" .
                        "{$salam}, kami sampaikan bahwa Ananda:\n" .
                        "Nama: *{$namaSiswa}*\n" .
+                       "Hari/Tgl: {$tanggalStr}\n" .
                        "Aktivitas: *ABSEN PULANG*\n" .
-                       "Pukul: *{$jamScan} WIB*\n\n" .
+                       "Pukul: *{$jamScanStr} WIB*\n\n" .
                        "Hati-hati di jalan. Terima kasih.";
         }
-        // --- BAGIAN INI DINONAKTIFKAN SEMENTARA ---
-        // Jika aktivitas adalah Dhuha atau Dhuhur, job akan berhenti (return) tanpa kirim WA.
+        // --- FILTER KEAGAMAAN (DINONAKTIFKAN SEMENTARA) ---
         elseif (str_contains($aktivitasCek, 'dhuha') || str_contains($tipeCek, 'dhuha')) {
             return; 
         }
         elseif (str_contains($aktivitasCek, 'dhuhur') || str_contains($tipeCek, 'dhuhur') || str_contains($tipeCek, 'duhur')) {
             return;
         }
-        // ------------------------------------------
         else {
-            // Log warning hanya jika tipe benar-benar asing (bukan Dhuha/Dhuhur)
-            // Log::warning("Tipe Absen tidak dikenali untuk WA: " . $tipeAbsen);
             return;
         }
         
-        // 5. Kirim Pesan (Hanya untuk Masuk/Pulang)
+        // 5. Kirim via WaPanels dengan MULTI DEVICE SUPPORT
         $apiUrl = 'https://app.wapanels.com/api/create-message';
         $authKey = config('app.wapanels_authkey');
-        $appKeys = config('app.wapanels_appkeys');
+        
+        // --- PERBAIKAN UTAMA: Handle String to Array ---
+        $appKeysRaw = config('app.wapanels_appkeys');
+        
+        // Jika formatnya string (karena dari .env), kita pecah jadi array
+        if (is_string($appKeysRaw)) {
+            // Hapus spasi jika ada, lalu explode berdasarkan koma
+            $appKeys = explode(',', str_replace(' ', '', $appKeysRaw));
+        } elseif (is_array($appKeysRaw)) {
+            $appKeys = $appKeysRaw;
+        } else {
+            $appKeys = [];
+        }
 
+        // Validasi jika key kosong
         if (empty($appKeys) || empty($appKeys[0])) {
-            Log::error('WAPANELS_APP_KEYS kosong.');
+            Log::error('WAPANELS_APP_KEYS kosong atau format salah di .env');
             return; 
         }
+
+        // Pilih satu device secara acak (Load Balancing)
         $appKey = $appKeys[array_rand($appKeys)]; 
 
-        if(empty($nomorWA)) {
-             // Opsional: Log jika nomor kosong
-             return;
-        }
+        if(empty($nomorWA)) return;
 
         try {
             $response = Http::post($apiUrl, [
@@ -118,7 +140,7 @@ class SendWaScanNotificationJob implements ShouldQueue
             ]);
             
             if ($response->failed()) {
-                Log::error("API WaPanels Error: " . $response->body());
+                Log::error("API WaPanels Error (Key: ...".substr($appKey, -4)."): " . $response->body());
                 throw new \Exception("Gagal kirim ke WaPanels");
             }
 
