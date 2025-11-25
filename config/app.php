@@ -126,7 +126,7 @@ return [
         // App\Providers\AuthServiceProvider::class,      // <-- SUDAH DI-KOMENTAR SEBELUMNYA
         // App\Providers\BroadcastServiceProvider::class, // <-- SUDAH DI-KOMENTAR SEBELUMNYA
         // App\Providers\EventServiceProvider::class,     // <-- ERROR BARU: SAYA KOMENTAR JUGA
-        App\Providers\RouteServiceProvider::class,     // <-- JIKA INI ERROR JUGA NANTI, SILAKAN DI-KOMENTAR JUGA
+        //App\Providers\RouteServiceProvider::class,     // <-- JIKA INI ERROR JUGA NANTI, SILAKAN DI-KOMENTAR JUGA
 
     ],
 
