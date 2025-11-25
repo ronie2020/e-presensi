@@ -123,10 +123,12 @@ return [
          * Application Service Providers...
          */
         App\Providers\AppServiceProvider::class,
-        // App\Providers\AuthServiceProvider::class,      // <-- SUDAH DI-KOMENTAR SEBELUMNYA
-        // App\Providers\BroadcastServiceProvider::class, // <-- SUDAH DI-KOMENTAR SEBELUMNYA
-        // App\Providers\EventServiceProvider::class,     // <-- ERROR BARU: SAYA KOMENTAR JUGA
-        //App\Providers\RouteServiceProvider::class,     // <-- JIKA INI ERROR JUGA NANTI, SILAKAN DI-KOMENTAR JUGA
+        
+        // --- DAFTAR PROVIDER INI DIHAPUS DI LARAVEL 11 (WAJIB MATIKAN/COMMENT) ---
+        // App\Providers\AuthServiceProvider::class,
+        // App\Providers\BroadcastServiceProvider::class,
+        // App\Providers\EventServiceProvider::class,
+        // App\Providers\RouteServiceProvider::class,  <-- INI BIANG KEROK ERROR ANDA
 
     ],
 
@@ -143,10 +145,12 @@ return [
     |--------------------------------------------------------------------------
     | WaPanels Configuration (MULTI-DEVICE SUPPORT)
     |--------------------------------------------------------------------------
+    |
+    | Kita gunakan trim dan array_filter untuk membersihkan input dari .env
+    |
     */
-    'wapanels_authkey' => env('WAPANELS_AUTH_KEY', ''),
+    'wapanels_authkey' => trim((string) env('WAPANELS_AUTH_KEY', '')),
     
-    // FIX: Gunakan (string) dan default value '' agar aman jika env kosong
-    'wapanels_appkeys' => array_filter(explode(',', (string) env('WAPANELS_APP_KEYS', ''))),
+    'wapanels_appkeys' => array_map('trim', array_filter(explode(',', (string) env('WAPANELS_APP_KEYS', '')))),
 
 ];
