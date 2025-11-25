@@ -27,31 +27,44 @@ class SendGeneralWaJob implements ShouldQueue
     {
         if (empty($this->phoneNumber)) return;
 
-        // ANTI-BAN BROADCAST: Jeda EKSTRA PANJANG (5-10 detik)
-        // Broadcast tidak harus realtime, yang penting aman.
-        // Jika 500 siswa, butuh waktu sekitar 1-1.5 jam untuk selesai. Ini sangat aman.
+        // Jeda agar aman dari banned
         sleep(rand(5, 10));
 
         $apiUrl = 'https://app.wapanels.com/api/create-message';
         $authKey = config('app.wapanels_authkey');
-        $appKeys = config('app.wapanels_appkeys');
+        
+        // --- PERBAIKAN: Handle String to Array (Multi Device) ---
+        $appKeysRaw = config('app.wapanels_appkeys');
+        
+        if (is_string($appKeysRaw)) {
+            $appKeys = explode(',', str_replace(' ', '', $appKeysRaw));
+        } elseif (is_array($appKeysRaw)) {
+            $appKeys = $appKeysRaw;
+        } else {
+            $appKeys = [];
+        }
 
         if (empty($appKeys) || empty($appKeys[0])) {
             Log::error('WAPANELS_APP_KEYS kosong.');
             return; 
         }
         
-        // Rotasi Device tetap dilakukan
+        // Rotasi Device
         $appKey = $appKeys[array_rand($appKeys)]; 
 
         try {
-            Http::post($apiUrl, [
+            $response = Http::post($apiUrl, [
                 'appkey' => $appKey,
                 'authkey' => $authKey,
                 'to' => $this->phoneNumber,
                 'message' => $this->message,
                 'sandbox' => 'false'
             ]);
+
+            if ($response->failed()) {
+                Log::error("Gagal Broadcast WA: " . $response->body());
+            }
+
         } catch (\Exception $e) {
             Log::error('Gagal kirim Broadcast WA: ' . $e->getMessage());
         }

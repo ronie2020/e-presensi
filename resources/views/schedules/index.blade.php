@@ -43,7 +43,7 @@
                 </div>
                 <div>
                     <h3 class="text-lg font-black text-gray-800">Jadwal Sekolah Reguler</h3>
-                    <p class="text-xs text-gray-500">Atur jam operasional standar mingguan.</p>
+                    <p class="text-xs text-gray-500">Atur jam operasional standar mingguan (Gunakan format 24 Jam, misal 14:00).</p>
                 </div>
             </div>
 
@@ -58,36 +58,37 @@
                                 <span class="w-2 h-6 bg-blue-500 rounded-full"></span>
                                 Senin - Kamis
                             </h4>
-                            <span class="text-xs font-bold bg-blue-100 text-blue-600 px-2 py-1 rounded">Hari Biasa</span>
+                            <span class="text-[10px] font-bold bg-blue-100 text-blue-600 px-2 py-1 rounded uppercase tracking-wide">Hari Biasa</span>
                         </div>
                         <input type="hidden" name="day_type[]" value="Biasa">
                         
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3"> {{-- Changed gap to 3 --}}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {{-- Jam Masuk --}}
-                            <div class="bg-white p-2.5 rounded-xl border border-blue-100 shadow-sm"> {{-- Reduced padding --}}
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 text-center tracking-wider">Jam Masuk</label>
-                                <div class="flex items-center gap-1.5"> {{-- Reduced gap --}}
+                            <div class="bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 text-center tracking-wider">Jam Masuk</label>
+                                <div class="flex items-center gap-2">
+                                    {{-- PERUBAHAN: text-xs dan font-medium agar lebih kecil & rapi --}}
                                     <input type="time" name="start_in[]" 
                                         value="{{ isset($regularSchedules['Biasa']->start_in) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->start_in)->format('H:i') : '05:30' }}" 
-                                        class="flex-1 min-w-0 text-center font-bold text-sm text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 px-1 py-2">
-                                    <span class="text-gray-300 font-bold">-</span>
+                                        class="flex-1 min-w-0 text-center font-medium text-xs text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 px-1 py-2">
+                                    <span class="text-gray-300 font-bold text-xs">-</span>
                                     <input type="time" name="end_in[]" 
                                         value="{{ isset($regularSchedules['Biasa']->end_in) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->end_in)->format('H:i') : '07:00' }}" 
-                                        class="flex-1 min-w-0 text-center font-bold text-sm text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 px-1 py-2">
+                                        class="flex-1 min-w-0 text-center font-medium text-xs text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 px-1 py-2">
                                 </div>
                             </div>
 
                             {{-- Jam Pulang --}}
-                            <div class="bg-white p-2.5 rounded-xl border border-blue-100 shadow-sm">
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 text-center tracking-wider">Jam Pulang</label>
-                                <div class="flex items-center gap-1.5">
+                            <div class="bg-white p-3 rounded-xl border border-blue-100 shadow-sm">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 text-center tracking-wider">Jam Pulang</label>
+                                <div class="flex items-center gap-2">
                                     <input type="time" name="start_out[]" 
                                         value="{{ isset($regularSchedules['Biasa']->start_out) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->start_out)->format('H:i') : '14:20' }}" 
-                                        class="flex-1 min-w-0 text-center font-bold text-sm text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 px-1 py-2">
-                                    <span class="text-gray-300 font-bold">-</span>
+                                        class="flex-1 min-w-0 text-center font-medium text-xs text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 px-1 py-2">
+                                    <span class="text-gray-300 font-bold text-xs">-</span>
                                     <input type="time" name="end_out[]" 
                                         value="{{ isset($regularSchedules['Biasa']->end_out) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->end_out)->format('H:i') : '17:00' }}" 
-                                        class="flex-1 min-w-0 text-center font-bold text-sm text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 px-1 py-2">
+                                        class="flex-1 min-w-0 text-center font-medium text-xs text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 px-1 py-2">
                                 </div>
                             </div>
                         </div>
@@ -100,36 +101,36 @@
                                 <span class="w-2 h-6 bg-purple-500 rounded-full"></span>
                                 Hari Jum'at
                             </h4>
-                            <span class="text-xs font-bold bg-purple-100 text-purple-600 px-2 py-1 rounded">Khusus</span>
+                            <span class="text-[10px] font-bold bg-purple-100 text-purple-600 px-2 py-1 rounded uppercase tracking-wide">Khusus</span>
                         </div>
                         <input type="hidden" name="day_type[]" value="Jumat">
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {{-- Jam Masuk --}}
-                            <div class="bg-white p-2.5 rounded-xl border border-purple-100 shadow-sm">
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 text-center tracking-wider">Jam Masuk</label>
-                                <div class="flex items-center gap-1.5">
+                            <div class="bg-white p-3 rounded-xl border border-purple-100 shadow-sm">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 text-center tracking-wider">Jam Masuk</label>
+                                <div class="flex items-center gap-2">
                                     <input type="time" name="start_in[]" 
                                         value="{{ isset($regularSchedules['Jumat']->start_in) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->start_in)->format('H:i') : '05:30' }}" 
-                                        class="flex-1 min-w-0 text-center font-bold text-sm text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-purple-500 px-1 py-2">
-                                    <span class="text-gray-300 font-bold">-</span>
+                                        class="flex-1 min-w-0 text-center font-medium text-xs text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-purple-500 px-1 py-2">
+                                    <span class="text-gray-300 font-bold text-xs">-</span>
                                     <input type="time" name="end_in[]" 
                                         value="{{ isset($regularSchedules['Jumat']->end_in) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->end_in)->format('H:i') : '07:00' }}" 
-                                        class="flex-1 min-w-0 text-center font-bold text-sm text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-purple-500 px-1 py-2">
+                                        class="flex-1 min-w-0 text-center font-medium text-xs text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-purple-500 px-1 py-2">
                                 </div>
                             </div>
 
                             {{-- Jam Pulang --}}
-                            <div class="bg-white p-2.5 rounded-xl border border-purple-100 shadow-sm">
-                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1.5 text-center tracking-wider">Jam Pulang</label>
-                                <div class="flex items-center gap-1.5">
+                            <div class="bg-white p-3 rounded-xl border border-purple-100 shadow-sm">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2 text-center tracking-wider">Jam Pulang</label>
+                                <div class="flex items-center gap-2">
                                     <input type="time" name="start_out[]" 
                                         value="{{ isset($regularSchedules['Jumat']->start_out) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->start_out)->format('H:i') : '11:00' }}" 
-                                        class="flex-1 min-w-0 text-center font-bold text-sm text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-purple-500 px-1 py-2">
-                                    <span class="text-gray-300 font-bold">-</span>
+                                        class="flex-1 min-w-0 text-center font-medium text-xs text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-purple-500 px-1 py-2">
+                                    <span class="text-gray-300 font-bold text-xs">-</span>
                                     <input type="time" name="end_out[]" 
                                         value="{{ isset($regularSchedules['Jumat']->end_out) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->end_out)->format('H:i') : '15:00' }}" 
-                                        class="flex-1 min-w-0 text-center font-bold text-sm text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-purple-500 px-1 py-2">
+                                        class="flex-1 min-w-0 text-center font-medium text-xs text-gray-700 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-purple-500 px-1 py-2">
                                 </div>
                             </div>
                         </div>
@@ -182,19 +183,19 @@
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
                                         <label class="text-[10px] text-gray-500 font-bold text-center block mb-1">Masuk Mulai</label>
-                                        <input type="time" name="start_in" class="w-full text-sm text-center rounded-lg border-gray-300 px-1">
+                                        <input type="time" name="start_in" class="w-full text-xs text-center font-medium rounded-lg border-gray-200 bg-white px-1 py-2">
                                     </div>
                                     <div>
                                         <label class="text-[10px] text-gray-500 font-bold text-center block mb-1">Masuk Akhir</label>
-                                        <input type="time" name="end_in" class="w-full text-sm text-center rounded-lg border-gray-300 px-1">
+                                        <input type="time" name="end_in" class="w-full text-xs text-center font-medium rounded-lg border-gray-200 bg-white px-1 py-2">
                                     </div>
                                     <div>
                                         <label class="text-[10px] text-gray-500 font-bold text-center block mb-1">Pulang Mulai</label>
-                                        <input type="time" name="start_out" class="w-full text-sm text-center rounded-lg border-gray-300 px-1">
+                                        <input type="time" name="start_out" class="w-full text-xs text-center font-medium rounded-lg border-gray-200 bg-white px-1 py-2">
                                     </div>
                                     <div>
                                         <label class="text-[10px] text-gray-500 font-bold text-center block mb-1">Pulang Akhir</label>
-                                        <input type="time" name="end_out" class="w-full text-sm text-center rounded-lg border-gray-300 px-1">
+                                        <input type="time" name="end_out" class="w-full text-xs text-center font-medium rounded-lg border-gray-200 bg-white px-1 py-2">
                                     </div>
                                 </div>
                             </div>

@@ -24,7 +24,6 @@ class SendWaManualNotificationJob implements ShouldQueue
 
     public function handle(): void
     {
-        // ANTI-BAN: Jeda 2-4 detik per pesan
         sleep(rand(2, 4));
 
         if (!$this->attendance->student) {
@@ -37,7 +36,6 @@ class SendWaManualNotificationJob implements ShouldQueue
         $statusManual = $this->attendance->status;
         $catatan = $this->attendance->notes;
 
-        // ANTI-BAN: Variasi Salam
         $salamList = ["Assalamualaikum", "Selamat Pagi/Siang", "Pemberitahuan Sekolah", "Yth. Wali Murid"];
         $salam = $salamList[array_rand($salamList)];
 
@@ -50,20 +48,34 @@ class SendWaManualNotificationJob implements ShouldQueue
         
         $apiUrl = 'https://app.wapanels.com/api/create-message';
         $authKey = config('app.wapanels_authkey');
-        $appKeys = config('app.wapanels_appkeys');
+        
+        // --- PERBAIKAN: Handle String to Array (Multi Device) ---
+        $appKeysRaw = config('app.wapanels_appkeys');
+        
+        if (is_string($appKeysRaw)) {
+            $appKeys = explode(',', str_replace(' ', '', $appKeysRaw));
+        } elseif (is_array($appKeysRaw)) {
+            $appKeys = $appKeysRaw;
+        } else {
+            $appKeys = [];
+        }
 
         if (empty($appKeys) || empty($appKeys[0])) return;
         
         $appKey = $appKeys[array_rand($appKeys)];
 
         try {
-            Http::post($apiUrl, [
+            $response = Http::post($apiUrl, [
                 'appkey' => $appKey,
                 'authkey' => $authKey,
                 'to' => $nomorWA,
                 'message' => $message,
                 'sandbox' => 'false'
             ]);
+
+            if ($response->failed()) {
+                Log::error("Gagal WA Manual: " . $response->body());
+            }
         } catch (\Exception $e) {
             Log::error('Gagal kirim WA Manual: ' . $e->getMessage());
         }
