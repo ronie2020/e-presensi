@@ -88,25 +88,29 @@ Route::middleware('auth')->group(function () {
     Route::get('/report-card/{student_id}', [GradeController::class, 'reportCard'])->name('grades.report');
  
     // PENGATURAN AKADEMIK (BARU)
-    Route::get('/settings/academic', [App\Http\Controllers\AcademicYearController::class, 'index'])->name('settings.academic.index');
-    Route::post('/settings/academic', [App\Http\Controllers\AcademicYearController::class, 'store'])->name('settings.academic.store');
-    Route::patch('/settings/academic/{id}/activate', [App\Http\Controllers\AcademicYearController::class, 'activate'])->name('settings.academic.activate');
-    Route::delete('/settings/academic/{id}', [App\Http\Controllers\AcademicYearController::class, 'destroy'])->name('settings.academic.destroy');
-
-    // === MODUL PERPUSTAKAAN ===
+    Route::get('/settings/academic', [\App\Http\Controllers\AcademicYearController::class, 'index'])->name('settings.academic.index');
+    Route::post('/settings/academic', [\App\Http\Controllers\AcademicYearController::class, 'store'])->name('settings.academic.store');
+    Route::patch('/settings/academic/{id}/activate', [\App\Http\Controllers\AcademicYearController::class, 'activate'])->name('settings.academic.activate');
+    Route::delete('/settings/academic/{id}', [\App\Http\Controllers\AcademicYearController::class, 'destroy'])->name('settings.academic.destroy');
+ // === MODUL PERPUSTAKAAN ===
     Route::prefix('library')->name('library.')->group(function () {
-        // Manajemen Buku (Menggunakan Resource Controller tapi manual prefix agar rapi)
-        // Kita arahkan 'library/books' ke BookController
-        Route::resource('books', \App\Http\Controllers\BookController::class);
+        
+        // 1. Dashboard Perpus
         Route::get('/dashboard', [\App\Http\Controllers\LibraryDashboardController::class, 'index'])->name('dashboard');
-         // === SIRKULASI (BARU) ===
+        
+        // 2. Manajemen Buku
+        // (Import ditaruh SEBELUM resource agar tidak tertimpa logic 'show')
+        Route::post('/books/import', [\App\Http\Controllers\BookController::class, 'import'])->name('books.import');
+        Route::resource('books', \App\Http\Controllers\BookController::class);
+
+        // 3. Sirkulasi (Peminjaman & Pengembalian)
         Route::get('/circulation', [\App\Http\Controllers\LibraryCirculationController::class, 'index'])->name('circulation.index');
-        // API Routes untuk AJAX Sirkulasi
         Route::post('/circulation/search-student', [\App\Http\Controllers\LibraryCirculationController::class, 'searchStudent'])->name('circulation.searchStudent');
         Route::post('/circulation/search-book', [\App\Http\Controllers\LibraryCirculationController::class, 'searchBook'])->name('circulation.searchBook');
         Route::post('/circulation/borrow', [\App\Http\Controllers\LibraryCirculationController::class, 'store'])->name('circulation.store');
         Route::post('/circulation/return', [\App\Http\Controllers\LibraryCirculationController::class, 'returnBook'])->name('circulation.return');
-         // Route Import Buku (Tambahkan ini)
+    
+        // Route Import Buku (Tambahkan ini)
         Route::post('/books/import', [\App\Http\Controllers\BookController::class, 'import'])->name('books.import');
         
         Route::resource('books', \App\Http\Controllers\BookController::class);
