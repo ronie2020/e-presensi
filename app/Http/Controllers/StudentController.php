@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-// Impor Model yang kita butuhkan
 use App\Models\Student;
 use App\Models\SchoolClass;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\StudentsImport;
 use App\Exports\StudentsExport;
@@ -17,60 +17,44 @@ class StudentController extends Controller
 {
     /**
      * Menampilkan halaman daftar siswa (CRUD).
-     * Ini adalah fungsi 'index'
      */
-    public function index(Request $request) // <-- MEMBUTUHKAN Request $request
+    public function index(Request $request)
     {
-        $user = Auth::user(); // Dapatkan user yang sedang login
-
-        // 1. Ambil semua data kelas untuk dropdown form
+        $user = Auth::user();
         $classes = SchoolClass::orderBy('name', 'asc')->get();
-
-        // 2. Ambil input dari form pencarian
         $search = $request->get('search');
         $filter_class_id = $request->get('filter_class_id');
 
-        // 3. Siapkan query dasar untuk mengambil siswa
         $query = Student::with('schoolClass')
             ->join('classes', 'students.class_id', '=', 'classes.id')
-            ->select('students.*'); // Penting untuk menghindari konflik ID
+            ->select('students.*');
 
-        // 4. LOGIKA FILTER WALI KELAS
-        // Jika user yang login adalah 'Wali Kelas'
+        // Filter Wali Kelas
         if ($user->role == 'Wali Kelas') {
-            // Cari kelas yang dipegang oleh user ini
-            $homeroomClass = $user->homeroomClass; // Gunakan relasi yang kita buat di User.php
-            
+            $homeroomClass = $user->homeroomClass;
             if ($homeroomClass) {
-                // Filter query agar hanya menampilkan siswa dari kelasnya
                 $query->where('students.class_id', $homeroomClass->id);
             } else {
-                // Jika dia Wali Kelas tapi tidak punya kelas, jangan tampilkan apa-apa
-                $query->where('students.class_id', -1); // Trik agar query kosong
+                $query->where('students.class_id', -1);
             }
         }
 
-        // 5. LOGIKA FILTER PENCARIAN & KELAS (YANG HILANG)
-        // Jika ada input 'search'
+        // Filter Pencarian
         $query->when($search, function ($q) use ($search) {
-            // Cari berdasarkan nama siswa ATAU student_id
             return $q->where('students.name', 'like', '%' . $search . '%')
                      ->orWhere('students.student_id', 'like', '%' . $search . '%');
         });
 
-        // Jika ada input 'filter_class_id'
+        // Filter Kelas Dropdown
         $query->when($filter_class_id, function ($q) use ($filter_class_id) {
             return $q->where('students.class_id', $filter_class_id);
         });
         
-        // 6. LOGIKA SORTING (URUTAN)
-        // Urutkan berdasarkan nama kelas, LALU berdasarkan nama siswa
         $students = $query->orderBy('classes.name', 'asc') 
                          ->orderBy('students.name', 'asc')
-                         ->paginate(10) // Kita ubah kembali ke 10 agar pas dengan 'appends'
-                         ->appends(request()->query()); // Tambahkan ini agar pagination ingat filternya
+                         ->paginate(10)
+                         ->appends(request()->query());
 
-        // 7. Tampilkan view 'students.index' dan kirimkan data $classes dan $students
         return view('students.index', [
             'classes' => $classes,
             'students' => $students
@@ -78,154 +62,150 @@ class StudentController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menampilkan Form Tambah Siswa.
      */
     public function create()
     {
-        // Kita tidak pakai fungsi ini karena form 'create' sudah ada di halaman 'index'
-        return redirect()->route('students.index');
-    }
-
-    /**
-     * Menyimpan data siswa baru dari form.
-     * Ini adalah fungsi 'store'
-     */
-    public function store(Request $request)
-    {
-        // 1. Validasi data yang masuk
-        $validatedData = $request->validate([
-            'student_id' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('students', 'student_id') // Pastikan ID Siswa unik
-            ],
-            'name' => 'required|string|max:255',
-            'class_id' => 'required|integer|exists:classes,id', // Pastikan class_id ada di tabel 'classes'
-            'rfid_id' => [
-                'nullable',
-                'string',
-                'max:255',
-                Rule::unique('students', 'rfid_id')->whereNotNull('rfid_id') // Pastikan RFID unik jika diisi
-            ],
-            'parent_wa_number' => 'nullable|string|max:20',
-        ]);
-
-        // 2. Jika validasi berhasil, buat data siswa baru
-        Student::create($validatedData);
-
-        // 3. Kembali ke halaman index dengan pesan sukses
-        return redirect()->route('students.index')->with('success', 'Siswa baru berhasil ditambahkan.');
-    }
-
-    /**
-     * 2. TAMBAHKAN FUNGSI BARU INI UNTUK MEMPROSES FILE IMPORT
-     */
-    public function import(Request $request)
-    {
-        // 1. Validasi file yang di-upload
-        $request->validate([
-            'file' => 'required|mimes:csv,xls,xlsx'
-        ], [
-            'file.required' => 'Silakan pilih file untuk diimpor.',
-            'file.mimes' => 'File harus berupa CSV, XLS, atau XLSX.',
-        ]);
-
-        try {
-            // 2. Lakukan impor
-            Excel::import(new StudentsImport, $request->file('file'));
-            
-            // 3. Jika sukses, kembali dengan pesan sukses
-            return redirect()->route('students.index')->with('success', 'Data siswa berhasil diimpor.');
-
-        } catch (ValidationException $e) {
-            // 4. Jika ada error validasi di dalam file CSV
-            $failures = $e->failures();
-            $errorMessages = [];
-            foreach ($failures as $failure) {
-                $errorMessages[] = 'Baris ' . $failure->row() . ': ' . implode(', ', $failure->errors());
-            }
-            return redirect()->route('students.index')->with('error', 'Gagal mengimpor data: ' . implode(' | ', $errorMessages));
-        
-        } catch (\Exception $e) {
-            // 5. Jika ada error lain
-            return redirect()->route('students.index')->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * 3. TAMBAHKAN FUNGSI BARU INI UNTUK MEMPROSES EXPORT
-     */
-    public function export()
-    {
-        return Excel::download(new StudentsExport, 'data_siswa.xlsx');
-    }
-
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Student $student)
-    {
-        // (Bisa dikembangkan nanti untuk melihat detail siswa)
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Student $student)
-    {
-        // $student adalah data siswa yang akan diedit (via Route-Model Binding)
-        
-        // Kita juga butuh daftar semua kelas untuk dropdown
         $classes = SchoolClass::orderBy('name', 'asc')->get();
-
-        return view('students.edit', [
-            'student' => $student,
+        return view('students.create', [
             'classes' => $classes
         ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Menyimpan data siswa baru (Quick Register & Full).
      */
-     public function update(Request $request, Student $student)
+    public function store(Request $request)
     {
-        // 1. Validasi data (mirip 'store', tapi 'unique' harus mengabaikan ID siswa ini sendiri)
-        $validatedData = $request->validate([
-            'student_id' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('students', 'student_id')->ignore($student->id) // Abaikan ID saat ini
-            ],
+        // 1. Validasi Data Lengkap
+        $rules = [
+            'student_id' => ['required', 'string', 'max:255', Rule::unique('students', 'student_id')],
             'name' => 'required|string|max:255',
             'class_id' => 'required|integer|exists:classes,id',
-            'rfid_id' => [
-                'nullable',
-                'string',
-                'max:255',
-                Rule::unique('students', 'rfid_id')->ignore($student->id)->whereNotNull('rfid_id') // Abaikan ID saat ini
-            ],
+            'rfid_id' => ['nullable', 'string', 'max:255', Rule::unique('students', 'rfid_id')->whereNotNull('rfid_id')],
             'parent_wa_number' => 'nullable|string|max:20',
+            // Validasi Foto
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            // Gender wajib diisi (dari form quick register)
+            'gender' => 'required|in:L,P',
+        ];
+
+        // Validasi field tambahan jika ada (nullable agar tidak error di quick register)
+        $request->validate($rules);
+
+        // 2. Ambil semua data input kecuali token, method, dan photo
+        $data = $request->except(['_token', '_method', 'photo']);
+
+        // 3. Proses Upload Foto (Jika Ada)
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('students', 'public');
+            $data['photo_path'] = $path;
+        }
+
+        // 4. Simpan ke Database
+        Student::create($data);
+
+        return redirect()->route('students.index')->with('success', 'Siswa berhasil ditambahkan.');
+    }
+
+    public function show(Student $student)
+    {
+        return view('students.show', [
+            'student' => $student
         ]);
+    }
 
-        // 2. Update data di database
-        $student->update($validatedData);
-
-        // 3. Kembali ke halaman index dengan pesan sukses
-        return redirect()->route('students.index')->with('success', 'Data siswa berhasil diperbarui.');
+    /**
+     * Menampilkan Form Edit (Buku Induk).
+     */
+    public function edit(Student $student)
+    {
+        $classes = SchoolClass::orderBy('name', 'asc')->get();
+        return view('students.edit', [
+            'student' => $student,
+            'classes' => $classes
+        ]);
     }
     /**
+     * Update data siswa (Buku Induk + Foto).
+     */
+    public function update(Request $request, Student $student)
+    {
+        // 1. Validasi data
+        $rules = [
+            'student_id' => ['required', Rule::unique('students', 'student_id')->ignore($student->id)],
+            'name' => 'required|string|max:255',
+            'class_id' => 'required|integer|exists:classes,id',
+            'rfid_id' => ['nullable', Rule::unique('students', 'rfid_id')->ignore($student->id)->whereNotNull('rfid_id')],
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            // Tambahkan validasi lain sesuai kebutuhan
+        ];
+        
+        $request->validate($rules);
+
+        // Ambil data input
+        $data = $request->except(['_token', '_method', 'photo']);
+
+        // 2. Proses Upload Foto
+        if ($request->hasFile('photo')) {
+            // Hapus foto lama jika ada
+            if ($student->photo_path && Storage::disk('public')->exists($student->photo_path)) {
+                Storage::disk('public')->delete($student->photo_path);
+            }
+            // Simpan foto baru
+            $path = $request->file('photo')->store('students', 'public');
+            $data['photo_path'] = $path;
+        }
+
+        // 3. Update Database
+        $student->update($data);
+
+        return redirect()->route('students.index')->with('success', 'Data Buku Induk siswa berhasil diperbarui.');
+    }
+
+    /**
      * Menghapus data siswa.
-     * Ini adalah fungsi 'destroy'
      */
     public function destroy(Student $student)
     {
-        // Gunakan soft delete (karena kita pakai SoftDeletes di Model)
+        // Hapus foto jika ada (opsional, tergantung kebijakan soft delete)
+        // if ($student->photo_path && Storage::disk('public')->exists($student->photo_path)) {
+        //    Storage::disk('public')->delete($student->photo_path);
+        // }
+
         $student->delete();
-        
-        // Kembali ke halaman index dengan pesan sukses
         return redirect()->route('students.index')->with('success', 'Siswa berhasil dihapus.');
+    }
+
+    /**
+     * Import data dari Excel.
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:csv,xls,xlsx'
+        ]);
+
+        try {
+            Excel::import(new StudentsImport, $request->file('file'));
+            return redirect()->route('students.index')->with('success', 'Data siswa berhasil diimpor.');
+        } catch (ValidationException $e) {
+            $failures = $e->failures();
+            $errorMessages = [];
+            foreach ($failures as $failure) {
+                $errorMessages[] = 'Baris ' . $failure->row() . ': ' . implode(', ', $failure->errors());
+            }
+            return redirect()->route('students.index')->with('error', 'Gagal impor: ' . implode(' | ', $errorMessages));
+        } catch (\Exception $e) {
+            return redirect()->route('students.index')->with('error', 'Kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export data ke Excel.
+     */
+    public function export()
+    {
+        return Excel::download(new StudentsExport, 'data_siswa_buku_induk.xlsx');
     }
 }

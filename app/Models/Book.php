@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Book extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'book_code',      // Kode Barcode
+        'title',          // Judul
+        'category_id',    // ID Kategori
+        'author',         // Pengarang
+        'publisher',      // Penerbit
+        'year',           // Tahun Terbit
+        'isbn',
+        'stock',          // Jumlah Stok
+        'shelf_location', // Lokasi Rak
+        'description',
+        'cover_path',     // Foto Cover
+    ];
+
+    /**
+     * Relasi: Satu Buku termasuk dalam SATU Kategori.
+     */
+    public function category()
+    {
+        return $this->belongsTo(BookCategory::class, 'category_id');
+    }
+
+    /**
+     * Relasi: Satu Buku bisa dipinjam BANYAK kali (history).
+     */
+    public function borrowings()
+    {
+        return $this->hasMany(Borrowing::class, 'book_id');
+    }
+    
+    /**
+     * Helper: Cek apakah stok tersedia
+     */
+    public function isAvailable()
+    {
+        return $this->stock > 0;
+    }
+}

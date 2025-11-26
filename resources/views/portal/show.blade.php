@@ -1,158 +1,190 @@
 @extends('layouts.public')
 
 @section('content')
-    <!-- Hero / Profile Header -->
-    <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-8 border border-gray-100 relative">
-        <div class="bg-blue-600 h-24 w-full absolute top-0 left-0 z-0"></div>
-        <div class="relative z-10 px-8 pt-12 pb-8 flex flex-col md:flex-row items-center md:items-end text-center md:text-left">
-            <div class="bg-white p-1.5 rounded-full shadow-md mb-4 md:mb-0">
-                <!-- Avatar Placeholder berdasarkan inisial nama -->
-                <div class="w-24 h-24 rounded-full bg-blue-100 flex items-center justify-center text-3xl font-bold text-blue-600 border-4 border-white">
-                    {{ substr($student->name, 0, 1) }}
+<div class="w-full max-w-5xl mx-auto">
+    
+    <!-- 1. Header Profil & Foto -->
+    <div class="bg-white rounded-3xl shadow-xl overflow-hidden mb-8 border border-gray-100 relative group">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 h-32 w-full absolute top-0 left-0 z-0">
+            <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        </div>
+        
+        <div class="relative z-10 px-8 pt-16 pb-8 flex flex-col md:flex-row items-center md:items-end text-center md:text-left">
+            
+            <!-- UPDATE: Foto Siswa -->
+            <div class="bg-white p-1.5 rounded-full shadow-2xl mb-4 md:mb-0 relative -mt-12 md:-mt-0">
+                <div class="w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-4 border-white relative shadow-inner">
+                    @if($student->photo_path)
+                        {{-- Menampilkan foto dari storage --}}
+                        <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
+                    @else
+                        {{-- Placeholder Inisial jika tidak ada foto --}}
+                        <div class="w-full h-full bg-blue-50 flex items-center justify-center text-4xl font-black text-blue-300 select-none">
+                            {{ substr($student->name, 0, 1) }}
+                        </div>
+                    @endif
                 </div>
             </div>
-            <div class="md:ml-6 mb-2">
-                <h1 class="text-3xl font-bold text-gray-900">{{ $student->name }}</h1>
-                <div class="flex flex-col md:flex-row gap-2 md:gap-6 text-gray-600 mt-1 text-sm">
-                    <span class="flex items-center justify-center md:justify-start">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                        Kelas: {{ $student->schoolClass->name ?? '-' }}
+            
+            <div class="md:ml-6 mb-2 flex-1 pt-2 md:pt-0">
+                <h1 class="text-3xl md:text-4xl font-black text-gray-900 tracking-tight mb-2">{{ $student->name }}</h1>
+                <div class="flex flex-col md:flex-row gap-2 md:gap-4 text-gray-600 text-sm font-medium justify-center md:justify-start">
+                    <span class="flex items-center bg-blue-50 px-3 py-1.5 rounded-full text-blue-700 border border-blue-100">
+                        <i class="ph-fill ph-chalkboard-teacher mr-2 text-lg"></i>
+                        Kelas {{ $student->schoolClass->name ?? 'Belum Diatur' }}
                     </span>
-                    <span class="flex items-center justify-center md:justify-start">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path></svg>
-                        NIS: {{ $student->student_id }}
+                    <span class="flex items-center bg-gray-100 px-3 py-1.5 rounded-full text-gray-700 border border-gray-200 font-mono">
+                        <i class="ph-fill ph-identification-card mr-2 text-lg text-gray-500"></i>
+                        {{ $student->student_id }}
                     </span>
                 </div>
             </div>
-            <div class="md:ml-auto mt-4 md:mt-0">
-                <a href="{{ route('portal.index') }}" class="text-sm text-gray-500 hover:text-blue-600 underline flex items-center">
-                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+
+            <div class="md:ml-auto mt-6 md:mt-0">
+                <a href="{{ route('portal.index') }}" class="inline-flex items-center px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm group">
+                    <i class="ph-bold ph-magnifying-glass mr-2 group-hover:scale-110 transition-transform"></i>
                     Cari Siswa Lain
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- Statistik Kehadiran -->
+    <!-- 2. Statistik Kehadiran -->
     <div class="mb-8">
-        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-            Rekap Kehadiran Tahun Ini
-        </h3>
+        <div class="flex items-center gap-3 mb-4 px-2">
+            <div class="p-2 bg-blue-600 rounded-lg text-white shadow-lg shadow-blue-200">
+                <i class="ph-bold ph-chart-bar text-xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800">Rekap Kehadiran</h3>
+        </div>
+
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <!-- Hadir -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Hadir</p>
-                    <p class="text-3xl font-bold text-green-600 mt-1">{{ $hadir }}</p>
-                </div>
-                <div class="p-3 bg-green-50 rounded-lg text-green-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-emerald-100 flex flex-col items-center justify-center text-center hover:shadow-md transition">
+                <div class="p-3 bg-emerald-50 rounded-xl text-emerald-600 mb-2"><i class="ph-duotone ph-check-circle text-3xl"></i></div>
+                <p class="text-4xl font-black text-emerald-600 mb-1">{{ $hadir }}</p>
+                <p class="text-xs text-gray-400 uppercase font-bold tracking-widest">Hadir</p>
             </div>
-            <!-- Sakit -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Sakit</p>
-                    <p class="text-3xl font-bold text-blue-600 mt-1">{{ $sakit }}</p>
-                </div>
-                <div class="p-3 bg-blue-50 rounded-lg text-blue-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-blue-100 flex flex-col items-center justify-center text-center hover:shadow-md transition">
+                <div class="p-3 bg-blue-50 rounded-xl text-blue-600 mb-2"><i class="ph-duotone ph-thermometer text-3xl"></i></div>
+                <p class="text-4xl font-black text-blue-600 mb-1">{{ $sakit }}</p>
+                <p class="text-xs text-gray-400 uppercase font-bold tracking-widest">Sakit</p>
             </div>
-            <!-- Izin -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Izin</p>
-                    <p class="text-3xl font-bold text-yellow-600 mt-1">{{ $izin }}</p>
-                </div>
-                <div class="p-3 bg-yellow-50 rounded-lg text-yellow-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-amber-100 flex flex-col items-center justify-center text-center hover:shadow-md transition">
+                <div class="p-3 bg-amber-50 rounded-xl text-amber-500 mb-2"><i class="ph-duotone ph-hand-waving text-3xl"></i></div>
+                <p class="text-3xl font-black text-amber-500 mb-1">{{ $izin }}</p>
+                <p class="text-xs text-gray-400 uppercase font-bold tracking-widest">Izin</p>
             </div>
-            <!-- Alpa -->
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Alpa</p>
-                    <p class="text-3xl font-bold text-red-600 mt-1">{{ $alpa }}</p>
-                </div>
-                <div class="p-3 bg-red-50 rounded-lg text-red-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-rose-100 flex flex-col items-center justify-center text-center hover:shadow-md transition">
+                <div class="p-3 bg-rose-50 rounded-xl text-rose-600 mb-2"><i class="ph-duotone ph-x-circle text-3xl"></i></div>
+                <p class="text-4xl font-black text-rose-600 mb-1">{{ $alpa }}</p>
+                <p class="text-xs text-gray-400 uppercase font-bold tracking-widest">Alpa</p>
             </div>
         </div>
     </div>
 
-    <!-- Rekap Poin (Grid 2 Kolom) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <!-- Pelanggaran -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-red-500 flex justify-between items-center">
-            <div>
-                <h4 class="text-gray-500 font-medium text-sm">Total Poin Pelanggaran</h4>
-                <div class="text-3xl font-bold text-gray-900 mt-1">{{ $poin_pelanggaran ?? 0 }}</div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- 3. Rekap Disiplin -->
+        <div class="space-y-6">
+            <div class="flex items-center gap-3 px-2">
+                <div class="p-2 bg-indigo-600 rounded-lg text-white shadow-lg shadow-indigo-200">
+                    <i class="ph-bold ph-star text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Catatan Karakter</h3>
             </div>
-            <div class="text-red-500 bg-red-50 p-3 rounded-full">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            </div>
-        </div>
 
-        <!-- Kebaikan -->
-        <div class="bg-white p-6 rounded-2xl shadow-sm border-l-4 border-green-500 flex justify-between items-center">
-            <div>
-                <h4 class="text-gray-500 font-medium text-sm">Total Poin Kebaikan</h4>
-                <div class="text-3xl font-bold text-gray-900 mt-1">{{ $poin_kebaikan ?? 0 }}</div>
-            </div>
-            <div class="text-green-500 bg-green-50 p-3 rounded-full">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
-        </div>
-    </div>
-
-    <!-- Riwayat Disiplin -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-            <h3 class="text-lg font-bold text-gray-800">Riwayat Catatan Disiplin</h3>
-        </div>
-        
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-white">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tanggal</th>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Kejadian</th>
-                        <th class="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Poin</th>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Pencatat</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-100">
-                    @forelse ($discipline_history as $record)
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ \Carbon\Carbon::parse($record->date)->translatedFormat('d M Y') }}
-                            </td>
-                            <td class="px-6 py-4">
-                                <div class="text-sm font-medium text-gray-900">{{ $record->disciplineType->name ?? '-' }}</div>
-                                <div class="text-xs text-gray-500 mt-0.5">{{ $record->notes ?? '-' }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                    {{ $record->disciplineType->type == 'Kebaikan' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                    {{ $record->disciplineType->type == 'Kebaikan' ? '+' : '-' }}{{ $record->disciplineType->point_value ?? 0 }}
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden">
+                 <div class="grid grid-cols-2 gap-4">
+                    <div class="p-4 bg-rose-50 rounded-2xl text-center border border-rose-100">
+                        <p class="text-xs font-bold text-rose-500 uppercase tracking-widest mb-1">Pelanggaran</p>
+                        <p class="text-4xl font-black text-rose-600">{{ $poin_pelanggaran ?? 0 }}</p>
+                        <p class="text-[10px] text-gray-400 mt-1">Poin</p>
+                    </div>
+                    <div class="p-4 bg-emerald-50 rounded-2xl text-center border border-emerald-100">
+                        <p class="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-1">Kebaikan</p>
+                        <p class="text-4xl font-black text-emerald-600">{{ $poin_kebaikan ?? 0 }}</p>
+                        <p class="text-[10px] text-gray-400 mt-1">Poin</p>
+                    </div>
+                 </div>
+                 <div class="mt-6">
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Aktivitas Terakhir</h4>
+                    <div class="space-y-3">
+                        @forelse ($discipline_history as $record)
+                            <div class="flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+                                <div class="mt-0.5">
+                                    @if($record->disciplineType->type == 'Kebaikan')
+                                        <i class="ph-fill ph-thumbs-up text-emerald-500"></i>
+                                    @else
+                                        <i class="ph-fill ph-warning text-rose-500"></i>
+                                    @endif
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-gray-800">{{ $record->disciplineType->name }}</p>
+                                    <p class="text-xs text-gray-500">{{ \Carbon\Carbon::parse($record->date)->translatedFormat('d M Y') }}</p>
+                                </div>
+                                <span class="ml-auto text-xs font-black {{ $record->disciplineType->type == 'Kebaikan' ? 'text-emerald-600' : 'text-rose-600' }}">
+                                    {{ $record->disciplineType->type == 'Kebaikan' ? '+' : '-' }}{{ $record->disciplineType->point_value }}
                                 </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $record->recorder->name ?? 'Sistem' }}
-                            </td>
-                        </tr>
+                            </div>
+                        @empty
+                            <p class="text-center text-sm text-gray-400 py-4">Belum ada catatan.</p>
+                        @endforelse
+                    </div>
+                 </div>
+            </div>
+        </div>
+
+        <!-- 4. Rekap Perpustakaan (BARU) -->
+        <div class="space-y-6">
+            <div class="flex items-center gap-3 px-2">
+                <div class="p-2 bg-orange-500 rounded-lg text-white shadow-lg shadow-orange-200">
+                    <i class="ph-bold ph-books text-xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Aktivitas Perpustakaan</h3>
+            </div>
+
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden h-full">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <p class="text-3xl font-black text-gray-800">{{ $library_visits }}</p>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Kali Berkunjung</p>
+                    </div>
+                    <div class="p-3 bg-orange-50 rounded-2xl text-orange-500">
+                        <i class="ph-duotone ph-read-cv-logo text-4xl"></i>
+                    </div>
+                </div>
+
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">Buku Dipinjam Terakhir</h4>
+                <div class="space-y-3 overflow-y-auto max-h-64 pr-1 custom-scrollbar">
+                    @forelse($borrowing_history as $loan)
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100">
+                            <div class="flex items-center gap-3 overflow-hidden">
+                                <div class="flex-shrink-0 w-8 h-10 bg-gray-200 rounded overflow-hidden">
+                                     @if($loan->book->cover_path)
+                                        <img src="{{ asset('storage/' . $loan->book->cover_path) }}" class="w-full h-full object-cover">
+                                     @else
+                                        <div class="w-full h-full flex items-center justify-center text-gray-400"><i class="ph-fill ph-book"></i></div>
+                                     @endif
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-bold text-gray-800 truncate">{{ $loan->book->title }}</p>
+                                    <p class="text-[10px] text-gray-500">Pinjam: {{ \Carbon\Carbon::parse($loan->borrow_date)->format('d M Y') }}</p>
+                                </div>
+                            </div>
+                            
+                            <span class="px-2 py-1 rounded text-[10px] font-bold uppercase {{ $loan->status == 'returned' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600' }}">
+                                {{ $loan->status == 'returned' ? 'Kembali' : 'Dipinjam' }}
+                            </span>
+                        </div>
                     @empty
-                        <tr>
-                            <td colspan="4" class="px-6 py-10 text-center text-gray-400 italic bg-gray-50">
-                                Belum ada catatan disiplin.
-                            </td>
-                        </tr>
+                        <div class="text-center py-8 text-gray-400">
+                            <i class="ph-duotone ph-book-open text-3xl mb-2"></i>
+                            <p class="text-sm">Belum pernah meminjam buku.</p>
+                        </div>
                     @endforelse
-                </tbody>
-            </table>
+                </div>
+            </div>
         </div>
     </div>
+
+</div>
 @endsection

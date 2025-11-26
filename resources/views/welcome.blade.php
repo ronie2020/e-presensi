@@ -19,12 +19,12 @@
     },
     closeAnnouncement() {
         this.modalOpen = false;
-        setTimeout(() => { this.activeAnnouncement = null }, 300); // Clear data after animation
+        setTimeout(() => { this.activeAnnouncement = null }, 300);
         document.body.style.overflow = 'auto';
     }
 }">
 
-    <!-- NAVBAR (Tetap Sama) -->
+    <!-- NAVBAR -->
     <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-200 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
@@ -45,9 +45,8 @@
         </div>
     </nav>
 
-    <!-- HERO SECTION (Improved Contrast) -->
+    <!-- HERO SECTION (Statistik Kehadiran) -->
     <div class="relative bg-blue-800 overflow-hidden text-white">
-        <!-- Abstract Background -->
         <div class="absolute inset-0 bg-gradient-to-br from-blue-700 via-blue-800 to-indigo-900 z-0"></div>
         <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] z-0"></div>
         
@@ -65,7 +64,7 @@
                     Platform digital SMPN 3 Lakbok untuk memantau kehadiran, aktivitas, dan perkembangan akademik siswa secara real-time.
                 </p>
                 
-                <!-- Statistik Mini -->
+                <!-- Statistik Mini Presensi -->
                 <div class="flex flex-wrap justify-center md:justify-start gap-4">
                     <div class="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 shadow-lg min-w-[140px]">
                         <div class="text-3xl font-bold">{{ $stats['hadir'] ?? 0 }}</div>
@@ -78,13 +77,13 @@
                 </div>
             </div>
 
-            <!-- GRAFIK PUBLIK -->
+            <!-- GRAFIK PRESENSI -->
             <div class="md:w-1/2 w-full pl-0 md:pl-10">
                 <div class="bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-6 text-gray-800 border border-gray-100/50 transform rotate-1 hover:rotate-0 transition duration-500">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="font-bold text-lg text-gray-800 flex items-center gap-2">
                             <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                            Statistik Mingguan
+                            Statistik Kehadiran
                         </h3>
                         <span class="text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 px-2 py-1 rounded-full flex items-center gap-1">
                             <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Live
@@ -106,40 +105,102 @@
     </div>
 
     <!-- MENU AKSES -->
-    <div class="bg-gray-50 pb-20 pt-10">
+    <div class="bg-gray-50 py-12 relative z-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-20">
-                <!-- Card 1 -->
-                <a href="{{ route('portal.index') }}" class="group bg-white p-8 rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:shadow-2xl hover:shadow-blue-200/50 transition-all duration-300 transform hover:-translate-y-2">
-                    <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Card 1: Portal Siswa -->
+                <a href="{{ route('portal.index') }}" class="group bg-white p-6 rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:shadow-2xl hover:shadow-blue-200/50 transition-all duration-300 transform hover:-translate-y-2 h-full">
+                    <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-5 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">Portal Siswa</h3>
-                    <p class="text-gray-500 leading-relaxed">Akses data kehadiran pribadi dan catatan kedisiplinan siswa secara mandiri.</p>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">Portal Siswa</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Cek kehadiran, poin disiplin, dan nilai siswa secara mandiri.</p>
                 </a>
                 
-                <!-- Card 2 -->
-                <a href="{{ route('kiosk.show') }}" class="group bg-white p-8 rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:shadow-2xl hover:shadow-purple-200/50 transition-all duration-300 transform hover:-translate-y-2">
-                    <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4h2v-4zM6 19v-4H4v4h2zM6 12V7a1 1 0 011-1h10a1 1 0 011 1v5m-4 0h4"/></svg>
+                <!-- Card 2: Mesin Absensi -->
+                <a href="{{ route('kiosk.show') }}" class="group bg-white p-6 rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:shadow-2xl hover:shadow-purple-200/50 transition-all duration-300 transform hover:-translate-y-2 h-full">
+                    <div class="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-5 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4h2v-4zM6 19v-4H4v4h2zM6 12V7a1 1 0 011-1h10a1 1 0 011 1v5m-4 0h4"/></svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">Mesin Absensi</h3>
-                    <p class="text-gray-500 leading-relaxed">Mode Kiosk untuk pemindaian kartu atau QR Code kehadiran harian siswa.</p>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-purple-600 transition-colors">Mesin Absensi</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Mode Kiosk untuk scan kehadiran harian siswa di gerbang.</p>
                 </a>
 
-                <!-- Card 3 -->
-                <a href="{{ route('login') }}" class="group bg-white p-8 rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:shadow-2xl hover:shadow-green-200/50 transition-all duration-300 transform hover:-translate-y-2">
-                    <div class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 mb-6 group-hover:scale-110 group-hover:bg-green-600 group-hover:text-white transition-all duration-300">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <!-- Card 3: Buku Tamu Perpus -->
+                <a href="{{ route('library.kiosk.index') }}" class="group bg-white p-6 rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:shadow-2xl hover:shadow-emerald-200/50 transition-all duration-300 transform hover:-translate-y-2 h-full">
+                    <div class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mb-5 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">Login Guru</h3>
-                    <p class="text-gray-500 leading-relaxed">Area administratif untuk Guru dan Staf mengelola data dan laporan.</p>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">Kiosk Perpus</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Buku tamu digital untuk mencatat kunjungan perpustakaan.</p>
+                </a>
+
+                <!-- Card 4: Login Guru -->
+                <a href="{{ route('login') }}" class="group bg-white p-6 rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 hover:shadow-2xl hover:shadow-green-200/50 transition-all duration-300 transform hover:-translate-y-2 h-full">
+                    <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 mb-5 group-hover:scale-110 group-hover:bg-green-600 group-hover:text-white transition-all duration-300">
+                        <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-green-600 transition-colors">Login Guru</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Area administratif untuk Guru dan Staf sekolah.</p>
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- PENGUMUMAN (AlpineJS Powered) -->
+    <!-- SECTION BARU: STATISTIK PERPUSTAKAAN -->
+    <div class="py-16 bg-emerald-50 border-t border-emerald-100 relative overflow-hidden">
+        <!-- Abstract BG for Library -->
+        <div class="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/notebook.png')] pointer-events-none"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col md:flex-row items-center gap-12">
+                
+                <!-- Teks & Statistik Mini -->
+                <div class="w-full md:w-1/2">
+                    <span class="inline-flex items-center py-1 px-3 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-4">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        Pusat Literasi
+                    </span>
+                    <h2 class="text-3xl md:text-4xl font-black text-gray-900 tracking-tight mb-4">
+                        Budayakan Membaca, <br>
+                        <span class="text-emerald-600">Jelajahi Dunia</span>
+                    </h2>
+                    <p class="text-gray-600 text-lg mb-8 leading-relaxed">
+                        Pantau aktivitas perpustakaan secara real-time. Kami berkomitmen menyediakan akses literasi terbaik bagi siswa.
+                    </p>
+                    
+                    <!-- Statistik Mini Library -->
+                    <div class="flex gap-6">
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-emerald-100 w-40">
+                            <p class="text-3xl font-black text-emerald-600">{{ $libraryStats['visitors_today'] ?? 0 }}</p>
+                            <p class="text-xs font-bold text-gray-400 uppercase mt-1">Pengunjung Hari Ini</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-emerald-100 w-40">
+                            <p class="text-3xl font-black text-blue-600">{{ $libraryStats['books_borrowed'] ?? 0 }}</p>
+                            <p class="text-xs font-bold text-gray-400 uppercase mt-1">Buku Dipinjam</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grafik Perpustakaan -->
+                <div class="w-full md:w-1/2">
+                    <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-bold text-lg text-gray-800">Grafik Kunjungan Minggu Ini</h3>
+                            <a href="{{ route('library.dashboard') }}" class="text-xs font-bold text-emerald-600 hover:text-emerald-700">Lihat Detail &rarr;</a>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="publicLibraryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- PENGUMUMAN -->
     <div class="py-20 bg-white relative overflow-hidden">
         {{-- Background blobs --}}
         <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-blue-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
@@ -187,64 +248,29 @@
         </div>
     </div>
 
-    <!-- MODAL (AlpineJS Driven) -->
-    <div x-show="modalOpen" 
-         style="display: none;"
-         class="fixed inset-0 z-[100] overflow-y-auto" 
-         aria-labelledby="modal-title" 
-         role="dialog" 
-         aria-modal="true">
-        
-        <!-- Backdrop -->
-        <div x-show="modalOpen"
-             x-transition:enter="ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" 
-             @click="closeAnnouncement()">
-        </div>
-
-        <!-- Panel -->
+    <!-- MODAL -->
+    <div x-show="modalOpen" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div x-show="modalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" @click="closeAnnouncement()"></div>
         <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
-            <div x-show="modalOpen"
-                 x-transition:enter="ease-out duration-300"
-                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                 x-transition:leave="ease-in duration-200"
-                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-gray-100">
-                
+            <div x-show="modalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-gray-100">
                 <div class="bg-white px-6 py-6 sm:p-8">
                     <div class="flex items-start justify-between mb-6">
                         <h3 class="text-2xl font-black text-gray-900 leading-tight" x-text="activeAnnouncement?.title"></h3>
                         <button @click="closeAnnouncement()" class="ml-4 rounded-full p-1 bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition">
-                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
                     </div>
-                    
                     <div class="flex items-center gap-3 text-sm text-gray-500 mb-6 pb-6 border-b border-gray-100">
-                        <span class="flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <span x-text="new Date(activeAnnouncement?.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })"></span>
-                        </span>
+                        <span class="flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span x-text="new Date(activeAnnouncement?.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })"></span></span>
                         <span>&bull;</span>
                         <span class="text-blue-600 font-semibold">Admin Sekolah</span>
                     </div>
-
                     <div class="prose prose-blue max-w-none text-gray-700 leading-relaxed">
-                         <!-- Note: x-html can be dangerous with user input. Ensure content is sanitized on backend -->
                         <div x-html="activeAnnouncement?.content.replace(/\n/g, '<br>')"></div>
                     </div>
                 </div>
-                
                 <div class="bg-gray-50 px-6 py-4 flex justify-end">
-                    <button type="button" class="inline-flex w-full justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-blue-700 sm:w-auto transition-colors" @click="closeAnnouncement()">
-                        Tutup
-                    </button>
+                    <button type="button" class="inline-flex w-full justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-blue-700 sm:w-auto transition-colors" @click="closeAnnouncement()">Tutup</button>
                 </div>
             </div>
         </div>
@@ -265,8 +291,8 @@
     </footer>
 
     <script>
-        // Chart Script (Sama, tapi pastikan data tersedia)
         document.addEventListener('DOMContentLoaded', function() {
+            // CHART PRESENSI (Sudah Ada)
             const ctx = document.getElementById('publicWeeklyChart');
             if(ctx) {
                 const chartData = @json($barChartData); 
@@ -277,15 +303,52 @@
                         datasets: chartData.datasets
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        borderRadius: 4,
+                        responsive: true, maintainAspectRatio: false, borderRadius: 4,
+                        scales: { y: { beginAtZero: true, stacked: true, grid: { display: false } }, x: { stacked: true, grid: { display: false } } },
+                        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } } }
+                    }
+                });
+            }
+
+            // CHART PERPUSTAKAAN (BARU)
+            const libCtx = document.getElementById('publicLibraryChart');
+            if (libCtx) {
+                // Mengambil data yang sudah siap di $libraryChartData (atau default jika null)
+                @php
+                    // Definisikan nilai default agar @json tidak error jika variabel belum ada
+                    $defaultLibData = [
+                        'labels' => ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'], 
+                        'data' => [0, 0, 0, 0, 0]
+                    ];
+                    // Gunakan variabel dari controller jika ada, atau default jika tidak
+                    $finalLibData = $libraryChartData ?? $defaultLibData;
+                @endphp
+
+                const libData = @json($finalLibData);
+
+                new Chart(libCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: libData.labels,
+                        datasets: [{
+                            label: 'Kunjungan',
+                            data: libData.data,
+                            borderColor: '#059669', // Emerald 600
+                            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#059669',
+                            pointBorderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
                         scales: {
-                            y: { beginAtZero: true, stacked: true, grid: { display: false } },
-                            x: { stacked: true, grid: { display: false } }
-                        },
-                        plugins: {
-                            legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } }
+                            y: { beginAtZero: true, border: { display: false }, grid: { color: '#f3f4f6' }, ticks: { stepSize: 1 } },
+                            x: { grid: { display: false } }
                         }
                     }
                 });

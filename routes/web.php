@@ -14,6 +14,7 @@ use App\Http\Controllers\StudentPortalController;
 use App\Http\Controllers\LandingPageController; 
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\DisciplineTypeController;
+use App\Http\Controllers\GradeController; // <-- Tambahkan Import Controller Nilai
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,6 +41,9 @@ Route::get('/portal', [StudentPortalController::class, 'index'])->name('portal.i
 Route::post('/portal/search', [StudentPortalController::class, 'search'])->name('portal.search');
 Route::get('/portal/{student_id}', [StudentPortalController::class, 'show'])->name('portal.show');
 
+// RUTE KIOSK PERPUSTAKAAN (BUKU TAMU)
+Route::get('/library/kiosk', [\App\Http\Controllers\LibraryKioskController::class, 'index'])->name('library.kiosk.index');
+Route::post('/library/kiosk/process', [\App\Http\Controllers\LibraryKioskController::class, 'process'])->name('library.kiosk.process');
 
 // --- GRUP RUTE YANG BUTUH LOGIN ---
 Route::middleware('auth')->group(function () {
@@ -73,8 +77,41 @@ Route::middleware('auth')->group(function () {
         'index', 'store', 'destroy'
     ]);
     
+   
     // Manajemen Tipe Disiplin (Master Data Pelanggaran/Kebaikan)
     Route::resource('discipline-types', DisciplineTypeController::class);
+
+    // --- MODUL BARU: MANAJEMEN NILAI & E-RAPOR ---
+    Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
+    Route::get('/grades/input', [GradeController::class, 'create'])->name('grades.create');
+    Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');
+    Route::get('/report-card/{student_id}', [GradeController::class, 'reportCard'])->name('grades.report');
+ 
+    // PENGATURAN AKADEMIK (BARU)
+    Route::get('/settings/academic', [App\Http\Controllers\AcademicYearController::class, 'index'])->name('settings.academic.index');
+    Route::post('/settings/academic', [App\Http\Controllers\AcademicYearController::class, 'store'])->name('settings.academic.store');
+    Route::patch('/settings/academic/{id}/activate', [App\Http\Controllers\AcademicYearController::class, 'activate'])->name('settings.academic.activate');
+    Route::delete('/settings/academic/{id}', [App\Http\Controllers\AcademicYearController::class, 'destroy'])->name('settings.academic.destroy');
+
+    // === MODUL PERPUSTAKAAN ===
+    Route::prefix('library')->name('library.')->group(function () {
+        // Manajemen Buku (Menggunakan Resource Controller tapi manual prefix agar rapi)
+        // Kita arahkan 'library/books' ke BookController
+        Route::resource('books', \App\Http\Controllers\BookController::class);
+        Route::get('/dashboard', [\App\Http\Controllers\LibraryDashboardController::class, 'index'])->name('dashboard');
+         // === SIRKULASI (BARU) ===
+        Route::get('/circulation', [\App\Http\Controllers\LibraryCirculationController::class, 'index'])->name('circulation.index');
+        // API Routes untuk AJAX Sirkulasi
+        Route::post('/circulation/search-student', [\App\Http\Controllers\LibraryCirculationController::class, 'searchStudent'])->name('circulation.searchStudent');
+        Route::post('/circulation/search-book', [\App\Http\Controllers\LibraryCirculationController::class, 'searchBook'])->name('circulation.searchBook');
+        Route::post('/circulation/borrow', [\App\Http\Controllers\LibraryCirculationController::class, 'store'])->name('circulation.store');
+        Route::post('/circulation/return', [\App\Http\Controllers\LibraryCirculationController::class, 'returnBook'])->name('circulation.return');
+         // Route Import Buku (Tambahkan ini)
+        Route::post('/books/import', [\App\Http\Controllers\BookController::class, 'import'])->name('books.import');
+        
+        Route::resource('books', \App\Http\Controllers\BookController::class);
+        // ...
+    });
 
     // Pengumuman & Notifikasi WA Broadcast
     Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');

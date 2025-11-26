@@ -2,113 +2,96 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\AttendanceSiswa;
-// use App\Models\Discipline; // Ganti ini
-use App\Models\DisciplineRecord; // Menjadi ini
-use Carbon\Carbon;
+use App\Models\DisciplineRecord;
+use App\Models\LibraryVisit;
+use App\Models\Borrowing;
+use Illuminate\Http\Request;
 
 class StudentPortalController extends Controller
 {
-    /**
-     * Menampilkan halaman pencarian siswa.
-     */
     public function index()
     {
-        // Menggunakan layout publik
         return view('portal.index');
     }
 
-    /**
-     * Memproses pencarian siswa berdasarkan NIS/NISN.
-     */
     public function search(Request $request)
     {
         $request->validate([
-            'student_id' => 'required|string|max:100'
-        ], [
-            'student_id.required' => 'NIS/NISN wajib diisi.'
+            'student_id' => 'required|string',
         ]);
 
-        // Cari siswa berdasarkan student_id (NISN)
-        $student = Student::where('student_id', $request->student_id)->first();
+        // Cari berdasarkan NISN (student_id) atau NIS
+        $student = Student::where('student_id', $request->student_id)
+                    ->orWhere('nis', $request->student_id)
+                    ->first();
 
         if (!$student) {
-            // Jika tidak ketemu, kembalikan ke halaman pencarian dengan error
-            return redirect()->route('portal.index')
-                ->with('error', 'Siswa dengan NIS/NISN ' . $request->student_id . ' tidak ditemukan.');
+            return back()->with('error', 'Data siswa tidak ditemukan. Periksa kembali Nomor Induk Anda.');
         }
 
-        // Jika ketemu, alihkan ke halaman hasil
-        return redirect()->route('portal.show', ['student_id' => $student->student_id]);
+        return redirect()->route('portal.show', $student->id);
     }
 
-    /**
-     * Menampilkan dashboard rekap siswa.
-     */
-    public function show($student_id)
+    public function show($id)
     {
-        // Cari siswa, jika tidak ada akan error 404
-        $student = Student::with('schoolClass') // Eager load relasi kelas
-            ->where('student_id', $student_id)
-            ->firstOrFail();
+        $student = Student::with('schoolClass')->findOrFail($id);
+        
+        $year = date('Y');
 
-        $year = now()->year; // Kita ambil rekap "Tahun Ini"
-
-        // 1. Rekap Kehadiran (Tahun Ini)
-        // Asumsi: 'Masuk' dihitung sebagai Hadir. Sakit/Izin/Alpa dicatat manual.
+        // 1. REKAP ABSENSI (PERBAIKAN: Menggunakan 'attendance_date')
+        
+        // Hadir: Berdasarkan type 'Masuk'
         $hadir = AttendanceSiswa::where('student_id', $student->id)
-                    ->whereYear('attendance_date', $year)
-                    ->where('type', 'Masuk') // Hanya hitung 'Masuk' sebagai 'Hadir'
+                    ->whereYear('attendance_date', $year) // FIX: Pakai attendance_date
+                    ->where('type', 'Masuk')
                     ->count();
         
+        // Sakit, Izin, Alpa: Berdasarkan status
         $sakit = AttendanceSiswa::where('student_id', $student->id)
-                    ->whereYear('attendance_date', $year)
+                    ->whereYear('attendance_date', $year) // FIX: Pakai attendance_date
                     ->where('status', 'Sakit')
                     ->count();
 
         $izin = AttendanceSiswa::where('student_id', $student->id)
-                    ->whereYear('attendance_date', $year)
+                    ->whereYear('attendance_date', $year) // FIX: Pakai attendance_date
                     ->where('status', 'Izin')
                     ->count();
       
         $alpa = AttendanceSiswa::where('student_id', $student->id)
-                    ->whereYear('attendance_date', $year)
+                    ->whereYear('attendance_date', $year) // FIX: Pakai attendance_date
                     ->where('status', 'Alpa')
                     ->count();
 
-        // 2. REKAP POIN DISIPLIN (LOGIKA DIPERBARUI)
-        // Kita akan join dengan tabel 'discipline_types'
-        // Asumsi: tabel 'discipline_types' punya kolom 'points' dan 'type' ('Pelanggaran'/'Kebaikan')
-        
+        // 2. Rekap Disiplin
         $poin_pelanggaran = DisciplineRecord::where('student_id', $student->id)
-                            ->join('discipline_types', 'discipline_records.discipline_type_id', '=', 'discipline_types.id')
-                            ->where('discipline_types.type', 'Pelanggaran') // Asumsi kolom type
-                            ->sum('discipline_types.point_value'); // PERBAIKAN: points -> point_value
-                            
-        $poin_kebaikan = DisciplineRecord::where('student_id', $student->id)
-                            ->join('discipline_types', 'discipline_records.discipline_type_id', '=', 'discipline_types.id')
-                            ->where('discipline_types.type', 'Kebaikan') // Asumsi kolom type
-                            ->sum('discipline_types.point_value'); // PERBAIKAN: points -> point_value
+            ->whereHas('disciplineType', function($q) { $q->where('type', 'Pelanggaran'); })
+            ->with('disciplineType')->get()->sum(fn($r) => $r->disciplineType->point_value);
 
-        // 3. RIWAYAT CATATAN DISIPLIN (LOGIKA DIPERBARUI)
-        // Kita eager load relasi 'disciplineType' (dari DisciplineRecord) dan 'recorder'
-        $discipline_history = DisciplineRecord::where('student_id', $student->id)
-                                ->with(['disciplineType', 'recorder']) // Memuat relasi
-                                ->orderBy('date', 'desc')
-                                ->get();
-                                
-        // Kirim semua data ke view
-        return view('portal.show', [
-            'student' => $student,
-            'hadir' => $hadir,
-            'sakit' => $sakit,
-            'izin' => $izin,
-            'alpa' => $alpa,
-            'poin_pelanggaran' => $poin_pelanggaran,
-            'poin_kebaikan' => $poin_kebaikan,
-            'discipline_history' => $discipline_history,
-        ]);
+        $poin_kebaikan = DisciplineRecord::where('student_id', $student->id)
+            ->whereHas('disciplineType', function($q) { $q->where('type', 'Kebaikan'); })
+            ->with('disciplineType')->get()->sum(fn($r) => $r->disciplineType->point_value);
+
+        $discipline_history = DisciplineRecord::with(['disciplineType', 'recorder'])
+            ->where('student_id', $student->id)
+            ->orderBy('date', 'desc')
+            ->limit(5)
+            ->get();
+
+        // 3. Data Perpustakaan
+        $library_visits = LibraryVisit::where('student_id', $student->id)->count();
+
+        $borrowing_history = Borrowing::with('book')
+            ->where('student_id', $student->id)
+            ->orderBy('borrow_date', 'desc')
+            ->limit(10)
+            ->get();
+
+        return view('portal.show', compact(
+            'student', 'hadir', 'sakit', 'izin', 'alpa',
+            'poin_pelanggaran', 'poin_kebaikan', 'discipline_history',
+            'library_visits', 'borrowing_history'
+        ));
     }
 }

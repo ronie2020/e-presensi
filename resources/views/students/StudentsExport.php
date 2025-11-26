@@ -17,10 +17,9 @@ class StudentsExport implements FromCollection, WithHeadings, WithMapping, Shoul
     */
     public function collection()
     {
-        // Ambil siswa beserta data kelasnya, urutkan berdasarkan nama kelas lalu nama siswa
         return Student::with('schoolClass')
             ->join('classes', 'students.class_id', '=', 'classes.id')
-            ->select('students.*') // Ambil kolom students saja agar tidak bentrok
+            ->select('students.*')
             ->orderBy('classes.name', 'asc')
             ->orderBy('students.name', 'asc')
             ->get();
@@ -32,33 +31,48 @@ class StudentsExport implements FromCollection, WithHeadings, WithMapping, Shoul
     public function headings(): array
     {
         return [
-            'ID Siswa (NISN)',
+            'NIS / NISN',
             'Nama Lengkap',
             'Kelas',
+            'L/P',
+            'Tempat Lahir',
+            'Tanggal Lahir',
+            'Agama',
+            'Alamat',
+            'Nama Ayah',
+            'Pekerjaan Ayah',
+            'Nama Ibu',
+            'Pekerjaan Ibu',
+            'No. WA Ortu',
             'RFID ID',
-            'Nomor WA Orang Tua',
-            'Tanggal Terdaftar'
+            'Status', // Aktif/Tidak (jika ada)
         ];
     }
 
     /**
-    * Memetakan data per baris agar sesuai urutan Header.
+    * Memetakan data per baris.
     */
     public function map($student): array
     {
         return [
             $student->student_id,
             $student->name,
-            $student->schoolClass ? $student->schoolClass->name : 'Tanpa Kelas',
-            $student->rfid_id,
+            $student->schoolClass ? $student->schoolClass->name : '-',
+            $student->gender,
+            $student->pob,
+            $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d-m-Y') : '-',
+            $student->religion,
+            $student->address,
+            $student->father_name,
+            $student->father_job,
+            $student->mother_name,
+            $student->mother_job,
             $student->parent_wa_number,
-            $student->created_at ? $student->created_at->format('d-m-Y') : '-',
+            $student->rfid_id,
+            'Aktif', 
         ];
     }
 
-    /**
-    * Styling sederhana (Bold pada header).
-    */
     public function styles(Worksheet $sheet)
     {
         return [
