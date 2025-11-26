@@ -151,6 +151,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/religious', [ReportController::class, 'religiousReport'])->name('reports.religious');
     Route::delete('/reports/religious', [ReportController::class, 'destroyReligious'])->name('reports.destroyReligious');
     Route::get('/reports/export-religious', [ReportController::class, 'exportReligious'])->name('reports.exportReligious');
+
+     // PENGATURAN MATA PELAJARAN
+    Route::resource('subjects', \App\Http\Controllers\SubjectController::class)->only(['index', 'store', 'update', 'destroy']);
+    
+
 });
 
 require __DIR__.'/auth.php';
