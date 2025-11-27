@@ -392,15 +392,15 @@
                     <ul class="space-y-4 text-sm text-slate-400">
                         <li class="flex items-start gap-3">
                             <i class="ph-fill ph-map-pin mt-1 text-blue-500"></i>
-                            <span>Jl. Raya Cintaratu, Kec. Lakbok, Kab. Ciamis, Jawa Barat 46385</span>
+                            <span>Jl. Mekarjaya No.199 Sidaharja Kec. Lakbok, Kab. Ciamis, Jawa Barat 46385</span>
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="ph-fill ph-phone text-blue-500"></i>
-                            <span>(0265) 1234567</span>
+                            <span>+6285135961994</span>
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="ph-fill ph-envelope text-blue-500"></i>
-                            <span>info@smpn3lakbok.sch.id</span>
+                            <span>admin@smpn3lakbok.sch.id</span>
                         </li>
                     </ul>
                 </div>
@@ -409,7 +409,7 @@
             <!-- COPYRIGHT -->
             <div class="text-center pt-8 border-t border-slate-800">
                 <p class="text-slate-500 text-sm">
-                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Developed with <i class="ph-fill ph-heart text-red-500 mx-1"></i> by IT Team.
+                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Developed with <i class="ph-fill ph-heart text-red-500 mx-1"></i> by RI.. Team.
                 </p>
             </div>
         </div>

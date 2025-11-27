@@ -19,51 +19,50 @@ class AddReligiousPointJob implements ShouldQueue
 
     protected $attendance;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(AttendanceSiswa $attendance)
     {
         $this->attendance = $attendance;
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
-        // 1. Cek apakah data siswa ada
+        // 1. Cek Data Siswa
         if (!$this->attendance->student) {
             return;
         }
 
-        $activity = strtolower($this->attendance->activity ?? $this->attendance->type);
+        $activity = $this->attendance->activity ?? $this->attendance->type;
         
-        // 2. Filter: Hanya proses jika aktivitas adalah Dhuha atau Dhuhur
-        // Sesuaikan kata kuncinya dengan data yang masuk dari QR Code
-        $isReligious = str_contains($activity, 'dhuha') || 
-                       str_contains($activity, 'dhuhur') || 
-                       str_contains($activity, 'duhur');
-
-        if (!$isReligious) {
-            return; // Stop jika bukan absen keagamaan
+        // 2. Filter: Hanya proses jika Dhuha atau Dhuhur
+        if (!in_array($activity, ['Dhuha', 'Dhuhur'])) {
+            return; 
         }
 
-        // 3. Cari Tipe Poin di Database (Hardcode nama atau ID-nya)
-        // Pastikan Anda punya Master Data "Sholat Berjamaah" atau "Ibadah Harian" bertipe 'Prestasi'
-        // Tips: Lebih aman pakai ID jika nama sering berubah, tapi pakai Nama lebih mudah dibaca dev.
-        $pointType = DisciplineType::where('name', 'LIKE', '%Sholat%')
-                        ->where('type', 'Prestasi') // Pastikan tipenya Kebaikan/Prestasi
+        // 3. Cari Jenis Kebaikan di Database
+        // PERBAIKAN: Ubah 'Prestasi' menjadi 'Kebaikan' agar sesuai dengan Controller
+        $pointName = "Sholat " . $activity . " Berjamaah";
+        
+        $pointType = DisciplineType::where('name', $pointName)
+                        ->where('type', 'Kebaikan') 
                         ->first();
 
-        // Jika tidak ditemukan master datanya, buat default atau return
+        // 4. AUTO-CREATE (Jika belum ada jenis kebaikannya, buatkan otomatis)
         if (!$pointType) {
-            Log::warning("Auto-Point Gagal: Master data 'DisciplineType' untuk Sholat tidak ditemukan.");
-            return;
+            try {
+                $pointType = DisciplineType::create([
+                    'name' => $pointName,
+                    'type' => 'Kebaikan',
+                    'point_value' => 5, // Default 5 poin
+                    'description' => "Poin otomatis dari scan kehadiran $activity"
+                ]);
+                Log::info("Master Data '$pointName' dibuat otomatis.");
+            } catch (\Exception $e) {
+                Log::error("Gagal membuat master data poin: " . $e->getMessage());
+                return;
+            }
         }
 
-        // 4. CEK DUPLIKASI (PENTING!)
-        // Jangan sampai scan 2x dapat poin 10. Cek apakah hari ini sudah dapat poin untuk tipe ini?
+        // 5. CEK DUPLIKASI (Agar tidak double poin di hari yang sama)
         $today = Carbon::today()->toDateString();
         $alreadyHasPoint = Discipline::where('student_id', $this->attendance->student_id)
                             ->where('discipline_type_id', $pointType->id)
@@ -71,24 +70,23 @@ class AddReligiousPointJob implements ShouldQueue
                             ->exists();
 
         if ($alreadyHasPoint) {
-            // Log::info("Siswa {$this->attendance->student->name} sudah dapat poin sholat hari ini.");
-            return;
+            return; // Sudah dapat poin hari ini, skip.
         }
 
-        // 5. Tambahkan Poin
+        // 6. EKSEKUSI SIMPAN POIN
         try {
             Discipline::create([
                 'student_id'         => $this->attendance->student_id,
                 'discipline_type_id' => $pointType->id,
                 'date'               => $today,
-                'notes'              => "Otomatis dari Scan " . ucwords($activity),
-                'user_id'            => 1, // ID Admin/Sistem (sesuaikan dengan ID user sistem Anda)
+                'notes'              => "Otomatis - Scan Absen $activity",
+                'recorded_by_user_id' => 1, // Pastikan ID User 1 (Admin) ada di tabel users
             ]);
 
-            Log::info("Auto-Point Berhasil: +{$pointType->point_value} poin untuk {$this->attendance->student->name} ({$activity})");
+            Log::info("SUKSES: +5 Poin untuk {$this->attendance->student->name} ($activity)");
 
         } catch (\Exception $e) {
-            Log::error("Gagal input auto-point: " . $e->getMessage());
+            Log::error("GAGAL Input Poin: " . $e->getMessage());
         }
     }
 }

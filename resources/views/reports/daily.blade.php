@@ -44,7 +44,11 @@
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all duration-300">
                 <div>
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Hadir</p>
-                    <h3 class="text-3xl font-extrabold text-gray-800 group-hover:text-emerald-600 transition-colors">{{ $hadirCount }}</h3>
+                    {{-- PERBAIKAN: Hitung Hadir + Terlambat --}}
+                    @php 
+                        $totalHadirFisik = $todayAttendances->whereIn('status_final', ['Hadir', 'Terlambat'])->count(); 
+                    @endphp
+                    <h3 class="text-3xl font-extrabold text-gray-800 group-hover:text-emerald-600 transition-colors">{{ $totalHadirFisik }}</h3>
                 </div>
                 <div class="h-12 w-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -82,7 +86,7 @@
                 <button @click="activeTab = 'hadir'" 
                         :class="activeTab === 'hadir' ? 'bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-100' : 'text-gray-500 hover:bg-white/60'" 
                         class="flex-none py-3 px-6 rounded-xl text-sm font-bold whitespace-nowrap transition-all duration-200">
-                    Hadir
+                    Hadir / Terlambat
                 </button>
                 <button @click="activeTab = 'belum'" 
                         :class="activeTab === 'belum' ? 'bg-white text-gray-700 shadow-sm ring-1 ring-gray-200' : 'text-gray-500 hover:bg-white/60'" 
@@ -92,16 +96,15 @@
                 <button @click="activeTab = 'lain'" 
                         :class="activeTab === 'lain' ? 'bg-white text-amber-600 shadow-sm ring-1 ring-amber-100' : 'text-gray-500 hover:bg-white/60'" 
                         class="flex-none py-3 px-6 rounded-xl text-sm font-bold whitespace-nowrap transition-all duration-200">
-                    Ket. Lain
+                    Sakit / Izin / Alfa
                 </button>
             </div>
 
             {{-- Content --}}
             <div class="w-full relative min-h-[300px]">
                 
-                {{-- TAB HADIR --}}
+                {{-- TAB HADIR (Sekarang Termasuk Terlambat) --}}
                 <div x-show="activeTab === 'hadir'" x-transition:enter.duration.300ms class="w-full">
-                    {{-- FIX: Added max-w-[calc(100vw-3rem)] for forced mobile scrolling --}}
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
                         <table class="w-full text-left border-collapse" style="min-width: 800px;">
                             <thead class="bg-gray-50 border-b border-gray-100">
@@ -114,16 +117,29 @@
                             </thead>
                             <tbody class="divide-y divide-gray-50">
                                 @forelse ($todayAttendances as $att)
-                                    @if($att->status_final == 'Hadir')
+                                    {{-- PERBAIKAN: Tampilkan jika 'Hadir' ATAU 'Terlambat' --}}
+                                    @if($att->status_final == 'Hadir' || $att->status_final == 'Terlambat')
                                         <tr class="hover:bg-blue-50/50 transition-colors group">
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="font-bold text-gray-900">{{ $att->student->name }}</div>
                                                 <div class="text-xs text-gray-400">{{ $att->student->schoolClass->name ?? '-' }}</div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-emerald-100 text-emerald-800 font-mono">
-                                                    {{ $att->time_in_final ? \Carbon\Carbon::parse($att->time_in_final)->format('H:i') : '-' }}
-                                                </span>
+                                                {{-- BADGE JAM MASUK --}}
+                                                @if($att->status_final == 'Terlambat')
+                                                    {{-- Tampilan untuk Terlambat (Kuning/Oranye) --}}
+                                                    <div class="flex flex-col items-start">
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-amber-100 text-amber-800 font-mono ring-1 ring-amber-200">
+                                                            {{ $att->time_in_final ? \Carbon\Carbon::parse($att->time_in_final)->format('H:i') : '-' }}
+                                                        </span>
+                                                        <span class="text-[10px] font-bold text-amber-600 mt-1 uppercase tracking-wide">Terlambat</span>
+                                                    </div>
+                                                @else
+                                                    {{-- Tampilan Hadir Normal (Hijau) --}}
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-emerald-100 text-emerald-800 font-mono">
+                                                        {{ $att->time_in_final ? \Carbon\Carbon::parse($att->time_in_final)->format('H:i') : '-' }}
+                                                    </span>
+                                                @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-indigo-100 text-indigo-800 font-mono">
@@ -154,46 +170,16 @@
                         </table>
                     </div>
                     
-                    {{-- CUSTOM PAGINATION RESPONSIVE --}}
+                    {{-- Pagination --}}
                     @if($todayAttendances->hasPages())
                         <div class="p-4 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div class="text-sm text-gray-500 text-center md:text-left">
-                                Showing <span class="font-bold text-gray-800">{{ $todayAttendances->firstItem() }}</span> to <span class="font-bold text-gray-800">{{ $todayAttendances->lastItem() }}</span> of <span class="font-bold text-gray-800">{{ $todayAttendances->total() }}</span> results
-                            </div>
-                            <div class="flex items-center rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
-                                @if ($todayAttendances->onFirstPage())
-                                    <span class="px-3 py-2 text-gray-300 bg-gray-50 border-r border-gray-200 cursor-not-allowed">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                                    </span>
-                                @else
-                                    <a href="{{ $todayAttendances->previousPageUrl() }}" class="px-3 py-2 text-gray-600 bg-white hover:bg-gray-50 border-r border-gray-200 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                                    </a>
-                                @endif
-                                @foreach ($todayAttendances->getUrlRange(max($todayAttendances->currentPage() - 2, 1), min($todayAttendances->currentPage() + 2, $todayAttendances->lastPage())) as $page => $url)
-                                    @if ($page == $todayAttendances->currentPage())
-                                        <span class="px-4 py-2 text-sm font-bold text-blue-600 bg-blue-50 border-r border-gray-200">{{ $page }}</span>
-                                    @else
-                                        <a href="{{ $url }}" class="px-4 py-2 text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 border-r border-gray-200 transition-colors">{{ $page }}</a>
-                                    @endif
-                                @endforeach
-                                @if ($todayAttendances->hasMorePages())
-                                    <a href="{{ $todayAttendances->nextPageUrl() }}" class="px-3 py-2 text-gray-600 bg-white hover:bg-gray-50 transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                                    </a>
-                                @else
-                                    <span class="px-3 py-2 text-gray-300 bg-gray-50 cursor-not-allowed">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                                    </span>
-                                @endif
-                            </div>
+                            {{ $todayAttendances->links() }}
                         </div>
                     @endif
                 </div>
 
-                {{-- TAB BELUM ABSEN --}}
+                {{-- TAB BELUM ABSEN (Sama seperti sebelumnya) --}}
                 <div x-show="activeTab === 'belum'" x-transition:enter.duration.300ms style="display: none;" class="w-full">
-                    {{-- FIX: Force scroll mobile --}}
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full border rounded-lg">
                         <table class="min-w-full divide-y" style="min-width: 800px;">
                             <thead class="bg-gray-50 border-b border-gray-100">
@@ -218,14 +204,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="px-6 py-12 text-center text-gray-400">
-                                            <div class="flex flex-col items-center justify-center">
-                                                <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-3">
-                                                    <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                </div>
-                                                <p class="text-sm font-medium text-green-600">Luar biasa! Semua siswa sudah absen.</p>
-                                            </div>
-                                        </td>
+                                        <td colspan="3" class="px-6 py-12 text-center text-gray-400">Semua siswa sudah absen.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -233,9 +212,8 @@
                     </div>
                 </div>
 
-                {{-- TAB KET. LAIN --}}
+                {{-- TAB KET. LAIN (Sakit, Izin, Alfa) --}}
                 <div x-show="activeTab === 'lain'" x-transition:enter.duration.300ms style="display: none;" class="w-full">
-                    {{-- FIX: Force scroll mobile --}}
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full border rounded-lg">
                         <table class="w-full text-left border-collapse" style="min-width: 800px;">
                             <thead class="bg-gray-50 border-b border-gray-100">
@@ -248,7 +226,8 @@
                             </thead>
                             <tbody class="divide-y divide-gray-50">
                                 @forelse ($todayAttendances as $att)
-                                    @if($att->status_final != 'Hadir')
+                                    {{-- PERBAIKAN: Hanya tampilkan jika BUKAN Hadir DAN BUKAN Terlambat --}}
+                                    @if($att->status_final != 'Hadir' && $att->status_final != 'Terlambat')
                                         <tr class="hover:bg-amber-50/30 transition-colors">
                                             <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $att->student->name }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">
@@ -306,6 +285,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status Kehadiran</label>
                             <select name="status" id="daily-manual-status" required class="block w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" onchange="toggleTimeInput()">
                                 <option value="Hadir">Hadir (Manual)</option>
+                                <option value="Terlambat">Terlambat</option>
                                 <option value="Sakit">Sakit</option>
                                 <option value="Izin">Izin</option>
                                 <option value="Alfa">Alfa</option>
@@ -360,6 +340,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                     <select name="status" id="modal-status" class="w-full border-gray-300 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500" onchange="toggleEditTimeInput()">
                         <option value="Hadir">Hadir</option>
+                        <option value="Terlambat">Terlambat</option>
                         <option value="Sakit">Sakit</option>
                         <option value="Izin">Izin</option>
                         <option value="Alfa">Alfa</option>
@@ -397,7 +378,7 @@
             const status = document.getElementById('daily-manual-status').value;
             const timeContainer = document.getElementById('time-input-container');
             
-            if (status === 'Hadir') {
+            if (status === 'Hadir' || status === 'Terlambat') {
                 timeContainer.classList.remove('hidden', 'opacity-50', 'pointer-events-none');
             } else {
                 timeContainer.classList.add('hidden', 'opacity-50', 'pointer-events-none');
@@ -409,7 +390,7 @@
             const status = document.getElementById('modal-status').value;
             const timeContainer = document.getElementById('edit-time-container');
             
-            if (status === 'Hadir') {
+            if (status === 'Hadir' || status === 'Terlambat') {
                 timeContainer.classList.remove('hidden');
             } else {
                 timeContainer.classList.add('hidden');

@@ -28,12 +28,14 @@ class DisciplineTypeController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|in:Pelanggaran,Kebaikan',
             'point_value' => 'required|integer|min:1',
+            'description' => 'nullable|string', // Tambahkan validasi deskripsi
         ]);
 
         DisciplineType::create([
             'name' => $request->name,
             'type' => $request->type,
             'point_value' => $request->point_value,
+            'description' => $request->description, // Simpan deskripsi
         ]);
 
         return redirect()->back()->with('success', 'Jenis ' . $request->type . ' berhasil ditambahkan.');
@@ -46,7 +48,8 @@ class DisciplineTypeController extends Controller
     {
         $type = DisciplineType::findOrFail($id);
         
-        // Opsional: Cek apakah tipe ini sudah pernah dipakai di catatan siswa
+        // PENTING: Cek apakah tipe ini sudah pernah dipakai di catatan siswa
+        // Ini mencegah data poin siswa rusak/hilang referensinya
         if ($type->records()->count() > 0) {
             return redirect()->back()->with('error', 'Gagal hapus! Jenis ini sedang digunakan dalam catatan siswa.');
         }

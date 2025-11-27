@@ -6,6 +6,7 @@ use App\Models\Achievement;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Jobs\AddAchievementPointJob; // <--- JANGAN LUPA IMPORT INI
 
 class AchievementController extends Controller
 {
@@ -33,7 +34,7 @@ class AchievementController extends Controller
             'title' => 'required|string|max:255',
             'level' => 'required',
             'date' => 'required|date',
-            'photo' => 'nullable|image|max:2048', // Max 2MB
+            'photo' => 'nullable|image|max:2048', 
             'video_link' => 'nullable|url',
         ]);
 
@@ -53,9 +54,15 @@ class AchievementController extends Controller
             $data['photo_path'] = $request->file('photo')->store('achievements', 'public');
         }
 
-        Achievement::create($data);
+        // 1. Simpan Data Prestasi
+        $achievement = Achievement::create($data);
 
-        return redirect()->route('achievements.index')->with('success', 'Prestasi berhasil ditambahkan!');
+        // 2. Jalankan Job Otomatisasi Poin (Hanya jika tipe Siswa)
+        if ($achievement->type === 'Siswa') {
+            AddAchievementPointJob::dispatch($achievement);
+        }
+
+        return redirect()->route('achievements.index')->with('success', 'Prestasi berhasil ditambahkan & Poin Kebaikan dicatat!');
     }
 
     public function destroy(Achievement $achievement)
@@ -64,6 +71,9 @@ class AchievementController extends Controller
         if ($achievement->photo_path && Storage::disk('public')->exists($achievement->photo_path)) {
             Storage::disk('public')->delete($achievement->photo_path);
         }
+        
+        // Opsional: Jika ingin menghapus poin kebaikannya juga saat prestasi dihapus,
+        // Anda bisa menambah logika di sini. Tapi biasanya poin tetap dibiarkan sebagai history.
         
         $achievement->delete();
         return redirect()->route('achievements.index')->with('success', 'Data prestasi dihapus.');
