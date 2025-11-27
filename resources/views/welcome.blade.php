@@ -31,7 +31,7 @@
     activeAnnouncement: null,
     scrolled: false,
     
-    // PERBAIKAN: Fungsi buka modal pakai Index Array (Aman dari error quote/enter)
+    // Fungsi buka modal pakai Index Array (Aman dari error quote/enter)
     openAnnouncementByIndex(index) {
         if (window.announcementsData && window.announcementsData[index]) {
             this.activeAnnouncement = window.announcementsData[index];
@@ -211,6 +211,7 @@
                     <p class="text-slate-600 mb-8 leading-relaxed">
                         Perpustakaan SMPN 3 Lakbok menyediakan ribuan koleksi buku fisik dan digital. Pantau aktivitas literasi siswa secara transparan.
                     </p>
+                    
                     <div class="flex gap-6">
                         <div class="flex-1 bg-white p-6 rounded-2xl shadow-md border border-emerald-100/50">
                             <div class="flex items-center gap-3 mb-2">
@@ -243,7 +244,7 @@
         </div>
     </div>
 
-    <!-- ACHIEVEMENTS SECTION (HALL OF FAME) -->
+    <!-- ACHIEVEMENTS SECTION -->
     <div class="py-24 bg-white relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16" data-aos="fade-up">
@@ -257,11 +258,9 @@
                     <div class="group bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-lg hover:shadow-2xl hover:shadow-yellow-100/50 transition-all duration-300 hover:-translate-y-2" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                         <div class="aspect-video w-full bg-slate-100 relative overflow-hidden">
                             @if($item->photo_path)
-                                {{-- Fallback Image jika Error --}}
-                                <img src="{{ asset('storage/' . $item->photo_path) }}" 
-                                     alt="{{ $item->title }}" 
+                                <img src="{{ asset('storage/' . $item->photo_path) }}" alt="{{ $item->title }}" 
                                      class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                                     onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-full h-full flex flex-col items-center justify-center text-yellow-300 bg-slate-50\'><i class=\'ph-duotone ph-image-broken text-6xl mb-3\'></i><span class=\'text-xs font-bold text-slate-400 uppercase\'>Image Error</span></div>';">
+                                     onerror="this.style.display='none'; this.parentNode.innerHTML='<div class=\'w-full h-full flex flex-col items-center justify-center text-yellow-300 bg-slate-50\'><i class=\'ph-duotone ph-image-broken text-6xl mb-3\'></i><span class=\'text-xs font-bold text-slate-400 uppercase\'>Image Error</span></div>';">
                             @else
                                 <div class="w-full h-full flex flex-col items-center justify-center text-yellow-300 bg-slate-50 relative">
                                     <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
@@ -299,8 +298,9 @@
         </div>
     </div>
 
-    <!-- ANNOUNCEMENT & FOOTER SECTION (BAGIAN PENTING: PENGUMUMAN) -->
+    <!-- ANNOUNCEMENT & FOOTER SECTION -->
     <div class="bg-slate-900 text-white pt-24 pb-12 relative overflow-hidden mt-12">
+        <!-- Decoration -->
         <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
         <div class="absolute -right-20 top-20 w-96 h-96 bg-blue-600 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
 
@@ -326,10 +326,8 @@
                                     <i class="ph-fill ph-calendar-blank"></i> {{ $item->created_at->format('d M Y') }}
                                 </span>
                             </div>
-                            
-                            {{-- PERBAIKAN: PANGGIL FUNGSI JS DENGAN INDEX (Bukan Object Langsung) --}}
                             <h3 class="text-lg font-bold text-white mb-3 line-clamp-2 group-hover:text-blue-400 transition-colors">
-                                <a href="#" @click.prevent="openAnnouncementByIndex({{ $index }})">{{ $item->title }}</a>
+                                <a href="#" @click.prevent='openAnnouncementByIndex({{ $index }})'>{{ $item->title }}</a>
                             </h3>
                             <p class="text-slate-400 text-sm line-clamp-3 mb-4 flex-1">
                                 {{ Str::limit(strip_tags($item->content), 100) }}
@@ -352,6 +350,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center gap-3 mb-6">
+                        <!-- Footer Logo Update -->
                         <div class="w-10 h-10 rounded-lg overflow-hidden bg-white/10 flex items-center justify-center">
                              <img src="{{ asset('images/logo.png') }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" alt="Logo" class="w-full h-full object-contain">
                              <i class="ph-bold ph-graduation-cap text-xl text-white" style="display: none;"></i>
@@ -381,15 +380,15 @@
                     <ul class="space-y-4 text-sm text-slate-400">
                         <li class="flex items-start gap-3">
                             <i class="ph-fill ph-map-pin mt-1 text-blue-500"></i>
-                            <span>Jl. Mekarjaya No.199 Sidaharja Kec. Lakbok, Kab. Ciamis, Jawa Barat 46385</span>
+                            <span>Jl. Raya Cintaratu, Kec. Lakbok, Kab. Ciamis, Jawa Barat 46385</span>
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="ph-fill ph-phone text-blue-500"></i>
-                            <span>+6285135961994</span>
+                            <span>(0265) 1234567</span>
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="ph-fill ph-envelope text-blue-500"></i>
-                            <span>admin@smpn3lakbok.sch.id</span>
+                            <span>info@smpn3lakbok.sch.id</span>
                         </li>
                     </ul>
                 </div>
@@ -398,7 +397,7 @@
             <!-- COPYRIGHT -->
             <div class="text-center pt-8 border-t border-slate-800">
                 <p class="text-slate-500 text-sm">
-                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Developed with <i class="ph-fill ph-heart text-red-500 mx-1"></i> by RI.. Team.
+                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Developed with <i class="ph-fill ph-heart text-red-500 mx-1"></i> by IT Team.
                 </p>
             </div>
         </div>
@@ -435,8 +434,13 @@
             duration: 800,
         });
 
+        // -----------------------------------------------------
+        // DATA GLOBAL UNTUK JS (PENTING AGAR TIDAK ERROR!)
+        // -----------------------------------------------------
+        window.announcementsData = @json($announcements);
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Chart 1: Attendance (Grafik Batang)
+            // Chart 1: Attendance
             const ctx = document.getElementById('publicWeeklyChart');
             if(ctx) {
                 const chartData = @json($barChartData); 
@@ -449,16 +453,8 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        borderRadius: 4,
-                        barThickness: 25, // Sedikit ditebalkan biar sama dengan dashboard
-                        
-                        // --- TAMBAHAN PENTING DI SINI ---
-                        interaction: {
-                            mode: 'index',     // Menampilkan semua data pada index (hari) yang sama
-                            intersect: false,  // Tooltip muncul walau tidak pas kena batangnya
-                        },
-                        // --------------------------------
-
+                        borderRadius: 6,
+                        barThickness: 20,
                         scales: {
                             x: { 
                                 stacked: true, 
@@ -485,26 +481,14 @@
                                 padding: 12,
                                 cornerRadius: 8,
                                 titleFont: { family: "'Plus Jakarta Sans', sans-serif" },
-                                bodyFont: { family: "'Plus Jakarta Sans', sans-serif" },
-                                
-                                // --- MENAMBAHKAN TOTAL SISWA DI TOOLTIP ---
-                                callbacks: {
-                                    footer: function(tooltipItems) {
-                                        let total = 0;
-                                        tooltipItems.forEach(function(tooltipItem) {
-                                            total += tooltipItem.raw;
-                                        });
-                                        return 'Total: ' + total + ' Siswa';
-                                    }
-                                }
-                                // ------------------------------------------
+                                bodyFont: { family: "'Plus Jakarta Sans', sans-serif" }
                             }
                         }
                     }
                 });
             }
 
-            // Chart 2: Library (Grafik Garis - Tidak berubah)
+            // Chart 2: Library
             const libCtx = document.getElementById('publicLibraryChart');
             if (libCtx) {
                 const libData = @json($libraryChartData);
