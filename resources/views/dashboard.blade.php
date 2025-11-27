@@ -36,11 +36,8 @@
             =========================================
             BAGIAN 1: KARTU STATISTIK (STATS CARDS)
             =========================================
-            Catatan: Idealnya ini dibuat menjadi Blade Component terpisah: <x-stat-card />
         --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            
-            {{-- Helper Component untuk Card agar kode tidak berulang (Inline untuk contoh) --}}
             @php
                 $cards = [
                     [
@@ -93,7 +90,6 @@
             @foreach($cards as $card)
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 group relative overflow-hidden">
                 <div class="absolute right-0 top-0 h-24 w-24 {{ $card['bg_decor'] }} rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-                
                 <div class="relative flex items-center justify-between">
                     <div>
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ $card['title'] }}</p>
@@ -107,14 +103,12 @@
                 </div>
                 <div class="mt-4 flex items-center text-xs text-gray-400">
                     <span class="{{ $card['footer_color'] }} font-bold mr-1 flex items-center">
-                        {{-- Dot Indicator --}}
                         <span class="w-2 h-2 rounded-full bg-current mr-1.5 opacity-70"></span>
                         {{ $card['footer_text'] }}
                     </span>
                 </div>
             </div>
             @endforeach
-
         </div>
 
         {{-- 
@@ -131,7 +125,6 @@
                         <h3 class="text-lg font-bold text-gray-800">Analisis Kehadiran</h3>
                         <p class="text-xs text-gray-400">Tren kehadiran siswa dalam satu minggu</p>
                     </div>
-                    {{-- Export Button Example --}}
                     <button class="inline-flex items-center gap-2 text-xs font-semibold text-gray-600 bg-gray-50 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-colors border border-gray-200">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         Export PDF
@@ -149,7 +142,6 @@
                 
                 <div class="relative h-64 w-full flex-1 flex items-center justify-center">
                     <canvas id="dailyDonutChart"></canvas>
-                    {{-- Center Text untuk Donat --}}
                     <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                         <span class="text-3xl font-extrabold text-gray-800">{{ $totalStudents }}</span>
                         <span class="text-xs text-gray-400 font-medium">Total Siswa</span>
@@ -172,32 +164,59 @@
                 </div>
             </div>
         </div>
-
     </div>
 
-    {{-- Script Chart --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Chart Config (Sama seperti sebelumnya, hanya dirapikan)
-        Chart.defaults.font.family = "'Figtree', sans-serif";
+        Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
         Chart.defaults.color = '#94a3b8';
 
-        // 1. Grafik Batang Mingguan
+        // --- 1. GRAFIK BATANG MINGGUAN (STACKED SEPERTI LANDING PAGE) ---
         const ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
         
-        // Gradient untuk Bar
-        const gradientPresent = ctxWeekly.createLinearGradient(0, 0, 0, 300);
-        gradientPresent.addColorStop(0, '#10b981');
-        gradientPresent.addColorStop(1, '#059669');
+        // Data dari Controller
+        const rawPresentData = @json($weeklyPresentData); // Ini masih TOTAL (Hadir + Telat)
+        const rawLateData = @json($weeklyLateData);
+        const rawAbsentData = @json($weeklyAbsentData);
+
+        // KITA HITUNG ULANG DI JS AGAR STACKINGNYA BENAR
+        // Hadir Tepat Waktu = Total Hadir - Terlambat
+        const onTimeData = rawPresentData.map((total, index) => {
+            return Math.max(0, total - rawLateData[index]);
+        });
 
         new Chart(ctxWeekly, {
             type: 'bar',
             data: {
                 labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
                 datasets: [
-                    { label: 'Hadir', data: @json($weeklyPresentData), backgroundColor: gradientPresent, borderRadius: 4, barPercentage: 0.6 },
-                    { label: 'Terlambat', data: @json($weeklyLateData), backgroundColor: '#fbbf24', borderRadius: 4, barPercentage: 0.6 },
-                    { label: 'Tidak Hadir', data: @json($weeklyAbsentData), backgroundColor: '#f87171', borderRadius: 4, barPercentage: 0.6 }
+                    { 
+                        label: 'Hadir Tepat Waktu', 
+                        data: onTimeData, // Pakai data hasil hitungan
+                        backgroundColor: '#10b981', // Emerald-500 (Sama dgn Landing)
+                        hoverBackgroundColor: '#059669',
+                        borderRadius: 4, 
+                        barThickness: 25, // Batang Tebal Solid
+                        stack: 'mainStack' // Kunci agar bertumpuk
+                    },
+                    { 
+                        label: 'Terlambat', 
+                        data: rawLateData, 
+                        backgroundColor: '#f59e0b', // Amber-500 (Sama dgn Landing)
+                        hoverBackgroundColor: '#d97706',
+                        borderRadius: 4, 
+                        barThickness: 25,
+                        stack: 'mainStack'
+                    },
+                    { 
+                        label: 'Tidak Hadir', 
+                        data: rawAbsentData, 
+                        backgroundColor: '#ef4444', // Red-500 (Sama dgn Landing)
+                        hoverBackgroundColor: '#dc2626',
+                        borderRadius: 4, 
+                        barThickness: 25,
+                        stack: 'mainStack'
+                    }
                 ]
             },
             options: {
@@ -205,17 +224,43 @@
                 maintainAspectRatio: false,
                 interaction: { mode: 'index', intersect: false },
                 plugins: {
-                    legend: { position: 'top', align: 'end', labels: { usePointStyle: true, boxWidth: 8 } },
-                    tooltip: { backgroundColor: '#1e293b', padding: 12, cornerRadius: 8, displayColors: true }
+                    legend: { 
+                        position: 'top', 
+                        align: 'end', 
+                        labels: { usePointStyle: true, boxWidth: 8, padding: 20 } 
+                    },
+                    tooltip: { 
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)', 
+                        padding: 12, 
+                        cornerRadius: 8,
+                        callbacks: {
+                            // Custom tooltip agar totalnya benar
+                            footer: function(tooltipItems) {
+                                let total = 0;
+                                tooltipItems.forEach(function(tooltipItem) {
+                                    total += tooltipItem.raw;
+                                });
+                                return 'Total: ' + total + ' Siswa';
+                            }
+                        }
+                    }
                 },
                 scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [4, 4], color: '#f1f5f9', drawBorder: false } },
-                    x: { grid: { display: false } }
+                    y: { 
+                        beginAtZero: true, 
+                        stacked: true, // WAJIB: Aktifkan mode tumpuk Y
+                        grid: { borderDash: [4, 4], color: '#f1f5f9', drawBorder: false },
+                        border: { display: false }
+                    },
+                    x: { 
+                        stacked: true, // WAJIB: Aktifkan mode tumpuk X
+                        grid: { display: false, drawBorder: false } 
+                    }
                 }
             }
         });
 
-        // 2. Grafik Donat Harian
+        // --- 2. GRAFIK DONAT HARIAN ---
         const ctxDonut = document.getElementById('dailyDonutChart').getContext('2d');
         new Chart(ctxDonut, {
             type: 'doughnut',
