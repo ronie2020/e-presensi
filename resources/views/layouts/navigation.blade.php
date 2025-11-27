@@ -140,7 +140,7 @@
                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
                    @endif
                     <svg class="w-5 h-5 mr-3 {{ request()->routeIs('library.dashboard') ? 'text-white' : 'text-blue-300 group-hover:text-white' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                    <span class="text-sm font-semibold tracking-wide">Dashboard PUSTAKA</span>
+                    <span class="text-sm font-semibold tracking-wide">Dashboard Pustaka</span>
                 </a>
 
                 {{-- Sirkulasi (BARU) --}}
@@ -252,7 +252,7 @@
         <div class="mt-8 px-4 text-center">
              <div class="bg-blue-800/30 rounded-lg p-3 border border-blue-700/30">
                  <p class="text-[10px] text-blue-300 uppercase tracking-widest font-bold">Ri..Versi Sistem</p>
-                 <p class="text-xs text-white font-mono mt-1">v2.4.0 Beta</p>
+                 <p class="text-xs text-white font-mono mt-1">v2.8.0 Beta</p>
              </div>
         </div>
 

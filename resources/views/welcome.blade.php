@@ -24,6 +24,15 @@
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .animate-blob { animation: blob 7s infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
     </style>
 </head>
 <body class="antialiased text-slate-800 bg-slate-50 overflow-x-hidden" x-data="{ 
@@ -31,7 +40,6 @@
     activeAnnouncement: null,
     scrolled: false,
     
-    // Fungsi buka modal pakai Index Array (Aman dari error quote/enter)
     openAnnouncementByIndex(index) {
         if (window.announcementsData && window.announcementsData[index]) {
             this.activeAnnouncement = window.announcementsData[index];
@@ -192,6 +200,106 @@
                     <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-orange-600">Login Guru</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Panel administrasi data untuk Guru, Wali Kelas dan Staff TU.</p>
                 </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- [BARU] SECTION: PROFIL SEKOLAH -->
+    <div id="profil" class="py-24 bg-white relative overflow-hidden border-y border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                
+                <!-- Kiri: Teks -->
+                <div class="space-y-6" data-aos="fade-right">
+                    <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-black uppercase tracking-widest border border-blue-100">Tentang Kami</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 leading-tight">Mewujudkan Generasi <br><span class="text-blue-600">Cerdas & Berkarakter</span></h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">
+                        SMP Negeri 3 Lakbok berkomitmen untuk memberikan layanan pendidikan terbaik yang mengintegrasikan kecerdasan akademik dengan nilai-nilai karakter luhur. Kami hadir untuk mencetak pemimpin masa depan.
+                    </p>
+                    
+                    <!-- Stats Grid (Placeholder Static Data) -->
+                    <div class="grid grid-cols-3 gap-6 pt-6">
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-md transition-all">
+                            <p class="text-3xl font-black text-slate-800">542</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1">Total Siswa</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-md transition-all">
+                            <p class="text-3xl font-black text-slate-800">32</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1">Guru & Staff</p>
+                        </div>
+                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-md transition-all">
+                            <p class="text-3xl font-black text-slate-800">18</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1">Rombel Kelas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kanan: Ilustrasi/Foto -->
+                <div class="relative" data-aos="fade-left">
+                    <div class="absolute inset-0 bg-blue-600 rounded-[2.5rem] rotate-3 opacity-10"></div>
+                    <div class="bg-slate-200 rounded-[2rem] overflow-hidden shadow-2xl relative aspect-video group">
+                        <!-- Placeholder Image -->
+                        <div class="absolute inset-0 bg-gradient-to-tr from-blue-900 to-indigo-900 flex items-center justify-center group-hover:scale-105 transition-transform duration-700">
+                            <div class="text-center text-white p-8">
+                                <i class="ph-duotone ph-buildings text-6xl mb-4 opacity-50"></i>
+                                <p class="font-bold opacity-70">Foto Gedung Sekolah</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- [BARU] SECTION: KEGIATAN SEKOLAH -->
+    <div id="kegiatan" class="py-24 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
+                <span class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-black uppercase tracking-widest border border-indigo-100">Galeri</span>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mt-4 mb-4">Aktifitas & Kegiatan Siswa</h2>
+                <p class="text-slate-500 text-lg">Beragam kegiatan ekstrakurikuler dan acara sekolah yang mendukung pengembangan bakat dan minat siswa secara holistik.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="bg-white rounded-3xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 group border border-slate-100 hover:border-blue-200" data-aos="fade-up" data-aos-delay="100">
+                    <div class="h-48 bg-blue-50 rounded-2xl mb-4 overflow-hidden relative">
+                        <div class="absolute inset-0 flex items-center justify-center bg-blue-100 text-blue-300 group-hover:scale-110 transition-transform duration-500">
+                             <i class="ph-duotone ph-basketball text-6xl"></i>
+                        </div>
+                    </div>
+                    <div class="px-2 pb-2">
+                        <h4 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">Ekstrakurikuler Olahraga</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">Pengembangan fisik, sportivitas, dan kerjasama tim melalui kegiatan bola basket, bola voli, dan futsal.</p>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white rounded-3xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 group border border-slate-100 hover:border-purple-200" data-aos="fade-up" data-aos-delay="200">
+                    <div class="h-48 bg-purple-50 rounded-2xl mb-4 overflow-hidden relative">
+                        <div class="absolute inset-0 flex items-center justify-center bg-purple-100 text-purple-300 group-hover:scale-110 transition-transform duration-500">
+                             <i class="ph-duotone ph-tent text-6xl"></i>
+                        </div>
+                    </div>
+                    <div class="px-2 pb-2">
+                        <h4 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">Pramuka & Kepemimpinan</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">Membentuk karakter disiplin, kemandirian, dan jiwa kepemimpinan yang tangguh melalui kegiatan kepramukaan.</p>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white rounded-3xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 group border border-slate-100 hover:border-orange-200" data-aos="fade-up" data-aos-delay="300">
+                    <div class="h-48 bg-orange-50 rounded-2xl mb-4 overflow-hidden relative">
+                        <div class="absolute inset-0 flex items-center justify-center bg-orange-100 text-orange-300 group-hover:scale-110 transition-transform duration-500">
+                             <i class="ph-duotone ph-book-open-text text-6xl"></i>
+                        </div>
+                    </div>
+                    <div class="px-2 pb-2">
+                        <h4 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-orange-600 transition-colors">Literasi & Keagamaan</h4>
+                        <p class="text-sm text-slate-500 leading-relaxed">Program pembiasaan membaca pagi (literasi) dan kegiatan keagamaan rutin untuk keseimbangan ilmu dan iman.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -435,7 +543,7 @@
         });
 
         // -----------------------------------------------------
-        // DATA GLOBAL UNTUK JS (PENTING AGAR TIDAK ERROR!)
+        // DATA GLOBAL UNTUK JS
         // -----------------------------------------------------
         window.announcementsData = @json($announcements);
 
