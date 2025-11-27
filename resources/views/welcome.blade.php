@@ -49,18 +49,15 @@
             <div class="flex justify-between h-20 items-center">
                 <div class="flex items-center gap-3">
                     
-                    <!-- IMPLEMENTASI LOGO DISINI -->
-                    <!-- Pastikan file logo Anda (misal: logo.png) disimpan di folder: public/images/ -->
-                    <!-- Jika logo belum ada, kode ini akan otomatis menampilkan ikon topi wisuda sebagai cadangan (fallback) -->
-                    
+                    <!-- LOGO SEKOLAH -->
                     <div class="relative w-12 h-12 flex-shrink-0">
                         <img 
-                            src="{{ asset('images/logo_smp3.png') }}" 
+                            src="{{ asset('images/logo.png') }}" 
                             alt="Logo SMPN 3 Lakbok" 
                             class="w-full h-full object-contain drop-shadow-md hover:scale-105 transition-transform duration-300"
                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                         >
-                        <!-- Fallback Icon (Akan muncul jika gambar error/tidak ditemukan) -->
+                        <!-- Fallback Icon -->
                         <div class="absolute inset-0 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-500/30 flex items-center justify-center" style="display: none;">
                             <i class="ph-bold ph-graduation-cap text-2xl"></i>
                         </div>
@@ -149,7 +146,7 @@
                             Real-time Data
                         </span>
                     </div>
-                    <div class="h-72 w-full">
+                    <div class="h-72 w-full relative">
                          <canvas id="publicWeeklyChart"></canvas>
                     </div>
                 </div>
@@ -214,9 +211,7 @@
 
     <!-- LIBRARY SECTION -->
     <div class="py-20 bg-emerald-50/50 border-y border-emerald-100 relative overflow-hidden">
-        <div class="absolute right-0 top-0 opacity-5 -mr-20 -mt-20">
-            <i class="ph-fill ph-book-open text-[400px]"></i>
-        </div>
+        <!-- Background Icon Removed Here to Fix Shadow Issue -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="flex flex-col lg:flex-row items-center gap-16">
                 <div class="w-full lg:w-5/12" data-aos="fade-right">
@@ -367,7 +362,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center gap-3 mb-6">
-                        <!-- Footer Logo Update -->
+                        <!-- Footer Logo -->
                         <div class="w-10 h-10 rounded-lg overflow-hidden bg-white/10 flex items-center justify-center">
                              <img src="{{ asset('images/logo.png') }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" alt="Logo" class="w-full h-full object-contain">
                              <i class="ph-bold ph-graduation-cap text-xl text-white" style="display: none;"></i>
