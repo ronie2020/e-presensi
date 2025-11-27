@@ -141,9 +141,7 @@
                             </div>
                             
                             <div class="flex-1 overflow-hidden relative">
-                                {{-- FIX 2: overflow-auto (x dan y) agar bisa scroll horizontal di HP --}}
                                 <div class="absolute inset-0 overflow-auto custom-scrollbar p-2">
-                                    {{-- FIX 2: min-width agar kolom tidak gepeng di HP --}}
                                     <table class="w-full border-collapse" style="min-width: 600px;">
                                         <thead class="bg-gray-100/50 text-gray-500 text-xs uppercase tracking-wider font-bold sticky top-0 z-10 backdrop-blur-sm">
                                             <tr>
@@ -184,11 +182,13 @@
                                                     </td>
 
                                                     <td class="log-status px-4 py-3 whitespace-nowrap text-right">
+                                                        {{-- BADGE LOGIC BLADE --}}
                                                         <span class="status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg
                                                             {{ $scan['status'] == 'Masuk' ? 'bg-green-100 text-green-700' : 
+                                                               ($scan['status'] == 'Terlambat' ? 'bg-amber-100 text-amber-700' :
                                                                ($scan['status'] == 'Pulang' ? 'bg-indigo-100 text-indigo-700' : 
                                                                ($scan['status'] == 'Dhuha' ? 'bg-emerald-100 text-emerald-700' : 
-                                                               ($scan['status'] == 'Dhuhur' || $scan['status'] == 'Duhur' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'))) }}">
+                                                               ($scan['status'] == 'Dhuhur' || $scan['status'] == 'Duhur' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600')))) }}">
                                                             {{ $scan['status'] == 'Duhur' ? 'Dhuhur' : $scan['status'] }}
                                                         </span>
                                                     </td>
@@ -197,7 +197,7 @@
                                         </tbody>
                                     </table>
                                     
-                                    {{-- Empty State jika data kosong --}}
+                                    {{-- Empty State --}}
                                     <div id="no-log-entry" class="hidden py-8 text-center">
                                         <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-3">
                                             <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
@@ -220,12 +220,8 @@
             const csrfToken = '{{ csrf_token() }}';
             const scanProcessUrl = '{{ route('scan.process') }}';
             
-            // FIX 1: Audio Feedback
-            const beepSound = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"); // Simple placeholder sound/beep
-            // Anda bisa mengganti URL di atas dengan file audio beep asli, misal: '/sounds/beep.mp3'
-            // Fungsi helper untuk play sound
+            const beepSound = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"); 
             function playBeep() {
-                // Gunakan oscillator web audio API untuk beep yang lebih modern & tidak butuh file eksternal
                 try {
                     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                     const oscillator = audioCtx.createOscillator();
@@ -234,30 +230,27 @@
                     oscillator.connect(gainNode);
                     gainNode.connect(audioCtx.destination);
                     
-                    oscillator.type = 'sine'; // tipe suara
-                    oscillator.frequency.value = 1000; // frekuensi (Hz)
+                    oscillator.type = 'sine'; 
+                    oscillator.frequency.value = 1000; 
                     
                     gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
                     
                     oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + 0.15); // durasi 150ms
+                    oscillator.stop(audioCtx.currentTime + 0.15); 
                 } catch (e) {
                     console.log("Audio context error", e);
                 }
             }
 
-            // DOM Elements
             const logTableBody = document.getElementById('scan-log');
             const scanStatus = document.getElementById('scan-status');
             const scanResult = document.getElementById('scan-result');
             const modeIndicator = document.getElementById('mode-indicator');
             const cameraContainer = document.getElementById('camera-container');
             
-            // VARIABLE PENTING
             let resultTimeout; 
             let isProcessing = false;
 
-            // --- KONFIGURASI STYLE TAB & THEME ---
             const typeConfig = {
                 'Harian': { 
                     activeClass: 'bg-blue-600 text-white shadow-lg shadow-blue-200', 
@@ -276,7 +269,6 @@
                 }
             };
 
-            // JAM DIGITAL
             const clockElement = document.getElementById('clock');
             if(clockElement) {
                 setInterval(() => {
@@ -284,7 +276,6 @@
                 }, 1000);
             }
 
-            // LOGIKA TAB
             const buttons = document.querySelectorAll('.scan-type-btn');
             function setActiveTab(type) {
                 selectedType = type;
@@ -332,7 +323,6 @@
                 }
             }
 
-            // --- SCANNER LOGIC ---
             const html5QrCode = new Html5Qrcode("qr-reader");
             
             const qrCodeSuccessCallback = (decodedText, decodedResult) => {
@@ -340,7 +330,7 @@
                 isProcessing = true;
 
                 html5QrCode.pause();
-                playBeep(); // FIX 1: Play Beep Sound
+                playBeep();
                 scanStatus.textContent = `Memproses Data...`;
                 
                 if (decodedText.length < 3 || decodedText.length > 50) {
@@ -480,10 +470,14 @@
                 const dhuhurSpan = row.querySelector('.time-dhuhur');
                 
                 if (scan.type === 'Harian') {
-                    if (scan.status === 'Masuk') {
+                    if (scan.status === 'Masuk' || scan.status === 'Hadir') { // Menangani status Hadir sebagai Masuk
                         row.querySelector('.log-time-in').textContent = timeStr;
                         badge.className = 'status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-green-100 text-green-700';
                         badge.textContent = 'Masuk';
+                    } else if (scan.status === 'Terlambat') { // MENANGANI STATUS TERLAMBAT
+                        row.querySelector('.log-time-in').textContent = timeStr;
+                        badge.className = 'status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-amber-100 text-amber-700'; // Warna Kuning/Amber
+                        badge.textContent = 'Terlambat';
                     } else if (scan.status === 'Pulang') {
                         row.querySelector('.log-time-out').textContent = timeStr;
                         badge.className = 'status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-indigo-100 text-indigo-700';
@@ -508,7 +502,6 @@
             }
 
             function filterLogs(type) {
-                // PERBAIKAN: Hapus pesan kosong sebelumnya jika ada untuk mencegah duplikasi
                 const existingMsg = document.getElementById('empty-filter-msg');
                 if (existingMsg) existingMsg.remove();
 
@@ -536,7 +529,6 @@
                     if (showRow) visibleCount++;
                 });
 
-                // Tampilkan pesan "Belum ada data..." HANYA jika ada data lain (rows > 0) tapi tidak ada yg match filter (visibleCount == 0)
                 if (rows.length > 0 && visibleCount === 0) {
                     const emptyRow = document.createElement('tr');
                     emptyRow.id = 'empty-filter-msg';
@@ -551,7 +543,6 @@
                     logTableBody.appendChild(emptyRow);
                 }
                 
-                // Handle empty state global (#no-log-entry)
                 const noLogEntry = document.getElementById('no-log-entry');
                 if (noLogEntry) {
                     if (rows.length === 0) {

@@ -25,14 +25,9 @@ class DashboardController extends Controller
 
         // === 2. DATA HARI INI (Untuk Kartu Statistik Atas & Donut Chart) ===
         
-        // Ambil semua absensi hari ini
         $attendancesToday = AttendanceSiswa::whereDate('attendance_date', $today)->get();
-
-        // --- PERBAIKAN UTAMA: GROUPING BY SISWA ---
-        // Kita kelompokkan data berdasarkan student_id agar Masuk & Pulang dihitung sebagai 1 orang.
         $groupedAttendances = $attendancesToday->groupBy('student_id');
 
-        // Inisialisasi Variabel Counter
         $presentCount = 0;
         $lateCount = 0;
         $earlyLeaveCount = 0;
@@ -40,20 +35,24 @@ class DashboardController extends Controller
         $permitCount = 0;
         $alphaCount = 0;
 
-        // Looping setiap siswa unik untuk menentukan status finalnya hari ini
         foreach ($groupedAttendances as $studentId => $records) {
-            // Ambil status unik dari record siswa ini (misal: Hadir, Sakit, Izin)
             $statuses = $records->pluck('status')->toArray();
             
-            // Gabungkan semua notes untuk pengecekan Terlambat/Pulang Awal
+            // Gabungkan semua notes untuk pengecekan manual (Pulang Awal)
             $allNotes = $records->pluck('notes')->implode(' ');
 
-            // LOGIKA PRIORITAS STATUS
-            if (in_array('Hadir', $statuses)) {
-                $presentCount++;
+            // --- PERBAIKAN LOGIKA STATUS ---
+            // Cek apakah ada status 'Hadir' ATAU 'Terlambat' (karena Terlambat = Hadir secara fisik)
+            $isHadir = in_array('Hadir', $statuses);
+            $isTerlambat = in_array('Terlambat', $statuses); // <-- Cek status Terlambat dari DB
 
-                // Cek Terlambat (Cari kata 'Terlambat' di notes record manapun milik siswa ini)
-                if (stripos($allNotes, 'Terlambat') !== false) {
+            if ($isHadir || $isTerlambat) {
+                $presentCount++; // Hitung sebagai hadir fisik
+
+                // Cek Terlambat:
+                // 1. Jika status di DB 'Terlambat'
+                // 2. ATAU jika di notes ada kata 'Terlambat' (untuk data lama/kompatibilitas)
+                if ($isTerlambat || stripos($allNotes, 'Terlambat') !== false) {
                     $lateCount++;
                 }
 
@@ -61,7 +60,8 @@ class DashboardController extends Controller
                 if (stripos($allNotes, 'Pulang Awal') !== false) {
                     $earlyLeaveCount++;
                 }
-            } elseif (in_array('Sakit', $statuses)) {
+            } 
+            elseif (in_array('Sakit', $statuses)) {
                 $sickCount++;
             } elseif (in_array('Izin', $statuses)) {
                 $permitCount++;
@@ -71,7 +71,6 @@ class DashboardController extends Controller
         }
 
         // Hitung Belum Hadir 
-        // Rumus: Total Siswa - (Yang sudah ada statusnya hari ini)
         $totalRecorded = $groupedAttendances->count();
         $absentCount = max(0, $totalStudents - $totalRecorded);
 
@@ -83,36 +82,37 @@ class DashboardController extends Controller
 
 
         // === 3. DATA MINGGUAN (Untuk Grafik Batang) ===
-        // Array kosong untuk 6 hari (Senin-Sabtu)
         $weeklyPresentData = [];
         $weeklyLateData = [];
         $weeklyAbsentData = [];
 
-        // Ambil data seminggu
         $weeklyAttendances = AttendanceSiswa::whereBetween('attendance_date', [$startOfWeek, $endOfWeek])->get();
 
-        for ($i = 0; $i < 6; $i++) {
+        for ($i = 0; $i < 6; $i++) { // Senin - Sabtu
             $dateCheck = $startOfWeek->copy()->addDays($i)->format('Y-m-d');
             
-            // Filter data per hari
             $dailyRecords = $weeklyAttendances->filter(function ($item) use ($dateCheck) {
                 return Carbon::parse($item->attendance_date)->format('Y-m-d') == $dateCheck;
             });
 
-            // Grouping per siswa untuk data mingguan juga (PENTING!)
             $dailyGrouped = $dailyRecords->groupBy('student_id');
 
             $dailyPresent = 0;
             $dailyLate = 0;
-            $dailyAbsent = 0; // Sakit/Izin/Alfa
+            $dailyAbsent = 0;
 
             foreach ($dailyGrouped as $studentId => $records) {
                 $statuses = $records->pluck('status')->toArray();
                 $allNotes = $records->pluck('notes')->implode(' ');
 
-                if (in_array('Hadir', $statuses)) {
+                $isHadir = in_array('Hadir', $statuses);
+                $isTerlambat = in_array('Terlambat', $statuses);
+
+                // PERBAIKAN LOGIKA MINGGUAN JUGA
+                if ($isHadir || $isTerlambat) {
                     $dailyPresent++;
-                    if (stripos($allNotes, 'Terlambat') !== false) {
+                    
+                    if ($isTerlambat || stripos($allNotes, 'Terlambat') !== false) {
                         $dailyLate++;
                     }
                 } elseif (in_array('Sakit', $statuses) || in_array('Izin', $statuses) || in_array('Alfa', $statuses)) {
@@ -120,30 +120,23 @@ class DashboardController extends Controller
                 }
             }
 
-            // Masukkan ke array grafik
             $weeklyPresentData[] = $dailyPresent;
             $weeklyLateData[] = $dailyLate;
             $weeklyAbsentData[] = $dailyAbsent;
         }
 
-
         // === 4. KIRIM KE VIEW ===
         return view('dashboard', [
-            // Kartu Utama
             'totalStudents' => $totalStudents,
-            'presentCount' => $presentCount,     // Sekarang menghitung ORANG, bukan baris
+            'presentCount' => $presentCount,     
             'lateCount' => $lateCount,
-            'absentCount' => $absentCount,       // Belum Hadir (Siswa yg belum scan sama sekali)
+            'absentCount' => $absentCount,      
             'sickCount' => $sickCount,
             'permitCount' => $permitCount,
             'alphaCount' => $alphaCount,
             'earlyLeaveCount' => $earlyLeaveCount,
             'presentPercentage' => $presentPercentage,
-            
-            // Data Donut Chart
             'presentOnTimeCount' => $presentOnTimeCount,
-
-            // Data Bar Chart (Mingguan)
             'weeklyPresentData' => $weeklyPresentData,
             'weeklyLateData' => $weeklyLateData,
             'weeklyAbsentData' => $weeklyAbsentData,
