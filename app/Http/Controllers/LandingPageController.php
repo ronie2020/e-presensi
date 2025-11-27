@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\AttendanceSiswa; // Pastikan Model ini benar
+use App\Models\AttendanceSiswa; 
 use App\Models\LibraryVisit;
 use App\Models\Borrowing;
 use App\Models\Announcement;
@@ -18,34 +18,35 @@ class LandingPageController extends Controller
         $today = Carbon::today();
         
         // --- 1. STATISTIK HARIAN (KOTAK INFO) ---
-        // PERBAIKAN: Menghapus ->where('type', 'Masuk') agar query lebih fleksibel
-        // PERBAIKAN: Menggunakan whereIn untuk toleransi penulisan huruf besar/kecil
+        // PERBAIKAN UTAMA: Tambahkan ->distinct('student_id') agar siswa yang scan 2x tidak dihitung ganda
         
         $hadir = AttendanceSiswa::whereDate('attendance_date', $today)
-                    ->whereIn('status', ['Hadir', 'hadir', 'Present']) // Cek berbagai kemungkinan penulisan
-                    ->count();
+                    ->whereIn('status', ['Hadir', 'hadir', 'Present'])
+                    ->distinct('student_id') // <--- PENTING: Hitung siswa unik saja
+                    ->count('student_id');
                     
         $terlambat = AttendanceSiswa::whereDate('attendance_date', $today)
                     ->whereIn('status', ['Terlambat', 'terlambat', 'Late'])
-                    ->count();
+                    ->distinct('student_id') // <--- PENTING
+                    ->count('student_id');
                     
         $sakit = AttendanceSiswa::whereDate('attendance_date', $today)
                     ->whereIn('status', ['Sakit', 'sakit'])
-                    ->count();
+                    ->distinct('student_id')
+                    ->count('student_id');
                     
         $izin = AttendanceSiswa::whereDate('attendance_date', $today)
                     ->whereIn('status', ['Izin', 'izin'])
-                    ->count();
+                    ->distinct('student_id')
+                    ->count('student_id');
                     
         $alpa = AttendanceSiswa::whereDate('attendance_date', $today)
                     ->whereIn('status', ['Alpa', 'alpa', 'Alpha', 'alpha'])
-                    ->count();
-
-        // Debugging (Opsional): Jika masih 0, uncomment baris bawah ini untuk cek data mentah
-        // dd(AttendanceSiswa::whereDate('attendance_date', $today)->get());
+                    ->distinct('student_id')
+                    ->count('student_id');
 
         $stats = [
-            'hadir'       => $hadir + $terlambat, // Total yang fisik ada di sekolah
+            'hadir'       => $hadir + $terlambat, // Total Siswa di Sekolah (Tepat Waktu + Terlambat)
             'tepat_waktu' => $hadir,
             'terlambat'   => $terlambat,
             'tidak_hadir' => $sakit + $izin + $alpa
@@ -55,16 +56,15 @@ class LandingPageController extends Controller
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
 
-        // Helper Query (Diperbaiki: Hapus filter Type)
+        // Helper Query (Juga diperbaiki dengan distinct agar grafik akurat)
         $getQuery = function($statusList) use ($startOfWeek, $endOfWeek) {
-            // Pastikan status berupa array
             if (!is_array($statusList)) {
                 $statusList = [$statusList];
             }
 
-            return AttendanceSiswa::select(DB::raw('DATE(attendance_date) as date'), DB::raw('count(*) as total'))
+            return AttendanceSiswa::select(DB::raw('DATE(attendance_date) as date'), DB::raw('count(distinct student_id) as total')) // <--- Pakai count(distinct student_id)
                 ->whereBetween('attendance_date', [$startOfWeek, $endOfWeek])
-                ->whereIn('status', $statusList) // Pakai whereIn agar lebih aman
+                ->whereIn('status', $statusList)
                 ->groupBy('date')
                 ->pluck('total', 'date');
         };
@@ -80,12 +80,10 @@ class LandingPageController extends Controller
         $datasetTelat = [];
         $datasetAbsen = [];
 
-        // Loop 7 Hari (Senin - Minggu)
         for ($i = 0; $i < 7; $i++) {
             $currentDay = $startOfWeek->copy()->addDays($i);
             $dateKey = $currentDay->format('Y-m-d');
             
-            // Label Hari Indonesia
             $labels[] = $currentDay->locale('id')->isoFormat('dddd'); 
             
             $datasetHadir[] = $dataTepatWaktu[$dateKey] ?? 0;
@@ -99,26 +97,25 @@ class LandingPageController extends Controller
                 [
                     'label' => 'Hadir Tepat Waktu',
                     'data' => $datasetHadir,
-                    'backgroundColor' => '#10b981', // Emerald
+                    'backgroundColor' => '#10b981', 
                     'borderRadius' => 4,
                 ],
                 [
                     'label' => 'Terlambat',
                     'data' => $datasetTelat,
-                    'backgroundColor' => '#f59e0b', // Amber
+                    'backgroundColor' => '#f59e0b',
                     'borderRadius' => 4,
                 ],
                 [
                     'label' => 'Tidak Hadir',
                     'data' => $datasetAbsen,
-                    'backgroundColor' => '#ef4444', // Red
+                    'backgroundColor' => '#ef4444',
                     'borderRadius' => 4,
                 ]
             ]
         ];
 
-        // --- 3. DATA LAINNYA (Perpus, Pengumuman, dll) ---
-        // Menggunakan try-catch agar jika tabel belum ada tidak error 500
+        // --- 3. DATA LAINNYA ---
         try {
             $libraryStats = [
                 'visitors_today' => LibraryVisit::whereDate('date', $today)->count(),
@@ -136,7 +133,6 @@ class LandingPageController extends Controller
             }
             $libraryChartData = ['labels' => $labels, 'data' => $libData];
         } catch (\Exception $e) {
-            // Fallback jika tabel library belum ada
             $libraryStats = ['visitors_today' => 0, 'books_borrowed' => 0];
             $libraryChartData = ['labels' => $labels, 'data' => array_fill(0, 7, 0)];
         }
