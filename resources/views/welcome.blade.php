@@ -20,7 +20,6 @@
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        /* Custom scrollbar for modern feel */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -31,11 +30,16 @@
     modalOpen: false, 
     activeAnnouncement: null,
     scrolled: false,
-    openAnnouncement(item) {
-        this.activeAnnouncement = item;
-        this.modalOpen = true;
-        document.body.style.overflow = 'hidden';
+    
+    // PERBAIKAN: Fungsi buka modal pakai Index Array (Aman dari error quote/enter)
+    openAnnouncementByIndex(index) {
+        if (window.announcementsData && window.announcementsData[index]) {
+            this.activeAnnouncement = window.announcementsData[index];
+            this.modalOpen = true;
+            document.body.style.overflow = 'hidden';
+        }
     },
+    
     closeAnnouncement() {
         this.modalOpen = false;
         setTimeout(() => { this.activeAnnouncement = null }, 300);
@@ -48,28 +52,24 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
                 <div class="flex items-center gap-3">
-                    
-                    <!-- LOGO SEKOLAH -->
                     <div class="relative w-12 h-12 flex-shrink-0">
+                        {{-- Fallback Logo jika file tidak ditemukan --}}
                         <img 
                             src="{{ asset('images/logo.png') }}" 
                             alt="Logo SMPN 3 Lakbok" 
                             class="w-full h-full object-contain drop-shadow-md hover:scale-105 transition-transform duration-300"
                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                         >
-                        <!-- Fallback Icon -->
                         <div class="absolute inset-0 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-500/30 flex items-center justify-center" style="display: none;">
                             <i class="ph-bold ph-graduation-cap text-2xl"></i>
                         </div>
                     </div>
-
                     <div class="flex flex-col">
                         <span class="block text-xl font-extrabold text-slate-900 leading-none tracking-tight">SMPN 3 LAKBOK</span>
                         <span class="text-xs font-bold text-blue-600 tracking-wide mt-1">
                             BERJAYA : <span class="text-slate-500 font-medium">Unggul, Berkarakter, Juara</span>
                         </span>
                     </div>
-
                 </div>
                 <div class="flex items-center space-x-4">
                     @auth
@@ -79,7 +79,6 @@
                             <span class="mr-2">Login Staff</span>
                             <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                         </a>
-                        <!-- Mobile Login Icon -->
                         <a href="{{ route('login') }}" class="md:hidden p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors">
                             <i class="ph-bold ph-sign-in text-2xl"></i>
                         </a>
@@ -91,14 +90,12 @@
 
     <!-- HERO SECTION -->
     <div class="relative bg-slate-900 pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden">
-        <!-- Background Elements -->
         <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-10 mix-blend-overlay"></div>
         <div class="absolute inset-0 bg-gradient-to-br from-blue-900 via-slate-900 to-slate-900 opacity-95"></div>
         <div class="absolute -top-24 -right-24 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
         <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
 
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-12 lg:gap-20 z-10">
-            <!-- Text Content -->
             <div class="lg:w-1/2 text-center lg:text-left" data-aos="fade-right" data-aos-duration="1000">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-bold uppercase tracking-wider mb-6">
                     <span class="relative flex h-2 w-2">
@@ -115,7 +112,6 @@
                     Platform digital terintegrasi SMPN 3 Lakbok untuk pemantauan akademik, absensi kehadiran, dan literasi siswa secara real-time.
                 </p>
                 
-                <!-- Stats Cards Grid -->
                 <div class="grid grid-cols-3 gap-3 max-w-md mx-auto lg:mx-0">
                     <div class="bg-white/5 backdrop-blur-sm p-4 rounded-xl border border-emerald-500/20 shadow-lg group hover:bg-white/10 transition-colors">
                         <div class="text-3xl font-bold text-emerald-400 mb-1 group-hover:scale-110 transition-transform origin-left">{{ $stats['hadir'] ?? 0 }}</div>
@@ -132,7 +128,6 @@
                 </div>
             </div>
 
-            <!-- Chart Section -->
             <div class="lg:w-1/2 w-full" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
                 <div class="relative bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-6 border border-white/20 transform hover:scale-[1.02] transition duration-500 ring-1 ring-black/5">
                     <div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
@@ -153,7 +148,6 @@
             </div>
         </div>
         
-        <!-- Decorative Wave -->
         <div class="absolute bottom-0 left-0 right-0">
              <svg class="w-full h-12 lg:h-24 text-slate-50 fill-current" viewBox="0 0 1440 320" preserveAspectRatio="none">
                  <path d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
@@ -161,7 +155,7 @@
         </div>
     </div>
 
-    <!-- MAIN FEATURES / MENU AKSES -->
+    <!-- MENU AKSES -->
     <div class="bg-slate-50 py-16 lg:py-24 relative z-20 -mt-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16" data-aos="fade-up">
@@ -170,7 +164,6 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                <!-- Portal Siswa -->
                 <a href="{{ route('portal.index') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl hover:shadow-blue-200/50 border border-slate-100 hover:border-blue-200 transition-all duration-300" data-aos="fade-up" data-aos-delay="100">
                     <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-inner">
                         <i class="ph-duotone ph-student text-4xl"></i>
@@ -178,8 +171,6 @@
                     <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600">Portal Siswa</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Akses data kehadiran, nilai akademik, dan poin kedisiplinan siswa.</p>
                 </a>
-                
-                <!-- Mesin Absensi -->
                 <a href="{{ route('kiosk.show') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl hover:shadow-purple-200/50 border border-slate-100 hover:border-purple-200 transition-all duration-300" data-aos="fade-up" data-aos-delay="200">
                     <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-inner">
                         <i class="ph-duotone ph-qr-code text-4xl"></i>
@@ -187,8 +178,6 @@
                     <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-purple-600">Mesin Absensi</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Mode Kiosk untuk pemindaian kartu pelajar saat kehadiran.</p>
                 </a>
-                
-                <!-- Kiosk Perpus -->
                 <a href="{{ route('library.kiosk.index') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl hover:shadow-emerald-200/50 border border-slate-100 hover:border-emerald-200 transition-all duration-300" data-aos="fade-up" data-aos-delay="300">
                     <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-inner">
                         <i class="ph-duotone ph-books text-4xl"></i>
@@ -196,8 +185,6 @@
                     <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-emerald-600">E-Library</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Buku tamu digital dan pencatatan peminjaman buku perpustakaan.</p>
                 </a>
-                
-                <!-- Login Guru -->
                 <a href="{{ route('login') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl hover:shadow-orange-200/50 border border-slate-100 hover:border-orange-200 transition-all duration-300" data-aos="fade-up" data-aos-delay="400">
                     <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 mb-6 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 shadow-inner">
                         <i class="ph-duotone ph-chalkboard-teacher text-4xl"></i>
@@ -211,7 +198,6 @@
 
     <!-- LIBRARY SECTION -->
     <div class="py-20 bg-emerald-50/50 border-y border-emerald-100 relative overflow-hidden">
-        <!-- Background Icon Removed Here to Fix Shadow Issue -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="flex flex-col lg:flex-row items-center gap-16">
                 <div class="w-full lg:w-5/12" data-aos="fade-right">
@@ -225,7 +211,6 @@
                     <p class="text-slate-600 mb-8 leading-relaxed">
                         Perpustakaan SMPN 3 Lakbok menyediakan ribuan koleksi buku fisik dan digital. Pantau aktivitas literasi siswa secara transparan.
                     </p>
-                    
                     <div class="flex gap-6">
                         <div class="flex-1 bg-white p-6 rounded-2xl shadow-md border border-emerald-100/50">
                             <div class="flex items-center gap-3 mb-2">
@@ -258,7 +243,7 @@
         </div>
     </div>
 
-    <!-- ACHIEVEMENTS SECTION -->
+    <!-- ACHIEVEMENTS SECTION (HALL OF FAME) -->
     <div class="py-24 bg-white relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16" data-aos="fade-up">
@@ -272,7 +257,11 @@
                     <div class="group bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-lg hover:shadow-2xl hover:shadow-yellow-100/50 transition-all duration-300 hover:-translate-y-2" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                         <div class="aspect-video w-full bg-slate-100 relative overflow-hidden">
                             @if($item->photo_path)
-                                <img src="{{ asset('storage/' . $item->photo_path) }}" alt="{{ $item->title }}" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
+                                {{-- Fallback Image jika Error --}}
+                                <img src="{{ asset('storage/' . $item->photo_path) }}" 
+                                     alt="{{ $item->title }}" 
+                                     class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                                     onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'w-full h-full flex flex-col items-center justify-center text-yellow-300 bg-slate-50\'><i class=\'ph-duotone ph-image-broken text-6xl mb-3\'></i><span class=\'text-xs font-bold text-slate-400 uppercase\'>Image Error</span></div>';">
                             @else
                                 <div class="w-full h-full flex flex-col items-center justify-center text-yellow-300 bg-slate-50 relative">
                                     <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
@@ -310,9 +299,8 @@
         </div>
     </div>
 
-    <!-- ANNOUNCEMENT & FOOTER SECTION -->
+    <!-- ANNOUNCEMENT & FOOTER SECTION (BAGIAN PENTING: PENGUMUMAN) -->
     <div class="bg-slate-900 text-white pt-24 pb-12 relative overflow-hidden mt-12">
-        <!-- Decoration -->
         <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
         <div class="absolute -right-20 top-20 w-96 h-96 bg-blue-600 rounded-full mix-blend-overlay filter blur-3xl opacity-20"></div>
 
@@ -330,7 +318,7 @@
                 </div>
                 
                 <div class="grid gap-6 md:grid-cols-3">
-                    @forelse ($announcements as $item)
+                    @forelse ($announcements as $index => $item)
                         <article class="bg-slate-800/50 backdrop-blur rounded-xl p-6 border border-slate-700 hover:border-blue-500/50 transition-all duration-300 hover:bg-slate-800 group h-full flex flex-col" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                             <div class="flex justify-between items-start mb-4">
                                 <span class="px-2 py-1 rounded bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-wide border border-blue-500/20">Info Sekolah</span>
@@ -338,13 +326,15 @@
                                     <i class="ph-fill ph-calendar-blank"></i> {{ $item->created_at->format('d M Y') }}
                                 </span>
                             </div>
+                            
+                            {{-- PERBAIKAN: PANGGIL FUNGSI JS DENGAN INDEX (Bukan Object Langsung) --}}
                             <h3 class="text-lg font-bold text-white mb-3 line-clamp-2 group-hover:text-blue-400 transition-colors">
-                                <a href="#" @click.prevent='openAnnouncement(@json($item))'>{{ $item->title }}</a>
+                                <a href="#" @click.prevent="openAnnouncementByIndex({{ $index }})">{{ $item->title }}</a>
                             </h3>
                             <p class="text-slate-400 text-sm line-clamp-3 mb-4 flex-1">
                                 {{ Str::limit(strip_tags($item->content), 100) }}
                             </p>
-                            <button @click="openAnnouncement(@json($item))" class="text-sm text-blue-400 font-semibold hover:text-blue-300 flex items-center gap-1 mt-auto">
+                            <button @click="openAnnouncementByIndex({{ $index }})" class="text-sm text-blue-400 font-semibold hover:text-blue-300 flex items-center gap-1 mt-auto">
                                 Baca Selengkapnya <i class="ph-bold ph-arrow-right text-xs"></i>
                             </button>
                         </article>
@@ -362,7 +352,6 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center gap-3 mb-6">
-                        <!-- Footer Logo -->
                         <div class="w-10 h-10 rounded-lg overflow-hidden bg-white/10 flex items-center justify-center">
                              <img src="{{ asset('images/logo.png') }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" alt="Logo" class="w-full h-full object-contain">
                              <i class="ph-bold ph-graduation-cap text-xl text-white" style="display: none;"></i>
