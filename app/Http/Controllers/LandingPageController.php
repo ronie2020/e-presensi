@@ -2,133 +2,120 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Announcement;
-use App\Models\AttendanceSiswa;
 use Illuminate\Http\Request;
+use App\Models\AttendanceSiswa;
+use App\Models\LibraryVisit;
+use App\Models\Borrowing;
+use App\Models\Announcement;
+use App\Models\Achievement;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class LandingPageController extends Controller
 {
     public function index()
     {
-        // 1. Ambil Pengumuman Terbaru (Tetap Sama)
-        try {
-            $announcements = Announcement::where('is_active', true)
-                ->with('author')
-                ->latest()
-                ->take(3)
-                ->get();
-        } catch (\Exception $e) {
-            $announcements = [];
-        }
-
-        // 2. STATISTIK HARIAN (LOGIKA BARU: GROUPING)
         $today = Carbon::today();
         
-        // Ambil semua data hari ini dulu
-        $todaysAttendance = AttendanceSiswa::whereDate('attendance_date', $today)
-            ->whereIn('type', ['Harian', 'Masuk', 'Pulang']) // Ambil semua tipe
-            ->get()
-            ->groupBy('student_id'); // KUNCI: Disatukan per siswa
+        // 1. STATISTIK HARIAN (Tetap diambil untuk kotak info)
+        $hadir = AttendanceSiswa::whereDate('attendance_date', $today)->where('type', 'Masuk')->where('status', 'Hadir')->count();
+        $terlambat = AttendanceSiswa::whereDate('attendance_date', $today)->where('type', 'Masuk')->where('status', 'Terlambat')->count();
+        $sakit = AttendanceSiswa::whereDate('attendance_date', $today)->where('status', 'Sakit')->count();
+        $izin = AttendanceSiswa::whereDate('attendance_date', $today)->where('status', 'Izin')->count();
+        $alpa = AttendanceSiswa::whereDate('attendance_date', $today)->where('status', 'Alpa')->count();
 
-        // Variabel penghitung
-        $hadirCount = 0;
-        $sakitCount = 0;
-        $izinCount = 0;
-        $terlambatCount = 0;
-
-        // Loop setiap siswa (bukan setiap baris)
-        foreach ($todaysAttendance as $studentId => $logs) {
-            // Ambil semua status & catatan siswa ini
-            $statuses = $logs->pluck('status')->toArray();
-            $allNotes = $logs->pluck('notes')->implode(' ');
-
-            // Prioritas Status
-            if (in_array('Hadir', $statuses)) {
-                $hadirCount++;
-                
-                // Cek Terlambat khusus yang Hadir
-                if (stripos($allNotes, 'Terlambat') !== false) {
-                    $terlambatCount++;
-                }
-            } elseif (in_array('Sakit', $statuses)) {
-                $sakitCount++;
-            } elseif (in_array('Izin', $statuses)) {
-                $izinCount++;
-            }
-        }
-        
         $stats = [
-            'hadir' => $hadirCount,
-            'sakit' => $sakitCount,
-            'izin' => $izinCount,
-            'terlambat' => $terlambatCount,
+            'hadir' => $hadir + $terlambat, // Total kehadiran fisik
+            'tepat_waktu' => $hadir,
+            'terlambat' => $terlambat,
+            'tidak_hadir' => $sakit + $izin + $alpa
         ];
 
-        // 3. GRAFIK MINGGUAN (LOGIKA BARU: GROUPING)
+        // 2. CHART MINGGUAN (STACKED)
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
-        
-        // Ambil data seminggu sekaligus
-        $weeklyAttendance = AttendanceSiswa::whereBetween('attendance_date', [$startOfWeek, $endOfWeek])
-            ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
-            ->get();
 
-        $weeklyData = [
-            'labels' => [],
-            'tepat' => [],
-            'telat' => [],
-            'absen' => []
-        ];
-
-        // Loop 6 hari (Senin - Sabtu)
-        for ($i = 0; $i < 6; $i++) {
-            $dateCheck = $startOfWeek->copy()->addDays($i);
-            $dateString = $dateCheck->format('Y-m-d');
+        // Helper Query untuk grouping tanggal
+        $getQuery = function($status, $type = null) use ($startOfWeek, $endOfWeek) {
+            $q = AttendanceSiswa::select(DB::raw('DATE(attendance_date) as date'), DB::raw('count(*) as total'))
+                ->whereBetween('attendance_date', [$startOfWeek, $endOfWeek]);
             
-            $weeklyData['labels'][] = $dateCheck->translatedFormat('D'); // Sen, Sel...
+            if ($type) $q->where('type', $type);
+            
+            if (is_array($status)) $q->whereIn('status', $status);
+            else $q->where('status', $status);
 
-            // Filter data mentah untuk hari yang sedang di-loop
-            $dailyLogs = $weeklyAttendance->filter(function($item) use ($dateString) {
-                return Carbon::parse($item->attendance_date)->format('Y-m-d') == $dateString;
-            });
+            return $q->groupBy('date')->pluck('total', 'date');
+        };
 
-            // Grouping per siswa
-            $dailyGrouped = $dailyLogs->groupBy('student_id');
+        // Ambil Data 3 Kategori
+        $dataTepatWaktu = $getQuery('Hadir', 'Masuk');
+        $dataTerlambat = $getQuery('Terlambat', 'Masuk');
+        $dataTidakHadir = $getQuery(['Sakit', 'Izin', 'Alpa']); // Gabungan ketidakhadiran
 
-            $countHadir = 0;
-            $countTelat = 0;
-            $countAbsen = 0; // S/I/A
+        // Format Data untuk ChartJS
+        $labels = [];
+        $datasetHadir = [];
+        $datasetTelat = [];
+        $datasetAbsen = [];
 
-            foreach ($dailyGrouped as $logs) {
-                $statuses = $logs->pluck('status')->toArray();
-                $notes = $logs->pluck('notes')->implode(' ');
-
-                if (in_array('Hadir', $statuses)) {
-                    $countHadir++;
-                    if (stripos($notes, 'Terlambat') !== false) {
-                        $countTelat++;
-                    }
-                } elseif (in_array('Sakit', $statuses) || in_array('Izin', $statuses) || in_array('Alfa', $statuses)) {
-                    $countAbsen++;
-                }
-            }
-
-            // Masukkan ke array data
-            $weeklyData['tepat'][] = $countHadir - $countTelat; // Tepat waktu = Total Hadir - Yang Telat
-            $weeklyData['telat'][] = $countTelat;
-            $weeklyData['absen'][] = $countAbsen;
+        for ($i = 0; $i < 7; $i++) {
+            $date = $startOfWeek->copy()->addDays($i)->format('Y-m-d');
+            $labels[] = $startOfWeek->copy()->addDays($i)->isoFormat('dddd'); // Nama Hari
+            
+            $datasetHadir[] = $dataTepatWaktu[$date] ?? 0;
+            $datasetTelat[] = $dataTerlambat[$date] ?? 0;
+            $datasetAbsen[] = $dataTidakHadir[$date] ?? 0;
         }
 
         $barChartData = [
-            'labels' => $weeklyData['labels'],
+            'labels' => $labels,
             'datasets' => [
-                ['label' => 'Tepat Waktu', 'data' => $weeklyData['tepat'], 'backgroundColor' => '#10B981'], // Green
-                ['label' => 'Terlambat', 'data' => $weeklyData['telat'], 'backgroundColor' => '#F59E0B'], // Yellow
-                ['label' => 'Tdk Hadir', 'data' => $weeklyData['absen'], 'backgroundColor' => '#EF4444']  // Red
+                [
+                    'label' => 'Tepat Waktu',
+                    'data' => $datasetHadir,
+                    'backgroundColor' => '#10b981', // Emerald 500 (Hijau)
+                    'borderRadius' => 4,
+                ],
+                [
+                    'label' => 'Terlambat',
+                    'data' => $datasetTelat,
+                    'backgroundColor' => '#f59e0b', // Amber 500 (Kuning/Oranye)
+                    'borderRadius' => 4,
+                ],
+                [
+                    'label' => 'Tidak Hadir', // Sakit + Izin + Alpa
+                    'data' => $datasetAbsen,
+                    'backgroundColor' => '#ef4444', // Red 500 (Merah)
+                    'borderRadius' => 4,
+                ]
             ]
         ];
 
-        return view('welcome', compact('announcements', 'stats', 'barChartData'));
+        // ... (SISA KODE SAMA: Library, Pengumuman, Prestasi) ...
+        $libraryStats = [
+            'visitors_today' => LibraryVisit::whereDate('date', $today)->count(),
+            'books_borrowed' => Borrowing::where('status', 'borrowed')->count(),
+        ];
+        
+        $libWeeklyData = LibraryVisit::select(DB::raw('DATE(date) as visit_date'), DB::raw('count(*) as total'))
+            ->whereBetween('date', [$startOfWeek, $endOfWeek])
+            ->groupBy('visit_date')->pluck('total', 'visit_date');
+
+        $libData = [];
+        foreach ($labels as $index => $dayName) {
+            $date = $startOfWeek->copy()->addDays($index)->format('Y-m-d');
+            $libData[] = $libWeeklyData[$date] ?? 0;
+        }
+        $libraryChartData = ['labels' => $labels, 'data' => $libData];
+
+        $announcements = Announcement::orderBy('created_at', 'desc')->limit(3)->get();
+        $achievements = Achievement::with('student')->orderBy('date', 'desc')->limit(6)->get();
+
+        return view('welcome', compact(
+            'stats', 'barChartData', 
+            'libraryStats', 'libraryChartData', 
+            'announcements', 'achievements'
+        ));
     }
 }

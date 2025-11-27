@@ -34,9 +34,11 @@
                 {{-- Dashboard --}}
                 <a href="{{ route('dashboard') }}" 
                    class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden {{ request()->routeIs('dashboard') ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50 ring-1 ring-blue-400/30' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                    
                     @if(request()->routeIs('dashboard'))
                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
                     @endif
+                    
                     <svg class="w-5 h-5 mr-3 {{ request()->routeIs('dashboard') ? 'text-white' : 'text-blue-300 group-hover:text-white' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                     <span class="text-sm font-semibold tracking-wide">Dashboard</span>
                 </a>
@@ -79,6 +81,17 @@
                    @endif
                     <svg class="w-5 h-5 mr-3 {{ request()->routeIs('discipline.index') ? 'text-white' : 'text-blue-300 group-hover:text-white' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span class="text-sm font-semibold tracking-wide">Catatan Disiplin</span>
+                </a>
+
+                {{-- PRESTASI (BARU) --}}
+                <a href="{{ route('achievements.index') }}" 
+                   class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden {{ request()->routeIs('achievements.*') ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50 ring-1 ring-blue-400/30' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                   @if(request()->routeIs('achievements.*'))
+                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
+                   @endif
+                   {{-- Ikon Bintang/Piala --}}
+                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('achievements.*') ? 'text-white' : 'text-blue-300 group-hover:text-white' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+                    <span class="text-sm font-semibold tracking-wide">Prestasi & Penghargaan</span>
                 </a>
                 
                 {{-- Pusat Informasi --}}
@@ -127,7 +140,7 @@
                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
                    @endif
                     <svg class="w-5 h-5 mr-3 {{ request()->routeIs('library.dashboard') ? 'text-white' : 'text-blue-300 group-hover:text-white' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                    <span class="text-sm font-semibold tracking-wide">Dashboard Perpus</span>
+                    <span class="text-sm font-semibold tracking-wide">Dashboard PUSTAKA</span>
                 </a>
 
                 {{-- Sirkulasi (BARU) --}}

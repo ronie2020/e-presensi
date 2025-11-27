@@ -155,6 +155,8 @@ Route::middleware('auth')->group(function () {
      // PENGATURAN MATA PELAJARAN
     Route::resource('subjects', \App\Http\Controllers\SubjectController::class)->only(['index', 'store', 'update', 'destroy']);
     
+    // Route Achievement
+    Route::resource('achievements', \App\Http\Controllers\AchievementController::class);
 
 });
 
