@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\AttendanceSiswa;
+use App\Models\AttendanceSiswa; // Pastikan Model ini benar
 use App\Models\LibraryVisit;
 use App\Models\Borrowing;
 use App\Models\Announcement;
@@ -17,41 +17,62 @@ class LandingPageController extends Controller
     {
         $today = Carbon::today();
         
-        // 1. STATISTIK HARIAN (Tetap diambil untuk kotak info)
-        $hadir = AttendanceSiswa::whereDate('attendance_date', $today)->where('type', 'Masuk')->where('status', 'Hadir')->count();
-        $terlambat = AttendanceSiswa::whereDate('attendance_date', $today)->where('type', 'Masuk')->where('status', 'Terlambat')->count();
-        $sakit = AttendanceSiswa::whereDate('attendance_date', $today)->where('status', 'Sakit')->count();
-        $izin = AttendanceSiswa::whereDate('attendance_date', $today)->where('status', 'Izin')->count();
-        $alpa = AttendanceSiswa::whereDate('attendance_date', $today)->where('status', 'Alpa')->count();
+        // --- 1. STATISTIK HARIAN (KOTAK INFO) ---
+        // PERBAIKAN: Menghapus ->where('type', 'Masuk') agar query lebih fleksibel
+        // PERBAIKAN: Menggunakan whereIn untuk toleransi penulisan huruf besar/kecil
+        
+        $hadir = AttendanceSiswa::whereDate('attendance_date', $today)
+                    ->whereIn('status', ['Hadir', 'hadir', 'Present']) // Cek berbagai kemungkinan penulisan
+                    ->count();
+                    
+        $terlambat = AttendanceSiswa::whereDate('attendance_date', $today)
+                    ->whereIn('status', ['Terlambat', 'terlambat', 'Late'])
+                    ->count();
+                    
+        $sakit = AttendanceSiswa::whereDate('attendance_date', $today)
+                    ->whereIn('status', ['Sakit', 'sakit'])
+                    ->count();
+                    
+        $izin = AttendanceSiswa::whereDate('attendance_date', $today)
+                    ->whereIn('status', ['Izin', 'izin'])
+                    ->count();
+                    
+        $alpa = AttendanceSiswa::whereDate('attendance_date', $today)
+                    ->whereIn('status', ['Alpa', 'alpa', 'Alpha', 'alpha'])
+                    ->count();
+
+        // Debugging (Opsional): Jika masih 0, uncomment baris bawah ini untuk cek data mentah
+        // dd(AttendanceSiswa::whereDate('attendance_date', $today)->get());
 
         $stats = [
-            'hadir' => $hadir + $terlambat, // Total kehadiran fisik
+            'hadir'       => $hadir + $terlambat, // Total yang fisik ada di sekolah
             'tepat_waktu' => $hadir,
-            'terlambat' => $terlambat,
+            'terlambat'   => $terlambat,
             'tidak_hadir' => $sakit + $izin + $alpa
         ];
 
-        // 2. CHART MINGGUAN (STACKED)
+        // --- 2. CHART MINGGUAN (STACKED) ---
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
 
-        // Helper Query untuk grouping tanggal
-        $getQuery = function($status, $type = null) use ($startOfWeek, $endOfWeek) {
-            $q = AttendanceSiswa::select(DB::raw('DATE(attendance_date) as date'), DB::raw('count(*) as total'))
-                ->whereBetween('attendance_date', [$startOfWeek, $endOfWeek]);
-            
-            if ($type) $q->where('type', $type);
-            
-            if (is_array($status)) $q->whereIn('status', $status);
-            else $q->where('status', $status);
+        // Helper Query (Diperbaiki: Hapus filter Type)
+        $getQuery = function($statusList) use ($startOfWeek, $endOfWeek) {
+            // Pastikan status berupa array
+            if (!is_array($statusList)) {
+                $statusList = [$statusList];
+            }
 
-            return $q->groupBy('date')->pluck('total', 'date');
+            return AttendanceSiswa::select(DB::raw('DATE(attendance_date) as date'), DB::raw('count(*) as total'))
+                ->whereBetween('attendance_date', [$startOfWeek, $endOfWeek])
+                ->whereIn('status', $statusList) // Pakai whereIn agar lebih aman
+                ->groupBy('date')
+                ->pluck('total', 'date');
         };
 
-        // Ambil Data 3 Kategori
-        $dataTepatWaktu = $getQuery('Hadir', 'Masuk');
-        $dataTerlambat = $getQuery('Terlambat', 'Masuk');
-        $dataTidakHadir = $getQuery(['Sakit', 'Izin', 'Alpa']); // Gabungan ketidakhadiran
+        // Ambil Data Chart
+        $dataTepatWaktu = $getQuery(['Hadir', 'hadir', 'Present']);
+        $dataTerlambat  = $getQuery(['Terlambat', 'terlambat']);
+        $dataTidakHadir = $getQuery(['Sakit', 'sakit', 'Izin', 'izin', 'Alpa', 'alpa', 'Alpha']);
 
         // Format Data untuk ChartJS
         $labels = [];
@@ -59,55 +80,66 @@ class LandingPageController extends Controller
         $datasetTelat = [];
         $datasetAbsen = [];
 
+        // Loop 7 Hari (Senin - Minggu)
         for ($i = 0; $i < 7; $i++) {
-            $date = $startOfWeek->copy()->addDays($i)->format('Y-m-d');
-            $labels[] = $startOfWeek->copy()->addDays($i)->isoFormat('dddd'); // Nama Hari
+            $currentDay = $startOfWeek->copy()->addDays($i);
+            $dateKey = $currentDay->format('Y-m-d');
             
-            $datasetHadir[] = $dataTepatWaktu[$date] ?? 0;
-            $datasetTelat[] = $dataTerlambat[$date] ?? 0;
-            $datasetAbsen[] = $dataTidakHadir[$date] ?? 0;
+            // Label Hari Indonesia
+            $labels[] = $currentDay->locale('id')->isoFormat('dddd'); 
+            
+            $datasetHadir[] = $dataTepatWaktu[$dateKey] ?? 0;
+            $datasetTelat[] = $dataTerlambat[$dateKey] ?? 0;
+            $datasetAbsen[] = $dataTidakHadir[$dateKey] ?? 0;
         }
 
         $barChartData = [
             'labels' => $labels,
             'datasets' => [
                 [
-                    'label' => 'Tepat Waktu',
+                    'label' => 'Hadir Tepat Waktu',
                     'data' => $datasetHadir,
-                    'backgroundColor' => '#10b981', // Emerald 500 (Hijau)
+                    'backgroundColor' => '#10b981', // Emerald
                     'borderRadius' => 4,
                 ],
                 [
                     'label' => 'Terlambat',
                     'data' => $datasetTelat,
-                    'backgroundColor' => '#f59e0b', // Amber 500 (Kuning/Oranye)
+                    'backgroundColor' => '#f59e0b', // Amber
                     'borderRadius' => 4,
                 ],
                 [
-                    'label' => 'Tidak Hadir', // Sakit + Izin + Alpa
+                    'label' => 'Tidak Hadir',
                     'data' => $datasetAbsen,
-                    'backgroundColor' => '#ef4444', // Red 500 (Merah)
+                    'backgroundColor' => '#ef4444', // Red
                     'borderRadius' => 4,
                 ]
             ]
         ];
 
-        // ... (SISA KODE SAMA: Library, Pengumuman, Prestasi) ...
-        $libraryStats = [
-            'visitors_today' => LibraryVisit::whereDate('date', $today)->count(),
-            'books_borrowed' => Borrowing::where('status', 'borrowed')->count(),
-        ];
-        
-        $libWeeklyData = LibraryVisit::select(DB::raw('DATE(date) as visit_date'), DB::raw('count(*) as total'))
-            ->whereBetween('date', [$startOfWeek, $endOfWeek])
-            ->groupBy('visit_date')->pluck('total', 'visit_date');
+        // --- 3. DATA LAINNYA (Perpus, Pengumuman, dll) ---
+        // Menggunakan try-catch agar jika tabel belum ada tidak error 500
+        try {
+            $libraryStats = [
+                'visitors_today' => LibraryVisit::whereDate('date', $today)->count(),
+                'books_borrowed' => Borrowing::where('status', 'borrowed')->count(),
+            ];
+            
+            $libWeeklyData = LibraryVisit::select(DB::raw('DATE(date) as visit_date'), DB::raw('count(*) as total'))
+                ->whereBetween('date', [$startOfWeek, $endOfWeek])
+                ->groupBy('visit_date')->pluck('total', 'visit_date');
 
-        $libData = [];
-        foreach ($labels as $index => $dayName) {
-            $date = $startOfWeek->copy()->addDays($index)->format('Y-m-d');
-            $libData[] = $libWeeklyData[$date] ?? 0;
+            $libData = [];
+            foreach ($labels as $index => $dayName) {
+                $date = $startOfWeek->copy()->addDays($index)->format('Y-m-d');
+                $libData[] = $libWeeklyData[$date] ?? 0;
+            }
+            $libraryChartData = ['labels' => $labels, 'data' => $libData];
+        } catch (\Exception $e) {
+            // Fallback jika tabel library belum ada
+            $libraryStats = ['visitors_today' => 0, 'books_borrowed' => 0];
+            $libraryChartData = ['labels' => $labels, 'data' => array_fill(0, 7, 0)];
         }
-        $libraryChartData = ['labels' => $labels, 'data' => $libData];
 
         $announcements = Announcement::orderBy('created_at', 'desc')->limit(3)->get();
         $achievements = Achievement::with('student')->orderBy('date', 'desc')->limit(6)->get();
