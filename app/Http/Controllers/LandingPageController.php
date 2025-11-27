@@ -17,36 +17,43 @@ class LandingPageController extends Controller
     {
         $today = Carbon::today();
         
+        // --- DEFINISI STATUS (Supaya Konsisten di Atas & Bawah) ---
+        // Kita definisikan array status di sini agar dipakai di semua query
+        $statusHadir     = ['Hadir', 'hadir', 'Present', 'present', 'Tepat Waktu'];
+        $statusTerlambat = ['Terlambat', 'terlambat', 'Late', 'late', 'Telat', 'telat'];
+        $statusSakit     = ['Sakit', 'sakit', 'Sick', 'sick'];
+        $statusIzin      = ['Izin', 'izin', 'Permission', 'permission'];
+        $statusAlpa      = ['Alpa', 'alpa', 'Alpha', 'alpha', 'Absent', 'absent'];
+
         // --- 1. STATISTIK HARIAN (KOTAK INFO) ---
-        // PERBAIKAN UTAMA: Tambahkan ->distinct('student_id') agar siswa yang scan 2x tidak dihitung ganda
         
         $hadir = AttendanceSiswa::whereDate('attendance_date', $today)
-                    ->whereIn('status', ['Hadir', 'hadir', 'Present'])
-                    ->distinct('student_id') // <--- PENTING: Hitung siswa unik saja
+                    ->whereIn('status', $statusHadir)
+                    ->distinct('student_id') 
                     ->count('student_id');
                     
         $terlambat = AttendanceSiswa::whereDate('attendance_date', $today)
-                    ->whereIn('status', ['Terlambat', 'terlambat', 'Late'])
-                    ->distinct('student_id') // <--- PENTING
+                    ->whereIn('status', $statusTerlambat)
+                    ->distinct('student_id') 
                     ->count('student_id');
                     
         $sakit = AttendanceSiswa::whereDate('attendance_date', $today)
-                    ->whereIn('status', ['Sakit', 'sakit'])
+                    ->whereIn('status', $statusSakit)
                     ->distinct('student_id')
                     ->count('student_id');
                     
         $izin = AttendanceSiswa::whereDate('attendance_date', $today)
-                    ->whereIn('status', ['Izin', 'izin'])
+                    ->whereIn('status', $statusIzin)
                     ->distinct('student_id')
                     ->count('student_id');
                     
         $alpa = AttendanceSiswa::whereDate('attendance_date', $today)
-                    ->whereIn('status', ['Alpa', 'alpa', 'Alpha', 'alpha'])
+                    ->whereIn('status', $statusAlpa)
                     ->distinct('student_id')
                     ->count('student_id');
 
         $stats = [
-            'hadir'       => $hadir + $terlambat, // Total Siswa di Sekolah (Tepat Waktu + Terlambat)
+            'hadir'       => $hadir + $terlambat, // Total yang fisik ada di sekolah
             'tepat_waktu' => $hadir,
             'terlambat'   => $terlambat,
             'tidak_hadir' => $sakit + $izin + $alpa
@@ -56,23 +63,22 @@ class LandingPageController extends Controller
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
 
-        // Helper Query (Juga diperbaiki dengan distinct agar grafik akurat)
+        // Helper Query 
         $getQuery = function($statusList) use ($startOfWeek, $endOfWeek) {
-            if (!is_array($statusList)) {
-                $statusList = [$statusList];
-            }
-
-            return AttendanceSiswa::select(DB::raw('DATE(attendance_date) as date'), DB::raw('count(distinct student_id) as total')) // <--- Pakai count(distinct student_id)
+            return AttendanceSiswa::select(DB::raw('DATE(attendance_date) as date'), DB::raw('count(distinct student_id) as total'))
                 ->whereBetween('attendance_date', [$startOfWeek, $endOfWeek])
-                ->whereIn('status', $statusList)
+                ->whereIn('status', $statusList) // Filter status array
                 ->groupBy('date')
                 ->pluck('total', 'date');
         };
 
-        // Ambil Data Chart
-        $dataTepatWaktu = $getQuery(['Hadir', 'hadir', 'Present']);
-        $dataTerlambat  = $getQuery(['Terlambat', 'terlambat']);
-        $dataTidakHadir = $getQuery(['Sakit', 'sakit', 'Izin', 'izin', 'Alpa', 'alpa', 'Alpha']);
+        // Ambil Data Chart Menggunakan Array Status yang Sama
+        $dataTepatWaktu = $getQuery($statusHadir);
+        $dataTerlambat  = $getQuery($statusTerlambat); // SEKARANG SUDAH TERMASUK 'Late', 'Telat', dll
+        
+        // Gabungkan semua status tidak hadir untuk chart merah
+        $allTidakHadir = array_merge($statusSakit, $statusIzin, $statusAlpa);
+        $dataTidakHadir = $getQuery($allTidakHadir);
 
         // Format Data untuk ChartJS
         $labels = [];
