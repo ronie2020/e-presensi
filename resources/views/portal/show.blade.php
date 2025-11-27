@@ -16,8 +16,9 @@
         
         <div class="relative z-10 px-6 sm:px-10 pt-20 pb-8 flex flex-col md:flex-row items-center md:items-end text-center md:text-left">
             
-            <!-- Foto Siswa -->
-            <div class="relative group">
+            <!-- Foto Siswa (DIPERBAIKI: Ditambahkan 'shrink-0') -->
+            <!-- 'shrink-0' mencegah foto tergencet oleh teks nama yang panjang -->
+            <div class="relative group shrink-0">
                 <div class="w-36 h-36 rounded-full bg-white p-1.5 shadow-2xl relative z-10 transform group-hover:scale-105 transition-transform duration-300">
                     <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-4 border-blue-50 relative">
                         @if($student->photo_path)
@@ -36,8 +37,8 @@
             </div>
             
             <!-- Info Siswa -->
-            <div class="md:ml-8 mb-2 flex-1 pt-4 md:pt-0">
-                <h1 class="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight leading-tight mb-2">{{ $student->name }}</h1>
+            <div class="md:ml-8 mb-2 flex-1 pt-4 md:pt-0 min-w-0"> <!-- min-w-0 added for text truncation safety -->
+                <h1 class="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight leading-tight mb-2 break-words">{{ $student->name }}</h1>
                 
                 <div class="flex flex-wrap justify-center md:justify-start gap-3 text-sm font-medium">
                     <!-- Kelas -->
@@ -50,15 +51,11 @@
                         <i class="ph-fill ph-identification-card mr-2 text-lg text-gray-400"></i>
                         {{ $student->student_id }}
                     </span>
-                    <!-- Gender (Optional jika ada kolom gender) -->
-                    {{-- <span class="flex items-center bg-purple-50 px-4 py-1.5 rounded-full text-purple-700 border border-purple-100">
-                        <i class="ph-fill ph-gender-intersex mr-2 text-lg"></i> Laki-laki
-                    </span> --}}
                 </div>
             </div>
 
             <!-- Tombol Cari Lain -->
-            <div class="md:ml-auto mt-6 md:mt-0">
+            <div class="md:ml-auto mt-6 md:mt-0 shrink-0">
                 <a href="{{ route('portal.index') }}" class="inline-flex items-center px-6 py-3 bg-white border-2 border-gray-100 rounded-2xl text-sm font-bold text-gray-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm group">
                     <i class="ph-bold ph-magnifying-glass mr-2 group-hover:scale-110 transition-transform"></i>
                     Cari Siswa Lain
