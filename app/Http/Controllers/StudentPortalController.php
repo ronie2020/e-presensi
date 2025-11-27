@@ -7,6 +7,7 @@ use App\Models\AttendanceSiswa;
 use App\Models\DisciplineRecord;
 use App\Models\LibraryVisit;
 use App\Models\Borrowing;
+use App\Models\Achievement; // Pastikan model ini ada
 use Illuminate\Http\Request;
 
 class StudentPortalController extends Controller
@@ -40,31 +41,56 @@ class StudentPortalController extends Controller
         
         $year = date('Y');
 
-        // 1. REKAP ABSENSI (PERBAIKAN: Menggunakan 'attendance_date')
-        
-        // Hadir: Berdasarkan type 'Masuk'
+        // --- 1. REKAP ABSENSI HARIAN ---
         $hadir = AttendanceSiswa::where('student_id', $student->id)
-                    ->whereYear('attendance_date', $year) // FIX: Pakai attendance_date
-                    ->where('type', 'Masuk')
+                    ->whereYear('attendance_date', $year)
+                    ->where('type', 'Harian')
+                    ->whereIn('status', ['Hadir', 'Terlambat']) 
                     ->count();
         
-        // Sakit, Izin, Alpa: Berdasarkan status
         $sakit = AttendanceSiswa::where('student_id', $student->id)
-                    ->whereYear('attendance_date', $year) // FIX: Pakai attendance_date
+                    ->whereYear('attendance_date', $year)
                     ->where('status', 'Sakit')
                     ->count();
 
         $izin = AttendanceSiswa::where('student_id', $student->id)
-                    ->whereYear('attendance_date', $year) // FIX: Pakai attendance_date
+                    ->whereYear('attendance_date', $year)
                     ->where('status', 'Izin')
                     ->count();
       
         $alpa = AttendanceSiswa::where('student_id', $student->id)
-                    ->whereYear('attendance_date', $year) // FIX: Pakai attendance_date
+                    ->whereYear('attendance_date', $year)
                     ->where('status', 'Alpa')
                     ->count();
+        
+        // (BARU) Riwayat Kehadiran 10 Terakhir
+        $attendance_history = AttendanceSiswa::where('student_id', $student->id)
+                    ->where('type', 'Harian')
+                    ->latest('attendance_date')
+                    ->limit(7)
+                    ->get();
 
-        // 2. Rekap Disiplin
+        // --- 2. REKAP KEAGAMAAN ---
+        $sholat_dhuha = AttendanceSiswa::where('student_id', $student->id)
+                    ->whereYear('attendance_date', $year)
+                    ->where('type', 'Keagamaan')
+                    ->where('activity', 'Dhuha')
+                    ->count();
+
+        $sholat_dhuhur = AttendanceSiswa::where('student_id', $student->id)
+                    ->whereYear('attendance_date', $year)
+                    ->where('type', 'Keagamaan')
+                    ->whereIn('activity', ['Dhuhur', 'Duhur'])
+                    ->count();
+        
+        // (BARU) Riwayat Ibadah Terakhir
+        $religious_history = AttendanceSiswa::where('student_id', $student->id)
+                    ->where('type', 'Keagamaan')
+                    ->latest('created_at')
+                    ->limit(5)
+                    ->get();
+
+        // --- 3. REKAP DISIPLIN ---
         $poin_pelanggaran = DisciplineRecord::where('student_id', $student->id)
             ->whereHas('disciplineType', function($q) { $q->where('type', 'Pelanggaran'); })
             ->with('disciplineType')->get()->sum(fn($r) => $r->disciplineType->point_value);
@@ -76,10 +102,19 @@ class StudentPortalController extends Controller
         $discipline_history = DisciplineRecord::with(['disciplineType', 'recorder'])
             ->where('student_id', $student->id)
             ->orderBy('date', 'desc')
-            ->limit(5)
+            ->limit(10)
             ->get();
 
-        // 3. Data Perpustakaan
+        // --- 4. PRESTASI ---
+        // Cek jika model Achievement ada, jika tidak kosongkan array agar tidak error
+        $achievements = [];
+        if (class_exists('App\Models\Achievement')) {
+            $achievements = Achievement::where('student_id', $student->id)
+                ->orderBy('date', 'desc')
+                ->get();
+        }
+
+        // --- 5. DATA PERPUSTAKAAN ---
         $library_visits = LibraryVisit::where('student_id', $student->id)->count();
 
         $borrowing_history = Borrowing::with('book')
@@ -89,8 +124,11 @@ class StudentPortalController extends Controller
             ->get();
 
         return view('portal.show', compact(
-            'student', 'hadir', 'sakit', 'izin', 'alpa',
+            'student', 
+            'hadir', 'sakit', 'izin', 'alpa', 'attendance_history',
+            'sholat_dhuha', 'sholat_dhuhur', 'religious_history',
             'poin_pelanggaran', 'poin_kebaikan', 'discipline_history',
+            'achievements',
             'library_visits', 'borrowing_history'
         ));
     }
