@@ -447,7 +447,7 @@
         });
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Chart 1: Attendance
+            // Chart 1: Attendance (Grafik Batang)
             const ctx = document.getElementById('publicWeeklyChart');
             if(ctx) {
                 const chartData = @json($barChartData); 
@@ -460,8 +460,16 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        borderRadius: 6,
-                        barThickness: 20,
+                        borderRadius: 4,
+                        barThickness: 25, // Sedikit ditebalkan biar sama dengan dashboard
+                        
+                        // --- TAMBAHAN PENTING DI SINI ---
+                        interaction: {
+                            mode: 'index',     // Menampilkan semua data pada index (hari) yang sama
+                            intersect: false,  // Tooltip muncul walau tidak pas kena batangnya
+                        },
+                        // --------------------------------
+
                         scales: {
                             x: { 
                                 stacked: true, 
@@ -488,14 +496,26 @@
                                 padding: 12,
                                 cornerRadius: 8,
                                 titleFont: { family: "'Plus Jakarta Sans', sans-serif" },
-                                bodyFont: { family: "'Plus Jakarta Sans', sans-serif" }
+                                bodyFont: { family: "'Plus Jakarta Sans', sans-serif" },
+                                
+                                // --- MENAMBAHKAN TOTAL SISWA DI TOOLTIP ---
+                                callbacks: {
+                                    footer: function(tooltipItems) {
+                                        let total = 0;
+                                        tooltipItems.forEach(function(tooltipItem) {
+                                            total += tooltipItem.raw;
+                                        });
+                                        return 'Total: ' + total + ' Siswa';
+                                    }
+                                }
+                                // ------------------------------------------
                             }
                         }
                     }
                 });
             }
 
-            // Chart 2: Library
+            // Chart 2: Library (Grafik Garis - Tidak berubah)
             const libCtx = document.getElementById('publicLibraryChart');
             if (libCtx) {
                 const libData = @json($libraryChartData);
