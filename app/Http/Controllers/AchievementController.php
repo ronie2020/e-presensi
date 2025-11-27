@@ -6,14 +6,23 @@ use App\Models\Achievement;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Jobs\AddAchievementPointJob; // <--- JANGAN LUPA IMPORT INI
+use App\Jobs\AddAchievementPointJob; 
 
 class AchievementController extends Controller
 {
     public function index(Request $request)
     {
-        // Ambil data siswa untuk dropdown
-        $students = Student::with('schoolClass')->orderBy('name')->get();
+        // === PERBAIKAN SORTING SISWA ===
+        // 1. Ambil semua siswa beserta kelasnya
+        // 2. Lakukan sorting koleksi (PHP) agar lebih fleksibel
+        $students = Student::with('schoolClass')
+            ->get()
+            ->sortBy(function ($student) {
+                // Kunci pengurutan: Nama Kelas + Nama Siswa
+                // Contoh: "7A Ahmad", "7A Budi", "7B Caca"
+                $className = $student->schoolClass->name ?? 'ZZZ'; 
+                return $className . $student->name;
+            });
 
         // Ambil data prestasi dengan filter & sorting
         $achievements = Achievement::with('student')
@@ -71,9 +80,6 @@ class AchievementController extends Controller
         if ($achievement->photo_path && Storage::disk('public')->exists($achievement->photo_path)) {
             Storage::disk('public')->delete($achievement->photo_path);
         }
-        
-        // Opsional: Jika ingin menghapus poin kebaikannya juga saat prestasi dihapus,
-        // Anda bisa menambah logika di sini. Tapi biasanya poin tetap dibiarkan sebagai history.
         
         $achievement->delete();
         return redirect()->route('achievements.index')->with('success', 'Data prestasi dihapus.');
