@@ -26,8 +26,8 @@
             90% { opacity: 1; }
             100% { top: 100%; opacity: 0; }
         }
-        /* Custom Scrollbar untuk Table */
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; } /* Height added for horizontal scroll */
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; } 
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
@@ -79,7 +79,7 @@
                             </button>
                         </div>
                         
-                        {{-- Indikator Mode Aktif (Alert Kecil) --}}
+                        {{-- Indikator Mode Aktif --}}
                         <div id="mode-indicator" class="mt-3 mx-1 p-2.5 rounded-lg text-center text-xs font-bold uppercase tracking-wide transition-all duration-300 bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-current animate-pulse"></span>
                             <span>Mode Aktif: Absensi Harian</span>
@@ -91,35 +91,20 @@
                         {{-- AREA KAMERA (KIRI) --}}
                         <div class="lg:col-span-5 flex flex-col">
                             <div class="relative bg-gray-900 rounded-3xl overflow-hidden shadow-lg border-4 border-gray-100 aspect-square sm:aspect-auto sm:h-[400px]" id="camera-container">
-                                
-                                {{-- Placeholder saat loading --}}
                                 <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 z-0">
                                     <svg class="w-12 h-12 mb-2 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                     <span class="text-xs font-medium uppercase tracking-widest">Memuat Kamera...</span>
                                 </div>
-
-                                {{-- Element Video --}}
                                 <div id="qr-reader" class="w-full h-full object-cover relative z-10"></div>
-                                
-                                {{-- Overlay Animasi Scanning --}}
-                                <div class="scanner-overlay z-20">
-                                    <div class="scanner-line"></div>
-                                </div>
-
-                                {{-- Status Badge di dalam kamera --}}
+                                <div class="scanner-overlay z-20"><div class="scanner-line"></div></div>
                                 <div class="absolute bottom-4 left-0 right-0 flex justify-center z-30 px-4">
                                     <div id="scan-status" class="bg-black/60 backdrop-blur-md text-white text-xs py-1.5 px-4 rounded-full font-mono border border-white/10">
                                         Menunggu Input...
                                     </div>
                                 </div>
                             </div>
-
-                            {{-- Hasil Scan Alert --}}
                             <div id="scan-result" class="mt-4 p-4 rounded-2xl font-bold text-sm text-center hidden transition-all duration-500 shadow-md transform scale-95 opacity-0"></div>
-                            
-                            <p class="mt-4 text-center text-xs text-gray-400">
-                                Pastikan QR Code berada di dalam bingkai dan memiliki pencahayaan yang cukup.
-                            </p>
+                            <p class="mt-4 text-center text-xs text-gray-400">Pastikan QR Code berada di dalam bingkai dan memiliki pencahayaan yang cukup.</p>
                         </div>
 
                         {{-- AREA TABEL RIWAYAT (KANAN) --}}
@@ -132,10 +117,7 @@
                                     Riwayat Live
                                 </h3>
                                 <div class="flex items-center gap-2">
-                                    <span class="flex h-2 w-2">
-                                      <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
-                                      <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                                    </span>
+                                    <span class="flex h-2 w-2"><span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span></span>
                                     <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Real-time</span>
                                 </div>
                             </div>
@@ -153,7 +135,6 @@
                                             </tr>
                                         </thead>
                                         <tbody id="scan-log" class="text-sm divide-y divide-gray-100">
-                                            {{-- Iterasi data scan terbaru --}}
                                             @foreach($recentScans as $scan)
                                                 <tr class="log-entry group hover:bg-white transition-colors rounded-xl" id="log-row-{{ $scan['student_id'] }}" 
                                                     data-harian="{{ $scan['data_harian'] ? 'true' : 'false' }}"
@@ -182,14 +163,22 @@
                                                     </td>
 
                                                     <td class="log-status px-4 py-3 whitespace-nowrap text-right">
-                                                        {{-- BADGE LOGIC BLADE --}}
-                                                        <span class="status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg
+                                                        {{-- BADGE: HARIAN (Default) --}}
+                                                        <span class="badge-harian status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg
                                                             {{ $scan['status'] == 'Masuk' ? 'bg-green-100 text-green-700' : 
                                                                ($scan['status'] == 'Terlambat' ? 'bg-amber-100 text-amber-700' :
-                                                               ($scan['status'] == 'Pulang' ? 'bg-indigo-100 text-indigo-700' : 
-                                                               ($scan['status'] == 'Dhuha' ? 'bg-emerald-100 text-emerald-700' : 
-                                                               ($scan['status'] == 'Dhuhur' || $scan['status'] == 'Duhur' ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600')))) }}">
-                                                            {{ $scan['status'] == 'Duhur' ? 'Dhuhur' : $scan['status'] }}
+                                                               ($scan['status'] == 'Pulang' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600')) }}">
+                                                            {{ $scan['status'] }}
+                                                        </span>
+
+                                                        {{-- BADGE: DHUHA (Hidden by Default) --}}
+                                                        <span class="badge-dhuha status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-emerald-100 text-emerald-700 hidden">
+                                                            Sholat Dhuha
+                                                        </span>
+
+                                                        {{-- BADGE: DHUHUR (Hidden by Default) --}}
+                                                        <span class="badge-dhuhur status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-orange-100 text-orange-700 hidden">
+                                                            Sholat Dhuhur
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -226,54 +215,30 @@
                     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                     const oscillator = audioCtx.createOscillator();
                     const gainNode = audioCtx.createGain();
-                    
                     oscillator.connect(gainNode);
                     gainNode.connect(audioCtx.destination);
-                    
-                    oscillator.type = 'sine'; 
-                    oscillator.frequency.value = 1000; 
-                    
+                    oscillator.type = 'sine'; oscillator.frequency.value = 1000; 
                     gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                    
-                    oscillator.start();
-                    oscillator.stop(audioCtx.currentTime + 0.15); 
-                } catch (e) {
-                    console.log("Audio context error", e);
-                }
+                    oscillator.start(); oscillator.stop(audioCtx.currentTime + 0.15); 
+                } catch (e) {}
             }
 
             const logTableBody = document.getElementById('scan-log');
             const scanStatus = document.getElementById('scan-status');
             const scanResult = document.getElementById('scan-result');
             const modeIndicator = document.getElementById('mode-indicator');
-            const cameraContainer = document.getElementById('camera-container');
-            
             let resultTimeout; 
             let isProcessing = false;
 
             const typeConfig = {
-                'Harian': { 
-                    activeClass: 'bg-blue-600 text-white shadow-lg shadow-blue-200', 
-                    inactiveClass: 'bg-white text-gray-500 hover:bg-gray-100',
-                    indicatorClass: 'bg-blue-50 text-blue-600 border-blue-100',
-                },
-                'Dhuha': { 
-                    activeClass: 'bg-emerald-600 text-white shadow-lg shadow-emerald-200', 
-                    inactiveClass: 'bg-white text-gray-500 hover:bg-gray-100',
-                    indicatorClass: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-                },
-                'Dhuhur': { 
-                    activeClass: 'bg-orange-500 text-white shadow-lg shadow-orange-200', 
-                    inactiveClass: 'bg-white text-gray-500 hover:bg-gray-100',
-                    indicatorClass: 'bg-orange-50 text-orange-600 border-orange-100',
-                }
+                'Harian': { activeClass: 'bg-blue-600 text-white shadow-lg shadow-blue-200', inactiveClass: 'bg-white text-gray-500 hover:bg-gray-100', indicatorClass: 'bg-blue-50 text-blue-600 border-blue-100' },
+                'Dhuha': { activeClass: 'bg-emerald-600 text-white shadow-lg shadow-emerald-200', inactiveClass: 'bg-white text-gray-500 hover:bg-gray-100', indicatorClass: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
+                'Dhuhur': { activeClass: 'bg-orange-500 text-white shadow-lg shadow-orange-200', inactiveClass: 'bg-white text-gray-500 hover:bg-gray-100', indicatorClass: 'bg-orange-50 text-orange-600 border-orange-100' }
             };
 
             const clockElement = document.getElementById('clock');
             if(clockElement) {
-                setInterval(() => {
-                    clockElement.textContent = new Date().toLocaleTimeString('id-ID', { hour12: false });
-                }, 1000);
+                setInterval(() => { clockElement.textContent = new Date().toLocaleTimeString('id-ID', { hour12: false }); }, 1000);
             }
 
             const buttons = document.querySelectorAll('.scan-type-btn');
@@ -299,40 +264,53 @@
                 filterLogs(selectedType);
             }
 
-            buttons.forEach(button => {
-                button.addEventListener('click', () => {
-                    setActiveTab(button.getAttribute('data-type'));
-                });
-            });
-            
+            buttons.forEach(button => button.addEventListener('click', () => setActiveTab(button.getAttribute('data-type'))));
             setActiveTab('Harian');
 
             function updateTableLayout(type) {
                 const harianCols = document.querySelectorAll('.col-harian');
                 const prayerCols = document.querySelectorAll('.col-prayer');
                 const thElements = document.querySelectorAll('thead th');
+                
+                // Toggle Badges
+                const harianBadges = document.querySelectorAll('.badge-harian');
+                const dhuhaBadges = document.querySelectorAll('.badge-dhuha');
+                const dhuhurBadges = document.querySelectorAll('.badge-dhuhur');
 
                 if (type === 'Harian') {
                     harianCols.forEach(el => el.style.display = '');
                     prayerCols.forEach(el => el.style.display = 'none');
-                    if(thElements[4]) thElements[4].textContent = 'Status'; 
-                } else {
+                    if(thElements[4]) thElements[4].textContent = 'Status';
+                    
+                    harianBadges.forEach(el => el.classList.remove('hidden'));
+                    dhuhaBadges.forEach(el => el.classList.add('hidden'));
+                    dhuhurBadges.forEach(el => el.classList.add('hidden'));
+                } else if (type === 'Dhuha') {
                     harianCols.forEach(el => el.style.display = 'none');
                     prayerCols.forEach(el => el.style.display = '');
-                    if(thElements[3]) thElements[3].textContent = 'Waktu Sholat'; 
+                    if(thElements[3]) thElements[3].textContent = 'Waktu Sholat';
+                    
+                    harianBadges.forEach(el => el.classList.add('hidden'));
+                    dhuhaBadges.forEach(el => el.classList.remove('hidden'));
+                    dhuhurBadges.forEach(el => el.classList.add('hidden'));
+                } else if (type === 'Dhuhur') {
+                    harianCols.forEach(el => el.style.display = 'none');
+                    prayerCols.forEach(el => el.style.display = '');
+                    if(thElements[3]) thElements[3].textContent = 'Waktu Sholat';
+                    
+                    harianBadges.forEach(el => el.classList.add('hidden'));
+                    dhuhaBadges.forEach(el => el.classList.add('hidden'));
+                    dhuhurBadges.forEach(el => el.classList.remove('hidden'));
                 }
             }
 
             const html5QrCode = new Html5Qrcode("qr-reader");
-            
             const qrCodeSuccessCallback = (decodedText, decodedResult) => {
                 if (isProcessing) return;
                 isProcessing = true;
-
                 html5QrCode.pause();
                 playBeep();
                 scanStatus.textContent = `Memproses Data...`;
-                
                 if (decodedText.length < 3 || decodedText.length > 50) {
                      showScanResult('error', 'Format QR Code tidak valid.');
                      resumeScanner();
@@ -342,19 +320,14 @@
             };
 
             const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
-            
             Html5Qrcode.getCameras().then(cameras => {
                 if (cameras && cameras.length) {
                     const rearCamera = cameras.find(camera => camera.label.toLowerCase().includes('back')) || cameras[0];
                     html5QrCode.start(rearCamera.id, config, qrCodeSuccessCallback).catch(() => {
                          html5QrCode.start(cameras[0].id, config, qrCodeSuccessCallback);
                     });
-                } else {
-                    scanStatus.textContent = "Kamera tidak ditemukan";
-                }
-            }).catch(err => {
-                scanStatus.textContent = "Izin kamera ditolak";
-            });
+                } else { scanStatus.textContent = "Kamera tidak ditemukan"; }
+            }).catch(err => { scanStatus.textContent = "Izin kamera ditolak"; });
 
             function resumeScanner() {
                 setTimeout(() => {
@@ -372,66 +345,34 @@
                         body: JSON.stringify({ student_id: studentId, type: scanType })
                     });
                     const result = await response.json();
-
                     if (response.ok || response.status === 409 || response.status === 200) {
                         const msgType = response.status === 409 ? 'warning' : 'success';
                         showScanResult(msgType, result.message);
-                        
                         if (result.scan) {
                             const realType = result.scan.type === 'Harian' ? 'Harian' : (result.scan.activity || scanType);
                             updateOrCreateScanLog(result.scan, realType);
                         }
-                    } else {
-                        showScanResult('error', result.message || `Error ${response.status}`);
-                    }
-                } catch (error) {
-                    console.error(error);
-                    showScanResult('error', 'Gagal terhubung ke server.');
-                } finally {
-                    resumeScanner();
-                }
+                    } else { showScanResult('error', result.message || `Error ${response.status}`); }
+                } catch (error) { showScanResult('error', 'Gagal terhubung ke server.'); } finally { resumeScanner(); }
             }
 
             function showScanResult(type, message) {
                 if (resultTimeout) clearTimeout(resultTimeout);
-
                 scanResult.className = 'mt-4 p-4 rounded-2xl font-bold text-sm text-center transition-all duration-500 shadow-md transform scale-100 opacity-100';
-                
-                if (type === 'success') {
-                    scanResult.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-200');
-                } else if (type === 'warning') {
-                    scanResult.classList.add('bg-yellow-50', 'text-yellow-700', 'border', 'border-yellow-200');
-                } else {
-                    scanResult.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-200');
-                }
-                
-                scanResult.innerHTML = `
-                    <div class="flex items-center justify-center gap-2">
-                        ${type === 'success' ? 
-                            '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' : 
-                            (type === 'warning' ? 
-                            '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>' :
-                            '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>')
-                        }
-                        <span>${message}</span>
-                    </div>
-                `;
-
+                if (type === 'success') scanResult.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-200');
+                else if (type === 'warning') scanResult.classList.add('bg-yellow-50', 'text-yellow-700', 'border', 'border-yellow-200');
+                else scanResult.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-200');
+                scanResult.innerHTML = `<span>${message}</span>`;
                 scanResult.classList.remove('hidden');
-
                 resultTimeout = setTimeout(() => {
-                    scanResult.classList.remove('opacity-100', 'scale-100');
                     scanResult.classList.add('opacity-0', 'scale-95');
-                    setTimeout(() => {
-                        scanResult.classList.add('hidden');
-                    }, 300);
+                    setTimeout(() => scanResult.classList.add('hidden'), 300);
                 }, 5000); 
             }
 
             function updateOrCreateScanLog(scan, scanTypeProcessed) { 
                 if (document.getElementById('no-log-entry')) document.getElementById('no-log-entry').classList.add('hidden'); 
                 if (document.getElementById('empty-filter-msg')) document.getElementById('empty-filter-msg').remove();
-
                 if (!scan.student) return;
 
                 const rowId = `log-row-${scan.student.student_id}`; 
@@ -453,7 +394,9 @@
                             <span class="time-dhuhur hidden">-</span>
                         </td>
                         <td class="log-status px-4 py-3 whitespace-nowrap text-right">
-                            <span class="status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-gray-100 text-gray-800">Baru</span>
+                            <span class="badge-harian status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-gray-100 text-gray-800">Baru</span>
+                            <span class="badge-dhuha status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-emerald-100 text-emerald-700 hidden">Sholat Dhuha</span>
+                            <span class="badge-dhuhur status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-orange-100 text-orange-700 hidden">Sholat Dhuhur</span>
                         </td>
                     `;
                     logTableBody.prepend(row);
@@ -465,23 +408,23 @@
                 else if (scanTypeProcessed === 'Dhuhur' || scanTypeProcessed === 'Duhur') row.setAttribute('data-dhuhur', 'true');
 
                 const timeStr = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
-                const badge = row.querySelector('.status-badge');
+                const badgeHarian = row.querySelector('.badge-harian');
                 const dhuhaSpan = row.querySelector('.time-dhuha');
                 const dhuhurSpan = row.querySelector('.time-dhuhur');
                 
                 if (scan.type === 'Harian') {
-                    if (scan.status === 'Masuk' || scan.status === 'Hadir') { // Menangani status Hadir sebagai Masuk
+                    if (scan.status === 'Masuk' || scan.status === 'Hadir') { 
                         row.querySelector('.log-time-in').textContent = timeStr;
-                        badge.className = 'status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-green-100 text-green-700';
-                        badge.textContent = 'Masuk';
-                    } else if (scan.status === 'Terlambat') { // MENANGANI STATUS TERLAMBAT
+                        badgeHarian.className = 'badge-harian status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-green-100 text-green-700';
+                        badgeHarian.textContent = 'Masuk';
+                    } else if (scan.status === 'Terlambat') { 
                         row.querySelector('.log-time-in').textContent = timeStr;
-                        badge.className = 'status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-amber-100 text-amber-700'; // Warna Kuning/Amber
-                        badge.textContent = 'Terlambat';
+                        badgeHarian.className = 'badge-harian status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-amber-100 text-amber-700';
+                        badgeHarian.textContent = 'Terlambat';
                     } else if (scan.status === 'Pulang') {
                         row.querySelector('.log-time-out').textContent = timeStr;
-                        badge.className = 'status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-indigo-100 text-indigo-700';
-                        badge.textContent = 'Pulang';
+                        badgeHarian.className = 'badge-harian status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-indigo-100 text-indigo-700';
+                        badgeHarian.textContent = 'Pulang';
                     }
                 } else {
                     let activityName = scan.activity || scanTypeProcessed;
@@ -489,12 +432,9 @@
 
                     if (activityName === 'Dhuha') {
                         if(dhuhaSpan) { dhuhaSpan.textContent = timeStr; dhuhaSpan.classList.remove('hidden'); }
-                        badge.className = 'status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-emerald-100 text-emerald-700';
                     } else if (activityName === 'Dhuhur') {
                         if(dhuhurSpan) { dhuhurSpan.textContent = timeStr; dhuhurSpan.classList.remove('hidden'); }
-                        badge.className = 'status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-orange-100 text-orange-700';
                     }
-                    badge.textContent = activityName;
                 }
 
                 updateTableLayout(selectedType);
@@ -532,25 +472,11 @@
                 if (rows.length > 0 && visibleCount === 0) {
                     const emptyRow = document.createElement('tr');
                     emptyRow.id = 'empty-filter-msg';
-                    emptyRow.innerHTML = `<td colspan="5" class="px-6 py-12 text-center">
-                        <div class="flex flex-col items-center justify-center">
-                            <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
-                                <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <p class="text-sm text-gray-400 font-medium italic">Belum ada data untuk ${type === 'Harian' ? 'Absensi Harian' : 'Sholat ' + type}</p>
-                        </div>
-                    </td>`;
+                    emptyRow.innerHTML = `<td colspan="5" class="px-6 py-12 text-center text-gray-400 font-medium italic">Belum ada data untuk ${type === 'Harian' ? 'Absensi Harian' : 'Sholat ' + type}</td>`;
                     logTableBody.appendChild(emptyRow);
                 }
-                
                 const noLogEntry = document.getElementById('no-log-entry');
-                if (noLogEntry) {
-                    if (rows.length === 0) {
-                        noLogEntry.classList.remove('hidden');
-                    } else {
-                        noLogEntry.classList.add('hidden');
-                    }
-                }
+                if (noLogEntry) noLogEntry.classList.toggle('hidden', rows.length > 0);
             }
         });
     </script>
