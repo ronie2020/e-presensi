@@ -26,6 +26,10 @@ use Illuminate\Support\Facades\Route;
 // --- UTAMA: RUTE LANDING PAGE ---
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 
+// [BARU] RUTE DIREKTORI GURU
+Route::get('/pengajar', [LandingPageController::class, 'teachers'])->name('teachers.index');
+
+
 
 // RUTE DASHBOARD (Hanya bisa diakses setelah Login)
 Route::get('/dashboard', [DashboardController::class, 'index']) 

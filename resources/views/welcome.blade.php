@@ -343,7 +343,8 @@
         
         <!-- Tombol Lihat Semua -->
         <div class="text-center mt-12" data-aos="fade-up">
-            <a href="#" class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm hover:shadow-md">
+            <!-- UPDATE HREF DI SINI -->
+            <a href="{{ route('teachers.index') }}" class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm hover:shadow-md">
                 Lihat Seluruh Staff Pengajar
                 <i class="ph-bold ph-arrow-right ml-2"></i>
             </a>

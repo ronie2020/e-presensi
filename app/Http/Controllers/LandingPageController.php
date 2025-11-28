@@ -110,21 +110,33 @@ class LandingPageController extends Controller
         // --- 5. DATA GURU (BAGIAN PERBAIKAN) ---
         // Ini adalah bagian yang menyebabkan error sebelumnya karena tidak ada.
         // Sekarang kita ambil data User yang perannya adalah guru/staf.
-        $teachers = User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'])
+       $teachers = User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'])
                         ->latest()
-                        ->take(8) // Ambil 8 guru terbaru
+                        ->take(8) 
                         ->get();
 
-        // --- KIRIM KE VIEW ---
         return view('welcome', compact(
-            'stats', 
-            'barChartData', 
-            'libraryStats', 
-            'libraryChartData', 
-            'announcements', 
-            'achievements',
-            'activities',
-            'teachers' // <--- 2. VARIABEL INI WAJIB DIKIRIM AGAR TIDAK ERROR
+            'stats', 'barChartData', 'libraryStats', 'libraryChartData', 
+            'announcements', 'achievements', 'activities', 'teachers'
         ));
+    }
+
+    // --- [BARU] METHOD UNTUK HALAMAN SEMUA GURU ---
+    public function teachers(Request $request)
+    {
+        // Ambil input pencarian (opsional)
+        $search = $request->input('q');
+
+        $query = User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket']);
+
+        if ($search) {
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('position', 'like', "%{$search}%");
+        }
+
+        // Ambil data dengan pagination (12 orang per halaman)
+        $teachers = $query->orderBy('name', 'asc')->paginate(12);
+
+        return view('teachers', compact('teachers'));
     }
 }
