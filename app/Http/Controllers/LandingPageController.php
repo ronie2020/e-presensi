@@ -8,6 +8,7 @@ use App\Models\LibraryVisit;
 use App\Models\Borrowing;
 use App\Models\Announcement;
 use App\Models\Achievement;
+use App\Models\SchoolActivity; // <--- 1. TAMBAHKAN IMPORT INI
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -18,7 +19,6 @@ class LandingPageController extends Controller
         $today = Carbon::today();
         
         // --- DEFINISI STATUS (Supaya Konsisten di Atas & Bawah) ---
-        // Kita definisikan array status di sini agar dipakai di semua query
         $statusHadir     = ['Hadir', 'hadir', 'Present', 'present', 'Tepat Waktu'];
         $statusTerlambat = ['Terlambat', 'terlambat', 'Late', 'late', 'Telat', 'telat'];
         $statusSakit     = ['Sakit', 'sakit', 'Sick', 'sick'];
@@ -53,7 +53,7 @@ class LandingPageController extends Controller
                     ->count('student_id');
 
         $stats = [
-            'hadir'       => $hadir + $terlambat, // Total yang fisik ada di sekolah
+            'hadir'       => $hadir + $terlambat,
             'tepat_waktu' => $hadir,
             'terlambat'   => $terlambat,
             'tidak_hadir' => $sakit + $izin + $alpa
@@ -63,24 +63,19 @@ class LandingPageController extends Controller
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
 
-        // Helper Query 
         $getQuery = function($statusList) use ($startOfWeek, $endOfWeek) {
             return AttendanceSiswa::select(DB::raw('DATE(attendance_date) as date'), DB::raw('count(distinct student_id) as total'))
                 ->whereBetween('attendance_date', [$startOfWeek, $endOfWeek])
-                ->whereIn('status', $statusList) // Filter status array
+                ->whereIn('status', $statusList)
                 ->groupBy('date')
                 ->pluck('total', 'date');
         };
 
-        // Ambil Data Chart Menggunakan Array Status yang Sama
         $dataTepatWaktu = $getQuery($statusHadir);
-        $dataTerlambat  = $getQuery($statusTerlambat); // SEKARANG SUDAH TERMASUK 'Late', 'Telat', dll
-        
-        // Gabungkan semua status tidak hadir untuk chart merah
+        $dataTerlambat  = $getQuery($statusTerlambat);
         $allTidakHadir = array_merge($statusSakit, $statusIzin, $statusAlpa);
         $dataTidakHadir = $getQuery($allTidakHadir);
 
-        // Format Data untuk ChartJS
         $labels = [];
         $datasetHadir = [];
         $datasetTelat = [];
@@ -143,13 +138,19 @@ class LandingPageController extends Controller
             $libraryChartData = ['labels' => $labels, 'data' => array_fill(0, 7, 0)];
         }
 
+        // --- 4. DATA CMS (Pengumuman, Prestasi, DAN KEGIATAN) ---
         $announcements = Announcement::orderBy('created_at', 'desc')->limit(3)->get();
         $achievements = Achievement::with('student')->orderBy('date', 'desc')->limit(6)->get();
+
+        // <--- 2. AMBIL DATA KEGIATAN DI SINI ---
+        // Mengambil 3 kegiatan terbaru untuk ditampilkan di grid landing page
+        $activities = SchoolActivity::latest()->take(3)->get();
 
         return view('welcome', compact(
             'stats', 'barChartData', 
             'libraryStats', 'libraryChartData', 
-            'announcements', 'achievements'
+            'announcements', 'achievements',
+            'activities' // <--- 3. KIRIM VARIABEL KE VIEW
         ));
     }
 }

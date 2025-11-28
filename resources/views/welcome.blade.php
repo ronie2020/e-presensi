@@ -61,7 +61,6 @@
             <div class="flex justify-between h-20 items-center">
                 <div class="flex items-center gap-3">
                     <div class="relative w-12 h-12 flex-shrink-0">
-                        {{-- Fallback Logo jika file tidak ditemukan --}}
                         <img 
                             src="{{ asset('images/logo.png') }}" 
                             alt="Logo SMPN 3 Lakbok" 
@@ -204,7 +203,7 @@
         </div>
     </div>
 
-    <!-- [BARU] SECTION: PROFIL SEKOLAH -->
+    <!-- SECTION: PROFIL SEKOLAH -->
     <div id="profil" class="py-24 bg-white relative overflow-hidden border-y border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -217,7 +216,7 @@
                         SMP Negeri 3 Lakbok berkomitmen untuk memberikan layanan pendidikan terbaik yang mengintegrasikan kecerdasan akademik dengan nilai-nilai karakter luhur. Kami hadir untuk mencetak pemimpin masa depan.
                     </p>
                     
-                    <!-- Stats Grid (Placeholder Static Data) -->
+                    <!-- Stats Grid (Static Data) -->
                     <div class="grid grid-cols-3 gap-6 pt-6">
                         <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-md transition-all">
                             <p class="text-3xl font-black text-slate-800">542</p>
@@ -252,54 +251,116 @@
         </div>
     </div>
 
-    <!-- [BARU] SECTION: KEGIATAN SEKOLAH -->
-    <div id="kegiatan" class="py-24 bg-slate-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- [UPDATED] SECTION: KEGIATAN SEKOLAH (DYNAMIC) -->
+    <div id="kegiatan" class="py-24 bg-slate-50 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up">
                 <span class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-black uppercase tracking-widest border border-indigo-100">Galeri</span>
                 <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 mt-4 mb-4">Aktifitas & Kegiatan Siswa</h2>
-                <p class="text-slate-500 text-lg">Beragam kegiatan ekstrakurikuler dan acara sekolah yang mendukung pengembangan bakat dan minat siswa secara holistik.</p>
+                <p class="text-slate-500 text-lg">Dokumentasi kegiatan ekstrakurikuler dan acara sekolah terbaru.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Card 1 -->
-                <div class="bg-white rounded-3xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 group border border-slate-100 hover:border-blue-200" data-aos="fade-up" data-aos-delay="100">
-                    <div class="h-48 bg-blue-50 rounded-2xl mb-4 overflow-hidden relative">
-                        <div class="absolute inset-0 flex items-center justify-center bg-blue-100 text-blue-300 group-hover:scale-110 transition-transform duration-500">
-                             <i class="ph-duotone ph-basketball text-6xl"></i>
-                        </div>
-                    </div>
-                    <div class="px-2 pb-2">
-                        <h4 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">Ekstrakurikuler Olahraga</h4>
-                        <p class="text-sm text-slate-500 leading-relaxed">Pengembangan fisik, sportivitas, dan kerjasama tim melalui kegiatan bola basket, bola voli, dan futsal.</p>
-                    </div>
-                </div>
+                @forelse($activities as $activity)
+                    <!-- Kartu Kegiatan -->
+                    <div class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-slate-100 flex flex-col h-full" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
+                        
+                        <!-- Area Gambar/Video -->
+                        <div class="relative h-56 overflow-hidden">
+                            <!-- Gambar Utama -->
+                            @if($activity->image_path)
+                                <img src="{{ asset('storage/' . $activity->image_path) }}" 
+                                     alt="{{ $activity->title }}" 
+                                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                >
+                                <div class="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400" style="display: none;">
+                                    <i class="ph-duotone ph-image-broken text-4xl"></i>
+                                </div>
+                            @else
+                                <div class="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400">
+                                    <i class="ph-duotone ph-image text-4xl"></i>
+                                </div>
+                            @endif
 
-                <!-- Card 2 -->
-                <div class="bg-white rounded-3xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 group border border-slate-100 hover:border-purple-200" data-aos="fade-up" data-aos-delay="200">
-                    <div class="h-48 bg-purple-50 rounded-2xl mb-4 overflow-hidden relative">
-                        <div class="absolute inset-0 flex items-center justify-center bg-purple-100 text-purple-300 group-hover:scale-110 transition-transform duration-500">
-                             <i class="ph-duotone ph-tent text-6xl"></i>
-                        </div>
-                    </div>
-                    <div class="px-2 pb-2">
-                        <h4 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">Pramuka & Kepemimpinan</h4>
-                        <p class="text-sm text-slate-500 leading-relaxed">Membentuk karakter disiplin, kemandirian, dan jiwa kepemimpinan yang tangguh melalui kegiatan kepramukaan.</p>
-                    </div>
-                </div>
+                            <!-- Overlay Gradient -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
 
-                <!-- Card 3 -->
-                <div class="bg-white rounded-3xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 group border border-slate-100 hover:border-orange-200" data-aos="fade-up" data-aos-delay="300">
-                    <div class="h-48 bg-orange-50 rounded-2xl mb-4 overflow-hidden relative">
-                        <div class="absolute inset-0 flex items-center justify-center bg-orange-100 text-orange-300 group-hover:scale-110 transition-transform duration-500">
-                             <i class="ph-duotone ph-book-open-text text-6xl"></i>
+                            <!-- Tombol Play Video (Muncul jika ada video_url) -->
+                            @if($activity->video_url)
+                                <a href="{{ $activity->video_url }}" target="_blank" class="absolute inset-0 flex items-center justify-center z-20 group/play">
+                                    <div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/50 shadow-lg group-hover/play:scale-110 group-hover/play:bg-red-600 group-hover/play:border-red-500 transition-all duration-300">
+                                        <i class="ph-fill ph-play text-2xl text-white ml-1"></i>
+                                    </div>
+                                </a>
+                                <div class="absolute top-4 right-4 z-20">
+                                    <span class="px-2 py-1 bg-red-600 text-white text-[10px] font-bold uppercase rounded-md shadow-md flex items-center gap-1">
+                                        <i class="ph-fill ph-video-camera"></i> Video
+                                    </span>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Konten Teks -->
+                        <div class="p-6 flex-1 flex flex-col">
+                            <h4 class="text-xl font-bold text-slate-800 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                {{ $activity->title }}
+                            </h4>
+                            <p class="text-sm text-slate-500 leading-relaxed line-clamp-3 mb-4 flex-1">
+                                {{ $activity->description }}
+                            </p>
+                            
+                            <!-- Footer Kartu -->
+                            <div class="pt-4 border-t border-slate-50 flex items-center justify-between text-xs text-slate-400 font-medium">
+                                <span class="flex items-center gap-1">
+                                    <i class="ph-fill ph-calendar-blank"></i> {{ $activity->created_at->format('d M Y') }}
+                                </span>
+                                @if($activity->video_url)
+                                    <a href="{{ $activity->video_url }}" target="_blank" class="text-blue-500 font-bold hover:underline">Tonton Video &rarr;</a>
+                                @endif
+                            </div>
                         </div>
                     </div>
-                    <div class="px-2 pb-2">
-                        <h4 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-orange-600 transition-colors">Literasi & Keagamaan</h4>
-                        <p class="text-sm text-slate-500 leading-relaxed">Program pembiasaan membaca pagi (literasi) dan kegiatan keagamaan rutin untuk keseimbangan ilmu dan iman.</p>
+                @empty
+                    <!-- Placeholder SEMENTARA (Jika Database Kosong) -->
+                    <!-- Dummy 1 -->
+                    <div class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col h-full" data-aos="fade-up" data-aos-delay="100">
+                        <div class="relative h-56 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-black/20"></div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-blue-600">Pertandingan Basket Antar Kelas</h4>
+                            <p class="text-sm text-slate-500">Keseruan pertandingan final liga basket sekolah yang mempertemukan kelas 9A dan 8C.</p>
+                        </div>
                     </div>
-                </div>
+
+                    <!-- Dummy 2 -->
+                    <div class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col h-full" data-aos="fade-up" data-aos-delay="200">
+                        <div class="relative h-56 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-black/20"></div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-blue-600">Kegiatan Belajar Mengajar Outdoor</h4>
+                            <p class="text-sm text-slate-500">Siswa kelas 7 melakukan observasi lingkungan sekolah untuk mata pelajaran IPA.</p>
+                        </div>
+                    </div>
+
+                    <!-- Dummy 3 -->
+                    <div class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col h-full" data-aos="fade-up" data-aos-delay="300">
+                        <div class="relative h-56 overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1526634332515-d56d77395b2c?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-14 h-14 bg-white/30 backdrop-blur rounded-full flex items-center justify-center border border-white"><i class="ph-fill ph-play text-white text-2xl ml-1"></i></div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-blue-600">Dokumentasi Perpisahan Kelas 9</h4>
+                            <p class="text-sm text-slate-500">Video rekap momen mengharukan pelepasan siswa kelas 9 angkatan 2024.</p>
+                        </div>
+                    </div>
+                @endforelse
             </div>
         </div>
     </div>
@@ -543,7 +604,7 @@
         });
 
         // -----------------------------------------------------
-        // DATA GLOBAL UNTUK JS
+        // DATA GLOBAL UNTUK JS (PENTING AGAR TIDAK ERROR!)
         // -----------------------------------------------------
         window.announcementsData = @json($announcements);
 

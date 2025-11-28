@@ -158,6 +158,9 @@ Route::middleware('auth')->group(function () {
     // Route Achievement
     Route::resource('achievements', \App\Http\Controllers\AchievementController::class);
 
+    // Route Kegiatan Sekolah (Admin CRUD)
+    Route::resource('school-activities', \App\Http\Controllers\SchoolActivityController::class);
+
 });
 
 require __DIR__.'/auth.php';
