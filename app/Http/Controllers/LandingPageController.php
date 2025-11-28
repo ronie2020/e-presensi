@@ -8,7 +8,8 @@ use App\Models\LibraryVisit;
 use App\Models\Borrowing;
 use App\Models\Announcement;
 use App\Models\Achievement;
-use App\Models\SchoolActivity; // <--- 1. TAMBAHKAN IMPORT INI
+use App\Models\SchoolActivity;
+use App\Models\User; // <--- 1. SAYA TAMBAHKAN INI (PENTING!)
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -18,39 +19,19 @@ class LandingPageController extends Controller
     {
         $today = Carbon::today();
         
-        // --- DEFINISI STATUS (Supaya Konsisten di Atas & Bawah) ---
+        // --- DEFINISI STATUS (LOGIKA ASLI ANDA) ---
         $statusHadir     = ['Hadir', 'hadir', 'Present', 'present', 'Tepat Waktu'];
         $statusTerlambat = ['Terlambat', 'terlambat', 'Late', 'late', 'Telat', 'telat'];
         $statusSakit     = ['Sakit', 'sakit', 'Sick', 'sick'];
         $statusIzin      = ['Izin', 'izin', 'Permission', 'permission'];
         $statusAlpa      = ['Alpa', 'alpa', 'Alpha', 'alpha', 'Absent', 'absent'];
 
-        // --- 1. STATISTIK HARIAN (KOTAK INFO) ---
-        
-        $hadir = AttendanceSiswa::whereDate('attendance_date', $today)
-                    ->whereIn('status', $statusHadir)
-                    ->distinct('student_id') 
-                    ->count('student_id');
-                    
-        $terlambat = AttendanceSiswa::whereDate('attendance_date', $today)
-                    ->whereIn('status', $statusTerlambat)
-                    ->distinct('student_id') 
-                    ->count('student_id');
-                    
-        $sakit = AttendanceSiswa::whereDate('attendance_date', $today)
-                    ->whereIn('status', $statusSakit)
-                    ->distinct('student_id')
-                    ->count('student_id');
-                    
-        $izin = AttendanceSiswa::whereDate('attendance_date', $today)
-                    ->whereIn('status', $statusIzin)
-                    ->distinct('student_id')
-                    ->count('student_id');
-                    
-        $alpa = AttendanceSiswa::whereDate('attendance_date', $today)
-                    ->whereIn('status', $statusAlpa)
-                    ->distinct('student_id')
-                    ->count('student_id');
+        // --- 1. STATISTIK HARIAN (LOGIKA ASLI ANDA - TETAP ADA) ---
+        $hadir = AttendanceSiswa::whereDate('attendance_date', $today)->whereIn('status', $statusHadir)->distinct('student_id')->count('student_id');
+        $terlambat = AttendanceSiswa::whereDate('attendance_date', $today)->whereIn('status', $statusTerlambat)->distinct('student_id')->count('student_id');
+        $sakit = AttendanceSiswa::whereDate('attendance_date', $today)->whereIn('status', $statusSakit)->distinct('student_id')->count('student_id');
+        $izin = AttendanceSiswa::whereDate('attendance_date', $today)->whereIn('status', $statusIzin)->distinct('student_id')->count('student_id');
+        $alpa = AttendanceSiswa::whereDate('attendance_date', $today)->whereIn('status', $statusAlpa)->distinct('student_id')->count('student_id');
 
         $stats = [
             'hadir'       => $hadir + $terlambat,
@@ -59,7 +40,7 @@ class LandingPageController extends Controller
             'tidak_hadir' => $sakit + $izin + $alpa
         ];
 
-        // --- 2. CHART MINGGUAN (STACKED) ---
+        // --- 2. CHART MINGGUAN (LOGIKA ASLI ANDA - TETAP ADA) ---
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
 
@@ -84,9 +65,7 @@ class LandingPageController extends Controller
         for ($i = 0; $i < 7; $i++) {
             $currentDay = $startOfWeek->copy()->addDays($i);
             $dateKey = $currentDay->format('Y-m-d');
-            
             $labels[] = $currentDay->locale('id')->isoFormat('dddd'); 
-            
             $datasetHadir[] = $dataTepatWaktu[$dateKey] ?? 0;
             $datasetTelat[] = $dataTerlambat[$dateKey] ?? 0;
             $datasetAbsen[] = $dataTidakHadir[$dateKey] ?? 0;
@@ -95,28 +74,13 @@ class LandingPageController extends Controller
         $barChartData = [
             'labels' => $labels,
             'datasets' => [
-                [
-                    'label' => 'Hadir Tepat Waktu',
-                    'data' => $datasetHadir,
-                    'backgroundColor' => '#10b981', 
-                    'borderRadius' => 4,
-                ],
-                [
-                    'label' => 'Terlambat',
-                    'data' => $datasetTelat,
-                    'backgroundColor' => '#f59e0b',
-                    'borderRadius' => 4,
-                ],
-                [
-                    'label' => 'Tidak Hadir',
-                    'data' => $datasetAbsen,
-                    'backgroundColor' => '#ef4444',
-                    'borderRadius' => 4,
-                ]
+                ['label' => 'Hadir Tepat Waktu', 'data' => $datasetHadir, 'backgroundColor' => '#10b981', 'borderRadius' => 4],
+                ['label' => 'Terlambat', 'data' => $datasetTelat, 'backgroundColor' => '#f59e0b', 'borderRadius' => 4],
+                ['label' => 'Tidak Hadir', 'data' => $datasetAbsen, 'backgroundColor' => '#ef4444', 'borderRadius' => 4]
             ]
         ];
 
-        // --- 3. DATA LAINNYA ---
+        // --- 3. DATA PERPUSTAKAAN (LOGIKA ASLI ANDA - TETAP ADA) ---
         try {
             $libraryStats = [
                 'visitors_today' => LibraryVisit::whereDate('date', $today)->count(),
@@ -138,19 +102,29 @@ class LandingPageController extends Controller
             $libraryChartData = ['labels' => $labels, 'data' => array_fill(0, 7, 0)];
         }
 
-        // --- 4. DATA CMS (Pengumuman, Prestasi, DAN KEGIATAN) ---
+        // --- 4. DATA CMS (LOGIKA ASLI ANDA - TETAP ADA) ---
         $announcements = Announcement::orderBy('created_at', 'desc')->limit(3)->get();
         $achievements = Achievement::with('student')->orderBy('date', 'desc')->limit(6)->get();
-
-        // <--- 2. AMBIL DATA KEGIATAN DI SINI ---
-        // Mengambil 3 kegiatan terbaru untuk ditampilkan di grid landing page
         $activities = SchoolActivity::latest()->take(3)->get();
 
+        // --- 5. DATA GURU (BAGIAN PERBAIKAN) ---
+        // Ini adalah bagian yang menyebabkan error sebelumnya karena tidak ada.
+        // Sekarang kita ambil data User yang perannya adalah guru/staf.
+        $teachers = User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'])
+                        ->latest()
+                        ->take(8) // Ambil 8 guru terbaru
+                        ->get();
+
+        // --- KIRIM KE VIEW ---
         return view('welcome', compact(
-            'stats', 'barChartData', 
-            'libraryStats', 'libraryChartData', 
-            'announcements', 'achievements',
-            'activities' // <--- 3. KIRIM VARIABEL KE VIEW
+            'stats', 
+            'barChartData', 
+            'libraryStats', 
+            'libraryChartData', 
+            'announcements', 
+            'achievements',
+            'activities',
+            'teachers' // <--- 2. VARIABEL INI WAJIB DIKIRIM AGAR TIDAK ERROR
         ));
     }
 }

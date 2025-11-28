@@ -251,6 +251,109 @@
         </div>
     </div>
 
+
+<!-- ... Setelah Section Profil Sekolah ... -->
+
+<!-- TEACHER PROFILE SECTION -->
+<div id="guru" class="py-24 bg-slate-50 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header Section -->
+        <div class="text-center mb-16" data-aos="fade-up">
+            <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-black uppercase tracking-widest border border-blue-100">
+                SDM Unggul
+            </span>
+            <h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl mt-4">Tenaga Pendidik & Kependidikan</h2>
+            <p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
+                Dibimbing oleh guru-guru profesional, berdedikasi, dan berpengalaman di bidangnya.
+            </p>
+        </div>
+
+        <!-- Grid Guru -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            @forelse($teachers as $teacher)
+                <div class="group relative bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 h-full flex flex-col" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
+                    
+                    <!-- Foto Profil / Avatar -->
+                    <div class="aspect-[4/5] w-full relative overflow-hidden bg-slate-100">
+                        @if($teacher->photo_path)
+                            <img src="{{ asset('storage/' . $teacher->photo_path) }}" 
+                                 alt="{{ $teacher->name }}" 
+                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            
+                            {{-- Fallback jika gambar rusak --}}
+                            <div class="w-full h-full hidden flex-col items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300 text-slate-500">
+                                <span class="text-6xl font-black opacity-30 select-none uppercase">
+                                    {{ substr($teacher->name, 0, 2) }}
+                                </span>
+                            </div>
+                        @else
+                            {{-- TAMPILAN INISIAL (Sinkron dengan Admin Panel) --}}
+                            <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 text-blue-600">
+                                <span class="text-7xl font-black opacity-20 select-none uppercase scale-110 group-hover:scale-125 transition-transform duration-500">
+                                    {{ substr($teacher->name, 0, 2) }}
+                                </span>
+                            </div>
+                        @endif
+
+                        <!-- Overlay Gradient (Muncul saat Hover) -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-blue-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                            <p class="text-white text-sm font-medium italic opacity-90 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-75 leading-relaxed">
+                                "{{ $teacher->bio ?? 'Mendidik dengan hati, mengajar dengan bukti.' }}"
+                            </p>
+                            
+                            <!-- Social Icons -->
+                            <div class="flex gap-3 mt-4 translate-y-4 group-hover:translate-y-0 transition-transform duration-300 delay-100">
+                                <a href="#" class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white hover:text-blue-600 transition-colors">
+                                    <i class="ph-fill ph-envelope-simple"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info Guru -->
+                    <div class="p-5 text-center relative bg-white flex-1 flex flex-col justify-end">
+                        <!-- Badge Jabatan -->
+                        <div class="absolute -top-4 left-0 right-0 flex justify-center">
+                            {{-- Jika jabatan kosong, tampilkan Role (Guru) --}}
+                            <span class="bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-3 rounded-full shadow-lg border-2 border-white">
+                                {{ $teacher->position ?? $teacher->role }}
+                            </span>
+                        </div>
+                        
+                        <h3 class="mt-4 text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                            {{ $teacher->name }}
+                        </h3>
+                        
+                        {{-- NIP hanya tampil jika ada datanya --}}
+                        @if(!empty($teacher->nip))
+                            <p class="text-xs text-slate-500 font-medium mt-1">
+                                NIP. {{ $teacher->nip }}
+                            </p>
+                        @endif
+                    </div>
+                </div>
+            @empty
+                <!-- Empty State (Sama seperti sebelumnya) -->
+                <div class="col-span-4 text-center py-12">
+                    <p class="text-slate-400">Belum ada data tenaga pendidik.</p>
+                </div>
+            @endforelse
+        </div>
+        
+        <!-- Tombol Lihat Semua -->
+        <div class="text-center mt-12" data-aos="fade-up">
+            <a href="#" class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm hover:shadow-md">
+                Lihat Seluruh Staff Pengajar
+                <i class="ph-bold ph-arrow-right ml-2"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ... Sebelum Section Kegiatan ... -->
+
+
     <!-- [UPDATED] SECTION: KEGIATAN SEKOLAH (DYNAMIC) -->
     <div id="kegiatan" class="py-24 bg-slate-50 relative overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

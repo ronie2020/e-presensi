@@ -54,34 +54,36 @@
                             </div>
                             <div>
                                 <h3 class="text-lg font-black text-gray-800">User Baru</h3>
-                                <p class="text-xs text-gray-500">Tambah akses sistem</p>
+                                <p class="text-xs text-gray-500">Tambah guru atau staf</p>
                             </div>
                         </div>
 
-                        <form action="{{ route('users.store') }}" method="POST" class="space-y-5">
+                        {{-- UPDATE: Tambahkan enctype untuk upload file --}}
+                        <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5" x-data="{ role: 'Guru' }">
                             @csrf
                             
                             <div>
                                 <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
-                                <input type="text" name="name" value="{{ old('name') }}" required 
+                                <input type="text" name="name" value="{{ old('name') }}" required placeholder="Contoh: Budi Santoso, S.Pd."
                                        class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 text-sm py-3 font-bold text-gray-700 transition-colors">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Email Login</label>
-                                <input type="email" name="email" value="{{ old('email') }}" required 
+                                <input type="email" name="email" value="{{ old('email') }}" required placeholder="email@sekolah.sch.id"
                                        class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 text-sm py-3 font-medium transition-colors">
                             </div>
 
                             <div>
                                 <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Peran (Role)</label>
                                 <div class="relative">
-                                    <select name="role" required class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 text-sm py-3 font-medium transition-colors appearance-none">
-                                        <option value="Guru" {{ old('role') == 'Guru' ? 'selected' : '' }}>Guru</option>
-                                        <option value="Wali Kelas" {{ old('role') == 'Wali Kelas' ? 'selected' : '' }}>Wali Kelas</option>
-                                        <option value="Guru Piket" {{ old('role') == 'Guru Piket' ? 'selected' : '' }}>Guru Piket</option>
-                                        <option value="Kepala Sekolah" {{ old('role') == 'Kepala Sekolah' ? 'selected' : '' }}>Kepala Sekolah</option>
-                                        <option value="Admin" {{ old('role') == 'Admin' ? 'selected' : '' }}>Admin (IT)</option>
+                                    {{-- x-model="role" digunakan untuk menampilkan field tambahan --}}
+                                    <select name="role" x-model="role" required class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 text-sm py-3 font-medium transition-colors appearance-none">
+                                        <option value="Guru">Guru</option>
+                                        <option value="Wali Kelas">Wali Kelas</option>
+                                        <option value="Guru Piket">Guru Piket</option>
+                                        <option value="Kepala Sekolah">Kepala Sekolah</option>
+                                        <option value="Admin">Admin (IT)</option>
                                     </select>
                                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -89,7 +91,29 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4">
+                            {{-- FIELD TAMBAHAN: HANYA MUNCUL JIKA ROLE BUKAN ADMIN --}}
+                            <div x-show="role !== 'Admin'" x-transition class="space-y-5 pt-2 border-t border-dashed border-gray-200">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Jabatan / Mapel</label>
+                                    <input type="text" name="position" placeholder="Contoh: Guru Matematika"
+                                           class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 text-sm py-3 transition-colors">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Bio Singkat (Kata Mutiara)</label>
+                                    <textarea name="bio" rows="2" placeholder="Contoh: Mendidik dengan hati..."
+                                           class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 text-sm py-3 transition-colors"></textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Foto Profil</label>
+                                    <input type="file" name="photo" accept="image/*"
+                                           class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100">
+                                    <p class="text-[10px] text-gray-400 mt-1">Format: JPG/PNG, Max 2MB. Rasio terbaik 4:5.</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 pt-2 border-t border-dashed border-gray-200">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Password</label>
                                     <input type="password" name="password" required 
@@ -104,7 +128,7 @@
 
                             <button type="submit" class="w-full py-3 px-6 bg-cyan-600 text-white font-bold rounded-xl hover:bg-cyan-700 transition-all shadow-lg shadow-cyan-200 flex items-center justify-center gap-2 mt-2 group-hover:translate-y-0.5">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                                Tambah Pengguna
+                                Simpan Data
                             </button>
                         </form>
                     </div>
@@ -127,7 +151,7 @@
                             <thead class="bg-white border-b border-gray-100">
                                 <tr>
                                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Identitas</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Peran</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Peran & Jabatan</th>
                                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Aksi</th>
                                 </tr>
                             </thead>
@@ -136,9 +160,14 @@
                                     <tr class="hover:bg-cyan-50/30 transition-colors group">
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center gap-3">
-                                                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 font-bold flex items-center justify-center text-xs group-hover:from-cyan-100 group-hover:to-cyan-200 group-hover:text-cyan-700 transition-all shadow-inner">
-                                                    {{ substr($user->name, 0, 2) }}
-                                                </div>
+                                                {{-- Tampilkan Foto Profil jika ada --}}
+                                                @if($user->photo_path)
+                                                    <img src="{{ asset('storage/' . $user->photo_path) }}" class="w-9 h-9 rounded-full object-cover shadow-sm border border-gray-200">
+                                                @else
+                                                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 font-bold flex items-center justify-center text-xs group-hover:from-cyan-100 group-hover:to-cyan-200 group-hover:text-cyan-700 transition-all shadow-inner">
+                                                        {{ substr($user->name, 0, 2) }}
+                                                    </div>
+                                                @endif
                                                 <div>
                                                     <div class="font-bold text-gray-800 text-sm">{{ $user->name }}</div>
                                                     <div class="text-xs text-gray-400">{{ $user->email }}</div>
@@ -152,25 +181,44 @@
                                                     'Kepala Sekolah' => 'bg-purple-100 text-purple-700 border-purple-200',
                                                     'Wali Kelas' => 'bg-blue-100 text-blue-700 border-blue-200',
                                                     'Guru Piket' => 'bg-amber-100 text-amber-700 border-amber-200',
-                                                    default => 'bg-emerald-100 text-emerald-700 border-emerald-200', // Guru
+                                                    default => 'bg-emerald-100 text-emerald-700 border-emerald-200',
                                                 };
                                             @endphp
-                                            <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold border {{ $badgeClass }}">
-                                                {{ $user->role }}
-                                            </span>
+                                            <div class="flex flex-col items-start gap-1">
+                                                <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold border {{ $badgeClass }}">
+                                                    {{ $user->role }}
+                                                </span>
+                                                @if($user->position)
+                                                    <span class="text-[10px] text-gray-500 font-medium ml-1">
+                                                        {{ $user->position }}
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            @if(Auth::id() != $user->id)
-                                                <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna {{ $user->name }}?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="p-2 text-gray-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all" title="Hapus User">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                                    </button>
-                                                </form>
-                                            @else
-                                                <span class="text-xs font-bold text-gray-300 italic mr-2 select-none">(Anda)</span>
-                                            @endif
+                                      <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+    @if(Auth::id() != $user->id)
+        
+        {{-- TOMBOL EDIT --}}
+        <a href="{{ route('users.edit', $user->id) }}" class="inline-block p-2 text-gray-300 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-all mr-1" title="Edit Data">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+        </a>
+
+        {{-- TOMBOL HAPUS --}}
+        <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna {{ $user->name }}?');">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="p-2 text-gray-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all" title="Hapus User">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+        </form>
+    @else
+        <span class="text-xs font-bold text-gray-300 italic mr-2 select-none">(Anda)</span>
+        
+        {{-- Tombol Edit Diri Sendiri (Opsional, biasanya lewat menu Profil) --}}
+        <a href="{{ route('profile.edit') }}" class="inline-block p-2 text-cyan-600 hover:bg-cyan-50 rounded-lg transition-all" title="Edit Profil Saya">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+        </a>
+    @endif
                                         </td>
                                     </tr>
                                 @empty

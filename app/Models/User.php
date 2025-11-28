@@ -9,25 +9,33 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role',
+        'role',        
+        'position',    
+        'bio',         
+        'photo_path', 
+        'nip',
+        // --- KONTAK & SOSMED (BARU) ---
+        'phone',
+        'instagram',
+        'tiktok',
+        'facebook',
     ];
 
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -39,16 +47,14 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+    
+    // Helper untuk cek apakah user ini Guru
+    public function isTeacher()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-
-     public function homeroomClass(): \Illuminate\Database\Eloquent\Relations\HasOne
-    {
-        return $this->hasOne(SchoolClass::class, 'homeroom_teacher_id');
+        return in_array($this->role, ['Guru', 'Wali Kelas', 'Kepala Sekolah']);
     }
 }
