@@ -6,32 +6,51 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            // Menambahkan kolom 'role' jika belum ada
-            if (!Schema::hasColumn('users', 'role')) {
-                $table->string('role')->default('Siswa')->after('email'); 
-                // Default Siswa, nanti diubah jadi Guru/Admin saat input
-            }
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            
+            // --- KOLOM TAMBAHAN (GABUNGAN) ---
+            $table->string('role')->default('Guru');
+            $table->string('position')->nullable();
+            $table->text('bio')->nullable();
+            $table->string('photo_path')->nullable();
+            $table->string('nip')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('instagram')->nullable();
+            $table->string('tiktok')->nullable();
+            $table->string('facebook')->nullable();
+            // ---------------------------------
 
-            // Kolom Khusus Profil Guru
-            $table->string('position')->nullable()->after('role'); // Jabatan (Misal: Guru Matematika)
-            $table->string('photo_path')->nullable()->after('position'); // Path Foto
-            $table->text('bio')->nullable()->after('photo_path'); // Bio Singkat
+            $table->rememberToken();
+            $table->timestamps();
+        });
+
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->string('email')->primary();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
+
+        Schema::create('sessions', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->foreignId('user_id')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['role', 'position', 'photo_path', 'bio']);
-        });
+        Schema::dropIfExists('users');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('sessions');
     }
 };

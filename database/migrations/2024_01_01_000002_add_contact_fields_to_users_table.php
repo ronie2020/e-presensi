@@ -9,11 +9,23 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Tambahkan kolom kontak setelah NIP
-            $table->string('phone')->nullable()->after('nip'); // No WA/HP
-            $table->string('instagram')->nullable()->after('phone');
-            $table->string('tiktok')->nullable()->after('instagram');
-            $table->string('facebook')->nullable()->after('tiktok');
+            // Cek satu per satu agar tidak error "Duplicate column"
+            
+            if (!Schema::hasColumn('users', 'phone')) {
+                $table->string('phone')->nullable()->after('nip');
+            }
+            
+            if (!Schema::hasColumn('users', 'instagram')) {
+                $table->string('instagram')->nullable()->after('phone');
+            }
+            
+            if (!Schema::hasColumn('users', 'tiktok')) {
+                $table->string('tiktok')->nullable()->after('instagram');
+            }
+            
+            if (!Schema::hasColumn('users', 'facebook')) {
+                $table->string('facebook')->nullable()->after('tiktok');
+            }
         });
     }
 

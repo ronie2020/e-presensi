@@ -17,10 +17,11 @@ class DisciplineType extends Model
         'name',
         'type',
         'point_value',
+        'description', // <--- TAMBAHAN PENTING (Agar tidak error saat Auto-Create)
     ];
 
     /**
-     * Hubungan: Satu Tipe Disiplin (misal 'Terlambat') bisa memiliki BANYAK Catatan Kejadian.
+     * Hubungan: Satu Tipe Disiplin bisa memiliki BANYAK Catatan Kejadian.
      */
     public function records(): HasMany
     {

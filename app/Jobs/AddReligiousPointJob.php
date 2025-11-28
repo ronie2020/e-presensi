@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\AttendanceSiswa;
-use App\Models\Discipline;
+use App\Models\DisciplineRecord; // <-- PERBAIKAN: Gunakan Model yang Benar
 use App\Models\DisciplineType;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -31,6 +31,7 @@ class AddReligiousPointJob implements ShouldQueue
             return;
         }
 
+        // Ambil aktivitas (Dhuha / Dhuhur) dari data absen
         $activity = $this->attendance->activity ?? $this->attendance->type;
         
         // 2. Filter: Hanya proses jika Dhuha atau Dhuhur
@@ -39,14 +40,14 @@ class AddReligiousPointJob implements ShouldQueue
         }
 
         // 3. Cari Jenis Kebaikan di Database
-        // PERBAIKAN: Ubah 'Prestasi' menjadi 'Kebaikan' agar sesuai dengan Controller
+        // Nama Poin: "Sholat Dhuha Berjamaah" atau "Sholat Dhuhur Berjamaah"
         $pointName = "Sholat " . $activity . " Berjamaah";
         
         $pointType = DisciplineType::where('name', $pointName)
                         ->where('type', 'Kebaikan') 
                         ->first();
 
-        // 4. AUTO-CREATE (Jika belum ada jenis kebaikannya, buatkan otomatis)
+        // 4. AUTO-CREATE (Jika jenis kebaikan belum ada, buatkan otomatis)
         if (!$pointType) {
             try {
                 $pointType = DisciplineType::create([
@@ -62,9 +63,10 @@ class AddReligiousPointJob implements ShouldQueue
             }
         }
 
-        // 5. CEK DUPLIKASI (Agar tidak double poin di hari yang sama)
+        // 5. CEK DUPLIKASI (Agar tidak dapat poin ganda di hari yang sama)
         $today = Carbon::today()->toDateString();
-        $alreadyHasPoint = Discipline::where('student_id', $this->attendance->student_id)
+        
+        $alreadyHasPoint = DisciplineRecord::where('student_id', $this->attendance->student_id)
                             ->where('discipline_type_id', $pointType->id)
                             ->where('date', $today)
                             ->exists();
@@ -75,12 +77,13 @@ class AddReligiousPointJob implements ShouldQueue
 
         // 6. EKSEKUSI SIMPAN POIN
         try {
-            Discipline::create([
+            // PERBAIKAN: Menggunakan DisciplineRecord::create
+            DisciplineRecord::create([
                 'student_id'         => $this->attendance->student_id,
                 'discipline_type_id' => $pointType->id,
                 'date'               => $today,
                 'notes'              => "Otomatis - Scan Absen $activity",
-                'recorded_by_user_id' => 1, // Pastikan ID User 1 (Admin) ada di tabel users
+                'recorded_by_user_id' => 1, // Pastikan ada User ID 1 (Admin) di tabel users
             ]);
 
             Log::info("SUKSES: +5 Poin untuk {$this->attendance->student->name} ($activity)");
