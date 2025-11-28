@@ -44,11 +44,14 @@
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all duration-300">
                 <div>
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Hadir</p>
-                    {{-- PERBAIKAN: Hitung Hadir + Terlambat --}}
-                    @php 
-                        $totalHadirFisik = $todayAttendances->whereIn('status_final', ['Hadir', 'Terlambat'])->count(); 
-                    @endphp
-                    <h3 class="text-3xl font-extrabold text-gray-800 group-hover:text-emerald-600 transition-colors">{{ $totalHadirFisik }}</h3>
+                    {{-- FIX: Gunakan variabel $hadirCount dari controller, BUKAN menghitung ulang di blade --}}
+                    <h3 class="text-3xl font-extrabold text-gray-800 group-hover:text-emerald-600 transition-colors">{{ $hadirCount }}</h3>
+                    
+                    @if($terlambatCount > 0)
+                        <span class="inline-flex items-center mt-2 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700">
+                            Termasuk {{ $terlambatCount }} Terlambat
+                        </span>
+                    @endif
                 </div>
                 <div class="h-12 w-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -59,6 +62,7 @@
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all duration-300">
                 <div>
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Sakit / Izin / Alfa</p>
+                    {{-- FIX: Gunakan variabel count dari controller --}}
                     <h3 class="text-3xl font-extrabold text-gray-800 group-hover:text-amber-500 transition-colors">{{ $sakitCount + $izinCount + $alfaCount }}</h3>
                 </div>
                 <div class="h-12 w-12 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
