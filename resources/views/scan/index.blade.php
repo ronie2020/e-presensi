@@ -1,5 +1,8 @@
 {{-- Halaman ini adalah tampilan untuk resources/views/scan/index.blade.php --}}
 <x-app-layout>
+    {{-- 1. TAMBAHKAN LIBRARY SWEETALERT --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     {{-- Custom Style untuk Animasi Scanner --}}
     @push('styles')
     <style>
@@ -26,7 +29,6 @@
             90% { opacity: 1; }
             100% { top: 100%; opacity: 0; }
         }
-        /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; } 
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -79,7 +81,6 @@
                             </button>
                         </div>
                         
-                        {{-- Indikator Mode Aktif --}}
                         <div id="mode-indicator" class="mt-3 mx-1 p-2.5 rounded-lg text-center text-xs font-bold uppercase tracking-wide transition-all duration-300 bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-current animate-pulse"></span>
                             <span>Mode Aktif: Absensi Harian</span>
@@ -88,7 +89,7 @@
 
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                         
-                        {{-- AREA KAMERA (KIRI) --}}
+                        {{-- AREA KAMERA --}}
                         <div class="lg:col-span-5 flex flex-col">
                             <div class="relative bg-gray-900 rounded-3xl overflow-hidden shadow-lg border-4 border-gray-100 aspect-square sm:aspect-auto sm:h-[400px]" id="camera-container">
                                 <div class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 z-0">
@@ -103,11 +104,14 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            {{-- DIV HASIL SCAN (Dipakai untuk Harian) --}}
                             <div id="scan-result" class="mt-4 p-4 rounded-2xl font-bold text-sm text-center hidden transition-all duration-500 shadow-md transform scale-95 opacity-0"></div>
+                            
                             <p class="mt-4 text-center text-xs text-gray-400">Pastikan QR Code berada di dalam bingkai dan memiliki pencahayaan yang cukup.</p>
                         </div>
 
-                        {{-- AREA TABEL RIWAYAT (KANAN) --}}
+                        {{-- AREA TABEL --}}
                         <div class="lg:col-span-7 flex flex-col h-full min-h-[400px] bg-gray-50/50 rounded-3xl border border-gray-100 p-1">
                             <div class="p-4 flex justify-between items-center border-b border-gray-100 bg-white rounded-t-[1.3rem]">
                                 <h3 class="font-bold text-gray-800 flex items-center gap-2">
@@ -163,30 +167,19 @@
                                                     </td>
 
                                                     <td class="log-status px-4 py-3 whitespace-nowrap text-right">
-                                                        {{-- BADGE: HARIAN (Default) --}}
                                                         <span class="badge-harian status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg
                                                             {{ $scan['status'] == 'Masuk' ? 'bg-green-100 text-green-700' : 
                                                                ($scan['status'] == 'Terlambat' ? 'bg-amber-100 text-amber-700' :
                                                                ($scan['status'] == 'Pulang' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600')) }}">
                                                             {{ $scan['status'] }}
                                                         </span>
-
-                                                        {{-- BADGE: DHUHA (Hidden by Default) --}}
-                                                        <span class="badge-dhuha status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-emerald-100 text-emerald-700 hidden">
-                                                            Sholat Dhuha
-                                                        </span>
-
-                                                        {{-- BADGE: DHUHUR (Hidden by Default) --}}
-                                                        <span class="badge-dhuhur status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-orange-100 text-orange-700 hidden">
-                                                            Sholat Dhuhur
-                                                        </span>
+                                                        <span class="badge-dhuha status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-emerald-100 text-emerald-700 hidden">Sholat Dhuha</span>
+                                                        <span class="badge-dhuhur status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-orange-100 text-orange-700 hidden">Sholat Dhuhur</span>
                                                     </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
-                                    
-                                    {{-- Empty State --}}
                                     <div id="no-log-entry" class="hidden py-8 text-center">
                                         <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-3">
                                             <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
@@ -272,7 +265,6 @@
                 const prayerCols = document.querySelectorAll('.col-prayer');
                 const thElements = document.querySelectorAll('thead th');
                 
-                // Toggle Badges
                 const harianBadges = document.querySelectorAll('.badge-harian');
                 const dhuhaBadges = document.querySelectorAll('.badge-dhuha');
                 const dhuhurBadges = document.querySelectorAll('.badge-dhuhur');
@@ -345,15 +337,68 @@
                         body: JSON.stringify({ student_id: studentId, type: scanType })
                     });
                     const result = await response.json();
-                    if (response.ok || response.status === 409 || response.status === 200) {
-                        const msgType = response.status === 409 ? 'warning' : 'success';
-                        showScanResult(msgType, result.message);
+                    
+                    if (response.ok || response.status === 200) {
+                        // SUKSES
+                        
+                        // Cek jika ini scan Keagamaan
+                        if (scanType === 'Dhuha' || scanType === 'Dhuhur') {
+                            // TAMPILKAN POPUP SWEETALERT (Request Anda)
+                            Swal.fire({
+                                title: 'Alhamdulillah!',
+                                html: `
+                                    <div class="text-center">
+                                        <p class="text-xl text-gray-700 font-medium">Selamat <b>${result.scan.student.name}</b></p>
+                                        <p class="text-gray-500 mt-1 mb-4">Absen Sholat ${scanType} Berhasil</p>
+                                        
+                                        <div class="inline-flex items-center gap-2 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 shadow-sm animate-bounce">
+                                            <svg class="w-6 h-6 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                            <span class="font-bold text-lg">+5 Poin Kebaikan</span>
+                                        </div>
+                                    </div>
+                                `,
+                                icon: 'success',
+                                timer: 3000,
+                                showConfirmButton: false,
+                                padding: '2em',
+                                customClass: {
+                                    popup: 'rounded-[2rem] shadow-xl border border-gray-100',
+                                    title: 'text-2xl font-black text-gray-800'
+                                }
+                            });
+                        } else {
+                            // Scan Harian (Masuk/Pulang) - Pakai Alert Biasa
+                            showScanResult('success', result.message);
+                        }
+
                         if (result.scan) {
                             const realType = result.scan.type === 'Harian' ? 'Harian' : (result.scan.activity || scanType);
                             updateOrCreateScanLog(result.scan, realType);
                         }
-                    } else { showScanResult('error', result.message || `Error ${response.status}`); }
-                } catch (error) { showScanResult('error', 'Gagal terhubung ke server.'); } finally { resumeScanner(); }
+
+                    } else if (response.status === 409) {
+                        // KONFLIK (Sudah Absen)
+                        if (scanType === 'Dhuha' || scanType === 'Dhuhur') {
+                             Swal.fire({
+                                title: 'Sudah Melakukan Absen',
+                                text: result.message,
+                                icon: 'info',
+                                timer: 2500,
+                                showConfirmButton: false,
+                                customClass: { popup: 'rounded-3xl' }
+                            });
+                        } else {
+                            showScanResult('warning', result.message);
+                        }
+                    } else {
+                        showScanResult('error', result.message || `Error ${response.status}`);
+                    }
+                } catch (error) { 
+                    console.error(error);
+                    showScanResult('error', 'Gagal terhubung ke server.'); 
+                } finally { 
+                    resumeScanner(); 
+                }
             }
 
             function showScanResult(type, message) {
