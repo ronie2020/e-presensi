@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="py-6 sm:py-8">
-        <div class="max-w-4xl mx-auto"> <!-- Container diperlebar sedikit -->
+        <div class="max-w-4xl mx-auto">
             
             <!-- Header & Tombol Kembali -->
             <div class="flex items-center justify-between mb-8">
@@ -94,12 +94,11 @@
                             </div>
                         </div>
 
-                        <!-- 3. KONTAK & MEDIA SOSIAL (BARU) -->
+                        <!-- 3. KONTAK & MEDIA SOSIAL -->
                         <div x-show="role !== 'Admin'" class="pt-2">
                             <h4 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-4 border-l-4 border-purple-500 pl-3">Kontak & Media Sosial</h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
                                 
-                                <!-- No HP / WhatsApp -->
                                 <div class="col-span-2 md:col-span-1">
                                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
                                         <i class="ph-fill ph-whatsapp-logo text-green-500 text-lg"></i> WhatsApp / HP
@@ -108,7 +107,6 @@
                                            class="w-full rounded-xl border-gray-200 focus:border-green-500 focus:ring-green-500 text-sm py-3">
                                 </div>
 
-                                <!-- Instagram -->
                                 <div class="col-span-2 md:col-span-1">
                                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
                                         <i class="ph-fill ph-instagram-logo text-pink-500 text-lg"></i> Instagram (Username)
@@ -120,7 +118,6 @@
                                     </div>
                                 </div>
 
-                                <!-- TikTok -->
                                 <div class="col-span-2 md:col-span-1">
                                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
                                         <i class="ph-fill ph-tiktok-logo text-black text-lg"></i> TikTok (Username)
@@ -132,7 +129,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Facebook -->
                                 <div class="col-span-2 md:col-span-1">
                                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
                                         <i class="ph-fill ph-facebook-logo text-blue-600 text-lg"></i> Facebook (Nama/URL)
@@ -143,13 +139,14 @@
                             </div>
                         </div>
 
-                        <!-- 4. GANTI PASSWORD -->
-                        <div class="pt-6 border-t border-gray-100">
-                            <button type="button" x-data="{ open: false }" @click="open = !open" class="text-sm font-bold text-rose-500 flex items-center gap-2 hover:underline">
+                        <!-- 4. GANTI PASSWORD (DIPERBAIKI) -->
+                        {{-- FIX: Pindahkan x-data ke wrapper utama div ini agar mencakup tombol dan konten --}}
+                        <div class="pt-6 border-t border-gray-100" x-data="{ showPassword: false }">
+                            <button type="button" @click="showPassword = !showPassword" class="text-sm font-bold text-rose-500 flex items-center gap-2 hover:underline focus:outline-none">
                                 <i class="ph-bold ph-lock-key"></i> Ganti Password Akun?
                             </button>
                             
-                            <div x-show="open" x-transition class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 bg-rose-50/50 p-6 rounded-2xl border border-rose-100" style="display: none;">
+                            <div x-show="showPassword" x-transition class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 bg-rose-50/50 p-6 rounded-2xl border border-rose-100" style="display: none;">
                                 <div>
                                     <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Password Baru</label>
                                     <input type="password" name="password" class="w-full rounded-xl border-gray-200 bg-white focus:border-rose-500 text-sm py-3">
