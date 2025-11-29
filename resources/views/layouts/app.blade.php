@@ -14,6 +14,9 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         
+        <!-- [PERBAIKAN] Tambahkan Script Ikon Phosphor di sini agar terbaca di semua halaman -->
+        <script src="https://unpkg.com/@phosphor-icons/web"></script>
+        
         <style>
             /* Kustomisasi Scrollbar agar lebih tipis dan rapi */
             ::-webkit-scrollbar { width: 6px; height: 6px; }
