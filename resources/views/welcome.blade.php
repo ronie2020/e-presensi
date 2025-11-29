@@ -87,10 +87,16 @@
                             <i class="ph-bold ph-graduation-cap text-2xl"></i>
                         </div>
                     </div>
+                    
+                    <!-- [PERBAIKAN] Logika Warna Teks Dinamis -->
                     <div class="flex flex-col">
-                        <span class="block text-lg lg:text-xl font-extrabold text-slate-900 leading-none tracking-tight" :class="{'text-white': !scrolled && mobileMenuOpen}">SMPN 3 LAKBOK</span>
-                        <span class="text-[10px] lg:text-xs font-bold text-blue-600 tracking-wide mt-1" :class="{'text-blue-300': !scrolled && mobileMenuOpen}">
-                            BERJAYA : <span class="text-slate-500 font-medium" :class="{'text-slate-300': !scrolled && mobileMenuOpen}">Unggul, Berkarakter</span>
+                        <span class="block text-lg lg:text-xl font-extrabold leading-none tracking-tight transition-colors duration-300" 
+                              :class="scrolled ? 'text-slate-900' : 'text-white'">
+                            SMPN 3 LAKBOK
+                        </span>
+                        <span class="text-[10px] lg:text-xs font-bold tracking-wide mt-1 transition-colors duration-300"
+                              :class="scrolled ? 'text-blue-600' : 'text-blue-300'">
+                            BERJAYA : <span class="font-medium" :class="scrolled ? 'text-slate-500' : 'text-slate-300'">Unggul, Berkarakter</span>
                         </span>
                     </div>
                 </div>
@@ -335,7 +341,7 @@
                             '{{ asset('images/hadir.jpg') }}', 
                             '{{ asset('images/digital1.jpg') }}', 
                             '{{ asset('images/digital2.jpg') }}', 
-                            '{{ asset('images/kka.png') }}', 
+                            '{{ asset('images/kka.jpg') }}', 
                             '{{ asset('images/religi.jpg') }}'
                         ],
                         init() {
@@ -537,8 +543,8 @@
         </div>
     </div>
 
-    <!-- SECTION: EKSTRAKURIKULER (BARU) -->
-    <div id="ekskul" class="py-20 bg-slate-900 text-white relative overflow-hidden">
+    <!-- SECTION: EKSTRAKURIKULER (BARU - DESAIN UPDATE) -->
+    <div id="ekskul" class="py-24 bg-slate-900 text-white relative overflow-hidden">
         <!-- Decoration -->
         <div class="absolute top-0 right-0 w-96 h-96 bg-purple-600 rounded-full mix-blend-overlay filter blur-[128px] opacity-20"></div>
         <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-overlay filter blur-[128px] opacity-20"></div>
@@ -554,61 +560,81 @@
                 </p>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @forelse($extracurriculars as $ekskul)
-                    <div class="bg-white/5 backdrop-blur-sm border border-white/10 p-6 rounded-2xl hover:bg-white/10 transition-all duration-300 group hover:-translate-y-1 cursor-default h-full flex flex-col items-center text-center relative overflow-hidden" data-aos="fade-up">
-                        {{-- LOGIKA IKON VS GAMBAR --}}
-                        <div class="w-16 h-16 bg-purple-600/20 text-purple-400 rounded-2xl flex items-center justify-center mb-4 text-3xl group-hover:bg-purple-600 group-hover:text-white transition-all shadow-lg shadow-purple-900/20 overflow-hidden">
-                            @if(filter_var($ekskul->icon, FILTER_VALIDATE_URL) || preg_match('/\.(jpg|jpeg|png|gif|svg|webp)$/i', $ekskul->icon))
-                                {{-- Jika input adalah URL gambar atau file gambar --}}
-                                <img src="{{ asset($ekskul->icon) }}" alt="{{ $ekskul->name }}" class="w-full h-full object-cover">
-                            @else
-                                {{-- Jika input adalah class icon (default) --}}
-                                <i class="{{ $ekskul->icon ?? 'ph-fill ph-star' }}"></i>
-                            @endif
-                        </div>
+                    <div class="bg-slate-800/50 backdrop-blur-md border border-slate-700/50 p-6 rounded-3xl hover:border-purple-500/50 transition-all duration-300 group hover:-translate-y-1 flex flex-col h-full" data-aos="fade-up">
                         
-                        <h3 class="text-lg font-bold text-white mb-1">{{ $ekskul->name }}</h3>
-                        
-                        <div class="flex items-center justify-center gap-2 mt-auto pt-4 w-full border-t border-white/5">
-                            <div class="text-xs text-slate-400 font-mono flex items-center gap-1 bg-white/5 px-2 py-1 rounded">
-                                <i class="ph-bold ph-clock text-purple-400"></i> {{ $ekskul->schedule ?? 'Jadwal Menyusul' }}
+                        <!-- Header: Icon & Name -->
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-14 h-14 bg-slate-700 rounded-2xl flex items-center justify-center text-3xl text-purple-400 shadow-lg group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 overflow-hidden shrink-0">
+                                @if(filter_var($ekskul->icon, FILTER_VALIDATE_URL) || preg_match('/\.(jpg|jpeg|png|gif|svg|webp)$/i', $ekskul->icon))
+                                    <img src="{{ asset($ekskul->icon) }}" alt="{{ $ekskul->name }}" class="w-full h-full object-cover">
+                                @else
+                                    <i class="{{ $ekskul->icon ?? 'ph-fill ph-star' }}"></i>
+                                @endif
                             </div>
-                        </div>
-                        
-                        <p class="text-[10px] text-slate-500 mt-2 uppercase tracking-wide font-bold mb-4">
-                            {{ $ekskul->coach_name ? 'Pembina: ' . $ekskul->coach_name : '-' }}
-                        </p>
-
-                        {{-- INFO TAMBAHAN: ANGGOTA & AKTIVITAS TERAKHIR --}}
-                        <div class="grid grid-cols-2 gap-2 w-full border-t border-white/5 pt-3 mt-auto">
-                            <div class="flex flex-col items-center">
-                                <span class="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">Anggota</span>
-                                <span class="text-sm font-bold text-white flex items-center justify-center gap-1">
-                                    <i class="ph-fill ph-users text-blue-400 text-xs"></i> 
-                                    {{ $ekskul->members_count }}
-                                </span>
-                            </div>
-                            <div class="flex flex-col items-center border-l border-white/5">
-                                <span class="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">Keaktifan</span>
-                                <span class="text-xs font-bold text-white flex items-center justify-center gap-1 h-full">
-                                     @if($lastActivity = $ekskul->attendances->first())
-                                        <span class="text-emerald-400 flex items-center gap-1" title="Kegiatan Terakhir">
-                                            <i class="ph-fill ph-check-circle"></i> {{ \Carbon\Carbon::parse($lastActivity->date)->format('d M') }}
+                            <div>
+                                <h3 class="text-lg font-bold text-white leading-tight line-clamp-2">{{ $ekskul->name }}</h3>
+                                <div class="flex items-center gap-1.5 mt-1">
+                                    {{-- Status Keaktifan (Titik Hijau/Abu) --}}
+                                    @if($lastActivity = $ekskul->attendances->first())
+                                        <span class="relative flex h-2 w-2">
+                                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                                         </span>
+                                        <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wide">Aktif</span>
                                     @else
-                                        <span class="text-slate-600">-</span>
+                                        <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Vakum</span>
                                     @endif
-                                </span>
+                                </div>
                             </div>
                         </div>
+                        
+                        <!-- Info Details -->
+                        <div class="space-y-3 mt-auto">
+                            <!-- Jadwal -->
+                            <div class="bg-slate-900/50 rounded-xl p-3 flex items-center gap-3 border border-slate-700/30">
+                                <i class="ph-duotone ph-clock text-purple-400 text-lg"></i>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-[10px] text-slate-500 font-bold uppercase">Jadwal</p>
+                                    <p class="text-xs text-slate-300 font-mono truncate">{{ $ekskul->schedule ?? '-' }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Pembina -->
+                            <div class="bg-slate-900/50 rounded-xl p-3 flex items-center gap-3 border border-slate-700/30">
+                                <i class="ph-duotone ph-user-circle text-blue-400 text-lg"></i>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-[10px] text-slate-500 font-bold uppercase">Pembina</p>
+                                    <p class="text-xs text-slate-300 truncate">{{ $ekskul->coach_name ?? '-' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer: Stats -->
+                        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-700/50">
+                            <div class="flex items-center gap-2" title="Jumlah Anggota">
+                                <i class="ph-fill ph-users text-slate-400"></i>
+                                <span class="text-sm font-bold text-white">{{ $ekskul->members_count }}</span>
+                                <span class="text-xs text-slate-500">Anggota</span>
+                            </div>
+                            
+                            <div class="text-right">
+                                <p class="text-[9px] text-slate-500 uppercase font-bold">Kegiatan Terakhir</p>
+                                <p class="text-xs font-medium text-slate-300">
+                                    {{ $ekskul->attendances->first() ? \Carbon\Carbon::parse($ekskul->attendances->first()->date)->diffForHumans() : '-' }}
+                                </p>
+                            </div>
+                        </div>
+
                     </div>
                 @empty
-                    <div class="col-span-full text-center py-10 border border-dashed border-slate-700 rounded-2xl bg-slate-800/30">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-700 mb-3 text-slate-500">
-                            <i class="ph-duotone ph-puzzle-piece text-2xl"></i>
+                    <div class="col-span-full py-12 text-center border border-dashed border-slate-700 rounded-3xl bg-slate-800/20">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-800 mb-4 text-slate-600">
+                            <i class="ph-duotone ph-puzzle-piece text-3xl"></i>
                         </div>
-                        <p class="text-slate-500">Belum ada data ekstrakurikuler yang ditambahkan.</p>
+                        <p class="text-slate-400 font-medium">Belum ada data ekstrakurikuler.</p>
                     </div>
                 @endforelse
             </div>
@@ -798,7 +824,7 @@
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="ph-fill ph-envelope text-blue-500 shrink-0"></i>
-                            <span>info@smpn3lakbok.sch.id</span>
+                            <span>admin@smpn3lakbok.sch.id</span>
                         </li>
                     </ul>
                 </div>
@@ -807,7 +833,7 @@
             <!-- COPYRIGHT -->
             <div class="text-center pt-8 border-t border-slate-800">
                 <p class="text-slate-500 text-sm">
-                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. All rights reserved.
+                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. RI... All rights reserved.
                 </p>
             </div>
         </div>
@@ -828,7 +854,7 @@
         <i class="ph-bold ph-arrow-up text-xl"></i>
     </button>
 
-    <!-- ANNOUNCEMENT MODAL -->
+    <!-- MODAL POPUP -->
     <div x-show="modalOpen" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div x-show="modalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="closeAnnouncement()"></div>
         <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
@@ -856,7 +882,7 @@
         </div>
     </div>
 
-    <!-- GUEST BOOK MODAL (BARU) -->
+    <!-- GUEST BOOK MODAL -->
     <div x-show="guestBookModalOpen" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div x-show="guestBookModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="guestBookModalOpen = false"></div>
         <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
