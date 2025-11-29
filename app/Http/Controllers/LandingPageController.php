@@ -12,6 +12,7 @@ use App\Models\SchoolActivity;
 use App\Models\User;
 use App\Models\GuestBook;
 use App\Models\Extracurricular; 
+use App\Models\Agenda; // [PENTING] Import Model Agenda
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -43,7 +44,7 @@ class LandingPageController extends Controller
         ];
 
         // --- 2. CHART MINGGUAN ---
-        $barChartData = []; // (Sederhanakan kode chart untuk fokus ke perubahan ekskul)
+        $barChartData = []; 
         $libraryStats = [];
         $libraryChartData = [];
 
@@ -52,25 +53,32 @@ class LandingPageController extends Controller
         $achievements = Achievement::with('student')->orderBy('date', 'desc')->limit(6)->get();
         $activities = SchoolActivity::latest()->take(3)->get();
         
+        // [PERBAIKAN] Mengambil Data Agenda untuk Halaman Depan
+        $agendas = Agenda::where('event_date', '>=', now()->subDays(1)) // Ambil agenda mulai dari kemarin (agar agenda hari ini ttp muncul)
+                        ->orderBy('event_date', 'asc')
+                        ->limit(4) // Batasi 4 agenda saja di halaman depan
+                        ->get();
+        
         // --- 4. DATA GURU ---
         $teachers = User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'])->latest()->take(8)->get();
 
         // --- 5. DATA BUKU TAMU ---
         $guestbooks = GuestBook::latest()->take(3)->get();
 
-        // --- 6. DATA EKSTRAKURIKULER (DIPERBARUI) ---
-        // Mengambil data ekskul + menghitung jumlah anggota + mengambil absen terakhir untuk cek keaktifan
+        // --- 6. DATA EKSTRAKURIKULER ---
         $extracurriculars = Extracurricular::withCount('members')
             ->with(['attendances' => function($query) {
-                $query->latest('date')->limit(1); // Ambil 1 absen terakhir saja
+                $query->latest('date')->limit(1); 
             }])
             ->get();
 
+        // [PENTING] Tambahkan 'agendas' ke dalam compact
         return view('welcome', compact(
             'stats', 'barChartData', 'libraryStats', 'libraryChartData', 
             'announcements', 'achievements', 'activities', 'teachers',
             'guestbooks', 
-            'extracurriculars' 
+            'extracurriculars',
+            'agendas' 
         ));
     }
 

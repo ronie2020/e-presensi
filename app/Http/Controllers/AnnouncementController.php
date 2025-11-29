@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Announcement;
 use App\Models\SchoolClass;
 use App\Models\Student;
+use App\Models\Agenda; // [PENTING] Jangan lupa import model Agenda
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Jobs\SendGeneralWaJob;
@@ -13,21 +14,24 @@ class AnnouncementController extends Controller
 {
     public function index()
     {
+        // Ambil data pengumuman
         $announcements = Announcement::with('author')->latest()->get();
+        
+        // [BARU] Ambil data agenda (H-1 ke depan)
+        $agendas = Agenda::where('event_date', '>=', now()->subDays(1))
+                        ->orderBy('event_date', 'asc')
+                        ->get();
+
+        // Data untuk dropdown kelas/siswa (WA Gateway)
         $classes = SchoolClass::orderBy('name')->get();
         
-        // PERBAIKAN DISINI: Mengganti 'school_classes' menjadi 'classes'
-        // Jika masih error, cek database Anda, apakah nama tabelnya 'classes', 'tb_kelas', atau lainnya.
-        // Sesuaikan parameter pertama join('NAMA_TABEL', ...)
-        
         $students = Student::join('classes', 'students.class_id', '=', 'classes.id')
-            ->orderBy('classes.name', 'asc') // Urutkan berdasarkan nama kelas
-            ->orderBy('students.name', 'asc') // Lalu urutkan berdasarkan nama siswa
-            ->select('students.*')            // Ambil data siswa saja agar ID tidak tertimpa
+            ->orderBy('classes.name', 'asc')
+            ->orderBy('students.name', 'asc')
+            ->select('students.*')
             ->with('schoolClass')
             ->get();
         
-        // Template Pesan Cepat
         $templates = [
             "Pemberitahuan Libur" => "Yth. Bapak/Ibu Wali Murid, diberitahukan bahwa besok sekolah diliburkan karena...",
             "Undangan Rapat" => "Yth. Bapak/Ibu Wali Murid, kami mengundang Anda untuk hadir pada rapat wali murid tanggal...",
@@ -36,10 +40,11 @@ class AnnouncementController extends Controller
             "Panggilan Orang Tua (BK)" => "Yth. Bapak/Ibu, kami mengundang Bapak/Ibu untuk hadir ke sekolah besok terkait perkembangan ananda di sekolah. Mohon kehadirannya.",
         ];
 
-        return view('announcements.index', compact('announcements', 'classes', 'students', 'templates'));
+        // Kirim $agendas ke view
+        return view('announcements.index', compact('announcements', 'agendas', 'classes', 'students', 'templates'));
     }
 
-    // Simpan Pengumuman Website
+    // -- LOGIKA PENGUMUMAN --
     public function store(Request $request)
     {
         $request->validate([
@@ -56,14 +61,33 @@ class AnnouncementController extends Controller
         return back()->with('success', 'Pengumuman berhasil dipublikasikan.');
     }
 
-    // Hapus Pengumuman
     public function destroy($id)
     {
         Announcement::findOrFail($id)->delete();
         return back()->with('success', 'Pengumuman dihapus.');
     }
 
-    // Kirim Notifikasi WA
+    // -- [BARU] LOGIKA AGENDA --
+    public function storeAgenda(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:100',
+            'event_date' => 'required|date',
+            'location' => 'nullable|string|max:100',
+        ]);
+
+        Agenda::create($request->all());
+
+        return back()->with('success', 'Agenda kegiatan berhasil dijadwalkan.');
+    }
+
+    public function destroyAgenda($id)
+    {
+        Agenda::findOrFail($id)->delete();
+        return back()->with('success', 'Agenda kegiatan dihapus.');
+    }
+
+    // -- LOGIKA WA GATEWAY --
     public function sendNotification(Request $request)
     {
         $request->validate([
@@ -76,41 +100,28 @@ class AnnouncementController extends Controller
         $students = collect();
 
         if ($request->target_type == 'all') {
-            // Semua Siswa
             $students = Student::whereNotNull('parent_wa_number')->get();
-            
         } elseif ($request->target_type == 'class') {
-            // Per Kelas
             $students = Student::where('class_id', $request->class_id)
                                ->whereNotNull('parent_wa_number')
                                ->get();
-                               
         } elseif ($request->target_type == 'student') {
-            // Personal (Satu Siswa)
             $singleStudent = Student::where('id', $request->student_id)
                                     ->whereNotNull('parent_wa_number')
                                     ->first();
-            
-            if ($singleStudent) {
-                $students->push($singleStudent);
-            }
+            if ($singleStudent) $students->push($singleStudent);
         }
 
         if ($students->isEmpty()) {
-            $msg = $request->target_type == 'student' 
-                ? 'Nomor WA orang tua siswa ini tidak ditemukan di database.' 
-                : 'Tidak ada siswa dengan nomor WA yang ditemukan pada target yang dipilih.';
-                
-            return back()->with('error', $msg);
+            return back()->with('error', 'Tidak ada nomor WA tujuan ditemukan.');
         }
 
-        // Dispatch Job untuk setiap siswa
         $count = 0;
         foreach ($students as $student) {
             SendGeneralWaJob::dispatch($student->parent_wa_number, $request->message);
             $count++;
         }
 
-        return back()->with('success', "Notifikasi sedang dikirim ke {$count} penerima (antrian).");
+        return back()->with('success', "Notifikasi sedang dikirim ke {$count} penerima.");
     }
 }

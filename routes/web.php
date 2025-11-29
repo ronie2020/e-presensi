@@ -31,7 +31,7 @@ Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 // RUTE DIREKTORI GURU
 Route::get('/pengajar', [LandingPageController::class, 'teachers'])->name('teachers.index');
 
-// RUTE BUKU TAMU (Publik) - Ini perbaikan untuk error Anda
+// RUTE BUKU TAMU (Publik)
 Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
 
 // RUTE DASHBOARD (Hanya bisa diakses setelah Login)
@@ -93,7 +93,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');
     Route::get('/report-card/{student_id}', [GradeController::class, 'reportCard'])->name('grades.report');
  
-    // PENGATURAN AKADEMIK (BARU)
+    // PENGATURAN AKADEMIK
     Route::get('/settings/academic', [\App\Http\Controllers\AcademicYearController::class, 'index'])->name('settings.academic.index');
     Route::post('/settings/academic', [\App\Http\Controllers\AcademicYearController::class, 'store'])->name('settings.academic.store');
     Route::patch('/settings/academic/{id}/activate', [\App\Http\Controllers\AcademicYearController::class, 'activate'])->name('settings.academic.activate');
@@ -101,14 +101,9 @@ Route::middleware('auth')->group(function () {
 
     // === MODUL PERPUSTAKAAN ===
     Route::prefix('library')->name('library.')->group(function () {
-        // 1. Dashboard Perpus
         Route::get('/dashboard', [\App\Http\Controllers\LibraryDashboardController::class, 'index'])->name('dashboard');
-        
-        // 2. Manajemen Buku
         Route::post('/books/import', [\App\Http\Controllers\BookController::class, 'import'])->name('books.import');
         Route::resource('books', \App\Http\Controllers\BookController::class);
-
-        // 3. Sirkulasi (Peminjaman & Pengembalian)
         Route::get('/circulation', [\App\Http\Controllers\LibraryCirculationController::class, 'index'])->name('circulation.index');
         Route::post('/circulation/search-student', [\App\Http\Controllers\LibraryCirculationController::class, 'searchStudent'])->name('circulation.searchStudent');
         Route::post('/circulation/search-book', [\App\Http\Controllers\LibraryCirculationController::class, 'searchBook'])->name('circulation.searchBook');
@@ -116,11 +111,16 @@ Route::middleware('auth')->group(function () {
         Route::post('/circulation/return', [\App\Http\Controllers\LibraryCirculationController::class, 'returnBook'])->name('circulation.return');
     });
 
-    // Pengumuman & Notifikasi WA Broadcast
+    // === PENGUMUMAN & AGENDA & WA BROADCAST ===
     Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
     Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
     Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
     Route::post('/announcements/send', [AnnouncementController::class, 'sendNotification'])->name('announcements.send');
+    
+    // [BARU] Route untuk Agenda Kegiatan
+    Route::post('/agendas', [AnnouncementController::class, 'storeAgenda'])->name('agendas.store');
+    Route::delete('/agendas/{id}', [AnnouncementController::class, 'destroyAgenda'])->name('agendas.destroy');
+
 
     // Manajemen Pengguna (Admin)
     Route::resource('users', UserController::class);
@@ -140,22 +140,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/reports/religious', [ReportController::class, 'destroyReligious'])->name('reports.destroyReligious');
     Route::get('/reports/export-religious', [ReportController::class, 'exportReligious'])->name('reports.exportReligious');
 
-    // === MODUL EKSTRAKURIKULER (BARU) ===
+    // === MODUL EKSTRAKURIKULER ===
     Route::prefix('extracurriculars')->name('extracurriculars.')->group(function () {
-        // 1. Halaman Data & Jadwal
         Route::get('/', [ExtracurricularController::class, 'index'])->name('index');
         Route::post('/', [ExtracurricularController::class, 'store'])->name('store');
         Route::put('/{id}', [ExtracurricularController::class, 'update'])->name('update');
         Route::delete('/{id}', [ExtracurricularController::class, 'destroy'])->name('destroy');
-
-        // 2. Halaman Peserta (Anggota)
         Route::get('/members', [ExtracurricularController::class, 'members'])->name('members');
         Route::post('/members', [ExtracurricularController::class, 'storeMember'])->name('members.store');
         Route::delete('/members/{id}', [ExtracurricularController::class, 'destroyMember'])->name('members.destroy');
-
-        // 3. Halaman Rekap Laporan
         Route::get('/reports', [ExtracurricularController::class, 'reports'])->name('reports');
-         // [BARU] Route Export / Cetak Laporan
         Route::get('/reports/export', [ExtracurricularController::class, 'exportReports'])->name('reports.export');
     });
 

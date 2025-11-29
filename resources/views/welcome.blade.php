@@ -88,7 +88,6 @@
                         </div>
                     </div>
                     
-                    <!-- [PERBAIKAN] Logika Warna Teks Dinamis -->
                     <div class="flex flex-col">
                         <span class="block text-lg lg:text-xl font-extrabold leading-none tracking-tight transition-colors duration-300" 
                               :class="scrolled ? 'text-slate-900' : 'text-white'">
@@ -161,8 +160,8 @@
         </div>
     </nav>
 
-    <!-- HERO SECTION -->
-    <div class="relative bg-slate-900 pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden min-h-[90vh] flex items-center">
+    <!-- HERO SECTION (FIXED PADDING) -->
+    <div class="relative bg-slate-900 pt-28 pb-12 lg:pt-36 lg:pb-20 overflow-hidden min-h-[85vh] flex items-center">
         <!-- Background -->
         <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
         <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/95 to-blue-900/90"></div>
@@ -171,7 +170,7 @@
         <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob"></div>
         <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob animation-delay-2000"></div>
 
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-12 lg:gap-20 z-10 w-full">
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-10 lg:gap-20 z-10 w-full">
             <!-- Text Content -->
             <div class="lg:w-1/2 text-center lg:text-left" data-aos="fade-right" data-aos-duration="1000">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-blue-300 text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-sm">
@@ -209,7 +208,7 @@
             <!-- Chart / Visual Content -->
             <div class="lg:w-1/2 w-full" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
                 <div class="relative bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-6 lg:p-8 border border-white/20 transform hover:scale-[1.01] transition duration-500 ring-1 ring-black/5">
-                    <div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
+                    <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-4">
                         <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
                             <div class="p-2 bg-blue-100 rounded-lg text-blue-600">
                                 <i class="ph-fill ph-chart-bar text-xl"></i>
@@ -220,7 +219,8 @@
                             <span class="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse"></span> Live
                         </span>
                     </div>
-                    <div class="h-[300px] w-full relative">
+                    <!-- Height disesuaikan agar tidak terlalu tinggi -->
+                    <div class="h-[260px] lg:h-[280px] w-full relative">
                          <canvas id="publicWeeklyChart"></canvas>
                     </div>
                 </div>
@@ -236,7 +236,7 @@
     </div>
 
     <!-- MENU AKSES -->
-    <div class="bg-slate-50 py-16 lg:py-24 relative z-20 -mt-8 lg:-mt-16">
+    <div class="bg-slate-50 py-16 lg:py-20 relative z-20 -mt-8 lg:-mt-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16" data-aos="fade-up">
                 <h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">Akses Cepat Layanan</h2>
@@ -287,6 +287,43 @@
                     </div>
                     <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-pink-600">Buku Tamu</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Isi buku tamu kunjungan sekolah secara digital.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- [FITUR BARU] KEPALA SEKOLAH SECTION -->
+    <div class="bg-white py-20 border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-blue-600 rounded-3xl p-8 md:p-12 relative overflow-hidden flex flex-col md:flex-row items-center gap-10 shadow-2xl">
+                <!-- Background Decoration -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
+                
+                <!-- Foto Kepsek -->
+                <div class="relative shrink-0" data-aos="fade-right">
+                    <!-- GANTI FOTO DI SINI: -->
+                    <!-- Pastikan file 'kasek.jpg' ada di folder public/images -->
+                    <div class="w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-white/20 overflow-hidden shadow-lg bg-white">
+                         <img src="{{ asset('images/kasek.png') }}" alt="Kepala Sekolah" class="w-full h-full object-cover">
+                    </div>
+
+                    <div class="absolute bottom-2 right-2 bg-white text-blue-600 rounded-full p-2 shadow-lg">
+                        <i class="ph-fill ph-quotes text-xl"></i>
+                    </div>
+                </div>
+                
+                <!-- Quote Text -->
+                <div class="text-center md:text-left text-white" data-aos="fade-left">
+                    <h3 class="text-2xl md:text-3xl font-bold mb-4">Sambutan Kepala Sekolah</h3>
+                    <!-- GANTI KATA SAMBUTAN DI SINI: -->
+                    <p class="text-blue-100 text-lg italic leading-relaxed mb-6">
+                        "Pendidikan bukan sekadar transfer ilmu, melainkan proses pembentukan karakter dan penggalian potensi diri. Mari bersama membangun generasi emas yang berakhlak mulia dan kompeten di era global."
+                    </p>
+                    <div>
+                        <!-- GANTI NAMA & GELAR DI SINI: -->
+                        <p class="font-bold text-xl">TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.</p>
+                        <p class="text-blue-200 text-sm opacity-80">Kepala SMPN 3 Lakbok</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -390,6 +427,53 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- [FITUR BARU] VIDEO PROFIL SEKOLAH -->
+    <div class="py-24 bg-slate-900 relative overflow-hidden">
+        <!-- Overlay image background -->
+        <!-- GANTI GAMBAR DI SINI: -->
+        <!-- Ubah 'images/bg-video.jpg' dengan nama file gambar yang Anda simpan di folder public/images -->
+        <div class="absolute inset-0 bg-cover bg-center opacity-30" 
+             style="background-image: url('{{ asset('images/netila.jpg') }}');">
+        </div>
+        
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent"></div>
+        
+        <div class="max-w-4xl mx-auto px-4 relative z-10 text-center" data-aos="zoom-in">
+            <span class="inline-block py-1 px-3 rounded-full bg-red-600/20 text-red-400 border border-red-500/30 text-xs font-bold uppercase tracking-wider mb-6 animate-pulse">
+                <i class="ph-fill ph-youtube-logo mr-1"></i> Tonton Video
+            </span>
+            <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-8">Kenali Kami Lebih Dekat</h2>
+            
+            <!-- Video Container -->
+            <div class="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-700 group cursor-pointer">
+                
+                @php
+                    // MASUKKAN LINK YOUTUBE BIASA DISINI (Bisa dari database atau hardcode)
+                    $rawVideoUrl = 'https://www.youtube.com/watch?v=cx_Q4pyTNVQ'; 
+
+                    // Logika Konversi Otomatis ke Embed URL
+                    $embedUrl = $rawVideoUrl;
+                    if(str_contains($rawVideoUrl, 'watch?v=')) {
+                        $embedUrl = str_replace('watch?v=', 'embed/', $rawVideoUrl);
+                        // Hapus parameter tambahan jika ada (misal &t=10s)
+                        $embedUrl = explode('&', $embedUrl)[0];
+                    } elseif(str_contains($rawVideoUrl, 'youtu.be/')) {
+                        $embedUrl = str_replace('youtu.be/', 'www.youtube.com/embed/', $rawVideoUrl);
+                    }
+                @endphp
+
+                <!-- Gunakan variabel $embedUrl di src iframe -->
+                 <iframe class="w-full h-full" 
+                         src="{{ $embedUrl }}" 
+                         title="YouTube video player" 
+                         frameborder="0" 
+                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                         allowfullscreen>
+                 </iframe>
             </div>
         </div>
     </div>
@@ -778,6 +862,49 @@
                     @empty
                         <div class="col-span-3 text-center py-12 border border-dashed border-slate-700 rounded-xl bg-slate-800/30">
                             <p class="text-slate-500">Tidak ada pengumuman terbaru saat ini.</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- [FITUR BARU] AGENDA KEGIATAN -->
+            <div class="bg-slate-800/50 rounded-3xl p-8 mb-16 border border-slate-700/50 backdrop-blur-md">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
+                        <i class="ph-fill ph-calendar-check text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white">Agenda Mendatang</h3>
+                        <p class="text-slate-400 text-sm mt-0.5">Jadwal kegiatan akademik dan non-akademik.</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {{-- Loop Data Agenda --}}
+                    @forelse($agendas as $agenda)
+                        @php
+                            // Logika warna border acak/bergantian agar menarik
+                            $colors = ['blue', 'green', 'purple', 'orange', 'pink'];
+                            $color = $colors[$loop->index % count($colors)];
+                        @endphp
+                        
+                        <!-- PERBAIKAN TAMPILAN CARD: items-start, flex-1, min-w-0, line-clamp-2 -->
+                        <div class="bg-slate-700/50 p-4 rounded-xl border-l-4 border-{{ $color }}-500 flex items-start gap-4 hover:bg-slate-700 transition cursor-default group h-full">
+                            <div class="text-center bg-slate-800 p-2 rounded-lg min-w-[60px] shadow-lg group-hover:bg-slate-900 transition-colors shrink-0">
+                                <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">{{ $agenda->event_date->format('M') }}</span>
+                                <span class="block text-xl font-bold text-white">{{ $agenda->event_date->format('d') }}</span>
+                            </div>
+                            <div class="flex-1 min-w-0 py-0.5">
+                                <h4 class="text-white font-bold text-sm line-clamp-2 leading-snug mb-1" title="{{ $agenda->title }}">{{ $agenda->title }}</h4>
+                                <p class="text-slate-400 text-xs flex items-center gap-1.5">
+                                    <i class="ph-fill ph-map-pin shrink-0 text-{{ $color }}-400"></i> 
+                                    <span class="truncate">{{ $agenda->location ?? 'Sekolah' }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-span-4 text-center py-6">
+                            <p class="text-slate-500 italic">Belum ada agenda kegiatan mendatang.</p>
                         </div>
                     @endforelse
                 </div>
