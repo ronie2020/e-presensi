@@ -14,7 +14,8 @@ use App\Http\Controllers\StudentPortalController;
 use App\Http\Controllers\LandingPageController; 
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\DisciplineTypeController;
-use App\Http\Controllers\GradeController; // <-- Tambahkan Import Controller Nilai
+use App\Http\Controllers\GradeController;
+use App\Http\Controllers\GuestBookController; // [BARU] Import Controller Buku Tamu
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,10 +27,11 @@ use Illuminate\Support\Facades\Route;
 // --- UTAMA: RUTE LANDING PAGE ---
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 
-// [BARU] RUTE DIREKTORI GURU
+// RUTE DIREKTORI GURU
 Route::get('/pengajar', [LandingPageController::class, 'teachers'])->name('teachers.index');
 
-
+// RUTE BUKU TAMU (Publik) - Ini perbaikan untuk error Anda
+Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
 
 // RUTE DASHBOARD (Hanya bisa diakses setelah Login)
 Route::get('/dashboard', [DashboardController::class, 'index']) 
@@ -81,11 +83,10 @@ Route::middleware('auth')->group(function () {
         'index', 'store', 'destroy'
     ]);
     
-   
     // Manajemen Tipe Disiplin (Master Data Pelanggaran/Kebaikan)
     Route::resource('discipline-types', DisciplineTypeController::class);
 
-    // --- MODUL BARU: MANAJEMEN NILAI & E-RAPOR ---
+    // --- MODUL: MANAJEMEN NILAI & E-RAPOR ---
     Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
     Route::get('/grades/input', [GradeController::class, 'create'])->name('grades.create');
     Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');
@@ -96,14 +97,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/academic', [\App\Http\Controllers\AcademicYearController::class, 'store'])->name('settings.academic.store');
     Route::patch('/settings/academic/{id}/activate', [\App\Http\Controllers\AcademicYearController::class, 'activate'])->name('settings.academic.activate');
     Route::delete('/settings/academic/{id}', [\App\Http\Controllers\AcademicYearController::class, 'destroy'])->name('settings.academic.destroy');
- // === MODUL PERPUSTAKAAN ===
+
+    // === MODUL PERPUSTAKAAN ===
     Route::prefix('library')->name('library.')->group(function () {
-        
         // 1. Dashboard Perpus
         Route::get('/dashboard', [\App\Http\Controllers\LibraryDashboardController::class, 'index'])->name('dashboard');
         
         // 2. Manajemen Buku
-        // (Import ditaruh SEBELUM resource agar tidak tertimpa logic 'show')
         Route::post('/books/import', [\App\Http\Controllers\BookController::class, 'import'])->name('books.import');
         Route::resource('books', \App\Http\Controllers\BookController::class);
 
@@ -113,12 +113,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/circulation/search-book', [\App\Http\Controllers\LibraryCirculationController::class, 'searchBook'])->name('circulation.searchBook');
         Route::post('/circulation/borrow', [\App\Http\Controllers\LibraryCirculationController::class, 'store'])->name('circulation.store');
         Route::post('/circulation/return', [\App\Http\Controllers\LibraryCirculationController::class, 'returnBook'])->name('circulation.return');
-    
-        // Route Import Buku (Tambahkan ini)
-        Route::post('/books/import', [\App\Http\Controllers\BookController::class, 'import'])->name('books.import');
-        
-        Route::resource('books', \App\Http\Controllers\BookController::class);
-        // ...
     });
 
     // Pengumuman & Notifikasi WA Broadcast
@@ -131,22 +125,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class);
    
     // Laporan & Rekap
-    // Laporan Harian
     Route::get('/reports/daily', [ReportController::class, 'dailyReport'])->name('reports.daily');
-    
-    // Input Manual
     Route::post('/reports/manual-entry', [ReportController::class, 'storeManualEntry'])->name('reports.storeManual');
-    
-    // Aksi 1: Proses Siswa Alpa (Mass Action)
     Route::post('/reports/process-alpha', [ReportController::class, 'processAlpha'])->name('reports.processAlpha');
-    
-    // Aksi 2: Hapus Seluruh Rekap Harian (Mass Action)
     Route::delete('/reports/daily', [ReportController::class, 'destroyDaily'])->name('reports.destroyDaily');
-
-    // Aksi 3: Ekspor Data
     Route::get('/reports/export-daily', [ReportController::class, 'exportDaily'])->name('reports.exportDaily');
-    
-    // Aksi 4 & 5: Edit dan Hapus Per Baris
     Route::get('/reports/attendance/{attendance}/edit', [ReportController::class, 'editAttendance'])->name('reports.edit');
     Route::put('/reports/attendance/{attendance}', [ReportController::class, 'updateAttendance'])->name('reports.update');
     Route::delete('/reports/attendance/{attendance}', [ReportController::class, 'deleteAttendance'])->name('reports.delete');

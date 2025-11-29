@@ -46,6 +46,7 @@
     x-data="{ 
         mobileMenuOpen: false,
         modalOpen: false, 
+        guestBookModalOpen: false,
         activeAnnouncement: null,
         scrolled: false,
         showBackToTop: false,
@@ -234,9 +235,10 @@
                 <p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">Menu layanan digital terintegrasi untuk seluruh civitas akademika.</p>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+            <!-- Ganti dari Grid ke Flex Wrap untuk mengakomodasi 5 items dengan cantik -->
+            <div class="flex flex-wrap justify-center gap-6 lg:gap-8">
                 <!-- Portal Siswa -->
-                <a href="{{ route('portal.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-blue-500/10 border border-slate-100 hover:border-blue-200 transition-all duration-300 hover:-translate-y-1" data-aos="fade-up" data-aos-delay="100">
+                <a href="{{ route('portal.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-blue-500/10 border border-slate-100 hover:border-blue-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="100">
                     <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-student text-3xl"></i>
                     </div>
@@ -245,7 +247,7 @@
                 </a>
                 
                 <!-- Mesin Absensi -->
-                <a href="{{ route('kiosk.show') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-1" data-aos="fade-up" data-aos-delay="200">
+                <a href="{{ route('kiosk.show') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="200">
                     <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-qr-code text-3xl"></i>
                     </div>
@@ -254,7 +256,7 @@
                 </a>
                 
                 <!-- E-Library -->
-                <a href="{{ route('library.kiosk.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-emerald-500/10 border border-slate-100 hover:border-emerald-200 transition-all duration-300 hover:-translate-y-1" data-aos="fade-up" data-aos-delay="300">
+                <a href="{{ route('library.kiosk.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-emerald-500/10 border border-slate-100 hover:border-emerald-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="300">
                     <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-books text-3xl"></i>
                     </div>
@@ -263,13 +265,22 @@
                 </a>
                 
                 <!-- Login Guru -->
-                <a href="{{ route('login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-orange-500/10 border border-slate-100 hover:border-orange-200 transition-all duration-300 hover:-translate-y-1" data-aos="fade-up" data-aos-delay="400">
+                <a href="{{ route('login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-orange-500/10 border border-slate-100 hover:border-orange-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="400">
                     <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 mb-6 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-chalkboard-teacher text-3xl"></i>
                     </div>
                     <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-orange-600">Login Staff</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Panel administrasi untuk Guru, Wali Kelas dan TU.</p>
                 </a>
+
+                <!-- BUKU TAMU (BARU) -->
+                <div @click="guestBookModalOpen = true" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-pink-500/10 border border-slate-100 hover:border-pink-200 transition-all duration-300 hover:-translate-y-1 cursor-pointer w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="500">
+                    <div class="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center text-pink-600 mb-6 group-hover:bg-pink-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
+                        <i class="ph-duotone ph-book-open-text text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-pink-600">Buku Tamu</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">Isi buku tamu kunjungan sekolah secara digital.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -326,7 +337,6 @@
                             '{{ asset('images/kka.png') }}', 
                             '{{ asset('images/religi.jpg') }}', 
                         ],
-                            
                         init() {
                             setInterval(() => {
                                 this.currentSlide = (this.currentSlide + 1) % this.slides.length;
@@ -356,13 +366,14 @@
                         <!-- Overlay Statis -->
                         <div class="absolute inset-0 bg-gradient-to-tr from-blue-900/90 to-slate-800/40 flex items-center justify-center z-20">
                             <div class="flex flex-col items-center justify-center text-white p-8 text-center">
-                               
+                                <!-- Hapus icon static jika ingin gambar terlihat jelas, atau biarkan transparan -->
+                                <i class="ph-duotone ph-buildings text-6xl mb-4 opacity-0"></i> 
                                 
                                 <!-- Indikator Slideshow -->
-                                <div class="flex gap-2 mt-6">
+                                <div class="absolute bottom-6 flex gap-2">
                                     <template x-for="(_, index) in slides" :key="index">
                                         <button @click="currentSlide = index" 
-                                                class="h-1.5 rounded-full transition-all duration-500 cursor-pointer hover:bg-white" 
+                                                class="h-1.5 rounded-full transition-all duration-500 cursor-pointer hover:bg-white shadow-sm" 
                                                 :class="currentSlide === index ? 'w-8 bg-white' : 'w-2 bg-white/40'">
                                         </button>
                                     </template>
@@ -524,6 +535,52 @@
             </div>
         </div>
     </div>
+
+    <!-- BAGIAN KATA MEREKA / BUKU TAMU (BARU) -->
+    <div class="py-20 bg-slate-50 border-t border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12" data-aos="fade-up">
+                <h2 class="text-2xl font-bold text-slate-900">Kata Mereka</h2>
+                <p class="text-slate-500 mt-2">Pesan dan kesan dari pengunjung sekolah kami.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- LOGIC LOOPING DATA BUKU TAMU -->
+                @forelse($guestbooks as $guest)
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full flex flex-col" data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
+                        <div class="flex items-center gap-3 mb-4">
+                            <!-- Avatar Inisial Nama -->
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold shrink-0">
+                                {{ substr($guest->name, 0, 1) }}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-sm line-clamp-1">{{ $guest->name }}</h4>
+                                <p class="text-xs text-slate-500 line-clamp-1">{{ $guest->institution }}</p>
+                            </div>
+                        </div>
+                        <div class="relative flex-1">
+                            <i class="ph-fill ph-quotes text-slate-200 text-4xl absolute -top-2 -left-2 -z-10"></i>
+                            <p class="text-slate-600 text-sm italic leading-relaxed">
+                                "{{ Str::limit($guest->message, 100) }}"
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-50 text-[10px] text-slate-400 text-right">
+                            {{ $guest->created_at->diffForHumans() }}
+                        </div>
+                    </div>
+                @empty
+                    <!-- TAMPILAN JIKA BELUM ADA DATA -->
+                    <div class="col-span-3 text-center py-8 bg-white rounded-2xl border border-dashed border-slate-300">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 mb-3 text-slate-400">
+                            <i class="ph-duotone ph-chats-teardrop text-2xl"></i>
+                        </div>
+                        <p class="text-slate-500 text-sm">Belum ada pesan pengunjung. Jadilah yang pertama mengisi!</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
 
     <!-- LIBRARY SECTION -->
     <div class="py-24 bg-emerald-50/50 border-y border-emerald-100/50 relative overflow-hidden">
@@ -689,7 +746,7 @@
         <i class="ph-bold ph-arrow-up text-xl"></i>
     </button>
 
-    <!-- MODAL POPUP -->
+    <!-- ANNOUNCEMENT MODAL -->
     <div x-show="modalOpen" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div x-show="modalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="closeAnnouncement()"></div>
         <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
@@ -713,6 +770,55 @@
                 <div class="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100">
                     <button class="inline-flex w-full justify-center rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 sm:w-auto transition-colors" @click="closeAnnouncement()">Tutup</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GUEST BOOK MODAL (BARU) -->
+    <div x-show="guestBookModalOpen" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div x-show="guestBookModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="guestBookModalOpen = false"></div>
+        <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+            <div x-show="guestBookModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-200">
+                <form action="{{ route('guestbook.store') }}" method="POST">
+                    @csrf
+                    <div class="bg-white px-6 py-6 sm:p-8">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-2xl font-bold text-slate-900">Buku Tamu Digital</h3>
+                            <button type="button" @click="guestBookModalOpen = false" class="text-slate-400 hover:text-red-500 transition bg-slate-50 hover:bg-red-50 p-1 rounded-full"><i class="ph-bold ph-x text-xl"></i></button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label for="name" class="block text-sm font-semibold text-slate-700 mb-1">Nama Lengkap</label>
+                                <input type="text" name="name" id="name" required class="w-full rounded-lg border-slate-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm py-2.5 px-3" placeholder="Masukkan nama lengkap Anda">
+                            </div>
+                            
+                            <div>
+                                <label for="institution" class="block text-sm font-semibold text-slate-700 mb-1">Asal Instansi / Umum</label>
+                                <input type="text" name="institution" id="institution" required class="w-full rounded-lg border-slate-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm py-2.5 px-3" placeholder="Contoh: Dinas Pendidikan / Wali Murid">
+                            </div>
+
+                            <div>
+                                <label for="purpose" class="block text-sm font-semibold text-slate-700 mb-1">Tujuan Kunjungan</label>
+                                <select name="purpose" id="purpose" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm py-2.5 px-3">
+                                    <option value="Dinas">Kunjungan Dinas</option>
+                                    <option value="Rapat">Rapat / Pertemuan</option>
+                                    <option value="Wali Murid">Urusan Wali Murid</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="message" class="block text-sm font-semibold text-slate-700 mb-1">Pesan & Saran</label>
+                                <textarea name="message" id="message" rows="3" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 sm:text-sm py-2.5 px-3" placeholder="Tuliskan pesan atau saran Anda..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100">
+                        <button type="button" class="inline-flex justify-center rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 transition-colors" @click="guestBookModalOpen = false">Batal</button>
+                        <button type="submit" class="inline-flex justify-center rounded-xl bg-pink-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-pink-700 transition-colors shadow-pink-500/30">Kirim Data</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

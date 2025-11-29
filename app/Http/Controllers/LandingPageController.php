@@ -9,7 +9,8 @@ use App\Models\Borrowing;
 use App\Models\Announcement;
 use App\Models\Achievement;
 use App\Models\SchoolActivity;
-use App\Models\User; // <--- 1. SAYA TAMBAHKAN INI (PENTING!)
+use App\Models\User;
+use App\Models\GuestBook; // <--- [BARU] Tambahkan Model Ini
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -19,14 +20,14 @@ class LandingPageController extends Controller
     {
         $today = Carbon::today();
         
-        // --- DEFINISI STATUS (LOGIKA ASLI ANDA) ---
+        // --- DEFINISI STATUS ---
         $statusHadir     = ['Hadir', 'hadir', 'Present', 'present', 'Tepat Waktu'];
         $statusTerlambat = ['Terlambat', 'terlambat', 'Late', 'late', 'Telat', 'telat'];
         $statusSakit     = ['Sakit', 'sakit', 'Sick', 'sick'];
         $statusIzin      = ['Izin', 'izin', 'Permission', 'permission'];
         $statusAlpa      = ['Alpa', 'alpa', 'Alpha', 'alpha', 'Absent', 'absent'];
 
-        // --- 1. STATISTIK HARIAN (LOGIKA ASLI ANDA - TETAP ADA) ---
+        // --- 1. STATISTIK HARIAN ---
         $hadir = AttendanceSiswa::whereDate('attendance_date', $today)->whereIn('status', $statusHadir)->distinct('student_id')->count('student_id');
         $terlambat = AttendanceSiswa::whereDate('attendance_date', $today)->whereIn('status', $statusTerlambat)->distinct('student_id')->count('student_id');
         $sakit = AttendanceSiswa::whereDate('attendance_date', $today)->whereIn('status', $statusSakit)->distinct('student_id')->count('student_id');
@@ -40,7 +41,7 @@ class LandingPageController extends Controller
             'tidak_hadir' => $sakit + $izin + $alpa
         ];
 
-        // --- 2. CHART MINGGUAN (LOGIKA ASLI ANDA - TETAP ADA) ---
+        // --- 2. CHART MINGGUAN ---
         $startOfWeek = Carbon::now()->startOfWeek();
         $endOfWeek = Carbon::now()->endOfWeek();
 
@@ -80,7 +81,7 @@ class LandingPageController extends Controller
             ]
         ];
 
-        // --- 3. DATA PERPUSTAKAAN (LOGIKA ASLI ANDA - TETAP ADA) ---
+        // --- 3. DATA PERPUSTAKAAN ---
         try {
             $libraryStats = [
                 'visitors_today' => LibraryVisit::whereDate('date', $today)->count(),
@@ -102,29 +103,31 @@ class LandingPageController extends Controller
             $libraryChartData = ['labels' => $labels, 'data' => array_fill(0, 7, 0)];
         }
 
-        // --- 4. DATA CMS (LOGIKA ASLI ANDA - TETAP ADA) ---
+        // --- 4. DATA CMS ---
         $announcements = Announcement::orderBy('created_at', 'desc')->limit(3)->get();
         $achievements = Achievement::with('student')->orderBy('date', 'desc')->limit(6)->get();
         $activities = SchoolActivity::latest()->take(3)->get();
 
-        // --- 5. DATA GURU (BAGIAN PERBAIKAN) ---
-        // Ini adalah bagian yang menyebabkan error sebelumnya karena tidak ada.
-        // Sekarang kita ambil data User yang perannya adalah guru/staf.
+        // --- 5. DATA GURU ---
        $teachers = User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'])
                         ->latest()
                         ->take(8) 
                         ->get();
 
+        // --- 6. DATA BUKU TAMU (TESTIMONI PENGUNJUNG) --- <--- [BARU] BAGIAN INI
+        // Mengambil 3 inputan terbaru dari tabel guest_books
+        $guestbooks = GuestBook::latest()->take(3)->get();
+
         return view('welcome', compact(
             'stats', 'barChartData', 'libraryStats', 'libraryChartData', 
-            'announcements', 'achievements', 'activities', 'teachers'
+            'announcements', 'achievements', 'activities', 'teachers',
+            'guestbooks' // <--- [PENTING] Jangan lupa kirim variabel ini ke view
         ));
     }
 
-    // --- [BARU] METHOD UNTUK HALAMAN SEMUA GURU ---
+    // --- METHOD UNTUK HALAMAN SEMUA GURU ---
     public function teachers(Request $request)
     {
-        // Ambil input pencarian (opsional)
         $search = $request->input('q');
 
         $query = User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket']);
@@ -134,7 +137,6 @@ class LandingPageController extends Controller
                   ->orWhere('position', 'like', "%{$search}%");
         }
 
-        // Ambil data dengan pagination (12 orang per halaman)
         $teachers = $query->orderBy('name', 'asc')->paginate(12);
 
         return view('teachers', compact('teachers'));
