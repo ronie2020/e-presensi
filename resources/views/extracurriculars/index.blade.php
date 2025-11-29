@@ -16,23 +16,24 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
+                    <!-- Wrapper table responsif -->
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ikon / Gambar</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Ekskul</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pembina</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jadwal</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Anggota</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">Ikon</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Ekskul</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pembina</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jadwal</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Anggota</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse($extracurriculars as $ekskul)
                                 <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 text-xl overflow-hidden border border-blue-100">
+                                    <td class="px-4 py-4 whitespace-nowrap text-center align-top">
+                                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 text-xl overflow-hidden border border-blue-100">
                                             @if(Str::startsWith($ekskul->icon, 'storage/'))
                                                 <img src="{{ asset($ekskul->icon) }}" alt="Icon" class="w-full h-full object-cover">
                                             @elseif(Str::startsWith($ekskul->icon, 'http'))
@@ -42,32 +43,39 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-bold text-gray-900">{{ $ekskul->name }}</div>
+                                    
+                                    <!-- PERBAIKAN: Hapus whitespace-nowrap & tambah min-width -->
+                                    <td class="px-4 py-4 align-top">
+                                        <div class="text-sm font-bold text-gray-900 whitespace-normal max-w-[150px]">
+                                            {{ $ekskul->name }}
+                                        </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $ekskul->coach_name ?? '-' }}
+                                    
+                                    <!-- PERBAIKAN: Izinkan wrap untuk nama pembina yang panjang -->
+                                    <td class="px-4 py-4 align-top">
+                                        <div class="text-sm text-gray-500 whitespace-normal max-w-[200px] leading-snug">
+                                            {{ $ekskul->coach_name ?? '-' }}
+                                        </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+
+                                    <td class="px-4 py-4 align-top">
+                                        <span class="px-2 py-1 inline-flex text-xs leading-4 font-semibold rounded-full bg-blue-100 text-blue-800 whitespace-normal max-w-[120px] text-center">
                                             {{ $ekskul->schedule ?? 'Belum diatur' }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+
+                                    <td class="px-4 py-4 whitespace-nowrap text-center text-sm text-gray-500 align-top">
                                         {{ $ekskul->members_count }} Siswa
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+
+                                    <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium align-top">
                                         <div class="flex items-center justify-end gap-2">
-                                            <!-- Tombol Edit -->
                                             <button type="button" 
                                                 onclick="openEditModal({{ json_encode($ekskul) }})"
                                                 class="text-yellow-600 hover:text-yellow-900 font-bold">
                                                 Edit
                                             </button>
-                                            
                                             <span class="text-gray-300">|</span>
-
-                                            <!-- Tombol Hapus -->
                                             <form action="{{ route('extracurriculars.destroy', $ekskul->id) }}" method="POST" onsubmit="return confirm('Hapus data ini?');" class="inline">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:text-red-900 font-bold">Hapus</button>
@@ -77,7 +85,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">Belum ada data ekstrakurikuler.</td>
+                                    <td colspan="6" class="px-6 py-8 text-center text-gray-500">Belum ada data ekstrakurikuler.</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -142,7 +150,6 @@
         <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true" onclick="document.getElementById('editModal').classList.add('hidden')"></div>
             <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <!-- Form Action akan diupdate via JS -->
                 <form id="editForm" method="POST" enctype="multipart/form-data">
                     @csrf 
                     @method('PUT')
@@ -163,12 +170,9 @@
                                     <input type="text" name="schedule" id="edit_schedule" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                 </div>
                             </div>
-
-                            <!-- BAGIAN EDIT IKON -->
                             <div class="border-t pt-3 mt-2">
                                 <label class="block text-sm font-bold text-gray-800 mb-2">Update Tampilan (Opsional)</label>
                                 <p class="text-xs text-gray-500 mb-2">Biarkan kosong jika tidak ingin mengubah ikon/gambar.</p>
-                                
                                 <div class="mb-3">
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Upload Gambar Baru</label>
                                     <input type="file" name="image_file" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
@@ -194,24 +198,21 @@
 
     <script>
         function openEditModal(ekskul) {
-            // Isi form dengan data yang dikirim
             document.getElementById('edit_name').value = ekskul.name;
             document.getElementById('edit_coach').value = ekskul.coach_name;
             document.getElementById('edit_schedule').value = ekskul.schedule;
             
-            // Cek apakah icon adalah text (bukan path storage)
             if (ekskul.icon && !ekskul.icon.startsWith('storage/')) {
                 document.getElementById('edit_icon_text').value = ekskul.icon;
             } else {
-                document.getElementById('edit_icon_text').value = ''; // Reset jika gambar
+                document.getElementById('edit_icon_text').value = '';
             }
 
-            // [PERBAIKAN UTAMA] Gunakan dummy ID '0' lalu replace dengan ID asli
+            // MENGGUNAKAN URL DUMMY "0" LALU REPLACE
             let url = "{{ route('extracurriculars.update', 0) }}";
             let form = document.getElementById('editForm');
             form.action = url.replace('/0', '/' + ekskul.id);
 
-            // Tampilkan Modal
             document.getElementById('editModal').classList.remove('hidden');
         }
     </script>
