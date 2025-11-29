@@ -26,18 +26,25 @@
                         <div class="flex gap-2">
                             <input type="date" name="end_date" value="{{ $endDate }}" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             <button type="submit" class="bg-blue-600 text-white px-4 rounded-md hover:bg-blue-700">Filter</button>
+                            
+                            <!-- [BARU] Tombol Cetak -->
+                            @if($selectedEkskulId)
+                                <a href="{{ route('extracurriculars.reports.export', request()->query()) }}" target="_blank" class="bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 flex items-center justify-center" title="Cetak Laporan">
+                                    <i class="ph-bold ph-printer text-xl"></i>
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </form>
 
-                <!-- Tabel Log -->
+                <!-- Tabel Log (Sama seperti sebelumnya) -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jam</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kelas</th> <!-- Pindah Posisi -->
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kelas</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Siswa</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kegiatan</th>
                             </tr>
@@ -51,7 +58,6 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">
                                     {{ $log->time_in }}
                                 </td>
-                                <!-- PERBAIKAN: Menampilkan Kelas dari Relasi -->
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700">
                                     {{ $log->student->schoolClass->name ?? $log->student->class_name ?? '-' }}
                                 </td>

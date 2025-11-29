@@ -155,6 +155,8 @@ Route::middleware('auth')->group(function () {
 
         // 3. Halaman Rekap Laporan
         Route::get('/reports', [ExtracurricularController::class, 'reports'])->name('reports');
+         // [BARU] Route Export / Cetak Laporan
+        Route::get('/reports/export', [ExtracurricularController::class, 'exportReports'])->name('reports.export');
     });
 
      // PENGATURAN MATA PELAJARAN

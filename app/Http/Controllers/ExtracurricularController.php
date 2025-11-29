@@ -163,4 +163,31 @@ class ExtracurricularController extends Controller
 
         return view('extracurriculars.reports', compact('extracurriculars', 'selectedEkskulId', 'attendances', 'startDate', 'endDate'));
     }
+
+    // [BARU] Method untuk Cetak / Export
+    public function exportReports(Request $request)
+    {
+        $selectedEkskulId = $request->get('ekskul_id');
+        $startDate = $request->get('start_date');
+        $endDate = $request->get('end_date');
+
+        $ekskul = null;
+        $attendances = collect();
+
+        if ($selectedEkskulId) {
+            $ekskul = Extracurricular::find($selectedEkskulId);
+            
+            $attendances = ExtracurricularAttendance::with(['student.schoolClass'])
+                ->where('extracurricular_id', $selectedEkskulId)
+                ->whereBetween('date', [$startDate, $endDate])
+                ->get()
+                ->sortByDesc('date')
+                ->sortBy(function($log) {
+                    $className = $log->student->schoolClass->name ?? $log->student->class_name ?? 'Z';
+                    return $className . $log->student->name;
+                });
+        }
+
+        return view('extracurriculars.print_reports', compact('ekskul', 'attendances', 'startDate', 'endDate'));
+    }
 }

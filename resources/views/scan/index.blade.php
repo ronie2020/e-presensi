@@ -85,7 +85,7 @@
                             </button>
                         </div>
                         
-                        {{-- DROPDOWN PEMILIH KEGIATAN EKSKUL (Hanya muncul jika tombol Ekstrakurikuler diklik) --}}
+                        {{-- DROPDOWN PEMILIH KEGIATAN EKSKUL (SUDAH DINAMIS) --}}
                         <div id="extra-selector-container" class="hidden mt-4 animate-fade-in-down">
                             <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 flex flex-col md:flex-row items-center gap-4">
                                 <label class="text-xs font-bold text-blue-800 uppercase tracking-wide whitespace-nowrap">
@@ -93,12 +93,12 @@
                                 </label>
                                 <select id="extra-activity-select" class="w-full md:w-auto flex-1 rounded-lg border-blue-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition duration-200">
                                     <option value="">-- Pilih Ekstrakurikuler --</option>
-                                    <option value="Basket">🏀 Bola Basket</option>
-                                    <option value="Futsal">⚽ Futsal</option>
-                                    <option value="Pramuka">⚜️ Pramuka</option>
-                                    <option value="Musik">🎵 Seni Musik</option>
-                                    <option value="Paskibra">🇮🇩 Paskibra</option>
-                                    {{-- Nanti opsi ini bisa diambil dari database --}}
+                                    
+                                    {{-- PERBAIKAN: Menggunakan Looping Data dari Database --}}
+                                    @foreach($extracurriculars as $ekskul)
+                                        <option value="{{ $ekskul->name }}">{{ $ekskul->name }}</option>
+                                    @endforeach
+                                    
                                 </select>
                             </div>
                         </div>
@@ -314,10 +314,6 @@
                 const prayerCols = document.querySelectorAll('.col-prayer');
                 const thElements = document.querySelectorAll('thead th');
                 
-                const harianBadges = document.querySelectorAll('.badge-harian');
-                const dhuhaBadges = document.querySelectorAll('.badge-dhuha');
-                const dhuhurBadges = document.querySelectorAll('.badge-dhuhur');
-
                 // Reset all
                 harianCols.forEach(el => el.style.display = 'none');
                 prayerCols.forEach(el => el.style.display = 'none');
@@ -474,11 +470,12 @@
             }
 
             function filterLogs(type) {
-                // Sederhana: Tampilkan pesan "Belum ada data" jika mode diganti
-                // Di sistem real, Anda harus fetch data via AJAX saat ganti tab agar tabel terisi
+                // Konsep filtering sederhana di frontend
+                // Di sistem real, Anda harus fetch data via AJAX saat ganti tab agar tabel terisi data ekskul
                 const rows = logTableBody.querySelectorAll('.log-entry');
-                rows.forEach(row => row.style.display = 'none'); // Sembunyikan semua dulu (konsep)
+                rows.forEach(row => row.style.display = 'none'); 
                 
+                // Tampilkan pesan kosong jika mode Ekskul dipilih (karena data belum diambil via AJAX)
                 const noLogEntry = document.getElementById('no-log-entry');
                 if(noLogEntry) noLogEntry.classList.remove('hidden');
             }
