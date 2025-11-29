@@ -39,7 +39,7 @@
                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
                     @endif
                     
-                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('dashboard') ? 'text-white' : 'text-blue-300 group-hover:text-white' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('dashboard') ? 'text-white' : 'text-blue-300 group-hover:text-white' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                     <span class="text-sm font-semibold tracking-wide">Dashboard</span>
                 </a>
 
@@ -103,14 +103,12 @@
                     <span class="text-sm font-semibold tracking-wide">Pusat Informasi</span>
                 </a>
 
-                {{-- [BARU] Galeri Kegiatan --}}
-                {{-- Pastikan Anda sudah membuat Route 'school-activities.index' di web.php --}}
+                {{-- Galeri Kegiatan --}}
                 <a href="{{ route('school-activities.index') }}" 
                    class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden {{ request()->routeIs('school-activities.*') ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50 ring-1 ring-blue-400/30' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
                    @if(request()->routeIs('school-activities.*'))
                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
                    @endif
-                    {{-- Ikon Gambar/Galeri --}}
                     <svg class="w-5 h-5 mr-3 {{ request()->routeIs('school-activities.*') ? 'text-white' : 'text-blue-300 group-hover:text-white' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                     <span class="text-sm font-semibold tracking-wide">Galeri Kegiatan</span>
                 </a>
@@ -121,7 +119,57 @@
         {{-- SEPARATOR --}}
         <div class="border-t border-white/10 mx-4"></div>
 
-        {{-- GRUP 2: AKADEMIK --}}
+        {{-- GRUP 2: EKSTRAKURIKULER (BARU) --}}
+        {{-- Fitur ini disatukan dalam satu grup seperti saran Anda --}}
+        <div>
+            <h3 class="px-4 text-[10px] font-black text-blue-300/50 uppercase tracking-widest mb-3 ml-1">Ekstrakurikuler</h3>
+            <div class="space-y-1.5">
+                
+                {{-- Manajemen Ekskul (Jadwal & Data) --}}
+                <a href="{{ route('extracurriculars.index') }}" 
+                   class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden {{ request()->routeIs('extracurriculars.index') ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50 ring-1 ring-blue-400/30' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                   @if(request()->routeIs('extracurriculars.index'))
+                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
+                   @endif
+                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('extracurriculars.index') ? 'text-white' : 'text-blue-300 group-hover:text-white' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    <span class="text-sm font-semibold tracking-wide">Data & Jadwal Ekskul</span>
+                </a>
+
+                {{-- Input Peserta (Anggota) --}}
+                <a href="{{ route('extracurriculars.members') }}" 
+                   class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden {{ request()->routeIs('extracurriculars.members') ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50 ring-1 ring-blue-400/30' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                   @if(request()->routeIs('extracurriculars.members'))
+                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
+                   @endif
+                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('extracurriculars.members') ? 'text-white' : 'text-blue-300 group-hover:text-white' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    <span class="text-sm font-semibold tracking-wide">Peserta Ekskul</span>
+                </a>
+
+                {{-- SCAN ABSENSI (MENU BARU) --}}
+                {{-- Langsung mengarah ke halaman scan --}}
+                <a href="{{ route('scan.show') }}" 
+                   class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden text-blue-100 hover:bg-white/10 hover:text-white">
+                    <svg class="w-5 h-5 mr-3 text-blue-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4h2v-4zM6 8v4M6 20v-4M2 20h4M2 4h4M2 12h2m8 0h2M2 8v4M2 16h2M6 16h2M6 12h4m0-8h4m4 0h4M14 8h-2M10 8h2M10 4h2m4 0h2M18 8h2m0 4h2M18 16h2m-2 4h2M2 12v4m0 4v-4m10-4v4m2-4v4m4-4v4M6 4v4m12 0v4"></path></svg>
+                    <span class="text-sm font-semibold tracking-wide">Scan Absensi</span>
+                </a>
+
+                {{-- Rekap Kegiatan (Laporan) --}}
+                <a href="{{ route('extracurriculars.reports') }}" 
+                   class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden {{ request()->routeIs('extracurriculars.reports') ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50 ring-1 ring-blue-400/30' : 'text-blue-100 hover:bg-white/10 hover:text-white' }}">
+                   @if(request()->routeIs('extracurriculars.reports'))
+                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
+                   @endif
+                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('extracurriculars.reports') ? 'text-white' : 'text-blue-300 group-hover:text-white' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span class="text-sm font-semibold tracking-wide">Rekap Kegiatan</span>
+                </a>
+
+            </div>
+        </div>
+
+        {{-- SEPARATOR --}}
+        <div class="border-t border-white/10 mx-4"></div>
+
+        {{-- GRUP 3: AKADEMIK --}}
         <div>
             <h3 class="px-4 text-[10px] font-black text-blue-300/50 uppercase tracking-widest mb-3 ml-1">Akademik</h3>
             <div class="space-y-1.5">
@@ -140,7 +188,7 @@
         {{-- SEPARATOR --}}
         <div class="border-t border-white/10 mx-4"></div>
 
-        {{-- GRUP 3: PERPUSTAKAAN --}}
+        {{-- GRUP 4: PERPUSTAKAAN --}}
         <div>
             <h3 class="px-4 text-[10px] font-black text-blue-300/50 uppercase tracking-widest mb-3 ml-1">Perpustakaan</h3>
             <div class="space-y-1.5">
@@ -151,7 +199,7 @@
                    @if(request()->routeIs('library.dashboard'))
                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-yellow-400"></div>
                    @endif
-                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('library.dashboard') ? 'text-white' : 'text-blue-300 group-hover:text-white' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('library.dashboard') ? 'text-white' : 'text-blue-300 group-hover:text-white' }} transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                     <span class="text-sm font-semibold tracking-wide">Dashboard Pustaka</span>
                 </a>
 
@@ -180,7 +228,7 @@
         {{-- SEPARATOR --}}
         <div class="border-t border-white/10 mx-4"></div>
 
-        {{-- GRUP 4: ADMINISTRASI --}}
+        {{-- GRUP 5: ADMINISTRASI --}}
         <div>
             <h3 class="px-4 text-[10px] font-black text-blue-300/50 uppercase tracking-widest mb-3 ml-1">Administrasi</h3>
             

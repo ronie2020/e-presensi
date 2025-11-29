@@ -15,7 +15,8 @@ use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\DisciplineTypeController;
 use App\Http\Controllers\GradeController;
-use App\Http\Controllers\GuestBookController; // [BARU] Import Controller Buku Tamu
+use App\Http\Controllers\GuestBookController; 
+use App\Http\Controllers\ExtracurricularController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -138,6 +139,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/religious', [ReportController::class, 'religiousReport'])->name('reports.religious');
     Route::delete('/reports/religious', [ReportController::class, 'destroyReligious'])->name('reports.destroyReligious');
     Route::get('/reports/export-religious', [ReportController::class, 'exportReligious'])->name('reports.exportReligious');
+
+    // === MODUL EKSTRAKURIKULER (BARU) ===
+    Route::prefix('extracurriculars')->name('extracurriculars.')->group(function () {
+        // 1. Halaman Data & Jadwal
+        Route::get('/', [ExtracurricularController::class, 'index'])->name('index');
+        Route::post('/', [ExtracurricularController::class, 'store'])->name('store');
+        Route::put('/{id}', [ExtracurricularController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ExtracurricularController::class, 'destroy'])->name('destroy');
+
+        // 2. Halaman Peserta (Anggota)
+        Route::get('/members', [ExtracurricularController::class, 'members'])->name('members');
+        Route::post('/members', [ExtracurricularController::class, 'storeMember'])->name('members.store');
+        Route::delete('/members/{id}', [ExtracurricularController::class, 'destroyMember'])->name('members.destroy');
+
+        // 3. Halaman Rekap Laporan
+        Route::get('/reports', [ExtracurricularController::class, 'reports'])->name('reports');
+    });
 
      // PENGATURAN MATA PELAJARAN
     Route::resource('subjects', \App\Http\Controllers\SubjectController::class)->only(['index', 'store', 'update', 'destroy']);

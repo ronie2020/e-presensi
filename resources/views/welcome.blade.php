@@ -100,6 +100,7 @@
                     <a href="#profil" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Profil</a>
                     <a href="#guru" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Guru</a>
                     <a href="#kegiatan" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Kegiatan</a>
+                    <a href="#ekskul" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Ekskul</a>
                     
                     @auth
                         <a href="{{ url('/dashboard') }}" class="text-sm font-bold px-5 py-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">Dashboard</a>
@@ -134,6 +135,7 @@
                 <a href="#profil" @click="mobileMenuOpen = false" class="text-2xl font-bold text-white hover:text-blue-400 transition">Profil Sekolah</a>
                 <a href="#guru" @click="mobileMenuOpen = false" class="text-2xl font-bold text-white hover:text-blue-400 transition">Guru & Staff</a>
                 <a href="#kegiatan" @click="mobileMenuOpen = false" class="text-2xl font-bold text-white hover:text-blue-400 transition">Kegiatan</a>
+                <a href="#ekskul" @click="mobileMenuOpen = false" class="text-2xl font-bold text-white hover:text-blue-400 transition">Ekskul</a>
                 
                 <hr class="w-16 border-slate-700">
 
@@ -235,7 +237,6 @@
                 <p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">Menu layanan digital terintegrasi untuk seluruh civitas akademika.</p>
             </div>
             
-            <!-- Ganti dari Grid ke Flex Wrap untuk mengakomodasi 5 items dengan cantik -->
             <div class="flex flex-wrap justify-center gap-6 lg:gap-8">
                 <!-- Portal Siswa -->
                 <a href="{{ route('portal.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-blue-500/10 border border-slate-100 hover:border-blue-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="100">
@@ -273,7 +274,7 @@
                     <p class="text-slate-500 text-sm leading-relaxed">Panel administrasi untuk Guru, Wali Kelas dan TU.</p>
                 </a>
 
-                <!-- BUKU TAMU (BARU) -->
+                <!-- BUKU TAMU -->
                 <div @click="guestBookModalOpen = true" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-pink-500/10 border border-slate-100 hover:border-pink-200 transition-all duration-300 hover:-translate-y-1 cursor-pointer w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="500">
                     <div class="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center text-pink-600 mb-6 group-hover:bg-pink-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-book-open-text text-3xl"></i>
@@ -334,8 +335,8 @@
                             '{{ asset('images/hadir.jpg') }}', 
                             '{{ asset('images/digital1.jpg') }}', 
                             '{{ asset('images/digital2.jpg') }}', 
-                            '{{ asset('images/kka.png') }}', 
-                            '{{ asset('images/religi.jpg') }}', 
+                            '{{ asset('images/kka.jpg') }}', 
+                            '{{ asset('images/religi.jpg') }}'
                         ],
                         init() {
                             setInterval(() => {
@@ -536,6 +537,84 @@
         </div>
     </div>
 
+    <!-- SECTION: EKSTRAKURIKULER (BARU) -->
+    <div id="ekskul" class="py-20 bg-slate-900 text-white relative overflow-hidden">
+        <!-- Decoration -->
+        <div class="absolute top-0 right-0 w-96 h-96 bg-purple-600 rounded-full mix-blend-overlay filter blur-[128px] opacity-20"></div>
+        <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-overlay filter blur-[128px] opacity-20"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <span class="px-3 py-1 bg-purple-500/10 text-purple-300 rounded-full text-xs font-bold uppercase tracking-widest border border-purple-500/20">
+                    Bakat & Minat
+                </span>
+                <h2 class="text-3xl font-extrabold text-white sm:text-4xl mt-4">Ekstrakurikuler</h2>
+                <p class="mt-4 text-lg text-slate-400 max-w-2xl mx-auto">
+                    Wadah pengembangan potensi siswa di luar jam pelajaran akademik.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                @forelse($extracurriculars as $ekskul)
+                    <div class="bg-white/5 backdrop-blur-sm border border-white/10 p-6 rounded-2xl hover:bg-white/10 transition-all duration-300 group hover:-translate-y-1 cursor-default h-full flex flex-col items-center text-center relative overflow-hidden" data-aos="fade-up">
+                        {{-- LOGIKA IKON VS GAMBAR --}}
+                        <div class="w-16 h-16 bg-purple-600/20 text-purple-400 rounded-2xl flex items-center justify-center mb-4 text-3xl group-hover:bg-purple-600 group-hover:text-white transition-all shadow-lg shadow-purple-900/20 overflow-hidden">
+                            @if(filter_var($ekskul->icon, FILTER_VALIDATE_URL) || preg_match('/\.(jpg|jpeg|png|gif|svg|webp)$/i', $ekskul->icon))
+                                {{-- Jika input adalah URL gambar atau file gambar --}}
+                                <img src="{{ asset($ekskul->icon) }}" alt="{{ $ekskul->name }}" class="w-full h-full object-cover">
+                            @else
+                                {{-- Jika input adalah class icon (default) --}}
+                                <i class="{{ $ekskul->icon ?? 'ph-fill ph-star' }}"></i>
+                            @endif
+                        </div>
+                        
+                        <h3 class="text-lg font-bold text-white mb-1">{{ $ekskul->name }}</h3>
+                        
+                        <div class="flex items-center justify-center gap-2 mt-auto pt-4 w-full border-t border-white/5">
+                            <div class="text-xs text-slate-400 font-mono flex items-center gap-1 bg-white/5 px-2 py-1 rounded">
+                                <i class="ph-bold ph-clock text-purple-400"></i> {{ $ekskul->schedule ?? 'Jadwal Menyusul' }}
+                            </div>
+                        </div>
+                        
+                        <p class="text-[10px] text-slate-500 mt-2 uppercase tracking-wide font-bold mb-4">
+                            {{ $ekskul->coach_name ? 'Pembina: ' . $ekskul->coach_name : '-' }}
+                        </p>
+
+                        {{-- INFO TAMBAHAN: ANGGOTA & AKTIVITAS TERAKHIR --}}
+                        <div class="grid grid-cols-2 gap-2 w-full border-t border-white/5 pt-3 mt-auto">
+                            <div class="flex flex-col items-center">
+                                <span class="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">Anggota</span>
+                                <span class="text-sm font-bold text-white flex items-center justify-center gap-1">
+                                    <i class="ph-fill ph-users text-blue-400 text-xs"></i> 
+                                    {{ $ekskul->members_count }}
+                                </span>
+                            </div>
+                            <div class="flex flex-col items-center border-l border-white/5">
+                                <span class="text-[9px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">Keaktifan</span>
+                                <span class="text-xs font-bold text-white flex items-center justify-center gap-1 h-full">
+                                     @if($lastActivity = $ekskul->attendances->first())
+                                        <span class="text-emerald-400 flex items-center gap-1" title="Kegiatan Terakhir">
+                                            <i class="ph-fill ph-check-circle"></i> {{ \Carbon\Carbon::parse($lastActivity->date)->format('d M') }}
+                                        </span>
+                                    @else
+                                        <span class="text-slate-600">-</span>
+                                    @endif
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-full text-center py-10 border border-dashed border-slate-700 rounded-2xl bg-slate-800/30">
+                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-700 mb-3 text-slate-500">
+                            <i class="ph-duotone ph-puzzle-piece text-2xl"></i>
+                        </div>
+                        <p class="text-slate-500">Belum ada data ekstrakurikuler yang ditambahkan.</p>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
     <!-- BAGIAN KATA MEREKA / BUKU TAMU (BARU) -->
     <div class="py-20 bg-slate-50 border-t border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -550,7 +629,7 @@
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full flex flex-col" data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
                         <div class="flex items-center gap-3 mb-4">
                             <!-- Avatar Inisial Nama -->
-                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold shrink-0">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold shrink-0 border border-blue-200">
                                 {{ substr($guest->name, 0, 1) }}
                             </div>
                             <div>
@@ -558,29 +637,32 @@
                                 <p class="text-xs text-slate-500 line-clamp-1">{{ $guest->institution }}</p>
                             </div>
                         </div>
-                        <div class="relative flex-1">
-                            <i class="ph-fill ph-quotes text-slate-200 text-4xl absolute -top-2 -left-2 -z-10"></i>
-                            <p class="text-slate-600 text-sm italic leading-relaxed">
+                        <div class="relative flex-1 bg-slate-50 p-4 rounded-xl">
+                            <i class="ph-fill ph-quotes text-blue-200 text-2xl absolute -top-2 -left-1"></i>
+                            <p class="text-slate-600 text-sm italic leading-relaxed relative z-10 pl-2">
                                 "{{ Str::limit($guest->message, 100) }}"
                             </p>
                         </div>
-                        <div class="mt-4 pt-4 border-t border-slate-50 text-[10px] text-slate-400 text-right">
+                        <div class="mt-3 text-[10px] text-slate-400 text-right font-medium">
                             {{ $guest->created_at->diffForHumans() }}
                         </div>
                     </div>
                 @empty
                     <!-- TAMPILAN JIKA BELUM ADA DATA -->
-                    <div class="col-span-3 text-center py-8 bg-white rounded-2xl border border-dashed border-slate-300">
-                        <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 mb-3 text-slate-400">
-                            <i class="ph-duotone ph-chats-teardrop text-2xl"></i>
+                    <div class="col-span-3 text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4 text-slate-400 shadow-sm">
+                            <i class="ph-duotone ph-chats-teardrop text-3xl"></i>
                         </div>
-                        <p class="text-slate-500 text-sm">Belum ada pesan pengunjung. Jadilah yang pertama mengisi!</p>
+                        <h3 class="text-lg font-bold text-slate-700">Belum Ada Pesan</h3>
+                        <p class="text-slate-500 text-sm mt-1">Jadilah pengunjung pertama yang memberikan kesan!</p>
+                        <button @click="guestBookModalOpen = true" class="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">
+                            Isi Buku Tamu
+                        </button>
                     </div>
                 @endforelse
             </div>
         </div>
     </div>
-
 
     <!-- LIBRARY SECTION -->
     <div class="py-24 bg-emerald-50/50 border-y border-emerald-100/50 relative overflow-hidden">
@@ -697,7 +779,7 @@
                 <div>
                     <h4 class="text-white font-bold mb-6 text-lg">Menu Utama</h4>
                     <ul class="space-y-3 text-sm text-slate-400">
-                        <li><a href="{{ route('teachers.index') }}" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Profil Sekolah</a></li>
+                        <li><a href="#profil" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Profil Sekolah</a></li>
                         <li><a href="#guru" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Tenaga Pendidik</a></li>
                         <li><a href="#kegiatan" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Galeri Kegiatan</a></li>
                         <li><a href="{{ route('login') }}" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Login Staff</a></li>
@@ -712,11 +794,11 @@
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="ph-fill ph-phone text-blue-500 shrink-0"></i>
-                            <span>+6285135961994</span>
+                            <span>(0265) 1234567</span>
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="ph-fill ph-envelope text-blue-500 shrink-0"></i>
-                            <span>admin@smpn3lakbok.sch.id</span>
+                            <span>info@smpn3lakbok.sch.id</span>
                         </li>
                     </ul>
                 </div>
@@ -725,7 +807,7 @@
             <!-- COPYRIGHT -->
             <div class="text-center pt-8 border-t border-slate-800">
                 <p class="text-slate-500 text-sm">
-                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Ri.. and All rights reserved.
+                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. All rights reserved.
                 </p>
             </div>
         </div>

@@ -6,6 +6,10 @@ use App\Models\AttendanceSiswa;
 use App\Models\Student;
 use App\Models\ScheduleRegular;
 use App\Models\ScheduleSpecial;
+// [BARU] Import Model Ekskul
+use App\Models\Extracurricular;
+use App\Models\ExtracurricularMember;
+use App\Models\ExtracurricularAttendance;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log; 
@@ -17,6 +21,8 @@ class AttendanceSiswaController extends Controller
     public function showScanner()
     {
         $today = Carbon::today();
+        
+        // Ambil log harian biasa
         $logs = AttendanceSiswa::with('student')
             ->whereDate('attendance_date', $today)
             ->latest('created_at')
@@ -26,7 +32,6 @@ class AttendanceSiswaController extends Controller
 
         foreach ($logs as $log) {
             $studentId = $log->student?->student_id;
-            
             if (!$studentId) continue;
 
             if (!isset($recentScans[$studentId])) {
@@ -56,11 +61,8 @@ class AttendanceSiswaController extends Controller
                 if ($scan['time_in'] && $scan['time_out']) {
                     $scan['status'] = 'Pulang';
                 } elseif ($scan['time_in']) {
-                    // PERBAIKAN: Jika status di DB 'Terlambat', tampilkan 'Terlambat'
-                    // Jika 'Hadir', tampilkan 'Masuk'
                     $scan['status'] = ($log->status === 'Terlambat') ? 'Terlambat' : 'Masuk';
                 }
-                
                 if ($scan['is_manual']) $scan['status'] = $log->status;
 
             } elseif ($log->type == 'Keagamaan') {
@@ -75,16 +77,21 @@ class AttendanceSiswaController extends Controller
             }
         }
         
+        // [BARU] Ambil Data Ekskul untuk Dropdown
+        $extracurriculars = Extracurricular::all();
+
         return view('scan.index', [
             'recentScans' => array_values($recentScans),
+            'extracurriculars' => $extracurriculars // Kirim ke view
         ]);
     }
     
     public function processScan(Request $request)
     {
+        // Validasi input, izinkan 'Ekstrakurikuler'
         $request->validate([
             'student_id' => 'required|string', 
-            'type' => 'required|string|in:Harian,Dhuha,Dhuhur',
+            'type' => 'required|string|in:Harian,Dhuha,Dhuhur,Ekstrakurikuler',
         ]);
 
         $studentIdNisn = $request->student_id;
@@ -98,7 +105,64 @@ class AttendanceSiswaController extends Controller
             return response()->json(['message' => 'Siswa dengan ID ' . $studentIdNisn . ' tidak ditemukan.'], 404);
         }
 
-        // --- Logika Absensi Harian ---
+        // --- 1. LOGIKA ABSENSI EKSTRAKURIKULER (BARU) ---
+        if ($scanType == 'Ekstrakurikuler') {
+            $extraName = $request->activity; // Nama Ekskul dari dropdown
+            
+            // Validasi Data Ekskul
+            $ekskul = Extracurricular::where('name', $extraName)->first();
+            if (!$ekskul) {
+                return response()->json(['message' => 'Data Ekskul tidak valid atau belum dipilih.'], 400);
+            }
+
+            // Validasi Keanggotaan (Opsional: Matikan jika ingin open for all)
+            $isMember = ExtracurricularMember::where('extracurricular_id', $ekskul->id)
+                        ->where('student_id', $student->student_id)
+                        ->exists();
+
+            if (!$isMember) {
+                return response()->json([
+                    'message' => "Siswa ini bukan anggota {$ekskul->name}!",
+                    'status' => 'error'
+                ], 400);
+            }
+
+            // Cek Duplikasi Absen Hari Ini
+            $alreadyPresent = ExtracurricularAttendance::where('extracurricular_id', $ekskul->id)
+                            ->where('student_id', $student->student_id)
+                            ->whereDate('date', $today)
+                            ->exists();
+
+            if ($alreadyPresent) {
+                return response()->json(['message' => "Sudah absen {$ekskul->name} hari ini."], 409);
+            }
+
+            // Simpan Absen
+            try {
+                ExtracurricularAttendance::create([
+                    'extracurricular_id' => $ekskul->id,
+                    'student_id' => $student->student_id,
+                    'date' => $today,
+                    'time_in' => $timeNow,
+                ]);
+
+                return response()->json([
+                    'message' => "Absen {$ekskul->name} Berhasil",
+                    'scan' => [
+                        'student' => $student,
+                        'type' => 'Ekstrakurikuler',
+                        'activity' => $ekskul->name,
+                        'status' => 'Hadir'
+                    ]
+                ], 200);
+
+            } catch (\Exception $e) {
+                Log::error("Error Absen Ekskul: " . $e->getMessage());
+                return response()->json(['message' => 'Gagal mencatat absen ekskul.'], 500);
+            }
+        }
+
+        // --- 2. Logika Absensi Harian (TETAP SAMA SEPERTI KODE ASLI ANDA) ---
         if ($scanType == 'Harian') {
             
             $schedule = $this->getTodaysSchedule($now);
@@ -206,7 +270,7 @@ class AttendanceSiswaController extends Controller
                 ], 400); 
             }
         
-        // --- Logika Absensi Keagamaan ---
+        // --- 3. Logika Absensi Keagamaan (TETAP SAMA) ---
         } else {
             $activity = $scanType;
             $attendance = AttendanceSiswa::where('student_id', $student->id)
@@ -249,6 +313,7 @@ class AttendanceSiswaController extends Controller
 
     private function getTodaysSchedule(Carbon $now)
     {
+        // ... (Kode getTodaysSchedule tetap sama seperti file asli Anda) ...
         $today = $now->toDateString();
         $special = ScheduleSpecial::where('date', $today)->first();
         if ($special) {
