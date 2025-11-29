@@ -341,7 +341,7 @@
                             '{{ asset('images/hadir.jpg') }}', 
                             '{{ asset('images/digital1.jpg') }}', 
                             '{{ asset('images/digital2.jpg') }}', 
-                            '{{ asset('images/kka.jpg') }}', 
+                            '{{ asset('images/kka.png') }}', 
                             '{{ asset('images/religi.jpg') }}'
                         ],
                         init() {
