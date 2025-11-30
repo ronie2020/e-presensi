@@ -105,6 +105,8 @@
                     <a href="#profil" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Profil</a>
                     <a href="#guru" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Guru</a>
                     <a href="#kegiatan" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Kegiatan</a>
+                    <!-- UPDATE: Link Prestasi Added -->
+                    <a href="#prestasi" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Prestasi</a>
                     <a href="#ekskul" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Ekskul</a>
                     
                     @auth
@@ -140,6 +142,7 @@
                 <a href="#profil" @click="mobileMenuOpen = false" class="text-2xl font-bold text-white hover:text-blue-400 transition">Profil Sekolah</a>
                 <a href="#guru" @click="mobileMenuOpen = false" class="text-2xl font-bold text-white hover:text-blue-400 transition">Guru & Staff</a>
                 <a href="#kegiatan" @click="mobileMenuOpen = false" class="text-2xl font-bold text-white hover:text-blue-400 transition">Kegiatan</a>
+                <a href="#prestasi" @click="mobileMenuOpen = false" class="text-2xl font-bold text-white hover:text-blue-400 transition">Prestasi</a>
                 <a href="#ekskul" @click="mobileMenuOpen = false" class="text-2xl font-bold text-white hover:text-blue-400 transition">Ekskul</a>
                 
                 <hr class="w-16 border-slate-700">
@@ -627,6 +630,108 @@
         </div>
     </div>
 
+    <!-- UPDATE: PRESTASI SECTION (NEW) -->
+    <div id="prestasi" class="py-24 bg-gradient-to-b from-yellow-50/50 to-white relative overflow-hidden border-t border-slate-100">
+        <!-- Decoration -->
+        <div class="absolute top-0 right-0 w-96 h-96 bg-yellow-200 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6" data-aos="fade-up">
+                <div class="max-w-2xl">
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-bold uppercase tracking-wider mb-4 border border-yellow-200">
+                        <i class="ph-fill ph-trophy"></i> Hall of Fame
+                    </span>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight">
+                        Prestasi Membanggakan
+                    </h2>
+                    <p class="mt-4 text-lg text-slate-600">
+                        Jejak juara siswa dan guru yang mengharumkan nama sekolah.
+                    </p>
+                </div>
+                
+                <!-- Filter Buttons (Mockup Visual) -->
+                <div class="flex gap-2">
+                    <button class="px-4 py-2 bg-yellow-500 text-white rounded-full text-sm font-bold shadow-lg shadow-yellow-500/30">Terbaru</button>
+                    <button class="px-4 py-2 bg-white text-slate-500 border border-slate-200 rounded-full text-sm font-bold hover:bg-slate-50 transition">Nasional</button>
+                    <button class="px-4 py-2 bg-white text-slate-500 border border-slate-200 rounded-full text-sm font-bold hover:bg-slate-50 transition">Provinsi</button>
+                </div>
+            </div>
+
+            <!-- Grid Prestasi -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                @forelse($achievements ?? [] as $prestasi)
+                    <div class="group bg-white rounded-2xl p-6 border border-yellow-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-xl hover:shadow-yellow-500/10 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden" data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
+                        
+                        <!-- Top Decoration -->
+                        <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                            <i class="ph-fill ph-trophy text-6xl text-yellow-500"></i>
+                        </div>
+
+                        <!-- Header -->
+                        <div class="flex items-center justify-between mb-4 relative z-10">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-yellow-500/30 group-hover:scale-110 transition-transform duration-300">
+                                <i class="ph-bold ph-medal text-2xl"></i>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full bg-slate-50 border border-slate-100 text-[10px] font-bold uppercase text-slate-500 tracking-wide">
+                                {{ $prestasi->level ?? 'Sekolah' }}
+                            </span>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="relative z-10">
+                            <h4 class="text-lg font-bold text-slate-900 mb-2 leading-tight group-hover:text-yellow-600 transition-colors">
+                                {{ $prestasi->title ?? 'Juara Lomba' }}
+                            </h4>
+                            
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-xs">
+                                    <i class="ph-fill ph-user"></i>
+                                </span>
+                                <p class="text-sm font-medium text-slate-500">
+                                    {{ $prestasi->achiever_name ?? 'Nama Siswa' }}
+                                </p>
+                            </div>
+
+                            <div class="pt-4 border-t border-slate-50 flex items-center justify-between text-xs text-slate-400">
+                                <span class="flex items-center gap-1">
+                                    <i class="ph-fill ph-calendar"></i> 
+                                    {{ isset($prestasi->date) ? \Carbon\Carbon::parse($prestasi->date)->format('d M Y') : '-' }}
+                                </span>
+                                <span class="font-bold text-yellow-600">{{ $prestasi->type ?? 'Siswa' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <!-- Placeholder Card 1 -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm opacity-60">
+                        <div class="w-12 h-12 rounded-xl bg-slate-100 mb-4"></div>
+                        <div class="h-4 bg-slate-100 rounded w-3/4 mb-2"></div>
+                        <div class="h-3 bg-slate-50 rounded w-1/2"></div>
+                    </div>
+                    <!-- Placeholder Card 2 -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm opacity-60">
+                        <div class="w-12 h-12 rounded-xl bg-slate-100 mb-4"></div>
+                        <div class="h-4 bg-slate-100 rounded w-3/4 mb-2"></div>
+                        <div class="h-3 bg-slate-50 rounded w-1/2"></div>
+                    </div>
+                     <div class="col-span-full text-center py-4 text-slate-400 text-sm italic">
+                        Belum ada data prestasi yang ditampilkan.
+                    </div>
+                @endforelse
+            </div>
+
+            <!-- View All Button -->
+            <div class="mt-12 text-center" data-aos="fade-up">
+                 <a href="#" class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-full hover:bg-yellow-100 hover:text-yellow-800 transition-all shadow-sm">
+                    Lihat Arsip Prestasi
+                    <i class="ph-bold ph-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+
     <!-- SECTION: EKSTRAKURIKULER (BARU - DESAIN UPDATE) -->
     <div id="ekskul" class="py-24 bg-slate-900 text-white relative overflow-hidden">
         <!-- Decoration -->
@@ -935,6 +1040,8 @@
                         <li><a href="#profil" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Profil Sekolah</a></li>
                         <li><a href="#guru" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Tenaga Pendidik</a></li>
                         <li><a href="#kegiatan" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Galeri Kegiatan</a></li>
+                        <!-- Update: Link Prestasi Footer -->
+                        <li><a href="#prestasi" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Prestasi</a></li>
                         <li><a href="{{ route('login') }}" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Login Staff</a></li>
                     </ul>
                 </div>

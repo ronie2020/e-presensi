@@ -1,111 +1,143 @@
 <x-app-layout>
-    {{-- Menggunakan AlpineJS untuk manajemen state filter sederhana --}}
-    <div x-data="{ period: 'today' }">
+    {{-- 
+        =========================================
+        WRAPPER UTAMA (ALPINE.JS)
+        =========================================
+        Mengatur state untuk filter periode dan tanggal
+    --}}
+    <div x-data="{ 
+            period: new URLSearchParams(window.location.search).get('period') || 'today',
+            date: new URLSearchParams(window.location.search).get('date') || new Date().toISOString().split('T')[0],
+            
+            updateFilter(newPeriod) {
+                this.period = newPeriod;
+                // Logika reload halaman saat filter berubah (Opsional, aktifkan jika Controller sudah siap)
+                // window.location.search = '?period=' + this.period + '&date=' + this.date;
+            }
+        }" class="space-y-8">
         
-        {{-- Header Section --}}
-        <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {{-- HEADER SECTION --}}
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight">
+                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
                     Dashboard Monitoring
                 </h1>
                 <p class="text-sm text-gray-500 mt-1">
-                    Selamat Datang, <span class="text-blue-600 font-bold">{{ Auth::user()->name }}</span>!
-                    <span x-show="period === 'today'">Berikut ringkasan <span class="font-semibold text-gray-700">Hari Ini</span>.</span>
-                    <span x-show="period === 'week'" style="display: none;">Berikut ringkasan <span class="font-semibold text-gray-700">Minggu Ini</span>.</span>
+                    Ringkasan data kehadiran siswa <span class="font-bold text-indigo-600" x-text="period === 'today' ? 'Hari Ini' : (period === 'week' ? 'Minggu Ini' : 'Bulan Ini')"></span>.
                 </p>
             </div>
-            
-            {{-- Filter Cepat dengan Interaksi AlpineJS --}}
-            <div class="flex items-center gap-2 bg-white p-1.5 rounded-xl shadow-sm border border-gray-100">
-                <button 
-                    @click="period = 'today'" 
-                    :class="period === 'today' ? 'bg-blue-50 text-blue-700 shadow-sm' : 'text-gray-500 hover:bg-gray-50'"
-                    class="px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200">
-                    Hari Ini
-                </button>
-                <button 
-                    @click="period = 'week'" 
-                    :class="period === 'week' ? 'bg-blue-50 text-blue-700 shadow-sm' : 'text-gray-500 hover:bg-gray-50'"
-                    class="px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200">
-                    Minggu Ini
-                </button>
+
+            {{-- FILTER SECTION (DIADOPSI DARI HTML) --}}
+            <div class="bg-white p-1.5 rounded-xl shadow-sm border border-gray-200 flex flex-wrap gap-2">
+                {{-- Tombol Periode --}}
+                <div class="flex bg-gray-100 rounded-lg p-1">
+                    <button @click="updateFilter('today')" 
+                        :class="period === 'today' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+                        class="px-4 py-2 text-xs font-bold rounded-md transition-all duration-200">
+                        Harian
+                    </button>
+                    <button @click="updateFilter('week')" 
+                        :class="period === 'week' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+                        class="px-4 py-2 text-xs font-bold rounded-md transition-all duration-200">
+                        Mingguan
+                    </button>
+                    <button @click="updateFilter('month')" 
+                        :class="period === 'month' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+                        class="px-4 py-2 text-xs font-bold rounded-md transition-all duration-200">
+                        Bulanan
+                    </button>
+                </div>
+
+                {{-- Input Tanggal Dinamis --}}
+                <div class="flex items-center">
+                    <input x-show="period === 'today'" type="date" x-model="date" class="text-xs border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                    <input x-show="period === 'week'" type="week" class="text-xs border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                    <input x-show="period === 'month'" type="month" class="text-xs border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
             </div>
         </div>
 
         {{-- 
             =========================================
-            BAGIAN 1: KARTU STATISTIK (STATS CARDS)
+            BAGIAN 1: KARTU STATISTIK (KPI CARDS)
             =========================================
+            Gaya visual diadopsi dari file dashboard.html (Border Left Color)
         --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             @php
+                // PENCEGAHAN ERROR VARIABLE
+                $totalStudents = $totalStudents ?? 0;
+                $presentCount = $presentCount ?? 0;
+                $lateCount = $lateCount ?? 0;
+                $absentCount = $absentCount ?? 0;
+                $earlyLeaveCount = $earlyLeaveCount ?? 0;
+                // Hitung total izin/sakit/alpa untuk kartu terakhir
+                $excusedCount = ($sickCount ?? 0) + ($permitCount ?? 0) + ($alphaCount ?? 0);
+
                 $cards = [
                     [
                         'title' => 'Total Siswa',
                         'value' => $totalStudents,
-                        'icon_bg' => 'bg-blue-100',
-                        'icon_text' => 'text-blue-600',
-                        'hover_text' => 'group-hover:text-blue-600',
-                        'bg_decor' => 'bg-blue-50',
-                        'icon_path' => 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
-                        'footer_text' => 'Terdaftar di sistem',
-                        'footer_color' => 'text-blue-600'
+                        'border' => 'border-indigo-500',
+                        'text_color' => 'text-gray-800',
+                        'icon_color' => 'text-indigo-500',
+                        'icon' => 'ph-student'
                     ],
                     [
-                        'title' => 'Hadir',
+                        'title' => 'Total Hadir',
                         'value' => $presentCount,
-                        'icon_bg' => 'bg-emerald-100',
-                        'icon_text' => 'text-emerald-600',
-                        'hover_text' => 'group-hover:text-emerald-600',
-                        'bg_decor' => 'bg-emerald-50',
-                        'icon_path' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
-                        'footer_text' => $presentPercentage . '% dari total siswa',
-                        'footer_color' => 'text-emerald-600'
-                    ],
-                    [
-                        'title' => 'Terlambat',
-                        'value' => $lateCount,
-                        'icon_bg' => 'bg-amber-100',
-                        'icon_text' => 'text-amber-600',
-                        'hover_text' => 'group-hover:text-amber-500',
-                        'bg_decor' => 'bg-amber-50',
-                        'icon_path' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
-                        'footer_text' => 'Perlu Perhatian',
-                        'footer_color' => 'text-amber-600'
+                        'border' => 'border-emerald-500',
+                        'text_color' => 'text-gray-800',
+                        'icon_color' => 'text-emerald-500',
+                        'icon' => 'ph-check-circle'
                     ],
                     [
                         'title' => 'Belum Hadir',
                         'value' => $absentCount,
-                        'icon_bg' => 'bg-red-100',
-                        'icon_text' => 'text-red-500',
-                        'hover_text' => 'group-hover:text-red-500',
-                        'bg_decor' => 'bg-red-50',
-                        'icon_path' => 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-                        'footer_text' => 'Sakit: '.$sickCount.' | Izin: '.$permitCount,
-                        'footer_color' => 'text-red-500'
+                        'border' => 'border-slate-500',
+                        'text_color' => 'text-gray-800',
+                        'icon_color' => 'text-slate-500',
+                        'icon' => 'ph-minus-circle'
+                    ],
+                    [
+                        'title' => 'Terlambat',
+                        'value' => $lateCount,
+                        'border' => 'border-orange-500',
+                        'text_color' => 'text-gray-800',
+                        'icon_color' => 'text-orange-500',
+                        'icon' => 'ph-clock-warning'
+                    ],
+                    [
+                        'title' => 'Pulang Awal',
+                        'value' => $earlyLeaveCount,
+                        'border' => 'border-yellow-500',
+                        'text_color' => 'text-gray-800',
+                        'icon_color' => 'text-yellow-500',
+                        'icon' => 'ph-person-simple-run'
+                    ],
+                    [
+                        'title' => 'Sakit / Izin',
+                        'value' => $excusedCount,
+                        'border' => 'border-red-500',
+                        'text_color' => 'text-gray-800',
+                        'icon_color' => 'text-red-500',
+                        'icon' => 'ph-first-aid'
                     ]
                 ];
             @endphp
 
             @foreach($cards as $card)
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 group relative overflow-hidden">
-                <div class="absolute right-0 top-0 h-24 w-24 {{ $card['bg_decor'] }} rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
-                <div class="relative flex items-center justify-between">
+            <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 {{ $card['border'] }} hover:shadow-md transition-all duration-300">
+                <div class="flex justify-between items-start">
                     <div>
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ $card['title'] }}</p>
-                        <h3 class="text-3xl font-extrabold text-gray-800 mt-1 {{ $card['hover_text'] }} transition-colors">
+                        <h3 class="text-2xl font-black {{ $card['text_color'] }} mt-1">
                             {{ $card['value'] }}
                         </h3>
                     </div>
-                    <div class="h-12 w-12 {{ $card['icon_bg'] }} {{ $card['icon_text'] }} rounded-xl flex items-center justify-center text-xl shadow-sm group-hover:rotate-12 transition-transform">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $card['icon_path'] }}"></path></svg>
+                    <div class="p-2 bg-gray-50 rounded-lg {{ $card['icon_color'] }}">
+                        <i class="{{ $card['icon'] ?? 'ph-hash' }} text-xl"></i>
                     </div>
-                </div>
-                <div class="mt-4 flex items-center text-xs text-gray-400">
-                    <span class="{{ $card['footer_color'] }} font-bold mr-1 flex items-center">
-                        <span class="w-2 h-2 rounded-full bg-current mr-1.5 opacity-70"></span>
-                        {{ $card['footer_text'] }}
-                    </span>
                 </div>
             </div>
             @endforeach
@@ -116,73 +148,75 @@
             BAGIAN 2: GRAFIK & CHART
             =========================================
         --}}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
-            <!-- Grafik Batang -->
-            <div class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+            <!-- A. Grafik Batang (Trend Kehadiran) -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div class="flex items-center justify-between mb-6">
                     <div>
-                        <h3 class="text-lg font-bold text-gray-800">Analisis Kehadiran</h3>
-                        <p class="text-xs text-gray-400">Tren kehadiran siswa dalam satu minggu</p>
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                            <i class="ph-chart-bar text-indigo-500"></i> Analisis Kehadiran
+                        </h3>
+                        <p class="text-xs text-gray-400">Tren kehadiran siswa berdasarkan periode terpilih.</p>
                     </div>
-                    <button class="inline-flex items-center gap-2 text-xs font-semibold text-gray-600 bg-gray-50 hover:bg-gray-100 px-3 py-1.5 rounded-lg transition-colors border border-gray-200">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Export PDF
+                    <button class="text-xs flex items-center gap-1 text-gray-500 hover:text-indigo-600 transition-colors">
+                        <i class="ph-download-simple"></i> Export
                     </button>
                 </div>
-                <div class="relative h-72 w-full">
+                <div class="relative h-80 w-full">
                     <canvas id="weeklyChart"></canvas>
                 </div>
             </div>
 
-            <!-- Grafik Donat -->
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col">
-                <h3 class="text-lg font-bold text-gray-800 mb-2">Komposisi Real-time</h3>
-                <p class="text-xs text-gray-400 mb-6">Persentase status siswa hari ini</p>
+            <!-- B. Grafik Donat (Komposisi) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+                <h3 class="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
+                    <i class="ph-chart-pie-slice text-purple-500"></i> Komposisi
+                </h3>
+                <p class="text-xs text-gray-400 mb-6">Persentase status siswa saat ini.</p>
                 
                 <div class="relative h-64 w-full flex-1 flex items-center justify-center">
                     <canvas id="dailyDonutChart"></canvas>
                     <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                         <span class="text-3xl font-extrabold text-gray-800">{{ $totalStudents }}</span>
-                        <span class="text-xs text-gray-400 font-medium">Total Siswa</span>
+                        <span class="text-xs text-gray-400 font-medium">Siswa</span>
                     </div>
                 </div>
                 
+                {{-- Legenda Custom --}}
                 <div class="mt-6 grid grid-cols-2 gap-3 text-xs text-gray-600">
-                    <div class="flex items-center p-2 rounded-lg bg-emerald-50/50 border border-emerald-100">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2"></span>Hadir Tepat
-                    </div>
-                    <div class="flex items-center p-2 rounded-lg bg-amber-50/50 border border-amber-100">
-                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 mr-2"></span>Terlambat
-                    </div>
-                    <div class="flex items-center p-2 rounded-lg bg-red-50/50 border border-red-100">
-                        <span class="w-2.5 h-2.5 rounded-full bg-red-500 mr-2"></span>Belum Hadir
-                    </div>
-                    <div class="flex items-center p-2 rounded-lg bg-blue-50/50 border border-blue-100">
-                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-2"></span>Pulang Awal
-                    </div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Hadir Tepat</div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Terlambat</div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500"></span> Belum Hadir</div>
+                    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Pulang Awal</div>
                 </div>
             </div>
         </div>
     </div>
 
+    {{-- SCRIPT CHART.JS (PHP Native Echo - Bulletproof) --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script>
         Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
         Chart.defaults.color = '#94a3b8';
 
-        // --- 1. GRAFIK BATANG MINGGUAN (STACKED SEPERTI LANDING PAGE) ---
-        const ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
-        
-        // Data dari Controller
-        const rawPresentData = @json($weeklyPresentData); // Ini masih TOTAL (Hadir + Telat)
-        const rawLateData = @json($weeklyLateData);
-        const rawAbsentData = @json($weeklyAbsentData);
+        // --- 1. DATA DARI PHP (Safe Encode) ---
+        const rawPresentData = <?php echo json_encode($weeklyPresentData ?? []); ?>;
+        const rawLateData = <?php echo json_encode($weeklyLateData ?? []); ?>;
+        const rawAbsentData = <?php echo json_encode($weeklyAbsentData ?? []); ?>;
 
-        // KITA HITUNG ULANG DI JS AGAR STACKINGNYA BENAR
-        // Hadir Tepat Waktu = Total Hadir - Terlambat
+        const d_presentOnTime = <?php echo json_encode($presentOnTimeCount ?? 0); ?>;
+        const d_late = <?php echo json_encode($lateCount ?? 0); ?>;
+        const d_absent = <?php echo json_encode($absentCount ?? 0); ?>;
+        const d_earlyLeave = <?php echo json_encode($earlyLeaveCount ?? 0); ?>;
+        const d_others = <?php echo json_encode(($sickCount ?? 0) + ($permitCount ?? 0) + ($alphaCount ?? 0)); ?>;
+
+        // --- 2. CHART BATANG (TREND) ---
+        const ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
         const onTimeData = rawPresentData.map((total, index) => {
-            return Math.max(0, total - rawLateData[index]);
+            const late = rawLateData[index] || 0;
+            return Math.max(0, total - late);
         });
 
         new Chart(ctxWeekly, {
@@ -190,97 +224,35 @@
             data: {
                 labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
                 datasets: [
-                    { 
-                        label: 'Hadir Tepat Waktu', 
-                        data: onTimeData, // Pakai data hasil hitungan
-                        backgroundColor: '#10b981', // Emerald-500 (Sama dgn Landing)
-                        hoverBackgroundColor: '#059669',
-                        borderRadius: 4, 
-                        barThickness: 25, // Batang Tebal Solid
-                        stack: 'mainStack' // Kunci agar bertumpuk
-                    },
-                    { 
-                        label: 'Terlambat', 
-                        data: rawLateData, 
-                        backgroundColor: '#f59e0b', // Amber-500 (Sama dgn Landing)
-                        hoverBackgroundColor: '#d97706',
-                        borderRadius: 4, 
-                        barThickness: 25,
-                        stack: 'mainStack'
-                    },
-                    { 
-                        label: 'Tidak Hadir', 
-                        data: rawAbsentData, 
-                        backgroundColor: '#ef4444', // Red-500 (Sama dgn Landing)
-                        hoverBackgroundColor: '#dc2626',
-                        borderRadius: 4, 
-                        barThickness: 25,
-                        stack: 'mainStack'
-                    }
+                    { label: 'Hadir Tepat', data: onTimeData, backgroundColor: '#10b981', borderRadius: 4, stack: 'main' },
+                    { label: 'Terlambat', data: rawLateData, backgroundColor: '#f59e0b', borderRadius: 4, stack: 'main' },
+                    { label: 'Tidak Hadir', data: rawAbsentData, backgroundColor: '#ef4444', borderRadius: 4, stack: 'main' }
                 ]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: { 
-                        position: 'top', 
-                        align: 'end', 
-                        labels: { usePointStyle: true, boxWidth: 8, padding: 20 } 
-                    },
-                    tooltip: { 
-                        backgroundColor: 'rgba(15, 23, 42, 0.9)', 
-                        padding: 12, 
-                        cornerRadius: 8,
-                        callbacks: {
-                            // Custom tooltip agar totalnya benar
-                            footer: function(tooltipItems) {
-                                let total = 0;
-                                tooltipItems.forEach(function(tooltipItem) {
-                                    total += tooltipItem.raw;
-                                });
-                                return 'Total: ' + total + ' Siswa';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: { 
-                        beginAtZero: true, 
-                        stacked: true, // WAJIB: Aktifkan mode tumpuk Y
-                        grid: { borderDash: [4, 4], color: '#f1f5f9', drawBorder: false },
-                        border: { display: false }
-                    },
-                    x: { 
-                        stacked: true, // WAJIB: Aktifkan mode tumpuk X
-                        grid: { display: false, drawBorder: false } 
-                    }
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'top', align: 'end' } },
+                scales: { 
+                    y: { beginAtZero: true, stacked: true, grid: { borderDash: [4, 4] }, border: { display: false } }, 
+                    x: { stacked: true, grid: { display: false } } 
                 }
             }
         });
 
-        // --- 2. GRAFIK DONAT HARIAN ---
+        // --- 3. CHART DONAT (KOMPOSISI) ---
         const ctxDonut = document.getElementById('dailyDonutChart').getContext('2d');
         new Chart(ctxDonut, {
             type: 'doughnut',
             data: {
                 labels: ['Hadir Tepat', 'Terlambat', 'Belum Hadir', 'Pulang Awal', 'Lainnya'],
                 datasets: [{
-                    data: [
-                        {{ $presentOnTimeCount }}, {{ $lateCount }}, {{ $absentCount }}, {{ $earlyLeaveCount }},
-                        {{ $sickCount + $permitCount + $alphaCount }}
-                    ],
+                    data: [d_presentOnTime, d_late, d_absent, d_earlyLeave, d_others],
                     backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6'],
-                    borderWidth: 2,
-                    borderColor: '#ffffff',
-                    hoverOffset: 6
+                    borderWidth: 0, hoverOffset: 6
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '80%', 
+                responsive: true, maintainAspectRatio: false, cutout: '75%', 
                 plugins: { legend: { display: false } }
             }
         });
