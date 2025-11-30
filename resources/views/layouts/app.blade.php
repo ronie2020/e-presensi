@@ -14,22 +14,25 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         
-        <!-- [PERBAIKAN] Tambahkan Script Ikon Phosphor di sini agar terbaca di semua halaman -->
+        <!-- Script Ikon Phosphor -->
         <script src="https://unpkg.com/@phosphor-icons/web"></script>
         
         <style>
-            /* Kustomisasi Scrollbar agar lebih tipis dan rapi */
+            /* Kustomisasi Scrollbar */
             ::-webkit-scrollbar { width: 6px; height: 6px; }
             ::-webkit-scrollbar-track { background: transparent; }
             ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
             ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         </style>
+        
+        {{-- [TAMBAHAN PENTING] Stack untuk CSS tambahan jika ada --}}
+        @stack('styles')
     </head>
     <body class="font-sans antialiased bg-blue-700 selection:bg-yellow-300 selection:text-blue-900">
         
         <div x-data="{ sidebarOpen: false }" class="h-screen flex overflow-hidden">
             
-            <!-- ====== SIDEBAR NAVIGASI (Background Biru) ====== -->
+            <!-- ====== SIDEBAR NAVIGASI ====== -->
             @include('layouts.navigation')
 
             <!-- Overlay Mobile -->
@@ -44,13 +47,13 @@
                  @click="sidebarOpen = false">
             </div>
 
-            <!-- ====== KONTEN UTAMA (Kertas Putih) ====== -->
+            <!-- ====== KONTEN UTAMA ====== -->
             <div class="flex-1 flex flex-col h-screen relative z-10 transition-all duration-300">
                 
-                <!-- Container Melengkung (Hanya di Desktop) -->
+                <!-- Container Melengkung -->
                 <div class="flex-1 bg-gray-50 md:rounded-l-[2.5rem] md:my-2 md:mr-2 overflow-hidden flex flex-col shadow-[0_0_40px_-10px_rgba(0,0,0,0.2)] relative">
 
-                    <!-- Header (Sticky & Blur) -->
+                    <!-- Header -->
                     <header class="bg-white/90 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100 px-6 py-4 flex justify-between items-center">
                         
                         <!-- Tombol Hamburger & Judul -->
@@ -61,7 +64,6 @@
                                 </svg>
                             </button>
 
-                            <!-- Header Title (Dari Slot) -->
                             @if (isset($header))
                                 <div class="text-2xl font-bold text-gray-800 tracking-tight">
                                     {{ $header }}
@@ -69,15 +71,13 @@
                             @endif
                         </div>
 
-                        <!-- User Dropdown & Info -->
+                        <!-- User Dropdown -->
                         <div class="flex items-center gap-4">
-                            <!-- Jam/Tanggal (Desktop Only) -->
                             <div class="hidden md:block text-right mr-2">
                                 <p class="text-xs font-bold text-blue-600 uppercase tracking-wider">Hari Ini</p>
                                 <p class="text-sm font-semibold text-gray-700">{{ \Carbon\Carbon::now()->translatedFormat('l, d M Y') }}</p>
                             </div>
 
-                            <!-- Dropdown -->
                             <div class="relative" x-data="{ open: false }">
                                 <button @click="open = !open" class="flex items-center gap-3 focus:outline-none group">
                                     <div class="text-right hidden sm:block">
@@ -85,12 +85,10 @@
                                         <p class="text-xs text-gray-500">{{ Auth::user()->role ?? 'User' }}</p>
                                     </div>
                                     <div class="h-10 w-10 rounded-full bg-blue-100 border-2 border-white shadow-sm flex items-center justify-center text-blue-600 font-bold text-lg overflow-hidden">
-                                        <!-- Avatar Initials -->
                                         <img class="h-full w-full object-cover" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&color=2563eb&background=dbeafe&bold=true" alt="Avatar">
                                     </div>
                                 </button>
 
-                                <!-- Dropdown Content -->
                                 <div x-show="open" @click.away="open = false" 
                                      x-transition:enter="transition ease-out duration-100"
                                      x-transition:enter-start="transform opacity-0 scale-95"
@@ -120,7 +118,6 @@
                         </div>
                     </header>
 
-                    <!-- Main Scrollable Content -->
                     <main class="flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth">
                         <div class="max-w-7xl mx-auto">
                             {{ $slot }}
@@ -129,5 +126,8 @@
                 </div>
             </div>
         </div>
+        
+        {{-- [PERBAIKAN UTAMA] Tambahkan ini agar @push('scripts') di halaman lain berfungsi --}}
+        @stack('scripts')
     </body>
 </html>

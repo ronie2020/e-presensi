@@ -1,87 +1,126 @@
 <x-app-layout>
-    {{-- Load Library Scanner (Opsional jika ingin scan kartu siswa) --}}
-    @push('scripts')
-        <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    @endpush
-
-    <div class="py-6 sm:py-8">
-        
-        {{-- Header --}}
-        <div class="mb-8">
-            <h1 class="text-3xl font-black text-gray-800 tracking-tight leading-tight">
+    {{-- Header Section --}}
+    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <div class="p-2 bg-yellow-100 text-yellow-600 rounded-lg">
+                    <i class="ph-fill ph-trophy text-xl"></i>
+                </div>
+                <span class="text-sm font-bold text-yellow-600 uppercase tracking-wider">Modul Kesiswaan</span>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-black text-slate-800 tracking-tight">
                 Prestasi & Penghargaan
             </h1>
-            <p class="text-gray-500 mt-1">
-                Dokumentasikan pencapaian gemilang siswa, guru, dan sekolah.
+            <p class="text-slate-500 mt-2 text-lg">
+                Kelola data kejuaraan siswa dan guru di sini.
             </p>
         </div>
-
-        {{-- Flash Message --}}
-        @if (session('success'))
-            <div x-data="{ show: true }" x-show="show" class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
-                <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>{{ session('success') }}</span>
+        
+        {{-- Summary Card --}}
+        <div class="flex gap-4">
+            <div class="bg-white px-5 py-3 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center text-yellow-600 font-bold border border-yellow-100">
+                    <i class="ph-bold ph-medal text-xl"></i>
                 </div>
-                <button @click="show = false">&times;</button>
+                <div>
+                    <div class="text-xs text-slate-400 font-bold uppercase">Total Data</div>
+                    <div class="text-sm font-bold text-slate-800">{{ $achievements->total() ?? 0 }} Prestasi</div>
+                </div>
             </div>
-        @endif
+        </div>
+    </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            {{-- FORM INPUT PRESTASI --}}
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-3xl shadow-sm border border-yellow-100 overflow-hidden sticky top-6">
-                    <div class="p-6 relative z-10">
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-12 h-12 bg-yellow-50 text-yellow-600 rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-yellow-100">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+    {{-- Flash Message --}}
+    @if (session('success'))
+        <div x-data="{ show: true }" x-show="show" class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
+                    <i class="ph-bold ph-check"></i>
+                </div>
+                <span class="font-bold">{{ session('success') }}</span>
+            </div>
+            <button @click="show = false" class="text-emerald-400 hover:text-emerald-700"><i class="ph-bold ph-x"></i></button>
+        </div>
+    @endif
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {{-- KOLOM KIRI: FORM INPUT --}}
+        <div class="lg:col-span-4 space-y-6">
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden sticky top-24">
+                
+                {{-- Card Header --}}
+                <div class="bg-gradient-to-r from-yellow-500 to-amber-500 p-6 text-white relative overflow-hidden">
+                    <i class="ph-fill ph-medal absolute -right-4 -bottom-4 text-8xl text-white opacity-10 rotate-12"></i>
+                    <h3 class="text-xl font-bold relative z-10">Input Prestasi</h3>
+                    <p class="text-yellow-100 text-sm relative z-10">Catat momen juara baru.</p>
+                </div>
+
+                <div class="p-6">
+                    {{-- PERUBAHAN: x-data langsung didefinisikan di sini agar pasti jalan --}}
+                    <form action="{{ route('achievements.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5" x-data="{ type: 'Siswa', imgPreview: null }">
+                        @csrf
+                        
+                        {{-- Tipe Juara Switcher (PERBAIKAN: Tombol Manual agar lebih stabil) --}}
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Siapa yang Juara?</label>
+                            <div class="grid grid-cols-3 gap-1 p-1 bg-slate-50 rounded-xl border border-slate-200">
+                                <button type="button" 
+                                    @click="type = 'Siswa'" 
+                                    :class="type === 'Siswa' ? 'bg-white text-yellow-600 shadow-sm ring-1 ring-black/5' : 'text-slate-400 hover:text-slate-600'"
+                                    class="py-2 rounded-lg text-xs font-bold transition-all duration-200">
+                                    Siswa
+                                </button>
+                                <button type="button" 
+                                    @click="type = 'Guru'" 
+                                    :class="type === 'Guru' ? 'bg-white text-yellow-600 shadow-sm ring-1 ring-black/5' : 'text-slate-400 hover:text-slate-600'"
+                                    class="py-2 rounded-lg text-xs font-bold transition-all duration-200">
+                                    Guru
+                                </button>
+                                <button type="button" 
+                                    @click="type = 'Sekolah'" 
+                                    :class="type === 'Sekolah' ? 'bg-white text-yellow-600 shadow-sm ring-1 ring-black/5' : 'text-slate-400 hover:text-slate-600'"
+                                    class="py-2 rounded-lg text-xs font-bold transition-all duration-200">
+                                    Sekolah
+                                </button>
                             </div>
-                            <div>
-                                <h3 class="text-lg font-black text-gray-800">Input Prestasi</h3>
-                                <p class="text-xs text-gray-500">Catat momen juara baru</p>
-                            </div>
+                            {{-- Input Hidden untuk mengirim data ke Controller --}}
+                            <input type="hidden" name="type" x-model="type">
                         </div>
 
-                        <form action="{{ route('achievements.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4" x-data="{ type: 'Siswa' }">
-                            @csrf
-                            
-                            {{-- Pilih Tipe --}}
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Siapa yang berprestasi?</label>
-                                <div class="flex rounded-xl bg-gray-50 p-1 border border-gray-200">
-                                    <button type="button" @click="type = 'Siswa'" :class="type === 'Siswa' ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'" class="flex-1 py-2 rounded-lg text-xs font-bold transition-all">Siswa</button>
-                                    <button type="button" @click="type = 'Guru'" :class="type === 'Guru' ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'" class="flex-1 py-2 rounded-lg text-xs font-bold transition-all">Guru</button>
-                                    <button type="button" @click="type = 'Sekolah'" :class="type === 'Sekolah' ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'" class="flex-1 py-2 rounded-lg text-xs font-bold transition-all">Sekolah</button>
-                                </div>
-                                <input type="hidden" name="type" x-model="type">
-                            </div>
-
-                            {{-- Input Nama Dynamic --}}
-                            <div x-show="type === 'Siswa'">
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nama Siswa</label>
-                                <select name="student_id" class="w-full rounded-xl border-gray-200 focus:border-yellow-500 focus:ring-yellow-500 text-sm">
-                                    <option value="">-- Pilih Siswa --</option>
+                        {{-- Input Nama Siswa (Muncul jika type == Siswa) --}}
+                        <div x-show="type === 'Siswa'" x-transition>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Pilih Siswa</label>
+                            <div class="relative">
+                                <select name="student_id" class="w-full pl-3 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white transition-all cursor-pointer appearance-none">
+                                    <option value="">-- Cari Nama Siswa --</option>
                                     @foreach($students as $student)
                                         <option value="{{ $student->id }}">{{ $student->name }} ({{ $student->schoolClass->name ?? '-' }})</option>
                                     @endforeach
                                 </select>
+                                <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
+                                    <i class="ph-bold ph-caret-down text-xs"></i>
+                                </div>
                             </div>
-                            <div x-show="type !== 'Siswa'" style="display: none;">
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Nama Guru / Tim</label>
-                                <input type="text" name="name_manual" placeholder="Contoh: Tim Futsal Guru" class="w-full rounded-xl border-gray-200 focus:border-yellow-500 focus:ring-yellow-500 text-sm">
-                            </div>
+                        </div>
+                        
+                        {{-- Input Manual (Muncul jika type != Siswa) --}}
+                        <div x-show="type !== 'Siswa'" x-transition style="display: none;">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nama Guru / Tim</label>
+                            <input type="text" name="name_manual" placeholder="Contoh: Tim Robotik Guru" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white transition-all">
+                        </div>
 
-                            {{-- Judul Prestasi --}}
+                        {{-- Judul & Kategori --}}
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Judul Kejuaraan</label>
+                            <input type="text" name="title" required placeholder="Contoh: Juara 1 Lomba Web Design" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white transition-all">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Judul Kejuaraan</label>
-                                <input type="text" name="title" required placeholder="Contoh: Juara 1 Lomba Pidato" class="w-full rounded-xl border-gray-200 focus:border-yellow-500 focus:ring-yellow-500 text-sm font-bold text-gray-700">
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tingkat</label>
-                                    <select name="level" class="w-full rounded-xl border-gray-200 focus:border-yellow-500 focus:ring-yellow-500 text-sm">
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tingkat</label>
+                                <div class="relative">
+                                    <select name="level" class="w-full pl-3 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white transition-all appearance-none">
                                         <option value="Sekolah">Sekolah</option>
                                         <option value="Kecamatan">Kecamatan</option>
                                         <option value="Kabupaten">Kabupaten</option>
@@ -89,90 +128,164 @@
                                         <option value="Nasional">Nasional</option>
                                         <option value="Internasional">Internasional</option>
                                     </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
+                                        <i class="ph-bold ph-caret-down text-xs"></i>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Tanggal</label>
-                                    <input type="date" name="date" value="{{ date('Y-m-d') }}" class="w-full rounded-xl border-gray-200 focus:border-yellow-500 focus:ring-yellow-500 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tanggal</label>
+                                <input type="date" name="date" value="{{ date('Y-m-d') }}" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white transition-all text-slate-600">
+                            </div>
+                        </div>
+
+                        {{-- Image Upload with Preview --}}
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Foto Dokumentasi</label>
+                            
+                            <div class="relative group">
+                                <input type="file" name="photo" accept="image/*" 
+                                    @change="imgPreview = URL.createObjectURL($event.target.files[0])"
+                                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                
+                                <div class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center transition-all group-hover:border-yellow-400 group-hover:bg-yellow-50"
+                                     :class="{'border-yellow-400 bg-yellow-50': imgPreview}">
+                                    
+                                    <div x-show="!imgPreview" class="space-y-1">
+                                        <i class="ph-duotone ph-cloud-arrow-up text-2xl text-slate-300 group-hover:text-yellow-500 transition-colors"></i>
+                                        <p class="text-xs text-slate-500">Klik / geser foto ke sini</p>
+                                    </div>
+
+                                    <div x-show="imgPreview" class="relative h-32 w-full" style="display: none;">
+                                        <img :src="imgPreview" class="h-full w-full object-cover rounded-lg">
+                                        <button @click.prevent="imgPreview = null" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center text-xs shadow-md z-20 hover:bg-red-600 transition-colors">
+                                            <i class="ph-bold ph-x"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
 
-                            {{-- Upload Media --}}
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Foto Dokumentasi</label>
-                                <input type="file" name="photo" accept="image/*" class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100 border border-gray-200 rounded-xl">
-                            </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Link Video (Opsional)</label>
+                            <input type="url" name="video_link" placeholder="https://youtube.com/..." class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white transition-all">
+                        </div>
 
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Link Video (Youtube/IG)</label>
-                                <input type="url" name="video_link" placeholder="https://..." class="w-full rounded-xl border-gray-200 focus:border-yellow-500 focus:ring-yellow-500 text-sm">
-                            </div>
-
-                            <button type="submit" class="w-full py-3 px-4 bg-yellow-500 text-white font-bold rounded-xl hover:bg-yellow-600 transition-all shadow-lg shadow-yellow-200 flex items-center justify-center gap-2 mt-4">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                                Simpan Prestasi
-                            </button>
-                        </form>
-                    </div>
+                        <button type="submit" class="w-full py-3.5 px-4 bg-gradient-to-r from-yellow-500 to-amber-500 text-white font-bold rounded-xl hover:from-yellow-600 hover:to-amber-600 transition-all shadow-lg shadow-yellow-500/30 flex items-center justify-center gap-2 transform active:scale-[0.98]">
+                            <i class="ph-bold ph-floppy-disk"></i>
+                            <span>Simpan Prestasi</span>
+                        </button>
+                    </form>
                 </div>
             </div>
+        </div>
 
-            {{-- DAFTAR PRESTASI --}}
-            <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-4">Riwayat Prestasi Sekolah</h3>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="border-b border-gray-100 text-xs font-bold text-gray-400 uppercase">
-                                    <th class="py-3 px-4">Tanggal</th>
-                                    <th class="py-3 px-4">Juara</th>
-                                    <th class="py-3 px-4">Prestasi</th>
-                                    <th class="py-3 px-4">Tingkat</th>
-                                    <th class="py-3 px-4 text-right">Aksi</th>
-                                </div>
-                            </thead>
-                            <tbody class="divide-y divide-gray-50">
-                                @forelse($achievements as $item)
-                                    <tr class="hover:bg-yellow-50/30 transition group">
-                                        <td class="py-3 px-4 text-sm text-gray-500 whitespace-nowrap">
-                                            {{ \Carbon\Carbon::parse($item->date)->format('d M Y') }}
-                                        </td>
-                                        <td class="py-3 px-4">
-                                            <div class="font-bold text-gray-800 text-sm">{{ $item->achiever_name }}</div>
-                                            <div class="text-xs text-gray-400">{{ $item->type }}</div>
-                                        </td>
-                                        <td class="py-3 px-4">
-                                            <div class="font-medium text-indigo-600 text-sm">{{ $item->title }}</div>
-                                        </td>
-                                        <td class="py-3 px-4">
-                                            <span class="px-2 py-1 rounded-md text-xs font-bold bg-gray-100 text-gray-600 border border-gray-200">
-                                                {{ $item->level }}
-                                            </span>
-                                        </td>
-                                        <td class="py-3 px-4 text-right">
-                                            <form action="{{ route('achievements.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus data ini?');">
+        {{-- KOLOM KANAN: TABEL DATA --}}
+        <div class="lg:col-span-8 space-y-6">
+            
+            {{-- Filter Bar --}}
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                <div class="relative w-full sm:w-64">
+                    <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" placeholder="Cari nama / juara..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all">
+                </div>
+                
+                {{-- Tombol Export --}}
+                <button class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition">
+                    <i class="ph-bold ph-export"></i> Export Excel
+                </button>
+            </div>
+
+            {{-- Table Area --}}
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="p-6 border-b border-slate-50">
+                    <h3 class="font-bold text-slate-800 text-lg">Riwayat Prestasi Sekolah</h3>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50/50 text-xs font-extrabold text-slate-400 uppercase tracking-wider">
+                                <th class="py-4 px-6">Info Juara</th>
+                                <th class="py-4 px-6">Prestasi</th>
+                                <th class="py-4 px-6">Tingkat</th>
+                                <th class="py-4 px-6 text-center">Tanggal</th>
+                                <th class="py-4 px-6 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            @forelse($achievements as $item)
+                                <tr class="group hover:bg-yellow-50/20 transition-colors duration-200">
+                                    <td class="py-4 px-6">
+                                        <div class="flex items-center gap-3">
+                                            {{-- Avatar Logic --}}
+                                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shrink-0
+                                                {{ $item->type == 'Siswa' ? 'bg-indigo-100 text-indigo-600' : ($item->type == 'Guru' ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600') }}">
+                                                @if($item->type == 'Siswa')
+                                                    {{ substr($item->achiever_name, 0, 2) }}
+                                                @elseif($item->type == 'Guru')
+                                                    <i class="ph-bold ph-chalkboard-teacher text-lg"></i>
+                                                @else
+                                                    <i class="ph-bold ph-buildings text-lg"></i>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-slate-800 text-sm line-clamp-1">{{ $item->achiever_name }}</div>
+                                                <div class="text-[10px] font-bold px-1.5 py-0.5 rounded inline-block mt-0.5
+                                                    {{ $item->type == 'Siswa' ? 'bg-indigo-50 text-indigo-600' : ($item->type == 'Guru' ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-600') }}">
+                                                    {{ strtoupper($item->type) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <div class="font-bold text-slate-700 text-sm mb-1 line-clamp-2">{{ $item->title }}</div>
+                                        @if($item->video_link)
+                                            <a href="{{ $item->video_link }}" target="_blank" class="flex items-center gap-1 text-xs text-slate-400 hover:text-yellow-600 hover:underline transition">
+                                                <i class="ph-fill ph-video-camera"></i> Lihat Video
+                                            </a>
+                                        @endif
+                                    </td>
+                                    <td class="py-4 px-6">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                            <i class="ph-fill ph-map-pin text-[10px]"></i> {{ $item->level }}
+                                        </span>
+                                    </td>
+                                    <td class="py-4 px-6 text-center">
+                                        <div class="text-xs font-bold text-slate-500">{{ \Carbon\Carbon::parse($item->date)->format('d M') }}</div>
+                                        <div class="text-[10px] text-slate-400">{{ \Carbon\Carbon::parse($item->date)->format('Y') }}</div>
+                                    </td>
+                                    <td class="py-4 px-6 text-right">
+                                        <div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                                            <form action="{{ route('achievements.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data prestasi ini?');">
                                                 @csrf @method('DELETE')
-                                                <button class="text-gray-400 hover:text-rose-500 transition">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                <button type="submit" class="w-8 h-8 rounded-lg flex items-center justify-center bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm" title="Hapus Data">
+                                                    <i class="ph-bold ph-trash"></i>
                                                 </button>
                                             </form>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="py-8 text-center text-gray-400 text-sm">Belum ada data prestasi.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="mt-4">
-                        {{ $achievements->links() }}
-                    </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="py-12 text-center">
+                                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4">
+                                            <i class="ph-duotone ph-trophy text-3xl text-slate-300"></i>
+                                        </div>
+                                        <h3 class="text-slate-800 font-bold">Belum ada data prestasi</h3>
+                                        <p class="text-slate-500 text-sm">Silakan input prestasi pertama sekolah di formulir sebelah kiri.</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                
+                {{-- Pagination --}}
+                <div class="px-6 py-4 border-t border-slate-50">
+                    {{ $achievements->links() }}
                 </div>
             </div>
-
         </div>
     </div>
 </x-app-layout>

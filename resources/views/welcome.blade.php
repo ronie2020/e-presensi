@@ -33,13 +33,6 @@
             66% { transform: translate(-20px, 20px) scale(0.9); }
             100% { transform: translate(0px, 0px) scale(1); }
         }
-        
-        /* Glass Effect Utility */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
     </style>
 </head>
 <body class="antialiased text-slate-800 bg-slate-50 overflow-x-hidden" 
@@ -105,7 +98,6 @@
                     <a href="#profil" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Profil</a>
                     <a href="#guru" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Guru</a>
                     <a href="#kegiatan" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Kegiatan</a>
-                    <!-- UPDATE: Link Prestasi Added -->
                     <a href="#prestasi" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Prestasi</a>
                     <a href="#ekskul" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Ekskul</a>
                     
@@ -163,7 +155,7 @@
         </div>
     </nav>
 
-    <!-- HERO SECTION (FIXED PADDING) -->
+    <!-- HERO SECTION -->
     <div class="relative bg-slate-900 pt-28 pb-12 lg:pt-36 lg:pb-20 overflow-hidden min-h-[85vh] flex items-center">
         <!-- Background -->
         <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
@@ -295,7 +287,7 @@
         </div>
     </div>
 
-    <!-- [FITUR BARU] KEPALA SEKOLAH SECTION -->
+    <!-- KEPALA SEKOLAH SECTION -->
     <div class="bg-white py-20 border-b border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-blue-600 rounded-3xl p-8 md:p-12 relative overflow-hidden flex flex-col md:flex-row items-center gap-10 shadow-2xl">
@@ -434,11 +426,9 @@
         </div>
     </div>
 
-    <!-- [FITUR BARU] VIDEO PROFIL SEKOLAH -->
+    <!-- VIDEO PROFIL SEKOLAH -->
     <div class="py-24 bg-slate-900 relative overflow-hidden">
         <!-- Overlay image background -->
-        <!-- GANTI GAMBAR DI SINI: -->
-        <!-- Ubah 'images/bg-video.jpg' dengan nama file gambar yang Anda simpan di folder public/images -->
         <div class="absolute inset-0 bg-cover bg-center opacity-30" 
              style="background-image: url('{{ asset('images/netila.jpg') }}');">
         </div>
@@ -631,7 +621,8 @@
     </div>
 
     <!-- UPDATE: PRESTASI SECTION (NEW) -->
-    <div id="prestasi" class="py-24 bg-gradient-to-b from-yellow-50/50 to-white relative overflow-hidden border-t border-slate-100">
+    <!-- [PERUBAHAN]: Menambahkan x-data untuk filter logika -->
+    <div id="prestasi" class="py-24 bg-gradient-to-b from-yellow-50/50 to-white relative overflow-hidden border-t border-slate-100" x-data="{ activeFilter: 'Terbaru' }">
         <!-- Decoration -->
         <div class="absolute top-0 right-0 w-96 h-96 bg-yellow-200 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 pointer-events-none"></div>
         <div class="absolute bottom-0 left-0 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 pointer-events-none"></div>
@@ -650,72 +641,88 @@
                     </p>
                 </div>
                 
-                <!-- Filter Buttons (Mockup Visual) -->
+                <!-- [PERBAIKAN] Filter Buttons Logic -->
                 <div class="flex gap-2">
-                    <button class="px-4 py-2 bg-yellow-500 text-white rounded-full text-sm font-bold shadow-lg shadow-yellow-500/30">Terbaru</button>
-                    <button class="px-4 py-2 bg-white text-slate-500 border border-slate-200 rounded-full text-sm font-bold hover:bg-slate-50 transition">Nasional</button>
-                    <button class="px-4 py-2 bg-white text-slate-500 border border-slate-200 rounded-full text-sm font-bold hover:bg-slate-50 transition">Provinsi</button>
+                    <button @click="activeFilter = 'Terbaru'" 
+                        :class="activeFilter === 'Terbaru' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'"
+                        class="px-4 py-2 rounded-full text-sm font-bold transition">
+                        Terbaru
+                    </button>
+                    <button @click="activeFilter = 'Nasional'" 
+                        :class="activeFilter === 'Nasional' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'"
+                        class="px-4 py-2 rounded-full text-sm font-bold transition">
+                        Nasional
+                    </button>
+                    <button @click="activeFilter = 'Provinsi'" 
+                        :class="activeFilter === 'Provinsi' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'"
+                        class="px-4 py-2 rounded-full text-sm font-bold transition">
+                        Provinsi
+                    </button>
                 </div>
             </div>
 
             <!-- Grid Prestasi -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 @forelse($achievements ?? [] as $prestasi)
-                    <div class="group bg-white rounded-2xl p-6 border border-yellow-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-xl hover:shadow-yellow-500/10 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden" data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
+                    <!-- [PERBAIKAN] Logika x-show untuk filter -->
+                    <div class="group bg-white rounded-2xl border border-yellow-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-xl hover:shadow-yellow-500/10 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden h-full flex flex-col" 
+                         x-show="activeFilter === 'Terbaru' || activeFilter === '{{ $prestasi->level }}'"
+                         x-transition.duration.500ms
+                         data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
                         
-                        <!-- Top Decoration -->
-                        <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <i class="ph-fill ph-trophy text-6xl text-yellow-500"></i>
-                        </div>
-
-                        <!-- Header -->
-                        <div class="flex items-center justify-between mb-4 relative z-10">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-yellow-500/30 group-hover:scale-110 transition-transform duration-300">
-                                <i class="ph-bold ph-medal text-2xl"></i>
+                        <!-- [PERBAIKAN VARIABEL] Menggunakan photo_path bukan photo -->
+                        <div class="h-48 w-full bg-slate-100 relative overflow-hidden group">
+                            @if(!empty($prestasi->photo_path))
+                                <img src="{{ asset('storage/' . $prestasi->photo_path) }}" 
+                                     alt="{{ $prestasi->title }}" 
+                                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <!-- Fallback jika gambar gagal load -->
+                                <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-white" style="display: none;">
+                                    <i class="ph-bold ph-trophy text-4xl"></i>
+                                </div>
+                            @else
+                                <!-- Default jika tidak ada gambar -->
+                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-white">
+                                    <i class="ph-bold ph-trophy text-4xl"></i>
+                                </div>
+                            @endif
+                            
+                            <!-- Badge Level -->
+                            <div class="absolute top-3 right-3">
+                                 <span class="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur border border-white/20 text-[10px] font-bold uppercase text-yellow-700 tracking-wide shadow-sm">
+                                    {{ $prestasi->level ?? 'Sekolah' }}
+                                </span>
                             </div>
-                            <span class="px-2.5 py-1 rounded-full bg-slate-50 border border-slate-100 text-[10px] font-bold uppercase text-slate-500 tracking-wide">
-                                {{ $prestasi->level ?? 'Sekolah' }}
-                            </span>
                         </div>
 
                         <!-- Content -->
-                        <div class="relative z-10">
-                            <h4 class="text-lg font-bold text-slate-900 mb-2 leading-tight group-hover:text-yellow-600 transition-colors">
+                        <div class="p-5 flex-1 flex flex-col relative z-10">
+                            <!-- Tanggal -->
+                             <div class="text-xs text-slate-400 font-medium mb-2 flex items-center gap-1">
+                                <i class="ph-fill ph-calendar-blank"></i>
+                                {{ isset($prestasi->date) ? \Carbon\Carbon::parse($prestasi->date)->format('d M Y') : '-' }}
+                            </div>
+
+                            <h4 class="text-lg font-bold text-slate-900 mb-2 leading-tight group-hover:text-yellow-600 transition-colors line-clamp-2">
                                 {{ $prestasi->title ?? 'Juara Lomba' }}
                             </h4>
                             
-                            <div class="flex items-center gap-2 mb-4">
-                                <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-xs">
-                                    <i class="ph-fill ph-user"></i>
-                                </span>
-                                <p class="text-sm font-medium text-slate-500">
-                                    {{ $prestasi->achiever_name ?? 'Nama Siswa' }}
-                                </p>
-                            </div>
-
-                            <div class="pt-4 border-t border-slate-50 flex items-center justify-between text-xs text-slate-400">
-                                <span class="flex items-center gap-1">
-                                    <i class="ph-fill ph-calendar"></i> 
-                                    {{ isset($prestasi->date) ? \Carbon\Carbon::parse($prestasi->date)->format('d M Y') : '-' }}
-                                </span>
-                                <span class="font-bold text-yellow-600">{{ $prestasi->type ?? 'Siswa' }}</span>
+                            <div class="mt-auto pt-4 border-t border-slate-50 flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-sm">
+                                    <i class="ph-bold ph-user"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-700 line-clamp-1">
+                                        {{ $prestasi->achiever_name ?? 'Siswa' }}
+                                    </p>
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold">{{ $prestasi->type ?? 'Siswa' }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 @empty
-                    <!-- Placeholder Card 1 -->
-                    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm opacity-60">
-                        <div class="w-12 h-12 rounded-xl bg-slate-100 mb-4"></div>
-                        <div class="h-4 bg-slate-100 rounded w-3/4 mb-2"></div>
-                        <div class="h-3 bg-slate-50 rounded w-1/2"></div>
-                    </div>
-                    <!-- Placeholder Card 2 -->
-                    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm opacity-60">
-                        <div class="w-12 h-12 rounded-xl bg-slate-100 mb-4"></div>
-                        <div class="h-4 bg-slate-100 rounded w-3/4 mb-2"></div>
-                        <div class="h-3 bg-slate-50 rounded w-1/2"></div>
-                    </div>
-                     <div class="col-span-full text-center py-4 text-slate-400 text-sm italic">
+                    <div class="col-span-full text-center py-4 text-slate-400 text-sm italic">
                         Belum ada data prestasi yang ditampilkan.
                     </div>
                 @endforelse
@@ -1040,8 +1047,6 @@
                         <li><a href="#profil" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Profil Sekolah</a></li>
                         <li><a href="#guru" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Tenaga Pendidik</a></li>
                         <li><a href="#kegiatan" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Galeri Kegiatan</a></li>
-                        <!-- Update: Link Prestasi Footer -->
-                        <li><a href="#prestasi" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Prestasi</a></li>
                         <li><a href="{{ route('login') }}" class="hover:text-blue-400 transition-colors flex items-center gap-2"><i class="ph-bold ph-caret-right text-xs"></i> Login Staff</a></li>
                     </ul>
                 </div>
