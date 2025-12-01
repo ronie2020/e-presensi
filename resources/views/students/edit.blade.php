@@ -16,7 +16,8 @@
 
             {{-- Tampilkan Error Validasi --}}
             @if ($errors->any())
-                <div class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-xl text-sm">
+                <div class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-xl text-sm flex items-start gap-3">
+                    <i class="ph-fill ph-warning-circle text-lg shrink-0 mt-0.5"></i>
                     <ul class="list-disc list-inside font-bold">
                         @foreach ($errors->all() as $error)
                             <li>{{ $error }}</li>
@@ -27,13 +28,12 @@
 
             <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden" x-data="{ tab: 'pribadi' }">
                 
-               
                 {{-- TAB NAVIGATION (STYLE UPDATED) --}}
                 <div class="bg-slate-50 border-b border-slate-200 px-6 pt-4 flex gap-2 overflow-x-auto custom-scrollbar">
                     @foreach(['pribadi' => 'A. Pribadi', 'tempat_tinggal' => 'B. Alamat', 'kesehatan' => 'C. Kesehatan', 'pendidikan' => 'D. Pendidikan', 'orangtua' => 'E. Ortu & Wali', 'tamat' => 'F. Mutasi & Tamat'] as $key => $label)
                         <button type="button" @click="tab = '{{ $key }}'" 
-                            :class="{ 'bg-white text-blue-600 shadow-sm border-slate-200': tab === '{{ $key }}', 'text-slate-500 hover:text-slate-700 hover:bg-slate-100 border-transparent': tab !== '{{ $key }}' }" 
-                            class="px-5 py-2.5 rounded-t-xl border-t border-x font-bold text-sm whitespace-nowrap transition-all mb-[-1px]">
+                            :class="{ 'bg-white text-blue-600 shadow-sm border-slate-200 border-b-white translate-y-px': tab === '{{ $key }}', 'text-slate-500 hover:text-slate-700 hover:bg-slate-100 border-transparent': tab !== '{{ $key }}' }" 
+                            class="px-5 py-3 rounded-t-xl border-t border-x font-bold text-sm whitespace-nowrap transition-all relative z-10">
                             {{ $label }}
                         </button>
                     @endforeach
@@ -424,7 +424,8 @@
                     {{-- FOOTER --}}
                     <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center">
                         <p class="text-xs text-slate-400 italic">* Pastikan data sudah benar sebelum disimpan.</p>
-                        <button type="submit" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all transform hover:scale-105">
+                        <button type="submit" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all transform active:scale-95 flex items-center gap-2">
+                            <i class="ph-bold ph-floppy-disk"></i>
                             Simpan Perubahan
                         </button>
                     </div>

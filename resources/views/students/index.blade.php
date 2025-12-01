@@ -21,7 +21,7 @@
                     </div>
                     <span class="font-bold">{{ session('success') }}</span>
                 </div>
-                <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-1 rounded-lg hover:bg-emerald-100"><i class="ph-bold ph-x"></i></button>
+                <button @click="show = false" class="hover:bg-emerald-100 p-1 rounded-lg transition"><i class="ph-bold ph-x"></i></button>
             </div>
         @endif
 
@@ -33,7 +33,7 @@
                     </div>
                     <span class="font-bold">{{ session('error') }}</span>
                 </div>
-                <button @click="show = false" class="text-rose-400 hover:text-rose-600 p-1 rounded-lg hover:bg-rose-100"><i class="ph-bold ph-x"></i></button>
+                <button @click="show = false" class="hover:bg-rose-100 p-1 rounded-lg transition"><i class="ph-bold ph-x"></i></button>
             </div>
         @endif
 
@@ -43,17 +43,18 @@
             <div class="lg:col-span-1 space-y-6">
                 
                 <!-- CARD: PENDAFTARAN CEPAT -->
-                <div class="bg-white rounded-3xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden relative group hover:shadow-lg hover:shadow-blue-500/5 transition-all duration-300 sticky top-24">
-                    <div class="absolute top-0 left-0 w-1.5 h-full bg-blue-600"></div>
-                    <div class="p-6 md:p-8 relative z-10">
-                        
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden relative sticky top-24">
+                    {{-- Aksen Biru --}}
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-blue-600"></div>
+                    
+                    <div class="p-6 md:p-8">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-blue-100">
                                 <i class="ph-duotone ph-user-plus"></i>
                             </div>
                             <div>
                                 <h3 class="text-lg font-black text-slate-800">Registrasi Cepat</h3>
-                                <p class="text-xs text-slate-500 font-medium">Input data dasar siswa</p>
+                                <p class="text-xs text-slate-500 font-medium">Input data dasar siswa baru.</p>
                             </div>
                         </div>
 
@@ -85,7 +86,7 @@
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Kelas *</label>
-                                    <select name="class_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm py-2.5 font-bold text-slate-700 transition-colors cursor-pointer">
+                                    <select name="class_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm py-2.5 font-bold text-slate-700 transition-colors cursor-pointer appearance-none">
                                         <option value="">Pilih</option>
                                         @foreach ($classes as $class)
                                             <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>
@@ -96,14 +97,14 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Gender *</label>
-                                    <select name="gender" required class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm py-2.5 font-bold text-slate-700 transition-colors cursor-pointer">
+                                    <select name="gender" required class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm py-2.5 font-bold text-slate-700 transition-colors cursor-pointer appearance-none">
                                         <option value="L">Laki-laki</option>
                                         <option value="P">Perempuan</option>
                                     </select>
                                 </div>
                             </div>
 
-                            {{-- INPUT FOTO DENGAN PREVIEW --}}
+                            {{-- INPUT FOTO --}}
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Foto Siswa (Opsional)</label>
                                 <div class="flex items-center gap-3">
@@ -129,6 +130,7 @@
                                 </div>
                             </div>
 
+                            {{-- RFID & WA --}}
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">ID Kartu RFID (Opsional)</label>
                                 <div class="relative">
@@ -152,7 +154,8 @@
                             </div>
 
                             <div class="pt-2">
-                                <button type="submit" class="w-full py-3 px-6 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg flex items-center justify-center gap-2 group-hover:translate-y-0.5 transform active:scale-95">
+                                {{-- Tombol diubah ke Blue-600 dengan Shadow Glow --}}
+                                <button type="submit" class="w-full py-3 px-6 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 group-hover:translate-y-0.5 transform active:scale-95">
                                     <i class="ph-bold ph-floppy-disk"></i>
                                     Simpan Data Dasar
                                 </button>
@@ -175,14 +178,14 @@
                         <form action="{{ route('students.import') }}" method="POST" enctype="multipart/form-data" class="flex gap-2 items-center">
                             @csrf
                             <label class="flex-1 cursor-pointer group">
-                                <div class="bg-white border border-dashed border-blue-300 rounded-xl py-2 px-3 text-center transition-all group-hover:border-blue-500 group-hover:bg-white/80 truncate">
+                                <div class="bg-white border border-dashed border-blue-300 rounded-xl py-2.5 px-3 text-center transition-all group-hover:border-blue-500 group-hover:bg-blue-50 truncate">
                                     <span class="text-xs font-bold text-blue-600 truncate flex items-center justify-center gap-1">
                                         <i class="ph-bold ph-upload-simple"></i> Pilih File...
                                     </span>
                                 </div>
                                 <input type="file" name="file" id="file" required class="hidden">
                             </label>
-                            <button type="submit" class="py-2.5 px-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors text-xs shadow-md">
+                            <button type="submit" class="py-2.5 px-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors text-xs shadow-md shadow-emerald-500/20">
                                 Upload
                             </button>
                         </form>
@@ -208,13 +211,13 @@
                             <form action="{{ route('students.index') }}" method="GET" class="flex gap-2 flex-1">
                                 <div class="relative flex-1">
                                     <input type="text" name="search" placeholder="Cari nama / NISN..." value="{{ request('search') }}"
-                                           class="w-full pl-9 pr-4 py-2.5 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-xs font-bold text-slate-700 shadow-sm">
+                                           class="w-full pl-9 pr-4 py-2.5 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-xs font-bold text-slate-700 shadow-sm transition-colors">
                                     <div class="absolute left-3 top-2.5 text-slate-400">
                                         <i class="ph-bold ph-magnifying-glass"></i>
                                     </div>
                                 </div>
                                 
-                                <select name="filter_class_id" onchange="this.form.submit()" class="rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-xs font-bold text-slate-700 py-2.5 shadow-sm cursor-pointer">
+                                <select name="filter_class_id" onchange="this.form.submit()" class="rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-xs font-bold text-slate-700 py-2.5 shadow-sm cursor-pointer px-3">
                                     <option value="">Semua Kelas</option>
                                     @foreach ($classes as $class)
                                         <option value="{{ $class->id }}" {{ request('filter_class_id') == $class->id ? 'selected' : '' }}>
@@ -224,7 +227,7 @@
                                 </select>
                             </form>
 
-                            <a href="{{ route('students.export') }}" class="flex items-center justify-center px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shadow-sm font-bold text-xs gap-2" title="Download Excel">
+                            <a href="{{ route('students.export') }}" class="flex items-center justify-center px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 hover:text-emerald-600 hover:border-emerald-200 transition-all shadow-sm font-bold text-xs gap-2" title="Download Excel">
                                 <i class="ph-bold ph-microsoft-excel-logo text-lg"></i>
                                 <span class="hidden sm:inline">Export</span>
                             </a>
@@ -244,7 +247,7 @@
                             </thead>
                             <tbody class="divide-y divide-slate-50">
                                 @forelse ($students as $student)
-                                    <tr class="hover:bg-blue-50/30 transition-colors group">
+                                    <tr class="hover:bg-slate-50/50 transition-colors group">
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center gap-3">
                                                 <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm bg-slate-100 flex-shrink-0">

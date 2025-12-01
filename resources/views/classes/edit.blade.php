@@ -9,30 +9,32 @@
                     <h1 class="text-2xl font-black text-slate-800 tracking-tight leading-none">Edit Kelas</h1>
                     <p class="text-sm text-slate-500 mt-1">Perbarui informasi rombongan belajar.</p>
                 </div>
-                <a href="{{ route('classes.index') }}" class="text-sm font-bold text-slate-500 hover:text-blue-600 flex items-center gap-1.5 transition-colors bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200">
+                <a href="{{ route('classes.index') }}" class="text-sm font-bold text-slate-500 hover:text-blue-600 flex items-center gap-1.5 transition-colors bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200 hover:border-blue-200">
                     <i class="ph-bold ph-arrow-left"></i>
                     Kembali
                 </a>
             </div>
 
             <div class="bg-white rounded-3xl shadow-xl shadow-blue-500/5 border border-slate-100 overflow-hidden relative">
+                {{-- Aksen Gradient --}}
                 <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
                 
                 <div class="p-8">
-                    <div class="flex items-center gap-4 mb-8 p-4 bg-blue-50/50 rounded-2xl border border-blue-100">
-                        <div class="w-12 h-12 bg-white text-blue-600 rounded-xl flex items-center justify-center shadow-sm border border-blue-50 text-2xl">
+                    {{-- Info Card --}}
+                    <div class="flex items-center gap-4 mb-8 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                        <div class="w-12 h-12 bg-white text-blue-600 rounded-xl flex items-center justify-center shadow-sm border border-blue-50 text-2xl shrink-0">
                             <i class="ph-duotone ph-pencil-simple-line"></i>
                         </div>
                         <div>
                             <h3 class="text-base font-bold text-slate-800">Formulir Perubahan</h3>
-                            <p class="text-xs text-slate-500">Ubah nama atau wali kelas di bawah ini.</p>
+                            <p class="text-xs text-slate-500 leading-tight mt-0.5">Ubah nama atau wali kelas untuk rombel <strong>{{ $class->name }}</strong>.</p>
                         </div>
                     </div>
 
                     {{-- Tampilkan error validasi jika ada --}}
                     @if ($errors->any())
                         <div class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-xl text-sm flex items-start gap-3">
-                            <i class="ph-fill ph-warning-circle text-lg mt-0.5"></i>
+                            <i class="ph-fill ph-warning-circle text-lg mt-0.5 shrink-0"></i>
                             <ul class="list-disc list-inside">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
