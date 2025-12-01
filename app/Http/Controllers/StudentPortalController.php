@@ -7,7 +7,7 @@ use App\Models\AttendanceSiswa;
 use App\Models\DisciplineRecord;
 use App\Models\LibraryVisit;
 use App\Models\Borrowing;
-use App\Models\Achievement; // Pastikan model ini ada
+use App\Models\Achievement;
 use Illuminate\Http\Request;
 
 class StudentPortalController extends Controller
@@ -37,7 +37,8 @@ class StudentPortalController extends Controller
 
     public function show($id)
     {
-        $student = Student::with('schoolClass')->findOrFail($id);
+        // 1. LOAD SISWA + RELASI
+        $student = Student::with(['schoolClass', 'disciplineRecords.disciplineType'])->findOrFail($id);
         
         $year = date('Y');
 
@@ -58,14 +59,14 @@ class StudentPortalController extends Controller
                     ->where('status', 'Izin')
                     ->count();
       
+        // [FIX] DEFINISI VARIABEL $alpa YANG HILANG
         $alpa = AttendanceSiswa::where('student_id', $student->id)
                     ->whereYear('attendance_date', $year)
-                    ->where('status', 'Alpa')
+                    ->where('status', 'Alfa') // Pastikan di DB statusnya 'Alfa' (bukan Alpa)
                     ->count();
         
-        // (BARU) Riwayat Kehadiran 10 Terakhir
         $attendance_history = AttendanceSiswa::where('student_id', $student->id)
-                    ->where('type', 'Harian')
+                    ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
                     ->latest('attendance_date')
                     ->limit(7)
                     ->get();
@@ -83,7 +84,6 @@ class StudentPortalController extends Controller
                     ->whereIn('activity', ['Dhuhur', 'Duhur'])
                     ->count();
         
-        // (BARU) Riwayat Ibadah Terakhir
         $religious_history = AttendanceSiswa::where('student_id', $student->id)
                     ->where('type', 'Keagamaan')
                     ->latest('created_at')
@@ -91,22 +91,26 @@ class StudentPortalController extends Controller
                     ->get();
 
         // --- 3. REKAP DISIPLIN ---
-        $poin_pelanggaran = DisciplineRecord::where('student_id', $student->id)
-            ->whereHas('disciplineType', function($q) { $q->where('type', 'Pelanggaran'); })
-            ->with('disciplineType')->get()->sum(fn($r) => $r->disciplineType->point_value);
+        // Hitung poin dari relasi yang sudah di-load (agar akurat)
+        $poin_pelanggaran = $student->disciplineRecords->filter(function ($record) {
+            return $record->disciplineType && $record->disciplineType->type == 'Pelanggaran';
+        })->sum(function ($record) {
+            return $record->disciplineType->point_value;
+        });
 
-        $poin_kebaikan = DisciplineRecord::where('student_id', $student->id)
-            ->whereHas('disciplineType', function($q) { $q->where('type', 'Kebaikan'); })
-            ->with('disciplineType')->get()->sum(fn($r) => $r->disciplineType->point_value);
+        $poin_kebaikan = $student->disciplineRecords->filter(function ($record) {
+            return $record->disciplineType && $record->disciplineType->type == 'Kebaikan';
+        })->sum(function ($record) {
+            return $record->disciplineType->point_value;
+        });
 
-        $discipline_history = DisciplineRecord::with(['disciplineType', 'recorder'])
+        $discipline_history = DisciplineRecord::with('disciplineType')
             ->where('student_id', $student->id)
             ->orderBy('date', 'desc')
             ->limit(10)
             ->get();
 
         // --- 4. PRESTASI ---
-        // Cek jika model Achievement ada, jika tidak kosongkan array agar tidak error
         $achievements = [];
         if (class_exists('App\Models\Achievement')) {
             $achievements = Achievement::where('student_id', $student->id)
@@ -115,14 +119,21 @@ class StudentPortalController extends Controller
         }
 
         // --- 5. DATA PERPUSTAKAAN ---
-        $library_visits = LibraryVisit::where('student_id', $student->id)->count();
+        $library_visits = 0;
+        if (class_exists('App\Models\LibraryVisit')) {
+            $library_visits = LibraryVisit::where('student_id', $student->id)->count();
+        }
 
-        $borrowing_history = Borrowing::with('book')
-            ->where('student_id', $student->id)
-            ->orderBy('borrow_date', 'desc')
-            ->limit(10)
-            ->get();
+        $borrowing_history = [];
+        if (class_exists('App\Models\Borrowing')) {
+            $borrowing_history = Borrowing::with('book')
+                ->where('student_id', $student->id)
+                ->orderBy('borrow_date', 'desc')
+                ->limit(10)
+                ->get();
+        }
 
+        // Pastikan semua variabel di sini SUDAH didefinisikan di atas
         return view('portal.show', compact(
             'student', 
             'hadir', 'sakit', 'izin', 'alpa', 'attendance_history',

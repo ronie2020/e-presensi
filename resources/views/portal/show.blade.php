@@ -4,20 +4,29 @@
 <!-- Container Utama dengan Alpine.js untuk Tab -->
 <div class="w-full max-w-6xl mx-auto" x-data="{ activeTab: 'ringkasan' }">
     
-    <!-- 1. HEADER PROFIL (Sticky/Static) -->
+    <!-- 1. HEADER PROFIL (THEMA: DARK BLUE) -->
     <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden mb-6 border border-gray-100 relative group">
-        <!-- Background Banner -->
-        <div class="bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 h-36 w-full absolute top-0 left-0 z-0">
-            <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-            <!-- Decorative Circles -->
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
-            <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-indigo-400 opacity-20 rounded-full blur-2xl"></div>
+        
+        <!-- Background Banner (Biru Tua) -->
+        <div class="absolute top-0 left-0 w-full h-44 z-0 overflow-hidden bg-slate-900">
+            <!-- Gambar Background Tipis -->
+            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
+            
+            <!-- Gradasi Biru Tua -->
+            <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900/80 to-slate-900"></div>
+            
+            <!-- Pattern Kubus Halus -->
+            <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+            
+            <!-- Dekorasi Cahaya (Glow Effect) -->
+            <div class="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-500 rounded-full mix-blend-screen filter blur-[80px] opacity-20 -mr-20 -mt-20"></div>
+            <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500 rounded-full mix-blend-screen filter blur-[80px] opacity-20 -ml-20 -mb-20"></div>
         </div>
         
-        <div class="relative z-10 px-6 sm:px-10 pt-20 pb-8 flex flex-col md:flex-row items-center md:items-end text-center md:text-left">
+        <!-- Konten Header -->
+        <div class="relative z-10 px-6 sm:px-10 pt-28 pb-8 flex flex-col md:flex-row items-center md:items-center text-center md:text-left">
             
-            <!-- Foto Siswa (DIPERBAIKI: Ditambahkan 'shrink-0') -->
-            <!-- 'shrink-0' mencegah foto tergencet oleh teks nama yang panjang -->
+            <!-- Foto Siswa -->
             <div class="relative group shrink-0">
                 <div class="w-36 h-36 rounded-full bg-white p-1.5 shadow-2xl relative z-10 transform group-hover:scale-105 transition-transform duration-300">
                     <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-4 border-blue-50 relative">
@@ -30,25 +39,26 @@
                         @endif
                     </div>
                 </div>
-                <!-- Status Badge (Optional) -->
-                <div class="absolute bottom-2 right-2 z-20 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-full border-2 border-white shadow-sm">
-                    SISWA AKTIF
+                <!-- Status Badge -->
+                <div class="absolute bottom-2 right-2 z-20 bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-full border-2 border-white shadow-sm flex items-center gap-1">
+                    <div class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div> SISWA AKTIF
                 </div>
             </div>
             
             <!-- Info Siswa -->
-            <div class="md:ml-8 mb-2 flex-1 pt-4 md:pt-0 min-w-0"> <!-- min-w-0 added for text truncation safety -->
-                <h1 class="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight leading-tight mb-2 break-words">{{ $student->name }}</h1>
+            <div class="md:ml-8 mt-4 md:mt-0 flex-1 min-w-0 pt-2">
+                <!-- NAMA SISWA (Capitalize & Warna Gelap) -->
+                <h1 class="text-3xl sm:text-4xl font-black text-slate-800 tracking-tight leading-tight mb-3 break-words capitalize drop-shadow-sm">
+                    {{ strtolower($student->name) }}
+                </h1>
                 
                 <div class="flex flex-wrap justify-center md:justify-start gap-3 text-sm font-medium">
-                    <!-- Kelas -->
                     <span class="flex items-center bg-blue-50 px-4 py-1.5 rounded-full text-blue-700 border border-blue-100 transition hover:bg-blue-100">
                         <i class="ph-fill ph-chalkboard-teacher mr-2 text-lg"></i>
                         Kelas {{ $student->schoolClass->name ?? 'Unassigned' }}
                     </span>
-                    <!-- NIS/NISN -->
-                    <span class="flex items-center bg-gray-50 px-4 py-1.5 rounded-full text-gray-600 border border-gray-200 font-mono transition hover:bg-gray-100">
-                        <i class="ph-fill ph-identification-card mr-2 text-lg text-gray-400"></i>
+                    <span class="flex items-center bg-slate-50 px-4 py-1.5 rounded-full text-slate-600 border border-slate-200 font-mono transition hover:bg-gray-100">
+                        <i class="ph-fill ph-identification-card mr-2 text-lg text-slate-400"></i>
                         {{ $student->student_id }}
                     </span>
                 </div>
@@ -64,8 +74,8 @@
         </div>
     </div>
 
-    <!-- 2. NAVIGATION TABS (Scrollable on Mobile) -->
-    <div class="mb-8 sticky top-4 z-40">
+    <!-- 2. NAVIGATION TABS -->
+    <div class="mb-8 sticky top-24 z-40">
         <div class="bg-white/80 backdrop-blur-md p-1.5 rounded-2xl shadow-lg border border-gray-100 overflow-x-auto custom-scrollbar">
             <div class="flex space-x-1 min-w-max">
                 <!-- Tab: Ringkasan -->
@@ -171,7 +181,7 @@
         <!-- KONTEN TAB: KEHADIRAN -->
         <div x-show="activeTab === 'kehadiran'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                 <!-- Statistik Cards (Sama seperti sebelumnya tapi di tab khusus) -->
+                 <!-- Statistik Cards -->
                 <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 text-center">
                     <div class="text-3xl font-black text-emerald-600">{{ $hadir }}</div>
                     <div class="text-xs font-bold text-emerald-600 uppercase tracking-wide">Hadir</div>
@@ -206,7 +216,7 @@
                             </p>
                         </div>
                         <span class="px-3 py-1 rounded-full text-xs font-bold uppercase 
-                            {{ $log->status == 'Hadir' || $log->status == 'Masuk' ? 'bg-green-100 text-green-700' : 
+                            {{ ($log->status == 'Hadir' || $log->status == 'Masuk' || $log->status == 'Terlambat') ? 'bg-green-100 text-green-700' : 
                               ($log->status == 'Sakit' ? 'bg-blue-100 text-blue-700' : 
                               ($log->status == 'Izin' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700')) }}">
                             {{ $log->status }}
@@ -293,7 +303,7 @@
                     @forelse ($discipline_history as $record)
                         <div class="flex items-start gap-4 p-5 hover:bg-gray-50 transition">
                             <div class="mt-1">
-                                @if($record->disciplineType->type == 'Kebaikan')
+                                @if($record->disciplineType && $record->disciplineType->type == 'Kebaikan')
                                     <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"><i class="ph-fill ph-thumbs-up text-lg"></i></div>
                                 @else
                                     <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-600"><i class="ph-fill ph-warning text-lg"></i></div>
@@ -301,10 +311,12 @@
                             </div>
                             <div class="flex-1">
                                 <div class="flex justify-between items-start">
-                                    <h4 class="font-bold text-gray-800">{{ $record->disciplineType->name }}</h4>
+                                    <h4 class="font-bold text-gray-800">{{ $record->disciplineType->name ?? 'Data Dihapus' }}</h4>
+                                    @if($record->disciplineType)
                                     <span class="text-xs font-black px-2 py-1 rounded {{ $record->disciplineType->type == 'Kebaikan' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700' }}">
                                         {{ $record->disciplineType->type == 'Kebaikan' ? '+' : '-' }}{{ $record->disciplineType->point_value }}
                                     </span>
+                                    @endif
                                 </div>
                                 <p class="text-sm text-gray-500 mt-1">{{ $record->description ?? 'Tidak ada keterangan tambahan.' }}</p>
                                 <p class="text-xs text-gray-400 mt-2 flex items-center gap-1">

@@ -3,7 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Achievement;
-use App\Models\Discipline;
+use App\Models\DisciplineRecord; // <-- PERBAIKAN: Gunakan DisciplineRecord, bukan Discipline
 use App\Models\DisciplineType;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -64,12 +64,13 @@ class AddAchievementPointJob implements ShouldQueue
 
         // 4. Simpan ke Catatan Disiplin
         try {
-            Discipline::create([
+            // PERBAIKAN: Menggunakan DisciplineRecord::create
+            DisciplineRecord::create([
                 'student_id'         => $this->achievement->student_id,
                 'discipline_type_id' => $pointType->id,
                 'date'               => $this->achievement->date, // Sesuaikan tanggal poin dengan tanggal prestasi
                 'notes'              => "Otomatis: " . $this->achievement->title, // Catatan: Judul Juara
-                'recorded_by_user_id' => 1, // ID System/Admin
+                'recorded_by_user_id' => 1, // ID System/Admin (Pastikan User ID 1 ada di database)
             ]);
 
             Log::info("Poin Prestasi Berhasil: {$this->achievement->student->name} dapat {$points} poin ($level)");

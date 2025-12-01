@@ -27,7 +27,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 
-                {{-- FORM TAMBAH --}}
+                {{-- FORM TAMBAH (KIRI) --}}
                 <div class="lg:col-span-1">
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 sticky top-24">
                         <div class="flex items-center gap-3 mb-6">
@@ -39,7 +39,6 @@
 
                         <form action="{{ route('subjects.store') }}" method="POST" class="space-y-5">
                             @csrf
-                            
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nama Mapel</label>
                                 <div class="relative">
@@ -68,7 +67,7 @@
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                                             <i class="ph-bold ph-sort-ascending"></i>
                                         </div>
-                                        <input type="number" name="order" value="1" required 
+                                        <input type="number" name="order" value="{{ $subjects->count() + 1 }}" required 
                                                class="w-full pl-10 pr-4 py-3 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 text-sm font-bold text-slate-700 transition-colors">
                                     </div>
                                 </div>
@@ -97,7 +96,7 @@
                     </div>
                 </div>
 
-                {{-- DAFTAR MAPEL --}}
+                {{-- DAFTAR MAPEL (KANAN) --}}
                 <div class="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
                     <div class="p-6 border-b border-slate-50 flex justify-between items-center">
                         <h2 class="text-lg font-bold text-slate-800">Daftar Mapel Aktif</h2>
@@ -142,7 +141,15 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 text-right">
-                                            <div class="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                
+                                                {{-- TOMBOL EDIT --}}
+                                                <button onclick="openEditModal('{{ $subject->id }}', '{{ $subject->name }}', '{{ $subject->code }}', '{{ $subject->group }}', '{{ $subject->order }}')" 
+                                                    class="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit Mapel">
+                                                    <i class="ph-bold ph-pencil-simple text-lg"></i>
+                                                </button>
+
+                                                {{-- TOMBOL HAPUS --}}
                                                 <form action="{{ route('subjects.destroy', $subject->id) }}" method="POST" onsubmit="return confirm('Hapus mapel ini? Data nilai terkait mungkin akan hilang.');">
                                                     @csrf @method('DELETE')
                                                     <button type="submit" class="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Hapus Mapel">
@@ -155,9 +162,6 @@
                                 @empty
                                     <tr>
                                         <td colspan="4" class="px-6 py-12 text-center text-slate-400 italic">
-                                            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-300">
-                                                <i class="ph-duotone ph-folder-open text-3xl"></i>
-                                            </div>
                                             Belum ada mata pelajaran.
                                         </td>
                                     </tr>
@@ -167,7 +171,102 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
+
+    {{-- MODAL EDIT MAPEL --}}
+    <div id="editModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300" id="editModalContent">
+            <div class="p-6 border-b border-slate-50 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-800">Edit Mata Pelajaran</h3>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 transition">
+                    <i class="ph-bold ph-x text-xl"></i>
+                </button>
+            </div>
+            
+            {{-- Form Update akan diisi action via JS --}}
+            <form id="editForm" method="POST" class="p-6 space-y-5">
+                @csrf
+                @method('PUT')
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nama Mapel</label>
+                    <input type="text" name="name" id="edit_name" required class="w-full px-4 py-3 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm font-bold text-slate-700">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Kode</label>
+                        <input type="text" name="code" id="edit_code" class="w-full px-4 py-3 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm font-bold text-slate-700 uppercase">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">No. Urut</label>
+                        <input type="number" name="order" id="edit_order" required class="w-full px-4 py-3 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm font-bold text-slate-700">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Kelompok</label>
+                    <select name="group" id="edit_group" class="w-full px-4 py-3 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm font-medium text-slate-700">
+                        <option value="A">Kelompok A (Umum)</option>
+                        <option value="B">Kelompok B (Muatan Lokal)</option>
+                        <option value="C">Kelompok C (Peminatan)</option>
+                        <option value="P5">Projek (P5)</option>
+                    </select>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">
+                        Simpan Perubahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- SCRIPT MODAL EDIT --}}
+    <script>
+        function openEditModal(id, name, code, group, order) {
+            // Isi Form dengan data
+            document.getElementById('edit_name').value = name;
+            document.getElementById('edit_code').value = code;
+            document.getElementById('edit_group').value = group;
+            document.getElementById('edit_order').value = order;
+            
+            // Set Action Form (Ganti ID di URL)
+            // Asumsi route: /subjects/{id}
+            let actionUrl = "{{ route('subjects.update', ':id') }}";
+            actionUrl = actionUrl.replace(':id', id);
+            document.getElementById('editForm').action = actionUrl;
+
+            // Tampilkan Modal
+            const modal = document.getElementById('editModal');
+            const content = document.getElementById('editModalContent');
+            modal.classList.remove('hidden');
+            // Animasi kecil
+            setTimeout(() => {
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            const content = document.getElementById('editModalContent');
+            
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 150);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+    </script>
 </x-app-layout>

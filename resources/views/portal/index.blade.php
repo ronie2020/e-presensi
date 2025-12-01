@@ -1,77 +1,89 @@
 @extends('layouts.public')
 
 @section('content')
-    <div class="w-full max-w-md mx-auto transform hover:scale-105 transition-transform duration-500">
+<div class="max-w-3xl mx-auto text-center">
+    
+    <!-- Hero Text -->
+    <div class="mb-10" data-aos="fade-up">
+        <span class="inline-block py-1 px-3 rounded-full bg-blue-50 text-blue-600 text-xs font-bold uppercase tracking-wider mb-4 border border-blue-100">
+            Portal Akademik Siswa
+        </span>
+        <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">
+            Cek Prestasi & <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Kehadiranmu Disini</span>
+        </h1>
+        <p class="text-lg text-slate-500 max-w-xl mx-auto">
+            Masukkan Nomor Induk Siswa (NIS/NISN) untuk mengakses data akademik, riwayat absensi, dan poin kedisiplinan.
+        </p>
+    </div>
 
-        <!-- Header Teks -->
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-blue-50 text-blue-600 mb-4 shadow-sm border border-blue-100">
-                <i class="ph-duotone ph-student text-4xl"></i>
-            </div>
-            <h2 class="text-3xl font-black text-gray-800 tracking-tight">Selamat Datang Siswa</h2>
-            <p class="text-gray-500 text-sm mt-2 px-6">Silakan masukkan NIS atau NISN Anda untuk melihat profil akademik & kedisiplinan.</p>
-        </div>
+    <!-- Search Form Card -->
+    <div class="bg-white p-2 rounded-3xl shadow-xl shadow-blue-900/5 border border-slate-100 max-w-xl mx-auto relative overflow-hidden" data-aos="fade-up" data-aos-delay="100">
+        
+        <!-- Decoration -->
+        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-100 rounded-full mix-blend-multiply filter blur-2xl opacity-50 -mr-10 -mt-10 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-32 h-32 bg-purple-100 rounded-full mix-blend-multiply filter blur-2xl opacity-50 -ml-10 -mb-10 pointer-events-none"></div>
 
-        <!-- Form Pencarian -->
-        <div class="bg-white p-8 rounded-3xl shadow-xl shadow-blue-100/50 border border-white relative overflow-hidden">
-            <!-- Dekorasi -->
-            <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-blue-50 rounded-full blur-2xl opacity-50"></div>
-
-            <form action="{{ route('portal.search') }}" method="POST" class="relative z-10">
-                @csrf
+        <div class="relative bg-white rounded-2xl p-6 sm:p-8">
+            <form action="{{ route('portal.search') }}" method="POST" class="space-y-4">
                 
-                <div class="mb-6">
-                    <label for="student_id" class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                        Nomor Induk Siswa (NISN)
-                    </label>
-                    
+                {{-- [PENTING] INI YANG MENYEBABKAN ERROR 419 JIKA TIDAK ADA --}}
+                @csrf 
+                
+                <div class="text-left">
+                    <label for="student_id" class="block text-sm font-bold text-slate-700 mb-2 ml-1">Nomor Induk Siswa (NIS/NISN)</label>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                             <i class="ph-bold ph-identification-card text-xl"></i>
                         </div>
                         <input type="text" name="student_id" id="student_id" 
-                            class="pl-12 block w-full px-4 py-3.5 rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 transition-all font-mono text-lg font-bold text-gray-700 placeholder-gray-300"
-                            placeholder="Contoh: 005487..."
-                            value="{{ old('student_id') }}"
-                            required autofocus>
+                            class="block w-full pl-11 pr-4 py-4 bg-slate-50 border-slate-200 text-slate-900 text-lg font-bold rounded-xl focus:ring-blue-500 focus:border-blue-500 placeholder-slate-300 transition-all shadow-sm" 
+                            placeholder="Contoh: 2024001" required autofocus>
                     </div>
-
-                    @error('student_id')
-                        <p class="text-sm text-red-600 mt-2 flex items-center font-medium">
-                            <i class="ph-fill ph-warning-circle mr-1"></i> {{ $message }}
-                        </p>
-                    @enderror
-                    
-                    @if (session('error'))
-                        <div class="mt-4 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm flex items-start">
-                            <i class="ph-fill ph-warning mr-2 mt-0.5 text-lg"></i> 
-                            <span class="font-medium">{{ session('error') }}</span>
-                        </div>
-                    @endif
                 </div>
 
-                <button type="submit" 
-                        class="w-full bg-blue-600 text-white font-bold py-3.5 px-6 rounded-xl hover:bg-blue-700 transition duration-200 flex justify-center items-center gap-2 shadow-lg shadow-blue-500/30 group">
-                    <i class="ph-bold ph-magnifying-glass group-hover:scale-110 transition-transform"></i>
-                    Cari Data Siswa
+                <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-lg">
+                    <i class="ph-bold ph-magnifying-glass"></i>
+                    Cari Data Saya
                 </button>
             </form>
-
-            <div class="relative my-8">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-gray-100"></div>
-                </div>
-                <div class="relative flex justify-center text-[10px] uppercase tracking-widest font-bold">
-                    <span class="px-3 bg-white text-gray-400">Navigasi</span>
-                </div>
-            </div>
-
-            <div class="text-center">
-                <a href="{{ route('landing') }}" class="inline-flex items-center justify-center w-full px-4 py-3 border border-gray-200 shadow-sm text-sm font-bold rounded-xl text-gray-600 bg-white hover:bg-gray-50 hover:text-blue-600 hover:border-blue-200 transition-all group">
-                    <i class="ph-bold ph-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
-                    Kembali ke Halaman Utama
-                </a>
-            </div>
         </div>
     </div>
+
+    <!-- Features Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+        <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm text-center" data-aos="fade-up" data-aos-delay="200">
+            <div class="w-10 h-10 mx-auto bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-3">
+                <i class="ph-fill ph-calendar-check text-xl"></i>
+            </div>
+            <p class="text-xs font-bold text-slate-600 uppercase">Absensi Realtime</p>
+        </div>
+        <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm text-center" data-aos="fade-up" data-aos-delay="300">
+            <div class="w-10 h-10 mx-auto bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3">
+                <i class="ph-fill ph-trend-up text-xl"></i>
+            </div>
+            <p class="text-xs font-bold text-slate-600 uppercase">Monitoring Poin</p>
+        </div>
+        <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm text-center" data-aos="fade-up" data-aos-delay="400">
+            <div class="w-10 h-10 mx-auto bg-yellow-50 text-yellow-600 rounded-full flex items-center justify-center mb-3">
+                <i class="ph-fill ph-trophy text-xl"></i>
+            </div>
+            <p class="text-xs font-bold text-slate-600 uppercase">Rekap Prestasi</p>
+        </div>
+        <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm text-center" data-aos="fade-up" data-aos-delay="500">
+            <div class="w-10 h-10 mx-auto bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mb-3">
+                <i class="ph-fill ph-books text-xl"></i>
+            </div>
+            <p class="text-xs font-bold text-slate-600 uppercase">Riwayat Pustaka</p>
+        </div>
+    </div>
+
+    <!-- Error Alert (Jika data tidak ditemukan) -->
+    @if(session('error'))
+        <div class="mt-8 p-4 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100 flex items-center justify-center gap-2 max-w-md mx-auto animate-bounce">
+            <i class="ph-fill ph-warning-circle text-xl"></i>
+            <span class="font-bold text-sm">{{ session('error') }}</span>
+        </div>
+    @endif
+
+</div>
 @endsection
