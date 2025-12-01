@@ -91,6 +91,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
     Route::get('/grades/input', [GradeController::class, 'create'])->name('grades.create');
     Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');
+    
+    // [PERBAIKAN: MENAMBAHKAN ROUTE YANG HILANG]
+    Route::get('/grades/list', [GradeController::class, 'listStudents'])->name('grades.list'); // <-- Ini yang menyebabkan error
     Route::get('/report-card/{student_id}', [GradeController::class, 'reportCard'])->name('grades.report');
  
     // PENGATURAN AKADEMIK
@@ -110,13 +113,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/books/categories/store-ajax', [\App\Http\Controllers\BookController::class, 'storeCategoryAjax'])->name('books.categories.ajax');
 
         // Resource Buku
-        Route::resource('books', \App\Http\Controllers\BookController::class);
+        Route::resource('books', \App\Http\Controllers\BookController::class);   
         
-        // [PERBAIKAN WAJIB DI SINI]
-        // Tambahkan '.index' agar menjadi 'library.circulation.index'
-        // Ini akan COCOK dengan file navigation.blade.php kamu.
         Route::get('/circulation', [\App\Http\Controllers\LibraryCirculationController::class, 'index'])->name('circulation.index');
-        
         // Route untuk proses sirkulasi
         Route::post('/circulation/search-student', [\App\Http\Controllers\LibraryCirculationController::class, 'searchStudent'])->name('circulation.searchStudent');
         Route::post('/circulation/search-book', [\App\Http\Controllers\LibraryCirculationController::class, 'searchBook'])->name('circulation.searchBook');

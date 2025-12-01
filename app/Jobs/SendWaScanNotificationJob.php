@@ -26,7 +26,6 @@ class SendWaScanNotificationJob implements ShouldQueue
     public function handle(): void
     {
         // 1. Jeda Acak (PENTING untuk Anti-Banned)
-        // Memberi jeda 2-6 detik antara setiap pesan agar tidak dianggap bot spamming
         sleep(rand(2, 6));
 
         if (!$this->attendance->student) return;
@@ -36,20 +35,22 @@ class SendWaScanNotificationJob implements ShouldQueue
         $nomorWA   = $student->parent_wa_number;
         $namaSiswa = $student->name;
         $jamScan   = Carbon::parse($this->attendance->time_in)->format('H:i');
-        $jamPulang = $this->attendance->time_out ? Carbon::parse($this->attendance->time_out)->format('H:i') : '';
+        
+        // Cek jam pulang (pastikan tidak null/kosong)
+        $jamPulang = (!empty($this->attendance->time_out)) ? Carbon::parse($this->attendance->time_out)->format('H:i') : null;
+        
         $tanggal   = Carbon::parse($this->attendance->attendance_date)->translatedFormat('d F Y');
         
         $tipeAbsen = strtolower($this->attendance->type); 
         $aktivitas = strtolower($this->attendance->activity ?? $tipeAbsen);
         $status    = $this->attendance->status;
+        $catatan   = $this->attendance->notes ?? ''; // Ambil catatan (misal: "Terlambat 15 menit")
 
         // Validasi Nomor HP
         if(empty($nomorWA)) {
-             // Log::warning("Skip WA: {$namaSiswa} tidak ada nomor HP.");
              return;
         }
 
-        // 3. LOGIKA TEMPLATE PESAN (ACAK)
         $message = "";
 
         // --- Variasi Salam ---
@@ -60,65 +61,76 @@ class SendWaScanNotificationJob implements ShouldQueue
             "Salam Hormat,"
         ])->random();
 
-        // --- SKENARIO 1: ABSEN MASUK ---
-        if ($tipeAbsen == 'masuk' || $status == 'Hadir' || $status == 'Terlambat') {
-            if (str_contains($aktivitas, 'harian') || $tipeAbsen == 'harian') {
-                
-                // Kumpulan Template Masuk (Agar pesan tidak identik)
-                $templates = [
-                    // Template A (Formal)
-                    "*LAPORAN KEHADIRAN SISWA*\n\n{$salam}\nKami informasikan bahwa Ananda *{$namaSiswa}* telah tiba di sekolah.\n\n📅 Tanggal: {$tanggal}\n⏰ Pukul: {$jamScan} WIB\n✅ Status: {$status}\n\nTerima kasih, SMPN 3 Lakbok.",
-                    
-                    // Template B (Singkat)
-                    "*INFO SEKOLAH*\n\n{$salam} Orang Tua Siswa.\nAnanda *{$namaSiswa}* terdeteksi absen masuk pada pukul *{$jamScan} WIB* hari ini ({$tanggal}).\nStatus kehadiran: {$status}.\n\nSemoga hari ini menyenangkan.",
-                    
-                    // Template C (Ceria)
-                    "🔔 *NOTIFIKASI PRESENSI*\n\nHalo Ayah/Bunda,\nAnanda *{$namaSiswa}* sudah siap belajar di sekolah! 🏫\nAbsen masuk tercatat pukul: {$jamScan} WIB.\n\nMohon doanya agar kegiatan belajar berjalan lancar.",
-                ];
-                
-                $message = $templates[array_rand($templates)];
-            } else {
-                return; // Skip jika bukan harian
-            }
-        } 
-        
-        // --- SKENARIO 2: ABSEN PULANG ---
-        elseif ($tipeAbsen == 'pulang' || !empty($this->attendance->time_out)) {
+        // =========================================================================
+        // LOGIKA PESAN WA
+        // =========================================================================
+
+        // --- SKENARIO 1: ABSEN PULANG ---
+        if ($tipeAbsen == 'pulang' || !empty($jamPulang)) {
             
-            // Kumpulan Template Pulang
             $templates = [
-                // Template A (Formal)
                 "*LAPORAN KEPULANGAN*\n\n{$salam}\nAnanda *{$namaSiswa}* telah menyelesaikan kegiatan belajar dan meninggalkan sekolah.\n\n⏰ Jam Pulang: {$jamPulang} WIB\n\nMohon dipantau kepulangannya. Terima kasih.",
                 
-                // Template B (Perhatian)
                 "*INFO PULANG SEKOLAH*\n\n{$salam}\nDiinformasikan bahwa Ananda *{$namaSiswa}* sudah absen pulang pada pukul *{$jamPulang} WIB*.\nHati-hati di jalan dan selamat beristirahat.\n\n- Admin SMPN 3 Lakbok -",
                 
-                // Template C (Singkat)
                 "🔔 *INFO SISWA*\n\nAnanda *{$namaSiswa}* telah pulang sekolah hari ini ({$tanggal}) pukul {$jamPulang} WIB.\nTerima kasih atas kerja samanya."
             ];
 
             $message = $templates[array_rand($templates)];
         }
+
+        // --- SKENARIO 2: ABSEN MASUK ---
+        elseif ($tipeAbsen == 'masuk' || $status == 'Hadir' || $status == 'Terlambat') {
+            
+            if (str_contains($aktivitas, 'harian') || $tipeAbsen == 'harian' || $tipeAbsen == 'masuk') {
+                
+                // [BARU] Jika Terlambat, gunakan Template Khusus yang lebih informatif
+                if ($status == 'Terlambat') {
+                    $templates = [
+                        // Template Terlambat A
+                        "⚠️ *INFO KETERLAMBATAN*\n\n{$salam}\nKami informasikan Ananda *{$namaSiswa}* telah tiba di sekolah namun tercatat *TERLAMBAT*.\n\n📅 Tanggal: {$tanggal}\n⏰ Jam Masuk: {$jamScan} WIB\n📝 Info: _{$catatan}_\n\nMohon pembinaan agar esok datang lebih awal. Terima kasih.",
+                        
+                        // Template Terlambat B
+                        "*LAPORAN KEHADIRAN*\n\n{$salam}\nAnanda *{$namaSiswa}* hadir di sekolah pada pukul {$jamScan} WIB.\nStatus: *TERLAMBAT*\nKeterangan: {$catatan}\n\nTerima kasih atas perhatiannya."
+                    ];
+                } 
+                // Jika Tepat Waktu (Hadir)
+                else {
+                    $templates = [
+                        // Template Masuk A
+                        "*LAPORAN KEHADIRAN SISWA*\n\n{$salam}\nKami informasikan bahwa Ananda *{$namaSiswa}* telah tiba di sekolah.\n\n📅 Tanggal: {$tanggal}\n⏰ Pukul: {$jamScan} WIB\n✅ Status: TEPAT WAKTU\n\nTerima kasih, SMPN 3 Lakbok.",
+                        
+                        // Template Masuk B
+                        "*INFO SEKOLAH*\n\n{$salam} Orang Tua Siswa.\nAnanda *{$namaSiswa}* terdeteksi absen masuk pada pukul *{$jamScan} WIB* hari ini ({$tanggal}).\nStatus: HADIR.\n\nSemoga hari ini menyenangkan.",
+                        
+                        // Template Masuk C
+                        "🔔 *NOTIFIKASI PRESENSI*\n\nHalo Ayah/Bunda,\nAnanda *{$namaSiswa}* sudah siap belajar di sekolah! 🏫\nAbsen masuk tercatat pukul: {$jamScan} WIB.\n\nMohon doanya agar kegiatan belajar berjalan lancar.",
+                    ];
+                }
+                
+                $message = $templates[array_rand($templates)];
+            } else {
+                return; 
+            }
+        } 
+        
         else {
             return; // Tipe lain skip
         }
 
         // 4. KONFIGURASI API & MULTI DEVICE
-        // Mengambil config dari app.php yang sudah memproses .env
         $apiUrl = 'https://app.wapanels.com/api/create-message';
         $authKey = config('app.wapanels_authkey');
-        $appKeys = config('app.wapanels_appkeys'); // Ini sudah berbentuk Array
+        $appKeys = config('app.wapanels_appkeys'); 
 
         if (empty($appKeys) || empty($authKey)) {
             Log::error('GAGAL WA: AuthKey/AppKeys kosong. Cek config/app.php');
             return; 
         }
 
-        // --- LOAD BALANCING (Pilih Device Secara Acak) ---
-        // Ini kunci untuk membagi beban pengiriman ke 2 device atau lebih
         $selectedAppKey = $appKeys[array_rand($appKeys)];
 
-        // 5. KIRIM PESAN (Format Form Data)
+        // 5. KIRIM PESAN
         try {
             $response = Http::asForm()->post($apiUrl, [
                 'appkey' => $selectedAppKey,
@@ -129,9 +141,8 @@ class SendWaScanNotificationJob implements ShouldQueue
             ]);
 
             if ($response->successful()) {
-                // Log device mana yang dipakai (mengambil 5 karakter terakhir key)
                 $deviceCode = substr($selectedAppKey, -5);
-                Log::info("WA Terkirim ke {$namaSiswa}. Device: ...{$deviceCode}");
+                Log::info("WA " . (!empty($jamPulang) ? 'PULANG' : 'MASUK') . " Terkirim ke {$namaSiswa}. Device: ...{$deviceCode}");
             } else {
                 Log::error("WA Gagal (WaPanels): " . $response->body());
             }

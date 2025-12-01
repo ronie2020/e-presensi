@@ -2,7 +2,7 @@
     {{-- 1. LIBRARY PENDUKUNG --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- 2. CUSTOM CSS (Tampilan Tetap Sesuai Proyek Anda) --}}
+    {{-- 2. CUSTOM CSS --}}
     @push('styles')
     <style>
         /* Animasi Scanner */
@@ -29,10 +29,9 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        /* Utility Penting untuk Menyembunyikan Kolom/Baris via JS */
+        /* Utility */
         .hidden-col { display: none !important; }
         .hidden-row { display: none !important; }
-        .active-tab { background-color: #2563eb; color: white; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.1), 0 4px 6px -2px rgba(37, 99, 235, 0.05); }
     </style>
     @endpush
 
@@ -125,7 +124,7 @@
                             <p class="mt-4 text-center text-xs text-gray-400">Pastikan QR Code berada di dalam bingkai.</p>
                         </div>
 
-                        {{-- AREA TABEL RIWAYAT (DENGAN STRICT FILTERING) --}}
+                        {{-- AREA TABEL RIWAYAT --}}
                         <div class="lg:col-span-7 flex flex-col h-full min-h-[400px] bg-gray-50/50 rounded-3xl border border-gray-100 p-1">
                             <div class="p-4 flex justify-between items-center border-b border-gray-100 bg-white rounded-t-[1.3rem]">
                                 <h3 class="font-bold text-gray-800 flex items-center gap-2">
@@ -155,7 +154,7 @@
                                         </thead>
                                         <tbody id="scan-log" class="text-sm divide-y divide-gray-100">
                                             @foreach($recentScans as $scan)
-                                                <tr class="log-entry group hover:bg-white transition-colors rounded-xl" id="log-row-{{ $scan['student_id'] }}" 
+                                                <tr class="log-entry group hover:bg-white transition-colors rounded-xl" 
                                                     data-harian="{{ $scan['data_harian'] ? 'true' : 'false' }}"
                                                     data-dhuha="{{ $scan['data_dhuha'] ? 'true' : 'false' }}"
                                                     data-dhuhur="{{ $scan['data_dhuhur'] ? 'true' : 'false' }}"
@@ -207,24 +206,35 @@
         </div>
     </div>
 
-    {{-- 3. JAVASCRIPT LOGIC (Updated from Kiosk Logic) --}}
+    {{-- 3. JAVASCRIPT LOGIC --}}
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
-            // --- KONFIGURASI LOGIKA DARI KIOSK.HTML ---
+            
+            // --- [UPDATE] KONFIGURASI WAKTU PRESISI (DALAM FORMAT MENIT) ---
+            // Format: Jam * 60 + Menit. Contoh: 13:00 = 13*60 = 780
+            
+            const toMinutes = (h, m) => h * 60 + m;
+
+            // UBAH DISINI SESUAI KEBUTUHAN SEKOLAH
             const MODE_TIMES = {
-                DHUHA_START: 7,  // Jam 7 - 11: Otomatis Dhuha
-                DHUHA_END: 11,
-                DHUHUR_START: 11, // Jam 11 - 14: Otomatis Dhuhur
-                DHUHUR_END: 14
+                // Dhuha: 07:00 s/d 10:30
+                DHUHA_START: toMinutes(7, 30), 
+                DHUHA_END:   toMinutes(9, 30),
+                
+                // Dhuhur: DIPERSEMPIT! Hanya 11:45 s/d 12:30 (Istirahat Sholat)
+                // Setelah jam 12:30 otomatis kembali ke Harian (untuk persiapan Pulang)
+                DHUHUR_START: toMinutes(11, 45),
+                DHUHUR_END:   toMinutes(12, 30) 
             };
 
-            let currentScanMode = 'Harian'; // State global
+            let currentScanMode = 'Harian';
             let selectedExtra = ''; 
+            let manualOverride = false; // Flag jika user klik tombol manual
             const csrfToken = '{{ csrf_token() }}';
             const scanProcessUrl = '{{ route('scan.process') }}';
             
-            // Audio Context (Lebih stabil seperti di kiosk.html)
+            // Audio Context Logic
             let audioCtx;
             function playBeep(type = 'success') {
                 try {
@@ -234,7 +244,8 @@
                     oscillator.connect(gainNode);
                     gainNode.connect(audioCtx.destination);
                     oscillator.type = 'sine';
-                    oscillator.frequency.setValueAtTime(type === 'success' ? 880 : 440, audioCtx.currentTime);
+                    let freq = type === 'success' ? 880 : (type === 'warning' ? 600 : 440);
+                    oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
                     gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
                     oscillator.start(audioCtx.currentTime);
@@ -254,7 +265,6 @@
             let resultTimeout; 
             let isProcessing = false;
 
-            // Config Tampilan UI
             const typeConfig = {
                 'Harian': { activeClass: 'bg-blue-600 text-white shadow-lg', inactiveClass: 'bg-white text-gray-500 hover:bg-gray-100', indicatorClass: 'bg-blue-50 text-blue-600 border-blue-100' },
                 'Dhuha': { activeClass: 'bg-emerald-600 text-white shadow-lg', inactiveClass: 'bg-white text-gray-500 hover:bg-gray-100', indicatorClass: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
@@ -262,26 +272,40 @@
                 'Ekstrakurikuler': { activeClass: 'bg-purple-600 text-white shadow-lg', inactiveClass: 'bg-white text-gray-500 hover:bg-gray-100', indicatorClass: 'bg-purple-50 text-purple-600 border-purple-100' }
             };
 
-            // Jam Digital
             const clockElement = document.getElementById('clock');
             if(clockElement) {
                 setInterval(() => { clockElement.textContent = new Date().toLocaleTimeString('id-ID', { hour12: false }); }, 1000);
             }
 
-            // --- OTOMATISASI MODE BERDASARKAN JAM (LOGIKA KIOSK) ---
+            // --- [UPDATE] LOGIKA OTOMATIS BERBASIS MENIT ---
             function autoSelectMode() {
-                const currentHour = new Date().getHours();
-                if (currentHour >= MODE_TIMES.DHUHA_START && currentHour < MODE_TIMES.DHUHA_END) {
-                    selectScanMode('Dhuha');
-                } else if (currentHour >= MODE_TIMES.DHUHUR_START && currentHour < MODE_TIMES.DHUHUR_END) {
-                    selectScanMode('Dhuhur');
+                // Jika user baru saja klik manual, jangan timpa otomatis dulu (opsional)
+                // Tapi untuk keamanan, kita biarkan otomatis berjalan jika sudah lewat jamnya
+                if (manualOverride) return;
+
+                const now = new Date();
+                const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+                let newMode = 'Harian'; // Default (Masuk / Pulang)
+
+                if (currentMinutes >= MODE_TIMES.DHUHA_START && currentMinutes < MODE_TIMES.DHUHA_END) {
+                    newMode = 'Dhuha';
+                } else if (currentMinutes >= MODE_TIMES.DHUHUR_START && currentMinutes < MODE_TIMES.DHUHUR_END) {
+                    newMode = 'Dhuhur';
                 } else {
-                    selectScanMode('Harian');
+                    newMode = 'Harian'; // Di luar jam sholat (termasuk jam pulang sekolah)
+                }
+
+                // Hanya ganti jika mode saat ini berbeda, untuk menghindari redraw berlebihan
+                if (currentScanMode !== newMode && currentScanMode !== 'Ekstrakurikuler') {
+                    selectScanMode(newMode, true); // true = dipanggil oleh auto system
                 }
             }
 
-            // --- FUNGSI GANTI MODE ---
-            function selectScanMode(type) {
+            function selectScanMode(type, isAuto = false) {
+                if (!isAuto) manualOverride = true; // Set flag jika user klik sendiri
+                else manualOverride = false; // Reset flag jika sistem yang ubah (misal pergantian jam)
+
                 currentScanMode = type;
                 const config = typeConfig[type];
 
@@ -298,7 +322,6 @@
                 modeText.innerText = `Mode Aktif: ${indicatorText}`;
                 modeIndicator.className = `mt-3 mx-1 p-2.5 rounded-lg text-center text-xs font-bold uppercase tracking-wide transition-all duration-300 flex items-center justify-center gap-2 ${config.indicatorClass}`;
                 
-                // Show/Hide Extra Selector
                 if (type === 'Ekstrakurikuler') {
                     extraContainer.classList.remove('hidden');
                     scanStatus.textContent = selectedExtra ? `Siap Scan: ${selectedExtra}` : `Pilih Kegiatan Dulu`;
@@ -311,7 +334,6 @@
                 filterLogs(type);
             }
 
-            // Event Listeners Button
             document.querySelectorAll('.scan-type-btn').forEach(btn => {
                 btn.addEventListener('click', () => selectScanMode(btn.getAttribute('data-type')));
             });
@@ -324,8 +346,12 @@
 
             // Jalankan Auto Select saat load
             autoSelectMode();
+            
+            // [BARU] Jalankan cek otomatis setiap 1 menit
+            // Ini untuk memastikan jika halaman dibiarkan terbuka, mode akan berubah sendiri
+            // saat jam Dhuhur habis (misal jam 12:31)
+            setInterval(autoSelectMode, 60000); 
 
-            // --- LOGIC LAYOUT TABEL (KOLOM) ---
             function updateTableLayout(type) {
                 const harianCols = document.querySelectorAll('.col-harian');
                 const waktuCols = document.querySelectorAll('.col-waktu');
@@ -345,7 +371,6 @@
                 }
             }
 
-            // --- LOGIC FILTER DATA (BARIS - STRICT) ---
             function filterLogs(type) {
                 const rows = logTableBody.querySelectorAll('.log-entry');
                 let visibleCount = 0;
@@ -390,7 +415,6 @@
                 }
             }
 
-            // --- SCANNER LOGIC (DIPISAH SESUAI LOGIKA KIOSK) ---
             const html5QrCode = new Html5Qrcode("qr-reader");
             
             const onScanSuccess = (decodedText, decodedResult) => {
@@ -403,15 +427,14 @@
 
                 isProcessing = true;
                 html5QrCode.pause();
-                playBeep('success');
                 scanStatus.textContent = `Memproses Data...`;
                 
                 if (decodedText.length < 3 || decodedText.length > 50) {
                      showScanResult('error', 'Format QR Code tidak valid.');
+                     playBeep('error');
                      resumeScanner(); return;
                 }
                 
-                // Panggil Handler yang sesuai
                 if (currentScanMode === 'Harian') {
                     handleScanHarian(decodedText);
                 } else {
@@ -419,7 +442,6 @@
                 }
             };
 
-            // --- HANDLER KHUSUS HARIAN ---
             async function handleScanHarian(studentId) {
                 try {
                     const response = await fetch(scanProcessUrl, {
@@ -430,10 +452,16 @@
                     const result = await response.json();
                     
                     if (response.ok) {
-                        showScanResult('success', result.message);
-                        // Optional: Update tabel manual di sini jika ingin real-time tanpa refresh
+                        if (result.message.toUpperCase().includes('TERLAMBAT')) {
+                            showScanResult('warning', result.message);
+                            playBeep('warning');
+                        } else {
+                            showScanResult('success', result.message);
+                            playBeep('success');
+                        }
                     } else if (response.status === 409) {
                         showScanResult('warning', result.message);
+                        playBeep('warning');
                     } else {
                         showScanResult('error', result.message || 'Error Server');
                         playBeep('error');
@@ -445,7 +473,6 @@
                 }
             }
 
-            // --- HANDLER KHUSUS KEGIATAN (DHUHA/DHUHUR/EKSKUL) ---
             async function handleScanKegiatan(studentId, type, extraName) {
                 try {
                     const response = await fetch(scanProcessUrl, {
@@ -456,6 +483,7 @@
                     const result = await response.json();
                     
                     if (response.ok) {
+                        playBeep('success');
                         let titleText = type === 'Ekstrakurikuler' ? 'Absen Ekskul Berhasil' : `Absen ${type} Berhasil`;
                         let pointsText = type === 'Ekstrakurikuler' ? '+10 Poin Keaktifan' : '+5 Poin Kebaikan';
                         
@@ -466,6 +494,7 @@
                         });
                     } else if (response.status === 409) {
                         Swal.fire({ title: 'Sudah Absen', text: result.message, icon: 'info', timer: 2500, showConfirmButton: false });
+                        playBeep('warning');
                     } else {
                         showScanResult('error', result.message || 'Error Server');
                         playBeep('error');
