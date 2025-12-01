@@ -8,55 +8,67 @@ use Illuminate\Http\Request;
 class SubjectController extends Controller
 {
     /**
-     * Menampilkan daftar mata pelajaran.
+     * Menampilkan daftar semua mata pelajaran.
+     * PERBAIKAN: Menggunakan get() bukan paginate() agar semua data tampil.
      */
     public function index()
     {
-        // Urutkan berdasarkan 'urutan cetak' (order) agar rapi di rapor
+        // Mengambil semua data diurutkan berdasarkan 'order' (No. Urut)
         $subjects = Subject::orderBy('order', 'asc')->get();
+        
+        // Pastikan nama view sesuai dengan lokasi file blade Anda
+        // Jika file ada di resources/views/subjects.blade.php gunakan 'subjects'
+        // Jika file ada di resources/views/subjects/index.blade.php gunakan 'subjects.index'
         return view('settings.subjects', compact('subjects'));
     }
 
     /**
-     * Menyimpan mapel baru.
+     * Menyimpan data mapel baru.
      */
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'nullable|string|max:10',
-            'group' => 'required|in:A,B,C,P5', // Sesuaikan dengan kelompok rapor (A=Umum, B=Mulok, P5=Projek)
-            'order' => 'required|integer|min:1', // Urutan di rapor
+            'code' => 'nullable|string|max:20',
+            'order' => 'required|integer',
+            'group' => 'required|in:A,B,C,P5', // Validasi sesuai opsi di form
         ]);
 
-        Subject::create($request->all());
+        Subject::create([
+            'name' => $request->name,
+            'code' => strtoupper($request->code), // Paksa huruf besar untuk kode
+            'order' => $request->order,
+            'group' => $request->group,
+        ]);
 
-        return back()->with('success', 'Mata Pelajaran berhasil ditambahkan.');
+        return redirect()->back()->with('success', 'Mata pelajaran berhasil ditambahkan.');
     }
 
     /**
-     * Update mapel.
+     * Update data (diperlukan karena route resource, meski belum ada UI edit).
      */
-    public function update(Request $request, Subject $subject)
+    public function update(Request $request, $id)
     {
+        $subject = Subject::findOrFail($id);
+        
         $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'nullable|string|max:10',
-            'group' => 'required|in:A,B,C,P5',
-            'order' => 'required|integer|min:1',
+            'order' => 'required|integer',
         ]);
 
         $subject->update($request->all());
 
-        return back()->with('success', 'Mata Pelajaran berhasil diperbarui.');
+        return redirect()->back()->with('success', 'Mata pelajaran berhasil diperbarui.');
     }
 
     /**
-     * Hapus mapel.
+     * Menghapus mapel.
      */
-    public function destroy(Subject $subject)
+    public function destroy($id)
     {
+        $subject = Subject::findOrFail($id);
         $subject->delete();
-        return back()->with('success', 'Mata Pelajaran dihapus.');
+
+        return redirect()->back()->with('success', 'Mata pelajaran berhasil dihapus.');
     }
 }
