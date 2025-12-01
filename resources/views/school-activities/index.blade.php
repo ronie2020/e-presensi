@@ -1,171 +1,217 @@
 <x-app-layout>
     <div class="py-6 sm:py-8">
         
-        {{-- Header --}}
-        <div class="mb-8 px-4 sm:px-0">
-            <h1 class="text-3xl font-black text-gray-800 tracking-tight leading-tight">
-                Galeri Kegiatan Sekolah
-            </h1>
-            <p class="text-gray-500 mt-1">
-                Kelola konten aktifitas yang akan tampil di Halaman Depan (Landing Page).
-            </p>
+        {{-- Header Page --}}
+        <div class="mb-8 px-4 sm:px-0 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight leading-tight flex items-center gap-3">
+                    <i class="ph-duotone ph-images-square text-indigo-600"></i> Galeri Kegiatan
+                </h1>
+                <p class="text-slate-500 mt-2 text-lg">
+                    Kelola dokumentasi aktivitas sekolah untuk Halaman Depan.
+                </p>
+            </div>
+            
+            <div class="hidden md:block">
+                <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-bold uppercase tracking-wide">
+                    <i class="ph-bold ph-eye"></i> Live Preview
+                </span>
+            </div>
         </div>
 
         {{-- Flash Message --}}
         @if (session('success'))
-            <div x-data="{ show: true }" x-show="show" class="mb-6 mx-4 sm:mx-0 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
-                <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>{{ session('success') }}</span>
+            <div x-data="{ show: true }" x-show="show" x-transition class="mb-6 mx-4 sm:mx-0 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
+                        <i class="ph-bold ph-check-circle text-xl"></i>
+                    </div>
+                    <span class="font-bold">{{ session('success') }}</span>
                 </div>
-                <button @click="show = false">&times;</button>
+                <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-1 rounded-md hover:bg-emerald-100 transition"><i class="ph-bold ph-x"></i></button>
             </div>
         @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 px-4 sm:px-0">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 px-4 sm:px-0 items-start">
             
-            {{-- KOLOM KIRI: FORM INPUT --}}
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-3xl shadow-lg shadow-indigo-100/50 border border-indigo-50 overflow-hidden sticky top-6">
-                    <div class="p-6 relative z-10">
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-indigo-100">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-black text-gray-800">Tambah Kegiatan</h3>
-                                <p class="text-xs text-gray-500">Publikasikan aktifitas terbaru</p>
-                            </div>
-                        </div>
+            {{-- KOLOM KIRI (1/3): FORM INPUT --}}
+            <div class="lg:col-span-1 space-y-6">
+                
+                <div class="bg-white rounded-3xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden sticky top-24">
+                    <!-- Header Card -->
+                    <div class="bg-gradient-to-r from-indigo-600 to-violet-600 p-6 text-white relative overflow-hidden">
+                        <i class="ph-duotone ph-aperture absolute -right-4 -bottom-4 text-8xl text-white opacity-10 rotate-12"></i>
+                        <h3 class="text-xl font-bold relative z-10">Upload Kegiatan</h3>
+                        <p class="text-indigo-100 text-sm relative z-10">Bagikan momen terbaik sekolah.</p>
+                    </div>
 
-                        <form action="{{ route('school-activities.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
+                    <div class="p-6">
+                        <!-- Form dengan Alpine Data untuk Preview Gambar -->
+                        <form action="{{ route('school-activities.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5" x-data="{ imgPreview: null }">
                             @csrf
                             
                             {{-- Judul --}}
                             <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Judul Kegiatan</label>
-                                <input type="text" name="title" required placeholder="Contoh: Perkemahan Sabtu Minggu" class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm font-bold text-gray-700 placeholder-gray-300 py-2.5">
-                                @error('title') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Judul Kegiatan</label>
+                                <input type="text" name="title" required placeholder="Contoh: Perkemahan Sabtu Minggu" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 font-bold text-slate-800 py-3 transition-colors placeholder:font-normal">
+                                @error('title') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                             </div>
 
                             {{-- Deskripsi --}}
                             <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Deskripsi Singkat</label>
-                                <textarea name="description" required rows="4" placeholder="Jelaskan secara singkat kegiatan ini..." class="w-full rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm text-gray-700 placeholder-gray-300"></textarea>
-                                @error('description') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Deskripsi Singkat</label>
+                                <textarea name="description" required rows="3" placeholder="Ceritakan sedikit tentang kegiatan ini..." class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 text-sm text-slate-700 placeholder:font-normal p-3"></textarea>
+                                @error('description') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                             </div>
 
-                            {{-- Upload Foto --}}
+                            {{-- Upload Foto (Dengan Preview) --}}
                             <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Foto Utama (Thumbnail)</label>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Foto Utama</label>
+                                
                                 <div class="relative group">
-                                    <input type="file" name="photo" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-all border border-gray-200 rounded-xl cursor-pointer">
+                                    <input type="file" name="photo" accept="image/*" 
+                                        @change="imgPreview = URL.createObjectURL($event.target.files[0])"
+                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20">
+                                    
+                                    <div class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center transition-all group-hover:border-indigo-400 group-hover:bg-indigo-50"
+                                         :class="{'border-indigo-400 bg-indigo-50': imgPreview}">
+                                        
+                                        <!-- State: Belum ada gambar -->
+                                        <div x-show="!imgPreview" class="space-y-2 py-2">
+                                            <div class="mx-auto w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-indigo-500 transition-colors">
+                                                <i class="ph-bold ph-camera text-xl"></i>
+                                            </div>
+                                            <p class="text-xs text-slate-500"><span class="font-bold text-indigo-600">Klik untuk upload</span> foto</p>
+                                            <p class="text-[10px] text-slate-400">JPG/PNG, Max 2MB</p>
+                                        </div>
+
+                                        <!-- State: Sudah ada gambar (Preview) -->
+                                        <div x-show="imgPreview" class="relative h-40 w-full rounded-lg overflow-hidden shadow-sm" style="display: none;">
+                                            <img :src="imgPreview" class="h-full w-full object-cover">
+                                            <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                                            <div class="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm">
+                                                Ganti Foto
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <p class="text-[10px] text-gray-400 mt-1 ml-1">*Format: JPG, PNG. Max: 2MB.</p>
-                                @error('photo') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                @error('photo') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                             </div>
 
                             {{-- Link Video --}}
                             <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Link Video (Opsional)</label>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Link Video (Opsional)</label>
                                 <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                        <i class="ph-bold ph-youtube-logo"></i>
                                     </div>
-                                    <input type="url" name="video_url" placeholder="https://youtube.com/..." class="w-full pl-9 rounded-xl border-gray-200 focus:border-indigo-500 focus:ring-indigo-500 text-sm text-gray-700 placeholder-gray-300 py-2.5">
+                                    <input type="url" name="video_url" placeholder="https://youtube.com/..." class="w-full pl-10 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-indigo-500 text-sm text-slate-700 placeholder:font-normal py-3">
                                 </div>
-                                <p class="text-[10px] text-gray-400 mt-1 ml-1">*Jika diisi, ikon Play akan muncul di gambar.</p>
                             </div>
 
-                            <div class="pt-2">
-                                <button type="submit" class="w-full py-3.5 px-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2 group">
-                                    <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                    Publikasikan
-                                </button>
-                            </div>
+                            <button type="submit" class="w-full py-3.5 px-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2 transform active:scale-[0.98]">
+                                <i class="ph-bold ph-paper-plane-right"></i>
+                                <span>Publikasikan</span>
+                            </button>
                         </form>
                     </div>
                 </div>
             </div>
 
-            {{-- KOLOM KANAN: PREVIEW LIST (MIRIP LANDING PAGE) --}}
+            {{-- KOLOM KANAN (2/3): PREVIEW LIST --}}
             <div class="lg:col-span-2">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Preview Tampilan ({{ $activities->count() }})</h3>
-                </div>
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-6 border-b border-slate-50 flex items-center justify-between">
+                        <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                            <i class="ph-duotone ph-list-dashes text-indigo-500"></i> Daftar Kegiatan
+                        </h3>
+                        <span class="bg-slate-100 text-[10px] font-bold px-2.5 py-1 rounded-full text-slate-500 border border-slate-200">
+                            Total: {{ $activities->total() ?? 0 }}
+                        </span>
+                    </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @forelse($activities as $activity)
-                        <!-- Card Item -->
-                        <div class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 flex flex-col relative transition-all duration-300">
-                            
-                            <!-- Tombol Hapus (Overlay) -->
-                            <div class="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                <form action="{{ route('school-activities.destroy', $activity->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus kegiatan ini?');">
-                                    @csrf @method('DELETE')
-                                    <button class="bg-white/90 backdrop-blur text-rose-500 p-2 rounded-full shadow-lg hover:bg-rose-500 hover:text-white transition-colors border border-rose-100" title="Hapus Kegiatan">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </form>
-                            </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            @forelse($activities as $activity)
+                                <!-- Card Item -->
+                                <div class="group bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-500/5 transition-all duration-300 flex flex-col relative">
+                                    
+                                    <!-- Area Gambar/Video -->
+                                    <div class="relative h-48 w-full bg-slate-100 overflow-hidden">
+                                        @if($activity->image_path)
+                                            <img src="{{ asset('storage/' . $activity->image_path) }}" 
+                                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                                        @else
+                                            <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-50">
+                                                <i class="ph-duotone ph-image text-4xl mb-2"></i>
+                                                <span class="text-xs font-medium">Tidak ada foto</span>
+                                            </div>
+                                        @endif
 
-                            <!-- Area Gambar/Video -->
-                            <div class="relative h-48 overflow-hidden bg-gray-100">
-                                @if($activity->image_path)
-                                    <img src="{{ asset('storage/' . $activity->image_path) }}" 
-                                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center text-gray-300">
-                                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                    </div>
-                                @endif
+                                        <!-- Overlay Gradient -->
+                                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-60"></div>
 
-                                <!-- Overlay Gradient -->
-                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60"></div>
+                                        <!-- Badge Video -->
+                                        @if($activity->video_url)
+                                            <div class="absolute top-3 left-3 z-20">
+                                                <span class="px-2 py-1 bg-red-600/90 backdrop-blur text-white text-[10px] font-bold uppercase rounded-lg shadow-sm flex items-center gap-1">
+                                                    <i class="ph-fill ph-play-circle"></i> Video
+                                                </span>
+                                            </div>
+                                        @endif
 
-                                <!-- Indikator Video -->
-                                @if($activity->video_url)
-                                    <div class="absolute inset-0 flex items-center justify-center z-20">
-                                        <div class="w-10 h-10 bg-white/30 backdrop-blur rounded-full flex items-center justify-center border border-white/50">
-                                            <svg class="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" /></svg>
+                                        <!-- Tombol Hapus (Muncul saat Hover) -->
+                                        <div class="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                            <form action="{{ route('school-activities.destroy', $activity->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus kegiatan ini?');">
+                                                @csrf @method('DELETE')
+                                                <button class="bg-white/90 backdrop-blur text-slate-400 p-2 rounded-lg shadow-sm hover:bg-rose-50 hover:text-rose-600 transition-colors border border-white/50" title="Hapus Kegiatan">
+                                                    <i class="ph-bold ph-trash text-lg"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </div>
-                                    <div class="absolute top-3 left-3 z-20">
-                                        <span class="px-2 py-0.5 bg-red-600 text-white text-[10px] font-bold uppercase rounded shadow-sm flex items-center gap-1">
-                                            Video
-                                        </span>
+
+                                    <!-- Konten Teks -->
+                                    <div class="p-5 flex-1 flex flex-col">
+                                        <div class="mb-3">
+                                            <h4 class="text-lg font-bold text-slate-800 mb-2 line-clamp-2 leading-tight group-hover:text-indigo-600 transition-colors">
+                                                {{ $activity->title }}
+                                            </h4>
+                                            <p class="text-xs text-slate-500 leading-relaxed line-clamp-3">
+                                                {{ $activity->description }}
+                                            </p>
+                                        </div>
+                                        
+                                        <div class="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1.5">
+                                                <i class="ph-fill ph-calendar-blank"></i>
+                                                {{ $activity->created_at->format('d M Y') }}
+                                            </span>
+                                            
+                                            @if($activity->video_url)
+                                                <a href="{{ $activity->video_url }}" target="_blank" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1 hover:underline">
+                                                    Tonton <i class="ph-bold ph-arrow-square-out"></i>
+                                                </a>
+                                            @endif
+                                        </div>
                                     </div>
-                                @endif
-                            </div>
-
-                            <!-- Konten Teks -->
-                            <div class="p-5 flex-1 flex flex-col">
-                                <h4 class="text-lg font-bold text-gray-800 mb-2 line-clamp-2 leading-tight">
-                                    {{ $activity->title }}
-                                </h4>
-                                <p class="text-xs text-gray-500 leading-relaxed line-clamp-3 mb-4 flex-1">
-                                    {{ $activity->description }}
-                                </p>
-                                
-                                <div class="pt-3 border-t border-gray-50 flex items-center justify-between text-[10px] text-gray-400 font-bold uppercase tracking-wide">
-                                    <span>{{ $activity->created_at->format('d M Y') }}</span>
-                                    @if($activity->video_url)
-                                        <a href="{{ $activity->video_url }}" target="_blank" class="text-indigo-500 hover:underline">Cek Link &rarr;</a>
-                                    @endif
                                 </div>
-                            </div>
+                            @empty
+                                <div class="col-span-1 md:col-span-2 py-16 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 text-slate-300 shadow-sm">
+                                        <i class="ph-duotone ph-image-broken text-3xl"></i>
+                                    </div>
+                                    <h4 class="text-slate-600 font-bold">Belum ada kegiatan</h4>
+                                    <p class="text-xs text-slate-400 mt-1">Mulai dengan mengupload foto kegiatan sekolah.</p>
+                                </div>
+                            @endforelse
                         </div>
-                    @empty
-                        <div class="col-span-2 text-center py-12 bg-white rounded-3xl border-2 border-dashed border-gray-200">
-                            <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            <p class="text-gray-400 text-sm">Belum ada kegiatan yang diunggah.</p>
-                        </div>
-                    @endforelse
-                </div>
 
-                {{-- Pagination --}}
-                <div class="mt-6">
-                    {{ $activities->links() }}
+                        {{-- Pagination --}}
+                        <div class="mt-8">
+                            {{ $activities->links() }}
+                        </div>
+                    </div>
                 </div>
             </div>
 

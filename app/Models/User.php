@@ -6,6 +6,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+// 1. PENTING: Tambahkan import ini agar kenal model SchoolClass
+use App\Models\SchoolClass; 
 
 class User extends Authenticatable
 {
@@ -56,5 +58,16 @@ class User extends Authenticatable
     public function isTeacher()
     {
         return in_array($this->role, ['Guru', 'Wali Kelas', 'Kepala Sekolah']);
+    }
+
+    /**
+     * [DITAMBAHKAN] Relasi Wali Kelas
+     * Menghubungkan Guru (User) dengan Kelas yang dia ampuh.
+     */
+    public function homeroomClass()
+    {
+        // Seorang User (Wali Kelas) memiliki satu SchoolClass
+        // Foreign key di tabel classes adalah 'homeroom_teacher_id'
+        return $this->hasOne(SchoolClass::class, 'homeroom_teacher_id');
     }
 }

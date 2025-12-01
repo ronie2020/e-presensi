@@ -1,203 +1,227 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">Manajemen Ekstrakurikuler</h2>
-                <button onclick="document.getElementById('addModal').classList.remove('hidden')" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                    + Tambah Ekskul
-                </button>
+    <div class="py-6 sm:py-8" x-data="{ addModalOpen: false, editModalOpen: false, editData: {} }">
+        
+        {{-- Header --}}
+        <div class="mb-8 px-4 sm:px-0 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight leading-tight flex items-center gap-3">
+                    <i class="ph-duotone ph-basketball text-orange-600"></i> Manajemen Ekstrakurikuler
+                </h1>
+                <p class="text-slate-500 mt-2 text-lg">
+                    Kelola data kegiatan, pembina, dan jadwal latihan.
+                </p>
             </div>
-
-            @if(session('success'))
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                    <span class="block sm:inline">{{ session('success') }}</span>
-                </div>
-            @endif
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    <!-- Wrapper table responsif -->
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">Ikon</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Ekskul</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pembina</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jadwal</th>
-                                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Anggota</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($extracurriculars as $ekskul)
-                                <tr>
-                                    <td class="px-4 py-4 whitespace-nowrap text-center align-top">
-                                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 text-xl overflow-hidden border border-blue-100">
-                                            @if(Str::startsWith($ekskul->icon, 'storage/'))
-                                                <img src="{{ asset($ekskul->icon) }}" alt="Icon" class="w-full h-full object-cover">
-                                            @elseif(Str::startsWith($ekskul->icon, 'http'))
-                                                 <img src="{{ $ekskul->icon }}" alt="Icon" class="w-full h-full object-cover">
-                                            @else
-                                                <i class="{{ $ekskul->icon ?? 'ph-fill ph-star' }}"></i>
-                                            @endif
-                                        </div>
-                                    </td>
-                                    
-                                    <!-- PERBAIKAN: Hapus whitespace-nowrap & tambah min-width -->
-                                    <td class="px-4 py-4 align-top">
-                                        <div class="text-sm font-bold text-gray-900 whitespace-normal max-w-[150px]">
-                                            {{ $ekskul->name }}
-                                        </div>
-                                    </td>
-                                    
-                                    <!-- PERBAIKAN: Izinkan wrap untuk nama pembina yang panjang -->
-                                    <td class="px-4 py-4 align-top">
-                                        <div class="text-sm text-gray-500 whitespace-normal max-w-[200px] leading-snug">
-                                            {{ $ekskul->coach_name ?? '-' }}
-                                        </div>
-                                    </td>
-
-                                    <td class="px-4 py-4 align-top">
-                                        <span class="px-2 py-1 inline-flex text-xs leading-4 font-semibold rounded-full bg-blue-100 text-blue-800 whitespace-normal max-w-[120px] text-center">
-                                            {{ $ekskul->schedule ?? 'Belum diatur' }}
-                                        </span>
-                                    </td>
-
-                                    <td class="px-4 py-4 whitespace-nowrap text-center text-sm text-gray-500 align-top">
-                                        {{ $ekskul->members_count }} Siswa
-                                    </td>
-
-                                    <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium align-top">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <button type="button" 
-                                                onclick="openEditModal({{ json_encode($ekskul) }})"
-                                                class="text-yellow-600 hover:text-yellow-900 font-bold">
-                                                Edit
-                                            </button>
-                                            <span class="text-gray-300">|</span>
-                                            <form action="{{ route('extracurriculars.destroy', $ekskul->id) }}" method="POST" onsubmit="return confirm('Hapus data ini?');" class="inline">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900 font-bold">Hapus</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="6" class="px-6 py-8 text-center text-gray-500">Belum ada data ekstrakurikuler.</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+            <button @click="addModalOpen = true" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-orange-600 text-white font-bold text-sm shadow-lg shadow-orange-500/30 hover:bg-orange-700 transition-all hover:-translate-y-0.5">
+                <i class="ph-bold ph-plus"></i> Tambah Ekskul
+            </button>
         </div>
-    </div>
 
-    <!-- MODAL TAMBAH -->
-    <div id="addModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true" onclick="document.getElementById('addModal').classList.add('hidden')"></div>
-            <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <form action="{{ route('extracurriculars.store') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4">
-                        <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Tambah Ekstrakurikuler Baru</h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Nama Ekskul</label>
-                                <input type="text" name="name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Nama Pembina</label>
-                                    <input type="text" name="coach_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Jadwal</label>
-                                    <input type="text" name="schedule" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Senin, 15:00">
-                                </div>
-                            </div>
-                            <div class="border-t pt-3 mt-2">
-                                <label class="block text-sm font-bold text-gray-800 mb-2">Tampilan (Pilih Salah Satu)</label>
-                                <div class="mb-3">
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Opsi A: Upload Gambar</label>
-                                    <input type="file" name="image_file" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-                                </div>
-                                <div class="relative flex py-2 items-center">
-                                    <div class="flex-grow border-t border-gray-200"></div><span class="flex-shrink-0 mx-4 text-xs text-gray-400 font-bold">ATAU</span><div class="flex-grow border-t border-gray-200"></div>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Opsi B: Kode Ikon (Phosphor)</label>
-                                    <input type="text" name="icon_text" placeholder="ph-fill ph-basketball" class="flex-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-mono">
-                                </div>
+        {{-- Flash Message --}}
+        @if(session('success'))
+            <div x-data="{ show: true }" x-show="show" class="mb-6 mx-4 sm:mx-0 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-emerald-100 rounded-full text-emerald-600"><i class="ph-bold ph-check-circle text-xl"></i></div>
+                    <span class="font-bold">{{ session('success') }}</span>
+                </div>
+                <button @click="show = false" class="text-emerald-400 hover:text-emerald-600"><i class="ph-bold ph-x"></i></button>
+            </div>
+        @endif
+
+        {{-- Grid Card Layout --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 sm:px-0">
+            @forelse($extracurriculars as $ekskul)
+                <div class="bg-white rounded-3xl border border-slate-200 p-6 hover:shadow-xl hover:shadow-orange-500/5 hover:border-orange-200 transition-all duration-300 group flex flex-col h-full relative overflow-hidden">
+                    
+                    {{-- Dekorasi Background --}}
+                    <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                        <i class="ph-fill ph-trophy text-8xl text-orange-500"></i>
+                    </div>
+
+                    {{-- Header Card --}}
+                    <div class="flex items-start justify-between mb-4 relative z-10">
+                        <div class="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-600 text-2xl shadow-sm">
+                            @if(Str::startsWith($ekskul->icon, 'storage/'))
+                                <img src="{{ asset($ekskul->icon) }}" class="w-full h-full object-cover rounded-2xl">
+                            @elseif(Str::startsWith($ekskul->icon, 'http'))
+                                <img src="{{ $ekskul->icon }}" class="w-full h-full object-cover rounded-2xl">
+                            @else
+                                <i class="{{ $ekskul->icon ?? 'ph-fill ph-star' }}"></i>
+                            @endif
+                        </div>
+                        
+                        {{-- Dropdown Actions --}}
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" @click.away="open = false" class="p-2 rounded-lg text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-colors">
+                                <i class="ph-bold ph-dots-three-vertical text-xl"></i>
+                            </button>
+                            <div x-show="open" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 z-20 py-1" style="display: none;">
+                                <button @click="
+                                    editModalOpen = true; 
+                                    editData = {{ json_encode($ekskul) }};
+                                    open = false;
+                                    setTimeout(() => setupEditForm(editData), 50);
+                                " class="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-2">
+                                    <i class="ph-bold ph-pencil-simple text-orange-500"></i> Edit Data
+                                </button>
+                                <form action="{{ route('extracurriculars.destroy', $ekskul->id) }}" method="POST" onsubmit="return confirm('Hapus ekskul ini?');">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-2">
+                                        <i class="ph-bold ph-trash"></i> Hapus
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
-                    <div class="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Simpan</button>
-                        <button type="button" onclick="document.getElementById('addModal').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
 
-    <!-- MODAL EDIT -->
-    <div id="editModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" aria-hidden="true" onclick="document.getElementById('editModal').classList.add('hidden')"></div>
-            <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                <form id="editForm" method="POST" enctype="multipart/form-data">
-                    @csrf 
-                    @method('PUT')
-                    <div class="px-4 pt-5 pb-4 bg-white sm:p-6 sm:pb-4">
-                        <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Edit Ekstrakurikuler</h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Nama Ekskul</label>
-                                <input type="text" name="name" id="edit_name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    {{-- Content --}}
+                    <div class="flex-1 relative z-10">
+                        <h3 class="text-xl font-bold text-slate-800 mb-1">{{ $ekskul->name }}</h3>
+                        <div class="flex items-center gap-2 text-sm text-slate-500 mb-4">
+                            <i class="ph-duotone ph-user-circle text-orange-400"></i>
+                            <span>{{ $ekskul->coach_name ?? 'Belum ada pembina' }}</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Jadwal</span>
+                                <span class="text-xs font-bold text-slate-700 flex items-center gap-1">
+                                    <i class="ph-fill ph-clock text-slate-400"></i> {{ $ekskul->schedule ?? '-' }}
+                                </span>
                             </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Nama Pembina</label>
-                                    <input type="text" name="coach_name" id="edit_coach" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700">Jadwal</label>
-                                    <input type="text" name="schedule" id="edit_schedule" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                </div>
-                            </div>
-                            <div class="border-t pt-3 mt-2">
-                                <label class="block text-sm font-bold text-gray-800 mb-2">Update Tampilan (Opsional)</label>
-                                <p class="text-xs text-gray-500 mb-2">Biarkan kosong jika tidak ingin mengubah ikon/gambar.</p>
-                                <div class="mb-3">
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Upload Gambar Baru</label>
-                                    <input type="file" name="image_file" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-                                </div>
-                                <div class="relative flex py-2 items-center">
-                                    <div class="flex-grow border-t border-gray-200"></div><span class="flex-shrink-0 mx-4 text-xs text-gray-400 font-bold">ATAU</span><div class="flex-grow border-t border-gray-200"></div>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Ganti Kode Ikon</label>
-                                    <input type="text" name="icon_text" id="edit_icon_text" class="flex-1 w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-mono">
-                                </div>
+                            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                                <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Anggota</span>
+                                <span class="text-xs font-bold text-slate-700 flex items-center gap-1">
+                                    <i class="ph-fill ph-users text-slate-400"></i> {{ $ekskul->members_count }} Siswa
+                                </span>
                             </div>
                         </div>
                     </div>
-                    <div class="px-4 py-3 bg-gray-50 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Update</button>
-                        <button type="button" onclick="document.getElementById('editModal').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Batal</button>
+
+                    {{-- Footer Link --}}
+                    <div class="mt-auto border-t border-slate-100 pt-4 relative z-10">
+                        <a href="{{ route('extracurriculars.members', ['ekskul_id' => $ekskul->id]) }}" class="flex items-center justify-center gap-2 text-sm font-bold text-orange-600 hover:text-orange-700 transition-colors">
+                            Kelola Anggota <i class="ph-bold ph-arrow-right"></i>
+                        </a>
                     </div>
-                </form>
+                </div>
+            @empty
+                <div class="col-span-full py-16 text-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm text-slate-300">
+                        <i class="ph-duotone ph-puzzle-piece text-4xl"></i>
+                    </div>
+                    <h3 class="text-slate-600 font-bold text-lg">Belum ada Ekstrakurikuler</h3>
+                    <p class="text-slate-400 text-sm mt-1">Tambahkan kegiatan baru untuk memulai.</p>
+                </div>
+            @endforelse
+        </div>
+
+        {{-- MODAL TAMBAH --}}
+        <div x-show="addModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" @click="addModalOpen = false"></div>
+            <div class="flex min-h-screen items-center justify-center p-4">
+                <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden transform transition-all">
+                    <div class="bg-orange-600 p-4 px-6 flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-white">Tambah Ekskul Baru</h3>
+                        <button @click="addModalOpen = false" class="text-orange-200 hover:text-white"><i class="ph-bold ph-x text-xl"></i></button>
+                    </div>
+                    <form action="{{ route('extracurriculars.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+                        @csrf
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1">Nama Ekskul</label>
+                            <input type="text" name="name" required class="w-full rounded-xl border-slate-300 focus:border-orange-500 focus:ring-orange-500 text-sm py-2.5">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-1">Nama Pembina</label>
+                                <input type="text" name="coach_name" class="w-full rounded-xl border-slate-300 focus:border-orange-500 focus:ring-orange-500 text-sm py-2.5">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-1">Jadwal</label>
+                                <input type="text" name="schedule" placeholder="Senin, 15:00" class="w-full rounded-xl border-slate-300 focus:border-orange-500 focus:ring-orange-500 text-sm py-2.5">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Ikon / Logo</label>
+                            <div x-data="{ type: 'upload' }" class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                <div class="flex gap-4 mb-4">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" x-model="type" value="upload" class="text-orange-600 focus:ring-orange-500">
+                                        <span class="text-sm font-medium text-slate-600">Upload Gambar</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" x-model="type" value="icon" class="text-orange-600 focus:ring-orange-500">
+                                        <span class="text-sm font-medium text-slate-600">Kode Phosphor Icon</span>
+                                    </label>
+                                </div>
+                                <div x-show="type === 'upload'">
+                                    <input type="file" name="image_file" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"/>
+                                </div>
+                                <div x-show="type === 'icon'" style="display: none;">
+                                    <input type="text" name="icon_text" placeholder="Contoh: ph-fill ph-basketball" class="w-full rounded-lg border-slate-300 text-sm py-2 bg-white">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-4 flex justify-end gap-3">
+                            <button type="button" @click="addModalOpen = false" class="px-4 py-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-100">Batal</button>
+                            <button type="submit" class="px-6 py-2 rounded-lg bg-orange-600 text-white text-sm font-bold hover:bg-orange-700 shadow-lg shadow-orange-500/20">Simpan Data</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
+
+        {{-- MODAL EDIT --}}
+        <div x-show="editModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" @click="editModalOpen = false"></div>
+            <div class="flex min-h-screen items-center justify-center p-4">
+                <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden transform transition-all">
+                    <div class="bg-orange-600 p-4 px-6 flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-white">Edit Ekstrakurikuler</h3>
+                        <button @click="editModalOpen = false" class="text-orange-200 hover:text-white"><i class="ph-bold ph-x text-xl"></i></button>
+                    </div>
+                    <form id="editForm" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+                        @csrf @method('PUT')
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1">Nama Ekskul</label>
+                            <input type="text" name="name" id="edit_name" required class="w-full rounded-xl border-slate-300 focus:border-orange-500 focus:ring-orange-500 text-sm py-2.5">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-1">Nama Pembina</label>
+                                <input type="text" name="coach_name" id="edit_coach" class="w-full rounded-xl border-slate-300 focus:border-orange-500 focus:ring-orange-500 text-sm py-2.5">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-1">Jadwal</label>
+                                <input type="text" name="schedule" id="edit_schedule" class="w-full rounded-xl border-slate-300 focus:border-orange-500 focus:ring-orange-500 text-sm py-2.5">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Update Tampilan</label>
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                                <div class="mb-3">
+                                    <label class="block text-xs font-medium text-slate-500 mb-1">Ganti Gambar (Opsional)</label>
+                                    <input type="file" name="image_file" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"/>
+                                </div>
+                                <div class="border-t border-slate-200 my-2"></div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 mb-1">Atau Ganti Kode Ikon</label>
+                                    <input type="text" name="icon_text" id="edit_icon_text" class="w-full rounded-lg border-slate-300 text-sm py-2 bg-white">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-4 flex justify-end gap-3">
+                            <button type="button" @click="editModalOpen = false" class="px-4 py-2 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-100">Batal</button>
+                            <button type="submit" class="px-6 py-2 rounded-lg bg-orange-600 text-white text-sm font-bold hover:bg-orange-700 shadow-lg shadow-orange-500/20">Update Data</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        function openEditModal(ekskul) {
+        function setupEditForm(ekskul) {
             document.getElementById('edit_name').value = ekskul.name;
             document.getElementById('edit_coach').value = ekskul.coach_name;
             document.getElementById('edit_schedule').value = ekskul.schedule;
@@ -208,12 +232,10 @@
                 document.getElementById('edit_icon_text').value = '';
             }
 
-            // MENGGUNAKAN URL DUMMY "0" LALU REPLACE
+            // Replace URL ID dummy '0'
             let url = "{{ route('extracurriculars.update', 0) }}";
             let form = document.getElementById('editForm');
             form.action = url.replace('/0', '/' + ekskul.id);
-
-            document.getElementById('editModal').classList.remove('hidden');
         }
     </script>
 </x-app-layout>

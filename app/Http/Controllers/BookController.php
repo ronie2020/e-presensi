@@ -7,6 +7,8 @@ use App\Models\BookCategory;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel; // Pastikan import ini ada jika pakai Excel
+use App\Imports\BooksImport; // Pastikan import ini ada
 
 class BookController extends Controller
 {
@@ -73,7 +75,35 @@ class BookController extends Controller
 
         Book::create($data);
 
-        return redirect()->route('books.index')->with('success', 'Buku berhasil ditambahkan.');
+        return redirect()->route('library.books.index')->with('success', 'Buku berhasil ditambahkan.');
+    }
+
+    /**
+     * [FITUR BARU] Simpan Kategori via AJAX (Popup)
+     */
+    public function storeCategoryAjax(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:100|unique:book_categories,name'
+        ]);
+
+        try {
+            $category = BookCategory::create([
+                'name' => $request->name
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'id' => $category->id,
+                'name' => $category->name,
+                'message' => 'Kategori berhasil ditambahkan!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan kategori: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -111,7 +141,7 @@ class BookController extends Controller
 
         $book->update($data);
 
-        return redirect()->route('books.index')->with('success', 'Data buku diperbarui.');
+        return redirect()->route('library.books.index')->with('success', 'Data buku diperbarui.');
     }
 
     /**
@@ -125,7 +155,7 @@ class BookController extends Controller
         }
         
         $book->delete();
-        return redirect()->route('books.index')->with('success', 'Buku berhasil dihapus.');
+        return redirect()->route('library.books.index')->with('success', 'Buku berhasil dihapus.');
     }
 
     /**

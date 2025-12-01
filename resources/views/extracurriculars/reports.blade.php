@@ -1,97 +1,105 @@
 <x-app-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">Rekap Kehadiran Ekstrakurikuler</h2>
-            </div>
+    <div class="py-6 sm:py-8">
+        
+        {{-- Header --}}
+        <div class="mb-8 px-4 sm:px-0">
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight leading-tight flex items-center gap-3">
+                <i class="ph-duotone ph-files text-purple-600"></i> Rekap Kehadiran
+            </h1>
+            <p class="text-slate-500 mt-2 text-lg">
+                Pantau histori kehadiran siswa dalam kegiatan ekstrakurikuler.
+            </p>
+        </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <!-- Filter -->
-                <form method="GET" action="{{ route('extracurriculars.reports') }}" class="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6 items-end">
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden mx-4 sm:mx-0">
+            
+            {{-- Filter Section --}}
+            <div class="p-6 border-b border-slate-50 bg-slate-50/50">
+                <form method="GET" action="{{ route('extracurriculars.reports') }}" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                     
-                    <!-- Kolom 1: Pilih Kegiatan (Lebar 4/12) -->
+                    <!-- Pilih Kegiatan -->
                     <div class="md:col-span-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Kegiatan</label>
-                        <select name="ekskul_id" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="">-- Semua Kegiatan --</option>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Kegiatan Ekskul</label>
+                        <select name="ekskul_id" class="w-full rounded-xl border-slate-300 focus:border-purple-500 focus:ring-purple-500 text-sm py-2.5 font-bold text-slate-700">
+                            <option value="">-- Tampilkan Semua --</option>
                             @foreach($extracurriculars as $ekskul)
                                 <option value="{{ $ekskul->id }}" {{ $selectedEkskulId == $ekskul->id ? 'selected' : '' }}>{{ $ekskul->name }}</option>
                             @endforeach
                         </select>
                     </div>
 
-                    <!-- Kolom 2: Dari Tanggal (Lebar 3/12) -->
+                    <!-- Periode Tanggal -->
                     <div class="md:col-span-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Dari Tanggal</label>
-                        <input type="date" name="start_date" value="{{ $startDate }}" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Dari Tanggal</label>
+                        <input type="date" name="start_date" value="{{ $startDate }}" class="w-full rounded-xl border-slate-300 focus:border-purple-500 focus:ring-purple-500 text-sm py-2.5 text-slate-600">
+                    </div>
+                    <div class="md:col-span-3">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Sampai Tanggal</label>
+                        <input type="date" name="end_date" value="{{ $endDate }}" class="w-full rounded-xl border-slate-300 focus:border-purple-500 focus:ring-purple-500 text-sm py-2.5 text-slate-600">
                     </div>
 
-                    <!-- Kolom 3: Sampai Tanggal (Lebar 3/12) -->
-                    <div class="md:col-span-3">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Sampai Tanggal</label>
-                        <input type="date" name="end_date" value="{{ $endDate }}" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-
-                    <!-- Kolom 4: Tombol Aksi (Lebar 2/12) -->
+                    <!-- Action Buttons -->
                     <div class="md:col-span-2 flex gap-2">
-                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 w-full md:w-auto shadow-sm transition-colors">
+                        <button type="submit" class="flex-1 bg-purple-600 text-white px-4 py-2.5 rounded-xl hover:bg-purple-700 font-bold text-sm shadow-lg shadow-purple-500/20 transition-all">
                             Filter
                         </button>
-                        
                         @if($selectedEkskulId)
-                            <a href="{{ route('extracurriculars.reports.export', request()->query()) }}" target="_blank" class="bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 shadow-sm transition-colors flex items-center justify-center" title="Cetak Laporan">
+                            <a href="{{ route('extracurriculars.reports.export', request()->query()) }}" target="_blank" class="px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:text-purple-600 transition-colors" title="Cetak PDF">
                                 <i class="ph-bold ph-printer text-xl"></i>
                             </a>
                         @endif
                     </div>
                 </form>
+            </div>
 
-                <!-- Tabel Log -->
-                <div class="overflow-x-auto border rounded-lg">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jam</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Siswa</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kegiatan</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse($attendances as $log)
-                            <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {{ \Carbon\Carbon::parse($log->date)->format('d M Y') }}
+            {{-- Table --}}
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 text-xs font-bold text-slate-400 uppercase">
+                        <tr>
+                            <th class="px-6 py-4">Waktu</th>
+                            <th class="px-6 py-4">Siswa</th>
+                            <th class="px-6 py-4">Kegiatan</th>
+                            <th class="px-6 py-4 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        @forelse($attendances as $log)
+                            <tr class="hover:bg-slate-50/50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-slate-700 text-sm">{{ \Carbon\Carbon::parse($log->date)->format('d M Y') }}</span>
+                                        <span class="text-xs text-slate-400 font-mono">{{ $log->time_in }} WIB</span>
+                                    </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">
-                                    {{ $log->time_in }}
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-slate-700 text-sm">{{ $log->student->name }}</div>
+                                    <div class="text-xs text-slate-500 mt-0.5">Kelas {{ $log->student->schoolClass->name ?? '-' }}</div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700">
-                                    {{ $log->student->schoolClass->name ?? $log->student->class_name ?? '-' }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                                    {{ $log->student->name }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 text-xs font-bold border border-purple-100">
                                         {{ $log->extracurricular->name }}
                                     </span>
                                 </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" class="px-6 py-12 text-center text-gray-500 italic">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <i class="ph-duotone ph-clipboard-text text-4xl mb-2 text-gray-300"></i>
-                                        <span>Tidak ada data kehadiran pada periode ini.</span>
+                                <td class="px-6 py-4 text-center">
+                                    <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 mx-auto">
+                                        <i class="ph-bold ph-check"></i>
                                     </div>
                                 </td>
                             </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-6 py-16 text-center">
+                                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-300">
+                                        <i class="ph-duotone ph-clipboard-text text-3xl"></i>
+                                    </div>
+                                    <p class="text-sm font-bold text-slate-600">Tidak ada data kehadiran.</p>
+                                    <p class="text-xs text-slate-400 mt-1">Coba ubah filter tanggal atau pilih kegiatan lain.</p>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

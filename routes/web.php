@@ -102,9 +102,22 @@ Route::middleware('auth')->group(function () {
     // === MODUL PERPUSTAKAAN ===
     Route::prefix('library')->name('library.')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\LibraryDashboardController::class, 'index'])->name('dashboard');
+        
+        // Import Buku
         Route::post('/books/import', [\App\Http\Controllers\BookController::class, 'import'])->name('books.import');
+        
+        // Route untuk Simpan Kategori via AJAX
+        Route::post('/books/categories/store-ajax', [\App\Http\Controllers\BookController::class, 'storeCategoryAjax'])->name('books.categories.ajax');
+
+        // Resource Buku
         Route::resource('books', \App\Http\Controllers\BookController::class);
+        
+        // [PERBAIKAN WAJIB DI SINI]
+        // Tambahkan '.index' agar menjadi 'library.circulation.index'
+        // Ini akan COCOK dengan file navigation.blade.php kamu.
         Route::get('/circulation', [\App\Http\Controllers\LibraryCirculationController::class, 'index'])->name('circulation.index');
+        
+        // Route untuk proses sirkulasi
         Route::post('/circulation/search-student', [\App\Http\Controllers\LibraryCirculationController::class, 'searchStudent'])->name('circulation.searchStudent');
         Route::post('/circulation/search-book', [\App\Http\Controllers\LibraryCirculationController::class, 'searchBook'])->name('circulation.searchBook');
         Route::post('/circulation/borrow', [\App\Http\Controllers\LibraryCirculationController::class, 'store'])->name('circulation.store');
@@ -117,7 +130,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
     Route::post('/announcements/send', [AnnouncementController::class, 'sendNotification'])->name('announcements.send');
     
-    // [BARU] Route untuk Agenda Kegiatan
+    // Agenda Kegiatan
     Route::post('/agendas', [AnnouncementController::class, 'storeAgenda'])->name('agendas.store');
     Route::delete('/agendas/{id}', [AnnouncementController::class, 'destroyAgenda'])->name('agendas.destroy');
 
