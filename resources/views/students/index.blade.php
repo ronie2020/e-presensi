@@ -312,14 +312,18 @@
                                                     </button>
                                                     
                                                     <div x-show="open" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden py-1" style="display: none;">
+                                                        <!-- TOMBOL INPUT ABSEN (MODAL) -->
                                                         <button type="button" class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-2 open-absen-modal"
                                                             data-student-id="{{ $student->id }}" data-student-name="{{ $student->name }}">
                                                             <i class="ph-bold ph-user-check"></i> Input Absen
                                                         </button>
+                                                        
+                                                        <!-- TOMBOL LIHAT QR (MODAL) -->
                                                         <button type="button" class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-green-600 flex items-center gap-2 open-qr-modal"
                                                             data-student-id="{{ $student->student_id }}" data-student-name="{{ $student->name }}">
                                                             <i class="ph-bold ph-qr-code"></i> Lihat QR Code
                                                         </button>
+                                                        
                                                         <div class="border-t border-slate-100 my-1"></div>
                                                         <form action="{{ route('students.destroy', $student->id) }}" method="POST" onsubmit="return confirm('Hapus siswa ini? Data buku induk akan hilang.');">
                                                             @csrf @method('DELETE')
@@ -355,39 +359,60 @@
         </div>
     </div>
 
-    {{-- MODAL ABSEN & QR CODE (Inline Script) --}}
+    {{-- MODAL ABSEN & QR CODE (DIPERBARUI SESUAI REQUEST) --}}
     <div id="absen-manual-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-opacity">
         <div class="relative top-20 mx-auto p-0 border-0 w-full max-w-md shadow-2xl rounded-2xl bg-white overflow-hidden">
             <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">
                 <h3 class="font-bold text-white text-lg">Input Absensi Manual</h3>
                 <button type="button" id="absen-modal-close" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>
             </div>
-            <form id="absen-manual-form" action="{{ route('reports.storeManual') }}" method="POST" class="p-6 space-y-4">
+            <form id="absen-manual-form" action="{{ route('reports.storeManual') }}" method="POST" class="p-6 space-y-5">
                 @csrf
                 <input type="hidden" name="student_id" id="absen-modal-student-id">
                 <input type="hidden" name="attendance_type" value="Harian">
                 
-                <div class="text-center mb-4">
-                    <p class="text-xs text-slate-400 uppercase font-bold">Siswa</p>
+                <div class="text-center mb-2">
+                    <p class="text-xs text-slate-400 uppercase font-bold tracking-wide">Siswa</p>
                     <h4 id="absen-modal-student-name" class="text-xl font-black text-slate-800">Nama Siswa</h4>
                 </div>
 
+                {{-- FIELD BARU: TANGGAL --}}
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Status Kehadiran</label>
-                    <select name="status" class="w-full rounded-xl border-slate-300 focus:ring-blue-500 focus:border-blue-500 font-bold text-slate-700">
-                        <option value="Hadir">Hadir</option>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Tanggal</label>
+                    <input type="date" name="date" value="{{ date('Y-m-d') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-blue-500 focus:border-blue-500 font-bold text-slate-700">
+                </div>
+
+                {{-- FIELD: STATUS --}}
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Status Kehadiran</label>
+                    <select name="status" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-blue-500 focus:border-blue-500 font-bold text-slate-700">
+                        <option value="Hadir">Hadir (Manual)</option>
                         <option value="Sakit">Sakit</option>
                         <option value="Izin">Izin</option>
                         <option value="Alfa">Alfa</option>
+                        <option value="Terlambat">Terlambat</option>
                     </select>
                 </div>
+
+                {{-- FIELD BARU: JAM MASUK & PULANG --}}
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Masuk</label>
+                        <input type="time" name="time_in" value="{{ now()->format('H:i') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-blue-500 focus:border-blue-500 text-center font-mono font-bold text-slate-700">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Pulang</label>
+                        <input type="time" name="time_out" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-blue-500 focus:border-blue-500 text-center font-mono font-bold text-slate-700">
+                    </div>
+                </div>
                 
+                {{-- FIELD: KETERANGAN --}}
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Keterangan (Opsional)</label>
-                    <textarea name="notes" rows="2" class="w-full rounded-xl border-slate-300 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Keterangan Tambahan (Opsional)</label>
+                    <textarea name="notes" rows="2" placeholder="Contoh: Datang terlambat karena ban bocor..." class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-blue-500 focus:border-blue-500 text-sm"></textarea>
                 </div>
 
-                <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg">Simpan Data</button>
+                <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-transform active:scale-95">Simpan Data</button>
             </form>
         </div>
     </div>
@@ -424,7 +449,6 @@
                 btn.addEventListener('click', function() {
                     const id = this.dataset.studentId;
                     const name = this.dataset.studentName;
-                    // Menggunakan Student ID (NISN) untuk QR Code
                     const url = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(id)}`;
                     document.getElementById('qr-modal-student-name').innerText = name;
                     document.getElementById('qr-modal-image').src = url;
