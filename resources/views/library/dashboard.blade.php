@@ -13,12 +13,15 @@
                     </h1>
                     <p class="text-slate-500 mt-2 text-lg">Statistik dan manajemen perpustakaan sekolah.</p>
                 </div>
-                <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-full border border-slate-200 shadow-sm">
-                    <div class="flex -space-x-2">
-                        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold border-2 border-white">A</div>
-                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xs font-bold border-2 border-white">B</div>
+                <!-- Indikator Hari Ini -->
+                <div class="flex items-center gap-3 bg-white px-5 py-3 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 text-lg font-bold">
+                        <i class="ph-fill ph-users-three"></i>
                     </div>
-                    <span class="text-xs font-bold text-slate-600">Petugas Aktif</span>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase">Pengunjung Hari Ini</p>
+                        <p class="text-xl font-black text-slate-800">{{ number_format($todayVisits) }} <span class="text-xs font-medium text-slate-400">Siswa</span></p>
+                    </div>
                 </div>
             </div>
 
@@ -27,39 +30,30 @@
                 <!-- KOLOM UTAMA (KIRI) -->
                 <div class="lg:col-span-2 space-y-8">
 
-                    <!-- 1. Pintasan Cepat (Menu Grid) -->
+                    <!-- 1. Pintasan Cepat -->
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                         <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                             <i class="ph-bold ph-lightning text-yellow-500"></i> Akses Cepat
                         </h2>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            
-                            <!-- Sirkulasi (BAGIAN INI YANG DIPERBAIKI) -->
-                            {{-- Menggunakan 'library.circulation.index' agar cocok dengan web.php --}}
                             <a href="{{ route('library.circulation.index') }}" class="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 rounded-2xl transition-all group">
                                 <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform">
                                     <i class="ph-duotone ph-arrows-left-right text-2xl text-blue-600"></i>
                                 </div>
                                 <span class="font-bold text-slate-700 text-sm group-hover:text-blue-700">Sirkulasi</span>
                             </a>
-
-                            <!-- Cari Anggota -->
                             <button onclick="searchMemberPopup()" class="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-purple-50 border border-slate-100 hover:border-purple-200 rounded-2xl transition-all group">
                                 <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform">
                                     <i class="ph-duotone ph-user-focus text-2xl text-purple-600"></i>
                                 </div>
                                 <span class="font-bold text-slate-700 text-sm group-hover:text-purple-700">Cari Siswa</span>
                             </button>
-                            
-                            <!-- Tambah Buku -->
                             <a href="{{ route('library.books.create') }}" class="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-emerald-50 border border-slate-100 hover:border-emerald-200 rounded-2xl transition-all group">
                                 <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform">
                                     <i class="ph-duotone ph-book-medical text-2xl text-emerald-600"></i>
                                 </div>
                                 <span class="font-bold text-slate-700 text-sm group-hover:text-emerald-700">Input Buku</span>
                             </a>
-
-                            <!-- Kiosk Mode -->
                             <a href="{{ route('library.kiosk.index') }}" target="_blank" class="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-orange-50 border border-slate-100 hover:border-orange-200 rounded-2xl transition-all group">
                                 <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform">
                                     <i class="ph-duotone ph-desktop text-2xl text-orange-600"></i>
@@ -69,7 +63,7 @@
                         </div>
                     </div>
                     
-                    <!-- 2. Statistik Utama -->
+                    <!-- 2. Statistik Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-3xl shadow-lg shadow-blue-500/20 text-white relative overflow-hidden group">
                             <div class="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
@@ -98,19 +92,21 @@
                         </div>
                     </div>
 
-                    <!-- 3. Grafik Peminjaman -->
+                    <!-- 3. Grafik Statistik (Dual Tab) -->
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                         <div class="flex items-center justify-between mb-6">
                             <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                                <i class="ph-bold ph-chart-bar text-indigo-500"></i> Statistik Peminjaman
+                                <i class="ph-bold ph-chart-bar text-indigo-500"></i> Statistik Perpustakaan
                             </h2>
-                            <select class="text-xs border-none bg-slate-50 rounded-lg font-bold text-slate-500 focus:ring-0 cursor-pointer">
-                                <option>Minggu Ini</option>
-                                <option>Bulan Ini</option>
-                            </select>
+                            <!-- Toggle Chart -->
+                            <div class="flex bg-slate-100 p-1 rounded-xl">
+                                <button onclick="toggleChart('loans')" id="btn-loans" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white shadow-sm text-slate-800 transition-all">Peminjaman</button>
+                                <button onclick="toggleChart('visits')" id="btn-visits" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all">Kunjungan</button>
+                            </div>
                         </div>
-                        <div class="h-64 w-full">
-                             <canvas id="loanChart"></canvas>
+                        <div class="h-64 w-full relative">
+                             <!-- Canvas Chart -->
+                             <canvas id="mainChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -121,8 +117,6 @@
                      <!-- 4. Ringkasan Status -->
                      <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-6">
                         <h3 class="font-bold text-slate-800">Status Sirkulasi</h3>
-                        
-                        <!-- Cards Kecil -->
                         <div class="grid grid-cols-2 gap-3">
                             <div class="p-4 bg-indigo-50 rounded-2xl text-center border border-indigo-100">
                                 <i class="ph-duotone ph-hand-holding text-2xl text-indigo-500 mb-1"></i>
@@ -135,8 +129,6 @@
                                 <p class="text-[10px] font-bold text-slate-400 uppercase">Terlambat</p>
                             </div>
                         </div>
-
-                        <!-- Mini List Member Stats -->
                         <div class="pt-4 border-t border-dashed border-slate-200">
                             <div class="flex justify-between items-center text-sm mb-2">
                                 <span class="text-slate-500">Anggota Meminjam</span>
@@ -148,7 +140,7 @@
                         </div>
                     </div>
 
-                    <!-- 5. Aktivitas Terkini (List Style) -->
+                    <!-- 5. Aktivitas Terkini (SUDAH DIPERBAIKI: Support Kiosk & Pinjam) -->
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                         <div class="flex justify-between items-center mb-4">
                             <h2 class="text-lg font-bold text-slate-800">Log Aktivitas</h2>
@@ -158,21 +150,37 @@
                             @forelse($recentActivities as $activity)
                                 <div class="flex gap-3">
                                     <div class="relative mt-1">
-                                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-lg {{ $activity->status == 'returned' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600' }}">
-                                            <i class="{{ $activity->status == 'returned' ? 'ph-bold ph-arrow-u-down-left' : 'ph-bold ph-arrow-u-right-up' }}"></i>
-                                        </div>
-                                        @if($activity->status != 'returned')
-                                            <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-white rounded-full flex items-center justify-center">
-                                                <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                        @if($activity->type == 'visit')
+                                            <!-- Icon Kunjungan/Kiosk -->
+                                            <div class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-lg">
+                                                <i class="ph-bold ph-door-open"></i>
                                             </div>
+                                        @else
+                                            <!-- Icon Sirkulasi -->
+                                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-lg {{ $activity->status == 'returned' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600' }}">
+                                                <i class="{{ $activity->status == 'returned' ? 'ph-bold ph-arrow-u-down-left' : 'ph-bold ph-arrow-u-right-up' }}"></i>
+                                            </div>
+                                            @if($activity->status != 'returned')
+                                                <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-white rounded-full flex items-center justify-center">
+                                                    <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                                </div>
+                                            @endif
                                         @endif
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm font-bold text-slate-800 truncate">{{ $activity->student->name }}</p>
-                                        <p class="text-xs text-slate-500 truncate">{{ $activity->book->title }}</p>
+                                        
+                                        <!-- Logika Tampilan Deskripsi -->
+                                        @if($activity->type == 'visit')
+                                            <p class="text-xs text-slate-500 truncate flex items-center gap-1">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span> Absensi Masuk
+                                            </p>
+                                        @else
+                                            <p class="text-xs text-slate-500 truncate">{{ $activity->book->title }}</p>
+                                        @endif
                                     </div>
                                     <span class="text-[10px] font-bold text-slate-400 whitespace-nowrap">
-                                        {{ $activity->updated_at->diffForHumans(null, true) }}
+                                        {{ $activity->sort_time->diffForHumans(null, true) }}
                                     </span>
                                 </div>
                             @empty
@@ -203,25 +211,38 @@
         </div>
     </div>
 
-    {{-- Script untuk Chart & SweetAlert (Sama seperti sebelumnya, hanya disesuaikan selector) --}}
+    {{-- Script untuk Chart & SweetAlert --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Chart Configuration
-            const ctx = document.getElementById('loanChart');
-            if (ctx) {
-                const chartLabels = @json($chartLabels);
-                const chartData = @json($chartData);
+            // Data dari Controller
+            const loanLabels = @json($chartLabels);
+            const loanData = @json($chartData);
+            
+            const visitLabels = @json($visitChartLabels);
+            const visitData = @json($visitChartData);
 
-                new Chart(ctx.getContext('2d'), {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            let mainChart;
+
+            function renderChart(type) {
+                if(mainChart) mainChart.destroy();
+                
+                const isVisit = type === 'visits';
+                const labels = isVisit ? visitLabels : loanLabels;
+                const data = isVisit ? visitData : loanData;
+                const label = isVisit ? 'Jumlah Kunjungan' : 'Jumlah Peminjaman';
+                const color = isVisit ? '#f97316' : '#4f46e5'; // Orange vs Indigo
+
+                mainChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: chartLabels,
+                        labels: labels,
                         datasets: [{
-                            label: 'Peminjaman',
-                            data: chartData,
-                            backgroundColor: '#4f46e5',
+                            label: label,
+                            data: data,
+                            backgroundColor: color,
                             borderRadius: 6,
-                            barThickness: 20
+                            barThickness: isVisit ? 40 : 20
                         }]
                     },
                     options: {
@@ -235,9 +256,28 @@
                     }
                 });
             }
+
+            // Default render: Loans
+            renderChart('loans');
+
+            // Tombol Toggle Logic
+            window.toggleChart = function(type) {
+                const btnLoans = document.getElementById('btn-loans');
+                const btnVisits = document.getElementById('btn-visits');
+                
+                if(type === 'loans') {
+                    btnLoans.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-white shadow-sm text-slate-800 transition-all";
+                    btnVisits.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all";
+                    renderChart('loans');
+                } else {
+                    btnVisits.className = "px-3 py-1.5 rounded-lg text-xs font-bold bg-white shadow-sm text-slate-800 transition-all";
+                    btnLoans.className = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all";
+                    renderChart('visits');
+                }
+            };
         });
 
-        // Popup Cari Anggota
+        // Popup Cari Anggota (Sama seperti sebelumnya)
         async function searchMemberPopup() {
             const { value: query } = await Swal.fire({
                 title: 'Cari Data Siswa',
@@ -258,7 +298,6 @@
             if (query) {
                 try {
                     Swal.showLoading();
-                    // Pastikan route ini ada di web.php
                     const res = await fetch('{{ route("library.circulation.searchStudent") }}', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },

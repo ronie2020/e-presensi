@@ -24,7 +24,10 @@ class LibraryCirculationController extends Controller
     {
         $query = $request->get('q');
         
-        $student = Student::withCount(['borrowings' => function($q) {
+        // PERBAIKAN DI SINI:
+        // Gunakan 'schoolClass' (sesuai nama fungsi di Student.php), bukan 'school_class'
+        $student = Student::with('schoolClass') 
+                    ->withCount(['borrowings' => function($q) {
                         $q->where('status', 'borrowed');
                     }])
                     ->where('student_id', $query) // NISN
@@ -36,7 +39,7 @@ class LibraryCirculationController extends Controller
             return response()->json(['success' => false, 'message' => 'Anggota tidak ditemukan.']);
         }
 
-        // Cek apakah ada buku yang telat (blokir peminjaman jika ada denda/telat)
+        // Cek apakah ada buku yang telat
         $overdueLoans = Borrowing::where('student_id', $student->id)
                         ->where('status', 'borrowed')
                         ->where('due_date', '<', now())
@@ -47,7 +50,7 @@ class LibraryCirculationController extends Controller
             'student' => $student,
             'active_loans' => $student->borrowings_count,
             'has_overdue' => $overdueLoans->count() > 0,
-            'overdue_titles' => $overdueLoans->pluck('book.title') // Asumsi relasi book diload nanti jika perlu detail
+            'overdue_titles' => $overdueLoans->pluck('book.title')
         ]);
     }
 
@@ -106,7 +109,7 @@ class LibraryCirculationController extends Controller
                 'student_id' => $request->student_id,
                 'book_id' => $request->book_id,
                 'borrow_date' => now(),
-                'due_date' => now()->addDays(7), // Default pinjam 7 hari (bisa diubah)
+                'due_date' => now()->addDays(7), // Default pinjam 7 hari
                 'status' => 'borrowed',
                 'served_by' => Auth::id(),
             ]);
@@ -116,34 +119,27 @@ class LibraryCirculationController extends Controller
     }
 
     /**
-     * PROSES PENGEMBALIAN (Berdasarkan Barcode Buku)
+     * PROSES PENGEMBALIAN
      */
     public function returnBook(Request $request)
     {
         $bookCode = $request->get('book_code');
 
-        // Cari buku dulu
         $book = Book::where('book_code', $bookCode)->first();
         if (!$book) {
             return response()->json(['success' => false, 'message' => 'Buku tidak terdaftar di sistem.']);
         }
 
-        // Cari transaksi peminjaman aktif untuk buku ini
-        // (Asumsi: 1 buku fisik spesifik. Jika ada banyak copy dengan kode sama, 
-        // logika ini perlu disesuaikan misal dengan FIFO atau memilih siswa).
-        // Untuk simplifikasi: Kita cari transaksi 'borrowed' terakhir yang melibatkan buku jenis ini.
-        
         $borrowing = Borrowing::with('student')
                         ->where('book_id', $book->id)
                         ->where('status', 'borrowed')
-                        ->latest() // Ambil yang paling baru dipinjam
+                        ->latest() 
                         ->first();
 
         if (!$borrowing) {
             return response()->json(['success' => false, 'message' => 'Buku ini sedang tidak dipinjam (Stok ada di rak).']);
         }
 
-        // Hitung Denda (Jika terlambat)
         $dueDate = Carbon::parse($borrowing->due_date);
         $now = Carbon::now();
         $fine = 0;
@@ -151,10 +147,9 @@ class LibraryCirculationController extends Controller
 
         if ($now->gt($dueDate)) {
             $lateDays = $now->diffInDays($dueDate);
-            $fine = $lateDays * 500; // Denda Rp 500 per hari (Sesuaikan)
+            $fine = $lateDays * 500; 
         }
 
-        // Jika ini hanya cek data (belum konfirmasi kembali)
         if ($request->has('check_only')) {
             return response()->json([
                 'success' => true,
@@ -170,7 +165,6 @@ class LibraryCirculationController extends Controller
             ]);
         }
 
-        // Proses Pengembalian Final
         DB::transaction(function () use ($borrowing, $book, $fine) {
             $borrowing->update([
                 'status' => 'returned',

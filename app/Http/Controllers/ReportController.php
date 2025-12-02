@@ -19,7 +19,7 @@ class ReportController extends Controller
 {
     /**
      * =========================================================================
-     * BAGIAN 1: LAPORAN HARIAN
+     * BAGIAN 1: LAPORAN HARIAN (FIXED PAGINATION)
      * =========================================================================
      */
     public function dailyReport(Request $request)
@@ -33,13 +33,11 @@ class ReportController extends Controller
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
             ->get();
 
-        // 2. Grouping Data & Menentukan Status Final
+        // 2. Grouping & Logic Status
         $processedAttendances = $rawAttendances->groupBy('student_id')->map(function ($logs) {
             $firstLog = $logs->sortBy('created_at')->first();
-            
             $timeIn = $logs->whereNotNull('time_in')->pluck('time_in')->sort()->first(); 
             
-            // Logic ambil jam pulang
             $scanPulang = $logs->where('type', 'Pulang')->first();
             $timeOut = null;
             if ($scanPulang) {
@@ -53,9 +51,7 @@ class ReportController extends Controller
             $allNotes = $logs->pluck('notes')->filter()->unique()->implode(' | ');
             $statuses = $logs->pluck('status')->toArray();
             
-            // Logic Penentuan Status Final
             $finalStatus = $firstLog->status; 
-            
             if (in_array('Hadir', $statuses)) $finalStatus = 'Hadir';
             elseif (in_array('Terlambat', $statuses)) $finalStatus = 'Terlambat';
             elseif (in_array('Sakit', $statuses)) $finalStatus = 'Sakit';
@@ -70,64 +66,56 @@ class ReportController extends Controller
             return $firstLog;
         });
 
-        // Sorting: Kelas (ASC) -> Nama (ASC)
+        // Sorting
         $processedAttendances = $processedAttendances->sort(function ($a, $b) {
             $classA = $a->student->schoolClass->name ?? 'ZZZ';
             $classB = $b->student->schoolClass->name ?? 'ZZZ';
-            $classComparison = strnatcmp($classA, $classB);
-            if ($classComparison === 0) {
-                return strcasecmp($a->student->name, $b->student->name);
-            }
-            return $classComparison;
+            $cmp = strnatcmp($classA, $classB);
+            return $cmp === 0 ? strcasecmp($a->student->name, $b->student->name) : $cmp;
         });
 
-        // 3. HITUNG STATISTIK
-        $hadirCount = $processedAttendances->whereIn('status_final', ['Hadir', 'Terlambat'])->count();
-        $terlambatCount = $processedAttendances->where('status_final', 'Terlambat')->count();
-        $sakitCount = $processedAttendances->where('status_final', 'Sakit')->count();
-        $izinCount = $processedAttendances->where('status_final', 'Izin')->count();
-        $alfaCount = $processedAttendances->where('status_final', 'Alfa')->count();
+        // 3. PISAHKAN KOLEKSI DATA (Hadir vs Lainnya)
+        $hadirCollection = $processedAttendances->filter(function($item) {
+            return in_array($item->status_final, ['Hadir', 'Terlambat']);
+        });
+        
+        $lainCollection = $processedAttendances->filter(function($item) {
+            return !in_array($item->status_final, ['Hadir', 'Terlambat']);
+        });
 
-        // 4. Ambil Siswa Belum Absen
-        $allStudents = Student::with('schoolClass')
-            ->join('classes', 'students.class_id', '=', 'classes.id')
-            ->orderBy('classes.name', 'asc')
-            ->orderBy('students.name', 'asc')
-            ->select('students.*')
-            ->get();
+        // 4. BUAT PAGINATION TERPISAH
+        // Paginator Hadir (Page Param: page_hadir)
+        $pageHadir = Paginator::resolveCurrentPage('page_hadir');
+        $hadirPerSlice = $hadirCollection->slice(($pageHadir - 1) * 20, 20)->all();
+        $hadirPaginator = new LengthAwarePaginator($hadirPerSlice, $hadirCollection->count(), 20, $pageHadir, ['path' => $request->url(), 'pageName' => 'page_hadir', 'query' => $request->query()]);
 
+        // Paginator Lain (Page Param: page_lain)
+        $pageLain = Paginator::resolveCurrentPage('page_lain');
+        $lainPerSlice = $lainCollection->slice(($pageLain - 1) * 20, 20)->all();
+        $lainPaginator = new LengthAwarePaginator($lainPerSlice, $lainCollection->count(), 20, $pageLain, ['path' => $request->url(), 'pageName' => 'page_lain', 'query' => $request->query()]);
+
+        // 5. Belum Absen
+        $allStudents = Student::with('schoolClass')->join('classes', 'students.class_id', '=', 'classes.id')->orderBy('classes.name', 'asc')->orderBy('students.name', 'asc')->select('students.*')->get();
         $attendedIds = $processedAttendances->pluck('student_id');
         $belumAbsenList = $allStudents->whereNotIn('id', $attendedIds); 
 
-        // 5. Pagination
-        $perPage = 20;
-        $currentPage = LengthAwarePaginator::resolveCurrentPage();
-        $currentItems = $processedAttendances->slice(($currentPage - 1) * $perPage, $perPage)->all();
-        
-        $paginatedAttendances = new LengthAwarePaginator(
-            $currentItems,
-            $processedAttendances->count(),
-            $perPage,
-            $currentPage,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
-
         return view('reports.daily', [
             'selectedDate_db' => $selectedDate,
-            'todayAttendances' => $paginatedAttendances,
+            'attendancesHadir' => $hadirPaginator, // Kirim Paginator Khusus Hadir
+            'attendancesLain' => $lainPaginator,   // Kirim Paginator Khusus Lain
             'allStudents' => $allStudents,
-            'hadirCount' => $hadirCount,
-            'terlambatCount' => $terlambatCount,
-            'sakitCount' => $sakitCount,
-            'izinCount' => $izinCount,
-            'alfaCount' => $alfaCount,
+            'hadirCount' => $hadirCollection->count(),
+            'terlambatCount' => $hadirCollection->where('status_final', 'Terlambat')->count(),
+            'sakitCount' => $lainCollection->where('status_final', 'Sakit')->count(),
+            'izinCount' => $lainCollection->where('status_final', 'Izin')->count(),
+            'alfaCount' => $lainCollection->where('status_final', 'Alfa')->count(),
             'belumAbsenList' => $belumAbsenList,
         ]);
     }
 
     /**
      * =========================================================================
-     * BAGIAN 2: LAPORAN KEAGAMAAN
+     * BAGIAN 2: LAPORAN KEAGAMAAN (FIXED PAGINATION)
      * =========================================================================
      */
     public function religiousReport(Request $request)
@@ -152,67 +140,56 @@ class ReportController extends Controller
             $statuses = $logs->pluck('status')->toArray();
             
             $finalStatus = $firstLog->status;
-            if (in_array('Hadir', $statuses)) {
-                $finalStatus = 'Hadir';
-            } elseif (in_array("Uzur Syar'i", $statuses)) {
-                $finalStatus = "Uzur Syar'i";
-            } elseif (in_array("Alfa", $statuses)) {
-                $finalStatus = "Alfa";
-            }
+            if (in_array('Hadir', $statuses)) $finalStatus = 'Hadir';
+            elseif (in_array("Uzur Syar'i", $statuses)) $finalStatus = "Uzur Syar'i";
+            elseif (in_array("Alfa", $statuses)) $finalStatus = "Alfa";
             
             $firstLog->status_final = $finalStatus;
             $firstLog->notes_final = $allNotes;
             return $firstLog;
         });
 
+        // Sorting
         $processedAttendances = $processedAttendances->sort(function ($a, $b) {
             $classA = $a->student->schoolClass->name ?? 'ZZZ';
             $classB = $b->student->schoolClass->name ?? 'ZZZ';
-            $classComparison = strnatcmp($classA, $classB);
-            if ($classComparison === 0) {
-                return strcasecmp($a->student->name, $b->student->name);
-            }
-            return $classComparison;
+            $cmp = strnatcmp($classA, $classB);
+            return $cmp === 0 ? strcasecmp($a->student->name, $b->student->name) : $cmp;
         });
 
-        $hadirCount = $processedAttendances->where('status_final', 'Hadir')->count();
-        $izinUzurCount = $processedAttendances->where('status_final', "Uzur Syar'i")->count();
-        $alfaCount = $processedAttendances->where('status_final', 'Alfa')->count();
-        
-        $allStudents = Student::with('schoolClass')
-            ->join('classes', 'students.class_id', '=', 'classes.id')
-            ->orderBy('classes.name', 'asc')
-            ->orderBy('students.name', 'asc')
-            ->select('students.*')
-            ->get();
+        // PISAHKAN KOLEKSI
+        $hadirCollection = $processedAttendances->where('status_final', 'Hadir');
+        $nonHadirCollection = $processedAttendances->where('status_final', '!=', 'Hadir');
 
+        // PAGINATION TERPISAH
+        $pageHadir = Paginator::resolveCurrentPage('page_hadir');
+        $hadirPerSlice = $hadirCollection->slice(($pageHadir - 1) * 20, 20)->all();
+        $hadirPaginator = new LengthAwarePaginator($hadirPerSlice, $hadirCollection->count(), 20, $pageHadir, ['path' => $request->url(), 'pageName' => 'page_hadir', 'query' => $request->query()]);
+
+        $pageUzur = Paginator::resolveCurrentPage('page_uzur');
+        $uzurPerSlice = $nonHadirCollection->slice(($pageUzur - 1) * 20, 20)->all();
+        $uzurPaginator = new LengthAwarePaginator($uzurPerSlice, $nonHadirCollection->count(), 20, $pageUzur, ['path' => $request->url(), 'pageName' => 'page_uzur', 'query' => $request->query()]);
+
+        // Belum Absen
+        $allStudents = Student::with('schoolClass')->join('classes', 'students.class_id', '=', 'classes.id')->orderBy('classes.name', 'asc')->orderBy('students.name', 'asc')->select('students.*')->get();
         $attendedIds = $processedAttendances->pluck('student_id');
         $belumAbsenList = $allStudents->whereNotIn('id', $attendedIds);
 
         $totalStudents = $allStudents->count();
+        $hadirCount = $hadirCollection->count();
+        $izinUzurCount = $nonHadirCollection->where('status_final', "Uzur Syar'i")->count();
         $kehadiranPercentage = $totalStudents > 0 ? round((($hadirCount + $izinUzurCount) / $totalStudents) * 100, 1) : 0;
 
-        $perPage = 20;
-        $currentPage = LengthAwarePaginator::resolveCurrentPage();
-        $currentItems = $processedAttendances->slice(($currentPage - 1) * $perPage, $perPage)->all();
-        
-        $paginatedAttendances = new LengthAwarePaginator(
-            $currentItems,
-            $processedAttendances->count(),
-            $perPage,
-            $currentPage,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
-
         return view('reports.religious', [
-            'todayAttendances' => $paginatedAttendances,
+            'attendancesHadir' => $hadirPaginator, // Paginator Hadir
+            'attendancesUzur' => $uzurPaginator,   // Paginator Uzur/Alfa
             'belumAbsenList' => $belumAbsenList,
             'allStudents' => $allStudents,
             'selectedDate_db' => $selectedDate,
             'selectedActivity' => $selectedActivity,
             'hadirCount' => $hadirCount,
             'izinUzurCount' => $izinUzurCount,
-            'alfaCount' => $alfaCount,
+            'alfaCount' => $nonHadirCollection->where('status_final', 'Alfa')->count(),
             'belumAbsenCount' => $belumAbsenList->count(),
             'kehadiranPercentage' => $kehadiranPercentage
         ]);
@@ -220,10 +197,9 @@ class ReportController extends Controller
 
     /**
      * =========================================================================
-     * BAGIAN 3: EXPORT & DELETE & MANUAL
+     * BAGIAN 3 & 4 (EXPORT, STORE, BULK ALPHA) - TETAP SAMA SEPERTI SEBELUMNYA
      * =========================================================================
      */
-
     public function destroyDaily(Request $request)
     {
         $request->validate(['date' => 'required|date']);
@@ -363,7 +339,7 @@ class ReportController extends Controller
 
         try {
             DB::transaction(function () use ($request, $date, $timeNow) {
-                // 1. Simpan Data Absensi (Harian & Keagamaan TETAP DICATAT)
+                // 1. Simpan Data Absensi
                 $matchConditions = [
                     'student_id' => $request->student_id,
                     'attendance_date' => $date,
@@ -384,8 +360,6 @@ class ReportController extends Controller
                 
                 // 2. Logic Poin Pelanggaran: HANYA JIKA HARIAN
                 if ($request->status === 'Alfa' && $request->attendance_type === 'Harian') {
-                    
-                    // Logic Auto-Find or Auto-Create Discipline Type KHUSUS HARIAN
                     $disciplineType = DisciplineType::firstOrCreate(
                         ['name' => 'Alpa Harian'], 
                         [ 
@@ -395,7 +369,6 @@ class ReportController extends Controller
                         ]
                     );
 
-                    // Buat Record Pelanggaran
                     DisciplineRecord::create([
                         'student_id' => $request->student_id,
                         'discipline_type_id' => $disciplineType->id,
@@ -404,13 +377,11 @@ class ReportController extends Controller
                         'date' => $date,
                     ]);
                 }
-                // Jika Keagamaan, TIDAK ADA DisciplineRecord yang dibuat.
             });
 
             $savedDate = $date;
             if ($request->attendance_type === 'Keagamaan') {
-                return redirect()->route('reports.religious', ['date' => $savedDate, 'activity' => $request->activity])
-                    ->with('success', "Data berhasil disimpan.");
+                return redirect()->route('reports.religious', ['date' => $savedDate, 'activity' => $request->activity])->with('success', "Data berhasil disimpan.");
             } else {
                 return redirect()->route('reports.daily', ['date' => $savedDate])->with('success', "Data berhasil disimpan.");
             }
@@ -430,14 +401,8 @@ class ReportController extends Controller
         return back()->with('success', 'Data berhasil dihapus.');
     }
 
-    /**
-     * =========================================================================
-     * BAGIAN 4: FITUR BULK ALPHA (NO VIOLATION FOR RELIGIOUS)
-     * =========================================================================
-     */
     public function bulkAlpha(Request $request)
     {
-        // 1. Validasi Input
         $request->validate([
             'date' => 'required|date',
             'type' => 'required|in:Harian,Keagamaan',
@@ -446,65 +411,47 @@ class ReportController extends Controller
 
         $date = Carbon::parse($request->date)->toDateString();
         $type = $request->type;
-        $activity = $request->activity; // Bisa null jika Harian
+        $activity = $request->activity; 
 
-        // 2. Cari Siswa yang SUDAH absen hari ini (Hadir/Sakit/Izin/dll)
-        $query = AttendanceSiswa::whereDate('attendance_date', $date)
-            ->where('type', $type);
-
+        $query = AttendanceSiswa::whereDate('attendance_date', $date)->where('type', $type);
         if ($type === 'Keagamaan') {
             $query->where('activity', $activity);
         } else {
-            // Untuk Harian, anggap tipe 'Harian', 'Masuk', 'Pulang' sebagai satu kesatuan kehadiran
             $query->whereIn('type', ['Harian', 'Masuk', 'Pulang']);
         }
 
         $presentStudentIds = $query->pluck('student_id')->toArray();
-
-        // 3. Ambil Siswa yang BELUM absen (Target Alpa)
         $studentsToAlpha = Student::whereNotIn('id', $presentStudentIds)->get();
 
         if ($studentsToAlpha->isEmpty()) {
             return back()->with('success', "Semua siswa sudah diabsen, tidak ada yang diproses.");
         }
 
-        // 4. Proses Insert Massal dalam Database Transaction
         DB::transaction(function () use ($studentsToAlpha, $date, $type, $activity) {
-            
-            // A. PREPARE DISCIPLINE TYPE (HANYA UNTUK HARIAN)
             $disciplineType = null;
-
             if ($type === 'Harian') {
-                // Cari atau Buat Baru Tipe Disiplin agar tidak error
                 $disciplineType = DisciplineType::firstOrCreate(
                     ['name' => 'Alpa Harian'],
-                    [
-                        'type' => 'Pelanggaran',
-                        'point_value' => 10,
-                        'description' => 'Dibuat otomatis oleh sistem saat Bulk Alpha Harian'
-                    ]
+                    ['type' => 'Pelanggaran', 'point_value' => 10, 'description' => 'Auto by System']
                 );
             }
-            // Jika Keagamaan, $disciplineType tetap null (sehingga tidak ada pelanggaran dicatat)
 
             foreach ($studentsToAlpha as $student) {
-                // B. Buat Record Absensi 'Alfa' (SELALU DIBUAT UNTUK LAPORAN)
                 AttendanceSiswa::create([
                     'student_id' => $student->id,
                     'attendance_date' => $date,
                     'type' => $type,
-                    'activity' => $activity, // Null jika Harian
+                    'activity' => $activity, 
                     'status' => 'Alfa',
                     'notes' => 'Tanpa Keterangan (Otomatis)',
-                    'time_in' => null
+                    'time_in' => '00:00:00'
                 ]);
 
-                // C. CATAT PELANGGARAN DI DISCIPLINE RECORD (HANYA JIKA ADA DISCIPLINE TYPE / HARIAN)
                 if ($disciplineType) {
                     DisciplineRecord::create([
                         'student_id' => $student->id,
                         'discipline_type_id' => $disciplineType->id,
-                        'recorded_by_user_id' => Auth::id() ?? 1,   // User yang sedang login
+                        'recorded_by_user_id' => Auth::id() ?? 1,
                         'notes' => "Alpa Otomatis - Absensi Harian",
                         'date' => $date,
                     ]);
@@ -513,11 +460,8 @@ class ReportController extends Controller
         });
 
         $message = "Berhasil memproses " . $studentsToAlpha->count() . " siswa menjadi Alfa.";
-        if ($type === 'Harian') {
-            $message .= " Poin Pelanggaran telah ditambahkan.";
-        } else {
-            $message .= " (Hanya status absensi, tanpa poin pelanggaran).";
-        }
+        if ($type === 'Harian') $message .= " Poin Pelanggaran telah ditambahkan.";
+        else $message .= " (Hanya status absensi, tanpa poin pelanggaran).";
 
         return back()->with('success', $message);
     }

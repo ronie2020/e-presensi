@@ -3,14 +3,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
 
-    @php
-        $listHadir = $todayAttendances->where('status_final', 'Hadir');
-        $listUzur  = $todayAttendances->where('status_final', '!=', 'Hadir');
-        // $belumAbsenList sudah dikirim dari Controller
-    @endphp
-
-    <div class="py-6 sm:py-8">
-        {{-- Header & Filter (TETAP SAMA) --}}
+    {{-- FIX: Ambil tab aktif dari URL agar tidak reset --}}
+    <div class="py-6 sm:py-8" x-data="{ activeTab: '{{ request('activeTab', 'hadir') }}' }">
+        
+        {{-- Header & Filter --}}
         <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
                 <h1 class="text-3xl font-black text-gray-800 tracking-tight leading-tight">
@@ -22,13 +18,13 @@
             </div>
             
             <div class="flex flex-col sm:flex-row gap-3 items-center">
-                {{-- Switcher Kegiatan --}}
+                {{-- Switcher Kegiatan (Tambahkan activeTab agar tetap di tab yang sama saat ganti kegiatan) --}}
                 <div class="bg-white p-1.5 rounded-2xl flex items-center shadow-sm border border-gray-100">
-                    <a href="{{ route('reports.religious', ['activity' => 'Dhuha', 'date' => $selectedDate_db->format('Y-m-d')]) }}" 
+                    <a href="{{ route('reports.religious', ['activity' => 'Dhuha', 'date' => $selectedDate_db->format('Y-m-d'), 'activeTab' => request('activeTab')]) }}" 
                        class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ $selectedActivity == 'Dhuha' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
                     Shalat Dhuha
                     </a>
-                    <a href="{{ route('reports.religious', ['activity' => 'Dhuhur', 'date' => $selectedDate_db->format('Y-m-d')]) }}" 
+                    <a href="{{ route('reports.religious', ['activity' => 'Dhuhur', 'date' => $selectedDate_db->format('Y-m-d'), 'activeTab' => request('activeTab')]) }}" 
                        class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ $selectedActivity == 'Dhuhur' ? 'bg-orange-500 text-white shadow-lg shadow-orange-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
                     Shalat Dhuhur
                     </a>
@@ -37,6 +33,8 @@
                 {{-- Filter Tanggal Modern --}}
                 <form action="{{ route('reports.religious') }}" method="GET" class="flex items-center gap-2 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
                     <input type="hidden" name="activity" value="{{ $selectedActivity }}">
+                    <input type="hidden" name="activeTab" x-model="activeTab"> {{-- Simpan state tab --}}
+                    
                     <input type="date" name="date" 
                            value="{{ $selectedDate_db->format('Y-m-d') }}" 
                            class="border-0 focus:ring-0 text-sm font-bold text-gray-600 bg-transparent rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
@@ -47,7 +45,6 @@
             </div>
         </div>
 
-        {{-- Pesan Flash --}}
         @if (session('success'))
             <div x-data="{ show: true }" x-show="show" x-transition class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl font-medium text-sm flex justify-between items-center shadow-sm">
                 <div class="flex items-center gap-2">
@@ -58,7 +55,7 @@
             </div>
         @endif
 
-        {{-- STATISTIK (TETAP SAMA) --}}
+        {{-- STATISTIK --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all">
                 <div class="h-12 w-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
@@ -71,8 +68,8 @@
                 <div class="h-12 w-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <h3 class="text-3xl font-extrabold text-gray-800">{{ $izinUzurCount }}</h3>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Izin / Uzur</p>
+                <h3 class="text-3xl font-extrabold text-gray-800">{{ $izinUzurCount + $alfaCount }}</h3>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Izin / Uzur / Alfa</p>
             </div>
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all">
                 <div class="h-12 w-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
@@ -84,28 +81,13 @@
         </div>
 
         {{-- CONTAINER TABEL --}}
-        <div x-data="{ activeTab: 'hadir' }" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-            
-            {{-- Tabs Modern --}}
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="flex border-b border-gray-100 overflow-x-auto bg-gray-50/50 p-2 gap-2 flex-nowrap no-scrollbar">
-                <button @click="activeTab = 'hadir'" 
-                        :class="activeTab === 'hadir' ? 'bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-100' : 'text-gray-500 hover:bg-white/60'" 
-                        class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">
-                    Sudah Absen
-                </button>
-                <button @click="activeTab = 'belum'" 
-                        :class="activeTab === 'belum' ? 'bg-white text-red-600 shadow-sm ring-1 ring-red-100' : 'text-gray-500 hover:bg-white/60'" 
-                        class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">
-                    Belum Absen <span class="ml-1 px-1.5 py-0.5 bg-red-100 text-red-600 rounded text-[10px]">{{ $belumAbsenCount }}</span>
-                </button>
-                <button @click="activeTab = 'uzur'" 
-                        :class="activeTab === 'uzur' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-blue-100' : 'text-gray-500 hover:bg-white/60'" 
-                        class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">
-                    Izin / Uzur
-                </button>
+                <button @click="activeTab = 'hadir'" :class="activeTab === 'hadir' ? 'bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-100' : 'text-gray-500 hover:bg-white/60'" class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">Sudah Absen</button>
+                <button @click="activeTab = 'belum'" :class="activeTab === 'belum' ? 'bg-white text-red-600 shadow-sm ring-1 ring-red-100' : 'text-gray-500 hover:bg-white/60'" class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">Belum Absen <span class="ml-1 px-1.5 py-0.5 bg-red-100 text-red-600 rounded text-[10px]">{{ $belumAbsenCount }}</span></button>
+                <button @click="activeTab = 'uzur'" :class="activeTab === 'uzur' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-blue-100' : 'text-gray-500 hover:bg-white/60'" class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">Izin / Uzur / Alfa</button>
             </div>
 
-            {{-- Container Tabel --}}
             <div class="w-full relative min-h-[300px]">
                 
                 {{-- TAB 1: HADIR --}}
@@ -135,7 +117,7 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
-                                @forelse ($listHadir as $attendance)
+                                @forelse ($attendancesHadir as $attendance)
                                     <tr class="hover:bg-emerald-50/30 transition-colors">
                                         <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $attendance->student->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $attendance->student->schoolClass->name }}</td>
@@ -162,13 +144,13 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="p-4 border-t border-gray-100">{{ $todayAttendances->appends(request()->query())->links() }}</div>
+                    @if($attendancesHadir->hasPages())
+                        <div class="p-4 border-t border-gray-100">{{ $attendancesHadir->appends(request()->query() + ['activeTab' => 'hadir'])->links() }}</div>
+                    @endif
                 </div>
 
-                {{-- [UPDATE] TAB 2: BELUM ABSEN (ADA TOMBOL BULK ALPHA - TEXT UPDATED) --}}
+                {{-- TAB 2: BELUM ABSEN (TETAP SAMA) --}}
                 <div x-show="activeTab === 'belum'" style="display: none;" class="w-full">
-                    
-                    {{-- 1. TOMBOL PROSES AUTO ALPA KEAGAMAAN --}}
                     @if($belumAbsenList->count() > 0)
                         <div class="p-4 bg-red-50 border-b border-red-100 flex flex-col md:flex-row justify-between items-center gap-4">
                             <div class="flex items-center gap-3">
@@ -177,12 +159,9 @@
                                 </div>
                                 <div>
                                     <h4 class="font-bold text-red-800 text-sm">Aksi Massal</h4>
-                                    {{-- UPDATE TEKS: "Hanya Absensi" --}}
                                     <p class="text-xs text-red-600">Tandai {{ $belumAbsenList->count() }} siswa sebagai Alfa Shalat {{ $selectedActivity }} (Hanya Absensi).</p>
                                 </div>
                             </div>
-                            
-                            {{-- Form Bulk Alpha Keagamaan --}}
                             <form id="bulk-alpha-religious-form" action="{{ route('reports.bulkAlpha') }}" method="POST">
                                 @csrf
                                 <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
@@ -196,7 +175,6 @@
                             </form>
                         </div>
                     @endif
-
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
                         <table class="w-full text-left border-collapse" style="min-width: 800px;">
                             <thead class="bg-gray-50 border-b border-gray-100">
@@ -236,7 +214,7 @@
                     </div>
                 </div>
 
-                {{-- TAB 3: UZUR / IZIN (TETAP SAMA) --}}
+                {{-- TAB 3: UZUR / IZIN / ALFA (DATA DARI $attendancesUzur) --}}
                 <div x-show="activeTab === 'uzur'" style="display: none;" class="w-full">
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
                         <table class="w-full text-left border-collapse" style="min-width: 800px;">
@@ -249,7 +227,7 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
-                                @forelse ($listUzur as $attendance)
+                                @forelse ($attendancesUzur as $attendance)
                                     <tr class="hover:bg-blue-50/30 transition-colors">
                                         <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $attendance->student->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $attendance->student->schoolClass->name }}</td>
@@ -272,13 +250,16 @@
                             </tbody>
                         </table>
                     </div>
+                    @if($attendancesUzur->hasPages())
+                        <div class="p-4 border-t border-gray-100">{{ $attendancesUzur->appends(request()->query() + ['activeTab' => 'uzur'])->links() }}</div>
+                    @endif
                 </div>
 
             </div>
         </div>
     </div>
 
-    {{-- MODAL INPUT MANUAL, EDIT & SCRIPT --}}
+    {{-- MODAL & SCRIPTS --}}
     <div id="manualInputModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">
@@ -301,7 +282,7 @@
                         <select name="status" class="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 shadow-sm">
                             <option value="Hadir">Hadir</option>
                             <option value="Uzur Syar'i">Uzur Syar'i</option>
-                            <option value="Alfa">Alfa</option> {{-- Ditambahkan Opsi Alfa --}}
+                            <option value="Alfa">Alfa</option> 
                         </select>
                     </div>
                     <div>
@@ -357,7 +338,6 @@
             document.getElementById('manualInputModal').classList.add('hidden');
         }
         
-        // --- SAFE RESET LOGIC ---
         function confirmResetData() {
             Swal.fire({
                 title: 'Apakah Anda Yakin?',
@@ -375,11 +355,9 @@
             })
         }
 
-        // --- BULK ALPHA CONFIRMATION ---
         function confirmBulkAlphaReligious(count) {
             Swal.fire({
                 title: 'Tandai ' + count + ' Siswa Alfa?',
-                // UPDATE TEKS DI SWAL JUGA
                 text: "Siswa akan ditandai Alfa untuk Shalat {{ $selectedActivity }}. (Tanpa Pengurangan Poin)",
                 icon: 'warning',
                 showCancelButton: true,
