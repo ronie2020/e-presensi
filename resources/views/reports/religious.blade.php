@@ -1,10 +1,8 @@
 {{-- Halaman ini adalah tampilan untuk resources/views/reports/religious.blade.php --}}
 <x-app-layout>
-    {{-- SweetAlert sudah ada di layout utama (asumsi), jika belum, uncomment baris bawah --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
 
-    {{-- OPTIMASI: Filter Data di PHP (Blade) agar tidak looping 3x di HTML --}}
     @php
         $listHadir = $todayAttendances->where('status_final', 'Hadir');
         $listUzur  = $todayAttendances->where('status_final', '!=', 'Hadir');
@@ -12,7 +10,7 @@
     @endphp
 
     <div class="py-6 sm:py-8">
-        {{-- Header & Filter --}}
+        {{-- Header & Filter (TETAP SAMA) --}}
         <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
                 <h1 class="text-3xl font-black text-gray-800 tracking-tight leading-tight">
@@ -60,7 +58,7 @@
             </div>
         @endif
 
-        {{-- STATISTIK --}}
+        {{-- STATISTIK (TETAP SAMA) --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all">
                 <div class="h-12 w-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
@@ -98,7 +96,7 @@
                 <button @click="activeTab = 'belum'" 
                         :class="activeTab === 'belum' ? 'bg-white text-red-600 shadow-sm ring-1 ring-red-100' : 'text-gray-500 hover:bg-white/60'" 
                         class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">
-                    Belum Absen
+                    Belum Absen <span class="ml-1 px-1.5 py-0.5 bg-red-100 text-red-600 rounded text-[10px]">{{ $belumAbsenCount }}</span>
                 </button>
                 <button @click="activeTab = 'uzur'" 
                         :class="activeTab === 'uzur' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-blue-100' : 'text-gray-500 hover:bg-white/60'" 
@@ -111,11 +109,10 @@
             <div class="w-full relative min-h-[300px]">
                 
                 {{-- TAB 1: HADIR --}}
-                <div x-show="activeTab === 'hadir'" x-transition:enter.duration.300ms class="w-full">
+                <div x-show="activeTab === 'hadir'" class="w-full">
                     <div class="p-4 flex justify-between items-center bg-white border-b border-gray-100">
                         <h3 class="font-bold text-gray-800">Daftar Siswa Hadir</h3>
                         
-                        {{-- SAFETY UPDATE: Menggunakan Form Hidden & JS SweetAlert --}}
                         <form id="reset-data-form" method="POST" action="{{ route('reports.destroyReligious') }}" class="hidden">
                             @csrf @method('DELETE')
                             <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
@@ -125,9 +122,8 @@
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             Reset Data
                         </button>
-
                     </div>
-                    {{-- FIX: Force scroll mobile --}}
+
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
                         <table class="w-full text-left border-collapse" style="min-width: 800px;">
                             <thead class="bg-gray-50">
@@ -139,7 +135,6 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
-                                {{-- Gunakan list yang sudah difilter di PHP --}}
                                 @forelse ($listHadir as $attendance)
                                     <tr class="hover:bg-emerald-50/30 transition-colors">
                                         <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $attendance->student->name }}</td>
@@ -167,13 +162,41 @@
                             </tbody>
                         </table>
                     </div>
-                    {{-- Pagination (Hati-hati jika pakai filter manual, pagination bawaan query mungkin tidak akurat jika tidak difilter di controller) --}}
                     <div class="p-4 border-t border-gray-100">{{ $todayAttendances->appends(request()->query())->links() }}</div>
                 </div>
 
-                {{-- TAB 2: BELUM ABSEN --}}
-                <div x-show="activeTab === 'belum'" x-transition:enter.duration.300ms style="display: none;" class="w-full">
-                    {{-- FIX: Force scroll mobile --}}
+                {{-- [UPDATE] TAB 2: BELUM ABSEN (ADA TOMBOL BULK ALPHA - TEXT UPDATED) --}}
+                <div x-show="activeTab === 'belum'" style="display: none;" class="w-full">
+                    
+                    {{-- 1. TOMBOL PROSES AUTO ALPA KEAGAMAAN --}}
+                    @if($belumAbsenList->count() > 0)
+                        <div class="p-4 bg-red-50 border-b border-red-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-red-100 text-red-600 rounded-lg">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-red-800 text-sm">Aksi Massal</h4>
+                                    {{-- UPDATE TEKS: "Hanya Absensi" --}}
+                                    <p class="text-xs text-red-600">Tandai {{ $belumAbsenList->count() }} siswa sebagai Alfa Shalat {{ $selectedActivity }} (Hanya Absensi).</p>
+                                </div>
+                            </div>
+                            
+                            {{-- Form Bulk Alpha Keagamaan --}}
+                            <form id="bulk-alpha-religious-form" action="{{ route('reports.bulkAlpha') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
+                                <input type="hidden" name="type" value="Keagamaan">
+                                <input type="hidden" name="activity" value="{{ $selectedActivity }}">
+                                <button type="button" onclick="confirmBulkAlphaReligious('{{ $belumAbsenList->count() }}')" 
+                                    class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-red-200 transition-all flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                                    Proses Semua Alpa
+                                </button>
+                            </form>
+                        </div>
+                    @endif
+
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
                         <table class="w-full text-left border-collapse" style="min-width: 800px;">
                             <thead class="bg-gray-50 border-b border-gray-100">
@@ -213,9 +236,8 @@
                     </div>
                 </div>
 
-                {{-- TAB 3: UZUR / IZIN --}}
-                <div x-show="activeTab === 'uzur'" x-transition:enter.duration.300ms style="display: none;" class="w-full">
-                    {{-- FIX: Force scroll mobile --}}
+                {{-- TAB 3: UZUR / IZIN (TETAP SAMA) --}}
+                <div x-show="activeTab === 'uzur'" style="display: none;" class="w-full">
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
                         <table class="w-full text-left border-collapse" style="min-width: 800px;">
                             <thead class="bg-gray-50 border-b border-gray-100">
@@ -256,7 +278,7 @@
         </div>
     </div>
 
-    {{-- MODAL INPUT MANUAL, EDIT & SCRIPT (Sama) --}}
+    {{-- MODAL INPUT MANUAL, EDIT & SCRIPT --}}
     <div id="manualInputModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">
@@ -278,7 +300,8 @@
                         <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Status</label>
                         <select name="status" class="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 shadow-sm">
                             <option value="Hadir">Hadir</option>
-                            <option value="Uzur Syar'i" selected>Uzur Syar'i</option>
+                            <option value="Uzur Syar'i">Uzur Syar'i</option>
+                            <option value="Alfa">Alfa</option> {{-- Ditambahkan Opsi Alfa --}}
                         </select>
                     </div>
                     <div>
@@ -309,6 +332,7 @@
                     <select name="status" id="modal-religious-status" class="w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500">
                         <option value="Hadir">Hadir</option>
                         <option value="Uzur Syar'i">Uzur Syar'i</option>
+                        <option value="Alfa">Alfa</option>
                     </select>
                 </div>
                 <div class="mb-6">
@@ -347,6 +371,25 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     document.getElementById('reset-data-form').submit();
+                }
+            })
+        }
+
+        // --- BULK ALPHA CONFIRMATION ---
+        function confirmBulkAlphaReligious(count) {
+            Swal.fire({
+                title: 'Tandai ' + count + ' Siswa Alfa?',
+                // UPDATE TEKS DI SWAL JUGA
+                text: "Siswa akan ditandai Alfa untuk Shalat {{ $selectedActivity }}. (Tanpa Pengurangan Poin)",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Proses!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('bulk-alpha-religious-form').submit();
                 }
             })
         }

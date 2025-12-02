@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\AttendanceSiswa;
+// Import Model Disiplin & Tipe Disiplin
+use App\Models\DisciplineRecord;
+use App\Models\DisciplineType; 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +19,7 @@ class ReportController extends Controller
 {
     /**
      * =========================================================================
-     * BAGIAN 1: LAPORAN HARIAN (DIPERBAIKI)
+     * BAGIAN 1: LAPORAN HARIAN
      * =========================================================================
      */
     public function dailyReport(Request $request)
@@ -51,11 +54,10 @@ class ReportController extends Controller
             $statuses = $logs->pluck('status')->toArray();
             
             // Logic Penentuan Status Final
-            // Prioritas: Hadir/Terlambat > Sakit > Izin > Alfa
             $finalStatus = $firstLog->status; 
             
             if (in_array('Hadir', $statuses)) $finalStatus = 'Hadir';
-            elseif (in_array('Terlambat', $statuses)) $finalStatus = 'Terlambat'; // <-- Tambahkan prioritas Terlambat
+            elseif (in_array('Terlambat', $statuses)) $finalStatus = 'Terlambat';
             elseif (in_array('Sakit', $statuses)) $finalStatus = 'Sakit';
             elseif (in_array('Izin', $statuses)) $finalStatus = 'Izin';
             elseif (in_array('Alfa', $statuses)) $finalStatus = 'Alfa';
@@ -79,11 +81,9 @@ class ReportController extends Controller
             return $classComparison;
         });
 
-        // 3. HITUNG STATISTIK (DIPERBAIKI)
-        // Hitung total dari koleksi data lengkap SEBELUM dipaginasi
-        $hadirCount = $processedAttendances->whereIn('status_final', ['Hadir', 'Terlambat'])->count(); // Gabung Hadir & Terlambat
-        $terlambatCount = $processedAttendances->where('status_final', 'Terlambat')->count(); // Hitung khusus Terlambat
-        
+        // 3. HITUNG STATISTIK
+        $hadirCount = $processedAttendances->whereIn('status_final', ['Hadir', 'Terlambat'])->count();
+        $terlambatCount = $processedAttendances->where('status_final', 'Terlambat')->count();
         $sakitCount = $processedAttendances->where('status_final', 'Sakit')->count();
         $izinCount = $processedAttendances->where('status_final', 'Izin')->count();
         $alfaCount = $processedAttendances->where('status_final', 'Alfa')->count();
@@ -99,7 +99,7 @@ class ReportController extends Controller
         $attendedIds = $processedAttendances->pluck('student_id');
         $belumAbsenList = $allStudents->whereNotIn('id', $attendedIds); 
 
-        // 5. Pagination Manual
+        // 5. Pagination
         $perPage = 20;
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $currentItems = $processedAttendances->slice(($currentPage - 1) * $perPage, $perPage)->all();
@@ -114,10 +114,10 @@ class ReportController extends Controller
 
         return view('reports.daily', [
             'selectedDate_db' => $selectedDate,
-            'todayAttendances' => $paginatedAttendances, // Data per halaman
+            'todayAttendances' => $paginatedAttendances,
             'allStudents' => $allStudents,
-            'hadirCount' => $hadirCount,         // Total Hadir (Global)
-            'terlambatCount' => $terlambatCount, // Total Terlambat (Global)
+            'hadirCount' => $hadirCount,
+            'terlambatCount' => $terlambatCount,
             'sakitCount' => $sakitCount,
             'izinCount' => $izinCount,
             'alfaCount' => $alfaCount,
@@ -156,6 +156,8 @@ class ReportController extends Controller
                 $finalStatus = 'Hadir';
             } elseif (in_array("Uzur Syar'i", $statuses)) {
                 $finalStatus = "Uzur Syar'i";
+            } elseif (in_array("Alfa", $statuses)) {
+                $finalStatus = "Alfa";
             }
             
             $firstLog->status_final = $finalStatus;
@@ -175,6 +177,7 @@ class ReportController extends Controller
 
         $hadirCount = $processedAttendances->where('status_final', 'Hadir')->count();
         $izinUzurCount = $processedAttendances->where('status_final', "Uzur Syar'i")->count();
+        $alfaCount = $processedAttendances->where('status_final', 'Alfa')->count();
         
         $allStudents = Student::with('schoolClass')
             ->join('classes', 'students.class_id', '=', 'classes.id')
@@ -209,12 +212,18 @@ class ReportController extends Controller
             'selectedActivity' => $selectedActivity,
             'hadirCount' => $hadirCount,
             'izinUzurCount' => $izinUzurCount,
+            'alfaCount' => $alfaCount,
             'belumAbsenCount' => $belumAbsenList->count(),
             'kehadiranPercentage' => $kehadiranPercentage
         ]);
     }
 
-    // ... (Sisa fungsi destroyDaily, exportDaily, dll tetap sama, tidak perlu diubah) ...
+    /**
+     * =========================================================================
+     * BAGIAN 3: EXPORT & DELETE & MANUAL
+     * =========================================================================
+     */
+
     public function destroyDaily(Request $request)
     {
         $request->validate(['date' => 'required|date']);
@@ -243,7 +252,7 @@ class ReportController extends Controller
             
             $finalStatus = $firstLog->status;
             if (in_array('Hadir', $statuses)) $finalStatus = 'Hadir';
-            elseif (in_array('Terlambat', $statuses)) $finalStatus = 'Terlambat'; // Tambahkan ini juga di export
+            elseif (in_array('Terlambat', $statuses)) $finalStatus = 'Terlambat';
             elseif (in_array('Sakit', $statuses)) $finalStatus = 'Sakit';
             elseif (in_array('Izin', $statuses)) $finalStatus = 'Izin';
             elseif (in_array('Alfa', $statuses)) $finalStatus = 'Alfa';
@@ -353,25 +362,50 @@ class ReportController extends Controller
         $timeNow = Carbon::now()->toTimeString();
 
         try {
-            $matchConditions = [
-                'student_id' => $request->student_id,
-                'attendance_date' => $date,
-                'type' => $request->attendance_type,
-            ];
-            if ($request->attendance_type === 'Keagamaan') {
-                $matchConditions['activity'] = $request->activity;
-            }
+            DB::transaction(function () use ($request, $date, $timeNow) {
+                // 1. Simpan Data Absensi (Harian & Keagamaan TETAP DICATAT)
+                $matchConditions = [
+                    'student_id' => $request->student_id,
+                    'attendance_date' => $date,
+                    'type' => $request->attendance_type,
+                ];
+                if ($request->attendance_type === 'Keagamaan') {
+                    $matchConditions['activity'] = $request->activity;
+                }
 
-            $attendance = AttendanceSiswa::updateOrCreate(
-                $matchConditions,
-                [
-                    'status' => $request->status,
-                    'notes' => $request->notes ?? 'Manual Entry',
-                    'time_in' => DB::raw('COALESCE(time_in, "'.$timeNow.'")') 
-                ]
-            );
-            $attendance->status = $request->status;
-            $attendance->save();
+                AttendanceSiswa::updateOrCreate(
+                    $matchConditions,
+                    [
+                        'status' => $request->status,
+                        'notes' => $request->notes ?? 'Manual Entry',
+                        'time_in' => DB::raw('COALESCE(time_in, "'.$timeNow.'")') 
+                    ]
+                );
+                
+                // 2. Logic Poin Pelanggaran: HANYA JIKA HARIAN
+                if ($request->status === 'Alfa' && $request->attendance_type === 'Harian') {
+                    
+                    // Logic Auto-Find or Auto-Create Discipline Type KHUSUS HARIAN
+                    $disciplineType = DisciplineType::firstOrCreate(
+                        ['name' => 'Alpa Harian'], 
+                        [ 
+                            'type' => 'Pelanggaran',
+                            'point_value' => 10,
+                            'description' => 'Dibuat otomatis oleh sistem saat Absen Manual Alfa'
+                        ]
+                    );
+
+                    // Buat Record Pelanggaran
+                    DisciplineRecord::create([
+                        'student_id' => $request->student_id,
+                        'discipline_type_id' => $disciplineType->id,
+                        'recorded_by_user_id' => Auth::id() ?? 1, 
+                        'notes' => "Alpa Manual - Absensi Harian",
+                        'date' => $date,
+                    ]);
+                }
+                // Jika Keagamaan, TIDAK ADA DisciplineRecord yang dibuat.
+            });
 
             $savedDate = $date;
             if ($request->attendance_type === 'Keagamaan') {
@@ -396,29 +430,95 @@ class ReportController extends Controller
         return back()->with('success', 'Data berhasil dihapus.');
     }
 
-    public function processAlpha(Request $request)
+    /**
+     * =========================================================================
+     * BAGIAN 4: FITUR BULK ALPHA (NO VIOLATION FOR RELIGIOUS)
+     * =========================================================================
+     */
+    public function bulkAlpha(Request $request)
     {
-        $request->validate(['date' => 'required|date']);
+        // 1. Validasi Input
+        $request->validate([
+            'date' => 'required|date',
+            'type' => 'required|in:Harian,Keagamaan',
+            'activity' => 'nullable|string'
+        ]);
+
         $date = Carbon::parse($request->date)->toDateString();
-        $allStudents = Student::all();
-        $presentStudentIds = AttendanceSiswa::whereDate('attendance_date', $date)
-            ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
-            ->pluck('student_id')
-            ->toArray();
-        $count = 0;
-        foreach ($allStudents as $student) {
-            if (!in_array($student->id, $presentStudentIds)) {
+        $type = $request->type;
+        $activity = $request->activity; // Bisa null jika Harian
+
+        // 2. Cari Siswa yang SUDAH absen hari ini (Hadir/Sakit/Izin/dll)
+        $query = AttendanceSiswa::whereDate('attendance_date', $date)
+            ->where('type', $type);
+
+        if ($type === 'Keagamaan') {
+            $query->where('activity', $activity);
+        } else {
+            // Untuk Harian, anggap tipe 'Harian', 'Masuk', 'Pulang' sebagai satu kesatuan kehadiran
+            $query->whereIn('type', ['Harian', 'Masuk', 'Pulang']);
+        }
+
+        $presentStudentIds = $query->pluck('student_id')->toArray();
+
+        // 3. Ambil Siswa yang BELUM absen (Target Alpa)
+        $studentsToAlpha = Student::whereNotIn('id', $presentStudentIds)->get();
+
+        if ($studentsToAlpha->isEmpty()) {
+            return back()->with('success', "Semua siswa sudah diabsen, tidak ada yang diproses.");
+        }
+
+        // 4. Proses Insert Massal dalam Database Transaction
+        DB::transaction(function () use ($studentsToAlpha, $date, $type, $activity) {
+            
+            // A. PREPARE DISCIPLINE TYPE (HANYA UNTUK HARIAN)
+            $disciplineType = null;
+
+            if ($type === 'Harian') {
+                // Cari atau Buat Baru Tipe Disiplin agar tidak error
+                $disciplineType = DisciplineType::firstOrCreate(
+                    ['name' => 'Alpa Harian'],
+                    [
+                        'type' => 'Pelanggaran',
+                        'point_value' => 10,
+                        'description' => 'Dibuat otomatis oleh sistem saat Bulk Alpha Harian'
+                    ]
+                );
+            }
+            // Jika Keagamaan, $disciplineType tetap null (sehingga tidak ada pelanggaran dicatat)
+
+            foreach ($studentsToAlpha as $student) {
+                // B. Buat Record Absensi 'Alfa' (SELALU DIBUAT UNTUK LAPORAN)
                 AttendanceSiswa::create([
                     'student_id' => $student->id,
                     'attendance_date' => $date,
-                    'type' => 'Harian', 
+                    'type' => $type,
+                    'activity' => $activity, // Null jika Harian
                     'status' => 'Alfa',
                     'notes' => 'Tanpa Keterangan (Otomatis)',
                     'time_in' => null
                 ]);
-                $count++;
+
+                // C. CATAT PELANGGARAN DI DISCIPLINE RECORD (HANYA JIKA ADA DISCIPLINE TYPE / HARIAN)
+                if ($disciplineType) {
+                    DisciplineRecord::create([
+                        'student_id' => $student->id,
+                        'discipline_type_id' => $disciplineType->id,
+                        'recorded_by_user_id' => Auth::id() ?? 1,   // User yang sedang login
+                        'notes' => "Alpa Otomatis - Absensi Harian",
+                        'date' => $date,
+                    ]);
+                }
             }
+        });
+
+        $message = "Berhasil memproses " . $studentsToAlpha->count() . " siswa menjadi Alfa.";
+        if ($type === 'Harian') {
+            $message .= " Poin Pelanggaran telah ditambahkan.";
+        } else {
+            $message .= " (Hanya status absensi, tanpa poin pelanggaran).";
         }
-        return back()->with('success', "Berhasil memproses $count siswa menjadi Alfa.");
+
+        return back()->with('success', $message);
     }
 }

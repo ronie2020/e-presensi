@@ -151,6 +151,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/religious', [ReportController::class, 'religiousReport'])->name('reports.religious');
     Route::delete('/reports/religious', [ReportController::class, 'destroyReligious'])->name('reports.destroyReligious');
     Route::get('/reports/export-religious', [ReportController::class, 'exportReligious'])->name('reports.exportReligious');
+    Route::post('/reports/bulk-alpha', [ReportController::class, 'bulkAlpha'])->name('reports.bulkAlpha');
 
     // === MODUL EKSTRAKURIKULER ===
     Route::prefix('extracurriculars')->name('extracurriculars.')->group(function () {
