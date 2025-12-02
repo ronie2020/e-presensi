@@ -69,7 +69,6 @@
                     {{-- TAB NAVIGASI --}}
                     <div class="mb-8 bg-gray-50/50 p-2 rounded-2xl border border-gray-100">
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            {{-- Added onclick="initAudio()" to buttons to ensure audio context is ready --}}
                             <button id="btn-harian" data-type="Harian" class="scan-type-btn relative group overflow-hidden rounded-xl py-3 px-4 transition-all duration-300 bg-white text-gray-500 hover:bg-gray-100">
                                 <span class="relative z-10 font-bold text-sm sm:text-base transition-colors duration-300">Absen Harian</span>
                             </button>
@@ -93,6 +92,7 @@
                                 <select id="extra-activity-select" class="w-full md:w-auto flex-1 rounded-lg border-blue-300 focus:border-blue-500 focus:ring focus:ring-blue-200 transition duration-200">
                                     <option value="">-- Pilih Ekstrakurikuler --</option>
                                     @foreach($extracurriculars as $ekskul)
+                                        {{-- PERBAIKAN: Gunakan NAME agar Scanner Valid --}}
                                         <option value="{{ $ekskul->name }}">{{ $ekskul->name }}</option>
                                     @endforeach
                                 </select>
@@ -212,10 +212,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
             
-            // --- [UPDATE] KONFIGURASI WAKTU PRESISI (DALAM FORMAT MENIT) ---
             const toMinutes = (h, m) => h * 60 + m;
-
-            // UBAH DISINI SESUAI KEBUTUHAN SEKOLAH
             const MODE_TIMES = {
                 DHUHA_START: toMinutes(7, 30), 
                 DHUHA_END:   toMinutes(9, 30),
@@ -224,15 +221,12 @@
             };
 
             let currentScanMode = 'Harian';
-            let selectedExtra = ''; 
+            let selectedExtra = ''; // Kembali menggunakan Nama (string)
             let manualOverride = false;
             const csrfToken = '{{ csrf_token() }}';
             const scanProcessUrl = '{{ route('scan.process') }}';
             
-            // --- [IMPROVED] Audio Context Logic ---
             let audioCtx;
-            
-            // Fungsi inisialisasi audio yang aman untuk browser modern
             function initAudio() {
                 if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -244,29 +238,21 @@
 
             function playBeep(type = 'success') {
                 try {
-                    initAudio(); // Pastikan audio aktif
-                    
+                    initAudio();
                     const oscillator = audioCtx.createOscillator();
                     const gainNode = audioCtx.createGain();
                     oscillator.connect(gainNode);
                     gainNode.connect(audioCtx.destination);
-                    
                     oscillator.type = 'sine';
-                    // Frekuensi berbeda untuk tiap tipe notifikasi
                     let freq = type === 'success' ? 880 : (type === 'warning' ? 600 : 330);
-                    
                     oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
                     gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
-                    
                     oscillator.start(audioCtx.currentTime);
                     oscillator.stop(audioCtx.currentTime + 0.5);
-                } catch (e) { 
-                    console.log("Audio belum siap (butuh interaksi user)."); 
-                }
+                } catch (e) { console.log("Audio belum siap."); }
             }
 
-            // DOM Elements
             const logTableBody = document.getElementById('scan-log');
             const scanStatus = document.getElementById('scan-status');
             const scanResult = document.getElementById('scan-result');
@@ -292,40 +278,24 @@
 
             function autoSelectMode() {
                 if (manualOverride) return;
-
                 const now = new Date();
                 const currentMinutes = now.getHours() * 60 + now.getMinutes();
                 let newMode = 'Harian';
+                if (currentMinutes >= MODE_TIMES.DHUHA_START && currentMinutes < MODE_TIMES.DHUHA_END) newMode = 'Dhuha';
+                else if (currentMinutes >= MODE_TIMES.DHUHUR_START && currentMinutes < MODE_TIMES.DHUHUR_END) newMode = 'Dhuhur';
 
-                if (currentMinutes >= MODE_TIMES.DHUHA_START && currentMinutes < MODE_TIMES.DHUHA_END) {
-                    newMode = 'Dhuha';
-                } else if (currentMinutes >= MODE_TIMES.DHUHUR_START && currentMinutes < MODE_TIMES.DHUHUR_END) {
-                    newMode = 'Dhuhur';
-                }
-
-                if (currentScanMode !== newMode && currentScanMode !== 'Ekstrakurikuler') {
-                    selectScanMode(newMode, true);
-                }
+                if (currentScanMode !== newMode && currentScanMode !== 'Ekstrakurikuler') selectScanMode(newMode, true);
             }
 
             function selectScanMode(type, isAuto = false) {
-                if (!isAuto) {
-                    manualOverride = true;
-                    initAudio(); // Trigger audio saat user klik manual
-                } else {
-                    manualOverride = false;
-                }
-
+                if (!isAuto) { manualOverride = true; initAudio(); } else { manualOverride = false; }
                 currentScanMode = type;
                 const config = typeConfig[type];
 
                 document.querySelectorAll('.scan-type-btn').forEach(btn => {
                     const btnType = btn.getAttribute('data-type');
-                    if (btnType === type) {
-                        btn.className = `scan-type-btn relative group overflow-hidden rounded-xl py-3 px-4 transition-all duration-300 transform scale-105 ${config.activeClass}`;
-                    } else {
-                        btn.className = `scan-type-btn relative group overflow-hidden rounded-xl py-3 px-4 transition-all duration-300 ${config.inactiveClass}`;
-                    }
+                    if (btnType === type) btn.className = `scan-type-btn relative group overflow-hidden rounded-xl py-3 px-4 transition-all duration-300 transform scale-105 ${config.activeClass}`;
+                    else btn.className = `scan-type-btn relative group overflow-hidden rounded-xl py-3 px-4 transition-all duration-300 ${config.inactiveClass}`;
                 });
 
                 let indicatorText = type === 'Harian' ? 'Absensi Harian' : (type === 'Ekstrakurikuler' ? 'Kegiatan Ekstrakurikuler' : 'Sholat ' + type);
@@ -339,22 +309,20 @@
                     extraContainer.classList.add('hidden');
                     scanStatus.textContent = `Siap Scan: ${type}`;
                 }
-                
-                updateTableLayout(type);
-                filterLogs(type);
+                updateTableLayout(type); filterLogs(type);
             }
 
             document.querySelectorAll('.scan-type-btn').forEach(btn => {
                 btn.addEventListener('click', () => selectScanMode(btn.getAttribute('data-type')));
             });
             
+            // Logic Pilih Ekskul (Sederhana)
             extraSelect.addEventListener('change', (e) => {
-                selectedExtra = e.target.value;
+                selectedExtra = e.target.value; 
                 if (selectedExtra) scanStatus.textContent = `Siap Scan: ${selectedExtra}`;
                 else scanStatus.textContent = `Pilih Kegiatan Dulu`;
             });
 
-            // Jalankan Auto Select saat load dan interval
             autoSelectMode();
             setInterval(autoSelectMode, 60000); 
 
@@ -367,86 +335,51 @@
                 waktuCols.forEach(el => el.classList.add('hidden-col'));
                 kegiatanCols.forEach(el => el.classList.add('hidden-col'));
 
-                if (type === 'Harian') {
-                    harianCols.forEach(el => el.classList.remove('hidden-col'));
-                } else if (type === 'Ekstrakurikuler') {
-                    waktuCols.forEach(el => el.classList.remove('hidden-col'));
-                    kegiatanCols.forEach(el => el.classList.remove('hidden-col'));
-                } else {
-                    waktuCols.forEach(el => el.classList.remove('hidden-col'));
-                }
+                if (type === 'Harian') harianCols.forEach(el => el.classList.remove('hidden-col'));
+                else if (type === 'Ekstrakurikuler') { waktuCols.forEach(el => el.classList.remove('hidden-col')); kegiatanCols.forEach(el => el.classList.remove('hidden-col')); }
+                else waktuCols.forEach(el => el.classList.remove('hidden-col'));
             }
 
             function filterLogs(type) {
                 const rows = logTableBody.querySelectorAll('.log-entry');
                 let visibleCount = 0;
-
                 rows.forEach(row => {
                     let shouldShow = false;
+                    if (type === 'Harian') shouldShow = row.getAttribute('data-harian') === 'true';
+                    else if (type === 'Dhuha') shouldShow = row.getAttribute('data-dhuha') === 'true';
+                    else if (type === 'Dhuhur') shouldShow = row.getAttribute('data-dhuhur') === 'true';
+                    else if (type === 'Ekstrakurikuler') shouldShow = row.getAttribute('data-ekskul') === 'true';
 
-                    if (type === 'Harian') {
-                        shouldShow = row.getAttribute('data-harian') === 'true';
-                        if (shouldShow) toggleCells(row, 'harian');
-                    } else if (type === 'Dhuha') {
-                        shouldShow = row.getAttribute('data-dhuha') === 'true';
-                        if (shouldShow) toggleCells(row, 'dhuha');
-                    } else if (type === 'Dhuhur') {
-                        shouldShow = row.getAttribute('data-dhuhur') === 'true';
-                        if (shouldShow) toggleCells(row, 'dhuhur');
-                    } else if (type === 'Ekstrakurikuler') {
-                        shouldShow = row.getAttribute('data-ekskul') === 'true';
-                        if (shouldShow) toggleCells(row, 'ekskul');
-                    }
-
-                    if (shouldShow) {
-                        row.classList.remove('hidden-row');
-                        visibleCount++;
-                    } else {
-                        row.classList.add('hidden-row');
-                    }
+                    if (shouldShow) { row.classList.remove('hidden-row'); toggleCells(row, type.toLowerCase()); visibleCount++; }
+                    else row.classList.add('hidden-row');
                 });
-
                 const noLogEntry = document.getElementById('no-log-entry');
-                if (visibleCount === 0) noLogEntry.classList.remove('hidden');
-                else noLogEntry.classList.add('hidden');
+                if (visibleCount === 0) noLogEntry.classList.remove('hidden'); else noLogEntry.classList.add('hidden');
             }
 
             function toggleCells(row, activeType) {
                 row.querySelectorAll('.status-badge').forEach(el => el.classList.add('hidden'));
                 row.querySelectorAll('.col-waktu span').forEach(el => el.classList.add('hidden'));
-
                 row.querySelector(`.badge-${activeType}`).classList.remove('hidden');
-                if (activeType !== 'harian') {
-                    row.querySelector(`.time-${activeType}`).classList.remove('hidden');
-                }
+                if (activeType !== 'harian') row.querySelector(`.time-${activeType}`).classList.remove('hidden');
             }
 
             // --- SCANNER SETUP ---
             const html5QrCode = new Html5Qrcode("qr-reader");
-            
             const onScanSuccess = (decodedText, decodedResult) => {
                 if (isProcessing) return;
-
                 if (currentScanMode === 'Ekstrakurikuler' && !selectedExtra) {
                     Swal.fire({ icon: 'warning', title: 'Pilih Kegiatan!', text: 'Silakan pilih jenis ekstrakurikuler terlebih dahulu.', timer: 2000, showConfirmButton: false });
                     return;
                 }
-
-                isProcessing = true;
-                html5QrCode.pause();
-                scanStatus.textContent = `Memproses Data...`;
+                isProcessing = true; html5QrCode.pause(); scanStatus.textContent = `Memproses Data...`;
                 
                 if (decodedText.length < 3 || decodedText.length > 50) {
-                     showScanResult('error', 'Format QR Code tidak valid.');
-                     playBeep('error');
-                     resumeScanner(); return;
+                     showScanResult('error', 'Format QR Code tidak valid.'); playBeep('error'); resumeScanner(); return;
                 }
                 
-                if (currentScanMode === 'Harian') {
-                    handleScanHarian(decodedText);
-                } else {
-                    handleScanKegiatan(decodedText, currentScanMode, selectedExtra);
-                }
+                if (currentScanMode === 'Harian') handleScanHarian(decodedText);
+                else handleScanKegiatan(decodedText, currentScanMode, selectedExtra);
             };
 
             async function handleScanHarian(studentId) {
@@ -457,27 +390,13 @@
                         body: JSON.stringify({ student_id: studentId, type: 'Harian' })
                     });
                     const result = await response.json();
-                    
                     if (response.ok) {
-                        if (result.message.toUpperCase().includes('TERLAMBAT')) {
-                            showScanResult('warning', result.message);
-                            playBeep('warning');
-                        } else {
-                            showScanResult('success', result.message);
-                            playBeep('success');
-                        }
-                    } else if (response.status === 409) {
-                        showScanResult('warning', result.message);
-                        playBeep('warning');
-                    } else {
-                        showScanResult('error', result.message || 'Error Server');
-                        playBeep('error');
-                    }
-                } catch (error) { 
-                    console.error(error); showScanResult('error', 'Gagal koneksi server.'); playBeep('error');
-                } finally { 
-                    resumeScanner(); 
-                }
+                        if (result.message.toUpperCase().includes('TERLAMBAT')) { showScanResult('warning', result.message); playBeep('warning'); }
+                        else { showScanResult('success', result.message); playBeep('success'); }
+                    } else if (response.status === 409) { showScanResult('warning', result.message); playBeep('warning'); }
+                    else { showScanResult('error', result.message || 'Error Server'); playBeep('error'); }
+                } catch (error) { console.error(error); showScanResult('error', 'Gagal koneksi server.'); playBeep('error'); } 
+                finally { resumeScanner(); }
             }
 
             async function handleScanKegiatan(studentId, type, extraName) {
@@ -488,46 +407,28 @@
                         body: JSON.stringify({ student_id: studentId, type: type, activity: extraName })
                     });
                     const result = await response.json();
-                    
                     if (response.ok) {
                         playBeep('success');
                         let titleText = type === 'Ekstrakurikuler' ? 'Absen Ekskul Berhasil' : `Absen ${type} Berhasil`;
                         let pointsText = type === 'Ekstrakurikuler' ? '+10 Poin Keaktifan' : '+5 Poin Kebaikan';
-                        
                         Swal.fire({
                             title: 'Alhamdulillah!',
                             html: `<p class="text-xl text-gray-700">Selamat <b>${result.scan.student.name}</b></p><p class="text-gray-500 mt-1 mb-4">${titleText}</p><div class="inline-flex items-center gap-2 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 shadow-sm"><span class="font-bold text-lg">${pointsText}</span></div>`,
                             icon: 'success', timer: 3000, showConfirmButton: false, customClass: { popup: 'rounded-[2rem]' }
                         });
-                    } else if (response.status === 409) {
-                        Swal.fire({ title: 'Sudah Absen', text: result.message, icon: 'info', timer: 2500, showConfirmButton: false });
-                        playBeep('warning');
-                    } else {
-                        showScanResult('error', result.message || 'Error Server');
-                        playBeep('error');
-                    }
-                } catch (error) { 
-                    console.error(error); showScanResult('error', 'Gagal koneksi server.'); playBeep('error');
-                } finally { 
-                    resumeScanner(); 
-                }
+                    } else if (response.status === 409) { Swal.fire({ title: 'Sudah Absen', text: result.message, icon: 'info', timer: 2500, showConfirmButton: false }); playBeep('warning'); }
+                    else { showScanResult('error', result.message || 'Error Server'); playBeep('error'); }
+                } catch (error) { console.error(error); showScanResult('error', 'Gagal koneksi server.'); playBeep('error'); } 
+                finally { resumeScanner(); }
             }
 
             const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
             Html5Qrcode.getCameras().then(cameras => {
                 if (cameras && cameras.length) {
                     const rearCamera = cameras.find(c => c.label.toLowerCase().includes('back')) || cameras[0];
-                    html5QrCode.start(rearCamera.id, config, onScanSuccess).catch(() => {
-                         html5QrCode.start(cameras[0].id, config, onScanSuccess);
-                    });
-                } else { 
-                    scanStatus.textContent = "Kamera tidak ditemukan"; 
-                    Swal.fire('Kamera Error', 'Kamera tidak ditemukan pada perangkat ini.', 'error');
-                }
-            }).catch(err => { 
-                scanStatus.textContent = "Izin kamera ditolak";
-                Swal.fire('Izin Ditolak', 'Mohon izinkan akses kamera di browser Anda.', 'error');
-            });
+                    html5QrCode.start(rearCamera.id, config, onScanSuccess).catch(() => { html5QrCode.start(cameras[0].id, config, onScanSuccess); });
+                } else { scanStatus.textContent = "Kamera tidak ditemukan"; Swal.fire('Kamera Error', 'Kamera tidak ditemukan pada perangkat ini.', 'error'); }
+            }).catch(err => { scanStatus.textContent = "Izin kamera ditolak"; Swal.fire('Izin Ditolak', 'Mohon izinkan akses kamera di browser Anda.', 'error'); });
 
             function resumeScanner() {
                 setTimeout(() => {
@@ -544,10 +445,8 @@
                 if (type === 'success') scanResult.classList.add('bg-green-100', 'text-green-800', 'border', 'border-green-200');
                 else if (type === 'warning') scanResult.classList.add('bg-yellow-50', 'text-yellow-700', 'border', 'border-yellow-200');
                 else scanResult.classList.add('bg-red-100', 'text-red-800', 'border', 'border-red-200');
-                
                 scanResult.innerHTML = `<span>${message}</span>`;
                 scanResult.classList.remove('hidden');
-                
                 resultTimeout = setTimeout(() => {
                     scanResult.classList.add('opacity-0', 'scale-95');
                     setTimeout(() => scanResult.classList.add('hidden'), 300);

@@ -1,4 +1,8 @@
 <x-app-layout>
+    {{-- Load Library Tambahan --}}
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+
     <div class="py-6 sm:py-8">
         
         {{-- Header --}}
@@ -17,10 +21,10 @@
             <div class="p-6 border-b border-slate-50 bg-slate-50/50">
                 <form method="GET" action="{{ route('extracurriculars.reports') }}" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                     
-                    <!-- Pilih Kegiatan -->
+                    <!-- Pilih Kegiatan (UPGRADED: Searchable) -->
                     <div class="md:col-span-4">
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Kegiatan Ekskul</label>
-                        <select name="ekskul_id" class="w-full rounded-xl border-slate-300 focus:border-purple-500 focus:ring-purple-500 text-sm py-2.5 font-bold text-slate-700">
+                        <select id="filter-ekskul" name="ekskul_id" class="w-full" placeholder="Cari kegiatan..." autocomplete="off">
                             <option value="">-- Tampilkan Semua --</option>
                             @foreach($extracurriculars as $ekskul)
                                 <option value="{{ $ekskul->id }}" {{ $selectedEkskulId == $ekskul->id ? 'selected' : '' }}>{{ $ekskul->name }}</option>
@@ -31,20 +35,20 @@
                     <!-- Periode Tanggal -->
                     <div class="md:col-span-3">
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Dari Tanggal</label>
-                        <input type="date" name="start_date" value="{{ $startDate }}" class="w-full rounded-xl border-slate-300 focus:border-purple-500 focus:ring-purple-500 text-sm py-2.5 text-slate-600">
+                        <input type="date" name="start_date" value="{{ $startDate }}" class="w-full rounded-xl border-slate-300 focus:border-purple-500 focus:ring-purple-500 text-sm py-2 text-slate-600 font-bold shadow-sm">
                     </div>
                     <div class="md:col-span-3">
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Sampai Tanggal</label>
-                        <input type="date" name="end_date" value="{{ $endDate }}" class="w-full rounded-xl border-slate-300 focus:border-purple-500 focus:ring-purple-500 text-sm py-2.5 text-slate-600">
+                        <input type="date" name="end_date" value="{{ $endDate }}" class="w-full rounded-xl border-slate-300 focus:border-purple-500 focus:ring-purple-500 text-sm py-2 text-slate-600 font-bold shadow-sm">
                     </div>
 
                     <!-- Action Buttons -->
                     <div class="md:col-span-2 flex gap-2">
-                        <button type="submit" class="flex-1 bg-purple-600 text-white px-4 py-2.5 rounded-xl hover:bg-purple-700 font-bold text-sm shadow-lg shadow-purple-500/20 transition-all">
-                            Filter
+                        <button type="submit" class="flex-1 bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 font-bold text-sm shadow-lg shadow-purple-500/20 transition-all h-[42px] flex items-center justify-center gap-2">
+                            <i class="ph-bold ph-funnel"></i> Filter
                         </button>
                         @if($selectedEkskulId)
-                            <a href="{{ route('extracurriculars.reports.export', request()->query()) }}" target="_blank" class="px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:text-purple-600 transition-colors" title="Cetak PDF">
+                            <a href="{{ route('extracurriculars.reports.export', request()->query()) }}" target="_blank" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:text-purple-600 transition-colors h-[42px] flex items-center justify-center shadow-sm" title="Cetak PDF">
                                 <i class="ph-bold ph-printer text-xl"></i>
                             </a>
                         @endif
@@ -65,24 +69,31 @@
                     </thead>
                     <tbody class="divide-y divide-slate-50">
                         @forelse($attendances as $log)
-                            <tr class="hover:bg-slate-50/50 transition-colors">
+                            <tr class="hover:bg-slate-50/50 transition-colors group">
                                 <td class="px-6 py-4">
                                     <div class="flex flex-col">
                                         <span class="font-bold text-slate-700 text-sm">{{ \Carbon\Carbon::parse($log->date)->format('d M Y') }}</span>
-                                        <span class="text-xs text-slate-400 font-mono">{{ $log->time_in }} WIB</span>
+                                        <span class="text-xs text-slate-400 font-mono bg-slate-100 px-1.5 py-0.5 rounded w-fit mt-1">{{ $log->time_in }} WIB</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <div class="font-bold text-slate-700 text-sm">{{ $log->student->name }}</div>
-                                    <div class="text-xs text-slate-500 mt-0.5">Kelas {{ $log->student->schoolClass->name ?? '-' }}</div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold">
+                                            {{ substr($log->student->name, 0, 1) }}
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-slate-700 text-sm">{{ $log->student->name }}</div>
+                                            <div class="text-xs text-slate-500">{{ $log->student->schoolClass->name ?? '-' }}</div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 text-xs font-bold border border-purple-100">
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 text-xs font-bold shadow-sm group-hover:border-purple-200 group-hover:text-purple-600 transition-colors">
                                         {{ $log->extracurricular->name }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center">
-                                    <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 mx-auto">
+                                    <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 mx-auto shadow-sm shadow-emerald-500/20">
                                         <i class="ph-bold ph-check"></i>
                                     </div>
                                 </td>
@@ -101,6 +112,25 @@
                     </tbody>
                 </table>
             </div>
+            
+            {{-- Pagination (Jika ada) --}}
+            @if($attendances instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                <div class="p-4 border-t border-slate-50">
+                    {{ $attendances->withQueryString()->links() }}
+                </div>
+            @endif
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Init TomSelect
+            new TomSelect('#filter-ekskul', {
+                create: false,
+                sortField: { field: "text", direction: "asc" },
+                placeholder: "Cari kegiatan...",
+                plugins: ['dropdown_input'],
+            });
+        });
+    </script>
 </x-app-layout>

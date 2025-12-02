@@ -10,8 +10,9 @@ class ExtracurricularMember extends Model
 
     public function student()
     {
-        // Sesuaikan local key 'student_id' jika di tabel students primary key-nya bukan 'student_id'
-        return $this->belongsTo(Student::class, 'student_id', 'student_id');
+        // PERBAIKAN SAMA:
+        // Gunakan 'id' sebagai parameter ketiga agar relasi terbaca dengan benar.
+        return $this->belongsTo(Student::class, 'student_id', 'id');
     }
 
     public function extracurricular()

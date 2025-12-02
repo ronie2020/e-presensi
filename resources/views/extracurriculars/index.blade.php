@@ -1,4 +1,7 @@
 <x-app-layout>
+    {{-- Load SweetAlert --}}
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <div class="py-6 sm:py-8" x-data="{ addModalOpen: false, editModalOpen: false, editData: {} }">
         
         {{-- Header --}}
@@ -16,15 +19,21 @@
             </button>
         </div>
 
-        {{-- Flash Message --}}
+        {{-- SweetAlert Flash Message Handling --}}
         @if(session('success'))
-            <div x-data="{ show: true }" x-show="show" class="mb-6 mx-4 sm:mx-0 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-emerald-100 rounded-full text-emerald-600"><i class="ph-bold ph-check-circle text-xl"></i></div>
-                    <span class="font-bold">{{ session('success') }}</span>
-                </div>
-                <button @click="show = false" class="text-emerald-400 hover:text-emerald-600"><i class="ph-bold ph-x"></i></button>
-            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil',
+                        text: "{{ session('success') }}",
+                        timer: 3000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                });
+            </script>
         @endif
 
         {{-- Grid Card Layout --}}
@@ -63,9 +72,11 @@
                                 " class="w-full text-left px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-2">
                                     <i class="ph-bold ph-pencil-simple text-orange-500"></i> Edit Data
                                 </button>
-                                <form action="{{ route('extracurriculars.destroy', $ekskul->id) }}" method="POST" onsubmit="return confirm('Hapus ekskul ini?');">
+                                
+                                {{-- Form Hapus dengan SweetAlert --}}
+                                <form action="{{ route('extracurriculars.destroy', $ekskul->id) }}" method="POST" class="delete-form">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-2">
+                                    <button type="button" class="btn-delete w-full text-left px-4 py-2 text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-2">
                                         <i class="ph-bold ph-trash"></i> Hapus
                                     </button>
                                 </form>
@@ -115,7 +126,7 @@
             @endforelse
         </div>
 
-        {{-- MODAL TAMBAH --}}
+        {{-- MODAL TAMBAH (Sama seperti sebelumnya) --}}
         <div x-show="addModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" @click="addModalOpen = false"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
@@ -170,7 +181,7 @@
             </div>
         </div>
 
-        {{-- MODAL EDIT --}}
+        {{-- MODAL EDIT (Sama seperti sebelumnya) --}}
         <div x-show="editModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" @click="editModalOpen = false"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
@@ -237,5 +248,30 @@
             let form = document.getElementById('editForm');
             form.action = url.replace('/0', '/' + ekskul.id);
         }
+
+        // Handle Delete with SweetAlert
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const form = this.closest('.delete-form');
+                    Swal.fire({
+                        title: 'Hapus Ekskul?',
+                        text: "Data ekskul beserta riwayat absensinya akan dihapus permanen.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e11d48', // Rose-600
+                        cancelButtonColor: '#64748b', // Slate-500
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                        borderRadius: '1rem'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
     </script>
 </x-app-layout>

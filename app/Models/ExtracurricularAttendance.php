@@ -10,7 +10,10 @@ class ExtracurricularAttendance extends Model
 
     public function student()
     {
-        return $this->belongsTo(Student::class, 'student_id', 'student_id');
+        // PERBAIKAN: 
+        // Parameter ke-3 diubah dari 'student_id' menjadi 'id'.
+        // Ini memberitahu Laravel: "Cocokkan kolom student_id di tabel ini dengan kolom ID di tabel students"
+        return $this->belongsTo(Student::class, 'student_id', 'id');
     }
 
     public function extracurricular()

@@ -7,12 +7,13 @@ use App\Models\Extracurricular;
 use App\Models\ExtracurricularMember;
 use App\Models\ExtracurricularAttendance;
 use App\Models\Student;
+use App\Models\SchoolClass;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class ExtracurricularController extends Controller
 {
-    // --- 1. MANAJEMEN DATA & JADWAL ---
+    // ... Method index, store, update, destroy TETAP SAMA ... 
     public function index()
     {
         $extracurriculars = Extracurricular::withCount('members')->get();
@@ -47,7 +48,6 @@ class ExtracurricularController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Validasi Update
         $request->validate([
             'name' => 'required|string|max:255',
             'image_file' => 'nullable|image|max:2048',
@@ -56,23 +56,16 @@ class ExtracurricularController extends Controller
         $ekskul = Extracurricular::findOrFail($id);
         $data = $request->only(['name', 'coach_name', 'schedule']);
 
-        // LOGIKA UPDATE GAMBAR
         if ($request->hasFile('image_file')) {
-            // Hapus gambar lama jika ada (dan bukan teks/url luar)
             if ($ekskul->icon && str_starts_with($ekskul->icon, 'storage/')) {
                 $oldPath = str_replace('storage/', '', $ekskul->icon);
                 Storage::disk('public')->delete($oldPath);
             }
-            
-            // Simpan gambar baru
             $path = $request->file('image_file')->store('extracurriculars', 'public');
             $data['icon'] = 'storage/' . $path;
-            
         } elseif ($request->filled('icon_text')) {
-            // Jika user menginput kode ikon baru
             $data['icon'] = $request->icon_text;
         }
-        // Jika tidak ada input file/text baru, biarkan icon lama ($data['icon'] tidak diset)
 
         $ekskul->update($data);
         return redirect()->back()->with('success', 'Data berhasil diperbarui.');
@@ -91,47 +84,87 @@ class ExtracurricularController extends Controller
         return redirect()->back()->with('success', 'Ekstrakurikuler dihapus.');
     }
 
-    // ... (Method members, storeMember, destroyMember, reports TETAP SAMA, tidak perlu diubah) ...
+    // --- MANAJEMEN ANGGOTA ---
+
     public function members(Request $request)
     {
         $selectedEkskulId = $request->get('ekskul_id');
         $extracurriculars = Extracurricular::all();
+        $classes = SchoolClass::orderBy('name', 'asc')->get();
         
-        $members = collect();
+        $members = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
         $students = collect();
+        $studentsForJs = collect();
 
         if ($selectedEkskulId) {
-            $members = ExtracurricularMember::with(['student.schoolClass']) 
-                ->where('extracurricular_id', $selectedEkskulId)
-                ->get()
-                ->sortBy(function($member) {
-                    $className = $member->student->schoolClass->name ?? $member->student->class_name ?? 'Z';
-                    return $className . $member->student->name;
-                });
+            $members = ExtracurricularMember::select('extracurricular_members.*')
+                ->join('students', 'extracurricular_members.student_id', '=', 'students.id')
+                ->leftJoin('classes', 'students.class_id', '=', 'classes.id')
+                ->where('extracurricular_members.extracurricular_id', $selectedEkskulId)
+                ->whereHas('student') 
+                ->orderBy('classes.name', 'asc')
+                ->orderBy('students.name', 'asc')
+                ->with(['student.schoolClass'])
+                ->paginate(20)
+                ->withQueryString();
             
-            $existingMemberIds = $members->pluck('student_id')->toArray();
+            $existingMemberIds = ExtracurricularMember::where('extracurricular_id', $selectedEkskulId)
+                                    ->pluck('student_id')
+                                    ->toArray();
             
             $students = Student::with('schoolClass')
-                ->whereNotIn('student_id', $existingMemberIds)
+                ->whereNotIn('id', $existingMemberIds)
                 ->get()
                 ->sortBy(function($student) {
-                    $className = $student->schoolClass->name ?? $student->class_name ?? 'Z';
+                    $className = optional($student->schoolClass)->name ?? 'Z';
                     return $className . $student->name;
                 });
+
+            $studentsForJs = $students->map(function($s) {
+                return [
+                    'id' => $s->id,
+                    'name' => $s->name,
+                    'nis' => $s->nis,
+                    'class_id' => $s->class_id, 
+                    'class_name' => optional($s->schoolClass)->name ?? '-'
+                ];
+            })->values();
         }
 
-        return view('extracurriculars.members', compact('extracurriculars', 'selectedEkskulId', 'members', 'students'));
+        return view('extracurriculars.members', compact('extracurriculars', 'selectedEkskulId', 'members', 'students', 'classes', 'studentsForJs'));
     }
 
+    // [DIPERBAIKI] Hapus joined_at agar tidak error
     public function storeMember(Request $request)
     {
         $request->validate([
             'extracurricular_id' => 'required|exists:extracurriculars,id',
-            'student_id' => 'required|exists:students,student_id',
+            'student_ids'        => 'required|array',
+            'student_ids.*'      => 'exists:students,id', 
         ]);
 
-        ExtracurricularMember::create($request->only('extracurricular_id', 'student_id'));
-        return redirect()->back()->with('success', 'Siswa berhasil ditambahkan ke ekskul.');
+        $count = 0;
+        
+        foreach ($request->student_ids as $studentId) {
+            $exists = ExtracurricularMember::where('extracurricular_id', $request->extracurricular_id)
+                        ->where('student_id', $studentId)
+                        ->exists();
+
+            if (!$exists) {
+                ExtracurricularMember::create([
+                    'extracurricular_id' => $request->extracurricular_id,
+                    'student_id'         => $studentId,
+                    // 'joined_at' => now() <--- BARIS INI SUDAH DIHAPUS
+                ]);
+                $count++;
+            }
+        }
+
+        if ($count > 0) {
+            return redirect()->back()->with('success', "Berhasil menambahkan $count siswa ke ekskul.");
+        } else {
+            return redirect()->back()->with('info', 'Semua siswa yang dipilih sudah terdaftar sebelumnya.');
+        }
     }
 
     public function destroyMember($id)
@@ -139,6 +172,8 @@ class ExtracurricularController extends Controller
         ExtracurricularMember::findOrFail($id)->delete();
         return redirect()->back()->with('success', 'Siswa dikeluarkan dari ekskul.');
     }
+
+    // --- LAPORAN ---
 
     public function reports(Request $request)
     {
@@ -153,18 +188,18 @@ class ExtracurricularController extends Controller
             $attendances = ExtracurricularAttendance::with(['student.schoolClass'])
                 ->where('extracurricular_id', $selectedEkskulId)
                 ->whereBetween('date', [$startDate, $endDate])
+                ->whereHas('student')
                 ->get()
                 ->sortByDesc('date')
                 ->sortBy(function($log) {
-                    $className = $log->student->schoolClass->name ?? $log->student->class_name ?? 'Z';
-                    return $className . $log->student->name;
+                    $className = optional(optional($log->student)->schoolClass)->name ?? 'Z';
+                    return $className . optional($log->student)->name;
                 });
         }
 
         return view('extracurriculars.reports', compact('extracurriculars', 'selectedEkskulId', 'attendances', 'startDate', 'endDate'));
     }
 
-    // [BARU] Method untuk Cetak / Export
     public function exportReports(Request $request)
     {
         $selectedEkskulId = $request->get('ekskul_id');
@@ -180,11 +215,12 @@ class ExtracurricularController extends Controller
             $attendances = ExtracurricularAttendance::with(['student.schoolClass'])
                 ->where('extracurricular_id', $selectedEkskulId)
                 ->whereBetween('date', [$startDate, $endDate])
+                ->whereHas('student')
                 ->get()
                 ->sortByDesc('date')
                 ->sortBy(function($log) {
-                    $className = $log->student->schoolClass->name ?? $log->student->class_name ?? 'Z';
-                    return $className . $log->student->name;
+                    $className = optional(optional($log->student)->schoolClass)->name ?? 'Z';
+                    return $className . optional($log->student)->name;
                 });
         }
 
