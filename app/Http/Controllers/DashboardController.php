@@ -12,7 +12,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. TENTUKAN PERIODE
+        // 1. TENTUKAN PERIODE & TANGGAL
         $period = $request->query('period', 'today'); 
         $dateParam = $request->query('date', Carbon::today()->toDateString());
         
@@ -27,57 +27,72 @@ class DashboardController extends Controller
             $endDate = Carbon::parse($dateParam)->endOfMonth();
         }
 
-        // 2. QUERY DATA UTAMA
+        // 2. DATA STATISTIK UTAMA (KPIS)
         $totalStudents = Student::count();
         
-        // Ambil semua data dalam range sekaligus (Eager Loading) agar hemat query
+        // Ambil data dalam range
         $attendances = AttendanceSiswa::whereBetween('attendance_date', [$startDate, $endDate])->get();
         
-        // Hitung Statistik Global
+        // Hitung Hadir Total (Fisik di sekolah)
         $presentCount = $attendances->whereIn('status', ['Hadir', 'Terlambat', 'Tepat Waktu'])->unique('student_id')->count();
+        
+        // Hitung Terlambat
         $lateCount = $attendances->whereIn('status', ['Terlambat'])->unique('student_id')->count();
         
-        // Hitung Absen (Sakit/Izin/Alfa)
-        $sickCount = $attendances->whereIn('status', ['Sakit'])->count();
-        $permitCount = $attendances->whereIn('status', ['Izin'])->count();
-        $alphaCount = $attendances->whereIn('status', ['Alpa', 'Alpha'])->count();
-        
-        // Hitung yang belum absen (Hanya relevan jika periode = hari ini)
-        $absentCount = 0;
-        if ($period === 'today') {
-             // Total Siswa - (Hadir + Terlambat + Sakit + Izin + Alfa)
-             $recorded = $presentCount + $sickCount + $permitCount + $alphaCount; 
-             $absentCount = max(0, $totalStudents - $recorded);
-        }
+        // Hitung Hadir Tepat Waktu (Hadir Total - Terlambat)
+        $presentOnTimeCount = max(0, $presentCount - $lateCount);
 
+        // Hitung Kategori Izin/Sakit/Alpa
+        $sickCount = $attendances->whereIn('status', ['Sakit'])->unique('student_id')->count();
+        $permitCount = $attendances->whereIn('status', ['Izin'])->unique('student_id')->count();
+        $alphaCount = $attendances->whereIn('status', ['Alpa', 'Alpha'])->unique('student_id')->count();
+        
+        // Hitung Pulang Awal
         $earlyLeaveCount = $attendances->filter(function ($att) {
             return str_contains(strtolower($att->notes ?? ''), 'pulang awal');
         })->count();
 
-        // 3. LOGIKA GRAFIK (CHART) - PERBAIKAN DI SINI
+        // [PERBAIKAN LOGIKA]: Hitung "Belum Hadir"
+        // Hanya relevan jika filter adalah 'today'. Jika week/month, "Belum Hadir" tidak relevan (selalu 0 atau rata-rata)
+        $absentCount = 0;
+        if ($period === 'today') {
+             // Total Siswa - (Yang sudah absen Harian/Masuk/Pulang/Sakit/Izin/Alpa)
+             $alreadyRecorded = $attendances->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
+                                          ->unique('student_id')
+                                          ->count();
+             
+             // Pastikan tidak negatif
+             $absentCount = max(0, $totalStudents - $alreadyRecorded);
+        }
+
+        // 3. LOGIKA GRAFIK (CHART)
         $weeklyPresentData = [];
         $weeklyLateData = [];
         $weeklyAbsentData = [];
         $chartLabels = [];
 
-        // Jika filternya 'today', kita buat grafik jam (opsional) atau tetap harian 7 hari terakhir untuk tren
-        // Agar grafik selalu menarik, kita defaultkan menampilkan tren 7 hari terakhir jika filter bukan month/week
+        // Loop untuk grafik: Default 7 hari terakhir jika 'today', atau sesuai range jika week/month
         $graphStart = ($period === 'today') ? Carbon::today()->subDays(6) : $startDate;
         $graphEnd   = ($period === 'today') ? Carbon::today() : $endDate;
 
         $periodLoop = $graphStart->copy();
         while($periodLoop <= $graphEnd) {
             $dateStr = $periodLoop->toDateString();
-            $chartLabels[] = $periodLoop->format('d M'); // Label X-Axis (Tgl)
+            
+            // Format Label Tanggal
+            $chartLabels[] = $periodLoop->format('d M'); 
 
-            // Query per hari dari range
-            // Note: Jika range sangat besar (bulan), query dalam loop bisa berat. 
-            // Untuk optimasi produksi, gunakan groupBy di SQL. Tapi untuk skala sekolah, ini cukup.
+            // Query Harian
             $dailyAtt = AttendanceSiswa::whereDate('attendance_date', $dateStr)->get();
 
+            // [PENTING] Data Grafik harus konsisten
+            // PresentData = MURNI Tepat Waktu (Hadir/Tepat Waktu)
             $weeklyPresentData[] = $dailyAtt->whereIn('status', ['Hadir', 'Tepat Waktu'])->unique('student_id')->count();
+            
+            // LateData = MURNI Terlambat
             $weeklyLateData[] = $dailyAtt->whereIn('status', ['Terlambat'])->unique('student_id')->count();
-            // Sakit/Izin/Alfa digabung jadi "Tidak Hadir" di grafik
+            
+            // AbsentData = Sakit + Izin + Alpa
             $weeklyAbsentData[] = $dailyAtt->whereIn('status', ['Sakit', 'Izin', 'Alpa', 'Alpha'])->unique('student_id')->count();
 
             $periodLoop->addDay();
@@ -85,21 +100,20 @@ class DashboardController extends Controller
 
         return view('dashboard', [
             'totalStudents' => $totalStudents,
-            'presentCount' => $presentCount,
+            'presentCount' => $presentCount, // Total Hadir (termasuk telat)
+            'presentOnTimeCount' => $presentOnTimeCount, // Hadir Tepat Waktu
             'lateCount' => $lateCount,
-            'absentCount' => $absentCount, // Belum Hadir
+            'absentCount' => $absentCount, // Belum Hadir (Realtime)
             'earlyLeaveCount' => $earlyLeaveCount,
             'sickCount' => $sickCount,
             'permitCount' => $permitCount,
             'alphaCount' => $alphaCount,
             
-            // Data Grafik yang sudah diisi
-            'chartLabels' => $chartLabels, // Kirim label tanggal
-            'weeklyPresentData' => $weeklyPresentData,
-            'weeklyLateData' => $weeklyLateData,
-            'weeklyAbsentData' => $weeklyAbsentData,
-            
-            'presentOnTimeCount' => max(0, $presentCount - $lateCount),
+            // Data Grafik
+            'chartLabels' => $chartLabels,
+            'weeklyPresentData' => $weeklyPresentData, // Array Tepat Waktu
+            'weeklyLateData' => $weeklyLateData,       // Array Terlambat
+            'weeklyAbsentData' => $weeklyAbsentData,   // Array Tidak Hadir
         ]);
     }
 }

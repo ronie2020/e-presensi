@@ -276,7 +276,7 @@
                     <p class="text-slate-500 text-sm leading-relaxed">Panel administrasi untuk Guru, Wali Kelas dan TU.</p>
                 </a>
 
-                <!-- PEMILU OSIS (NEW) -->
+                <!-- PEMILU OSIS -->
                 <a href="https://pemilu-osis.smpn3lakbok.sch.id/" target="_blank" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-cyan-500/10 border border-slate-100 hover:border-cyan-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="450">
                     <div class="w-16 h-16 bg-cyan-50 rounded-2xl flex items-center justify-center text-cyan-600 mb-6 group-hover:bg-cyan-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-check-square-offset text-3xl"></i>
@@ -306,12 +306,9 @@
                 
                 <!-- Foto Kepsek -->
                 <div class="relative shrink-0" data-aos="fade-right">
-                    <!-- GANTI FOTO DI SINI: -->
-                    <!-- Pastikan file 'kasek.jpg' ada di folder public/images -->
                     <div class="w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-white/20 overflow-hidden shadow-lg bg-white">
                          <img src="{{ asset('images/kasek.png') }}" alt="Kepala Sekolah" class="w-full h-full object-cover">
                     </div>
-
                     <div class="absolute bottom-2 right-2 bg-white text-blue-600 rounded-full p-2 shadow-lg">
                         <i class="ph-fill ph-quotes text-xl"></i>
                     </div>
@@ -320,12 +317,10 @@
                 <!-- Quote Text -->
                 <div class="text-center md:text-left text-white" data-aos="fade-left">
                     <h3 class="text-2xl md:text-3xl font-bold mb-4">Sambutan Kepala Sekolah</h3>
-                    <!-- GANTI KATA SAMBUTAN DI SINI: -->
                     <p class="text-blue-100 text-lg italic leading-relaxed mb-6">
                         "Pendidikan bukan sekadar transfer ilmu, melainkan proses pembentukan karakter dan penggalian potensi diri. Mari bersama membangun generasi emas yang berakhlak mulia dan kompeten di era global."
                     </p>
                     <div>
-                        <!-- GANTI NAMA & GELAR DI SINI: -->
                         <p class="font-bold text-xl">TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.</p>
                         <p class="text-blue-200 text-sm opacity-80">Kepala SMPN 3 Lakbok</p>
                     </div>
@@ -398,7 +393,6 @@
                     <div class="absolute inset-0 bg-blue-600 rounded-[2.5rem] rotate-3 opacity-10"></div>
                     
                     <div class="bg-slate-200 rounded-[2rem] overflow-hidden shadow-2xl relative aspect-video z-10">
-                        <!-- Loop Gambar Slideshow -->
                         <template x-for="(slide, index) in slides" :key="index">
                             <img :src="slide" 
                                 x-show="currentSlide === index"
@@ -411,14 +405,8 @@
                                 class="absolute inset-0 w-full h-full object-cover" 
                                 alt="Gedung Sekolah">
                         </template>
-
-                        <!-- Overlay Statis -->
                         <div class="absolute inset-0 bg-gradient-to-tr from-blue-900/90 to-slate-800/40 flex items-center justify-center z-20">
                             <div class="flex flex-col items-center justify-center text-white p-8 text-center">
-                                <!-- Hapus icon static jika ingin gambar terlihat jelas, atau biarkan transparan -->
-                                <i class="ph-duotone ph-buildings text-6xl mb-4 opacity-0"></i> 
-                                
-                                <!-- Indikator Slideshow -->
                                 <div class="absolute bottom-6 flex gap-2">
                                     <template x-for="(_, index) in slides" :key="index">
                                         <button @click="currentSlide = index" 
@@ -431,52 +419,32 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
     <!-- VIDEO PROFIL SEKOLAH -->
     <div class="py-24 bg-slate-900 relative overflow-hidden">
-        <!-- Overlay image background -->
-        <div class="absolute inset-0 bg-cover bg-center opacity-30" 
-             style="background-image: url('{{ asset('images/netila.jpg') }}');">
-        </div>
-        
+        <div class="absolute inset-0 bg-cover bg-center opacity-30" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent"></div>
-        
         <div class="max-w-4xl mx-auto px-4 relative z-10 text-center" data-aos="zoom-in">
             <span class="inline-block py-1 px-3 rounded-full bg-red-600/20 text-red-400 border border-red-500/30 text-xs font-bold uppercase tracking-wider mb-6 animate-pulse">
                 <i class="ph-fill ph-youtube-logo mr-1"></i> Tonton Video
             </span>
             <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-8">Kenali Kami Lebih Dekat</h2>
             
-            <!-- Video Container -->
             <div class="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-700 group cursor-pointer">
-                
                 @php
-                    // MASUKKAN LINK YOUTUBE BIASA DISINI (Bisa dari database atau hardcode)
                     $rawVideoUrl = 'https://www.youtube.com/watch?v=cx_Q4pyTNVQ'; 
-
-                    // Logika Konversi Otomatis ke Embed URL
                     $embedUrl = $rawVideoUrl;
                     if(str_contains($rawVideoUrl, 'watch?v=')) {
                         $embedUrl = str_replace('watch?v=', 'embed/', $rawVideoUrl);
-                        // Hapus parameter tambahan jika ada (misal &t=10s)
                         $embedUrl = explode('&', $embedUrl)[0];
                     } elseif(str_contains($rawVideoUrl, 'youtu.be/')) {
                         $embedUrl = str_replace('youtu.be/', 'www.youtube.com/embed/', $rawVideoUrl);
                     }
                 @endphp
-
-                <!-- Gunakan variabel $embedUrl di src iframe -->
-                 <iframe class="w-full h-full" 
-                         src="{{ $embedUrl }}" 
-                         title="YouTube video player" 
-                         frameborder="0" 
-                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                         allowfullscreen>
-                 </iframe>
+                 <iframe class="w-full h-full" src="{{ $embedUrl }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
         </div>
     </div>
@@ -485,81 +453,47 @@
     <div id="guru" class="py-24 bg-slate-50 relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16" data-aos="fade-up">
-                <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold uppercase tracking-widest border border-blue-100">
-                    SDM Unggul
-                </span>
+                <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold uppercase tracking-widest border border-blue-100">SDM Unggul</span>
                 <h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl mt-4">Tenaga Pendidik</h2>
-                <p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
-                    Dibimbing oleh guru-guru profesional yang berdedikasi tinggi.
-                </p>
+                <p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">Dibimbing oleh guru-guru profesional yang berdedikasi tinggi.</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 @forelse($teachers as $teacher)
                     <div class="group relative bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 h-full flex flex-col" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
-                        
-                        <!-- Foto Profil -->
                         <div class="aspect-[3/4] w-full relative overflow-hidden bg-slate-100">
                             @if($teacher->photo_path)
-                                <img src="{{ asset('storage/' . $teacher->photo_path) }}" 
-                                     alt="{{ $teacher->name }}" 
-                                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                
+                                <img src="{{ asset('storage/' . $teacher->photo_path) }}" alt="{{ $teacher->name }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                 <div class="w-full h-full hidden flex-col items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300 text-slate-500">
-                                    <span class="text-6xl font-black opacity-30 select-none uppercase">
-                                        {{ substr($teacher->name, 0, 2) }}
-                                    </span>
+                                    <span class="text-6xl font-black opacity-30 select-none uppercase">{{ substr($teacher->name, 0, 2) }}</span>
                                 </div>
                             @else
                                 <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 text-blue-600">
-                                    <span class="text-7xl font-black opacity-20 select-none uppercase group-hover:scale-110 transition-transform">
-                                        {{ substr($teacher->name, 0, 2) }}
-                                    </span>
+                                    <span class="text-7xl font-black opacity-20 select-none uppercase group-hover:scale-110 transition-transform">{{ substr($teacher->name, 0, 2) }}</span>
                                 </div>
                             @endif
-
                             <div class="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </div>
-
-                        <!-- Info -->
                         <div class="p-5 text-center relative bg-white flex-1 flex flex-col justify-end">
                             <div class="absolute -top-4 left-0 right-0 flex justify-center">
-                                <span class="bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-3 rounded-full shadow-lg border-2 border-white">
-                                    {{ $teacher->position ?? $teacher->role }}
-                                </span>
+                                <span class="bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-3 rounded-full shadow-lg border-2 border-white">{{ $teacher->position ?? $teacher->role }}</span>
                             </div>
-                            
-                            <h3 class="mt-4 text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-                                {{ $teacher->name }}
-                            </h3>
-                            
+                            <h3 class="mt-4 text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">{{ $teacher->name }}</h3>
                             @if(!empty($teacher->nip))
-                                <p class="text-xs text-slate-500 font-medium mt-1">
-                                    NIP. {{ $teacher->nip }}
-                                </p>
+                                <p class="text-xs text-slate-500 font-medium mt-1">NIP. {{ $teacher->nip }}</p>
                             @endif
                         </div>
                     </div>
                 @empty
-                    <div class="col-span-full text-center py-12">
-                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
-                            <i class="ph-duotone ph-users text-2xl text-slate-400"></i>
-                        </div>
-                        <p class="text-slate-500">Belum ada data tenaga pendidik.</p>
-                    </div>
+                    <div class="col-span-full text-center py-12"><p class="text-slate-500">Belum ada data tenaga pendidik.</p></div>
                 @endforelse
             </div>
-            
             <div class="text-center mt-12" data-aos="fade-up">
-                <a href="{{ route('teachers.index') }}" class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm hover:shadow-md">
-                    Lihat Seluruh Staff
-                    <i class="ph-bold ph-arrow-right ml-2"></i>
-                </a>
+                <a href="{{ route('teachers.index') }}" class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm hover:shadow-md">Lihat Seluruh Staff <i class="ph-bold ph-arrow-right ml-2"></i></a>
             </div>
         </div>
     </div>
-
+    
     <!-- KEGIATAN SEKOLAH -->
     <div id="kegiatan" class="py-24 bg-white relative overflow-hidden border-t border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -630,125 +564,65 @@
         </div>
     </div>
 
-    <!-- UPDATE: PRESTASI SECTION (NEW) -->
-    <!-- [PERUBAHAN]: Menambahkan x-data untuk filter logika -->
+    <!-- PRESTASI SECTION -->
     <div id="prestasi" class="py-24 bg-gradient-to-b from-yellow-50/50 to-white relative overflow-hidden border-t border-slate-100" x-data="{ activeFilter: 'Terbaru' }">
-        <!-- Decoration -->
         <div class="absolute top-0 right-0 w-96 h-96 bg-yellow-200 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 pointer-events-none"></div>
         <div class="absolute bottom-0 left-0 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 pointer-events-none"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6" data-aos="fade-up">
                 <div class="max-w-2xl">
-                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-bold uppercase tracking-wider mb-4 border border-yellow-200">
-                        <i class="ph-fill ph-trophy"></i> Hall of Fame
-                    </span>
-                    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight">
-                        Prestasi Membanggakan
-                    </h2>
-                    <p class="mt-4 text-lg text-slate-600">
-                        Jejak juara siswa dan guru yang mengharumkan nama sekolah.
-                    </p>
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-bold uppercase tracking-wider mb-4 border border-yellow-200"><i class="ph-fill ph-trophy"></i> Hall of Fame</span>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight">Prestasi Membanggakan</h2>
+                    <p class="mt-4 text-lg text-slate-600">Jejak juara siswa dan guru yang mengharumkan nama sekolah.</p>
                 </div>
-                
-                <!-- [PERBAIKAN] Filter Buttons Logic -->
                 <div class="flex gap-2">
-                    <button @click="activeFilter = 'Terbaru'" 
-                        :class="activeFilter === 'Terbaru' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'"
-                        class="px-4 py-2 rounded-full text-sm font-bold transition">
-                        Terbaru
-                    </button>
-                    <button @click="activeFilter = 'Nasional'" 
-                        :class="activeFilter === 'Nasional' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'"
-                        class="px-4 py-2 rounded-full text-sm font-bold transition">
-                        Nasional
-                    </button>
-                    <button @click="activeFilter = 'Provinsi'" 
-                        :class="activeFilter === 'Provinsi' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'"
-                        class="px-4 py-2 rounded-full text-sm font-bold transition">
-                        Provinsi
-                    </button>
+                    <button @click="activeFilter = 'Terbaru'" :class="activeFilter === 'Terbaru' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'" class="px-4 py-2 rounded-full text-sm font-bold transition">Terbaru</button>
+                    <button @click="activeFilter = 'Nasional'" :class="activeFilter === 'Nasional' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'" class="px-4 py-2 rounded-full text-sm font-bold transition">Nasional</button>
+                    <button @click="activeFilter = 'Provinsi'" :class="activeFilter === 'Provinsi' ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'" class="px-4 py-2 rounded-full text-sm font-bold transition">Provinsi</button>
                 </div>
             </div>
 
-            <!-- Grid Prestasi -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 @forelse($achievements ?? [] as $prestasi)
-                    <!-- [PERBAIKAN] Logika x-show untuk filter -->
+                    <!-- [PERBAIKAN FITUR]: Menambahkan toLowerCase() agar filter tidak sensitif huruf besar/kecil -->
                     <div class="group bg-white rounded-2xl border border-yellow-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-xl hover:shadow-yellow-500/10 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden h-full flex flex-col" 
-                         x-show="activeFilter === 'Terbaru' || activeFilter === '{{ $prestasi->level }}'"
+                         x-show="activeFilter === 'Terbaru' || activeFilter.toLowerCase() === '{{ strtolower($prestasi->level ?? '') }}'"
                          x-transition.duration.500ms
                          data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
-                        
-                        <!-- [PERBAIKAN VARIABEL] Menggunakan photo_path bukan photo -->
                         <div class="h-48 w-full bg-slate-100 relative overflow-hidden group">
                             @if(!empty($prestasi->photo_path))
-                                <img src="{{ asset('storage/' . $prestasi->photo_path) }}" 
-                                     alt="{{ $prestasi->title }}" 
-                                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                <!-- Fallback jika gambar gagal load -->
-                                <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-white" style="display: none;">
-                                    <i class="ph-bold ph-trophy text-4xl"></i>
-                                </div>
+                                <img src="{{ asset('storage/' . $prestasi->photo_path) }}" alt="{{ $prestasi->title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-white" style="display: none;"><i class="ph-bold ph-trophy text-4xl"></i></div>
                             @else
-                                <!-- Default jika tidak ada gambar -->
-                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-white">
-                                    <i class="ph-bold ph-trophy text-4xl"></i>
-                                </div>
+                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-white"><i class="ph-bold ph-trophy text-4xl"></i></div>
                             @endif
-                            
-                            <!-- Badge Level -->
                             <div class="absolute top-3 right-3">
-                                 <span class="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur border border-white/20 text-[10px] font-bold uppercase text-yellow-700 tracking-wide shadow-sm">
-                                    {{ $prestasi->level ?? 'Sekolah' }}
-                                </span>
+                                 <span class="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur border border-white/20 text-[10px] font-bold uppercase text-yellow-700 tracking-wide shadow-sm">{{ $prestasi->level ?? 'Sekolah' }}</span>
                             </div>
                         </div>
-
-                        <!-- Content -->
                         <div class="p-5 flex-1 flex flex-col relative z-10">
-                            <!-- Tanggal -->
-                             <div class="text-xs text-slate-400 font-medium mb-2 flex items-center gap-1">
-                                <i class="ph-fill ph-calendar-blank"></i>
-                                {{ isset($prestasi->date) ? \Carbon\Carbon::parse($prestasi->date)->format('d M Y') : '-' }}
-                            </div>
-
-                            <h4 class="text-lg font-bold text-slate-900 mb-2 leading-tight group-hover:text-yellow-600 transition-colors line-clamp-2">
-                                {{ $prestasi->title ?? 'Juara Lomba' }}
-                            </h4>
-                            
+                             <div class="text-xs text-slate-400 font-medium mb-2 flex items-center gap-1"><i class="ph-fill ph-calendar-blank"></i> {{ isset($prestasi->date) ? \Carbon\Carbon::parse($prestasi->date)->format('d M Y') : '-' }}</div>
+                            <h4 class="text-lg font-bold text-slate-900 mb-2 leading-tight group-hover:text-yellow-600 transition-colors line-clamp-2">{{ $prestasi->title ?? 'Juara Lomba' }}</h4>
                             <div class="mt-auto pt-4 border-t border-slate-50 flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-sm">
-                                    <i class="ph-bold ph-user"></i>
-                                </div>
+                                <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-sm"><i class="ph-bold ph-user"></i></div>
                                 <div>
-                                    <p class="text-xs font-bold text-slate-700 line-clamp-1">
-                                        {{ $prestasi->achiever_name ?? 'Siswa' }}
-                                    </p>
+                                    <p class="text-xs font-bold text-slate-700 line-clamp-1">{{ $prestasi->achiever_name ?? 'Siswa' }}</p>
                                     <p class="text-[10px] text-slate-400 uppercase font-bold">{{ $prestasi->type ?? 'Siswa' }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 @empty
-                    <div class="col-span-full text-center py-4 text-slate-400 text-sm italic">
-                        Belum ada data prestasi yang ditampilkan.
-                    </div>
+                    <div class="col-span-full text-center py-4 text-slate-400 text-sm italic">Belum ada data prestasi yang ditampilkan.</div>
                 @endforelse
             </div>
-
-            <!-- View All Button -->
             <div class="mt-12 text-center" data-aos="fade-up">
-                 <a href="#" class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-full hover:bg-yellow-100 hover:text-yellow-800 transition-all shadow-sm">
-                    Lihat Arsip Prestasi
-                    <i class="ph-bold ph-arrow-right ml-2"></i>
-                </a>
+                 <a href="#" class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-full hover:bg-yellow-100 hover:text-yellow-800 transition-all shadow-sm">Lihat Arsip Prestasi <i class="ph-bold ph-arrow-right ml-2"></i></a>
             </div>
         </div>
     </div>
-
-
+    
     <!-- SECTION: EKSTRAKURIKULER (BARU - DESAIN UPDATE) -->
     <div id="ekskul" class="py-24 bg-slate-900 text-white relative overflow-hidden">
         <!-- Decoration -->
@@ -1082,7 +956,7 @@
             <!-- COPYRIGHT -->
             <div class="text-center pt-8 border-t border-slate-800">
                 <p class="text-slate-500 text-sm">
-                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. RI... All rights reserved.
+                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Ri... All rights reserved.
                 </p>
             </div>
         </div>
