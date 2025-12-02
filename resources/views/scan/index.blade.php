@@ -69,6 +69,7 @@
                     {{-- TAB NAVIGASI --}}
                     <div class="mb-8 bg-gray-50/50 p-2 rounded-2xl border border-gray-100">
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            {{-- Added onclick="initAudio()" to buttons to ensure audio context is ready --}}
                             <button id="btn-harian" data-type="Harian" class="scan-type-btn relative group overflow-hidden rounded-xl py-3 px-4 transition-all duration-300 bg-white text-gray-500 hover:bg-gray-100">
                                 <span class="relative z-10 font-bold text-sm sm:text-base transition-colors duration-300">Absen Harian</span>
                             </button>
@@ -212,45 +213,57 @@
         document.addEventListener('DOMContentLoaded', (event) => {
             
             // --- [UPDATE] KONFIGURASI WAKTU PRESISI (DALAM FORMAT MENIT) ---
-            // Format: Jam * 60 + Menit. Contoh: 13:00 = 13*60 = 780
-            
             const toMinutes = (h, m) => h * 60 + m;
 
             // UBAH DISINI SESUAI KEBUTUHAN SEKOLAH
             const MODE_TIMES = {
-                // Dhuha: 07:00 s/d 10:30
                 DHUHA_START: toMinutes(7, 30), 
                 DHUHA_END:   toMinutes(9, 30),
-                
-                // Dhuhur: DIPERSEMPIT! Hanya 11:45 s/d 12:30 (Istirahat Sholat)
-                // Setelah jam 12:30 otomatis kembali ke Harian (untuk persiapan Pulang)
                 DHUHUR_START: toMinutes(11, 45),
                 DHUHUR_END:   toMinutes(12, 30) 
             };
 
             let currentScanMode = 'Harian';
             let selectedExtra = ''; 
-            let manualOverride = false; // Flag jika user klik tombol manual
+            let manualOverride = false;
             const csrfToken = '{{ csrf_token() }}';
             const scanProcessUrl = '{{ route('scan.process') }}';
             
-            // Audio Context Logic
+            // --- [IMPROVED] Audio Context Logic ---
             let audioCtx;
+            
+            // Fungsi inisialisasi audio yang aman untuk browser modern
+            function initAudio() {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            }
+
             function playBeep(type = 'success') {
                 try {
-                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    initAudio(); // Pastikan audio aktif
+                    
                     const oscillator = audioCtx.createOscillator();
                     const gainNode = audioCtx.createGain();
                     oscillator.connect(gainNode);
                     gainNode.connect(audioCtx.destination);
+                    
                     oscillator.type = 'sine';
-                    let freq = type === 'success' ? 880 : (type === 'warning' ? 600 : 440);
+                    // Frekuensi berbeda untuk tiap tipe notifikasi
+                    let freq = type === 'success' ? 880 : (type === 'warning' ? 600 : 330);
+                    
                     oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
                     gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+                    
                     oscillator.start(audioCtx.currentTime);
-                    oscillator.stop(audioCtx.currentTime + 0.2);
-                } catch (e) { console.error("Audio error", e); }
+                    oscillator.stop(audioCtx.currentTime + 0.5);
+                } catch (e) { 
+                    console.log("Audio belum siap (butuh interaksi user)."); 
+                }
             }
 
             // DOM Elements
@@ -277,34 +290,31 @@
                 setInterval(() => { clockElement.textContent = new Date().toLocaleTimeString('id-ID', { hour12: false }); }, 1000);
             }
 
-            // --- [UPDATE] LOGIKA OTOMATIS BERBASIS MENIT ---
             function autoSelectMode() {
-                // Jika user baru saja klik manual, jangan timpa otomatis dulu (opsional)
-                // Tapi untuk keamanan, kita biarkan otomatis berjalan jika sudah lewat jamnya
                 if (manualOverride) return;
 
                 const now = new Date();
                 const currentMinutes = now.getHours() * 60 + now.getMinutes();
-
-                let newMode = 'Harian'; // Default (Masuk / Pulang)
+                let newMode = 'Harian';
 
                 if (currentMinutes >= MODE_TIMES.DHUHA_START && currentMinutes < MODE_TIMES.DHUHA_END) {
                     newMode = 'Dhuha';
                 } else if (currentMinutes >= MODE_TIMES.DHUHUR_START && currentMinutes < MODE_TIMES.DHUHUR_END) {
                     newMode = 'Dhuhur';
-                } else {
-                    newMode = 'Harian'; // Di luar jam sholat (termasuk jam pulang sekolah)
                 }
 
-                // Hanya ganti jika mode saat ini berbeda, untuk menghindari redraw berlebihan
                 if (currentScanMode !== newMode && currentScanMode !== 'Ekstrakurikuler') {
-                    selectScanMode(newMode, true); // true = dipanggil oleh auto system
+                    selectScanMode(newMode, true);
                 }
             }
 
             function selectScanMode(type, isAuto = false) {
-                if (!isAuto) manualOverride = true; // Set flag jika user klik sendiri
-                else manualOverride = false; // Reset flag jika sistem yang ubah (misal pergantian jam)
+                if (!isAuto) {
+                    manualOverride = true;
+                    initAudio(); // Trigger audio saat user klik manual
+                } else {
+                    manualOverride = false;
+                }
 
                 currentScanMode = type;
                 const config = typeConfig[type];
@@ -344,12 +354,8 @@
                 else scanStatus.textContent = `Pilih Kegiatan Dulu`;
             });
 
-            // Jalankan Auto Select saat load
+            // Jalankan Auto Select saat load dan interval
             autoSelectMode();
-            
-            // [BARU] Jalankan cek otomatis setiap 1 menit
-            // Ini untuk memastikan jika halaman dibiarkan terbuka, mode akan berubah sendiri
-            // saat jam Dhuhur habis (misal jam 12:31)
             setInterval(autoSelectMode, 60000); 
 
             function updateTableLayout(type) {
@@ -415,6 +421,7 @@
                 }
             }
 
+            // --- SCANNER SETUP ---
             const html5QrCode = new Html5Qrcode("qr-reader");
             
             const onScanSuccess = (decodedText, decodedResult) => {
@@ -513,8 +520,14 @@
                     html5QrCode.start(rearCamera.id, config, onScanSuccess).catch(() => {
                          html5QrCode.start(cameras[0].id, config, onScanSuccess);
                     });
-                } else { scanStatus.textContent = "Kamera tidak ditemukan"; }
-            }).catch(err => { scanStatus.textContent = "Izin kamera ditolak"; });
+                } else { 
+                    scanStatus.textContent = "Kamera tidak ditemukan"; 
+                    Swal.fire('Kamera Error', 'Kamera tidak ditemukan pada perangkat ini.', 'error');
+                }
+            }).catch(err => { 
+                scanStatus.textContent = "Izin kamera ditolak";
+                Swal.fire('Izin Ditolak', 'Mohon izinkan akses kamera di browser Anda.', 'error');
+            });
 
             function resumeScanner() {
                 setTimeout(() => {

@@ -1,6 +1,15 @@
 {{-- Halaman ini adalah tampilan untuk resources/views/reports/religious.blade.php --}}
 <x-app-layout>
+    {{-- SweetAlert sudah ada di layout utama (asumsi), jika belum, uncomment baris bawah --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
+
+    {{-- OPTIMASI: Filter Data di PHP (Blade) agar tidak looping 3x di HTML --}}
+    @php
+        $listHadir = $todayAttendances->where('status_final', 'Hadir');
+        $listUzur  = $todayAttendances->where('status_final', '!=', 'Hadir');
+        // $belumAbsenList sudah dikirim dari Controller
+    @endphp
 
     <div class="py-6 sm:py-8">
         {{-- Header & Filter --}}
@@ -105,15 +114,18 @@
                 <div x-show="activeTab === 'hadir'" x-transition:enter.duration.300ms class="w-full">
                     <div class="p-4 flex justify-between items-center bg-white border-b border-gray-100">
                         <h3 class="font-bold text-gray-800">Daftar Siswa Hadir</h3>
-                        <form method="POST" action="{{ route('reports.destroyReligious') }}" onsubmit="return confirm('Apakah Anda yakin ingin mereset data ini?')">
+                        
+                        {{-- SAFETY UPDATE: Menggunakan Form Hidden & JS SweetAlert --}}
+                        <form id="reset-data-form" method="POST" action="{{ route('reports.destroyReligious') }}" class="hidden">
                             @csrf @method('DELETE')
                             <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
                             <input type="hidden" name="activity" value="{{ $selectedActivity }}">
-                            <button class="text-xs font-bold text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                Reset Data
-                            </button>
                         </form>
+                        <button type="button" onclick="confirmResetData()" class="text-xs font-bold text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            Reset Data
+                        </button>
+
                     </div>
                     {{-- FIX: Force scroll mobile --}}
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
@@ -127,24 +139,20 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
-                                @php $hasHadir = false; @endphp
-                                @foreach ($todayAttendances as $attendance)
-                                    @if($attendance->status_final == 'Hadir')
-                                        @php $hasHadir = true; @endphp
-                                        <tr class="hover:bg-emerald-50/30 transition-colors">
-                                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $attendance->student->name }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $attendance->student->schoolClass->name }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap font-mono text-emerald-600 font-bold bg-emerald-50 inline-block rounded px-2 py-0.5 mt-3 ml-6">{{ $attendance->created_at->format('H:i') }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-right">
-                                                <button onclick="openEditModalReligious({{ $attendance->id }}, '{{ $attendance->student->name }}', '{{ $attendance->status_final }}', `{{ $attendance->notes_final }}`, '{{ $attendance->activity }}')" 
-                                                    class="text-gray-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-lg transition-colors">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endif
-                                @endforeach
-                                @if(!$hasHadir) 
+                                {{-- Gunakan list yang sudah difilter di PHP --}}
+                                @forelse ($listHadir as $attendance)
+                                    <tr class="hover:bg-emerald-50/30 transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $attendance->student->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $attendance->student->schoolClass->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap font-mono text-emerald-600 font-bold bg-emerald-50 inline-block rounded px-2 py-0.5 mt-3 ml-6">{{ $attendance->created_at->format('H:i') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                                            <button onclick="openEditModalReligious({{ $attendance->id }}, '{{ $attendance->student->name }}', '{{ $attendance->status_final }}', `{{ $attendance->notes_final }}`, '{{ $attendance->activity }}')" 
+                                                class="text-gray-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-lg transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @empty
                                     <tr>
                                         <td colspan="4" class="px-6 py-12 text-center text-gray-400">
                                             <div class="flex flex-col items-center justify-center">
@@ -155,11 +163,11 @@
                                             </div>
                                         </td>
                                     </tr> 
-                                @endif
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
-                    {{-- Pagination --}}
+                    {{-- Pagination (Hati-hati jika pakai filter manual, pagination bawaan query mungkin tidak akurat jika tidak difilter di controller) --}}
                     <div class="p-4 border-t border-gray-100">{{ $todayAttendances->appends(request()->query())->links() }}</div>
                 </div>
 
@@ -219,31 +227,26 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50">
-                                @php $hasUzur = false; @endphp
-                                @foreach ($todayAttendances as $attendance)
-                                    @if($attendance->status_final != 'Hadir')
-                                        @php $hasUzur = true; @endphp
-                                        <tr class="hover:bg-blue-50/30 transition-colors">
-                                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $attendance->student->name }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $attendance->student->schoolClass->name }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="px-2.5 py-1 rounded-lg bg-blue-100 text-blue-700 text-xs font-bold">{{ $attendance->status_final }}</span>
-                                                @if($attendance->notes_final)
-                                                    <span class="text-xs text-gray-400 ml-2 italic">({{ $attendance->notes_final }})</span>
-                                                @endif
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-right">
-                                                <button onclick="openEditModalReligious({{ $attendance->id }}, '{{ $attendance->student->name }}', '{{ $attendance->status_final }}', `{{ $attendance->notes_final }}`, '{{ $attendance->activity }}')" 
-                                                    class="text-gray-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-lg transition-colors">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endif
-                                @endforeach
-                                @if(!$hasUzur) 
+                                @forelse ($listUzur as $attendance)
+                                    <tr class="hover:bg-blue-50/30 transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $attendance->student->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $attendance->student->schoolClass->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2.5 py-1 rounded-lg bg-blue-100 text-blue-700 text-xs font-bold">{{ $attendance->status_final }}</span>
+                                            @if($attendance->notes_final)
+                                                <span class="text-xs text-gray-400 ml-2 italic">({{ $attendance->notes_final }})</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                                            <button onclick="openEditModalReligious({{ $attendance->id }}, '{{ $attendance->student->name }}', '{{ $attendance->status_final }}', `{{ $attendance->notes_final }}`, '{{ $attendance->activity }}')" 
+                                                class="text-gray-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-lg transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @empty
                                     <tr><td colspan="4" class="px-6 py-8 text-center text-gray-400 italic">Tidak ada data izin/uzur.</td></tr> 
-                                @endif
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -329,6 +332,25 @@
         function closeManualModal() {
             document.getElementById('manualInputModal').classList.add('hidden');
         }
+        
+        // --- SAFE RESET LOGIC ---
+        function confirmResetData() {
+            Swal.fire({
+                title: 'Apakah Anda Yakin?',
+                text: "Semua data kehadiran {{ $selectedActivity }} untuk tanggal ini akan dihapus permanen! Tindakan ini tidak dapat dibatalkan.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus Semua!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('reset-data-form').submit();
+                }
+            })
+        }
+
         const religiousModal = document.getElementById('editReligiousModal');
         const religiousForm = document.getElementById('editReligiousForm');
         const religiousStudentNameDisplay = document.getElementById('modal-religious-student-name');
