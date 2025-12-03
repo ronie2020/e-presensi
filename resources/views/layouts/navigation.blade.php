@@ -97,12 +97,6 @@
                         'route' => 'grades.index',
                         'active_check' => 'grades.*',
                         'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-                    ],
-                    [
-                        'name' => 'CBT / Ujian Online',
-                        'route' => 'cbt.index',
-                        'active_check' => 'cbt.*',
-                        'icon' => 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'
                     ]
                 ],
                 'Perpustakaan' => [
@@ -206,7 +200,7 @@
         <div class="mt-8 px-4 text-center">
              <div class="bg-blue-800/30 rounded-lg p-3 border border-blue-700/30">
                  <p class="text-[10px] text-blue-300 uppercase tracking-widest font-bold">Ri..Versi Sistem</p>
-                 <p class="text-xs text-white font-mono mt-1">v3.0.0 Beta</p>
+                 <p class="text-xs text-white font-mono mt-1">v2.8.0 Beta</p>
              </div>
         </div>
 

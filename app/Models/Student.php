@@ -3,21 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable; // [UBAH] Ganti Model jadi Authenticatable
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Notifications\Notifiable; // [TAMBAH] Tambahkan Notifiable
 
-class Student extends Authenticatable // [UBAH] Extends Authenticatable
+class Student extends Model
 {
-    use HasFactory, SoftDeletes, Notifiable;
+    use HasFactory, SoftDeletes;
 
     /**
      * Kolom yang boleh diisi secara massal.
+     * Sudah ditambahkan semua field Buku Induk agar bisa disimpan.
      */
     protected $fillable = [
-        // Identitas Utama
+        // Identitas Utama (Sudah ada sebelumnya)
         'student_id',
         'name',
         'class_id',
@@ -25,39 +25,39 @@ class Student extends Authenticatable // [UBAH] Extends Authenticatable
         'parent_wa_number',
 
         // --- TAMBAHAN BUKU INDUK (A. KETERANGAN PRIBADI) ---
-        'nickname',           
-        'gender',             
-        'pob',                
-        'dob',                
-        'religion',           
-        'citizenship',        
-        'birth_order',        
-        'siblings_count',     
-        'step_siblings_count',
-        'adoptive_siblings_count', 
-        'orphan_status',      
-        'daily_language',     
+        'nickname',           // Nama Panggilan
+        'gender',             // L/P
+        'pob',                // Tempat Lahir
+        'dob',                // Tanggal Lahir
+        'religion',           // Agama
+        'citizenship',        // Kewarganegaraan
+        'birth_order',        // Anak ke-
+        'siblings_count',     // Saudara Kandung
+        'step_siblings_count',// Saudara Tiri
+        'adoptive_siblings_count', // Saudara Angkat
+        'orphan_status',      // Yatim/Piatu
+        'daily_language',     // Bahasa Sehari-hari
 
         // --- B. TEMPAT TINGGAL ---
-        'address',            
-        'phone',              
-        'living_with',        
-        'distance_to_school', 
-        'transport_mode',     
+        'address',            // Alamat Lengkap
+        'phone',              // No Telp
+        'living_with',        // Tinggal Bersama
+        'distance_to_school', // Jarak ke Sekolah
+        'transport_mode',     // Kendaraan
 
         // --- C. KESEHATAN ---
-        'weight',             
-        'height',             
-        'blood_type',         
-        'history_disease',    
-        'physical_abnormalities', 
+        'weight',             // Berat Badan
+        'height',             // Tinggi Badan
+        'blood_type',         // Golongan Darah
+        'history_disease',    // Riwayat Penyakit
+        'physical_abnormalities', // Kelainan Jasmani
 
         // --- D. PENDIDIKAN SEBELUMNYA ---
-        'prev_school_name',   
-        'prev_diploma_no',    
-        'prev_exam_date',     
-        'accepted_date',      
-        'transfer_from_school', 
+        'prev_school_name',   // Asal Sekolah
+        'prev_diploma_no',    // No Ijazah
+        'prev_exam_date',     // Tanggal Ijazah
+        'accepted_date',      // Diterima Tanggal
+        'transfer_from_school', // Pindahan Dari
 
         // --- E. DATA ORANG TUA (AYAH) ---
         'father_name',
@@ -88,7 +88,7 @@ class Student extends Authenticatable // [UBAH] Extends Authenticatable
         'achievements',
 
         // --- LAINNYA ---
-        'photo_path',         
+        'photo_path',         // Foto Siswa
 
          'guardian_pob', 
          'guardian_dob', 
@@ -108,29 +108,32 @@ class Student extends Authenticatable // [UBAH] Extends Authenticatable
     ];
 
     /**
-     * [TAMBAH] Karena siswa login tanpa password (hanya NISN),
-     * kita override fungsi ini.
+     * Hubungan: Satu Siswa dimiliki oleh SATU Kelas.
      */
-    public function getAuthPassword()
-    {
-        return $this->student_id; 
-    }
-
     public function schoolClass(): BelongsTo
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
+    /**
+     * Hubungan: Satu Siswa memiliki BANYAK data Absensi.
+     */
     public function attendances(): HasMany
     {
         return $this->hasMany(AttendanceSiswa::class, 'student_id');
     }
 
+    /**
+     * Hubungan: Satu Siswa memiliki BANYAK Catatan Disiplin.
+     */
     public function disciplineRecords(): HasMany
     {
         return $this->hasMany(DisciplineRecord::class, 'student_id');
     }
 
+    /**
+     * Hubungan: Satu Siswa memiliki BANYAK Peminjaman Buku.
+     */
     public function borrowings()
     {
         return $this->hasMany(Borrowing::class, 'student_id');

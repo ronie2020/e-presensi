@@ -79,36 +79,15 @@
                             Portal Siswa
                         </a>
 
-                        {{-- [LOGIKA TOMBOL DINAMIS: CEK SISWA DULU, BARU GURU] --}}
-                        
-                        @if(Auth::guard('student')->check())
-                            <!-- Jika Login sebagai SISWA -->
-                            <div class="flex items-center gap-2">
-                                <a href="{{ route('student.exam.index') }}" class="text-sm font-bold px-5 py-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">
-                                    Dashboard Siswa
-                                </a>
-                                <!-- Tombol Logout Kecil -->
-                                <form method="POST" action="{{ route('student.logout') }}">
-                                    @csrf
-                                    <button type="submit" class="p-2.5 text-slate-400 hover:text-red-500 transition" title="Keluar">
-                                        <i class="ph-bold ph-sign-out text-lg"></i>
-                                    </button>
-                                </form>
-                            </div>
-
-                        @elseif(Auth::check())
-                            <!-- Jika Login sebagai GURU/ADMIN -->
-                            <a href="{{ route('dashboard') }}" class="text-sm font-bold px-5 py-2.5 rounded-full bg-slate-800 text-white hover:bg-slate-700 transition shadow-lg">
-                                Dashboard Guru
+                        @auth
+                            <a href="{{ url('/dashboard') }}" class="text-sm font-bold px-5 py-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">
+                                Dashboard
                             </a>
-
                         @else
-                            <!-- Jika BELUM LOGIN -->
                             <a href="{{ route('login') }}" class="text-sm font-bold px-5 py-2.5 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition shadow-lg">
                                 Login Staff
                             </a>
-                        @endif
-
+                        @endauth
                     </div>
                 </div>
 
@@ -136,20 +115,11 @@
                 <a href="{{ url('/') }}#guru" class="text-lg font-bold text-slate-600 hover:text-blue-600">Guru & Staff</a>
                 <a href="{{ route('portal.index') }}" class="text-lg font-bold text-blue-600">Portal Siswa</a>
                 <hr class="border-slate-100">
-                
-                {{-- [LOGIKA MOBILE MENU DINAMIS] --}}
-                @if(Auth::guard('student')->check())
-                    <a href="{{ route('student.exam.index') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-blue-600 text-white font-bold">Dashboard Siswa</a>
-                    <form method="POST" action="{{ route('student.logout') }}" class="block w-full">
-                        @csrf
-                        <button type="submit" class="w-full text-center px-6 py-3 rounded-xl border-2 border-slate-100 text-red-500 font-bold hover:bg-red-50">Keluar</button>
-                    </form>
-                @elseif(Auth::check())
-                    <a href="{{ route('dashboard') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-slate-800 text-white font-bold">Dashboard Guru</a>
+                @auth
+                    <a href="{{ url('/dashboard') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-blue-600 text-white font-bold">Dashboard</a>
                 @else
                     <a href="{{ route('login') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-slate-900 text-white font-bold">Login Staff</a>
-                @endif
-
+                @endauth
             </nav>
         </div>
     </nav>

@@ -250,32 +250,16 @@
                                     <tr class="hover:bg-slate-50/50 transition-colors group">
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center gap-3">
-                                                
-                                                {{-- [UPDATE] WRAPPER FOTO DENGAN ALPINE JS UNTUK ERROR HANDLING --}}
-                                                <div x-data="{ imgError: false }" class="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm bg-slate-100 flex-shrink-0 relative">
+                                                <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm bg-slate-100 flex-shrink-0">
                                                     @if($student->photo_path)
-                                                        {{-- Coba tampilkan gambar --}}
-                                                        <img 
-                                                            src="{{ asset('storage/' . $student->photo_path) }}" 
-                                                            alt="{{ $student->name }}" 
-                                                            class="w-full h-full object-cover"
-                                                            x-show="!imgError"
-                                                            x-on:error="imgError = true"
-                                                            x-transition.opacity
-                                                        >
-                                                        
-                                                        {{-- Fallback: Tampil jika gambar gagal dimuat (imgError = true) --}}
-                                                        <div x-show="imgError" class="w-full h-full flex items-center justify-center font-bold text-xs absolute inset-0 {{ $student->gender == 'L' ? 'bg-blue-100 text-blue-600' : 'bg-pink-100 text-pink-600' }}" style="display: none;">
-                                                            {{ substr($student->name, 0, 2) }}
-                                                        </div>
+                                                        <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
                                                     @else
-                                                        {{-- Fallback: Tampil jika path memang kosong dari DB --}}
-                                                        <div class="w-full h-full flex items-center justify-center font-bold text-xs {{ $student->gender == 'L' ? 'bg-blue-100 text-blue-600' : 'bg-pink-100 text-pink-600' }}">
+                                                        <div class="w-full h-full flex items-center justify-center font-bold text-xs 
+                                                            {{ $student->gender == 'L' ? 'bg-blue-100 text-blue-600' : 'bg-pink-100 text-pink-600' }}">
                                                             {{ substr($student->name, 0, 2) }}
                                                         </div>
                                                     @endif
                                                 </div>
-
                                                 <div>
                                                     <div class="font-bold text-slate-800 text-sm">{{ $student->name }}</div>
                                                     <div class="flex items-center gap-2 mt-0.5">
@@ -378,7 +362,7 @@
         </div>
     </div>
 
-    {{-- MODAL ABSEN & QR CODE (TETAP SAMA) --}}
+    {{-- MODAL ABSEN & QR CODE (DIPERBARUI SESUAI REQUEST) --}}
     <div id="absen-manual-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-opacity">
         <div class="relative top-20 mx-auto p-0 border-0 w-full max-w-md shadow-2xl rounded-2xl bg-white overflow-hidden">
             <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">
