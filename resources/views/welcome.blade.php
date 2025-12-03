@@ -248,6 +248,15 @@
                     <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600">Portal Siswa</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Cek kehadiran, nilai akademik, dan poin kedisiplinan.</p>
                 </a>
+
+                 <!-- UJIAN CBT (UPDATED LINK) -->                
+                <a href="{{ route('student.login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-rose-500/10 border border-slate-100 hover:border-rose-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="150">
+                    <div class="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 mb-6 group-hover:bg-rose-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
+                        <i class="ph-duotone ph-desktop text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-rose-600">Ujian CBT</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">Login peserta ujian berbasis komputer (PTS/PAS).</p>
+                </a>
                 
                 <!-- Mesin Absensi -->
                 <a href="{{ route('kiosk.show') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="200">
@@ -979,7 +988,7 @@
 
     <!-- MODAL POPUP -->
     <div x-show="modalOpen" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div x-show="modalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="closeAnnouncement()"></div>
+        <div x-show="modalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="closeAnnouncement()"></div>
         <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
             <div x-show="modalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-slate-200">
                 <div class="bg-white px-6 py-6 sm:p-8">

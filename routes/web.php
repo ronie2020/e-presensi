@@ -17,6 +17,10 @@ use App\Http\Controllers\DisciplineTypeController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\GuestBookController; 
 use App\Http\Controllers\ExtracurricularController;
+use App\Http\Controllers\StudentAuthController;
+use App\Http\Controllers\StudentExamController;
+// [WAJIB] Tambahkan Controller SEB yang baru kita buat
+use App\Http\Controllers\SebController; 
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,116 +32,125 @@ use Illuminate\Support\Facades\Route;
 // --- UTAMA: RUTE LANDING PAGE ---
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 
-// RUTE DIREKTORI GURU
+// ... (Route publik lainnya tetap sama) ...
 Route::get('/pengajar', [LandingPageController::class, 'teachers'])->name('teachers.index');
-
-// RUTE BUKU TAMU (Publik)
 Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
-
-// RUTE DASHBOARD (Hanya bisa diakses setelah Login)
-Route::get('/dashboard', [DashboardController::class, 'index']) 
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
-
-// RUTE KIOSK (Publik - Mesin Absensi)
 Route::get('/kiosk', [KioskController::class, 'showKiosk'])->name('kiosk.show');
 Route::post('/kiosk/process', [KioskController::class, 'processKioskScan'])->name('kiosk.process');
-
-// RUTE PORTAL SISWA (Publik - Cek Poin/Absensi)
 Route::get('/portal', [StudentPortalController::class, 'index'])->name('portal.index');
 Route::post('/portal/search', [StudentPortalController::class, 'search'])->name('portal.search');
 Route::get('/portal/{student_id}', [StudentPortalController::class, 'show'])->name('portal.show');
-
-// RUTE KIOSK PERPUSTAKAAN (BUKU TAMU)
 Route::get('/library/kiosk', [\App\Http\Controllers\LibraryKioskController::class, 'index'])->name('library.kiosk.index');
 Route::post('/library/kiosk/process', [\App\Http\Controllers\LibraryKioskController::class, 'process'])->name('library.kiosk.process');
 
-// --- GRUP RUTE YANG BUTUH LOGIN ---
+
+// =========================================================================
+//  SISTEM LOGIN & UJIAN KHUSUS SISWA
+// =========================================================================
+
+// 1. Route Login Siswa
+Route::middleware('guest:student')->group(function() {
+    Route::get('/student/login', [StudentAuthController::class, 'showLoginForm'])->name('student.login');
+    Route::post('/student/login', [StudentAuthController::class, 'login'])->name('student.login.post');
+});
+
+// 2. Route Logout Siswa
+Route::post('/student/logout', [StudentAuthController::class, 'logout'])->name('student.logout');
+
+// 3. Route Publik SEB (Landing Page & Download)
+Route::get('/exam/{exam}/seb-landing', [SebController::class, 'landing'])->name('cbt.seb_landing');
+Route::get('/exam/{exam}/download-seb', [SebController::class, 'downloadConfig'])->name('cbt.download_seb');
+
+
+// 4. GROUP ROUTE SISWA
+Route::middleware(['auth:student'])->prefix('student/exam')->name('student.exam.')->group(function () {
+    
+    // A. Halaman Daftar Ujian (BISA DIBUKA DI CHROME BIASA)
+    // Kita keluarkan ini dari middleware 'seb' agar siswa bisa masuk dan download file .seb
+    Route::get('/', [StudentExamController::class, 'index'])->name('index');
+
+    // B. Halaman Pengerjaan Ujian (WAJIB PAKAI SEB)
+    // Kita buat grup nested (bersarang) khusus untuk route yang butuh SEB
+    Route::middleware(['seb'])->group(function () {
+        
+        // Konfirmasi (Start)
+        Route::get('/{exam}/start', [StudentExamController::class, 'showStart'])->name('showStart');
+        Route::post('/{exam}/start', [StudentExamController::class, 'start'])->name('start');
+        
+        // Mengerjakan Soal
+        Route::get('/{exam}/run', [StudentExamController::class, 'run'])->name('run');
+        Route::post('/answer', [StudentExamController::class, 'saveAnswer'])->name('saveAnswer');
+        Route::post('/{exam}/finish', [StudentExamController::class, 'finish'])->name('finish');
+    });
+
+});
+// =========================================================================
+
+
+// --- GRUP RUTE GURU/ADMIN ---
 Route::middleware('auth')->group(function () {
     
-    // Profil User
+    // ... (Semua route admin/guru di bawah ini TETAP SAMA, tidak perlu diubah) ...
+    
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    // Manajemen Siswa    
     Route::post('/students/import', [StudentController::class, 'import'])->name('students.import');
     Route::get('/students/export', [StudentController::class, 'export'])->name('students.export'); 
-    
     Route::resource('students', StudentController::class); 
-
-    // Manajemen Kelas
     Route::resource('classes', SchoolClassController::class);
-
-    // Manajemen Jadwal
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
     Route::post('/schedules/regular', [ScheduleController::class, 'storeRegular'])->name('schedules.regular.store');
     Route::post('/schedules/special', [ScheduleController::class, 'storeSpecial'])->name('schedules.special.store');
     Route::delete('/schedules/special/{schedule}', [ScheduleController::class, 'destroySpecial'])->name('schedules.special.destroy');
-
-    // Scan Absensi (Fitur Guru Piket)
     Route::get('/scan', [AttendanceSiswaController::class, 'showScanner'])->name('scan.show');
     Route::post('/scan', [AttendanceSiswaController::class, 'processScan'])->name('scan.process');
-
-    // Catatan Disiplin (Input Pelanggaran/Kebaikan)
-    Route::resource('discipline', DisciplineController::class)->only([
-        'index', 'store', 'destroy'
-    ]);
-    
-    // Manajemen Tipe Disiplin (Master Data Pelanggaran/Kebaikan)
+    Route::resource('discipline', DisciplineController::class)->only(['index', 'store', 'destroy']);
     Route::resource('discipline-types', DisciplineTypeController::class);
-
-    // --- MODUL: MANAJEMEN NILAI & E-RAPOR ---
     Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
     Route::get('/grades/input', [GradeController::class, 'create'])->name('grades.create');
     Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');
-    
-    // [PERBAIKAN: MENAMBAHKAN ROUTE YANG HILANG]
-    Route::get('/grades/list', [GradeController::class, 'listStudents'])->name('grades.list'); // <-- Ini yang menyebabkan error
+    Route::get('/grades/list', [GradeController::class, 'listStudents'])->name('grades.list');
     Route::get('/report-card/{student_id}', [GradeController::class, 'reportCard'])->name('grades.report');
  
-    // PENGATURAN AKADEMIK
+    Route::prefix('cbt')->name('cbt.')->group(function () {
+        Route::resource('/', \App\Http\Controllers\CbtController::class)->parameters(['' => 'exam']);
+        Route::get('/exam/{exam}/questions', [\App\Http\Controllers\CbtController::class, 'manageQuestions'])->name('questions.manage');
+        Route::post('/exam/{exam}/questions', [\App\Http\Controllers\CbtController::class, 'storeQuestion'])->name('questions.store');
+        Route::delete('/questions/{id}', [\App\Http\Controllers\CbtController::class, 'destroyQuestion'])->name('questions.destroy');
+        Route::post('/exam/{exam}/import', [\App\Http\Controllers\CbtController::class, 'importQuestions'])->name('questions.import');
+        Route::get('/questions/template', [\App\Http\Controllers\CbtController::class, 'downloadTemplate'])->name('questions.template');
+        Route::get('/monitoring/{exam_id}', [\App\Http\Controllers\CbtController::class, 'monitoring'])->name('monitoring');
+        Route::get('/results', [\App\Http\Controllers\CbtController::class, 'results'])->name('results');
+    });
+
     Route::get('/settings/academic', [\App\Http\Controllers\AcademicYearController::class, 'index'])->name('settings.academic.index');
     Route::post('/settings/academic', [\App\Http\Controllers\AcademicYearController::class, 'store'])->name('settings.academic.store');
     Route::patch('/settings/academic/{id}/activate', [\App\Http\Controllers\AcademicYearController::class, 'activate'])->name('settings.academic.activate');
     Route::delete('/settings/academic/{id}', [\App\Http\Controllers\AcademicYearController::class, 'destroy'])->name('settings.academic.destroy');
 
-    // === MODUL PERPUSTAKAAN ===
     Route::prefix('library')->name('library.')->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\LibraryDashboardController::class, 'index'])->name('dashboard');
-        
-        // Import Buku
         Route::post('/books/import', [\App\Http\Controllers\BookController::class, 'import'])->name('books.import');
-        
-        // Route untuk Simpan Kategori via AJAX
         Route::post('/books/categories/store-ajax', [\App\Http\Controllers\BookController::class, 'storeCategoryAjax'])->name('books.categories.ajax');
-
-        // Resource Buku
         Route::resource('books', \App\Http\Controllers\BookController::class);   
-        
         Route::get('/circulation', [\App\Http\Controllers\LibraryCirculationController::class, 'index'])->name('circulation.index');
-        // Route untuk proses sirkulasi
         Route::post('/circulation/search-student', [\App\Http\Controllers\LibraryCirculationController::class, 'searchStudent'])->name('circulation.searchStudent');
         Route::post('/circulation/search-book', [\App\Http\Controllers\LibraryCirculationController::class, 'searchBook'])->name('circulation.searchBook');
         Route::post('/circulation/borrow', [\App\Http\Controllers\LibraryCirculationController::class, 'store'])->name('circulation.store');
         Route::post('/circulation/return', [\App\Http\Controllers\LibraryCirculationController::class, 'returnBook'])->name('circulation.return');
     });
 
-    // === PENGUMUMAN & AGENDA & WA BROADCAST ===
     Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
     Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
     Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
     Route::post('/announcements/send', [AnnouncementController::class, 'sendNotification'])->name('announcements.send');
-    
-    // Agenda Kegiatan
     Route::post('/agendas', [AnnouncementController::class, 'storeAgenda'])->name('agendas.store');
     Route::delete('/agendas/{id}', [AnnouncementController::class, 'destroyAgenda'])->name('agendas.destroy');
 
-
-    // Manajemen Pengguna (Admin)
     Route::resource('users', UserController::class);
    
-    // Laporan & Rekap
     Route::get('/reports/daily', [ReportController::class, 'dailyReport'])->name('reports.daily');
     Route::post('/reports/manual-entry', [ReportController::class, 'storeManualEntry'])->name('reports.storeManual');
     Route::post('/reports/process-alpha', [ReportController::class, 'processAlpha'])->name('reports.processAlpha');
@@ -146,14 +159,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/attendance/{attendance}/edit', [ReportController::class, 'editAttendance'])->name('reports.edit');
     Route::put('/reports/attendance/{attendance}', [ReportController::class, 'updateAttendance'])->name('reports.update');
     Route::delete('/reports/attendance/{attendance}', [ReportController::class, 'deleteAttendance'])->name('reports.delete');
-
-    // Route Khusus untuk Absensi Keagamaan
     Route::get('/reports/religious', [ReportController::class, 'religiousReport'])->name('reports.religious');
     Route::delete('/reports/religious', [ReportController::class, 'destroyReligious'])->name('reports.destroyReligious');
     Route::get('/reports/export-religious', [ReportController::class, 'exportReligious'])->name('reports.exportReligious');
     Route::post('/reports/bulk-alpha', [ReportController::class, 'bulkAlpha'])->name('reports.bulkAlpha');
 
-    // === MODUL EKSTRAKURIKULER ===
     Route::prefix('extracurriculars')->name('extracurriculars.')->group(function () {
         Route::get('/', [ExtracurricularController::class, 'index'])->name('index');
         Route::post('/', [ExtracurricularController::class, 'store'])->name('store');
@@ -166,13 +176,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports/export', [ExtracurricularController::class, 'exportReports'])->name('reports.export');
     });
 
-     // PENGATURAN MATA PELAJARAN
     Route::resource('subjects', \App\Http\Controllers\SubjectController::class)->only(['index', 'store', 'update', 'destroy']);
-    
-    // Route Achievement
     Route::resource('achievements', \App\Http\Controllers\AchievementController::class);
-
-    // Route Kegiatan Sekolah (Admin CRUD)
     Route::resource('school-activities', \App\Http\Controllers\SchoolActivityController::class);
 
 });
