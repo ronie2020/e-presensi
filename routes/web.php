@@ -101,6 +101,16 @@ Route::middleware('auth')->group(function () {
     Route::resource('students', StudentController::class); 
     Route::resource('classes', SchoolClassController::class);
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
+    
+     // === MANAJEMEN JADWAL (ADMIN) ===
+    Route::get('/schedules', [\App\Http\Controllers\ScheduleController::class, 'index'])->name('schedules.index');
+    
+    // Simpan Jadwal Pelajaran (Baru)
+    Route::post('/schedules', [\App\Http\Controllers\ScheduleController::class, 'store'])->name('schedules.store');
+    
+    // Hapus Jadwal
+    Route::delete('/schedules/{id}', [\App\Http\Controllers\ScheduleController::class, 'destroy'])->name('schedules.destroy');
+
     Route::post('/schedules/regular', [ScheduleController::class, 'storeRegular'])->name('schedules.regular.store');
     Route::post('/schedules/special', [ScheduleController::class, 'storeSpecial'])->name('schedules.special.store');
     Route::delete('/schedules/special/{schedule}', [ScheduleController::class, 'destroySpecial'])->name('schedules.special.destroy');
@@ -175,6 +185,34 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports', [ExtracurricularController::class, 'reports'])->name('reports');
         Route::get('/reports/export', [ExtracurricularController::class, 'exportReports'])->name('reports.export');
     });
+
+     // === FITUR BARU: TEACHING AGENDA (KBM) ===
+    Route::prefix('teaching')->name('teaching.')->group(function () {
+        // Dashboard Jadwal Mengajar Guru
+        Route::get('/', [\App\Http\Controllers\TeachingController::class, 'index'])->name('index');
+        
+        // [BARU] Route Riwayat
+        Route::get('/history', [\App\Http\Controllers\TeachingController::class, 'history'])->name('history');
+
+        // Mulai Sesi (Tombol Start)
+        Route::post('/start/{schedule_id}', [\App\Http\Controllers\TeachingController::class, 'start'])->name('start');
+        
+        // Halaman KBM Berlangsung (Isi Jurnal & Live Absen)
+        Route::get('/session/{id}', [\App\Http\Controllers\TeachingController::class, 'show'])->name('show');
+        
+        // Simpan Data Jurnal (Ajax/Form)
+        Route::put('/session/{id}', [\App\Http\Controllers\TeachingController::class, 'update'])->name('update');
+        
+        // Proses Scan Kartu Siswa
+        Route::post('/scan', [\App\Http\Controllers\TeachingController::class, 'scan'])->name('scan');
+        
+        // Tutup Sesi & Generate Alpha (Tombol Finish)
+        Route::post('/close/{id}', [\App\Http\Controllers\TeachingController::class, 'close'])->name('close');
+    });
+
+     // MONITORING & LAPORAN (ADMIN)
+    Route::get('/reports/teaching-journal', [\App\Http\Controllers\ReportController::class, 'teachingJournal'])->name('reports.teaching_journal');
+
 
     Route::resource('subjects', \App\Http\Controllers\SubjectController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('achievements', \App\Http\Controllers\AchievementController::class);

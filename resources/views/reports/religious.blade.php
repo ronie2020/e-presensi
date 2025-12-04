@@ -4,49 +4,120 @@
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
 
     {{-- FIX: Ambil tab aktif dari URL agar tidak reset --}}
-    <div class="py-6 sm:py-8" x-data="{ activeTab: '{{ request('activeTab', 'hadir') }}' }">
+    <div class="py-6 sm:py-8" x-data="{ 
+        activeTab: '{{ request('activeTab', 'hadir') }}',
+        reportType: '{{ request('report_type', 'daily') }}'
+    }">
         
-        {{-- Header & Filter --}}
-        <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-                <h1 class="text-3xl font-black text-gray-800 tracking-tight leading-tight">
-                    Rekapitulasi Keagamaan
-                </h1>
-                <p class="text-gray-500 mt-1">
-                    Laporan aktivitas ibadah siswa tanggal <span class="font-bold text-gray-700">{{ $selectedDate_db->translatedFormat('d F Y') }}</span>.
-                </p>
-            </div>
+        {{-- Header & Filter Section --}}
+        <div class="mb-8 flex flex-col justify-between gap-6 no-print">
             
-            <div class="flex flex-col sm:flex-row gap-3 items-center">
-                {{-- Switcher Kegiatan (Tambahkan activeTab agar tetap di tab yang sama saat ganti kegiatan) --}}
-                <div class="bg-white p-1.5 rounded-2xl flex items-center shadow-sm border border-gray-100">
-                    <a href="{{ route('reports.religious', ['activity' => 'Dhuha', 'date' => $selectedDate_db->format('Y-m-d'), 'activeTab' => request('activeTab')]) }}" 
-                       class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ $selectedActivity == 'Dhuha' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
-                    Shalat Dhuha
-                    </a>
-                    <a href="{{ route('reports.religious', ['activity' => 'Dhuhur', 'date' => $selectedDate_db->format('Y-m-d'), 'activeTab' => request('activeTab')]) }}" 
-                       class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ $selectedActivity == 'Dhuhur' ? 'bg-orange-500 text-white shadow-lg shadow-orange-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
-                    Shalat Dhuhur
-                    </a>
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <h1 class="text-3xl font-black text-gray-800 tracking-tight leading-tight">
+                        Rekapitulasi Keagamaan
+                    </h1>
+                    <p class="text-gray-500 mt-1">
+                        Laporan aktivitas ibadah siswa (Shalat Dhuha / Dhuhur).
+                    </p>
+                </div>
+                
+                {{-- Tombol Cetak & Switcher Activity --}}
+                <div class="flex flex-col sm:flex-row gap-3 items-center">
+                    
+                    {{-- Switcher Kegiatan --}}
+                    <div class="bg-white p-1.5 rounded-2xl flex items-center shadow-sm border border-gray-100">
+                        <a href="{{ route('reports.religious', array_merge(request()->all(), ['activity' => 'Dhuha'])) }}" 
+                           class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ $selectedActivity == 'Dhuha' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
+                        Shalat Dhuha
+                        </a>
+                        <a href="{{ route('reports.religious', array_merge(request()->all(), ['activity' => 'Dhuhur'])) }}" 
+                           class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ $selectedActivity == 'Dhuhur' ? 'bg-orange-500 text-white shadow-lg shadow-orange-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
+                        Shalat Dhuhur
+                        </a>
+                    </div>
+
+                    {{-- Tombol Cetak --}}
+                    <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 shadow-lg shadow-indigo-200 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        <span class="hidden sm:inline">Cetak</span>
+                    </button>
+                </div>
+            </div>
+
+            {{-- FILTER CARD (ADAPTASI DARI MANAJEMEN.HTML) --}}
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Filter Periode
+                </h2>
+
+                {{-- Tab Switcher Periode --}}
+                <div class="flex border-b mb-4">
+                    <button @click="reportType = 'daily'" :class="reportType === 'daily' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-2 px-4 -mb-px border-b-2 font-bold text-sm transition-colors">
+                        Harian
+                    </button>
+                    <button @click="reportType = 'weekly'" :class="reportType === 'weekly' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-2 px-4 -mb-px border-b-2 font-bold text-sm transition-colors">
+                        Mingguan
+                    </button>
+                    <button @click="reportType = 'monthly'" :class="reportType === 'monthly' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-2 px-4 -mb-px border-b-2 font-bold text-sm transition-colors">
+                        Bulanan
+                    </button>
                 </div>
 
-                {{-- Filter Tanggal Modern --}}
-                <form action="{{ route('reports.religious') }}" method="GET" class="flex items-center gap-2 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100">
+                {{-- Form Filter --}}
+                <form action="{{ route('reports.religious') }}" method="GET" class="flex flex-col sm:flex-row items-end gap-4">
                     <input type="hidden" name="activity" value="{{ $selectedActivity }}">
-                    <input type="hidden" name="activeTab" x-model="activeTab"> {{-- Simpan state tab --}}
+                    <input type="hidden" name="activeTab" x-model="activeTab">
+                    <input type="hidden" name="report_type" x-model="reportType">
                     
-                    <input type="date" name="date" 
-                           value="{{ $selectedDate_db->format('Y-m-d') }}" 
-                           class="border-0 focus:ring-0 text-sm font-bold text-gray-600 bg-transparent rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                    <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white p-2.5 rounded-xl transition-colors shadow-lg shadow-gray-300">
+                    {{-- Input Harian --}}
+                    <div x-show="reportType === 'daily'" class="w-full sm:w-auto">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Pilih Tanggal</label>
+                        <input type="date" name="date" value="{{ request('date', $selectedDate_db->format('Y-m-d')) }}" 
+                               class="block w-full sm:w-64 rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-semibold">
+                    </div>
+
+                    {{-- Input Mingguan --}}
+                    <div x-show="reportType === 'weekly'" style="display: none;" class="w-full sm:w-auto">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Pilih Minggu</label>
+                        <input type="week" name="week" value="{{ request('week') }}" 
+                               class="block w-full sm:w-64 rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-semibold">
+                    </div>
+
+                    {{-- Input Bulanan --}}
+                    <div x-show="reportType === 'monthly'" style="display: none;" class="w-full sm:w-auto">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Pilih Bulan</label>
+                        <input type="month" name="month" value="{{ request('month') }}" 
+                               class="block w-full sm:w-64 rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-semibold">
+                    </div>
+
+                    {{-- Tombol Submit --}}
+                    <button type="submit" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-900 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        Tampilkan
                     </button>
                 </form>
             </div>
         </div>
 
+        {{-- JUDUL KHUSUS CETAK --}}
+        <div class="hidden print-only mb-6 text-center border-b-2 border-black pb-4">
+            <h1 class="text-2xl font-black text-black uppercase">Laporan Shalat {{ $selectedActivity }}</h1>
+            <p class="text-sm text-black">
+                Periode: 
+                @if(request('report_type') == 'weekly')
+                    Mingguan ({{ request('week') }})
+                @elseif(request('report_type') == 'monthly')
+                    Bulanan ({{ request('month') }})
+                @else
+                    {{ $selectedDate_db->translatedFormat('d F Y') }}
+                @endif
+            </p>
+        </div>
+
         @if (session('success'))
-            <div x-data="{ show: true }" x-show="show" x-transition class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl font-medium text-sm flex justify-between items-center shadow-sm">
+            <div x-data="{ show: true }" x-show="show" x-transition class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl font-medium text-sm flex justify-between items-center shadow-sm no-print">
                 <div class="flex items-center gap-2">
                     <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span>{{ session('success') }}</span>
@@ -56,33 +127,33 @@
         @endif
 
         {{-- STATISTIK --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all">
-                <div class="h-12 w-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 print:gap-4 print:grid-cols-3">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all print:border-black print:p-4">
+                <div class="h-12 w-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform print:hidden">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </div>
-                <h3 class="text-3xl font-extrabold text-gray-800">{{ $hadirCount }}</h3>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Sudah Absen</p>
+                <h3 class="text-3xl font-extrabold text-gray-800 print:text-black">{{ $hadirCount }}</h3>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1 print:text-black">Sudah Absen</p>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all">
-                <div class="h-12 w-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all print:border-black print:p-4">
+                <div class="h-12 w-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform print:hidden">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <h3 class="text-3xl font-extrabold text-gray-800">{{ $izinUzurCount + $alfaCount }}</h3>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Izin / Uzur / Alfa</p>
+                <h3 class="text-3xl font-extrabold text-gray-800 print:text-black">{{ $izinUzurCount + $alfaCount }}</h3>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1 print:text-black">Izin / Uzur / Alfa</p>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all">
-                <div class="h-12 w-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all print:border-black print:p-4">
+                <div class="h-12 w-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform print:hidden">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </div>
-                <h3 class="text-3xl font-extrabold text-gray-800">{{ $belumAbsenCount }}</h3>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Belum Absen</p>
+                <h3 class="text-3xl font-extrabold text-gray-800 print:text-black">{{ $belumAbsenCount }}</h3>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1 print:text-black">Belum Absen</p>
             </div>
         </div>
 
         {{-- CONTAINER TABEL --}}
-        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="flex border-b border-gray-100 overflow-x-auto bg-gray-50/50 p-2 gap-2 flex-nowrap no-scrollbar">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden print:border-none print:shadow-none">
+            <div class="flex border-b border-gray-100 overflow-x-auto bg-gray-50/50 p-2 gap-2 flex-nowrap no-scrollbar no-print">
                 <button @click="activeTab = 'hadir'" :class="activeTab === 'hadir' ? 'bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-100' : 'text-gray-500 hover:bg-white/60'" class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">Sudah Absen</button>
                 <button @click="activeTab = 'belum'" :class="activeTab === 'belum' ? 'bg-white text-red-600 shadow-sm ring-1 ring-red-100' : 'text-gray-500 hover:bg-white/60'" class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">Belum Absen <span class="ml-1 px-1.5 py-0.5 bg-red-100 text-red-600 rounded text-[10px]">{{ $belumAbsenCount }}</span></button>
                 <button @click="activeTab = 'uzur'" :class="activeTab === 'uzur' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-blue-100' : 'text-gray-500 hover:bg-white/60'" class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">Izin / Uzur / Alfa</button>
@@ -91,8 +162,10 @@
             <div class="w-full relative min-h-[300px]">
                 
                 {{-- TAB 1: HADIR --}}
-                <div x-show="activeTab === 'hadir'" class="w-full">
-                    <div class="p-4 flex justify-between items-center bg-white border-b border-gray-100">
+                <div x-show="activeTab === 'hadir'" class="w-full print:block">
+                    <div class="print:mb-4 print:font-bold print:text-lg hidden print:block border-b border-black pb-2">Daftar Siswa Hadir</div>
+
+                    <div class="p-4 flex justify-between items-center bg-white border-b border-gray-100 no-print">
                         <h3 class="font-bold text-gray-800">Daftar Siswa Hadir</h3>
                         
                         <form id="reset-data-form" method="POST" action="{{ route('reports.destroyReligious') }}" class="hidden">
@@ -107,22 +180,22 @@
                     </div>
 
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
-                        <table class="w-full text-left border-collapse" style="min-width: 800px;">
-                            <thead class="bg-gray-50">
+                        <table class="w-full text-left border-collapse" style="min-width: 800px; width: 100%;">
+                            <thead class="bg-gray-50 print:bg-gray-100">
                                 <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3">Nama Siswa</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4">Kelas</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4">Waktu</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap text-right w-1/6">Aksi</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3 print:text-black">Nama Siswa</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4 print:text-black">Kelas</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4 print:text-black">Waktu</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap text-right w-1/6 no-print">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-50">
+                            <tbody class="divide-y divide-gray-50 print:divide-gray-300">
                                 @forelse ($attendancesHadir as $attendance)
-                                    <tr class="hover:bg-emerald-50/30 transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $attendance->student->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $attendance->student->schoolClass->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap font-mono text-emerald-600 font-bold bg-emerald-50 inline-block rounded px-2 py-0.5 mt-3 ml-6">{{ $attendance->created_at->format('H:i') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                                    <tr class="hover:bg-emerald-50/30 transition-colors print:break-inside-avoid">
+                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 print:text-black">{{ $attendance->student->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500 print:text-black">{{ $attendance->student->schoolClass->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap font-mono text-emerald-600 font-bold bg-emerald-50 inline-block rounded px-2 py-0.5 mt-3 ml-6 print:bg-transparent print:text-black print:mt-0 print:ml-0">{{ $attendance->created_at->format('H:i') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right no-print">
                                             <button onclick="openEditModalReligious({{ $attendance->id }}, '{{ $attendance->student->name }}', '{{ $attendance->status_final }}', `{{ $attendance->notes_final }}`, '{{ $attendance->activity }}')" 
                                                 class="text-gray-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-lg transition-colors">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
@@ -132,12 +205,7 @@
                                 @empty
                                     <tr>
                                         <td colspan="4" class="px-6 py-12 text-center text-gray-400">
-                                            <div class="flex flex-col items-center justify-center">
-                                                 <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                                                    <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                                 </div>
-                                                 <p class="text-sm font-medium">Belum ada data hadir untuk aktivitas ini.</p>
-                                            </div>
+                                            <p class="text-sm font-medium">Belum ada data hadir untuk aktivitas ini.</p>
                                         </td>
                                     </tr> 
                                 @endforelse
@@ -145,14 +213,16 @@
                         </table>
                     </div>
                     @if($attendancesHadir->hasPages())
-                        <div class="p-4 border-t border-gray-100">{{ $attendancesHadir->appends(request()->query() + ['activeTab' => 'hadir'])->links() }}</div>
+                        <div class="p-4 border-t border-gray-100 no-print">{{ $attendancesHadir->appends(request()->query() + ['activeTab' => 'hadir'])->links() }}</div>
                     @endif
                 </div>
 
                 {{-- TAB 2: BELUM ABSEN (TETAP SAMA) --}}
-                <div x-show="activeTab === 'belum'" style="display: none;" class="w-full">
+                <div x-show="activeTab === 'belum'" style="display: none;" class="w-full print:block print:mt-8">
+                    <div class="print:mb-4 print:font-bold print:text-lg hidden print:block border-b border-black pb-2">Daftar Belum Absen</div>
+
                     @if($belumAbsenList->count() > 0)
-                        <div class="p-4 bg-red-50 border-b border-red-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div class="p-4 bg-red-50 border-b border-red-100 flex flex-col md:flex-row justify-between items-center gap-4 no-print">
                             <div class="flex items-center gap-3">
                                 <div class="p-2 bg-red-100 text-red-600 rounded-lg">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
@@ -176,20 +246,20 @@
                         </div>
                     @endif
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
-                        <table class="w-full text-left border-collapse" style="min-width: 800px;">
-                            <thead class="bg-gray-50 border-b border-gray-100">
+                        <table class="w-full text-left border-collapse" style="min-width: 800px; width: 100%;">
+                            <thead class="bg-gray-50 border-b border-gray-100 print:bg-gray-100">
                                 <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3">Nama Siswa</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3">Kelas</th>
-                                    <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3">Aksi</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3 print:text-black">Nama Siswa</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3 print:text-black">Kelas</th>
+                                    <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3 no-print">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-50">
+                            <tbody class="divide-y divide-gray-50 print:divide-gray-300">
                                 @forelse ($belumAbsenList as $student)
-                                    <tr class="hover:bg-gray-50 transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $student->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $student->schoolClass->name ?? '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                                    <tr class="hover:bg-gray-50 transition-colors print:break-inside-avoid">
+                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 print:text-black">{{ $student->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500 print:text-black">{{ $student->schoolClass->name ?? '-' }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right no-print">
                                             <button onclick="openManualModalForStudent({{ $student->id }}, '{{ $student->name }}')" 
                                                     class="inline-flex items-center gap-2 bg-white border border-blue-200 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-50 transition-colors shadow-sm">
                                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -200,12 +270,7 @@
                                 @empty
                                     <tr>
                                         <td colspan="3" class="px-6 py-12 text-center text-gray-400">
-                                            <div class="flex flex-col items-center justify-center">
-                                                <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-3">
-                                                    <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                                </div>
-                                                <p class="text-sm font-medium text-green-600">Semua siswa sudah tercatat!</p>
-                                            </div>
+                                            <p class="text-sm font-medium text-green-600">Semua siswa sudah tercatat!</p>
                                         </td>
                                     </tr>
                                 @endforelse
@@ -215,29 +280,30 @@
                 </div>
 
                 {{-- TAB 3: UZUR / IZIN / ALFA (DATA DARI $attendancesUzur) --}}
-                <div x-show="activeTab === 'uzur'" style="display: none;" class="w-full">
+                <div x-show="activeTab === 'uzur'" style="display: none;" class="w-full print:block print:mt-8">
+                    <div class="print:mb-4 print:font-bold print:text-lg hidden print:block border-b border-black pb-2">Daftar Uzur / Izin / Alfa</div>
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
-                        <table class="w-full text-left border-collapse" style="min-width: 800px;">
-                            <thead class="bg-gray-50 border-b border-gray-100">
+                        <table class="w-full text-left border-collapse" style="min-width: 800px; width: 100%;">
+                            <thead class="bg-gray-50 border-b border-gray-100 print:bg-gray-100">
                                 <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3">Nama Siswa</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4">Kelas</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4">Keterangan</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap text-right w-1/6">Aksi</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3 print:text-black">Nama Siswa</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4 print:text-black">Kelas</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4 print:text-black">Keterangan</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap text-right w-1/6 no-print">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-50">
+                            <tbody class="divide-y divide-gray-50 print:divide-gray-300">
                                 @forelse ($attendancesUzur as $attendance)
-                                    <tr class="hover:bg-blue-50/30 transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $attendance->student->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $attendance->student->schoolClass->name }}</td>
+                                    <tr class="hover:bg-blue-50/30 transition-colors print:break-inside-avoid">
+                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 print:text-black">{{ $attendance->student->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500 print:text-black">{{ $attendance->student->schoolClass->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2.5 py-1 rounded-lg bg-blue-100 text-blue-700 text-xs font-bold">{{ $attendance->status_final }}</span>
+                                            <span class="px-2.5 py-1 rounded-lg bg-blue-100 text-blue-700 text-xs font-bold print:bg-transparent print:p-0 print:text-black">{{ $attendance->status_final }}</span>
                                             @if($attendance->notes_final)
-                                                <span class="text-xs text-gray-400 ml-2 italic">({{ $attendance->notes_final }})</span>
+                                                <span class="text-xs text-gray-400 ml-2 italic print:text-black">({{ $attendance->notes_final }})</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                                        <td class="px-6 py-4 whitespace-nowrap text-right no-print">
                                             <button onclick="openEditModalReligious({{ $attendance->id }}, '{{ $attendance->student->name }}', '{{ $attendance->status_final }}', `{{ $attendance->notes_final }}`, '{{ $attendance->activity }}')" 
                                                 class="text-gray-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-lg transition-colors">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
@@ -251,7 +317,7 @@
                         </table>
                     </div>
                     @if($attendancesUzur->hasPages())
-                        <div class="p-4 border-t border-gray-100">{{ $attendancesUzur->appends(request()->query() + ['activeTab' => 'uzur'])->links() }}</div>
+                        <div class="p-4 border-t border-gray-100 no-print">{{ $attendancesUzur->appends(request()->query() + ['activeTab' => 'uzur'])->links() }}</div>
                     @endif
                 </div>
 
@@ -259,8 +325,15 @@
         </div>
     </div>
 
+    {{-- Footer Cetak --}}
+    <div class="hidden print-only mt-8 text-right">
+        <p class="text-sm text-black">Dicetak pada: {{ now()->format('d F Y H:i') }}</p>
+        <p class="text-sm text-black mt-8">(_______________________)</p>
+        <p class="text-xs text-black">Guru Pendamping</p>
+    </div>
+
     {{-- MODAL & SCRIPTS --}}
-    <div id="manualInputModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
+    <div id="manualInputModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">
                 <h3 class="font-bold text-white">Input Keterangan Manual</h3>
@@ -295,7 +368,7 @@
         </div>
     </div>
 
-    <div id="editReligiousModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity">
+    <div id="editReligiousModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="bg-gray-800 px-6 py-4 flex justify-between items-center">
                 <h3 class="font-bold text-white">Edit Data Keagamaan</h3>
@@ -327,6 +400,18 @@
             </form>
         </div>
     </div>
+
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background-color: white; }
+            .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; }
+            .rounded-2xl, .rounded-xl, .rounded-lg { border-radius: 0 !important; }
+            table { width: 100% !important; min-width: 0 !important; }
+            [x-show] { display: block !important; }
+        }
+    </style>
 
     <script>
         function openManualModalForStudent(id, name) {

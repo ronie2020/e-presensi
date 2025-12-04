@@ -89,6 +89,7 @@
                 @php
                     $tabs = [
                         'ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan'],
+                        'kbm' => ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'],
                         'akademik' => ['icon' => 'exam', 'label' => 'Akademik'],
                         'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Kehadiran'],
                         'keagamaan' => ['icon' => 'book-open-text', 'label' => 'Keagamaan'],
@@ -161,6 +162,82 @@
                         <p class="mt-4 text-sm text-slate-500 font-medium">"Buku adalah jendela dunia."</p>
                     </div>
                 </div>
+            </div>
+        </div>
+
+ <!-- 2. TAB JURNAL KBM (FITUR BARU) -->
+        <div x-show="activeTab === 'kbm'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div class="grid grid-cols-1 gap-6">
+                
+                @if(isset($teaching_journals) && count($teaching_journals) > 0)
+                    @foreach($teaching_journals as $journal)
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                        <div class="p-6">
+                            <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wide border border-blue-100">
+                                            {{ $journal->schedule->subject->name }}
+                                        </span>
+                                        <span class="text-xs text-slate-400 font-bold flex items-center gap-1">
+                                            <i class="ph-fill ph-clock"></i>
+                                            {{ \Carbon\Carbon::parse($journal->started_at)->format('H:i') }}
+                                        </span>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-slate-800">{{ $journal->topic ?? 'Tanpa Topik' }}</h3>
+                                    <p class="text-sm text-slate-500">Pengajar: {{ $journal->schedule->teacher->name ?? 'Guru' }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-2xl font-black text-slate-200">{{ \Carbon\Carbon::parse($journal->date)->format('d') }}</p>
+                                    <p class="text-xs font-bold text-slate-400 uppercase">{{ \Carbon\Carbon::parse($journal->date)->format('M Y') }}</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Catatan / Tugas -->
+                            <div class="bg-slate-50 rounded-xl p-4 mb-4 border border-slate-100">
+                                <p class="text-xs font-bold text-slate-400 uppercase mb-2">Aktivitas / Tugas:</p>
+                                <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-line">
+                                    {{ $journal->activities ?? 'Tidak ada catatan khusus.' }}
+                                </p>
+                            </div>
+
+                            <!-- Link & Status Kehadiran Siswa di Mapel Ini -->
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-50">
+                                <div>
+                                    @if($journal->reference_link)
+                                        <a href="{{ $journal->reference_link }}" target="_blank" class="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline">
+                                            <i class="ph-bold ph-link"></i> Buka Materi / Link
+                                        </a>
+                                    @else
+                                        <span class="text-xs text-slate-400 italic">Tidak ada link referensi</span>
+                                    @endif
+                                </div>
+                                
+                                <!-- Status Kehadiran Siswa di Jam Ini -->
+                                @php
+                                    $myAtt = $journal->attendances->where('student_id', $student->id)->first();
+                                    $status = $myAtt ? $myAtt->status : 'alpha';
+                                    $color = match($status) {
+                                        'present' => 'text-emerald-600 bg-emerald-50 border-emerald-100',
+                                        'late' => 'text-amber-600 bg-amber-50 border-amber-100',
+                                        'alpha' => 'text-rose-600 bg-rose-50 border-rose-100',
+                                        default => 'text-slate-600 bg-slate-50 border-slate-100'
+                                    };
+                                @endphp
+                                <div class="px-3 py-1 rounded-full border text-xs font-bold uppercase {{ $color }}">
+                                    {{ $status == 'present' ? 'Hadir' : ($status == 'alpha' ? 'Alpha / Bolos' : ucfirst($status)) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                @else
+                    <div class="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
+                        <i class="ph-duotone ph-notebook text-4xl text-slate-300 mb-3"></i>
+                        <p class="text-slate-500 font-medium">Belum ada riwayat pembelajaran.</p>
+                    </div>
+                @endif
+
             </div>
         </div>
 
