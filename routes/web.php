@@ -86,9 +86,7 @@ Route::middleware(['auth:student'])->prefix('student/exam')->name('student.exam.
 
 // --- GRUP RUTE GURU/ADMIN ---
 Route::middleware('auth')->group(function () {
-    
-    // ... (Semua route admin/guru di bawah ini TETAP SAMA, tidak perlu diubah) ...
-    
+           
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -128,7 +126,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/questions/{id}', [\App\Http\Controllers\CbtController::class, 'destroyQuestion'])->name('questions.destroy');
         Route::post('/exam/{exam}/import', [\App\Http\Controllers\CbtController::class, 'importQuestions'])->name('questions.import');
         Route::get('/questions/template', [\App\Http\Controllers\CbtController::class, 'downloadTemplate'])->name('questions.template');
+         // Route Monitoring & Reset
         Route::get('/monitoring/{exam_id}', [\App\Http\Controllers\CbtController::class, 'monitoring'])->name('monitoring');
+        Route::post('/reset/{exam}/{student}', [\App\Http\Controllers\CbtController::class, 'resetExam'])->name('reset'); // Route Baru
         Route::get('/results', [\App\Http\Controllers\CbtController::class, 'results'])->name('results');
     });
 
@@ -158,6 +158,9 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('users', UserController::class);
    
+    // --- Route Cetak Laporan ---
+    Route::get('/reports/daily/print', [ReportController::class, 'printDaily'])->name('reports.printDaily');
+    
     Route::get('/reports/daily', [ReportController::class, 'dailyReport'])->name('reports.daily');
     Route::post('/reports/manual-entry', [ReportController::class, 'storeManualEntry'])->name('reports.storeManual');
     Route::post('/reports/process-alpha', [ReportController::class, 'processAlpha'])->name('reports.processAlpha');

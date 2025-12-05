@@ -23,22 +23,19 @@ class ReportController extends Controller
 {
     /**
      * Helper function untuk mempaginasi Collection secara manual.
-     * Ini mengubah Collection biasa menjadi LengthAwarePaginator agar bisa pakai ->links() di Blade.
      */
     public function paginate($items, $perPage = 20, $page = null, $options = [])
     {
         $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
         $items = $items instanceof Collection ? $items : Collection::make($items);
-        
-        // Pastikan path saat ini diambil agar link pagination benar
         $options = array_merge(['path' => Paginator::resolveCurrentPath()], $options);
 
         return new LengthAwarePaginator(
-            $items->forPage($page, $perPage), // Ambil item hanya untuk halaman ini
-            $items->count(), // Total item
-            $perPage, // Item per halaman
-            $page, // Halaman saat ini
-            $options // Opsi path, query, dll
+            $items->forPage($page, $perPage), 
+            $items->count(), 
+            $perPage, 
+            $page, 
+            $options 
         );
     }
 
@@ -47,38 +44,31 @@ class ReportController extends Controller
      */
     public function dailyReport(Request $request)
     {
-        // 1. Tentukan Tanggal (Default: Hari Ini)
         $dateStr = $request->input('date', Carbon::today()->toDateString());
         $selectedDate_db = Carbon::parse($dateStr); 
 
-        // 2. Ambil Data Kehadiran Harian
-        // Kita tetap pakai get() agar bisa menghitung statistik global dulu
+        // Data statistik global
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
             ->whereDate('attendance_date', $selectedDate_db)
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
             ->get();
 
-        // 3. Kelompokkan Data
-        // Hadir & Terlambat masuk kategori "Hadir"
         $attendancesHadirRaw = $attendances->whereIn('status', ['Hadir', 'Terlambat']);
-        // Sakit, Izin, Alfa masuk kategori "Lainnya"
         $attendancesLainRaw = $attendances->whereIn('status', ['Sakit', 'Izin', 'Alfa']);
 
-        // 4. Hitung Statistik
         $hadirCount = $attendances->where('status', 'Hadir')->count();
         $terlambatCount = $attendances->where('status', 'Terlambat')->count();
         $sakitCount = $attendances->where('status', 'Sakit')->count();
         $izinCount = $attendances->where('status', 'Izin')->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
-        // 5. Cari Siswa yang BELUM ABSEN
         $existingStudentIds = $attendances->pluck('student_id')->toArray();
         $belumAbsenList = Student::with('schoolClass')
             ->whereNotIn('id', $existingStudentIds)
             ->orderBy('name')
             ->get();
 
-        // 6. Mapping Data agar kompatibel dengan View (menambahkan properti _final)
+        // Mapping Data View
         $mappedHadir = $attendancesHadirRaw->map(function($item) {
             $item->status_final = $item->status;
             $item->time_in_final = $item->time_in;
@@ -93,16 +83,13 @@ class ReportController extends Controller
             return $item;
         });
 
-        // 7. [FIX ERROR] Convert Collection ke Paginator Manual
-        // Agar method ->hasPages() dan ->links() di Blade bisa bekerja
+        // Pagination untuk View Web
         $attendancesHadir = $this->paginate($mappedHadir, 20);
         $attendancesLain = $this->paginate($mappedLain, 20);
         
-        // Tambahkan query string saat ini ke link pagination agar filter tanggal tidak hilang saat ganti halaman
         $attendancesHadir->appends($request->all());
         $attendancesLain->appends($request->all());
 
-        // Kirim semua variabel ke View
         return view('reports.daily', compact(
             'selectedDate_db',
             'attendancesHadir',
@@ -117,32 +104,73 @@ class ReportController extends Controller
     }
 
     /**
+     * FITUR BARU: CETAK LAPORAN HARIAN (Tanpa Pagination)
+     */
+    public function printDaily(Request $request)
+    {
+        $dateStr = $request->input('date', Carbon::today()->toDateString());
+        $selectedDate_db = Carbon::parse($dateStr); 
+
+        // Ambil SEMUA data tanpa pagination
+        $attendances = AttendanceSiswa::with(['student.schoolClass'])
+            ->whereDate('attendance_date', $selectedDate_db)
+            ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
+            ->orderBy('updated_at', 'desc') // Urutkan berdasarkan data terbaru masuk
+            ->get();
+
+        // Grouping Data
+        $attendancesHadir = $attendances->whereIn('status', ['Hadir', 'Terlambat']);
+        $attendancesLain = $attendances->whereIn('status', ['Sakit', 'Izin', 'Alfa']);
+        
+        // Data Belum Absen
+        $existingStudentIds = $attendances->pluck('student_id')->toArray();
+        $belumAbsenList = Student::with('schoolClass')
+            ->whereNotIn('id', $existingStudentIds)
+            ->orderBy('school_class_id') // Urutkan per kelas agar rapi saat dicetak
+            ->orderBy('name')
+            ->get();
+
+        // Hitung Statistik
+        $stats = [
+            'hadir' => $attendances->where('status', 'Hadir')->count(),
+            'terlambat' => $attendances->where('status', 'Terlambat')->count(),
+            'sakit' => $attendances->where('status', 'Sakit')->count(),
+            'izin' => $attendances->where('status', 'Izin')->count(),
+            'alfa' => $attendances->where('status', 'Alfa')->count(),
+            'belum' => $belumAbsenList->count()
+        ];
+
+        return view('reports.print_daily', compact(
+            'selectedDate_db',
+            'attendancesHadir',
+            'attendancesLain',
+            'belumAbsenList',
+            'stats'
+        ));
+    }
+
+    /**
      * 2. REKAP KEAGAMAAN (Dhuha / Dhuhur)
      */
     public function religiousReport(Request $request)
     {
-        // 1. Filter Tanggal & Kegiatan
         $dateStr = $request->input('date', Carbon::today()->toDateString());
         $selectedDate_db = Carbon::parse($dateStr);
         $selectedActivity = $request->input('activity', 'Dhuha'); 
 
-        // 2. Ambil Data
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
             ->whereDate('attendance_date', $selectedDate_db)
             ->where('type', 'Keagamaan')
             ->where('activity', $selectedActivity)
             ->get();
 
-        // 3. Pisahkan Kategori
         $attendancesHadirRaw = $attendances->where('status', 'Hadir');
         $attendancesUzurRaw = $attendances->whereIn('status', ["Uzur Syar'i", "Alfa", "Izin", "Sakit"]);
 
-        // 4. Statistik
         $hadirCount = $attendancesHadirRaw->count();
         $izinUzurCount = $attendances->whereIn('status', ["Uzur Syar'i", "Izin", "Sakit"])->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
-        // 5. Belum Absen
         $existingIds = $attendances->pluck('student_id')->toArray();
         $belumAbsenList = Student::with('schoolClass')
             ->whereNotIn('id', $existingIds)
@@ -150,7 +178,6 @@ class ReportController extends Controller
             ->get();
         $belumAbsenCount = $belumAbsenList->count();
 
-        // 6. Mapping Data View
         $mappedHadir = $attendancesHadirRaw->map(function($item) {
             $item->status_final = $item->status;
             $item->notes_final = $item->notes;
@@ -163,11 +190,9 @@ class ReportController extends Controller
             return $item;
         });
 
-        // 7. [FIX ERROR] Convert Collection ke Paginator Manual
         $attendancesHadir = $this->paginate($mappedHadir, 20);
         $attendancesUzur = $this->paginate($mappedUzur, 20);
 
-        // Tambahkan query string agar filter tidak reset
         $attendancesHadir->appends($request->all());
         $attendancesUzur->appends($request->all());
 
@@ -240,10 +265,9 @@ class ReportController extends Controller
     public function bulkAlpha(Request $request)
     {
         $date = $request->input('date');
-        $type = $request->input('type'); // Harian / Keagamaan
-        $activity = $request->input('activity'); // Dhuha/Dhuhur (opsional)
+        $type = $request->input('type');
+        $activity = $request->input('activity');
 
-        // 1. Ambil Siswa yg SUDAH Absen
         $query = AttendanceSiswa::whereDate('attendance_date', $date)
                 ->where('type', $type);
         
@@ -252,15 +276,11 @@ class ReportController extends Controller
         }
 
         $presentIds = $query->pluck('student_id')->toArray();
-
-        // 2. Ambil Siswa yg BELUM Absen
         $absentStudents = Student::whereNotIn('id', $presentIds)->get();
 
-        // 3. Insert Masal
         $insertData = [];
         $now = now();
         
-        // Cari/Buat Tipe Pelanggaran untuk Poin (Hanya untuk Harian)
         $disciplineType = null;
         if($type == 'Harian') {
             $disciplineType = DisciplineType::firstOrCreate(
@@ -302,7 +322,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 5. SIMPAN MANUAL (Input dari Modal)
+     * 5. SIMPAN MANUAL
      */
     public function storeManualEntry(Request $request)
     {
@@ -313,7 +333,7 @@ class ReportController extends Controller
             'attendance_type' => 'required'
         ]);
 
-        $att = AttendanceSiswa::updateOrCreate(
+        AttendanceSiswa::updateOrCreate(
             [
                 'student_id' => $request->student_id,
                 'attendance_date' => $request->date,
@@ -332,7 +352,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 6. UPDATE DATA (Edit Modal)
+     * 6. UPDATE DATA
      */
     public function updateAttendance(Request $request, $id)
     {
@@ -347,7 +367,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 7. HAPUS DATA (Reset)
+     * 7. HAPUS DATA
      */
     public function destroyReligious(Request $request)
     {

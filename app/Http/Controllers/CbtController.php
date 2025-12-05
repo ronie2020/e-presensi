@@ -5,14 +5,16 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\CbtExam;
-use App\Models\CbtQuestion; 
-use Maatwebsite\Excel\Facades\Excel; // Tambahkan import Excel
-use App\Imports\QuestionsImport;     // Tambahkan import Class Import tadi
+use App\Models\CbtQuestion;
+use App\Models\Student;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\QuestionsImport;
 
 class CbtController extends Controller
 {
-    // ... (Kode sebelumnya: index, create, store, manageQuestions TETAP SAMA) ...
-
+    /**
+     * Menampilkan Dashboard CBT
+     */
     public function index()
     {
         $stats = [
@@ -27,11 +29,17 @@ class CbtController extends Controller
         return view('cbt.index', compact('stats', 'exams'));
     }
 
+    /**
+     * Halaman Buat Jadwal Ujian
+     */
     public function create()
     {
         return view('cbt.create');
     }
 
+    /**
+     * Simpan Jadwal Ujian Baru
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -51,15 +59,20 @@ class CbtController extends Controller
         return redirect()->route('cbt.index')->with('success', 'Jadwal ujian berhasil dibuat!');
     }
 
+    /**
+     * Halaman Kelola Soal
+     */
     public function manageQuestions($id)
     {
         $exam = CbtExam::with('questions')->findOrFail($id);
         return view('cbt.manage_questions', compact('exam'));
     }
 
+    /**
+     * Simpan Soal Manual
+     */
     public function storeQuestion(Request $request, $id)
     {
-        // ... (Kode simpan manual tetap sama) ...
         $request->validate([
             'question_text' => 'required',
             'option_A' => 'required',
@@ -76,6 +89,7 @@ class CbtController extends Controller
             $imagePath = $request->file('question_image')->store('soal', 'public');
         }
 
+        // Filter opsi agar dinamis (bisa 4 atau 5 opsi)
         $options = [
             'A' => $request->option_A,
             'B' => $request->option_B,
@@ -98,6 +112,9 @@ class CbtController extends Controller
         return back()->with('success', 'Soal berhasil ditambahkan!');
     }
 
+    /**
+     * Hapus Soal
+     */
     public function destroyQuestion($id)
     {
         $question = CbtQuestion::findOrFail($id);
@@ -105,8 +122,9 @@ class CbtController extends Controller
         return back()->with('success', 'Soal berhasil dihapus.');
     }
 
-    // --- TAMBAHAN BARU: LOGIKA IMPORT EXCEL ---
-
+    /**
+     * Import Soal dari Excel
+     */
     public function importQuestions(Request $request, $exam_id)
     {
         $request->validate([
@@ -121,9 +139,11 @@ class CbtController extends Controller
         }
     }
 
+    /**
+     * Download Template Excel/CSV
+     */
     public function downloadTemplate()
     {
-        // Membuat CSV sederhana on-the-fly
         $headers = [
             "Content-type"        => "text/csv",
             "Content-Disposition" => "attachment; filename=template_soal_cbt.csv",
@@ -137,19 +157,128 @@ class CbtController extends Controller
         $callback = function() use ($columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
-
             // Contoh Data Dummy
             fputcsv($file, ['Siapa presiden pertama RI?', 'Soekarno', 'Suharto', 'Habibie', 'Jokowi', 'A', '2']);
             fputcsv($file, ['Ibu kota Jawa Barat adalah?', 'Bandung', 'Jakarta', 'Surabaya', 'Semarang', 'A', '2']);
-
             fclose($file);
         };
 
         return response()->stream($callback, 200, $headers);
     }
 
-    // Placeholder
-    public function questionBank() { return "Halaman Bank Soal (Coming Soon)"; }
-    public function monitoring($exam_id) { return "Halaman Monitoring Ujian (Coming Soon)"; }
-    public function results() { return "Halaman Hasil (Coming Soon)"; }
+    /**
+     * IMPLEMENTASI MONITORING UJIAN (Real-time)
+     * [FIXED] Menggunakan whereHas untuk cek level kelas
+     */
+    public function monitoring($id)
+    {
+        // 1. Ambil Data Ujian
+        $exam = CbtExam::withCount('questions')->findOrFail($id);
+
+        // 2. Ambil Siswa yang Seharusnya Mengikuti Ujian
+        // KITA GUNAKAN WHEREHAS UNTUK CEK KE TABEL SCHOOL_CLASSES
+        $students = Student::with('schoolClass')
+            ->whereHas('schoolClass', function($query) use ($exam) {
+                // [PENTING] Sesuaikan 'level' dengan nama kolom di tabel school_classes Anda.
+                // Jika kolomnya bernama 'grade', ganti 'level' jadi 'grade'.
+                // Jika tidak ada kolom level dan hanya ada 'name' (misal '7A'), gunakan:
+                // $query->where('name', 'like', $exam->class_level . '%');
+                
+                // Asumsi: Ada kolom 'level' di tabel school_classes
+                // Jika error lagi "Unknown column 'level'", ganti baris ini dengan logic LIKE name di atas.
+                $query->where('name', 'like', $exam->class_level . '%');
+            })
+            ->orderBy('name')
+            ->get();
+
+        // 3. Ambil Progress Pengerjaan dari tabel 'cbt_student_exams'
+        $sessions = DB::table('cbt_student_exams')
+            ->where('cbt_exam_id', $id)
+            ->get()
+            ->keyBy('student_id');
+
+        // 4. Gabungkan Data untuk View
+        $monitoringData = $students->map(function($student) use ($sessions) {
+            $session = $sessions->get($student->id);
+            
+            // Default State
+            $status = 'Belum Mengerjakan';
+            $badgeColor = 'slate';
+            $startTime = '-';
+            $score = '-';
+            $isActive = false;
+
+            if ($session) {
+                $startTime = \Carbon\Carbon::parse($session->created_at)->format('H:i');
+                
+                if ($session->status == 'finished') {
+                    $status = 'Selesai';
+                    $badgeColor = 'green';
+                    $score = $session->total_score ?? 0;
+                } else {
+                    $status = 'Sedang Mengerjakan';
+                    $badgeColor = 'blue';
+                    $isActive = true; // Flag untuk tombol reset
+                    $score = $session->total_score ?? 0; // Nilai sementara
+                }
+            }
+
+            return (object) [
+                'id' => $student->id,
+                'name' => $student->name,
+                'class' => $student->schoolClass->name ?? '-',
+                'status' => $status,
+                'badge_color' => $badgeColor,
+                'start_time' => $startTime,
+                'score' => $score,
+                'is_active' => $isActive,
+            ];
+        });
+
+        // 5. Statistik Ringkas Real-time
+        $stats = [
+            'total_students' => $students->count(),
+            'working' => $monitoringData->where('status', 'Sedang Mengerjakan')->count(),
+            'finished' => $monitoringData->where('status', 'Selesai')->count(),
+            'not_started' => $monitoringData->where('status', 'Belum Mengerjakan')->count(),
+        ];
+
+        return view('cbt.monitoring', compact('exam', 'monitoringData', 'stats'));
+    }
+
+    /**
+     * RESET LOGIN SISWA
+     */
+    public function resetExam($exam_id, $student_id)
+    {
+        DB::table('cbt_student_exams')
+            ->where('cbt_exam_id', $exam_id)
+            ->where('student_id', $student_id)
+            ->delete(); 
+
+        return back()->with('success', 'Status ujian siswa berhasil di-reset. Siswa dapat login kembali.');
+    }
+
+    /**
+     * DAFTAR HASIL UJIAN
+     */
+    public function results()
+    {
+        $results = DB::table('cbt_student_exams')
+            ->join('students', 'cbt_student_exams.student_id', '=', 'students.id')
+            ->join('cbt_exams', 'cbt_student_exams.cbt_exam_id', '=', 'cbt_exams.id')
+            ->leftJoin('school_classes', 'students.school_class_id', '=', 'school_classes.id')
+            ->where('cbt_student_exams.status', 'finished')
+            ->select(
+                'cbt_student_exams.*',
+                'students.name as student_name',
+                'school_classes.name as class_name',
+                'cbt_exams.title as exam_title',
+                'cbt_exams.subject_name'
+            )
+            ->orderBy('cbt_student_exams.created_at', 'desc')
+            ->paginate(20);
+
+        return view('cbt.results', compact('results'));
+    }
 }
