@@ -6,7 +6,7 @@ use App\Models\TeachingSession;
 use App\Models\Schedule;
 use App\Models\Student;
 use App\Models\ClassAttendance;
-// [PERBAIKAN 1]: Gunakan Model yang Benar
+// Gunakan Model yang Benar
 use App\Models\DisciplineRecord; 
 use App\Models\DisciplineType;
 use Illuminate\Http\Request;
@@ -93,8 +93,6 @@ class TeachingController extends Controller
     public function history(Request $request)
     {
         $teacherId = Auth::id();
-        
-        // Filter Bulan (Default: Bulan ini)
         $month = $request->input('month', Carbon::now()->format('Y-m'));
 
         $histories = TeachingSession::with(['schedule.schoolClass', 'schedule.subject'])
@@ -105,7 +103,7 @@ class TeachingController extends Controller
                         'attendances as izin' => function($q){ $q->where('status', 'permission'); },
                     ])
                     ->where('teacher_id', $teacherId)
-                    ->where('status', 'closed') // Hanya yang sudah selesai
+                    ->where('status', 'closed')
                     ->where('date', 'like', "$month%")
                     ->orderBy('date', 'desc')
                     ->orderBy('started_at', 'desc')
@@ -159,6 +157,34 @@ class TeachingController extends Controller
         ]);
     }
 
+    // --- [PENTING] INI FUNGSI YANG SEBELUMNYA HILANG ---
+    public function storeManual(Request $request)
+    {
+        $request->validate([
+            'session_id' => 'required|exists:teaching_sessions,id',
+            'student_id' => 'required|exists:students,id',
+            'status'     => 'required|in:present,sick,permission,alpha',
+        ]);
+
+        // Gunakan updateOrCreate agar data tidak ganda jika diklik berkali-kali
+        $attendance = ClassAttendance::updateOrCreate(
+            [
+                'teaching_session_id' => $request->session_id,
+                'student_id' => $request->student_id
+            ],
+            [
+                'status' => $request->status,
+                'scanned_at' => now(), 
+            ]
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Status siswa berhasil diperbarui.',
+            'data' => $attendance
+        ]);
+    }
+
     public function close($id)
     {
         DB::beginTransaction();
@@ -174,12 +200,12 @@ class TeachingController extends Controller
             $presentIds = ClassAttendance::where('teaching_session_id', $id)
                           ->pluck('student_id')->toArray();
 
-            // [PERBAIKAN 2]: Sesuaikan dengan kolom di DisciplineType.php
+            // Auto-Create Jenis Pelanggaran jika belum ada
             $alphaDiscipline = DisciplineType::firstOrCreate(
                 ['name' => 'Bolos Pelajaran (Alpha)'],
                 [
-                    'type' => 'Pelanggaran', // Bukan 'category'
-                    'point_value' => 10,     // Bukan 'point'
+                    'type' => 'Pelanggaran', 
+                    'point_value' => 10,     
                     'description' => 'Siswa tidak berada di kelas saat jam pelajaran.'
                 ] 
             );
@@ -195,13 +221,13 @@ class TeachingController extends Controller
                         'scanned_at' => null
                     ]);
 
-                    // [PERBAIKAN 3]: Gunakan DisciplineRecord & Nama Kolom yang Benar
+                    // Catat ke Buku Disiplin
                     DisciplineRecord::create([
                         'student_id' => $student->id,
                         'discipline_type_id' => $alphaDiscipline->id,
                         'date' => Carbon::today(),
-                        'notes' => 'Tidak mengikuti KBM: ' . $session->schedule->subject->name . ' (' . $session->topic . ')', // Pakai 'notes'
-                        'recorded_by_user_id' => Auth::id() // Pakai 'recorded_by_user_id'
+                        'notes' => 'Tidak mengikuti KBM: ' . $session->schedule->subject->name . ' (' . $session->topic . ')', 
+                        'recorded_by_user_id' => Auth::id() 
                     ]);
 
                     $alphaCount++;

@@ -19,7 +19,6 @@ use App\Http\Controllers\GuestBookController;
 use App\Http\Controllers\ExtracurricularController;
 use App\Http\Controllers\StudentAuthController;
 use App\Http\Controllers\StudentExamController;
-// [WAJIB] Tambahkan Controller SEB yang baru kita buat
 use App\Http\Controllers\SebController; 
 use Illuminate\Support\Facades\Route;
 
@@ -65,14 +64,12 @@ Route::get('/exam/{exam}/download-seb', [SebController::class, 'downloadConfig']
 // 4. GROUP ROUTE SISWA
 Route::middleware(['auth:student'])->prefix('student/exam')->name('student.exam.')->group(function () {
     
-    // A. Halaman Daftar Ujian (BISA DIBUKA DI CHROME BIASA)
-    // Kita keluarkan ini dari middleware 'seb' agar siswa bisa masuk dan download file .seb
+    // A. Halaman Daftar Ujian (BISA DIBUKA DI CHROME BIASA)    
     Route::get('/', [StudentExamController::class, 'index'])->name('index');
 
-    // B. Halaman Pengerjaan Ujian (WAJIB PAKAI SEB)
-    // Kita buat grup nested (bersarang) khusus untuk route yang butuh SEB
+    // B. Halaman Pengerjaan Ujian (WAJIB PAKAI SEB)    
     Route::middleware(['seb'])->group(function () {
-        
+
         // Konfirmasi (Start)
         Route::get('/{exam}/start', [StudentExamController::class, 'showStart'])->name('showStart');
         Route::post('/{exam}/start', [StudentExamController::class, 'start'])->name('start');
@@ -186,7 +183,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports/export', [ExtracurricularController::class, 'exportReports'])->name('reports.export');
     });
 
-     // === FITUR BARU: TEACHING AGENDA (KBM) ===
+     // === TEACHING AGENDA (KBM) ===
     Route::prefix('teaching')->name('teaching.')->group(function () {
         // Dashboard Jadwal Mengajar Guru
         Route::get('/', [\App\Http\Controllers\TeachingController::class, 'index'])->name('index');
@@ -196,6 +193,9 @@ Route::middleware('auth')->group(function () {
 
         // Mulai Sesi (Tombol Start)
         Route::post('/start/{schedule_id}', [\App\Http\Controllers\TeachingController::class, 'start'])->name('start');
+        
+         // Simpan Absen Manual (Sakit/Izin/Alpha/Hadir Manual)
+        Route::post('/attendance/manual', [\App\Http\Controllers\TeachingController::class, 'storeManual'])->name('manual');
         
         // Halaman KBM Berlangsung (Isi Jurnal & Live Absen)
         Route::get('/session/{id}', [\App\Http\Controllers\TeachingController::class, 'show'])->name('show');
