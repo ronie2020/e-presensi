@@ -9,13 +9,15 @@
             }
             
             /* 2. Reset Layout Container agar Full Width Kertas */
-            body { 
-                background: white !important; 
-                font-family: 'Times New Roman', serif; /* Font resmi laporan */
-                -webkit-print-color-adjust: exact; 
+            body, html, #app, main { 
+                height: auto !important; 
+                width: 100% !important; 
+                overflow: visible !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                background: white !important;
+                display: block !important; /* Mencegah Flexbox di root */
             }
-            main { padding: 0 !important; margin: 0 !important; width: 100% !important; }
-            .min-h-screen { height: auto !important; }
             
             /* Hilangkan border radius dan shadow layout utama */
             .flex-1.bg-gray-50, .bg-white, .rounded-3xl { 
@@ -36,7 +38,7 @@
             table {
                 width: 100% !important;
                 border-collapse: collapse !important;
-                font-size: 11px !important; /* Perkecil font agar muat banyak */
+                font-size: 11px !important;
             }
             th, td {
                 border: 1px solid #000 !important; /* Border hitam tegas */
@@ -48,7 +50,9 @@
                 text-transform: uppercase;
                 font-weight: bold;
                 text-align: center;
+                -webkit-print-color-adjust: exact;
             }
+            tr { page-break-inside: avoid; }
             
             /* 4. Elemen Khusus Cetak */
             .print-header { display: block !important; }
@@ -59,7 +63,6 @@
             
             /* Reset warna teks untuk hemat tinta */
             .text-blue-600, .text-emerald-600, .text-rose-500 { color: black !important; }
-            .bg-slate-100, .bg-rose-50 { background-color: transparent !important; }
         }
 
         /* Default: Sembunyikan Elemen Cetak di Layar */

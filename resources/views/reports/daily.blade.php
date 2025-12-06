@@ -9,7 +9,7 @@
         reportType: '{{ request('report_type', 'daily') }}' 
     }">
         
-        {{-- Header Page & Filter Section (Diadaptasi dari manajemen.html) --}}
+        {{-- Header Page & Filter Section --}}
         <div class="mb-8 flex flex-col justify-between gap-6 no-print">
             
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -20,14 +20,14 @@
                     </p>
                 </div>
                 
-                {{-- Tombol Cetak --}}
-                <button onclick="window.print()" class="w-fit bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 sm:px-4 sm:py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-200 flex items-center gap-2 group">
+                {{-- PERBAIKAN: Tombol Cetak Menggunakan Link (Tag A) ke Route Print Khusus --}}
+                <a href="{{ route('reports.printDaily', request()->all()) }}" target="_blank" class="w-fit bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 sm:px-4 sm:py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-200 flex items-center gap-2 group">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                    <span class="hidden sm:inline font-bold text-sm">Cetak Rekapan</span>
-                </button>
+                    <span class="hidden sm:inline font-bold text-sm">Cetak Laporan Resmi</span>
+                </a>
             </div>
 
-            {{-- FILTER CARD (ADAPTASI DARI MANAJEMEN.HTML) --}}
+            {{-- FILTER CARD --}}
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
@@ -83,21 +83,6 @@
             </div>
         </div>
 
-        {{-- JUDUL KHUSUS CETAK (Hanya Muncul Saat Print) --}}
-        <div class="hidden print-only mb-6 text-center border-b-2 border-black pb-4">
-            <h1 class="text-2xl font-black text-black uppercase">Laporan Absensi Siswa</h1>
-            <p class="text-sm text-black">
-                Periode: 
-                @if(request('report_type') == 'weekly')
-                    Mingguan ({{ request('week') }})
-                @elseif(request('report_type') == 'monthly')
-                    Bulanan ({{ request('month') }})
-                @else
-                    {{ $selectedDate_db->translatedFormat('d F Y') }}
-                @endif
-            </p>
-        </div>
-
         @if (session('success'))
             <div x-data="{ show: true }" x-show="show" x-transition class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl font-medium text-sm flex justify-between items-center shadow-sm no-print">
                 <div class="flex items-center gap-2">
@@ -109,43 +94,43 @@
         @endif
 
         {{-- Kartu Stats --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 print:grid-cols-3 print:gap-4">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all duration-300 print:border-black print:p-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all duration-300">
                 <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 print:text-black">Total Hadir</p>
-                    <h3 class="text-3xl font-extrabold text-gray-800 group-hover:text-emerald-600 transition-colors print:text-black">{{ $hadirCount }}</h3>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Total Hadir</p>
+                    <h3 class="text-3xl font-extrabold text-gray-800 group-hover:text-emerald-600 transition-colors">{{ $hadirCount }}</h3>
                     @if($terlambatCount > 0)
-                        <span class="inline-flex items-center mt-2 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 print:border print:border-black print:bg-transparent print:text-black">Termasuk {{ $terlambatCount }} Terlambat</span>
+                        <span class="inline-flex items-center mt-2 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700">Termasuk {{ $terlambatCount }} Terlambat</span>
                     @endif
                 </div>
-                <div class="h-12 w-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform print:hidden">
+                <div class="h-12 w-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all duration-300 print:border-black print:p-4">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all duration-300">
                 <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 print:text-black">Sakit / Izin / Alfa</p>
-                    <h3 class="text-3xl font-extrabold text-gray-800 group-hover:text-amber-500 transition-colors print:text-black">{{ $sakitCount + $izinCount + $alfaCount }}</h3>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Sakit / Izin / Alfa</p>
+                    <h3 class="text-3xl font-extrabold text-gray-800 group-hover:text-amber-500 transition-colors">{{ $sakitCount + $izinCount + $alfaCount }}</h3>
                 </div>
-                <div class="h-12 w-12 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform print:hidden">
+                <div class="h-12 w-12 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all duration-300 print:border-black print:p-4">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between group hover:shadow-md transition-all duration-300">
                 <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 print:text-black">Belum Absen</p>
-                    <h3 class="text-3xl font-extrabold text-gray-800 group-hover:text-gray-600 transition-colors print:text-black">{{ $belumAbsenList->count() }}</h3>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Belum Absen</p>
+                    <h3 class="text-3xl font-extrabold text-gray-800 group-hover:text-gray-600 transition-colors">{{ $belumAbsenList->count() }}</h3>
                 </div>
-                <div class="h-12 w-12 bg-gray-50 text-gray-400 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform print:hidden">
+                <div class="h-12 w-12 bg-gray-50 text-gray-400 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
             </div>
         </div>
 
         {{-- TABEL UTAMA --}}
-        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden print:border-none print:shadow-none">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
             
-            {{-- Tabs Header (Hidden when printing) --}}
+            {{-- Tabs Header --}}
             <div class="flex border-b border-gray-100 overflow-x-auto bg-gray-50/50 p-2 gap-2 flex-nowrap no-scrollbar no-print">
                 <button @click="activeTab = 'hadir'" :class="activeTab === 'hadir' ? 'bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-100' : 'text-gray-500 hover:bg-white/60'" class="flex-none py-3 px-6 rounded-xl text-sm font-bold whitespace-nowrap transition-all duration-200">Hadir / Terlambat</button>
                 <button @click="activeTab = 'belum'" :class="activeTab === 'belum' ? 'bg-white text-gray-700 shadow-sm ring-1 ring-gray-200' : 'text-gray-500 hover:bg-white/60'" class="flex-none py-3 px-6 rounded-xl text-sm font-bold whitespace-nowrap transition-all duration-200">Belum Absen <span class="ml-1 px-1.5 py-0.5 bg-red-100 text-red-600 rounded text-[10px]">{{ $belumAbsenList->count() }}</span></button>
@@ -154,43 +139,41 @@
 
             <div class="w-full relative min-h-[300px]">
                 
-                {{-- TAB HADIR (Halaman Khusus) --}}
-                <div x-show="activeTab === 'hadir'" class="w-full print:block">
-                    <div class="print:mb-4 print:font-bold print:text-lg hidden print:block border-b border-black pb-2">Data Hadir & Terlambat</div>
-                    
+                {{-- TAB HADIR --}}
+                <div x-show="activeTab === 'hadir'" class="w-full">
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
                         <table class="w-full text-left border-collapse" style="min-width: 800px; width: 100%;">
-                            <thead class="bg-gray-50 border-b border-gray-100 print:bg-gray-100 print:text-black">
+                            <thead class="bg-gray-50 border-b border-gray-100">
                                 <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3 print:text-black">Siswa</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/6 print:text-black">Masuk</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/6 print:text-black">Pulang</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3">Siswa</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/6">Masuk</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/6">Pulang</th>
                                     <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider w-1/6 no-print">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-50 print:divide-gray-300">
+                            <tbody class="divide-y divide-gray-50">
                                 @forelse ($attendancesHadir as $att)
-                                    <tr class="hover:bg-blue-50/50 transition-colors group print:break-inside-avoid">
+                                    <tr class="hover:bg-blue-50/50 transition-colors group">
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="font-bold text-gray-900 print:text-black">{{ $att->student->name }}</div>
-                                            <div class="text-xs text-gray-400 print:text-gray-600">{{ $att->student->schoolClass->name ?? '-' }}</div>
+                                            <div class="font-bold text-gray-900">{{ $att->student->name }}</div>
+                                            <div class="text-xs text-gray-400">{{ $att->student->schoolClass->name ?? '-' }}</div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             @if($att->status_final == 'Terlambat')
                                                 <div class="flex flex-col items-start">
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-amber-100 text-amber-800 font-mono ring-1 ring-amber-200 print:bg-transparent print:ring-0 print:text-black print:p-0">
+                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-amber-100 text-amber-800 font-mono ring-1 ring-amber-200">
                                                         {{ $att->time_in_final ? \Carbon\Carbon::parse($att->time_in_final)->format('H:i') : '-' }}
                                                     </span>
-                                                    <span class="text-[10px] font-bold text-amber-600 mt-1 uppercase tracking-wide print:text-black">(Terlambat)</span>
+                                                    <span class="text-[10px] font-bold text-amber-600 mt-1 uppercase tracking-wide">(Terlambat)</span>
                                                 </div>
                                             @else
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-emerald-100 text-emerald-800 font-mono print:bg-transparent print:text-black print:p-0">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-emerald-100 text-emerald-800 font-mono">
                                                     {{ $att->time_in_final ? \Carbon\Carbon::parse($att->time_in_final)->format('H:i') : '-' }}
                                                 </span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-indigo-100 text-indigo-800 font-mono print:bg-transparent print:text-black print:p-0">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-indigo-100 text-indigo-800 font-mono">
                                                 {{ $att->time_out_final ? \Carbon\Carbon::parse($att->time_out_final)->format('H:i') : '-' }}
                                             </span>
                                         </td>
@@ -213,7 +196,6 @@
                             </tbody>
                         </table>
                     </div>
-                    {{-- Pagination Khusus Hadir (Menyimpan State Tab) --}}
                     @if($attendancesHadir->hasPages())
                         <div class="p-4 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4 no-print">
                             {{ $attendancesHadir->appends(request()->query() + ['activeTab' => 'hadir'])->links() }}
@@ -222,9 +204,7 @@
                 </div>
 
                 {{-- TAB BELUM ABSEN --}}
-                <div x-show="activeTab === 'belum'" style="display: none;" class="w-full print:block print:mt-8">
-                    <div class="print:mb-4 print:font-bold print:text-lg hidden print:block border-b border-black pb-2">Data Belum Absen</div>
-
+                <div x-show="activeTab === 'belum'" style="display: none;" class="w-full">
                     @if($belumAbsenList->count() > 0)
                         <div class="p-4 bg-red-50 border-b border-red-100 flex flex-col md:flex-row justify-between items-center gap-4 no-print">
                             <div class="flex items-center gap-3">
@@ -250,18 +230,18 @@
                     @endif
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full">
                         <table class="min-w-full divide-y" style="min-width: 800px; width: 100%;">
-                            <thead class="bg-gray-50 border-b border-gray-100 print:bg-gray-100">
+                            <thead class="bg-gray-50 border-b border-gray-100">
                                 <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3 print:text-black">Siswa</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3 print:text-black">Kelas</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3">Siswa</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3">Kelas</th>
                                     <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3 no-print">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-50 print:divide-gray-300">
+                            <tbody class="divide-y divide-gray-50">
                                 @forelse ($belumAbsenList as $student)
-                                    <tr class="hover:bg-gray-50 transition-colors print:break-inside-avoid">
-                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 print:text-black">{{ $student->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500 print:text-black">{{ $student->schoolClass->name }}</td>
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $student->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500">{{ $student->schoolClass->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right no-print">
                                             <button onclick="openManualModalDaily({{ $student->id }}, '{{ $student->name }}')" 
                                                 class="inline-flex items-center gap-2 bg-white border border-blue-200 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-50 transition-colors shadow-sm">
@@ -281,30 +261,28 @@
                     </div>
                 </div>
 
-                {{-- TAB KET. LAIN (Halaman Khusus) --}}
-                <div x-show="activeTab === 'lain'" style="display: none;" class="w-full print:block print:mt-8">
-                    <div class="print:mb-4 print:font-bold print:text-lg hidden print:block border-b border-black pb-2">Data Izin / Sakit / Alfa</div>
-
-                    <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full border rounded-lg print:border-none">
+                {{-- TAB KET. LAIN --}}
+                <div x-show="activeTab === 'lain'" style="display: none;" class="w-full">
+                    <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full border rounded-lg border-none">
                         <table class="w-full text-left border-collapse" style="min-width: 800px; width: 100%;">
-                            <thead class="bg-gray-50 border-b border-gray-100 print:bg-gray-100">
+                            <thead class="bg-gray-50 border-b border-gray-100">
                                 <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/4 print:text-black">Siswa</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/6 print:text-black">Status</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3 print:text-black">Keterangan</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/4">Siswa</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/6">Status</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3">Keterangan</th>
                                     <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider w-1/6 no-print">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-50 print:divide-gray-300">
+                            <tbody class="divide-y divide-gray-50">
                                 @forelse ($attendancesLain as $att)
-                                    <tr class="hover:bg-amber-50/30 transition-colors print:break-inside-avoid">
-                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 print:text-black">{{ $att->student->name }}</td>
+                                    <tr class="hover:bg-amber-50/30 transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $att->student->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2.5 py-1 rounded-lg text-xs font-bold {{ $att->status_final == 'Alfa' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700' }} print:bg-transparent print:p-0 print:text-black">
+                                            <span class="px-2.5 py-1 rounded-lg text-xs font-bold {{ $att->status_final == 'Alfa' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700' }}">
                                                 {{ $att->status_final }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-500 min-w-[200px] italic print:text-black">{{ $att->notes_final ?: '-' }}</td>
+                                        <td class="px-6 py-4 text-sm text-gray-500 min-w-[200px] italic">{{ $att->notes_final ?: '-' }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right no-print">
                                             <button onclick="openEditModal({{ $att->id }}, '{{ $att->student->name }}', '{{ $att->status_final }}', `{{ $att->notes_final }}`, '', '')" 
                                                 class="text-gray-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-100 rounded-lg">
@@ -318,7 +296,6 @@
                             </tbody>
                         </table>
                     </div>
-                    {{-- Pagination Khusus Lain (Menyimpan State Tab) --}}
                     @if($attendancesLain->hasPages())
                         <div class="p-4 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4 no-print">
                             {{ $attendancesLain->appends(request()->query() + ['activeTab' => 'lain'])->links() }}
@@ -328,11 +305,6 @@
             </div>
         </div>
     </div>
-        {{-- Tombol Cetak --}}
-            <a href="{{ route('reports.printDaily', request()->all()) }}" target="_blank" class="w-fit bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 sm:px-4 sm:py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-200 flex items-center gap-2 group">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                <span class="hidden sm:inline font-bold text-sm">Cetak Laporan</span>
-            </a>
         
     {{-- MODAL MANUAL/EDIT + SCRIPT --}}
     <div id="manualModalDaily" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-opacity no-print">
@@ -429,22 +401,6 @@
             </form>
         </div>
     </div>
-
-    {{-- CSS KHUSUS UNTUK PRINT --}}
-    <style>
-        @media print {
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { background-color: white; }
-            .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; }
-            .rounded-2xl, .rounded-xl, .rounded-lg { border-radius: 0 !important; }
-            /* Paksa tabel agar lebar penuh */
-            table { width: 100% !important; min-width: 0 !important; }
-            /* Pastikan semua tab ditampilkan berurutan saat print */
-            [x-show] { display: block !important; }
-            /* Sembunyikan navigasi tab AlpineJS yang tidak aktif jika perlu, tapi kita ingin semua data */
-        }
-    </style>
 
     <script>
         function confirmBulkAlpha(count) {

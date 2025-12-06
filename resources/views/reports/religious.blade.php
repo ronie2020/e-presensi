@@ -3,6 +3,31 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
 
+    {{-- TAMBAHAN: CSS FIX UNTUK PRINT DI HALAMAN INI --}}
+    <style>
+        @media print {
+            /* Sembunyikan Navigasi & Sidebar */
+            nav, header, aside, .sidebar, .no-print { display: none !important; }
+            
+            /* Reset Layout Konten */
+            body, main, #app, .min-h-screen { 
+                height: auto !important; 
+                width: 100% !important; 
+                overflow: visible !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                background: white !important;
+            }
+
+            /* Pastikan Semua Tab Muncul (Opsional, atau biarkan hanya tab aktif) */
+            /* [x-show] { display: block !important; } */
+
+            /* Perbaikan Tabel */
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { color: black !important; }
+        }
+    </style>
+
     {{-- FIX: Ambil tab aktif dari URL agar tidak reset --}}
     <div class="py-6 sm:py-8" x-data="{ 
         activeTab: '{{ request('activeTab', 'hadir') }}',
@@ -45,7 +70,7 @@
                 </div>
             </div>
 
-            {{-- FILTER CARD (ADAPTASI DARI MANAJEMEN.HTML) --}}
+            {{-- FILTER CARD --}}
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
                     <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>

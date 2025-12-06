@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-// [PENTING] Import Semua Model agar tidak error "Class not found"
 use App\Models\AttendanceSiswa;
 use App\Models\Student;
 use App\Models\TeachingSession; 
@@ -124,9 +123,13 @@ class ReportController extends Controller
         
         // Data Belum Absen
         $existingStudentIds = $attendances->pluck('student_id')->toArray();
+        
+        // [PERBAIKAN ERROR 42S22 DISINI]
+        // Sebelumnya: orderBy('school_class_id') -> Error karena kolom tidak ada
+        // Sekarang: orderBy('class_id') -> Menggunakan nama kolom standar Laravel
         $belumAbsenList = Student::with('schoolClass')
             ->whereNotIn('id', $existingStudentIds)
-            ->orderBy('school_class_id') // Urutkan per kelas agar rapi saat dicetak
+            ->orderBy('class_id') // GANTI INI: school_class_id -> class_id
             ->orderBy('name')
             ->get();
 
