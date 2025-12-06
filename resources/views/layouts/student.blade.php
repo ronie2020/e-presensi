@@ -11,14 +11,13 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.tailwindcss.com"></script> 
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased bg-slate-50">
     
-    <!-- NAVBAR SEDERHANA (Tanpa Sidebar) -->
+    <!-- NAVBAR SEDERHANA -->
     <nav class="bg-white border-b border-slate-200 fixed w-full z-30 top-0">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
@@ -36,10 +35,9 @@
                 <!-- Menu Kanan (User Info & Logout) -->
                 <div class="flex items-center gap-4">
                     <div class="hidden md:block text-right mr-2">
-                        @if(Auth::guard('student')->check())
-                            <p class="text-sm font-bold text-slate-700">{{ Auth::guard('student')->user()->name }}</p>
-                            <p class="text-xs text-slate-500">{{ Auth::guard('student')->user()->student_id }}</p>
-                        @endif
+                        <!-- Pastikan Auth guard sesuai -->
+                        <p class="text-sm font-bold text-slate-700">{{ Auth::guard('student')->user()->name ?? 'Siswa' }}</p>
+                        <p class="text-xs text-slate-500">{{ Auth::guard('student')->user()->student_id ?? '-' }}</p>
                     </div>
 
                     <!-- Tombol Logout -->

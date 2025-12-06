@@ -13,27 +13,30 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         
-        // --- LOGIKA REDIRECT USER YANG BELUM LOGIN ---
+        // 1. DAFTAR ALIAS MIDDLEWARE
+        $middleware->alias([
+            'seb' => \App\Http\Middleware\RequireSafeExamBrowser::class,
+        ]);
+
+        // 2. MENGATASI ERROR 419 SAAT LOGOUT (CSRF EXCEPTION)
+        // Kita whitelist route logout agar tidak kena validasi token saat sesi habis
+        $middleware->validateCsrfTokens(except: [
+            'logout',           // Untuk logout Admin/Guru
+            'student/logout',   // Untuk logout Siswa
+        ]);
+
+        // 3. LOGIKA REDIRECT USER YANG BELUM LOGIN
         $middleware->redirectGuestsTo(function (Request $request) {
-            // 1. Jika URL yang diakses berawalan "student/...", arahkan ke Login Siswa
+            // Jika URL yang diakses berawalan "student/...", arahkan ke Login Siswa
             if ($request->is('student/*') || $request->is('student')) {
                 return route('student.login');
             }
             
-            // 2. Default ke Login Guru
+            // Default ke Login Guru
             return route('login');
         });
 
     })
-
-    ->withMiddleware(function (Middleware $middleware) {
-            $middleware->alias([
-                'seb' => \App\Http\Middleware\RequireSafeExamBrowser::class,
-            ]);
-    })
-
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
-
-    

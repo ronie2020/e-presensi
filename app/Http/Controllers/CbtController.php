@@ -168,7 +168,6 @@ class CbtController extends Controller
 
     /**
      * IMPLEMENTASI MONITORING UJIAN (Real-time)
-     * [FIXED] Menggunakan whereHas untuk cek level kelas
      */
     public function monitoring($id)
     {
@@ -176,16 +175,10 @@ class CbtController extends Controller
         $exam = CbtExam::withCount('questions')->findOrFail($id);
 
         // 2. Ambil Siswa yang Seharusnya Mengikuti Ujian
-        // KITA GUNAKAN WHEREHAS UNTUK CEK KE TABEL SCHOOL_CLASSES
         $students = Student::with('schoolClass')
             ->whereHas('schoolClass', function($query) use ($exam) {
-                // [PENTING] Sesuaikan 'level' dengan nama kolom di tabel school_classes Anda.
-                // Jika kolomnya bernama 'grade', ganti 'level' jadi 'grade'.
-                // Jika tidak ada kolom level dan hanya ada 'name' (misal '7A'), gunakan:
-                // $query->where('name', 'like', $exam->class_level . '%');
-                
-                // Asumsi: Ada kolom 'level' di tabel school_classes
-                // Jika error lagi "Unknown column 'level'", ganti baris ini dengan logic LIKE name di atas.
+                // Asumsi: Ada kolom 'level' di tabel school_classes atau sesuaikan dengan struktur database Anda
+                // Jika pakai 'name' (misal 7A, 7B), gunakan: $query->where('name', 'like', $exam->class_level . '%');
                 $query->where('name', 'like', $exam->class_level . '%');
             })
             ->orderBy('name')
@@ -280,5 +273,52 @@ class CbtController extends Controller
             ->paginate(20);
 
         return view('cbt.results', compact('results'));
+    }
+
+    /**
+     * Generate dan Download File Config (.seb)
+     */
+    public function download_seb($id)
+    {
+        $exam = CbtExam::findOrFail($id);
+
+        // [PERBAIKAN] Gunakan route 'student.login' agar mengarah ke Login Siswa
+        // Sebelumnya: route('login') -> mengarah ke Login Guru/Admin
+        $startUrl = route('student.login'); 
+
+        // Generate Config XML
+        $sebConfig = '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>originatorVersion</key>
+    <string>SEB_Win_2.4.1</string>
+    <key>startURL</key>
+    <string>' . $startUrl . '</string>
+    <key>sendBrowserExamKey</key>
+    <true/>
+    <key>examKeySalt</key>
+    <data>' . base64_encode(random_bytes(32)) . '</data>
+    <key>allowQuit</key>
+    <true/>
+    <key>ignoreExitKeys</key>
+    <false/>
+    <key>showTaskBar</key>
+    <true/>
+    <key>showReloadButton</key>
+    <true/>
+    <key>showQuitButton</key>
+    <true/>
+</dict>
+</plist>';
+
+        $fileName = \Illuminate\Support\Str::slug($exam->title) . '.seb';
+
+        return response()->streamDownload(function () use ($sebConfig) {
+            echo $sebConfig;
+        }, $fileName, [
+            'Content-Type' => 'application/seb',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"'
+        ]);
     }
 }

@@ -20,6 +20,8 @@ use App\Http\Controllers\ExtracurricularController;
 use App\Http\Controllers\StudentAuthController;
 use App\Http\Controllers\StudentExamController;
 use App\Http\Controllers\SebController; 
+// [PENTING] Import CbtController agar bisa dipanggil di route download
+use App\Http\Controllers\CbtController; 
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -30,8 +32,6 @@ use Illuminate\Support\Facades\Route;
 
 // --- UTAMA: RUTE LANDING PAGE ---
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
-
-// ... (Route publik lainnya tetap sama) ...
 Route::get('/pengajar', [LandingPageController::class, 'teachers'])->name('teachers.index');
 Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
 Route::get('/kiosk', [KioskController::class, 'showKiosk'])->name('kiosk.show');
@@ -57,8 +57,12 @@ Route::middleware('guest:student')->group(function() {
 Route::post('/student/logout', [StudentAuthController::class, 'logout'])->name('student.logout');
 
 // 3. Route Publik SEB (Landing Page & Download)
+// Route untuk menampilkan halaman landing pilihan device (Laptop/HP)
 Route::get('/exam/{exam}/seb-landing', [SebController::class, 'landing'])->name('cbt.seb_landing');
-Route::get('/exam/{exam}/download-seb', [SebController::class, 'downloadConfig'])->name('cbt.download_seb');
+
+// [PERBAIKAN UTAMA] Route untuk download file config .seb
+// Mengarah ke CbtController@download_seb dengan parameter {id}
+Route::get('/exam/{id}/download-seb', [CbtController::class, 'download_seb'])->name('cbt.download_seb');
 
 
 // 4. GROUP ROUTE SISWA
