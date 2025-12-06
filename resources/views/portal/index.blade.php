@@ -1,13 +1,31 @@
 @extends('layouts.public')
 
 @section('content')
-<!-- Tambahkan x-cloak di style global agar tidak ada flash saat load -->
+<!-- 
+    NOTE: Idealnya block <style> ini dipindahkan ke file CSS terpisah (misal: resources/css/app.css) 
+    jika menggunakan Vite/Mix untuk performa caching yang lebih baik.
+-->
 <style>
     [x-cloak] { display: none !important; }
     .glass-effect {
         background: rgba(255, 255, 255, 0.7);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
+    }
+    @keyframes blob {
+        0% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(30px, -50px) scale(1.1); }
+        66% { transform: translate(-20px, 20px) scale(0.9); }
+        100% { transform: translate(0px, 0px) scale(1); }
+    }
+    .animate-blob {
+        animation: blob 7s infinite;
+    }
+    .animation-delay-2000 {
+        animation-delay: 2s;
+    }
+    .animation-delay-4000 {
+        animation-delay: 4s;
     }
 </style>
 
@@ -18,6 +36,7 @@
         
         <!-- Background Decoration -->
         <div class="absolute inset-0 bg-slate-900 z-0">
+            <!-- Gunakan asset() lokal jika memungkinkan untuk menghindari ketergantungan internet -->
             <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-30 mix-blend-overlay group-hover:scale-105 transition-transform duration-[3s]"></div>
             <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950/80 to-slate-900"></div>
             <!-- Pattern Overlay -->
@@ -130,7 +149,7 @@
 
             <!-- Error Message -->
             @if(session('error') || $errors->any())
-                <div class="mt-6 p-4 bg-rose-500/90 backdrop-blur-md border border-rose-400 rounded-2xl text-white flex items-center justify-center gap-3 animate-bounce shadow-xl max-w-lg mx-auto" role="alert">
+                <div class="mt-6 p-4 bg-rose-500/90 backdrop-blur-md border border-rose-400 rounded-2xl text-white flex items-center justify-center gap-3 animate-pulse shadow-xl max-w-lg mx-auto" role="alert">
                     <div class="bg-white/20 rounded-full p-1.5"><i class="ph-bold ph-warning text-white"></i></div>
                     <span class="font-bold text-sm">{{ session('error') ?? $errors->first() }}</span>
                 </div>
@@ -143,7 +162,7 @@
         </div>
     </div>
 
-    <!-- 2. FITUR GRID (Tetap sama, hanya penyesuaian sedikit pada hover) -->
+    <!-- 2. FITUR GRID -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-2 mb-12">
         <!-- Kartu 1: Absensi -->
         <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-default" data-aos="fade-up" data-aos-delay="200">
@@ -194,22 +213,4 @@
         </div>
     </div>
 </div>
-
-<style>
-    @keyframes blob {
-        0% { transform: translate(0px, 0px) scale(1); }
-        33% { transform: translate(30px, -50px) scale(1.1); }
-        66% { transform: translate(-20px, 20px) scale(0.9); }
-        100% { transform: translate(0px, 0px) scale(1); }
-    }
-    .animate-blob {
-        animation: blob 7s infinite;
-    }
-    .animation-delay-2000 {
-        animation-delay: 2s;
-    }
-    .animation-delay-4000 {
-        animation-delay: 4s;
-    }
-</style>
 @endsection

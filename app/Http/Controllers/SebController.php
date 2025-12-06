@@ -9,11 +9,14 @@ class SebController extends Controller
 {
     /**
      * Menampilkan Halaman Landing Page SEB
-     * (Halaman pilihan device HP / Laptop)
+     * (Halaman info jika user belum pakai SEB atau baru pemeriksaan)
      */
     public function landing(CbtExam $exam)
     {
-        // Pastikan file view ada di resources/views/cbt/seb_landing.blade.php
-        return view('cbt.seb_landing', compact('exam'));
+        // PERBAIKAN:
+        // Panggil 'cbt.seb_info' (Halaman Konten), BUKAN 'cbt.seb_landing' (Layout).
+        // File seb_info.blade.php adalah file yang barusan kita buat (yang ada pilihan Laptop/HP).
+        
+        return view('cbt.seb_info', compact('exam'));
     }
 }

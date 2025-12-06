@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\CbtExam;
 use App\Models\CbtQuestion;
 use App\Models\Student;
+use Illuminate\Support\Facades\Storage; // Tambahkan ini untuk handle hapus gambar
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\QuestionsImport;
 
@@ -113,11 +114,67 @@ class CbtController extends Controller
     }
 
     /**
+     * UPDATE SOAL (BARU DITAMBAHKAN)
+     */
+    public function updateQuestion(Request $request, $id)
+    {
+        // 1. Validasi
+        $request->validate([
+            'question_text' => 'required',
+            'option_A' => 'required',
+            'option_B' => 'required',
+            'correct_answer' => 'required|in:A,B,C,D,E',
+            'score_weight' => 'required|integer|min:1',
+            'question_image' => 'nullable|image|max:2048'
+        ]);
+
+        // 2. Cari Soal
+        $question = CbtQuestion::findOrFail($id);
+
+        // 3. Handle Gambar Baru
+        if ($request->hasFile('question_image')) {
+            // Hapus gambar lama jika ada
+            if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
+                Storage::delete('public/' . $question->question_image);
+            }
+            // Simpan gambar baru
+            $question->question_image = $request->file('question_image')->store('soal', 'public');
+        }
+
+        // 4. Update Opsi
+        $options = [
+            'A' => $request->option_A,
+            'B' => $request->option_B,
+            'C' => $request->option_C,
+            'D' => $request->option_D,
+            'E' => $request->option_E ?? null,
+        ];
+        // Filter null values
+        $options = array_filter($options, fn($value) => !is_null($value) && $value !== '');
+
+        // 5. Simpan Data Lainnya
+        $question->question_text = $request->question_text;
+        $question->options = $options; // Laravel otomatis convert array ke JSON jika di model di-cast
+        $question->correct_answer = $request->correct_answer;
+        $question->score_weight = $request->score_weight;
+        
+        $question->save();
+
+        return back()->with('success', 'Soal berhasil diperbarui!');
+    }
+
+    /**
      * Hapus Soal
      */
     public function destroyQuestion($id)
     {
         $question = CbtQuestion::findOrFail($id);
+        
+        // Hapus gambar fisik jika ada
+        if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
+            Storage::delete('public/' . $question->question_image);
+        }
+        
         $question->delete();
         return back()->with('success', 'Soal berhasil dihapus.');
     }
@@ -320,5 +377,23 @@ class CbtController extends Controller
             'Content-Type' => 'application/seb',
             'Content-Disposition' => 'attachment; filename="' . $fileName . '"'
         ]);
+    }
+
+    /**
+     * [BARU] Refresh Token Manual
+     */
+    public function refreshToken($id)
+    {
+        $exam = CbtExam::findOrFail($id);
+        
+        // Generate Token Baru (Huruf Besar & Angka, 5 Karakter)
+        // Menggunakan Str::upper(Str::random(5)) adalah cara termudah
+        $newToken = strtoupper(\Illuminate\Support\Str::random(5));
+        
+        $exam->update([
+            'token' => $newToken
+        ]);
+
+        return back()->with('success', 'Token ujian berhasil diperbarui: ' . $newToken);
     }
 }

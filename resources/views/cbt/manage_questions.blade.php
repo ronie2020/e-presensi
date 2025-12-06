@@ -1,13 +1,32 @@
 <x-app-layout>
-    <!-- Gunakan x-data AlpineJS untuk kontrol modal -->
-    <div x-data="{ showImportModal: false }">
+    <!-- 
+        UPDATE: x-data diperluas untuk menangani Modal Edit 
+        Kita menyimpan data form edit di dalam object 'editState'
+    -->
+    <div x-data="{ 
+        showImportModal: false, 
+        showEditModal: false,
+        editState: {
+            url: '',
+            question_text: '',
+            option_A: '',
+            option_B: '',
+            option_C: '',
+            option_D: '',
+            correct_answer: 'A',
+            score_weight: 2
+        },
+        openEdit(data, url) {
+            this.editState = { ...data, url: url };
+            this.showEditModal = true;
+        }
+    }">
         
         <x-slot name="header">
             <div class="flex justify-between items-center">
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                     {{ __('Kelola Soal Ujian') }}
                 </h2>
-                <!-- Link Alternatif di Header -->
                 <a href="{{ route('cbt.index') }}" class="text-sm text-slate-500 hover:text-slate-700">&larr; Kembali ke Dashboard</a>
             </div>
         </x-slot>
@@ -22,7 +41,6 @@
                         <p class="text-slate-500 text-sm">{{ $exam->subject_name }} - Kelas {{ $exam->class_level }}</p>
                     </div>
                     <div class="flex items-center gap-4">
-                        <!-- Tombol Buka Modal Import -->
                         <button @click="showImportModal = true" class="px-4 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition flex items-center gap-2 shadow-lg shadow-green-500/30">
                             <i class="ph-bold ph-microsoft-excel-logo"></i> Import Excel
                         </button>
@@ -107,7 +125,6 @@
                     <div class="lg:w-3/5 space-y-4">
                         <div class="flex justify-between items-center mb-2">
                             <h3 class="font-bold text-slate-800">Daftar Soal</h3>
-                            <!-- TOMBOL KEMBALI TAMBAHAN -->
                             <a href="{{ route('cbt.index') }}" class="px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition shadow-sm flex items-center gap-2">
                                 <i class="ph-bold ph-arrow-left"></i> Selesai & Kembali
                             </a>
@@ -140,8 +157,26 @@
                                     </div>
                                 </div>
 
-                                <!-- Delete Button -->
-                                <div class="absolute top-4 right-4">
+                                <!-- Action Buttons (Edit & Delete) -->
+                                <div class="absolute top-4 right-4 flex gap-2">
+                                    <!-- TOMBOL EDIT: Mengirim data JSON ke fungsi Alpine -->
+                                    <button 
+                                        type="button"
+                                        @click="openEdit({
+                                            question_text: {{ json_encode($q->question_text) }},
+                                            option_A: {{ json_encode($q->options['A'] ?? '') }},
+                                            option_B: {{ json_encode($q->options['B'] ?? '') }},
+                                            option_C: {{ json_encode($q->options['C'] ?? '') }},
+                                            option_D: {{ json_encode($q->options['D'] ?? '') }},
+                                            correct_answer: '{{ $q->correct_answer }}',
+                                            score_weight: {{ $q->score_weight }}
+                                        }, '{{ route('cbt.questions.update', $q->id) }}')"
+                                        class="p-2 rounded-lg text-slate-300 hover:text-blue-500 hover:bg-blue-50 transition" 
+                                        title="Edit Soal">
+                                        <i class="ph-bold ph-pencil-simple text-lg"></i>
+                                    </button>
+
+                                    <!-- Tombol Delete -->
                                     <form action="{{ route('cbt.questions.destroy', $q->id) }}" method="POST" onsubmit="return confirm('Hapus soal ini?')">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="p-2 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition" title="Hapus Soal">
@@ -164,48 +199,31 @@
             </div>
         </div>
 
-        <!-- MODAL IMPORT EXCEL -->
+        <!-- MODAL IMPORT EXCEL (Sama seperti sebelumnya) -->
         <div x-show="showImportModal" style="display: none;" 
-             class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <!-- Background Backdrop -->
-            <div x-show="showImportModal" 
-                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" 
-                 x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" 
-                 class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" 
-                 @click="showImportModal = false"></div>
-
+             class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+            <div x-show="showImportModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" @click="showImportModal = false"></div>
             <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
-                <div x-show="showImportModal" 
-                     x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
-                     x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-                     class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                    
+                <div x-show="showImportModal" class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                     <div class="bg-white px-6 py-6 pb-4">
                         <div class="sm:flex sm:items-start">
                             <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
                                 <i class="ph-bold ph-microsoft-excel-logo text-green-600 text-xl"></i>
                             </div>
                             <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
-                                <h3 class="text-lg font-bold leading-6 text-slate-900" id="modal-title">Import Soal dari Excel</h3>
+                                <h3 class="text-lg font-bold leading-6 text-slate-900">Import Soal dari Excel</h3>
                                 <div class="mt-2">
-                                    <p class="text-sm text-slate-500 mb-4">
-                                        Silakan upload file Excel (.xlsx/.csv) berisi daftar soal. Pastikan format kolom sesuai template.
-                                    </p>
-                                    
-                                    <!-- Tombol Download Template -->
+                                    <p class="text-sm text-slate-500 mb-4">Silakan upload file Excel (.xlsx/.csv). Pastikan format kolom sesuai template.</p>
                                     <a href="{{ route('cbt.questions.template') }}" class="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-800 mb-6 bg-blue-50 px-3 py-2 rounded-lg border border-blue-100 w-full justify-center">
                                         <i class="ph-bold ph-download-simple"></i> Download Template CSV
                                     </a>
-
                                     <form action="{{ route('cbt.questions.import', $exam->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                                         @csrf
                                         <div class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:bg-slate-50 transition cursor-pointer relative">
                                             <input type="file" name="file" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                                             <i class="ph-duotone ph-upload-simple text-3xl text-slate-400 mb-2"></i>
                                             <p class="text-sm font-medium text-slate-600">Klik untuk pilih file</p>
-                                            <p class="text-xs text-slate-400 mt-1">Format: .xlsx, .csv</p>
                                         </div>
-
                                         <div class="flex justify-end gap-3 mt-6">
                                             <button type="button" @click="showImportModal = false" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 font-bold rounded-lg hover:bg-slate-50">Batal</button>
                                             <button type="submit" class="px-4 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 shadow-lg shadow-green-500/30">Upload & Proses</button>
@@ -215,6 +233,103 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL EDIT SOAL (BARU) -->
+        <div x-show="showEditModal" style="display: none;" 
+             class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
+            <!-- Backdrop -->
+            <div x-show="showEditModal" 
+                 x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" 
+                 x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" 
+                 class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" 
+                 @click="showEditModal = false"></div>
+
+            <div class="flex min-h-screen items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div x-show="showEditModal" 
+                     x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl">
+                    
+                    <!-- Form Edit -->
+                    <form :action="editState.url" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT') <!-- Penting: Method Spoofing untuk Update -->
+                        
+                        <div class="bg-white px-6 py-6 border-b border-slate-100 flex justify-between items-center">
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="ph-fill ph-pencil-simple text-blue-600"></i> Edit Soal
+                            </h3>
+                            <button type="button" @click="showEditModal = false" class="text-slate-400 hover:text-slate-600">
+                                <i class="ph-bold ph-x text-lg"></i>
+                            </button>
+                        </div>
+
+                        <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                            <!-- Pertanyaan -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Pertanyaan</label>
+                                <textarea name="question_text" x-model="editState.question_text" rows="3" required class="w-full rounded-lg border-slate-300 text-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            </div>
+
+                            <!-- Gambar Update -->
+                            <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Ganti Gambar (Opsional)</label>
+                                <input type="file" name="question_image" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-white file:text-blue-700 hover:file:bg-blue-50">
+                                <p class="text-[10px] text-slate-500 mt-1 italic">*Biarkan kosong jika tidak ingin mengubah gambar.</p>
+                            </div>
+
+                            <!-- Opsi Jawaban -->
+                            <div class="space-y-2">
+                                <label class="block text-xs font-bold text-slate-500 uppercase">Pilihan Jawaban</label>
+                                <div class="flex gap-2 items-center">
+                                    <span class="w-6 text-center font-bold text-slate-400">A</span>
+                                    <input type="text" name="option_A" x-model="editState.option_A" required class="flex-1 rounded-lg border-slate-300 text-sm py-1.5">
+                                </div>
+                                <div class="flex gap-2 items-center">
+                                    <span class="w-6 text-center font-bold text-slate-400">B</span>
+                                    <input type="text" name="option_B" x-model="editState.option_B" required class="flex-1 rounded-lg border-slate-300 text-sm py-1.5">
+                                </div>
+                                <div class="flex gap-2 items-center">
+                                    <span class="w-6 text-center font-bold text-slate-400">C</span>
+                                    <input type="text" name="option_C" x-model="editState.option_C" required class="flex-1 rounded-lg border-slate-300 text-sm py-1.5">
+                                </div>
+                                <div class="flex gap-2 items-center">
+                                    <span class="w-6 text-center font-bold text-slate-400">D</span>
+                                    <input type="text" name="option_D" x-model="editState.option_D" required class="flex-1 rounded-lg border-slate-300 text-sm py-1.5">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <!-- Kunci Jawaban -->
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kunci Jawaban</label>
+                                    <select name="correct_answer" x-model="editState.correct_answer" required class="w-full rounded-lg border-slate-300 text-sm font-bold text-slate-700">
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="C">C</option>
+                                        <option value="D">D</option>
+                                    </select>
+                                </div>
+                                <!-- Bobot Nilai -->
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Bobot Nilai</label>
+                                    <input type="number" name="score_weight" x-model="editState.score_weight" required class="w-full rounded-lg border-slate-300 text-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 px-6 py-4 flex justify-end gap-3 rounded-b-2xl">
+                            <button type="button" @click="showEditModal = false" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 font-bold rounded-lg hover:bg-slate-100 transition">
+                                Batal
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">
+                                Update Soal
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

@@ -7,8 +7,8 @@ use App\Models\AttendanceSiswa;
 use App\Models\DisciplineRecord;
 use App\Models\LibraryVisit;
 use App\Models\Borrowing;
-use App\Models\Achievement;
 use App\Models\GradeRecord;
+use App\Models\ExtracurricularMember; // Tambahkan Model Ini
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -54,7 +54,6 @@ class StudentPortalController extends Controller
                     ->limit(7)
                     ->get();
 
-        // [BARU] SIAPKAN DATA CHART KEHADIRAN
         $attendanceChart = [
             'hadir' => $hadir,
             'sakit' => $sakit,
@@ -67,32 +66,43 @@ class StudentPortalController extends Controller
         $sholat_dhuhur = AttendanceSiswa::where('student_id', $student->id)->whereYear('attendance_date', $year)->where('type', 'Keagamaan')->whereIn('activity', ['Dhuhur', 'Duhur'])->count();
         $religious_history = AttendanceSiswa::where('student_id', $student->id)->where('type', 'Keagamaan')->latest('created_at')->limit(5)->get();
 
-        // 4. DISIPLIN
-        $poin_pelanggaran = $student->disciplineRecords->filter(fn($r) => $r->disciplineType && $r->disciplineType->type == 'Pelanggaran')->sum(fn($r) => $r->disciplineType->point_value);
-        $poin_kebaikan = $student->disciplineRecords->filter(fn($r) => $r->disciplineType && $r->disciplineType->type == 'Kebaikan')->sum(fn($r) => $r->disciplineType->point_value);
-        $discipline_history = DisciplineRecord::with('disciplineType')->where('student_id', $student->id)->orderBy('date', 'desc')->limit(10)->get();
+        // 4. DISIPLIN & PRESTASI
+        $violations = $student->disciplineRecords
+            ->filter(fn($r) => $r->disciplineType && $r->disciplineType->type == 'Pelanggaran')
+            ->sortByDesc('date');
+        $total_violation_points = $violations->sum(fn($r) => $r->disciplineType->point_value ?? 0);
 
-        // 5. LAINNYA
-        $achievements = class_exists('App\Models\Achievement') ? Achievement::where('student_id', $student->id)->orderBy('date', 'desc')->get() : [];
+        $achievements = $student->disciplineRecords
+            ->filter(fn($r) => $r->disciplineType && $r->disciplineType->type == 'Kebaikan')
+            ->sortByDesc('date');
+        $total_merit_points = $achievements->sum(fn($r) => $r->disciplineType->point_value ?? 0);
+
+        // 5. PERPUSTAKAAN
         $library_visits = class_exists('App\Models\LibraryVisit') ? LibraryVisit::where('student_id', $student->id)->count() : 0;
-        $borrowing_history = class_exists('App\Models\Borrowing') ? Borrowing::with('book')->where('student_id', $student->id)->orderBy('borrow_date', 'desc')->limit(10)->get() : [];
+        $library_history = class_exists('App\Models\Borrowing') ? Borrowing::with('book')->where('student_id', $student->id)->orderBy('borrow_date', 'desc')->limit(10)->get() : [];
 
-        // 6. DATA AKADEMIK (NILAI)
+        // 6. [BARU] EKSTRAKURIKULER
+        // Mengambil data ekskul yang diikuti siswa berdasarkan controller ExtracurricularController Anda
+        $extracurriculars_joined = [];
+        if (class_exists('App\Models\ExtracurricularMember')) {
+            $extracurriculars_joined = ExtracurricularMember::with('extracurricular')
+                ->where('student_id', $student->id)
+                ->get();
+        }
+
+        // 7. DATA AKADEMIK
         $academic_record = null;
         $chartData = ['labels' => [], 'scores' => []]; 
-
         if (class_exists('App\Models\GradeRecord')) {
             $academic_record = GradeRecord::with(['items.subject'])
                 ->where('student_id', $student->id)
                 ->latest('academic_year')
                 ->latest('semester')
                 ->first();
-
             if ($academic_record) {
                 foreach ($academic_record->items as $item) {
                     $name = $item->subject->name ?? 'Mapel';
-                    $shortName = Str::limit($name, 15);
-                    $chartData['labels'][] = $shortName;
+                    $chartData['labels'][] = Str::limit($name, 15);
                     $chartData['scores'][] = $item->score;
                 }
             }
@@ -100,11 +110,12 @@ class StudentPortalController extends Controller
 
         return view('portal.show', compact(
             'student', 
-            'hadir', 'sakit', 'izin', 'alpa', 'attendance_history', 'attendanceChart', // <-- Tambahkan ini
+            'hadir', 'sakit', 'izin', 'alpa', 'attendance_history', 'attendanceChart',
             'sholat_dhuha', 'sholat_dhuhur', 'religious_history',
-            'poin_pelanggaran', 'poin_kebaikan', 'discipline_history',
-            'achievements',
-            'library_visits', 'borrowing_history',
+            'violations', 'total_violation_points', 
+            'achievements', 'total_merit_points',
+            'library_visits', 'library_history',
+            'extracurriculars_joined', // <-- Variabel Baru dikirim ke View
             'academic_record', 'chartData'
         ));
     }

@@ -23,8 +23,8 @@
             <div class="flex justify-between h-16">
                 <!-- Logo & Judul -->
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white">
-                        <i class="ph-bold ph-student text-2xl"></i>
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white">
+                        <img src="{{ asset('images/logo.png') }}" class="w-10 h-10 object-contain" alt="Logo">
                     </div>
                     <div class="leading-tight">
                         <h1 class="font-bold text-slate-800 text-lg">Portal Siswa</h1>

@@ -1,12 +1,20 @@
-<x-student-layout>
-    <x-slot name="header">
+{{-- 
+    PERBAIKAN: 
+    Gunakan @component('cbt.seb_landing') alih-alih <x-cbt.seb_landing>.
+    Ini memberitahu Laravel untuk mengambil file view secara spesifik di 'resources/views/cbt/seb_landing.blade.php'.
+--}}
+@component('cbt.seb_landing')
+    
+    {{-- Mengisi variabel $header di layout --}}
+    @slot('header')
         <h2 class="font-bold text-xl text-slate-800 leading-tight flex items-center gap-2">
             <i class="ph-duotone ph-info text-blue-600"></i>
-            {{ __('Konfirmasi Ujian') }}
+            {{ __('Konfirmasi Peserta Ujian') }}
         </h2>
-    </x-slot>
+    @endslot
 
-    <div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
+    {{-- KONTEN UTAMA (Akan otomatis mengisi variabel $slot di layout) --}}
+    <div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="bg-white overflow-hidden shadow-xl shadow-slate-200 sm:rounded-3xl p-8 relative border border-slate-100">
             
             <!-- Indikator Aman SEB -->
@@ -21,6 +29,7 @@
                 <p class="text-slate-500 font-medium">{{ $exam->subject_name }}</p>
             </div>
 
+            <!-- Detail Durasi & Soal -->
             <div class="flex items-center gap-4 mb-8 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                 <div class="flex-1 flex items-center gap-3">
                     <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-blue-600 shadow-sm">
@@ -43,7 +52,7 @@
                 </div>
             </div>
 
-            <!-- Peringatan -->
+            <!-- Peringatan / Rules -->
             <div class="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-8">
                 <div class="flex gap-4">
                     <div class="flex-shrink-0">
@@ -53,7 +62,7 @@
                         <h4 class="font-bold text-amber-800 text-sm mb-1">Peraturan Ujian</h4>
                         <ul class="text-xs text-amber-700 space-y-1 font-medium list-disc list-inside">
                             <li>Dilarang membuka aplikasi lain selain SEB.</li>
-                            <li>Dilarang meninggalkan komputer selama ujian.</li>
+                            <li>Waktu akan berjalan otomatis setelah tombol ditekan.</li>
                             <li>Sistem akan mencatat segala bentuk kecurangan.</li>
                         </ul>
                     </div>
@@ -71,9 +80,13 @@
                             class="w-full rounded-xl border-slate-300 shadow-sm focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 uppercase text-center text-3xl font-black tracking-[0.5em] p-4 text-slate-800 placeholder-slate-300" 
                             placeholder="TOKEN" autocomplete="off">
                         <p class="text-xs text-slate-400 mt-2 text-center font-medium">*Minta token kepada pengawas ujian</p>
-                        @error('token')
-                            <p class="text-rose-500 text-sm mt-2 font-bold text-center bg-rose-50 p-2 rounded-lg border border-rose-100">{{ $message }}</p>
-                        @enderror
+                        
+                        @if($errors->has('token'))
+                            <div class="mt-2 bg-rose-50 border border-rose-100 text-rose-500 text-sm p-3 rounded-lg font-bold text-center flex items-center justify-center gap-2">
+                                <i class="ph-bold ph-warning-circle"></i>
+                                {{ $errors->first('token') }}
+                            </div>
+                        @endif
                     </div>
                 @else
                     <div class="bg-blue-50 text-blue-700 p-4 rounded-xl mb-8 text-sm flex items-center justify-center gap-2 border border-blue-100 font-bold">
@@ -84,8 +97,8 @@
 
                 <div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-2">
                     <!-- Tombol Keluar SEB -->
-                    <a href="javascript:window.close()" onclick="return confirm('Yakin ingin menutup SEB?')" class="text-slate-400 hover:text-rose-600 text-sm font-bold flex items-center gap-2 transition-colors py-2">
-                        <i class="ph-bold ph-power"></i> Keluar Aplikasi
+                    <a href="{{ route('cbt.index') }}" class="text-slate-400 hover:text-slate-600 text-sm font-bold flex items-center gap-2 transition-colors py-2">
+                        <i class="ph-bold ph-arrow-left"></i> Batal / Kembali
                     </a>
 
                     <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all transform active:scale-95 flex items-center justify-center gap-2">
@@ -96,4 +109,4 @@
 
         </div>
     </div>
-</x-student-layout>
+@endcomponent

@@ -23,7 +23,7 @@
                         </div>
                     </div>
 
-                    <!-- Statistik Ringkas (Sama seperti sebelumnya) -->
+                    <!-- Statistik Ringkas -->
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                             <div class="flex justify-between items-start mb-4">
@@ -33,7 +33,20 @@
                             <h3 class="text-3xl font-black text-slate-800">{{ $stats['active_exams'] ?? 0 }}</h3>
                             <p class="text-sm text-slate-500 font-medium mt-1">Ujian Aktif</p>
                         </div>
-                        <!-- ... statistik lainnya biarkan sama ... -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="p-3 bg-purple-50 text-purple-600 rounded-xl"><i class="ph-fill ph-list-numbers text-2xl"></i></div>
+                            </div>
+                            <h3 class="text-3xl font-black text-slate-800">{{ $stats['total_questions'] ?? 0 }}</h3>
+                            <p class="text-sm text-slate-500 font-medium mt-1">Total Soal</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="p-3 bg-orange-50 text-orange-600 rounded-xl"><i class="ph-fill ph-users text-2xl"></i></div>
+                            </div>
+                            <h3 class="text-3xl font-black text-slate-800">{{ $stats['students_working'] ?? 0 }}</h3>
+                            <p class="text-sm text-slate-500 font-medium mt-1">Siswa Mengerjakan</p>
+                        </div>
                          <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                             <div class="flex justify-between items-start mb-4">
                                 <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl"><i class="ph-fill ph-check-circle text-2xl"></i></div>
@@ -53,7 +66,8 @@
                                 <thead class="bg-slate-50 text-slate-800 font-bold uppercase text-xs">
                                     <tr>
                                         <th class="px-6 py-4">Nama Ujian</th>
-                                        <th class="px-6 py-4">Mapel / Kelas</th>
+                                        <!-- KOLOM BARU UNTUK TOKEN -->
+                                        <th class="px-6 py-4 text-center">Token</th>
                                         <th class="px-6 py-4">Waktu</th>
                                         <th class="px-6 py-4">Status</th>
                                         <th class="px-6 py-4 text-right">Aksi</th>
@@ -62,13 +76,33 @@
                                 <tbody class="divide-y divide-slate-100">
                                     @forelse($exams as $exam)
                                     <tr class="hover:bg-slate-50 transition">
-                                        <td class="px-6 py-4 font-bold text-slate-800">{{ $exam->title }}</td>
                                         <td class="px-6 py-4">
                                             <div class="flex flex-col">
-                                                <span class="font-bold">{{ $exam->subject_name }}</span>
-                                                <span class="text-xs">Kelas {{ $exam->class_level }}</span>
+                                                <span class="font-bold text-slate-800">{{ $exam->title }}</span>
+                                                <span class="text-xs text-slate-500">{{ $exam->subject_name }} (Kelas {{ $exam->class_level }})</span>
                                             </div>
                                         </td>
+                                        
+                                        <!-- TAMPILAN TOKEN -->
+                                        <td class="px-6 py-4 text-center">
+                                            @if($exam->token)
+                                                <div class="flex items-center justify-center gap-2 group">
+                                                    <span class="bg-slate-800 text-white font-mono font-bold px-3 py-1 rounded tracking-widest text-sm">
+                                                        {{ $exam->token }}
+                                                    </span>
+                                                    <!-- Tombol Refresh Token Manual -->
+                                                    <form action="{{ route('cbt.refresh_token', $exam->id) }}" method="POST" class="inline">
+                                                        @csrf
+                                                        <button type="submit" title="Ganti Token Baru" class="text-slate-300 hover:text-blue-600 transition">
+                                                            <i class="ph-bold ph-arrows-clockwise"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @else
+                                                <span class="text-slate-400 italic text-xs">Tidak ada token</span>
+                                            @endif
+                                        </td>
+
                                         <td class="px-6 py-4">
                                             <div class="flex flex-col">
                                                 <span class="font-bold">{{ \Carbon\Carbon::parse($exam->start_time)->format('d M Y') }}</span>
@@ -86,7 +120,6 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 text-right space-x-2">
-                                            <!-- TOMBOL KELOLA SOAL -->
                                             <a href="{{ route('cbt.questions.manage', $exam->id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-bold hover:bg-indigo-100 transition">
                                                 <i class="ph-bold ph-list-numbers"></i> Kelola Soal
                                             </a>
@@ -98,7 +131,7 @@
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="5" class="px-6 py-8 text-center text-slate-500 italic">Belum ada jadwal ujian.</td>
+                                        <td colspan="6" class="px-6 py-8 text-center text-slate-500 italic">Belum ada jadwal ujian.</td>
                                     </tr>
                                     @endforelse
                                 </tbody>
