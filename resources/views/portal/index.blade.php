@@ -53,7 +53,7 @@
             
             <!-- Logo Sekolah (Opsional/Placeholder) -->
             <div class="mb-6 w-20 h-20 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 shadow-lg" data-aos="fade-down">
-                <i class="ph-fill ph-graduation-cap text-4xl text-white"></i>
+                <img src="{{ asset('images/logo.png') }}" class="w-15 h-12 object-contain" alt="Logo">
             </div>
 
             <!-- Judul & Deskripsi -->

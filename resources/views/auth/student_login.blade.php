@@ -1,138 +1,178 @@
 <!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-50">
+<html lang="id" class="h-full">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login CBT Siswa - SMPN 3 Lakbok</title>
+    <title>Login CBT - Portal Siswa</title>
     
-    <!-- Menggunakan Tailwind CSS dari CDN untuk memastikan style berjalan tanpa build process yang rumit di tahap ini -->
+    <!-- Scripts & Styles -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
                     },
                     animation: {
-                        'fade-in-up': 'fadeInUp 0.5s ease-out',
-                        'fade-in': 'fadeIn 0.7s ease-out',
+                        'blob': 'blob 7s infinite',
+                        'float': 'float 6s ease-in-out infinite',
                     },
                     keyframes: {
-                        fadeInUp: {
-                            '0%': { opacity: '0', transform: 'translateY(20px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
                         },
-                        fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' },
-                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
                     }
                 }
             }
         }
     </script>
-    <!-- Google Font: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
-        /* Custom Style untuk Background Pattern */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f8fafc; /* slate-50 */
-            background-image: 
-                radial-gradient(at 40% 20%, rgba(59, 130, 246, 0.10) 0px, transparent 50%),
-                radial-gradient(at 80% 0%, rgba(236, 72, 153, 0.05) 0px, transparent 50%),
-                radial-gradient(at 0% 50%, rgba(99, 102, 241, 0.05) 0px, transparent 50%);
-            background-attachment: fixed;
+        /* CSS Glass Effect & Utilities */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .pattern-grid {
-            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2364748b' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        /* Style Tombol Kembali (Glass Button) */
+        .glass-button {
+             background: rgba(255, 255, 255, 0.1);
+             backdrop-filter: blur(10px);
+             border: 1px solid rgba(255, 255, 255, 0.1);
+             transition: all 0.3s ease;
         }
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateX(-3px); /* Efek geser sedikit saat hover */
+        }
+        .glass-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+        }
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(96, 165, 250, 0.5); /* blue-400 */
+        }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
     </style>
 </head>
-<body class="h-full antialiased pattern-grid">
-    <div class="min-h-[100dvh] flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+<body class="h-full bg-slate-900 text-white overflow-hidden selection:bg-blue-500 selection:text-white">
+
+    <!-- BACKGROUND ANIMATION -->
+    <div class="fixed inset-0 z-0">
+        <!-- Background Image Overlay -->
+        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
+        <!-- Gradient Background: Dominan Biru Gelap -->
+        <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900"></div>
         
-        <!-- Ilustrasi Dekoratif (Opsional - Bisa dihapus jika terlalu ramai) -->
-        <div class="absolute top-10 left-10 opacity-20 hidden lg:block animate-fade-in text-blue-500">
-             <i class="ph-duotone ph-exam text-9xl"></i>
+        <!-- Animated Blobs (Semua nuansa Biru) -->
+        <!-- Blob 1: Biru Utama -->
+        <div class="absolute top-0 -left-4 w-96 h-96 bg-blue-600 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob"></div>
+        <!-- Blob 2: Cyan/Langit -->
+        <div class="absolute top-0 -right-4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <!-- Blob 3: Indigo/Deep Blue -->
+        <div class="absolute -bottom-32 left-20 w-96 h-96 bg-indigo-600 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <!-- TOMBOL KEMBALI (FIXED TOP LEFT) -->
+    
+    <!-- MAIN CONTENT -->
+    <div class="relative z-10 min-h-screen flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8">
+        
+        <!-- Floating Icons Decoration -->
+        <div class="absolute top-1/4 left-[10%] animate-float hidden lg:block opacity-30 text-cyan-300">
+            <i class="ph-duotone ph-student text-8xl"></i>
         </div>
-        <div class="absolute bottom-10 right-10 opacity-20 hidden lg:block animate-fade-in text-indigo-500">
-             <i class="ph-duotone ph-student text-9xl"></i>
+        <div class="absolute bottom-1/4 right-[10%] animate-float hidden lg:block opacity-30 text-blue-300 animation-delay-2000">
+            <i class="ph-duotone ph-desktop text-8xl"></i>
         </div>
 
-        <!-- Header Logo & Judul -->
-        <div class="sm:mx-auto sm:w-full sm:max-w-md text-center mb-8 animate-fade-in-up">
-            <div class="inline-flex p-3 bg-white rounded-2xl shadow-sm border border-slate-100 mb-4">
-                <img src="{{ asset('images/logo.png') }}" class="h-16 w-auto" alt="Logo Sekolah" onerror="this.src='https://via.placeholder.com/150?text=LOGO'; this.onerror=null;">
+        <!-- LOGO & BRAND -->
+        <div class="text-center mb-8 transform hover:scale-105 transition-transform duration-300">
+            <div class="inline-flex p-4 glass-card rounded-2xl mb-6 shadow-2xl shadow-blue-500/20">
+                <img src="{{ asset('images/logo.png') }}" class="h-16 w-auto drop-shadow-lg" alt="Logo" onerror="this.src='https://ui-avatars.com/api/?name=S+L&background=0ea5e9&color=fff&size=128'; this.onerror=null;">
             </div>
-            <h2 class="text-3xl font-extrabold text-slate-800 tracking-tight">
+            <h2 class="text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-white to-blue-300 mb-2">
                 CBT System
             </h2>
-            <p class="mt-2 text-sm font-medium text-slate-500">
-                SMP Negeri 3 Lakbok
-            </p>
+            <p class="text-blue-200/60 font-medium">Ujian Berbasis Komputer & Portal Siswa</p>
         </div>
 
-        <!-- Kartu Login -->
-        <div class="sm:mx-auto sm:w-full sm:max-w-[480px] animate-fade-in-up delay-100">
-            <div class="bg-white py-10 px-6 shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)] sm:rounded-[2rem] sm:px-12 border border-slate-100 relative overflow-hidden group">
-                
-                <!-- Dekorasi Header Kartu -->
-                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500"></div>
-                <div class="absolute -top-24 -right-24 w-48 h-48 bg-blue-50 rounded-full opacity-50 blur-3xl pointer-events-none group-hover:bg-blue-100 transition-colors duration-500"></div>
-                
-                <div class="relative z-10">
+        <!-- LOGIN CARD -->
+        <div class="w-full max-w-md">
+            <div class="glass-card rounded-3xl p-1 shadow-2xl shadow-blue-900/20">
+                <div class="bg-slate-900/40 rounded-[1.3rem] p-8 backdrop-blur-sm">
+                    
                     <div class="mb-8 text-center">
-                         <h3 class="text-xl font-bold text-slate-800">Selamat Datang, Siswa!</h3>
-                         <p class="text-sm text-slate-500 mt-1">Silakan masukkan NISN untuk memulai ujian.</p>
+                        <h3 class="text-xl font-bold text-white mb-1">Login Peserta</h3>
+                        <p class="text-sm text-slate-400">Masukkan NISN untuk mengakses ujian.</p>
                     </div>
 
-                    <!-- Form Login -->
                     <form class="space-y-6" action="{{ route('student.login.post') }}" method="POST">
                         @csrf
-                        <div>
-                            <label for="student_id" class="block text-sm font-bold text-slate-700 mb-2">
+                        
+                        <!-- Input NISN -->
+                        <div class="space-y-2">
+                            <label for="student_id" class="block text-xs font-bold uppercase tracking-wider text-slate-400 ml-1">
                                 NISN / ID Siswa
                             </label>
-                            <div class="relative mt-1 rounded-xl shadow-sm">
-                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                                    <i class="ph-bold ph-identification-badge text-slate-400 text-xl"></i>
+                            <div class="relative group">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                    <i class="ph-bold ph-identification-card text-slate-400 group-focus-within:text-cyan-400 transition-colors text-xl"></i>
                                 </div>
-                                <input id="student_id" name="student_id" type="text" autocomplete="username" required autofocus 
-                                    class="block w-full rounded-xl border-0 py-3.5 pl-12 pr-4 text-slate-900 font-medium ring-1 ring-inset ring-slate-200 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 transition-shadow bg-slate-50/50 focus:bg-white"
-                                    placeholder="Contoh: 1234567890">
+                                <input id="student_id" name="student_id" type="text" autocomplete="off" required autofocus 
+                                    class="glass-input block w-full rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-slate-500 focus:ring-0 focus:outline-none transition-all duration-300 group-focus-within:bg-white/10"
+                                    placeholder="Contoh: 0056789012">
                             </div>
+                            <!-- Error Message Tetap Merah agar Waspada, tapi disesuaikan -->
                             @error('student_id')
-                                <p class="mt-2 text-sm text-rose-600 flex items-center font-medium animate-fade-in">
-                                    <i class="ph-bold ph-warning-circle mr-1.5"></i> {{ $message }}
+                                <p class="text-xs text-red-300 flex items-center gap-1 mt-2 animate-pulse font-bold bg-red-500/10 p-2 rounded-lg border border-red-500/20">
+                                    <i class="ph-fill ph-warning-circle"></i> {{ $message }}
                                 </p>
                             @enderror
                         </div>
 
-                        <div>
-                            <button type="submit" class="flex w-full justify-center items-center rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-blue-200 hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 group">
-                                <span class="mr-2">Masuk ke Ruang Ujian</span>
-                                <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                            </button>
-                        </div>
+                        <!-- Button Blue Gradient -->
+                        <button type="submit" class="group relative w-full flex justify-center py-4 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-cyan-500 transition-all duration-300 shadow-lg shadow-blue-600/30 overflow-hidden">
+                            <!-- Shine Effect -->
+                            <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                            
+                            <span class="relative flex items-center gap-2">
+                                Masuk Ruang Ujian <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                            </span>
+                        </button>
                     </form>
-                </div>
-            </div>
 
-            <!-- Footer -->
-            <div class="mt-8 text-center animate-fade-in delay-200">
-                <p class="text-xs font-medium text-slate-400">
-                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. <br class="sm:hidden">All rights reserved.
-                </p>
-                <a href="/" class="inline-flex items-center mt-4 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors">
-                    <i class="ph-bold ph-house-line mr-1.5"></i> Kembali ke Beranda Utama
-                </a>
+                    <!-- Footer Help -->
+                    <div class="mt-8 text-center">
+                        <p class="text-xs text-slate-500">
+                            Mengalami kendala login? 
+                            <a href="#" class="text-cyan-400 hover:text-cyan-300 font-bold transition-colors">Hubungi Proktor</a>
+                        </p>
+                        <!-- TOMBOL KEMBALI -->
+                        <p class="text-xs text-slate-500">                            
+                            <a href="{{ url('/') }}" class="text-cyan-400 hover:text-cyan-300 font-bold transition-colors">Kembali ke Menu Utama</a>
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
 </body>
 </html>
