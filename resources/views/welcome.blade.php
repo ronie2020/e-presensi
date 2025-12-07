@@ -88,7 +88,7 @@
                         </span>
                         <span class="text-[10px] lg:text-xs font-bold tracking-wide mt-1 transition-colors duration-300"
                               :class="scrolled ? 'text-blue-600' : 'text-blue-300'">
-                            BERJAYA : <span class="font-medium" :class="scrolled ? 'text-slate-500' : 'text-slate-300'">Unggul, Berkarakter</span>
+                            BERJAYA : <span class="font-medium" :class="scrolled ? 'text-slate-500' : 'text-slate-300'">Berakhlak Mulia * Enerjik * Resilien * Jujur * Arif * Yakin * Adaptif</span>
                         </span>
                     </div>
                 </div>
@@ -935,7 +935,7 @@
                         <span class="text-xl font-bold text-white tracking-tight">SMPN 3 LAKBOK</span>
                     </div>
                     <p class="text-slate-400 text-sm leading-relaxed mb-8">
-                        Lembaga pendidikan yang berdedikasi untuk mencetak generasi berprestasi, berkarakter mulia, dan peduli lingkungan.
+                    Visi sekolah adalah Terciptanya generasi pemelajar yang beriman dan bertakwa, tangguh, literat, berkecakapan global, serta berkesadaran budaya dan lingkungan.
                     </p>
                     <div class="flex space-x-4">
                         <a href="#" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-blue-600 transition-all duration-300"><i class="ph-fill ph-facebook-logo text-xl"></i></a>
@@ -961,7 +961,7 @@
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="ph-fill ph-phone text-blue-500 shrink-0"></i>
-                            <span>(0265) 1234567</span>
+                            <span>+6285135961994</span>
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="ph-fill ph-envelope text-blue-500 shrink-0"></i>
