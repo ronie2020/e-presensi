@@ -208,4 +208,10 @@ class StudentController extends Controller
     {
         return Excel::download(new StudentsExport, 'data_siswa_buku_induk.xlsx');
     }
+
+    public function card(Student $student)
+    {
+    
+        return view('students.osis_card', compact('student')); 
+    }
 }

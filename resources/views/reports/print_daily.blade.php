@@ -65,7 +65,7 @@
     <div class="header">
         <h1>Laporan Absensi Harian Siswa</h1>
         <h2>SMP NEGERI 3 LAKBOK</h2>
-        <p>Jl. Raya Lakbok No. 123, Ciamis, Jawa Barat</p>
+        <p>Jl. Mekarjaya No.199 Sidaharja Kec. Lakbok, Ciamis, Jawa Barat</p>
     </div>
 
     <table class="meta-table">

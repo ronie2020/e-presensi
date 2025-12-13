@@ -1,4 +1,3 @@
-{{-- Halaman ini adalah tampilan untuk resources/views/announcements/index.blade.php --}}
 <x-app-layout>
     <div class="py-6 sm:py-8">
         

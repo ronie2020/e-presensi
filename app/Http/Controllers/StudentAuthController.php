@@ -46,7 +46,6 @@ class StudentAuthController extends Controller
             'student_id' => 'NISN tidak terdaftar dalam sistem.',
         ])->withInput();
     }
-
     // 3. Proses Logout
     public function logout(Request $request)
     {

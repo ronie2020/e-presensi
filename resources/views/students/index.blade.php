@@ -343,6 +343,11 @@
                                                             <i class="ph-bold ph-qr-code"></i> Lihat QR Code
                                                         </button>
                                                         
+                                                         <!-- [BARU] TOMBOL CETAK KARTU OSIS -->
+                                                        <a href="{{ route('students.card', $student->id) }}" target="_blank" class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-purple-600 flex items-center gap-2">
+                                                            <i class="ph-bold ph-identification-card"></i> Cetak Kartu OSIS
+                                                        </a>
+                                                        
                                                         <div class="border-t border-slate-100 my-1"></div>
                                                         <form action="{{ route('students.destroy', $student->id) }}" method="POST" onsubmit="return confirm('Hapus siswa ini? Data buku induk akan hilang.');">
                                                             @csrf @method('DELETE')
@@ -378,7 +383,7 @@
         </div>
     </div>
 
-    {{-- MODAL ABSEN & QR CODE (TETAP SAMA) --}}
+    {{-- MODAL ABSEN & QR CODE --}}
     <div id="absen-manual-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-opacity">
         <div class="relative top-20 mx-auto p-0 border-0 w-full max-w-md shadow-2xl rounded-2xl bg-white overflow-hidden">
             <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">

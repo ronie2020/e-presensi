@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" oncontextmenu="return false"> <!-- Disable Klik Kanan -->
+<html lang="id" oncontextmenu="return false">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
@@ -9,108 +9,171 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* Mencegah seleksi teks (Copy Paste) */
         body { 
             user-select: none; 
             -webkit-user-select: none; 
-            -moz-user-select: none; 
-            -ms-user-select: none; 
         }
-        /* Overlay Peringatan */
-        #security-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 9999;
-            color: white;
-            text-align: center;
-            padding-top: 20%;
-        }
+        [x-cloak] { display: none !important; }
+        
+        /* Custom Scrollbar untuk Peta Soal */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800"
+<body class="bg-slate-50 text-slate-800 font-sans antialiased"
     x-data="examApp(@json($questions), {{ $timeLeft }}, {{ $sessionId }}, {{ $exam->id }})"
-    x-init="startTimer(); initSecurity()">
+    x-init="initData(); startTimer(); initSecurity(); checkPendingAnswers()"
+    @online.window="isOnline = true; syncPendingAnswers()"
+    @offline.window="isOnline = false">
 
-    <!-- Overlay Peringatan Pelanggaran -->
-    <div id="security-overlay">
-        <div class="max-w-md mx-auto px-4">
-            <i class="ph-duotone ph-warning-octagon text-6xl text-red-500 mb-4"></i>
-            <h2 class="text-2xl font-bold mb-2">PELANGGARAN TERDETEKSI!</h2>
-            <p class="mb-6">Anda terdeteksi meninggalkan halaman ujian atau membuka aplikasi lain.</p>
-            <button onclick="resumeExam()" class="bg-blue-600 px-6 py-2 rounded-lg font-bold">Kembali ke Ujian</button>
+    <!-- OVERLAY SECURITY (Pelanggaran) -->
+    <div x-show="showSecurityOverlay" x-transition.opacity
+         class="fixed inset-0 bg-slate-900/95 z-[9999] flex items-center justify-center text-center px-4"
+         x-cloak>
+        <div class="max-w-md w-full bg-white rounded-2xl p-8 shadow-2xl">
+            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 text-red-600 animate-pulse">
+                <i class="ph-duotone ph-warning-octagon text-5xl"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">PERINGATAN SISTEM!</h2>
+            <p class="text-slate-600 mb-6">
+                Anda terdeteksi meninggalkan halaman ujian. <br>
+                Sisa toleransi pelanggaran: <span class="font-bold text-red-600" x-text="maxViolations - violationCount"></span> kali.
+            </p>
+            <button @click="resumeExam()" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition transform active:scale-95">
+                Kembali ke Ujian
+            </button>
         </div>
     </div>
 
-    <!-- HEADER: Informasi & Timer -->
-    <nav class="fixed top-0 w-full bg-white border-b border-slate-200 z-50 h-16 flex items-center justify-between px-4 lg:px-8 shadow-sm">
-        <div class="flex items-center gap-3">
-            <img src="{{ asset('images/logo.png') }}" class="h-8 w-8" alt="Logo" onerror="this.style.display='none'">
-            <div class="hidden md:block">
-                <h1 class="text-sm font-bold text-slate-900 leading-tight">{{ $exam->title }}</h1>
-                <p class="text-xs text-slate-500">{{ $exam->subject_name }}</p>
+    <!-- BANNER OFFLINE -->
+    <div x-show="!isOnline" x-transition 
+         class="fixed top-16 left-0 w-full bg-rose-500 text-white text-center text-xs font-bold py-1 z-40 shadow-md">
+        <i class="ph-bold ph-wifi-slash"></i> Koneksi Terputus - Jawaban disimpan sementara di perangkat
+    </div>
+
+    <!-- HEADER -->
+    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md border-b border-slate-200 z-50 h-16 flex items-center justify-between px-4 lg:px-8 shadow-sm">
+        <div class="flex items-center gap-3 overflow-hidden">
+            <div class="h-9 w-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                <i class="ph-bold ph-student text-xl"></i>
+            </div>
+            <div class="hidden md:block truncate">
+                <h1 class="text-sm font-extrabold text-slate-900 leading-tight truncate max-w-[200px]">{{ $exam->title }}</h1>
+                <p class="text-[10px] uppercase tracking-wider font-bold text-slate-500">{{ $exam->subject_name }}</p>
             </div>
         </div>
 
-        <!-- TIMER -->
-        <div class="flex items-center gap-4">
-            <!-- Indikator Pelanggaran -->
-            <div class="hidden md:flex bg-red-50 text-red-600 px-3 py-1 rounded border border-red-100 text-xs font-bold items-center gap-1" x-show="violationCount > 0">
-                <i class="ph-bold ph-warning"></i>
-                <span x-text="violationCount + ' Pelanggaran'"></span>
+        <!-- TIMER & TOOLS -->
+        <div class="flex items-center gap-3">
+            <!-- Indikator Pelanggaran Kecil -->
+            <div class="hidden md:flex bg-red-50 text-red-600 px-3 py-1.5 rounded-lg border border-red-100 text-xs font-bold items-center gap-2" 
+                 x-show="violationCount > 0" x-cloak>
+                <i class="ph-fill ph-warning-circle"></i>
+                <span x-text="violationCount + '/' + maxViolations"></span>
             </div>
 
-            <div class="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg font-mono font-bold text-lg border border-blue-100 shadow-sm flex items-center gap-2">
-                <i class="ph-fill ph-clock"></i>
-                <span x-text="formattedTime">00:00:00</span>
+            <!-- Timer -->
+            <div class="bg-white text-slate-700 px-4 py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2"
+                 :class="timeLeft < 300 ? 'border-red-500 text-red-600 bg-red-50 animate-pulse' : ''">
+                <i class="ph-duotone ph-timer text-xl"></i>
+                <span x-text="formattedTime" class="font-mono font-bold text-lg tracking-widest">00:00:00</span>
             </div>
-            <button @click="finishExam()" class="md:hidden bg-red-600 text-white p-2 rounded-lg">
-                <i class="ph-bold ph-check-square"></i>
+
+            <!-- Mobile Menu Toggle -->
+            <button @click="showMobileMap = !showMobileMap" class="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+                <i class="ph-bold ph-squares-four text-xl"></i>
             </button>
         </div>
     </nav>
 
-    <!-- MAIN CONTENT (Sama seperti sebelumnya) -->
-    <div class="pt-20 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row gap-6">
+    <!-- MAIN CONTENT -->
+    <div class="pt-24 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row gap-6 h-[calc(100vh-6rem)]">
         
-        <!-- KOLOM KIRI: Soal -->
-        <div class="lg:w-3/4 w-full">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden min-h-[60vh] flex flex-col">
-                <!-- Header Soal -->
-                <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                    <span class="font-bold text-lg text-slate-700">Soal No. <span x-text="currentQuestion + 1"></span></span>
-                    <!-- Status Koneksi -->
-                    <span x-show="isSaving" class="text-xs text-blue-600 font-bold flex items-center gap-1 animate-pulse"><i class="ph-bold ph-arrows-clockwise"></i> Menyimpan...</span>
-                    <span x-show="!isSaving" class="text-xs text-green-600 font-bold flex items-center gap-1"><i class="ph-bold ph-cloud-check"></i> Tersimpan</span>
+        <!-- KOLOM KIRI: Area Soal -->
+        <div class="lg:w-3/4 w-full flex flex-col h-full">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden relative">
+                
+                <!-- Loading State -->
+                <div x-show="!initComplete" class="absolute inset-0 bg-white z-10 flex items-center justify-center flex-col">
+                    <div class="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-3"></div>
+                    <span class="text-sm text-slate-500 font-medium">Memuat Soal...</span>
                 </div>
 
-                <!-- Isi Soal -->
-                <div class="p-6 flex-1">
+                <!-- Header Soal -->
+                <div class="bg-white px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
+                    <div class="flex items-center gap-3">
+                        <span class="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-md">
+                            NO. <span x-text="currentQuestion + 1"></span>
+                        </span>
+                        <!-- Status Ragu-ragu -->
+                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" class="form-checkbox w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-500" 
+                                   x-model="markedQuestions[questions[currentQuestion]?.id]">
+                            <span class="text-sm font-bold text-amber-600">Ragu-ragu</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Status Simpan -->
+                    <div class="text-[10px] font-bold uppercase tracking-wider">
+                        <span x-show="saveStatus === 'saving'" class="text-blue-500 flex items-center gap-1">
+                            <i class="ph-bold ph-spinner animate-spin"></i> Menyimpan
+                        </span>
+                        <span x-show="saveStatus === 'saved'" class="text-emerald-500 flex items-center gap-1">
+                            <i class="ph-bold ph-check-circle"></i> Tersimpan
+                        </span>
+                        <span x-show="saveStatus === 'pending'" class="text-amber-500 flex items-center gap-1">
+                            <i class="ph-bold ph-cloud-warning"></i> Pending
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Scrollable Content -->
+                <div class="flex-1 overflow-y-auto custom-scroll p-6 lg:p-8">
                     <template x-if="questions.length > 0">
-                        <div>
-                            <div class="prose max-w-none text-slate-800 text-lg mb-8">
+                        <div class="max-w-3xl mx-auto">
+                            <!-- Soal Text/Image -->
+                            <div class="prose prose-lg max-w-none text-slate-800 mb-8">
                                 <template x-if="questions[currentQuestion].image">
-                                    <img :src="questions[currentQuestion].image" class="max-w-md rounded-lg mb-4 border border-slate-200">
+                                    <div class="mb-6 bg-slate-50 p-2 rounded-xl border border-slate-100 inline-block">
+                                        <!-- Perbaikan: Controller sudah mengirim URL lengkap, tidak perlu tambah /storage/ -->
+                                        <img :src="questions[currentQuestion].image" 
+                                             class="max-h-[300px] w-auto rounded-lg object-contain hover:scale-105 transition-transform cursor-zoom-in"
+                                             onclick="window.open(this.src, '_blank')">
+                                    </div>
                                 </template>
-                                <p x-html="questions[currentQuestion].text"></p>
+                                <div class="font-medium leading-loose text-lg" x-html="questions[currentQuestion].text"></div>
                             </div>
 
+                            <!-- Pilihan Jawaban -->
                             <div class="space-y-3">
                                 <template x-for="(optionText, optionKey) in questions[currentQuestion].options" :key="optionKey">
-                                    <label class="flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group hover:bg-blue-50"
-                                        :class="answers[questions[currentQuestion].id] === optionKey ? 'border-blue-500 bg-blue-50' : 'border-slate-100 bg-white'">
+                                    <label class="relative flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group"
+                                        :class="answers[questions[currentQuestion].id] === optionKey 
+                                            ? 'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500' 
+                                            : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'">
                                         
                                         <input type="radio" :name="'q_' + questions[currentQuestion].id" :value="optionKey" 
                                             @change="selectAnswer(questions[currentQuestion].id, optionKey)"
                                             x-model="answers[questions[currentQuestion].id]" 
-                                            class="hidden">
+                                            class="peer sr-only">
                                         
-                                        <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 transition-colors"
-                                            :class="answers[questions[currentQuestion].id] === optionKey ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-600 group-hover:bg-blue-200'">
+                                        <!-- Radio Indicator Custom -->
+                                        <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-base shrink-0 transition-all shadow-sm border"
+                                            :class="answers[questions[currentQuestion].id] === optionKey 
+                                                ? 'bg-blue-600 text-white border-blue-600 scale-110' 
+                                                : 'bg-white text-slate-500 border-slate-200 group-hover:border-blue-300 group-hover:text-blue-600'">
                                             <span x-text="optionKey"></span>
                                         </div>
-                                        <span class="text-slate-700 pt-1" x-text="optionText"></span>
+                                        
+                                        <span class="text-slate-700 font-medium peer-checked:text-slate-900" x-text="optionText"></span>
+                                        
+                                        <!-- Checkmark icon on active -->
+                                        <div x-show="answers[questions[currentQuestion].id] === optionKey" class="absolute right-4 text-blue-600">
+                                            <i class="ph-fill ph-check-circle text-xl"></i>
+                                        </div>
                                     </label>
                                 </template>
                             </div>
@@ -118,157 +181,255 @@
                     </template>
                 </div>
 
-                <!-- Footer Navigasi Soal -->
-                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                <!-- Footer Navigasi -->
+                <div class="px-6 py-4 bg-white border-t border-slate-200 flex justify-between items-center shrink-0">
                     <button @click="prevQuestion" :disabled="currentQuestion === 0" 
-                        class="px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition"
-                        :class="currentQuestion === 0 ? 'text-slate-300 cursor-not-allowed' : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'">
-                        <i class="ph-bold ph-arrow-left"></i> Sebelumnya
+                        class="px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed text-slate-600 hover:bg-slate-100 border border-transparent hover:border-slate-200">
+                        <i class="ph-bold ph-arrow-left"></i> <span class="hidden sm:inline">Sebelumnya</span>
                     </button>
 
                     <button @click="nextQuestion" x-show="currentQuestion < totalQuestions - 1"
-                        class="px-5 py-2.5 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2 shadow-lg shadow-blue-500/30 transition">
-                        Selanjutnya <i class="ph-bold ph-arrow-right"></i>
+                        class="px-6 py-2.5 rounded-xl font-bold bg-slate-900 text-white hover:bg-blue-600 flex items-center gap-2 shadow-lg shadow-slate-900/10 hover:shadow-blue-600/20 transition-all">
+                        <span class="hidden sm:inline">Selanjutnya</span> <i class="ph-bold ph-arrow-right"></i>
                     </button>
                     
                     <button @click="finishExam" x-show="currentQuestion === totalQuestions - 1"
-                        class="px-5 py-2.5 rounded-xl font-bold bg-green-600 text-white hover:bg-green-700 flex items-center gap-2 shadow-lg shadow-green-500/30 transition">
-                        <i class="ph-bold ph-check-circle"></i> Selesai Ujian
+                        class="px-6 py-2.5 rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-2 shadow-lg shadow-emerald-500/30 transition-all">
+                        <i class="ph-bold ph-check-circle"></i> Selesai
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- KOLOM KANAN: Peta Soal -->
-        <div class="lg:w-1/4 w-full">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 sticky top-24">
-                <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="ph-fill ph-squares-four text-blue-600"></i> Navigasi Soal
-                </h3>
+        <!-- KOLOM KANAN: Navigasi Nomor (Responsive) -->
+        <div class="lg:w-1/4 w-full fixed lg:static inset-0 z-40 lg:z-auto bg-slate-900/50 lg:bg-transparent backdrop-blur-sm lg:backdrop-blur-none"
+             x-show="showMobileMap || window.innerWidth >= 1024"
+             @click.self="showMobileMap = false"
+             x-transition.opacity>
+            
+            <div class="bg-white h-full lg:h-auto lg:rounded-2xl shadow-xl lg:shadow-sm border-l lg:border border-slate-200 p-5 w-3/4 max-w-xs ml-auto lg:w-full lg:ml-0 overflow-y-auto custom-scroll flex flex-col">
+                <div class="flex justify-between items-center mb-4 lg:hidden">
+                    <h3 class="font-bold text-slate-800">Daftar Soal</h3>
+                    <button @click="showMobileMap = false" class="text-slate-500"><i class="ph-bold ph-x text-xl"></i></button>
+                </div>
+
+                <div class="bg-blue-50/50 rounded-xl p-4 mb-4 border border-blue-100 hidden lg:block">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 mb-2">
+                        <i class="ph-fill ph-squares-four text-blue-600"></i> Navigasi Soal
+                    </h3>
+                    <div class="flex gap-4 text-[10px] font-bold text-slate-500">
+                        <div class="flex items-center gap-1"><div class="w-3 h-3 bg-blue-600 rounded"></div> Isi</div>
+                        <div class="flex items-center gap-1"><div class="w-3 h-3 bg-amber-400 rounded"></div> Ragu</div>
+                        <div class="flex items-center gap-1"><div class="w-3 h-3 bg-white border border-slate-300 rounded"></div> 0</div>
+                    </div>
+                </div>
                 
-                <div class="grid grid-cols-5 gap-2">
+                <div class="grid grid-cols-5 gap-2 content-start">
                     <template x-for="(q, index) in questions" :key="index">
-                        <button @click="currentQuestion = index"
-                            class="aspect-square rounded-lg flex items-center justify-center font-bold text-sm transition-all border-2"
+                        <button @click="currentQuestion = index; showMobileMap = false"
+                            class="aspect-square rounded-lg flex items-center justify-center font-bold text-sm transition-all border-2 relative"
                             :class="{
-                                'bg-blue-600 text-white border-blue-600': currentQuestion === index,
-                                'bg-green-100 text-green-700 border-green-200': answers[q.id] && currentQuestion !== index,
-                                'bg-white text-slate-600 border-slate-200 hover:border-blue-300': !answers[q.id] && currentQuestion !== index
+                                'ring-2 ring-offset-1 ring-blue-500 z-10': currentQuestion === index,
+                                'bg-blue-600 text-white border-blue-600': answers[q.id] && !markedQuestions[q.id],
+                                'bg-amber-400 text-white border-amber-400': markedQuestions[q.id],
+                                'bg-white text-slate-600 border-slate-200 hover:border-blue-300': !answers[q.id] && !markedQuestions[q.id]
                             }">
                             <span x-text="index + 1"></span>
                         </button>
                     </template>
                 </div>
                 
-                <hr class="my-4 border-slate-100">
-                <p class="text-xs text-slate-500 text-center">
-                    Jangan keluar dari halaman ini.<br>Sistem akan mencatat pelanggaran.
-                </p>
+                <div class="mt-auto lg:mt-6 pt-6 border-t border-slate-100">
+                    <button @click="finishExam()" class="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition flex items-center justify-center gap-2">
+                         Kumpulkan Jawaban
+                    </button>
+                </div>
             </div>
         </div>
-
     </div>
 
-    <!-- LOGIC JAVASCRIPT -->
+    <!-- LOGIC SYSTEM -->
     <script>
-        // Fungsi Global untuk Resume dari Overlay
-        function resumeExam() {
-            document.getElementById('security-overlay').style.display = 'none';
-            // Masuk Fullscreen lagi jika memungkinkan
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            }
-        }
-
-        function examApp(initialQuestions, initialTimeLeft, sessionId, examId) {
+        function examApp(initialData, initialTimeLeft, sessionId, examId) {
             return {
-                questions: initialQuestions,
+                rawQuestions: initialData,
+                questions: [],
                 currentQuestion: 0,
-                totalQuestions: initialQuestions.length,
+                totalQuestions: 0,
                 timeLeft: initialTimeLeft,
                 formattedTime: '00:00:00',
                 answers: {}, 
+                markedQuestions: {},
                 sessionId: sessionId,
                 examId: examId,
-                isSaving: false,
-                violationCount: 0, // Counter Pelanggaran
+                
+                // State UI
+                initComplete: false,
+                isOnline: navigator.onLine,
+                saveStatus: 'idle', // idle, saving, saved, pending
+                showMobileMap: false,
+                
+                // Security State
+                violationCount: 0,
+                maxViolations: 3,
+                showSecurityOverlay: false,
 
-                init() {
-                    // Load saved answers from DB
+                // INIT
+                initData() {
+                    // PERBAIKAN UTAMA:
+                    // Data dari StudentExamController sudah dalam format yang benar ('text', 'image', 'options').
+                    // Kita tidak perlu mapping ulang properti yang tidak ada (seperti question_text, option_A, dll).
+                    // Cukup gunakan data apa adanya.
+                    
+                    this.questions = this.rawQuestions;
+                    this.totalQuestions = this.questions.length;
+
+                    // Load jawaban dari Server ATAU LocalStorage (Prioritas LocalStorage jika lebih baru)
+                    this.loadLocalProgress();
+                    
+                    // Set jawaban yang tersimpan di server jika local kosong
                     this.questions.forEach(q => {
-                        if(q.saved_answer) {
+                        if(q.saved_answer && !this.answers[q.id]) {
                             this.answers[q.id] = q.saved_answer;
                         }
                     });
+
+                    this.initComplete = true;
                 },
 
-                // ----------------------------------------------------
-                // SECURITY INIT
-                // ----------------------------------------------------
-                initSecurity() {
-                    const self = this;
+                // ---- NAVIGATION ----
+                nextQuestion() { if (this.currentQuestion < this.totalQuestions - 1) this.currentQuestion++; },
+                prevQuestion() { if (this.currentQuestion > 0) this.currentQuestion--; },
 
-                    // 1. Paksa Fullscreen saat mulai (Opsional, kadang diblok browser)
-                    // document.documentElement.requestFullscreen().catch(() => {});
+                // ---- CORE: SAVING ANSWER WITH RETRY & OFFLINE SUPPORT ----
+                async selectAnswer(questionId, answer) {
+                    this.answers[questionId] = answer;
+                    this.saveToLocal(); // Backup ke LocalStorage
+                    
+                    if (!this.isOnline) {
+                        this.saveStatus = 'pending';
+                        return;
+                    }
 
-                    // 2. Deteksi Pindah Tab / Minimize Window
-                    document.addEventListener("visibilitychange", function() {
-                        if (document.hidden) {
-                            self.recordViolation('Meninggalkan Tab Ujian');
-                        }
-                    });
+                    this.saveStatus = 'saving';
+                    try {
+                        const response = await fetch("{{ route('student.exam.saveAnswer') }}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                session_id: this.sessionId,
+                                question_id: questionId,
+                                answer: answer
+                            })
+                        });
 
-                    // 3. Deteksi Kehilangan Fokus (Klik aplikasi lain di Desktop)
-                    window.addEventListener("blur", function() {
-                        self.recordViolation('Kehilangan Fokus Layar');
-                    });
-
-                    // 4. Mencegah Klik Kanan
-                    document.addEventListener('contextmenu', event => event.preventDefault());
-
-                    // 5. Mencegah Tombol Keyboard Tertentu (Inspect Element, Copy, Paste)
-                    document.onkeydown = function(e) {
-                        // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-                        if(e.keyCode == 123) return false;
-                        if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
-                        if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
-                        if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
-                        // Copy Paste Cut
-                        if(e.ctrlKey && e.keyCode == 'C'.charCodeAt(0)) return false;
-                        if(e.ctrlKey && e.keyCode == 'V'.charCodeAt(0)) return false;
+                        if (!response.ok) throw new Error('Server reject');
+                        
+                        setTimeout(() => this.saveStatus = 'saved', 300);
+                        
+                    } catch (error) {
+                        console.error('Save failed, queuing...', error);
+                        this.saveStatus = 'pending';
                     }
                 },
 
-                recordViolation(reason) {
+                // ---- LOCAL STORAGE HANDLING ----
+                saveToLocal() {
+                    const progress = {
+                        answers: this.answers,
+                        marked: this.markedQuestions,
+                        timestamp: new Date().getTime()
+                    };
+                    localStorage.setItem(`exam_${this.sessionId}`, JSON.stringify(progress));
+                },
+
+                loadLocalProgress() {
+                    const saved = localStorage.getItem(`exam_${this.sessionId}`);
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        this.answers = data.answers || {};
+                        this.markedQuestions = data.marked || {};
+                    }
+                },
+
+                // Sync saat online kembali
+                async syncPendingAnswers() {
+                    if(this.saveStatus !== 'pending') return;
+                    
+                    // Kirim semua jawaban yang ada di state (brute force sync untuk memastikan konsistensi)
+                    for (const [qId, ans] of Object.entries(this.answers)) {
+                        await this.selectAnswer(qId, ans);
+                    }
+                },
+                
+                checkPendingAnswers() {
+                   if(Object.keys(this.answers).length > 0) {
+                       this.saveStatus = 'saved';
+                   }
+                },
+
+                // ---- SECURITY SYSTEM ----
+                initSecurity() {
+                    const self = this;
+                    document.addEventListener("visibilitychange", () => {
+                        if (document.hidden) self.triggerViolation('Meninggalkan Tab');
+                    });
+                    window.addEventListener("blur", () => {
+                       setTimeout(() => {
+                           if(document.activeElement.tagName === 'IFRAME') return; 
+                           self.triggerViolation('Kehilangan Fokus');
+                       }, 500); 
+                    });
+                    window.addEventListener('keydown', (e) => {
+                        if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) e.preventDefault();
+                        if (e.ctrlKey && e.shiftKey && e.key === 'I') e.preventDefault();
+                    });
+                },
+
+                triggerViolation(reason) {
+                    if (this.showSecurityOverlay) return; 
+
                     this.violationCount++;
-                    document.getElementById('security-overlay').style.display = 'block';
+                    this.showSecurityOverlay = true;
 
-                    // Opsional: Kirim log pelanggaran ke server
-                    // fetch('/exam/log-violation', { ... }) 
-
-                    // Jika pelanggaran terlalu banyak, otomatis submit
-                    if(this.violationCount >= 5) {
+                    if(this.violationCount >= this.maxViolations) {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Diskualifikasi',
-                            text: 'Anda terdeteksi melakukan kecurangan berulang kali. Ujian dihentikan otomatis.',
+                            title: 'DISKUALIFIKASI',
+                            text: 'Anda telah melanggar aturan ujian berulang kali. Ujian akan dihentikan otomatis.',
                             allowOutsideClick: false,
-                            confirmButtonText: 'Tutup'
+                            confirmButtonText: 'Keluar',
+                            confirmButtonColor: '#d33'
                         }).then(() => {
                             this.submitExam(true);
                         });
                     }
                 },
-                // ----------------------------------------------------
-                // END SECURITY
-                // ----------------------------------------------------
 
+                resumeExam() {
+                    this.showSecurityOverlay = false;
+                    if (document.documentElement.requestFullscreen) {
+                        document.documentElement.requestFullscreen().catch(() => {});
+                    }
+                },
+
+                // ---- TIMER & FINISH ----
                 startTimer() {
-                    setInterval(() => {
+                    const timerInterval = setInterval(() => {
                         if (this.timeLeft > 0) {
                             this.timeLeft--;
                             this.formatTime();
+                            
+                            if(this.timeLeft === 300) {
+                                const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+                                Toast.fire({ icon: 'warning', title: 'Waktu tinggal 5 menit!' });
+                            }
                         } else {
+                            clearInterval(timerInterval);
                             this.submitExam(true);
                         }
                     }, 1000);
@@ -279,105 +440,66 @@
                     let m = Math.floor((this.timeLeft % 3600) / 60);
                     let s = this.timeLeft % 60;
                     this.formattedTime = 
-                        (h < 10 ? "0" + h : h) + ":" + 
-                        (m < 10 ? "0" + m : m) + ":" + 
-                        (s < 10 ? "0" + s : s);
-                },
-
-                nextQuestion() {
-                    if (this.currentQuestion < this.totalQuestions - 1) {
-                        this.currentQuestion++;
-                    }
-                },
-
-                prevQuestion() {
-                    if (this.currentQuestion > 0) {
-                        this.currentQuestion--;
-                    }
-                },
-
-                async selectAnswer(questionId, answer) {
-                    this.answers[questionId] = answer;
-                    this.isSaving = true;
-
-                    try {
-                        const response = await fetch("{{ route('student.exam.saveAnswer') }}", {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: JSON.stringify({
-                                session_id: this.sessionId,
-                                question_id: questionId,
-                                answer: answer
-                            })
-                        });
-                        
-                        if(!response.ok) throw new Error('Network error');
-                        setTimeout(() => this.isSaving = false, 500);
-
-                    } catch (error) {
-                        console.error('Gagal menyimpan jawaban', error);
-                        this.isSaving = false;
-                    }
+                        (h < 10 ? "0" + h : h) + ":" + (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
                 },
 
                 finishExam() {
-                    let answeredCount = Object.keys(this.answers).length;
-                    let remaining = this.totalQuestions - answeredCount;
+                    const answeredCount = Object.keys(this.answers).length;
+                    const remaining = this.totalQuestions - answeredCount;
+                    const markedCount = Object.values(this.markedQuestions).filter(v => v).length;
 
-                    if (remaining > 0) {
-                        Swal.fire({
-                            title: 'Masih ada soal kosong!',
-                            text: `Anda belum menjawab ${remaining} soal. Yakin ingin mengumpulkan?`,
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#3085d6',
-                            cancelButtonColor: '#d33',
-                            confirmButtonText: 'Ya, Kumpulkan',
-                            cancelButtonText: 'Lanjut Mengerjakan'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                this.submitExam();
-                            }
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Konfirmasi Selesai',
-                            text: "Jawaban akan dikirim dan tidak bisa diubah lagi.",
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonText: 'Kumpulkan Jawaban'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                this.submitExam();
-                            }
-                        });
-                    }
+                    let warningText = "";
+                    if (remaining > 0) warningText += `Masih ada <b>${remaining}</b> soal kosong. `;
+                    if (markedCount > 0) warningText += `Ada <b>${markedCount}</b> soal ragu-ragu. `;
+                    
+                    Swal.fire({
+                        title: 'Kumpulkan Jawaban?',
+                        html: warningText ? warningText + "<br>Yakin ingin mengakhiri ujian?" : "Pastikan semua jawaban sudah benar.",
+                        icon: warningText ? 'warning' : 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10b981',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Ya, Kumpulkan',
+                        cancelButtonText: 'Cek Lagi'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.submitExam();
+                        }
+                    });
                 },
 
                 submitExam(forced = false) {
+                    if(this.saveStatus === 'pending') {
+                         Swal.fire({
+                            title: 'Sinkronisasi...',
+                            text: 'Sedang mengirim jawaban offline...',
+                            allowOutsideClick: false,
+                            didOpen: () => Swal.showLoading()
+                        });
+                        this.syncPendingAnswers().then(() => this.doSubmit(forced));
+                    } else {
+                        this.doSubmit(forced);
+                    }
+                },
+
+                doSubmit(forced) {
                     Swal.fire({
-                        title: 'Menyimpan Jawaban...',
-                        timer: 2000,
-                        timerProgressBar: true,
+                        title: 'Menyimpan Ujian...',
                         allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading()
-                        }
+                        didOpen: () => Swal.showLoading()
                     });
+
+                    localStorage.removeItem(`exam_${this.sessionId}`);
 
                     const form = document.createElement('form');
                     form.method = 'POST';
-                    const finishUrl = "{{ route('student.exam.finish', ':id') }}".replace(':id', this.examId);
-                    form.action = finishUrl;
+                    form.action = "{{ route('student.exam.finish', ':id') }}".replace(':id', this.examId);
                     
-                    const csrfToken = document.createElement('input');
-                    csrfToken.type = 'hidden';
-                    csrfToken.name = '_token';
-                    csrfToken.value = document.querySelector('meta[name="csrf-token"]').content;
-                    form.appendChild(csrfToken);
+                    const tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = '_token';
+                    tokenInput.value = document.querySelector('meta[name="csrf-token"]').content;
+                    form.appendChild(tokenInput);
 
                     document.body.appendChild(form);
                     form.submit();

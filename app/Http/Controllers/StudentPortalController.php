@@ -8,7 +8,7 @@ use App\Models\DisciplineRecord;
 use App\Models\LibraryVisit;
 use App\Models\Borrowing;
 use App\Models\GradeRecord;
-use App\Models\ExtracurricularMember; // Tambahkan Model Ini
+use App\Models\ExtracurricularMember; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -81,8 +81,7 @@ class StudentPortalController extends Controller
         $library_visits = class_exists('App\Models\LibraryVisit') ? LibraryVisit::where('student_id', $student->id)->count() : 0;
         $library_history = class_exists('App\Models\Borrowing') ? Borrowing::with('book')->where('student_id', $student->id)->orderBy('borrow_date', 'desc')->limit(10)->get() : [];
 
-        // 6. [BARU] EKSTRAKURIKULER
-        // Mengambil data ekskul yang diikuti siswa berdasarkan controller ExtracurricularController Anda
+        // 6. EKSTRAKURIKULER
         $extracurriculars_joined = [];
         if (class_exists('App\Models\ExtracurricularMember')) {
             $extracurriculars_joined = ExtracurricularMember::with('extracurricular')
@@ -115,8 +114,21 @@ class StudentPortalController extends Controller
             'violations', 'total_violation_points', 
             'achievements', 'total_merit_points',
             'library_visits', 'library_history',
-            'extracurriculars_joined', // <-- Variabel Baru dikirim ke View
+            'extracurriculars_joined', 
             'academic_record', 'chartData'
         ));
+    }
+
+    /**
+     * Menampilkan Kartu OSIS untuk dicetak oleh siswa via Portal
+     */
+    public function printCard($id)
+    {
+        // Cari siswa, jika tidak ketemu akan otomatis 404
+        $student = Student::with('schoolClass')->findOrFail($id);
+
+        // Menggunakan view yang sama dengan admin (reusable)
+        // Pastikan file view 'students.osis_card' sudah ada
+        return view('students.osis_card', compact('student'));
     }
 }

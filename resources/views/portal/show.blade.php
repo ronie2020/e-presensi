@@ -1,7 +1,9 @@
 @extends('layouts.public')
 
 @section('content')
-<!-- X-DATA: Menangani Tab & Resize Chart -->
+<!-- X-DATA: Menangani Tab & Resize Chart 
+     Perbaikan: Menambahkan logic resize yang lebih robust untuk Chart.js di dalam tab tersembunyi
+-->
 <div class="w-full max-w-6xl mx-auto pb-20" 
      x-data="{ 
         activeTab: new URLSearchParams(window.location.search).get('tab') || 'ringkasan',
@@ -10,9 +12,12 @@
             const url = new URL(window.location);
             url.searchParams.set('tab', val);
             window.history.pushState({}, '', url);
-            // Trigger resize chart jika tab chart dibuka
+            
+            // Trigger resize chart khusus jika tab chart dibuka agar tidak gepeng
             if(val === 'akademik' || val === 'kehadiran') {
-                setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 100);
+                setTimeout(() => { 
+                    window.dispatchEvent(new Event('resize')); 
+                }, 100);
             }
         }
      }">
@@ -24,6 +29,8 @@
             <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-blue-900/80 to-slate-900"></div>
             <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+            
+            <!-- Dekorasi Blur -->
             <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-600 rounded-full mix-blend-overlay filter blur-[80px] opacity-20 -mr-20 -mt-20"></div>
             <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-600 rounded-full mix-blend-overlay filter blur-[80px] opacity-20 -ml-20 -mb-20"></div>
         </div>
@@ -68,10 +75,15 @@
                 </div>
             </div>
 
-            <!-- Action Button -->
+            <!-- Action Buttons -->
             <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2 mt-4 md:mt-0 md:pb-4">
+                {{-- TOMBOL CETAK KARTU OSIS (Fitur Baru) --}}
+                <a href="{{ route('portal.card', $student->id) }}" target="_blank" class="flex-1 sm:flex-none justify-center inline-flex items-center px-5 py-2.5 bg-emerald-500/80 backdrop-blur-md border border-emerald-400/30 rounded-xl text-sm font-bold text-white hover:bg-emerald-500 transition-all shadow-lg hover:shadow-emerald-500/20 group">
+                    <i class="ph-bold ph-identification-card mr-2 group-hover:animate-bounce"></i> Kartu OSIS
+                </a>
+
                 <button onclick="window.print()" class="flex-1 sm:flex-none justify-center inline-flex items-center px-5 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-sm font-bold text-white hover:bg-white hover:text-slate-900 transition-all shadow-lg">
-                    <i class="ph-bold ph-printer mr-2"></i> Cetak
+                    <i class="ph-bold ph-printer mr-2"></i> Biodata
                 </button>
                 <a href="{{ route('portal.index') }}" class="flex-1 sm:flex-none justify-center inline-flex items-center px-5 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-sm font-bold text-white hover:bg-white hover:text-slate-900 transition-all shadow-lg">
                     <i class="ph-bold ph-magnifying-glass mr-2"></i> Cari Lain
@@ -121,7 +133,10 @@
                     <div class="relative z-10">
                         <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">Persentase Kehadiran</h3>
                         <div class="flex items-baseline gap-2 mb-4">
-                            @php $total_hari = ($hadir ?? 0) + ($sakit ?? 0) + ($izin ?? 0) + ($alpa ?? 0); $persen = $total_hari > 0 ? round(($hadir/$total_hari)*100) : 0; @endphp
+                            @php 
+                                $total_hari = ($hadir ?? 0) + ($sakit ?? 0) + ($izin ?? 0) + ($alpa ?? 0); 
+                                $persen = $total_hari > 0 ? round(($hadir/$total_hari)*100) : 0; 
+                            @endphp
                             <span class="text-5xl font-black text-slate-800">{{ $persen }}<span class="text-2xl text-slate-400">%</span></span>
                         </div>
                         <div class="flex gap-2">
@@ -131,7 +146,7 @@
                     </div>
                 </div>
                 
-                <!-- Card Poin (Updated) -->
+                <!-- Card Poin -->
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i class="ph-fill ph-star text-9xl text-yellow-500"></i></div>
                     <div class="relative z-10">
@@ -167,6 +182,7 @@
         <!-- 2. TAB JURNAL KBM -->
         <div x-show="activeTab === 'kbm'" x-cloak x-transition:enter="transition ease-out duration-300">
             <div class="grid grid-cols-1 gap-6">
+                {{-- Cek apakah variabel teaching_journals ada (dari controller) --}}
                 @if(isset($teaching_journals) && count($teaching_journals) > 0)
                     @foreach($teaching_journals as $journal)
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
@@ -174,8 +190,9 @@
                             <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
                                 <div>
                                     <div class="flex items-center gap-2 mb-1">
+                                        {{-- Menggunakan null safe operator (?->) agar tidak error jika relasi hilang --}}
                                         <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wide border border-blue-100">
-                                            {{ $journal->schedule->subject->name ?? 'Mapel' }}
+                                            {{ $journal->schedule?->subject?->name ?? 'Mapel' }}
                                         </span>
                                         <span class="text-xs text-slate-400 font-bold flex items-center gap-1">
                                             <i class="ph-fill ph-clock"></i>
@@ -183,7 +200,7 @@
                                         </span>
                                     </div>
                                     <h3 class="text-lg font-bold text-slate-800">{{ $journal->topic ?? 'Tanpa Topik' }}</h3>
-                                    <p class="text-sm text-slate-500">Pengajar: {{ $journal->schedule->teacher->name ?? 'Guru' }}</p>
+                                    <p class="text-sm text-slate-500">Pengajar: {{ $journal->schedule?->teacher?->name ?? 'Guru' }}</p>
                                 </div>
                                 <div class="text-right">
                                     <p class="text-2xl font-black text-slate-200">{{ \Carbon\Carbon::parse($journal->date)->format('d') }}</p>
@@ -194,17 +211,13 @@
                                 <p class="text-xs font-bold text-slate-400 uppercase mb-2">Aktivitas / Tugas:</p>
                                 <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-line">{{ $journal->activities ?? '-' }}</p>
                             </div>
+                            @if($journal->reference_link)
                             <div class="flex justify-between items-center pt-2 border-t border-gray-50">
-                                <div>
-                                    @if($journal->reference_link)
-                                        <a href="{{ $journal->reference_link }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline">
-                                            <i class="ph-bold ph-link"></i> Buka Materi / Link
-                                        </a>
-                                    @else
-                                        <span class="text-xs text-slate-400 italic">Tidak ada link referensi</span>
-                                    @endif
-                                </div>
+                                <a href="{{ $journal->reference_link }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline">
+                                    <i class="ph-bold ph-link"></i> Buka Materi / Link
+                                </a>
                             </div>
+                            @endif
                         </div>
                     </div>
                     @endforeach
@@ -212,6 +225,7 @@
                     <div class="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
                         <i class="ph-duotone ph-notebook text-4xl text-slate-300 mb-3"></i>
                         <p class="text-slate-500 font-medium">Belum ada riwayat pembelajaran.</p>
+                        <p class="text-xs text-slate-400 mt-1">Data jurnal KBM belum tersedia untuk kelas ini.</p>
                     </div>
                 @endif
             </div>
@@ -614,23 +628,31 @@
     .custom-scrollbar::-webkit-scrollbar { height: 0px; background: transparent; }
     .custom-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     [x-cloak] { display: none !important; }
+    
+    /* Styling tambahan untuk icon agar rata tengah secara vertikal */
+    .ph-fill, .ph-duotone, .ph-bold { vertical-align: middle; }
 </style>
 
-<!-- SCRIPTS: Chart Logic -->
+<!-- SCRIPTS: Chart Logic (Diperbarui untuk mengatasi ParseError) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Init Academic Chart
-        const academicCtx = document.getElementById('academicChart');
-        if (academicCtx && typeof Chart !== 'undefined') {
-            const labels = @json($chartData['labels'] ?? []);
-            const scores = @json($chartData['scores'] ?? []);
-            new Chart(academicCtx, {
+        // --- 1. SETUP ACADEMIC CHART ---
+        const academicCanvas = document.getElementById('academicChart');
+        
+        // [FIX] Menggunakan null coalescing sederhana agar tidak ada koma yang membingungkan Blade
+        // Data sudah dijamin oleh controller, jika null kita fallback ke null JS dan cek nanti
+        const academicData = @json($chartData ?? null);
+
+        // Pastikan data valid sebelum render chart
+        if (academicCanvas && typeof Chart !== 'undefined' && academicData && academicData.labels && academicData.labels.length > 0) {
+            new Chart(academicCanvas, {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: academicData.labels,
                     datasets: [{
                         label: 'Nilai Akhir',
-                        data: scores,
+                        data: academicData.scores,
                         backgroundColor: 'rgba(37, 99, 235, 0.2)', 
                         borderColor: 'rgba(37, 99, 235, 1)',
                         borderWidth: 2,
@@ -646,28 +668,30 @@
                     plugins: { legend: { display: false } },
                     scales: {
                         x: { beginAtZero: true, max: 100, grid: { color: '#f1f5f9', borderDash: [4, 4] }, border: { display: false } },
-                        y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold' } } }
+                        y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 11 } } }
                     }
                 }
             });
         }
 
-        // Init Attendance Chart
-        const attendCtx = document.getElementById('attendanceChart');
-        if (attendCtx && typeof Chart !== 'undefined') {
-            const data = {
-                hadir: {{ $attendanceChart['hadir'] ?? 0 }},
-                sakit: {{ $attendanceChart['sakit'] ?? 0 }},
-                izin: {{ $attendanceChart['izin'] ?? 0 }},
-                alpa: {{ $attendanceChart['alpa'] ?? 0 }}
-            };
-            
-            new Chart(attendCtx, {
+        // --- 2. SETUP ATTENDANCE CHART ---
+        const attendCanvas = document.getElementById('attendanceChart');
+        // [FIX] Menggunakan null coalescing sederhana
+        const attendData = @json($attendanceChart ?? null);
+        
+        // Hitung total hanya jika data ada
+        let totalAttend = 0;
+        if(attendData) {
+            totalAttend = (attendData.hadir || 0) + (attendData.sakit || 0) + (attendData.izin || 0) + (attendData.alpa || 0);
+        }
+
+        if (attendCanvas && typeof Chart !== 'undefined' && totalAttend > 0) {
+            new Chart(attendCanvas, {
                 type: 'doughnut',
                 data: {
                     labels: ['Hadir', 'Sakit', 'Izin', 'Alpa'],
                     datasets: [{
-                        data: [data.hadir, data.sakit, data.izin, data.alpa],
+                        data: [attendData.hadir, attendData.sakit, attendData.izin, attendData.alpa],
                         backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
                         borderWidth: 0,
                         hoverOffset: 10
@@ -676,7 +700,7 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '70%',
+                    cutout: '75%', 
                     plugins: {
                         legend: { 
                             position: 'bottom', 
@@ -686,7 +710,15 @@
                             backgroundColor: 'rgba(15, 23, 42, 0.9)',
                             padding: 12,
                             cornerRadius: 8,
-                            displayColors: false
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.raw || 0;
+                                    let percentage = Math.round((value / totalAttend) * 100) + '%';
+                                    return label + ': ' + value + ' Hari (' + percentage + ')';
+                                }
+                            }
                         }
                     }
                 }

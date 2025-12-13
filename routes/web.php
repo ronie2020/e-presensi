@@ -64,6 +64,8 @@ Route::post('/kiosk/process', [KioskController::class, 'processKioskScan'])->nam
 Route::get('/portal', [StudentPortalController::class, 'index'])->name('portal.index');
 Route::post('/portal/search', [StudentPortalController::class, 'search'])->name('portal.search');
 Route::get('/portal/{student_id}', [StudentPortalController::class, 'show'])->name('portal.show');
+// ====> CETAK KARTU OSIS VIA PORTAL <====
+Route::get('/portal/student/{id}/card', [StudentPortalController::class, 'printCard'])->name('portal.card');
 
 // Library Kiosk
 Route::get('/library/kiosk', [LibraryKioskController::class, 'index'])->name('library.kiosk.index');
@@ -122,6 +124,7 @@ Route::middleware('auth')->group(function () {
     // --- Manajemen Master Data (Siswa, Kelas, Mapel, User) ---
     Route::post('/students/import', [StudentController::class, 'import'])->name('students.import');
     Route::get('/students/export', [StudentController::class, 'export'])->name('students.export'); 
+    Route::get('/students/{student}/card', [StudentController::class, 'card'])->name('students.card');
     Route::resource('students', StudentController::class); 
     Route::resource('classes', SchoolClassController::class);
     Route::resource('users', UserController::class);
@@ -217,8 +220,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
     Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
     Route::post('/announcements/send', [AnnouncementController::class, 'sendNotification'])->name('announcements.send');
+    
+    // [PASTIKAN BARIS INI ADA UNTUK MENGATASI ERROR]
+    Route::get('/agendas', [AnnouncementController::class, 'agendas'])->name('agendas.index'); 
+    
     Route::post('/agendas', [AnnouncementController::class, 'storeAgenda'])->name('agendas.store');
     Route::delete('/agendas/{id}', [AnnouncementController::class, 'destroyAgenda'])->name('agendas.destroy');
+    
+    Route::resource('activities', SchoolActivityController::class)->except(['show']);
 
     Route::get('/settings/academic', [AcademicYearController::class, 'index'])->name('settings.academic.index');
     Route::post('/settings/academic', [AcademicYearController::class, 'store'])->name('settings.academic.store');

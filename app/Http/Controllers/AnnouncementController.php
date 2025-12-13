@@ -44,6 +44,15 @@ class AnnouncementController extends Controller
         return view('announcements.index', compact('announcements', 'agendas', 'classes', 'students', 'templates'));
     }
 
+    /**
+     * [BARU] Fungsi khusus untuk menu 'Agenda Kegiatan'
+     * Menggunakan tampilan yang sama dengan index karena data agenda sudah ada disana.
+     */
+    public function agendas()
+    {
+        return $this->index();
+    }
+
     // -- LOGIKA PENGUMUMAN --
     public function store(Request $request)
     {
