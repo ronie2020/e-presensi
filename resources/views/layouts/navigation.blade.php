@@ -32,7 +32,7 @@
                     [
                         'name' => 'Dashboard',
                         'route' => 'dashboard',
-                        'icon' => 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'
+                        'icon' => 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2zz'
                     ],
                     [
                         'name' => 'Scan Aktifitas',
@@ -51,6 +51,12 @@
                     ],
                 ],
                 'Akademik' => [
+                    [
+                        'name' => 'Manajemen Kelulusan', // MENU BARU
+                        'route' => 'admin.graduation.index',
+                        'active_check' => 'admin.graduation.*',
+                        'icon' => 'M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z'
+                    ],
                     [
                         'name' => 'Jurnal Mengajar',
                         'route' => 'teaching.index',

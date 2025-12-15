@@ -26,6 +26,8 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\SchoolActivityController;
 use App\Http\Controllers\TeachingController;
+// Controller Kelulusan (Pastikan file Controller sudah dibuat sesuai langkah sebelumnya)
+use App\Http\Controllers\GraduationController; 
 
 // CBT & Exams (Admin Side)
 use App\Http\Controllers\CbtController;
@@ -66,6 +68,12 @@ Route::post('/portal/search', [StudentPortalController::class, 'search'])->name(
 Route::get('/portal/{student_id}', [StudentPortalController::class, 'show'])->name('portal.show');
 // ====> CETAK KARTU OSIS VIA PORTAL <====
 Route::get('/portal/student/{id}/card', [StudentPortalController::class, 'printCard'])->name('portal.card');
+
+// ====> PENGUMUMAN KELULUSAN (NEW) <====
+Route::get('/kelulusan', [GraduationController::class, 'index'])->name('graduation.index');
+Route::post('/kelulusan/cek', [GraduationController::class, 'check'])->name('graduation.check');
+Route::get('/kelulusan/cetak/{id}', [GraduationController::class, 'printSkl'])->name('graduation.print');
+
 
 // Library Kiosk
 Route::get('/library/kiosk', [LibraryKioskController::class, 'index'])->name('library.kiosk.index');
@@ -202,6 +210,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/circulation/return', [LibraryCirculationController::class, 'returnBook'])->name('circulation.return');
     });
 
+     // --- Manajemen Kelulusan (ADMIN) ---
+    Route::prefix('admin/graduation')->name('admin.graduation.')->group(function() {
+        Route::get('/', [GraduationController::class, 'adminIndex'])->name('index');
+        Route::post('/store', [GraduationController::class, 'store'])->name('store');
+        Route::post('/set-date', [GraduationController::class, 'setGlobalDate'])->name('set_date');
+    });
+
     // --- Ekstrakurikuler ---
     Route::prefix('extracurriculars')->name('extracurriculars.')->group(function () {
         Route::get('/', [ExtracurricularController::class, 'index'])->name('index');
@@ -221,7 +236,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
     Route::post('/announcements/send', [AnnouncementController::class, 'sendNotification'])->name('announcements.send');
     
-    // [PASTIKAN BARIS INI ADA UNTUK MENGATASI ERROR]
     Route::get('/agendas', [AnnouncementController::class, 'agendas'])->name('agendas.index'); 
     
     Route::post('/agendas', [AnnouncementController::class, 'storeAgenda'])->name('agendas.store');

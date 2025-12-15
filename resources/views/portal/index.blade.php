@@ -154,6 +154,15 @@
                     <span class="font-bold text-sm">{{ session('error') ?? $errors->first() }}</span>
                 </div>
             @endif
+
+            <!-- [TOMBOL PINTAS KELULUSAN] -->
+            <div class="mt-8 text-center" x-show="mode === 'portal'" x-transition>
+                <a href="{{ route('graduation.index') }}" class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-purple-900/40 border border-purple-500/30 text-purple-200 text-sm font-bold hover:bg-purple-900/60 hover:text-white transition-all backdrop-blur-sm group">
+                    <i class="ph-fill ph-sparkle text-purple-400 group-hover:animate-pulse"></i>
+                    <span>Cek Pengumuman Kelulusan Disini</span>
+                    <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                </a>
+            </div>
         </div>
         
         <!-- Bottom Decoration -->
