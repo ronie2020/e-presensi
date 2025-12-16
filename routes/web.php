@@ -55,7 +55,7 @@ use App\Http\Controllers\LibraryKioskController;
 // =========================================================================
 
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
-Route::get('/pengajar', [LandingPageController::class, 'teachers'])->name('teachers.index');
+Route::get('/guru', [LandingPageController::class, 'teachers'])->name('teachers.index');
 Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
 
 // Kiosk (Buku Tamu / Absen Mandiri)

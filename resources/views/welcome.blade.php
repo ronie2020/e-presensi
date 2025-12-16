@@ -25,8 +25,11 @@
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #64748b; }
         
+        /* Custom Animation Definitions */
         .animate-blob { animation: blob 7s infinite; }
         .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; } /* Tambahan delay baru */
+        
         @keyframes blob {
             0% { transform: translate(0px, 0px) scale(1); }
             33% { transform: translate(30px, -50px) scale(1.1); }
@@ -162,7 +165,7 @@
         <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
         <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/95 to-blue-900/90"></div>
         
-        <!-- Animated Blobs -->
+        <!-- Animated Blobs (Hero) -->
         <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob"></div>
         <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob animation-delay-2000"></div>
 
@@ -231,9 +234,17 @@
         </div>
     </div>
 
-    <!-- MENU AKSES -->
-    <div class="bg-slate-50 py-16 lg:py-20 relative z-20 -mt-8 lg:-mt-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- MENU AKSES (ANIMATED) -->
+    <div class="bg-slate-50 py-16 lg:py-20 relative z-20 -mt-8 lg:-mt-12 overflow-hidden">
+        
+        <!-- [TAMBAHAN BARU] Animated Background Blobs untuk Menu -->
+        <div class="absolute inset-0 pointer-events-none z-0">
+            <div class="absolute top-10 left-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+            <div class="absolute top-10 right-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+            <div class="absolute -bottom-8 left-1/3 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center mb-16" data-aos="fade-up">
                 <h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">Akses Cepat Layanan</h2>
                 <p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">Menu layanan digital terintegrasi untuk seluruh civitas akademika.</p>
@@ -242,83 +253,83 @@
             <div class="flex flex-wrap justify-center gap-6 lg:gap-8">
 
                   <!-- [MENU BARU] PENGUMUMAN KELULUSAN (THEME UNGU SPECIAL) -->
-                 <a href="{{ route('graduation.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
+                 <a href="{{ route('graduation.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
                     <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-graduation-cap text-3xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-purple-600">Cek Kelulusan</h3>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-purple-600 transition-colors">Cek Kelulusan</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Pengumuman resmi kelulusan siswa kelas IX Tahun Pelajaran {{ date('Y') }}.</p>
                 </a>
 
                 <!-- Portal Siswa -->
-                <a href="{{ route('portal.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-blue-500/10 border border-slate-100 hover:border-blue-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="100">
+                <a href="{{ route('portal.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-blue-500/10 border border-slate-100 hover:border-blue-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="100">
                     <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-student text-3xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600">Portal Siswa</h3>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">Portal Siswa</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Cek kehadiran, nilai akademik, dan poin kedisiplinan.</p>
                 </a>
 
                  <!-- UJIAN CBT (UPDATED LINK) -->                
-                <a href="{{ route('student.login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-rose-500/10 border border-slate-100 hover:border-rose-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="150">
+                <a href="{{ route('student.login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-rose-500/10 border border-slate-100 hover:border-rose-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="150">
                     <div class="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 mb-6 group-hover:bg-rose-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-desktop text-3xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-rose-600">Ujian CBT</h3>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-rose-600 transition-colors">Ujian CBT</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Login peserta ujian berbasis komputer (PTS/PAS).</p>
                 </a>
                 
                 <!-- Mesin Absensi -->
-                <a href="{{ route('kiosk.show') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="200">
+                <a href="{{ route('kiosk.show') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="200">
                     <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-qr-code text-3xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-purple-600">Mesin Absensi</h3>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-purple-600 transition-colors">Mesin Absensi</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Mode Kiosk untuk pemindaian kartu pelajar saat kehadiran.</p>
                 </a>
                 
                 <!-- E-Library -->
-                <a href="{{ route('library.kiosk.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-emerald-500/10 border border-slate-100 hover:border-emerald-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="300">
+                <a href="{{ route('library.kiosk.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-emerald-500/10 border border-slate-100 hover:border-emerald-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="300">
                     <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-books text-3xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-emerald-600">E-Library</h3>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors">E-Library</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Buku tamu digital dan katalog perpustakaan sekolah.</p>
                 </a>
                 
                 <!-- Login Guru -->
-                <a href="{{ route('login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-orange-500/10 border border-slate-100 hover:border-orange-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="400">
+                <a href="{{ route('login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-orange-500/10 border border-slate-100 hover:border-orange-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="400">
                     <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 mb-6 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-chalkboard-teacher text-3xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-orange-600">Login Staff</h3>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">Login Staff</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Panel administrasi untuk Guru, Wali Kelas dan TU.</p>
                 </a>
 
                 <!-- JURNAL MENGAJAR (BARU) -->
-                <a href="{{ route('teaching.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-indigo-500/10 border border-slate-100 hover:border-indigo-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="350">
+                <a href="{{ route('teaching.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-indigo-500/10 border border-slate-100 hover:border-indigo-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="350">
                     <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-presentation-chart text-3xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600">Jurnal Mengajar</h3>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">Jurnal Mengajar</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Akses cepat guru untuk mengisi jurnal KBM dan absensi kelas.</p>
                 </a>
 
                 <!-- PEMILU OSIS -->
-                <a href="https://pemilu-osis.smpn3lakbok.sch.id/" target="_blank" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-cyan-500/10 border border-slate-100 hover:border-cyan-200 transition-all duration-300 hover:-translate-y-1 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="450">
+                <a href="https://pemilu-osis.smpn3lakbok.sch.id/" target="_blank" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-cyan-500/10 border border-slate-100 hover:border-cyan-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="450">
                     <div class="w-16 h-16 bg-cyan-50 rounded-2xl flex items-center justify-center text-cyan-600 mb-6 group-hover:bg-cyan-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-check-square-offset text-3xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-cyan-600">Pemilu OSIS</h3>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-cyan-600 transition-colors">Pemilu OSIS</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Platform E-Voting Pemilihan Ketua OSIS masa bakti terbaru.</p>
                 </a>
 
                 <!-- BUKU TAMU -->
-                <div @click="guestBookModalOpen = true" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-pink-500/10 border border-slate-100 hover:border-pink-200 transition-all duration-300 hover:-translate-y-1 cursor-pointer w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="500">
+                <div @click="guestBookModalOpen = true" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-pink-500/10 border border-slate-100 hover:border-pink-200 transition-all duration-300 hover:-translate-y-2 cursor-pointer w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="500">
                     <div class="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center text-pink-600 mb-6 group-hover:bg-pink-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-book-open-text text-3xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-pink-600">Buku Tamu</h3>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-pink-600 transition-colors">Buku Tamu</h3>
                     <p class="text-slate-500 text-sm leading-relaxed">Isi buku tamu kunjungan sekolah secara digital.</p>
                 </div>
             </div>

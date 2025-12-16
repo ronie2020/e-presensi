@@ -18,6 +18,11 @@
             box-shadow: inset 0 0 50px rgba(34, 197, 94, 0.8);
             border-color: #22c55e;
         }
+        /* TAMBAHAN: Efek Warning untuk Terlambat */
+        .scan-warning-effect {
+            box-shadow: inset 0 0 50px rgba(245, 158, 11, 0.8); /* Amber */
+            border-color: #f59e0b;
+        }
         .scan-error-effect {
             box-shadow: inset 0 0 50px rgba(239, 68, 68, 0.8);
             border-color: #ef4444;
@@ -255,9 +260,11 @@
                                                             {{ $scan['ekskul_name'] ?? '-' }}
                                                         </td>
                                                         <td class="log-status px-4 py-3 whitespace-nowrap text-right">
+                                                            {{-- BADGE HARIAN --}}
                                                             <span class="badge-harian status-badge px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg {{ $scan['status'] == 'Masuk' ? 'bg-green-100 text-green-700' : ($scan['status'] == 'Terlambat' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600') }}">
                                                                 {{ $scan['status'] }}
                                                             </span>
+                                                            {{-- BADGE LAINNYA --}}
                                                             <span class="badge-dhuha status-badge hidden px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-emerald-100 text-emerald-700">Dhuha</span>
                                                             <span class="badge-dhuhur status-badge hidden px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-orange-100 text-orange-700">Dhuhur</span>
                                                             <span class="badge-ekskul status-badge hidden px-2.5 py-1 inline-flex text-[10px] leading-tight font-black uppercase tracking-wide rounded-lg bg-purple-100 text-purple-700">Hadir</span>
@@ -287,10 +294,7 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
         // --- DATA JADWAL DINAMIS DARI CONTROLLER ---
-        // Kita menggunakan variabel PHP yang sudah di-encode sebelumnya
-        // Teknik ini 100% aman dari error parsing Blade
         const SCHEDULE_DATA = {!! $scheduleJson !!};
-
         console.log("Active Schedule Configuration:", SCHEDULE_DATA);
 
         // --- GLOBAL & UTILITY ---
@@ -304,7 +308,6 @@
             }
         }
 
-        // FUNGSI PENTING: Mencegah XSS (Cross Site Scripting)
         function escapeHtml(text) {
             if (!text) return text;
             return String(text)
@@ -320,10 +323,9 @@
             // JIKA HARI LIBUR, STOP PROSES
             if(SCHEDULE_DATA.is_holiday) {
                 console.log("Hari ini libur. Scanner tidak diinisialisasi.");
-                return; // Jangan jalankan sisa script
+                return; 
             }
 
-            // KONFIGURASI JAM (Menggunakan data dari Controller)
             const toMinutes = (timeStr) => {
                 if(!timeStr) return 0;
                 const [h, m] = timeStr.split(':').map(Number);
@@ -345,7 +347,7 @@
             let isProcessing = false;
             
             const csrfToken = '{{ csrf_token() }}';
-            const scanProcessUrl = '{{ route('scan.process') }}'; // Pastikan route ini ada
+            const scanProcessUrl = '{{ route('scan.process') }}'; 
 
             // DOM ELEMENTS
             const logTableBody = document.getElementById('scan-log');
@@ -358,7 +360,7 @@
             const btnResetAuto = document.getElementById('btn-reset-auto');
             const scannerOverlay = document.getElementById('scanner-overlay-el');
 
-            // --- AUDIO FEEDBACK ---
+            // --- AUDIO FEEDBACK (UPDATED) ---
             function playBeep(type = 'success') {
                 try {
                     initAudio(); 
@@ -367,12 +369,17 @@
                     oscillator.connect(gainNode);
                     gainNode.connect(audioCtx.destination);
                     oscillator.type = 'sine';
-                    let freq = type === 'success' ? 880 : (type === 'warning' ? 500 : 200);
+                    
+                    // FREKUENSI UNIK UNTUK TERLAMBAT
+                    let freq = 880; // Default Success
+                    if(type === 'warning') freq = 440; // Terlambat (Nada Rendah)
+                    else if(type === 'error') freq = 200; // Error
+
                     oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
                     gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.3);
+                    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5); // Lebih panjang sedikit
                     oscillator.start(audioCtx.currentTime);
-                    oscillator.stop(audioCtx.currentTime + 0.3);
+                    oscillator.stop(audioCtx.currentTime + 0.5);
                 } catch (e) { console.log("Audio belum siap."); }
             }
 
@@ -384,7 +391,6 @@
                 'Ekstrakurikuler': { activeClass: 'bg-purple-600 text-white shadow-lg', inactiveClass: 'bg-white text-gray-500 hover:bg-gray-100', indicatorClass: 'bg-purple-50 text-purple-600 border-purple-100' }
             };
 
-            // --- CLOCK & AUTO MODE ---
             const clockElement = document.getElementById('clock');
             if(clockElement) {
                 setInterval(() => { clockElement.textContent = new Date().toLocaleTimeString('id-ID', { hour12: false }); }, 1000);
@@ -396,7 +402,6 @@
                 const currentMinutes = now.getHours() * 60 + now.getMinutes();
                 let newMode = 'Harian';
                 
-                // Gunakan MODE_TIMES yang sudah dinamis
                 if (currentMinutes >= MODE_TIMES.DHUHA_START && currentMinutes < MODE_TIMES.DHUHA_END) newMode = 'Dhuha';
                 else if (currentMinutes >= MODE_TIMES.DHUHUR_START && currentMinutes < MODE_TIMES.DHUHUR_END) newMode = 'Dhuhur';
 
@@ -442,7 +447,6 @@
                 filterLogs(type);
             }
 
-            // Event Listeners
             document.querySelectorAll('.scan-type-btn').forEach(btn => {
                 btn.addEventListener('click', () => selectScanMode(btn.getAttribute('data-type')));
             });
@@ -453,11 +457,9 @@
                 else scanStatus.textContent = `Pilih Kegiatan Dulu`;
             });
 
-            // Init Auto Mode
             autoSelectMode();
             setInterval(autoSelectMode, 60000); 
 
-            // --- TABLE MANAGEMENT ---
             function updateTableLayout(type) {
                 const harianCols = document.querySelectorAll('.col-harian');
                 const waktuCols = document.querySelectorAll('.col-waktu');
@@ -502,7 +504,6 @@
                 }
             }
 
-            // Fungsi Helper dengan SECURITY FIX (escapeHtml)
             function addNewRowToTable(scanData, scanType) {
                 const now = new Date();
                 const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
@@ -589,16 +590,19 @@
                 else handleScanKegiatan(decodedText, currentScanMode, selectedExtra);
             };
 
+            // MODIFIED TRIGGER EFFECT
             function triggerScanEffect(type) {
-                scannerOverlay.classList.remove('scan-success-effect', 'scan-error-effect');
+                scannerOverlay.classList.remove('scan-success-effect', 'scan-error-effect', 'scan-warning-effect');
                 if(type === 'success') scannerOverlay.classList.add('scan-success-effect');
+                else if(type === 'warning') scannerOverlay.classList.add('scan-warning-effect'); // BARU
                 else scannerOverlay.classList.add('scan-error-effect');
                 
                 setTimeout(() => {
-                    scannerOverlay.classList.remove('scan-success-effect', 'scan-error-effect');
+                    scannerOverlay.classList.remove('scan-success-effect', 'scan-error-effect', 'scan-warning-effect');
                 }, 500);
             }
 
+            // MODIFIED HANDLE SCAN HARIAN
             async function handleScanHarian(studentId) {
                 try {
                     const response = await fetch(scanProcessUrl, {
@@ -609,10 +613,18 @@
                     const result = await response.json();
                     
                     if (response.ok) {
-                        triggerScanEffect('success');
-                        playBeep('success');
-                        if (result.message.toUpperCase().includes('TERLAMBAT')) showScanResult('warning', result.message); 
-                        else showScanResult('success', result.message); 
+                        // CEK STATUS TERLAMBAT
+                        const isLate = result.message.toUpperCase().includes('TERLAMBAT');
+                        
+                        if (isLate) {
+                            triggerScanEffect('warning');
+                            playBeep('warning'); // Bunyi beda
+                            showScanResult('warning', result.message); 
+                        } else {
+                            triggerScanEffect('success');
+                            playBeep('success');
+                            showScanResult('success', result.message); 
+                        }
                         
                         if(result.scan) addNewRowToTable(result.scan, 'Harian');
 
@@ -649,7 +661,6 @@
                         let titleText = type === 'Ekstrakurikuler' ? 'Absen Ekskul Berhasil' : `Absen ${type} Berhasil`;
                         let pointsText = type === 'Ekstrakurikuler' ? '+10 Poin Keaktifan' : '+5 Poin Kebaikan';
                         
-                        // Gunakan escapeHtml juga di Swal untuk keamanan tambahan
                         Swal.fire({
                             title: 'Alhamdulillah!',
                             html: `<p class="text-xl text-gray-700">Selamat <b>${escapeHtml(result.scan?.student?.name || 'Siswa')}</b></p><p class="text-gray-500 mt-1 mb-4">${titleText}</p><div class="inline-flex items-center gap-2 px-4 py-3 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-100 shadow-sm"><span class="font-bold text-lg">${pointsText}</span></div>`,

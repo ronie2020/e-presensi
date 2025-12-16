@@ -9,6 +9,10 @@ use App\Models\ScheduleSpecial;
 use App\Models\Extracurricular;
 use App\Models\ExtracurricularMember;
 use App\Models\ExtracurricularAttendance;
+// --- TAMBAHAN MODEL UNTUK POIN KEDISIPLINAN ---
+use App\Models\DisciplineRecord;
+use App\Models\DisciplineType;
+// ----------------------------------------------
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log; 
@@ -24,20 +28,18 @@ class AttendanceSiswaController extends Controller
     {
         $today = Carbon::today();
         
-        // --- 1. LOGIKA JADWAL DINAMIS (BARU) ---
-        // Default Config (Jika tidak ada jadwal di DB)
+        // --- 1. LOGIKA JADWAL DINAMIS ---
         $scheduleConfig = [
             'type' => 'Regular',
             'is_holiday' => false,
             'description' => 'KBM Normal',
             'start_in' => '06:00', 'end_in' => '07:15',
             'start_out' => '14:00', 'end_out' => '17:00',
-            // Jam Sholat (Bisa di-hardcode atau ambil dari DB jika nanti ada tabelnya)
             'dhuha_start' => '07:30', 'dhuha_end' => '09:30',
             'dhuhur_start' => '11:45', 'dhuhur_end' => '12:30',
         ];
 
-        // Cek Jadwal Khusus Hari Ini
+        // Cek Jadwal Khusus
         $specialSchedule = ScheduleSpecial::whereDate('date', $today)->first();
 
         if ($specialSchedule) {
@@ -45,7 +47,6 @@ class AttendanceSiswaController extends Controller
             $scheduleConfig['is_holiday'] = (bool) $specialSchedule->is_holiday;
             $scheduleConfig['description'] = $specialSchedule->description ?? 'Kegiatan Khusus';
             
-            // Jika bukan libur, update jam operasional sesuai jadwal khusus
             if (!$specialSchedule->is_holiday) {
                 $scheduleConfig['start_in'] = substr($specialSchedule->start_in, 0, 5);
                 $scheduleConfig['end_in'] = substr($specialSchedule->end_in, 0, 5);
@@ -53,15 +54,12 @@ class AttendanceSiswaController extends Controller
                 $scheduleConfig['end_out'] = substr($specialSchedule->end_out, 0, 5);
             }
         } else {
-            // Jika Tidak Ada Jadwal Khusus, Cek Jadwal Reguler (Senin-Jumat)
-            $dayOfWeek = $today->dayOfWeek; // 0=Minggu, 1=Senin, ..., 6=Sabtu
-            $dayType = ($dayOfWeek == 5) ? 'Jumat' : 'Biasa'; // 5 = Jumat
+            // Cek Jadwal Reguler
+            $dayOfWeek = $today->dayOfWeek;
+            $dayType = ($dayOfWeek == 5) ? 'Jumat' : 'Biasa'; 
             
-            // Kecuali Sabtu/Minggu (Bisa disesuaikan jika sekolah 5 hari kerja)
             if ($dayOfWeek == 0 || $dayOfWeek == 6) {
-                // Opsional: Set Sabtu/Minggu jadi libur jika tidak ada KBM
-                // $scheduleConfig['is_holiday'] = true;
-                // $scheduleConfig['description'] = 'Libur Akhir Pekan';
+                // Opsional: Libur Sabtu/Minggu
             } else {
                 $regularSchedule = ScheduleRegular::where('day_type', $dayType)->first();
                 if ($regularSchedule) {
@@ -73,7 +71,7 @@ class AttendanceSiswaController extends Controller
             }
         }
         
-        // --- 2. AMBIL RIWAYAT HARI INI (LOGIKA LAMA) ---
+        // --- 2. AMBIL RIWAYAT HARI INI ---
         $logs = AttendanceSiswa::with('student')
             ->whereDate('attendance_date', $today)
             ->latest('created_at')
@@ -88,7 +86,7 @@ class AttendanceSiswaController extends Controller
 
         $recentScans = [];
 
-        // Parsing Log Harian & Keagamaan
+        // Parsing Log
         foreach ($logs as $log) {
             $studentId = $log->student?->student_id;
             if (!$studentId) continue;
@@ -141,11 +139,10 @@ class AttendanceSiswaController extends Controller
         
         $extracurriculars = Extracurricular::all();
 
-        // --- 3. RETURN VIEW DENGAN DATA BARU ---
-        return view('scan.index', [ // Pastikan nama view ini sesuai dengan lokasi file blade Anda
+        return view('scan.index', [
             'recentScans' => array_values($recentScans),
             'extracurriculars' => $extracurriculars,
-            'scheduleConfig' => $scheduleConfig, // <--- Variabel penting untuk JS Frontend
+            'scheduleConfig' => $scheduleConfig,
         ]);
     }
 
@@ -189,7 +186,7 @@ class AttendanceSiswaController extends Controller
             return response()->json(['message' => 'Siswa tidak ditemukan (NISN: ' . $studentIdNisn . ')'], 404);
         }
 
-        // ================= LOGIKA EKSKUL =================
+        // ================= LOGIKA 1: EKSKUL =================
         if ($scanType == 'Ekstrakurikuler') {
             $extraName = $request->activity; 
             if (!$extraName) return response()->json(['message' => 'Pilih kegiatan ekskul dulu.'], 400);
@@ -233,13 +230,13 @@ class AttendanceSiswaController extends Controller
             }
         }
 
-        // ================= LOGIKA HARIAN =================
+        // ================= LOGIKA 2: ABSEN HARIAN (MASUK/PULANG) =================
+        // DI SINI KITA TERAPKAN FITUR TERLAMBAT
         if ($scanType == 'Harian') {
             
-            // Ambil jadwal untuk validasi Terlambat/Pulang
+            // Ambil jadwal hari ini untuk pengecekan jam terlambat
             $schedule = $this->getTodaysSchedule($now);
             
-            // Jika Libur atau NULL, Tolak Absen (Opsional, tergantung kebijakan)
             if (!$schedule) {
                  return response()->json(['message' => 'Hari ini libur atau jadwal belum diatur.'], 400);
             }
@@ -253,7 +250,7 @@ class AttendanceSiswaController extends Controller
                 return response()->json(['message' => "Siswa tercatat {$attendance->status} hari ini."], 409);
             }
 
-            // A. SCAN MASUK
+            // A. SCAN MASUK (Logika Terlambat ada di sini)
             if (!$attendance) {
                 if ($timeNow > $schedule->end_out) {
                     return response()->json(['message' => 'Sekolah sudah tutup.'], 400);
@@ -262,38 +259,58 @@ class AttendanceSiswaController extends Controller
                 $statusAbsen = 'Hadir'; 
                 $finalNotes = 'Masuk Tepat Waktu';
                 
+                // [KHUSUS HARIAN] Cek Batas Waktu Masuk
                 if ($timeNow > $schedule->end_in) { 
                     $endCarbon = Carbon::parse($schedule->end_in);
                     $nowCarbon = Carbon::parse($timeNow);
                     $minutesLate = $endCarbon->diffInMinutes($nowCarbon); 
                     
+                    // Ubah status jadi Terlambat
                     $statusAbsen = 'Terlambat'; 
                     $finalNotes = 'Terlambat ' . $minutesLate . ' menit';
                 }
 
                 try {
+                    // Simpan Absensi Harian
                     $newAttendance = AttendanceSiswa::create([
                         'student_id' => $student->id,
                         'attendance_date' => $today,
                         'type' => 'Masuk', 
-                        'status' => $statusAbsen, 
+                        'status' => $statusAbsen, // Bisa 'Hadir' atau 'Terlambat'
                         'time_in' => $timeNow,
                         'notes' => $finalNotes,
                     ]);
                     
-                    // Dispatch WA Job
+                    // [KHUSUS HARIAN] Catat Poin Pelanggaran Jika Terlambat
+                    if ($statusAbsen == 'Terlambat') {
+                        $disciplineType = DisciplineType::firstOrCreate(
+                            ['name' => 'Keterlambatan Masuk Sekolah'],
+                            ['point_value' => 3, 'type' => 'Pelanggaran']
+                        );
+
+                        DisciplineRecord::create([
+                            'student_id' => $student->id,
+                            'discipline_type_id' => $disciplineType->id,
+                            'date' => $today,
+                            'notes' => $finalNotes,
+                            'recorded_by_user_id' => auth()->id() ?? 1
+                        ]);
+                    }
+
+                    // Notifikasi WA
                     try { if (class_exists(SendWaScanNotificationJob::class)) SendWaScanNotificationJob::dispatch($newAttendance); } catch (\Exception $e) {}
 
                     return response()->json([
                         'message' => "{$student->name} Absen Masuk ({$statusAbsen}).",
                         'scan' => $newAttendance->load('student')
                     ], 200);
+
                 } catch (\Exception $e) {
                     return response()->json(['message' => 'Gagal Masuk: ' . $e->getMessage()], 500);
                 }
             }
             
-            // B. SCAN PULANG
+            // B. SCAN PULANG (Tidak ada istilah terlambat pulang, yang ada pulang cepat/lembur)
             else {
                 if ($attendance->time_out) {
                     return response()->json(['message' => "Sudah Absen Pulang jam {$attendance->time_out}."], 409);
@@ -306,7 +323,6 @@ class AttendanceSiswaController extends Controller
                             'notes' => $attendance->notes . ' | Pulang',
                         ]);
         
-                        // Dispatch WA Job
                         try { if (class_exists(SendWaScanNotificationJob::class)) SendWaScanNotificationJob::dispatch($attendance); } catch (\Exception $e) {}
 
                         return response()->json([
@@ -322,7 +338,8 @@ class AttendanceSiswaController extends Controller
             }
         }
         
-        // ================= LOGIKA KEAGAMAAN =================
+        // ================= LOGIKA 3: KEAGAMAAN (DHUHA / DHUHUR) =================
+        // DI SINI KITA PASTIKAN TIDAK ADA STATUS 'TERLAMBAT'
         else {
             $activity = $scanType; 
             $attendance = AttendanceSiswa::where('student_id', $student->id)
@@ -336,17 +353,18 @@ class AttendanceSiswaController extends Controller
             }
 
             try {
+                // [KHUSUS KEAGAMAAN] Langsung set status 'Hadir' tanpa cek jam
                 $newAttendance = AttendanceSiswa::create([
                     'student_id' => $student->id,
                     'attendance_date' => $today,
-                    'status' => 'Hadir',
+                    'status' => 'Hadir', // <--- SELALU HADIR (Tidak pernah Terlambat)
                     'type' => 'Keagamaan',
                     'activity' => $activity,
                     'time_in' => $timeNow,
                     'notes' => "Absen {$activity} otomatis.",
                 ]);
                 
-                // Dispatch Point Job
+                // Tambah Poin Kebaikan (Bukan Pelanggaran)
                 try { if (class_exists(AddReligiousPointJob::class)) AddReligiousPointJob::dispatch($newAttendance); } catch (\Exception $e) {}
 
                 return response()->json([
@@ -360,31 +378,22 @@ class AttendanceSiswaController extends Controller
         }
     }
 
-    /**
-     * Helper untuk mengambil object Jadwal
-     * Mengembalikan NULL jika hari libur atau tidak ada jadwal
-     */
     private function getTodaysSchedule(Carbon $now)
     {
         $today = $now->toDateString();
         try {
-            // 1. Cek Jadwal Khusus
             $special = ScheduleSpecial::where('date', $today)->first();
             if ($special) {
-                // Jika is_holiday true, return null (Libur)
-                // Jika false, return object special (Event tapi masuk)
                 return $special->is_holiday ? null : $special;
             }
 
-            // 2. Cek Jadwal Reguler
             $dayOfWeek = $now->dayOfWeek; 
-            if ($dayOfWeek == 5) { // Jumat
+            if ($dayOfWeek == 5) { 
                 return ScheduleRegular::where('day_type', 'Jumat')->first();
-            } elseif ($dayOfWeek >= 1 && $dayOfWeek <= 4) { // Senin-Kamis
+            } elseif ($dayOfWeek >= 1 && $dayOfWeek <= 4) { 
                 return ScheduleRegular::where('day_type', 'Biasa')->first();
             }
             
-            // Sabtu Minggu return null (kecuali ada settingan lain)
             return null;
 
         } catch (\Exception $e) {

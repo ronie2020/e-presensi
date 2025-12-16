@@ -1,9 +1,15 @@
 @extends('layouts.public')
 
 @section('content')
-<!-- X-DATA: Menangani Tab & Resize Chart 
-     Perbaikan: Menambahkan logic resize yang lebih robust untuk Chart.js di dalam tab tersembunyi
--->
+{{-- 
+    PERBAIKAN 1: SET LOCALE KE INDONESIA 
+    Memastikan semua format tanggal menggunakan Bahasa Indonesia 
+--}}
+@php
+    \Carbon\Carbon::setLocale('id');
+@endphp
+
+<!-- X-DATA: Menangani Tab & Resize Chart -->
 <div class="w-full max-w-6xl mx-auto pb-20" 
      x-data="{ 
         activeTab: new URLSearchParams(window.location.search).get('tab') || 'ringkasan',
@@ -77,7 +83,7 @@
 
             <!-- Action Buttons -->
             <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2 mt-4 md:mt-0 md:pb-4">
-                {{-- TOMBOL CETAK KARTU OSIS (Fitur Baru) --}}
+                {{-- TOMBOL CETAK KARTU OSIS --}}
                 <a href="{{ route('portal.card', $student->id) }}" target="_blank" class="flex-1 sm:flex-none justify-center inline-flex items-center px-5 py-2.5 bg-emerald-500/80 backdrop-blur-md border border-emerald-400/30 rounded-xl text-sm font-bold text-white hover:bg-emerald-500 transition-all shadow-lg hover:shadow-emerald-500/20 group">
                     <i class="ph-bold ph-identification-card mr-2 group-hover:animate-bounce"></i> Kartu OSIS
                 </a>
@@ -182,7 +188,6 @@
         <!-- 2. TAB JURNAL KBM -->
         <div x-show="activeTab === 'kbm'" x-cloak x-transition:enter="transition ease-out duration-300">
             <div class="grid grid-cols-1 gap-6">
-                {{-- Cek apakah variabel teaching_journals ada (dari controller) --}}
                 @if(isset($teaching_journals) && count($teaching_journals) > 0)
                     @foreach($teaching_journals as $journal)
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
@@ -190,7 +195,6 @@
                             <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
                                 <div>
                                     <div class="flex items-center gap-2 mb-1">
-                                        {{-- Menggunakan null safe operator (?->) agar tidak error jika relasi hilang --}}
                                         <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wide border border-blue-100">
                                             {{ $journal->schedule?->subject?->name ?? 'Mapel' }}
                                         </span>
@@ -204,7 +208,8 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="text-2xl font-black text-slate-200">{{ \Carbon\Carbon::parse($journal->date)->format('d') }}</p>
-                                    <p class="text-xs font-bold text-slate-400 uppercase">{{ \Carbon\Carbon::parse($journal->date)->format('M Y') }}</p>
+                                    {{-- PERBAIKAN: translatedFormat agar bulan ID --}}
+                                    <p class="text-xs font-bold text-slate-400 uppercase">{{ \Carbon\Carbon::parse($journal->date)->translatedFormat('M Y') }}</p>
                                 </div>
                             </div>
                             <div class="bg-slate-50 rounded-xl p-4 mb-4 border border-slate-100">
@@ -222,10 +227,13 @@
                     </div>
                     @endforeach
                 @else
-                    <div class="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
-                        <i class="ph-duotone ph-notebook text-4xl text-slate-300 mb-3"></i>
-                        <p class="text-slate-500 font-medium">Belum ada riwayat pembelajaran.</p>
-                        <p class="text-xs text-slate-400 mt-1">Data jurnal KBM belum tersedia untuk kelas ini.</p>
+                    {{-- PERBAIKAN: Empty State yang Konsisten --}}
+                    <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-16 text-center group hover:border-blue-300 transition-colors">
+                        <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-50 transition-colors">
+                            <i class="ph-duotone ph-notebook text-4xl text-slate-300 group-hover:text-blue-400 transition-colors"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-lg">Belum Ada Riwayat KBM</h3>
+                        <p class="text-slate-500 text-sm mt-2 max-w-xs mx-auto">Data jurnal kegiatan belajar mengajar belum tersedia untuk kelas ini.</p>
                     </div>
                 @endif
             </div>
@@ -369,6 +377,7 @@
                                        (($log->status == 'Izin') ? 'ph-file-text' : 'ph-x')) }}"></i>
                             </div>
                             <div>
+                                {{-- PERBAIKAN: Gunakan translatedFormat untuk hari Bahasa Indonesia --}}
                                 <p class="font-bold text-slate-800">{{ \Carbon\Carbon::parse($log->attendance_date)->translatedFormat('l, d F Y') }}</p>
                                 <p class="text-xs text-slate-500 font-mono">
                                     IN: <span class="font-bold text-slate-700">{{ $log->time_in ? \Carbon\Carbon::parse($log->time_in)->format('H:i') : '--:--' }}</span>
@@ -385,7 +394,10 @@
                         </span>
                     </div>
                     @empty
-                    <div class="p-8 text-center text-slate-400">Belum ada data kehadiran bulan ini.</div>
+                    <div class="p-12 text-center text-slate-400 flex flex-col items-center justify-center">
+                        <i class="ph-duotone ph-calendar-x text-3xl mb-2 text-slate-300"></i>
+                        <p>Belum ada data kehadiran bulan ini.</p>
+                    </div>
                     @endforelse
                 </div>
             </div>
@@ -425,8 +437,9 @@
                                         <div class="text-2xl font-black text-slate-300 group-hover:text-rose-400 transition-colors">
                                             {{ \Carbon\Carbon::parse($record->date)->format('d') }}
                                         </div>
+                                        {{-- PERBAIKAN: translatedFormat --}}
                                         <div class="text-[10px] font-bold text-slate-400 uppercase">
-                                            {{ \Carbon\Carbon::parse($record->date)->format('M Y') }}
+                                            {{ \Carbon\Carbon::parse($record->date)->translatedFormat('M Y') }}
                                         </div>
                                     </div>
                                     <div class="flex-grow">
@@ -445,7 +458,8 @@
                                 </div>
                                 @endforeach
                             @else
-                                <div class="p-12 text-center">
+                                {{-- PERBAIKAN: Empty State Konsisten --}}
+                                <div class="p-12 text-center flex flex-col items-center justify-center">
                                     <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <i class="ph-duotone ph-shield-check text-4xl text-emerald-400"></i>
                                     </div>
@@ -493,8 +507,9 @@
                                         <div class="text-2xl font-black text-slate-300 group-hover:text-emerald-500 transition-colors">
                                             {{ \Carbon\Carbon::parse($record->date)->format('d') }}
                                         </div>
+                                        {{-- PERBAIKAN: translatedFormat --}}
                                         <div class="text-[10px] font-bold text-slate-400 uppercase">
-                                            {{ \Carbon\Carbon::parse($record->date)->format('M Y') }}
+                                            {{ \Carbon\Carbon::parse($record->date)->translatedFormat('M Y') }}
                                         </div>
                                     </div>
                                     <div class="flex-grow">
@@ -513,7 +528,8 @@
                                 </div>
                                 @endforeach
                             @else
-                                <div class="p-12 text-center">
+                                {{-- PERBAIKAN: Empty State Konsisten --}}
+                                <div class="p-12 text-center flex flex-col items-center justify-center">
                                     <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <i class="ph-duotone ph-star text-4xl text-slate-300"></i>
                                     </div>
@@ -573,12 +589,14 @@
                                         <div class="flex items-center gap-3 mt-1 text-xs text-slate-500">
                                             <span class="flex items-center gap-1">
                                                 <i class="ph-bold ph-calendar-blank"></i> 
-                                                Pinjam: {{ \Carbon\Carbon::parse($book->borrow_date)->format('d M Y') }}
+                                                {{-- PERBAIKAN: translatedFormat --}}
+                                                Pinjam: {{ \Carbon\Carbon::parse($book->borrow_date)->translatedFormat('d M Y') }}
                                             </span>
                                             @if($book->return_date)
                                                 <span class="flex items-center gap-1">
                                                     <i class="ph-bold ph-check-circle"></i> 
-                                                    Kembali: {{ \Carbon\Carbon::parse($book->return_date)->format('d M Y') }}
+                                                    {{-- PERBAIKAN: translatedFormat --}}
+                                                    Kembali: {{ \Carbon\Carbon::parse($book->return_date)->translatedFormat('d M Y') }}
                                                 </span>
                                             @endif
                                         </div>
@@ -593,7 +611,8 @@
                                 </div>
                                 @endforeach
                             @else
-                                <div class="p-12 text-center">
+                                {{-- PERBAIKAN: Empty State Konsisten --}}
+                                <div class="p-12 text-center flex flex-col items-center justify-center">
                                     <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
                                         <i class="ph-duotone ph-book-bookmark text-4xl text-slate-300"></i>
                                     </div>
