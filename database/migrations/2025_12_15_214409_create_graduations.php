@@ -21,6 +21,13 @@ return new class extends Migration
             $table->float('average_score')->nullable(); // Nilai Rata-rata
             $table->timestamps();
         });
+
+         Schema::table('graduations', function (Blueprint $table) {
+            // Ubah tipe kolom menjadi DATETIME agar bisa simpan jam
+            $table->dateTime('announcement_date')->nullable()->change();
+        });
+
+
     }
 
     public function down()

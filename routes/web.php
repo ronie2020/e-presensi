@@ -213,9 +213,18 @@ Route::middleware('auth')->group(function () {
      // --- Manajemen Kelulusan (ADMIN) ---
     Route::prefix('admin/graduation')->name('admin.graduation.')->group(function() {
         Route::get('/', [GraduationController::class, 'adminIndex'])->name('index');
-        Route::post('/store', [GraduationController::class, 'store'])->name('store');
+        Route::post('/store', [GraduationController::class, 'store'])->name('store'); // Untuk update satuan (opsional)
+        
+        // TAMBAHKAN INI: Route untuk Update Massal (Sesuai desain baru)
+        Route::post('/bulk-update', [GraduationController::class, 'bulkUpdate'])->name('bulk_update');
+        
         Route::post('/set-date', [GraduationController::class, 'setGlobalDate'])->name('set_date');
-    });
+         // ROUTE BARU
+        Route::post('/import', [GraduationController::class, 'import'])->name('import');
+        Route::post('/auto-generate', [GraduationController::class, 'autoGenerate'])->name('auto_generate');
+        Route::get('/template', [GraduationController::class, 'downloadTemplate'])->name('template');
+
+    });    
 
     // --- Ekstrakurikuler ---
     Route::prefix('extracurriculars')->name('extracurriculars.')->group(function () {

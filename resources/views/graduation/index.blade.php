@@ -1,6 +1,14 @@
 @extends('layouts.public')
 
 @section('content')
+@php
+    // Logika pengecekan waktu dipindah ke sini, menggunakan variabel dari Controller
+    // Jika controller tidak mengirim variabel, gunakan default aman (tahun depan)
+    $targetDate = isset($announcementDate) ? $announcementDate : \Carbon\Carbon::now()->addYear();
+    $currentTime = \Carbon\Carbon::now();
+    $isOpen = $currentTime->greaterThanOrEqualTo($targetDate);
+@endphp
+
 <style>
     .bg-grid-pattern {
         background-image: linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
@@ -12,6 +20,13 @@
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+    /* Animasi Angka Countdown */
+    .countdown-item {
+        transition: all 0.3s ease;
+    }
+    .countdown-item:hover {
+        transform: translateY(-5px);
     }
 </style>
 
@@ -44,92 +59,142 @@
             <div class="h-2 w-full bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500"></div>
 
             <div class="p-8 md:p-12">
-                @if(!isset($student))
-                {{-- FORM PENCARIAN --}}
-                <div class="max-w-xl mx-auto text-center">
-                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Cek Status Kelulusan</h2>
-                    <p class="text-slate-500 mb-8">Silakan masukkan Nomor Induk Siswa Nasional (NISN).</p>
-
-                    <form action="{{ route('graduation.check') }}" method="POST" class="relative group">
-                        @csrf
-                        <div class="relative">
-                            <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                                <i class="ph-bold ph-student text-2xl text-purple-400"></i>
-                            </div>
-                            <input type="text" name="nisn" class="block w-full pl-14 pr-4 py-5 bg-purple-50/50 border-2 border-purple-100 text-slate-800 text-lg font-bold rounded-2xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 focus:bg-white transition-all placeholder:text-slate-400 outline-none" placeholder="Contoh: 0056xxxx" required autocomplete="off" autofocus>
+                
+                {{-- AREA COUNTDOWN (Hanya muncul jika belum dibuka) --}}
+                <div id="countdown-wrapper" class="{{ $isOpen ? 'hidden' : 'block' }}">
+                    <div class="text-center max-w-2xl mx-auto">
+                        <div class="mb-8">
+                            <span class="inline-block py-1 px-3 rounded-full bg-purple-100 text-purple-700 text-sm font-bold tracking-wider mb-4 border border-purple-200">
+                                SEGERA HADIR
+                            </span>
+                            <h2 class="text-3xl font-bold text-slate-800 mb-2">Menuju Pengumuman</h2>
+                            <p class="text-slate-500">Hasil kelulusan akan dapat diakses dalam:</p>
+                            @if(isset($announcementDate))
+                                <p class="text-xs text-purple-400 mt-1 font-mono">({{ $announcementDate->format('d M Y H:i') }} WIB)</p>
+                            @endif
                         </div>
-                        
-                        <button type="submit" class="w-full mt-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-purple-600/30 transform hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
-                            <span>Periksa Data</span>
-                            <i class="ph-bold ph-magnifying-glass text-xl"></i>
-                        </button>
-                    </form>
 
-                    @if(session('error'))
-                        <div class="mt-6 p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-center gap-3 text-left animate-pulse">
-                            <div class="bg-rose-100 p-2 rounded-full text-rose-600"><i class="ph-fill ph-warning-circle text-xl"></i></div>
-                            <div>
-                                <h4 class="font-bold text-rose-700 text-sm">Pencarian Gagal</h4>
-                                <p class="text-xs text-rose-600">{{ session('error') }}</p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            <!-- Hari -->
+                            <div class="countdown-item bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm">
+                                <span id="days" class="block text-4xl md:text-5xl font-black text-purple-600 font-mono">00</span>
+                                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Hari</span>
+                            </div>
+                            <!-- Jam -->
+                            <div class="countdown-item bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm">
+                                <span id="hours" class="block text-4xl md:text-5xl font-black text-indigo-600 font-mono">00</span>
+                                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Jam</span>
+                            </div>
+                            <!-- Menit -->
+                            <div class="countdown-item bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm">
+                                <span id="minutes" class="block text-4xl md:text-5xl font-black text-pink-600 font-mono">00</span>
+                                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Menit</span>
+                            </div>
+                            <!-- Detik -->
+                            <div class="countdown-item bg-slate-50 border border-slate-200 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+                                <span id="seconds" class="block text-4xl md:text-5xl font-black text-rose-600 font-mono relative z-10">00</span>
+                                <span class="text-xs text-slate-400 font-bold uppercase tracking-wider relative z-10">Detik</span>
+                                <!-- Efek detak -->
+                                <div class="absolute inset-0 bg-rose-50 opacity-0 animate-pulse"></div>
                             </div>
                         </div>
+
+                        <p class="text-sm text-slate-400">
+                            Halaman akan terbuka otomatis saat waktu hitung mundur selesai.
+                        </p>
+                    </div>
+                </div>
+
+                {{-- AREA UTAMA (Form Pencarian / Hasil) --}}
+                <div id="main-content" class="{{ $isOpen ? 'block animate-fade-in' : 'hidden' }}">
+                    @if(!isset($student))
+                    {{-- FORM PENCARIAN --}}
+                    <div class="max-w-xl mx-auto text-center">
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2">Cek Status Kelulusan</h2>
+                        <p class="text-slate-500 mb-8">Silakan masukkan Nomor Induk Siswa Nasional (NISN).</p>
+
+                        <form action="{{ route('graduation.check') }}" method="POST" class="relative group">
+                            @csrf
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                                    <i class="ph-bold ph-student text-2xl text-purple-400"></i>
+                                </div>
+                                <input type="text" name="nisn" class="block w-full pl-14 pr-4 py-5 bg-purple-50/50 border-2 border-purple-100 text-slate-800 text-lg font-bold rounded-2xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 focus:bg-white transition-all placeholder:text-slate-400 outline-none" placeholder="Contoh: 0056xxxx" required autocomplete="off" autofocus>
+                            </div>
+                            
+                            <button type="submit" class="w-full mt-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-purple-600/30 transform hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
+                                <span>Periksa Data</span>
+                                <i class="ph-bold ph-magnifying-glass text-xl"></i>
+                            </button>
+                        </form>
+
+                        @if(session('error'))
+                            <div class="mt-6 p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-center gap-3 text-left animate-pulse">
+                                <div class="bg-rose-100 p-2 rounded-full text-rose-600"><i class="ph-fill ph-warning-circle text-xl"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-rose-700 text-sm">Pencarian Gagal</h4>
+                                    <p class="text-xs text-rose-600">{{ session('error') }}</p>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    @else
+                    {{-- HASIL PENCARIAN --}}
+                    <div class="animate-fade-in-up">
+                        <div class="flex flex-col md:flex-row gap-8 items-start">
+                            <div class="w-full md:w-1/3 flex flex-col items-center text-center">
+                                <div class="w-40 h-40 rounded-full p-1 bg-gradient-to-br from-purple-500 to-pink-500 shadow-xl mb-4">
+                                    <div class="w-full h-full rounded-full bg-white overflow-hidden border-4 border-white relative">
+                                        @if($student->photo_path)
+                                            <img src="{{ asset('storage/' . $student->photo_path) }}" class="w-full h-full object-cover">
+                                        @else
+                                            <div class="w-full h-full bg-slate-100 flex items-center justify-center text-4xl font-bold text-slate-300">{{ substr($student->name, 0, 1) }}</div>
+                                        @endif
+                                    </div>
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-800">{{ $student->name }}</h3>
+                                <p class="text-slate-500 font-mono text-sm bg-slate-100 px-3 py-1 rounded-full mt-2">{{ $student->student_id }}</p>
+                            </div>
+
+                            <div class="w-full md:w-2/3">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Kelas</p>
+                                        <p class="font-bold text-slate-800 text-lg">{{ $student->schoolClass->name ?? '-' }}</p>
+                                    </div>
+                                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Tempat, Tanggal Lahir</p>
+                                        <p class="font-bold text-slate-800 text-lg">{{ $student->pob }}, {{ \Carbon\Carbon::parse($student->dob)->format('d M Y') }}</p>
+                                    </div>
+                                </div>
+
+                                @if($student->graduation->status === 'LULUS')
+                                    <div class="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl p-8 text-center text-white shadow-xl shadow-emerald-500/20 relative overflow-hidden mb-6">
+                                        <h2 class="text-lg font-medium text-emerald-100 mb-1">Hasil Rapat Pleno Dewan Guru</h2>
+                                        <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2 drop-shadow-md">ANDA LULUS</h1>
+                                        <p class="text-sm text-emerald-100 opacity-90">Selamat atas pencapaian luar biasa ini!</p>
+                                    </div>
+                                    <div class="flex gap-3">
+                                        <a href="{{ route('graduation.print', $student->id) }}" target="_blank" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
+                                            <i class="ph-bold ph-printer text-lg"></i> Cetak SKL
+                                        </a>
+                                        <a href="{{ route('graduation.index') }}" class="px-6 py-3.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all">Cari Lagi</a>
+                                    </div>
+                                @else
+                                    <div class="bg-gradient-to-r from-rose-500 to-red-600 rounded-3xl p-8 text-center text-white shadow-xl shadow-rose-500/20 relative overflow-hidden mb-6">
+                                        <h2 class="text-lg font-medium text-rose-100 mb-1">Hasil Rapat Pleno Dewan Guru</h2>
+                                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-2 drop-shadow-md uppercase">{{ $student->graduation->status ?? 'DITUNDA' }}</h1>
+                                        <p class="text-sm text-rose-100 opacity-90">Silakan hubungi pihak sekolah.</p>
+                                    </div>
+                                    <a href="{{ route('graduation.index') }}" class="w-full block text-center px-6 py-3.5 bg-slate-100 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all">Kembali</a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                     @endif
                 </div>
 
-                @else
-                {{-- HASIL PENCARIAN --}}
-                <div class="animate-fade-in-up">
-                    <div class="flex flex-col md:flex-row gap-8 items-start">
-                        <div class="w-full md:w-1/3 flex flex-col items-center text-center">
-                            <div class="w-40 h-40 rounded-full p-1 bg-gradient-to-br from-purple-500 to-pink-500 shadow-xl mb-4">
-                                <div class="w-full h-full rounded-full bg-white overflow-hidden border-4 border-white relative">
-                                    @if($student->photo_path)
-                                        <img src="{{ asset('storage/' . $student->photo_path) }}" class="w-full h-full object-cover">
-                                    @else
-                                        <div class="w-full h-full bg-slate-100 flex items-center justify-center text-4xl font-bold text-slate-300">{{ substr($student->name, 0, 1) }}</div>
-                                    @endif
-                                </div>
-                            </div>
-                            <h3 class="text-xl font-bold text-slate-800">{{ $student->name }}</h3>
-                            <p class="text-slate-500 font-mono text-sm bg-slate-100 px-3 py-1 rounded-full mt-2">{{ $student->student_id }}</p>
-                        </div>
-
-                        <div class="w-full md:w-2/3">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Kelas</p>
-                                    <p class="font-bold text-slate-800 text-lg">{{ $student->schoolClass->name ?? '-' }}</p>
-                                </div>
-                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                    <p class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Tempat, Tanggal Lahir</p>
-                                    <p class="font-bold text-slate-800 text-lg">{{ $student->pob }}, {{ \Carbon\Carbon::parse($student->dob)->format('d M Y') }}</p>
-                                </div>
-                            </div>
-
-                            @if($student->graduation->status === 'LULUS')
-                                <div class="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl p-8 text-center text-white shadow-xl shadow-emerald-500/20 relative overflow-hidden mb-6">
-                                    <h2 class="text-lg font-medium text-emerald-100 mb-1">Hasil Rapat Pleno Dewan Guru</h2>
-                                    <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-2 drop-shadow-md">ANDA LULUS</h1>
-                                    <p class="text-sm text-emerald-100 opacity-90">Selamat atas pencapaian luar biasa ini!</p>
-                                </div>
-                                <div class="flex gap-3">
-                                    <a href="{{ route('graduation.print', $student->id) }}" target="_blank" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg">
-                                        <i class="ph-bold ph-printer text-lg"></i> Cetak SKL
-                                    </a>
-                                    <a href="{{ route('graduation.index') }}" class="px-6 py-3.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition-all">Cari Lagi</a>
-                                </div>
-                            @else
-                                <div class="bg-gradient-to-r from-rose-500 to-red-600 rounded-3xl p-8 text-center text-white shadow-xl shadow-rose-500/20 relative overflow-hidden mb-6">
-                                    <h2 class="text-lg font-medium text-rose-100 mb-1">Hasil Rapat Pleno Dewan Guru</h2>
-                                    <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-2 drop-shadow-md uppercase">{{ $student->graduation->status ?? 'DITUNDA' }}</h1>
-                                    <p class="text-sm text-rose-100 opacity-90">Silakan hubungi pihak sekolah.</p>
-                                </div>
-                                <a href="{{ route('graduation.index') }}" class="w-full block text-center px-6 py-3.5 bg-slate-100 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all">Kembali</a>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-                @endif
             </div>
             
             <div class="bg-slate-50/50 border-t border-slate-100 p-4 text-center">
@@ -138,4 +203,42 @@
         </div>
     </div>
 </div>
+
+{{-- SCRIPT HITUNG MUNDUR --}}
+@if(!$isOpen)
+<script>
+    // Set tanggal tujuan dari variabel PHP yang dikirim Controller
+    const targetDateStr = "{{ $targetDate->format('Y-m-d H:i:s') }}";
+    const countDownDate = new Date(targetDateStr).getTime();
+
+    console.log("Countdown target:", targetDateStr);
+
+    const x = setInterval(function() {
+        const now = new Date().getTime();
+        const distance = countDownDate - now;
+
+        // Kalkulasi waktu
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        // Update UI
+        document.getElementById("days").innerText = days < 10 ? "0" + days : days;
+        document.getElementById("hours").innerText = hours < 10 ? "0" + hours : hours;
+        document.getElementById("minutes").innerText = minutes < 10 ? "0" + minutes : minutes;
+        document.getElementById("seconds").innerText = seconds < 10 ? "0" + seconds : seconds;
+
+        // Jika waktu habis
+        if (distance < 0) {
+            clearInterval(x);
+            // Sembunyikan countdown, tampilkan konten utama
+            document.getElementById("countdown-wrapper").style.display = "none";
+            document.getElementById("main-content").style.display = "block";
+            document.getElementById("main-content").classList.add('animate-fade-in');
+        }
+    }, 1000);
+</script>
+@endif
+
 @endsection
