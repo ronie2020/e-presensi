@@ -19,11 +19,13 @@ return new class extends Migration
             
             $table->date('attendance_date'); // Tanggal absen
             
-            // 'Harian', 'Dhuha', 'Dhuhur' (sesuai gambar scan)
-            $table->enum('type', ['Harian', 'Dhuha', 'Dhuhur'])->default('Harian'); 
+            // PERBAIKAN 1: Menambahkan 'Masuk' dan 'Pulang' ke tipe absen
+            // Agar support data dari QR Code yang mengirim 'Masuk'
+            $table->enum('type', ['Harian', 'Dhuha', 'Dhuhur', 'Masuk', 'Pulang'])->default('Harian'); 
             
-            // 'Hadir', 'Sakit', 'Izin', 'Alfa'
-            $table->enum('status', ['Hadir', 'Sakit', 'Izin', 'Alfa']); 
+            // PERBAIKAN 2: Menambahkan 'Terlambat' ke status
+            // Ini solusi untuk error "Data truncated"
+            $table->enum('status', ['Hadir', 'Sakit', 'Izin', 'Alfa', 'Terlambat']); 
             
             $table->time('time_in'); // Jam berapa siswa tercatat absen
             $table->text('notes')->nullable(); // Catatan (misal: "Terlambat 15 menit")
