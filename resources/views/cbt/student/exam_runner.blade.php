@@ -5,9 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Ujian Online - {{ $exam->title }}</title>
+    
+    {{-- 
+      PENTING UNTUK SEB:
+      Jangan gunakan 'npm run dev' saat testing dengan SEB. 
+      Vite server (port 5173) sering diblokir oleh SEB.
+      Gunakan 'npm run build' agar asset menjadi file statis (.css/.js) biasa.
+    --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    {{-- CDN Libraries --}}
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         body { 
             user-select: none; 
@@ -15,11 +25,14 @@
         }
         [x-cloak] { display: none !important; }
         
-        /* Custom Scrollbar untuk Peta Soal */
+        /* Custom Scrollbar */
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Emergency Error Message (Hidden by default) */
+        #fatal-error { display: none; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased"
@@ -28,7 +41,29 @@
     @online.window="isOnline = true; syncPendingAnswers()"
     @offline.window="isOnline = false">
 
-    <!-- OVERLAY SECURITY (Pelanggaran) -->
+    <!-- DETEKSI JS ERROR (Emergency Fallback) -->
+    <!-- Pesan ini akan muncul jika Alpine.js GAGAL dimuat (misal karena npm run dev di SEB) -->
+    <div id="fatal-error" class="fixed inset-0 bg-red-900 z-[10000] flex flex-col items-center justify-center text-white p-8 text-center">
+        <h1 class="text-3xl font-bold mb-4">Sistem Gagal Dimuat</h1>
+        <p class="mb-2">Aplikasi mendeteksi Javascript tidak berjalan.</p>
+        <div class="bg-black/30 p-4 rounded text-left font-mono text-xs mb-6 max-w-lg">
+            <strong>Penyebab Umum:</strong><br>
+            1. Anda menjalankan <code>npm run dev</code> di SEB (Gunakan <code>npm run build</code>).<br>
+            2. CDN (SweetAlert/Phosphor) terblokir firewall.<br>
+            3. Browser memblokir script eksternal.
+        </div>
+        <button onclick="window.location.reload()" class="px-6 py-2 bg-white text-red-900 font-bold rounded">Muat Ulang</button>
+    </div>
+
+    <!-- OVERLAY LOADING (Default State) -->
+    <!-- Diberi ID untuk kontrol manual jika Alpine mati -->
+    <div id="loading-overlay" x-show="!initComplete" 
+         class="fixed inset-0 bg-white z-[9000] flex items-center justify-center flex-col transition-opacity duration-300">
+        <div class="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-3"></div>
+        <span class="text-sm text-slate-500 font-medium">Sedang Menyiapkan Ujian...</span>
+    </div>
+
+    <!-- OVERLAY SECURITY -->
     <div x-show="showSecurityOverlay" x-transition.opacity
          class="fixed inset-0 bg-slate-900/95 z-[9999] flex items-center justify-center text-center px-4"
          x-cloak>
@@ -50,7 +85,7 @@
 
     <!-- BANNER OFFLINE -->
     <div x-show="!isOnline" x-transition 
-         class="fixed top-16 left-0 w-full bg-rose-500 text-white text-center text-xs font-bold py-1 z-40 shadow-md">
+         class="fixed top-16 left-0 w-full bg-rose-500 text-white text-center text-xs font-bold py-1 z-40 shadow-md" style="display: none;">
         <i class="ph-bold ph-wifi-slash"></i> Koneksi Terputus - Jawaban disimpan sementara di perangkat
     </div>
 
@@ -68,21 +103,18 @@
 
         <!-- TIMER & TOOLS -->
         <div class="flex items-center gap-3">
-            <!-- Indikator Pelanggaran Kecil -->
             <div class="hidden md:flex bg-red-50 text-red-600 px-3 py-1.5 rounded-lg border border-red-100 text-xs font-bold items-center gap-2" 
                  x-show="violationCount > 0" x-cloak>
                 <i class="ph-fill ph-warning-circle"></i>
                 <span x-text="violationCount + '/' + maxViolations"></span>
             </div>
 
-            <!-- Timer -->
             <div class="bg-white text-slate-700 px-4 py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2"
                  :class="timeLeft < 300 ? 'border-red-500 text-red-600 bg-red-50 animate-pulse' : ''">
                 <i class="ph-duotone ph-timer text-xl"></i>
                 <span x-text="formattedTime" class="font-mono font-bold text-lg tracking-widest">00:00:00</span>
             </div>
 
-            <!-- Mobile Menu Toggle -->
             <button @click="showMobileMap = !showMobileMap" class="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
                 <i class="ph-bold ph-squares-four text-xl"></i>
             </button>
@@ -96,19 +128,12 @@
         <div class="lg:w-3/4 w-full flex flex-col h-full">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden relative">
                 
-                <!-- Loading State -->
-                <div x-show="!initComplete" class="absolute inset-0 bg-white z-10 flex items-center justify-center flex-col">
-                    <div class="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-3"></div>
-                    <span class="text-sm text-slate-500 font-medium">Memuat Soal...</span>
-                </div>
-
                 <!-- Header Soal -->
                 <div class="bg-white px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
                     <div class="flex items-center gap-3">
                         <span class="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-md">
                             NO. <span x-text="currentQuestion + 1"></span>
                         </span>
-                        <!-- Status Ragu-ragu -->
                         <label class="flex items-center gap-2 cursor-pointer select-none">
                             <input type="checkbox" class="form-checkbox w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-500" 
                                    x-model="markedQuestions[questions[currentQuestion]?.id]">
@@ -116,7 +141,6 @@
                         </label>
                     </div>
                     
-                    <!-- Status Simpan -->
                     <div class="text-[10px] font-bold uppercase tracking-wider">
                         <span x-show="saveStatus === 'saving'" class="text-blue-500 flex items-center gap-1">
                             <i class="ph-bold ph-spinner animate-spin"></i> Menyimpan
@@ -132,13 +156,12 @@
 
                 <!-- Scrollable Content -->
                 <div class="flex-1 overflow-y-auto custom-scroll p-6 lg:p-8">
-                    <template x-if="questions.length > 0">
+                    <template x-if="questions.length > 0 && questions[currentQuestion]">
                         <div class="max-w-3xl mx-auto">
                             <!-- Soal Text/Image -->
                             <div class="prose prose-lg max-w-none text-slate-800 mb-8">
                                 <template x-if="questions[currentQuestion].image">
                                     <div class="mb-6 bg-slate-50 p-2 rounded-xl border border-slate-100 inline-block">
-                                        <!-- Perbaikan: Controller sudah mengirim URL lengkap, tidak perlu tambah /storage/ -->
                                         <img :src="questions[currentQuestion].image" 
                                              class="max-h-[300px] w-auto rounded-lg object-contain hover:scale-105 transition-transform cursor-zoom-in"
                                              onclick="window.open(this.src, '_blank')">
@@ -160,7 +183,6 @@
                                             x-model="answers[questions[currentQuestion].id]" 
                                             class="peer sr-only">
                                         
-                                        <!-- Radio Indicator Custom -->
                                         <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-base shrink-0 transition-all shadow-sm border"
                                             :class="answers[questions[currentQuestion].id] === optionKey 
                                                 ? 'bg-blue-600 text-white border-blue-600 scale-110' 
@@ -170,7 +192,6 @@
                                         
                                         <span class="text-slate-700 font-medium peer-checked:text-slate-900" x-text="optionText"></span>
                                         
-                                        <!-- Checkmark icon on active -->
                                         <div x-show="answers[questions[currentQuestion].id] === optionKey" class="absolute right-4 text-blue-600">
                                             <i class="ph-fill ph-check-circle text-xl"></i>
                                         </div>
@@ -201,11 +222,13 @@
             </div>
         </div>
 
-        <!-- KOLOM KANAN: Navigasi Nomor (Responsive) -->
+        <!-- KOLOM KANAN: Navigasi Nomor -->
         <div class="lg:w-1/4 w-full fixed lg:static inset-0 z-40 lg:z-auto bg-slate-900/50 lg:bg-transparent backdrop-blur-sm lg:backdrop-blur-none"
              x-show="showMobileMap || window.innerWidth >= 1024"
              @click.self="showMobileMap = false"
-             x-transition.opacity>
+             x-transition.opacity
+             style="display: none;" 
+             :style="{'display': (showMobileMap || window.innerWidth >= 1024) ? 'block' : 'none'}">
             
             <div class="bg-white h-full lg:h-auto lg:rounded-2xl shadow-xl lg:shadow-sm border-l lg:border border-slate-200 p-5 w-3/4 max-w-xs ml-auto lg:w-full lg:ml-0 overflow-y-auto custom-scroll flex flex-col">
                 <div class="flex justify-between items-center mb-4 lg:hidden">
@@ -217,11 +240,6 @@
                     <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 mb-2">
                         <i class="ph-fill ph-squares-four text-blue-600"></i> Navigasi Soal
                     </h3>
-                    <div class="flex gap-4 text-[10px] font-bold text-slate-500">
-                        <div class="flex items-center gap-1"><div class="w-3 h-3 bg-blue-600 rounded"></div> Isi</div>
-                        <div class="flex items-center gap-1"><div class="w-3 h-3 bg-amber-400 rounded"></div> Ragu</div>
-                        <div class="flex items-center gap-1"><div class="w-3 h-3 bg-white border border-slate-300 rounded"></div> 0</div>
-                    </div>
                 </div>
                 
                 <div class="grid grid-cols-5 gap-2 content-start">
@@ -250,9 +268,21 @@
 
     <!-- LOGIC SYSTEM -->
     <script>
+        // SCRIPT CHECKER: Mendeteksi apakah Alpine/Vite berhasil load
+        setTimeout(function() {
+            // Cek apakah Alpine sudah terdefinisi (artinya app.js sukses load)
+            const isAlpineLoaded = typeof Alpine !== 'undefined' || (document.querySelector('[x-data]') && document.querySelector('[x-data]').__x);
+            
+            if (!isAlpineLoaded) {
+                console.error("FATAL: Alpine.js tidak terdeteksi. Kemungkinan blokir SEB pada 'npm run dev' atau CDN.");
+                document.getElementById('loading-overlay').style.display = 'none'; // Matikan spinner
+                document.getElementById('fatal-error').style.display = 'flex'; // Munculkan pesan error
+            }
+        }, 3000); // Tunggu 3 detik
+
         function examApp(initialData, initialTimeLeft, sessionId, examId) {
             return {
-                rawQuestions: initialData,
+                rawQuestions: initialData || [],
                 questions: [],
                 currentQuestion: 0,
                 totalQuestions: 0,
@@ -266,7 +296,7 @@
                 // State UI
                 initComplete: false,
                 isOnline: navigator.onLine,
-                saveStatus: 'idle', // idle, saving, saved, pending
+                saveStatus: 'idle',
                 showMobileMap: false,
                 
                 // Security State
@@ -274,37 +304,35 @@
                 maxViolations: 3,
                 showSecurityOverlay: false,
 
-                // INIT
                 initData() {
-                    // PERBAIKAN UTAMA:
-                    // Data dari StudentExamController sudah dalam format yang benar ('text', 'image', 'options').
-                    // Kita tidak perlu mapping ulang properti yang tidak ada (seperti question_text, option_A, dll).
-                    // Cukup gunakan data apa adanya.
-                    
-                    this.questions = this.rawQuestions;
-                    this.totalQuestions = this.questions.length;
-
-                    // Load jawaban dari Server ATAU LocalStorage (Prioritas LocalStorage jika lebih baru)
-                    this.loadLocalProgress();
-                    
-                    // Set jawaban yang tersimpan di server jika local kosong
-                    this.questions.forEach(q => {
-                        if(q.saved_answer && !this.answers[q.id]) {
-                            this.answers[q.id] = q.saved_answer;
+                    try {
+                        if (!this.rawQuestions || !Array.isArray(this.rawQuestions) || this.rawQuestions.length === 0) {
+                            console.error('Data soal kosong!');
                         }
-                    });
+                        this.questions = this.rawQuestions;
+                        this.totalQuestions = this.questions.length;
 
-                    this.initComplete = true;
+                        try { this.loadLocalProgress(); } catch (e) { console.warn('LS Error'); }
+                        
+                        this.questions.forEach(q => {
+                            if(q.saved_answer && !this.answers[q.id]) {
+                                this.answers[q.id] = q.saved_answer;
+                            }
+                        });
+
+                    } catch (error) {
+                        console.error('Critical Error in initData:', error);
+                    } finally {
+                        this.initComplete = true; 
+                    }
                 },
 
-                // ---- NAVIGATION ----
                 nextQuestion() { if (this.currentQuestion < this.totalQuestions - 1) this.currentQuestion++; },
                 prevQuestion() { if (this.currentQuestion > 0) this.currentQuestion--; },
 
-                // ---- CORE: SAVING ANSWER WITH RETRY & OFFLINE SUPPORT ----
                 async selectAnswer(questionId, answer) {
                     this.answers[questionId] = answer;
-                    this.saveToLocal(); // Backup ke LocalStorage
+                    try { this.saveToLocal(); } catch(e){}
                     
                     if (!this.isOnline) {
                         this.saveStatus = 'pending';
@@ -328,39 +356,37 @@
                         });
 
                         if (!response.ok) throw new Error('Server reject');
-                        
                         setTimeout(() => this.saveStatus = 'saved', 300);
                         
                     } catch (error) {
-                        console.error('Save failed, queuing...', error);
                         this.saveStatus = 'pending';
                     }
                 },
 
-                // ---- LOCAL STORAGE HANDLING ----
                 saveToLocal() {
-                    const progress = {
-                        answers: this.answers,
-                        marked: this.markedQuestions,
-                        timestamp: new Date().getTime()
-                    };
-                    localStorage.setItem(`exam_${this.sessionId}`, JSON.stringify(progress));
+                    try {
+                        const progress = {
+                            answers: this.answers,
+                            marked: this.markedQuestions,
+                            timestamp: new Date().getTime()
+                        };
+                        localStorage.setItem(`exam_${this.sessionId}`, JSON.stringify(progress));
+                    } catch (e) {}
                 },
 
                 loadLocalProgress() {
-                    const saved = localStorage.getItem(`exam_${this.sessionId}`);
-                    if (saved) {
-                        const data = JSON.parse(saved);
-                        this.answers = data.answers || {};
-                        this.markedQuestions = data.marked || {};
-                    }
+                    try {
+                        const saved = localStorage.getItem(`exam_${this.sessionId}`);
+                        if (saved) {
+                            const data = JSON.parse(saved);
+                            this.answers = data.answers || {};
+                            this.markedQuestions = data.marked || {};
+                        }
+                    } catch (e) {}
                 },
 
-                // Sync saat online kembali
                 async syncPendingAnswers() {
                     if(this.saveStatus !== 'pending') return;
-                    
-                    // Kirim semua jawaban yang ada di state (brute force sync untuk memastikan konsistensi)
                     for (const [qId, ans] of Object.entries(this.answers)) {
                         await this.selectAnswer(qId, ans);
                     }
@@ -372,21 +398,23 @@
                    }
                 },
 
-                // ---- SECURITY SYSTEM ----
                 initSecurity() {
                     const self = this;
-                    document.addEventListener("visibilitychange", () => {
-                        if (document.hidden) self.triggerViolation('Meninggalkan Tab');
-                    });
+                    if (typeof document.hidden !== "undefined") {
+                        document.addEventListener("visibilitychange", () => {
+                            if (document.hidden) self.triggerViolation('Meninggalkan Tab');
+                        });
+                    }
+                    
                     window.addEventListener("blur", () => {
                        setTimeout(() => {
-                           if(document.activeElement.tagName === 'IFRAME') return; 
+                           if(document.activeElement && document.activeElement.tagName === 'IFRAME') return; 
                            self.triggerViolation('Kehilangan Fokus');
-                       }, 500); 
+                       }, 1000); 
                     });
+
                     window.addEventListener('keydown', (e) => {
                         if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) e.preventDefault();
-                        if (e.ctrlKey && e.shiftKey && e.key === 'I') e.preventDefault();
                     });
                 },
 
@@ -397,27 +425,31 @@
                     this.showSecurityOverlay = true;
 
                     if(this.violationCount >= this.maxViolations) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'DISKUALIFIKASI',
-                            text: 'Anda telah melanggar aturan ujian berulang kali. Ujian akan dihentikan otomatis.',
-                            allowOutsideClick: false,
-                            confirmButtonText: 'Keluar',
-                            confirmButtonColor: '#d33'
-                        }).then(() => {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'DISKUALIFIKASI',
+                                text: 'Pelanggaran batas maksimal.',
+                                allowOutsideClick: false,
+                                confirmButtonText: 'Keluar',
+                                confirmButtonColor: '#d33'
+                            }).then(() => this.submitExam(true));
+                        } else {
+                            alert('DISKUALIFIKASI: Anda melanggar aturan.');
                             this.submitExam(true);
-                        });
+                        }
                     }
                 },
 
                 resumeExam() {
                     this.showSecurityOverlay = false;
-                    if (document.documentElement.requestFullscreen) {
-                        document.documentElement.requestFullscreen().catch(() => {});
-                    }
+                    try {
+                        if (document.documentElement.requestFullscreen) {
+                            document.documentElement.requestFullscreen().catch(() => {});
+                        }
+                    } catch(e){}
                 },
 
-                // ---- TIMER & FINISH ----
                 startTimer() {
                     const timerInterval = setInterval(() => {
                         if (this.timeLeft > 0) {
@@ -425,8 +457,10 @@
                             this.formatTime();
                             
                             if(this.timeLeft === 300) {
-                                const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
-                                Toast.fire({ icon: 'warning', title: 'Waktu tinggal 5 menit!' });
+                                if (typeof Swal !== 'undefined') {
+                                    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+                                    Toast.fire({ icon: 'warning', title: 'Waktu tinggal 5 menit!' });
+                                }
                             }
                         } else {
                             clearInterval(timerInterval);
@@ -446,36 +480,30 @@
                 finishExam() {
                     const answeredCount = Object.keys(this.answers).length;
                     const remaining = this.totalQuestions - answeredCount;
-                    const markedCount = Object.values(this.markedQuestions).filter(v => v).length;
-
-                    let warningText = "";
-                    if (remaining > 0) warningText += `Masih ada <b>${remaining}</b> soal kosong. `;
-                    if (markedCount > 0) warningText += `Ada <b>${markedCount}</b> soal ragu-ragu. `;
                     
-                    Swal.fire({
-                        title: 'Kumpulkan Jawaban?',
-                        html: warningText ? warningText + "<br>Yakin ingin mengakhiri ujian?" : "Pastikan semua jawaban sudah benar.",
-                        icon: warningText ? 'warning' : 'question',
-                        showCancelButton: true,
-                        confirmButtonColor: '#10b981',
-                        cancelButtonColor: '#64748b',
-                        confirmButtonText: 'Ya, Kumpulkan',
-                        cancelButtonText: 'Cek Lagi'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
+                    if (typeof Swal === 'undefined') {
+                        if(confirm('Kumpulkan Jawaban? Masih ada ' + remaining + ' soal kosong.')) {
                             this.submitExam();
                         }
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Kumpulkan Jawaban?',
+                        html: remaining > 0 ? `Masih ada <b>${remaining}</b> soal kosong.` : "Pastikan semua jawaban benar.",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Kumpulkan'
+                    }).then((result) => {
+                        if (result.isConfirmed) this.submitExam();
                     });
                 },
 
                 submitExam(forced = false) {
                     if(this.saveStatus === 'pending') {
-                         Swal.fire({
-                            title: 'Sinkronisasi...',
-                            text: 'Sedang mengirim jawaban offline...',
-                            allowOutsideClick: false,
-                            didOpen: () => Swal.showLoading()
-                        });
+                        if(typeof Swal !== 'undefined') {
+                            Swal.fire({ title: 'Sinkronisasi...', didOpen: () => Swal.showLoading() });
+                        }
                         this.syncPendingAnswers().then(() => this.doSubmit(forced));
                     } else {
                         this.doSubmit(forced);
@@ -483,13 +511,11 @@
                 },
 
                 doSubmit(forced) {
-                    Swal.fire({
-                        title: 'Menyimpan Ujian...',
-                        allowOutsideClick: false,
-                        didOpen: () => Swal.showLoading()
-                    });
+                    if(typeof Swal !== 'undefined') {
+                        Swal.fire({ title: 'Menyimpan Ujian...', didOpen: () => Swal.showLoading() });
+                    }
 
-                    localStorage.removeItem(`exam_${this.sessionId}`);
+                    try { localStorage.removeItem(`exam_${this.sessionId}`); } catch(e){}
 
                     const form = document.createElement('form');
                     form.method = 'POST';
