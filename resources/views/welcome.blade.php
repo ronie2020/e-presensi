@@ -614,6 +614,15 @@
                                     {{ $activity->created_at->format('d M Y') }}
                                 </span>
                             </div>
+
+                             <!-- [BARU] BADGE VIDEO JIKA ADA LINK -->
+                            @if($activity->video_url)
+                                <div class="absolute top-4 right-4 z-20">
+                                    <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1 animate-pulse">
+                                        <i class="ph-fill ph-play-circle"></i> VIDEO
+                                    </span>
+                                </div>
+                            @endif
                         </div>
 
                         <div class="p-6 flex-1 flex flex-col">
@@ -623,6 +632,17 @@
                             <p class="text-sm text-slate-500 leading-relaxed line-clamp-3 mb-4 flex-1">
                                 {{ $activity->description }}
                             </p>
+
+                            <!-- [BARU] TOMBOL TONTON VIDEO -->
+                            @if($activity->video_url)
+                                <div class="mt-4 pt-4 border-t border-slate-100">
+                                    <a href="{{ $activity->video_url }}" target="_blank" class="inline-flex items-center gap-2 text-sm font-bold text-red-600 hover:text-red-700 transition-colors w-full group/video">
+                                        <i class="ph-fill ph-youtube-logo text-xl group-hover/video:scale-110 transition-transform"></i>
+                                        <span>Tonton Dokumentasi</span>
+                                        <i class="ph-bold ph-arrow-square-out ml-auto opacity-0 group-hover/video:opacity-100 transition-opacity"></i>
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 @empty
