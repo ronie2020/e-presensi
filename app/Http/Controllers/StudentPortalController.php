@@ -9,6 +9,10 @@ use App\Models\LibraryVisit;
 use App\Models\Borrowing;
 use App\Models\GradeRecord;
 use App\Models\ExtracurricularMember; 
+// IMPORT MODEL LMS
+use App\Models\LmsAssignment;
+use App\Models\LmsSubmission;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -89,7 +93,7 @@ class StudentPortalController extends Controller
                 ->get();
         }
 
-        // 7. DATA AKADEMIK
+        // 7. DATA AKADEMIK (NILAI RAPOR)
         $academic_record = null;
         $chartData = ['labels' => [], 'scores' => []]; 
         if (class_exists('App\Models\GradeRecord')) {
@@ -107,6 +111,30 @@ class StudentPortalController extends Controller
             }
         }
 
+        // 8. [BARU] DATA LMS (TUGAS & KUIS HARIAN)
+        // Ambil tugas yang ditujukan untuk kelas siswa ini
+        $lms_assignments_grouped = [];
+        $lms_grades = [];
+        
+        if ($student->class_id) {
+            // Ambil semua tugas untuk kelas ini, load relasi Subject
+            $assignments = LmsAssignment::with('subject')
+                ->where('class_id', $student->class_id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            // Kelompokkan berdasarkan Nama Mapel
+            $lms_assignments_grouped = $assignments->groupBy(function($item) {
+                return $item->subject->name ?? 'Lainnya';
+            });
+
+            // Ambil nilai (submission) siswa untuk tugas-tugas tersebut
+            $lms_grades = LmsSubmission::where('student_id', $student->id)
+                ->whereIn('assignment_id', $assignments->pluck('id'))
+                ->pluck('grade', 'assignment_id')
+                ->toArray(); 
+        }
+
         return view('portal.show', compact(
             'student', 
             'hadir', 'sakit', 'izin', 'alpa', 'attendance_history', 'attendanceChart',
@@ -115,7 +143,9 @@ class StudentPortalController extends Controller
             'achievements', 'total_merit_points',
             'library_visits', 'library_history',
             'extracurriculars_joined', 
-            'academic_record', 'chartData'
+            'academic_record', 'chartData',
+            // Variabel Baru
+            'lms_assignments_grouped', 'lms_grades'
         ));
     }
 
@@ -124,11 +154,7 @@ class StudentPortalController extends Controller
      */
     public function printCard($id)
     {
-        // Cari siswa, jika tidak ketemu akan otomatis 404
         $student = Student::with('schoolClass')->findOrFail($id);
-
-        // Menggunakan view yang sama dengan admin (reusable)
-        // Pastikan file view 'students.osis_card' sudah ada
         return view('students.osis_card', compact('student'));
     }
 }

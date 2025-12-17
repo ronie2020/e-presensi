@@ -2,15 +2,14 @@
 
 @section('content')
 {{-- 
-    PERBAIKAN 1: SET LOCALE KE INDONESIA 
-    Memastikan semua format tanggal menggunakan Bahasa Indonesia 
+    PERBAIKAN: SET LOCALE KE INDONESIA 
 --}}
 @php
     \Carbon\Carbon::setLocale('id');
 @endphp
 
 <!-- X-DATA: Menangani Tab & Resize Chart -->
-<div class="w-full max-w-6xl mx-auto pb-20" 
+<div class="w-full max-w-6xl mx-auto pb-20 px-4 sm:px-6"
      x-data="{ 
         activeTab: new URLSearchParams(window.location.search).get('tab') || 'ringkasan',
         updateTab(val) {
@@ -19,7 +18,6 @@
             url.searchParams.set('tab', val);
             window.history.pushState({}, '', url);
             
-            // Trigger resize chart khusus jika tab chart dibuka agar tidak gepeng
             if(val === 'akademik' || val === 'kehadiran') {
                 setTimeout(() => { 
                     window.dispatchEvent(new Event('resize')); 
@@ -31,26 +29,26 @@
     <!-- HEADER PROFIL -->
     <div class="bg-white rounded-[2rem] shadow-xl overflow-hidden mb-6 border border-gray-100 relative group">
         <!-- Background Banner -->
-        <div class="absolute top-0 left-0 w-full h-52 z-0 overflow-hidden bg-slate-900">
+        <div class="absolute top-0 left-0 w-full h-40 sm:h-52 z-0 overflow-hidden bg-slate-900">
             <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
             <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-blue-900/80 to-slate-900"></div>
             <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
             
             <!-- Dekorasi Blur -->
-            <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-600 rounded-full mix-blend-overlay filter blur-[80px] opacity-20 -mr-20 -mt-20"></div>
-            <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-600 rounded-full mix-blend-overlay filter blur-[80px] opacity-20 -ml-20 -mb-20"></div>
+            <div class="absolute top-0 right-0 w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] bg-blue-600 rounded-full mix-blend-overlay filter blur-[60px] sm:blur-[80px] opacity-20 -mr-10 -mt-10"></div>
+            <div class="absolute bottom-0 left-0 w-[150px] sm:w-[300px] h-[150px] sm:h-[300px] bg-indigo-600 rounded-full mix-blend-overlay filter blur-[60px] sm:blur-[80px] opacity-20 -ml-10 -mb-10"></div>
         </div>
         
         <!-- Content Container -->
-        <div class="relative z-10 px-6 sm:px-10 pt-28 pb-6 flex flex-col md:flex-row items-end md:items-end text-center md:text-left gap-6">
+        <div class="relative z-10 px-6 sm:px-10 pt-20 sm:pt-28 pb-6 flex flex-col md:flex-row items-center md:items-end text-center md:text-left gap-4 sm:gap-6">
             <!-- Foto Profil -->
             <div class="relative group shrink-0 mx-auto md:mx-0 -mb-2">
-                <div class="w-36 h-36 rounded-full bg-white p-1 shadow-2xl relative z-10 transform group-hover:scale-105 transition-transform duration-300 ring-4 ring-white/20 backdrop-blur-sm">
+                <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-white p-1 shadow-2xl relative z-10 transform group-hover:scale-105 transition-transform duration-300 ring-4 ring-white/20 backdrop-blur-sm">
                     <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white relative">
                         @if($student->photo_path)
                             <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
                         @else
-                            <div class="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-5xl font-black text-slate-400 select-none">
+                            <div class="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-4xl sm:text-5xl font-black text-slate-400 select-none">
                                 {{ substr(trim($student->name), 0, 1) }}
                             </div>
                         @endif
@@ -63,35 +61,34 @@
             
             <!-- Detail Siswa -->
             <div class="flex-1 min-w-0 w-full md:pb-3">
-                <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight mb-3 break-words capitalize drop-shadow-lg">
+                <h1 class="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight mb-2 sm:mb-3 break-words capitalize drop-shadow-lg">
                     {{ strtolower($student->name) }}
                 </h1>
-                <div class="flex flex-wrap justify-center md:justify-start gap-2 text-sm font-medium">
-                    <span class="flex items-center bg-blue-600 px-4 py-1.5 rounded-full text-white shadow-lg shadow-blue-900/30 border border-blue-500 transition hover:bg-blue-500 hover:scale-105">
-                        <i class="ph-fill ph-chalkboard-teacher mr-2 text-lg text-blue-200"></i>
+                <div class="flex flex-wrap justify-center md:justify-start gap-2 text-xs sm:text-sm font-medium">
+                    <span class="flex items-center bg-blue-600 px-3 sm:px-4 py-1.5 rounded-full text-white shadow-lg shadow-blue-900/30 border border-blue-500 transition hover:bg-blue-500 hover:scale-105">
+                        <i class="ph-fill ph-chalkboard-teacher mr-2 text-base sm:text-lg text-blue-200"></i>
                         <span>Kelas <strong class="font-bold text-white">{{ $student->schoolClass->name ?? 'Unassigned' }}</strong></span>
                     </span>
                     <span x-data="{ copied: false }" 
                           @click="navigator.clipboard.writeText('{{ $student->student_id }}'); copied = true; setTimeout(() => copied = false, 2000)" 
-                          class="flex items-center bg-blue-600 px-4 py-1.5 rounded-full text-white shadow-lg shadow-blue-900/30 border border-blue-500 font-mono transition hover:bg-blue-500 hover:scale-105 cursor-pointer select-none relative" 
+                          class="flex items-center bg-blue-600 px-3 sm:px-4 py-1.5 rounded-full text-white shadow-lg shadow-blue-900/30 border border-blue-500 font-mono transition hover:bg-blue-500 hover:scale-105 cursor-pointer select-none relative" 
                           title="Klik untuk salin">
-                        <i class="ph-fill mr-2 text-lg text-blue-200" :class="copied ? 'ph-check' : 'ph-identification-card'"></i>
+                        <i class="ph-fill mr-2 text-base sm:text-lg text-blue-200" :class="copied ? 'ph-check' : 'ph-identification-card'"></i>
                         <span x-text="copied ? 'Tersalin!' : '{{ $student->student_id }}'"></span>
                     </span>
                 </div>
             </div>
 
             <!-- Action Buttons -->
-            <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2 mt-4 md:mt-0 md:pb-4">
-                {{-- TOMBOL CETAK KARTU OSIS --}}
-                <a href="{{ route('portal.card', $student->id) }}" target="_blank" class="flex-1 sm:flex-none justify-center inline-flex items-center px-5 py-2.5 bg-emerald-500/80 backdrop-blur-md border border-emerald-400/30 rounded-xl text-sm font-bold text-white hover:bg-emerald-500 transition-all shadow-lg hover:shadow-emerald-500/20 group">
+            <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2 mt-2 md:mt-0 md:pb-4">
+                <a href="{{ route('portal.card', $student->id) }}" target="_blank" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-2.5 bg-emerald-500/80 backdrop-blur-md border border-emerald-400/30 rounded-xl text-xs sm:text-sm font-bold text-white hover:bg-emerald-500 transition-all shadow-lg hover:shadow-emerald-500/20 group">
                     <i class="ph-bold ph-identification-card mr-2 group-hover:animate-bounce"></i> Kartu OSIS
                 </a>
 
-                <button onclick="window.print()" class="flex-1 sm:flex-none justify-center inline-flex items-center px-5 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-sm font-bold text-white hover:bg-white hover:text-slate-900 transition-all shadow-lg">
+                <button onclick="window.print()" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-xs sm:text-sm font-bold text-white hover:bg-white hover:text-slate-900 transition-all shadow-lg">
                     <i class="ph-bold ph-printer mr-2"></i> Biodata
                 </button>
-                <a href="{{ route('portal.index') }}" class="flex-1 sm:flex-none justify-center inline-flex items-center px-5 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-sm font-bold text-white hover:bg-white hover:text-slate-900 transition-all shadow-lg">
+                <a href="{{ route('portal.index') }}" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-xs sm:text-sm font-bold text-white hover:bg-white hover:text-slate-900 transition-all shadow-lg">
                     <i class="ph-bold ph-magnifying-glass mr-2"></i> Cari Lain
                 </a>
             </div>
@@ -102,27 +99,36 @@
     <div class="mb-8 sticky top-4 z-40 transition-all duration-300" id="sticky-nav">
         <div class="bg-white/90 backdrop-blur-xl p-1.5 rounded-2xl shadow-lg border border-gray-100/50 relative group">
             <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden z-10 rounded-r-2xl"></div>
-            <div class="overflow-x-auto custom-scrollbar flex items-center gap-1 min-w-max pb-0.5 md:pb-0 scroll-smooth px-1">
-                @php
-                    $tabs = [
-                        'ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan'],
-                        'kbm' => ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'],
-                        'akademik' => ['icon' => 'exam', 'label' => 'Akademik'],
-                        'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Kehadiran'],
-                        'keagamaan' => ['icon' => 'book-open-text', 'label' => 'Keagamaan'],
-                        'disiplin' => ['icon' => 'warning-circle', 'label' => 'Disiplin'],
-                        'prestasi' => ['icon' => 'trophy', 'label' => 'Prestasi'],
-                        'perpustakaan' => ['icon' => 'books', 'label' => 'Pustaka'],
-                    ];
-                @endphp
+            
+            {{-- 
+               PERBAIKAN UTAMA:
+               1. Mobile: Tetap scrollable (overflow-x-auto)
+               2. Desktop (md): Hilangkan scroll (overflow-visible) dan biarkan WRAP (flex-wrap)
+            --}}
+            <div class="overflow-x-auto custom-scrollbar w-full pb-0.5 md:pb-0 scroll-smooth px-1 md:overflow-visible">
+                <div class="flex items-center gap-1 w-max md:w-full md:flex-wrap md:justify-center"> 
+                    @php
+                        $tabs = [
+                            'ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan'],
+                            'lms' => ['icon' => 'clipboard-text', 'label' => 'Tugas & Kuis'],
+                            'kbm' => ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'],
+                            'akademik' => ['icon' => 'exam', 'label' => 'Nilai Rapor'],
+                            'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Kehadiran'],
+                            'keagamaan' => ['icon' => 'book-open-text', 'label' => 'Keagamaan'],
+                            'disiplin' => ['icon' => 'warning-circle', 'label' => 'Disiplin'],
+                            'prestasi' => ['icon' => 'trophy', 'label' => 'Prestasi'],
+                            'perpustakaan' => ['icon' => 'books', 'label' => 'Pustaka'],
+                        ];
+                    @endphp
 
-                @foreach($tabs as $key => $tab)
-                    <button @click="updateTab('{{ $key }}')" 
-                        :class="activeTab === '{{ $key }}' ? 'bg-slate-900 text-white shadow-lg shadow-slate-300 transform scale-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
-                        class="px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 whitespace-nowrap outline-none focus:ring-2 focus:ring-slate-200">
-                        <i class="ph-bold ph-{{ $tab['icon'] }} text-lg"></i> {{ $tab['label'] }}
-                    </button>
-                @endforeach
+                    @foreach($tabs as $key => $tab)
+                        <button @click="updateTab('{{ $key }}')" 
+                            :class="activeTab === '{{ $key }}' ? 'bg-slate-900 text-white shadow-lg shadow-slate-300 transform scale-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
+                            class="px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 whitespace-nowrap flex-shrink-0 outline-none focus:ring-2 focus:ring-slate-200 mb-1"> {{-- Add mb-1 for wrap spacing --}}
+                            <i class="ph-bold ph-{{ $tab['icon'] }} text-lg"></i> {{ $tab['label'] }}
+                        </button>
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>
@@ -185,7 +191,79 @@
             </div>
         </div>
 
-        <!-- 2. TAB JURNAL KBM -->
+        <!-- TAB: LMS (TUGAS & KUIS) -->
+        <div x-show="activeTab === 'lms'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div class="space-y-6">
+                @if(isset($lms_assignments_grouped) && $lms_assignments_grouped->count() > 0)
+                    @foreach($lms_assignments_grouped as $subjectName => $assignments)
+                        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                            <div class="p-5 border-b border-gray-100 bg-slate-50 flex items-center justify-between">
+                                <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                                    <i class="ph-fill ph-book-bookmark text-blue-600"></i> {{ $subjectName }}
+                                </h3>
+                                <span class="text-xs font-bold bg-white px-3 py-1 rounded-full border border-gray-200 text-slate-500">
+                                    {{ $assignments->count() }} Tugas
+                                </span>
+                            </div>
+                            <div class="overflow-x-auto w-full"> 
+                                <table class="w-full text-left min-w-[500px]"> 
+                                    <tbody class="divide-y divide-gray-50">
+                                        @foreach($assignments as $task)
+                                            @php
+                                                $score = $lms_grades[$task->id] ?? null;
+                                                $isGraded = $score !== null;
+                                            @endphp
+                                            <tr class="group hover:bg-slate-50/50 transition">
+                                                <td class="p-5">
+                                                    <div class="flex items-start gap-4">
+                                                        <div class="w-12 h-12 rounded-xl flex-shrink-0 flex items-center justify-center text-xl
+                                                            {{ $task->assignment_type == 'quiz' ? 'bg-purple-50 text-purple-600' : 'bg-blue-50 text-blue-600' }}">
+                                                            <i class="ph-duotone {{ $task->assignment_type == 'quiz' ? 'ph-exam' : 'ph-clipboard-text' }}"></i>
+                                                        </div>
+                                                        <div>
+                                                            <h4 class="font-bold text-slate-700 text-sm group-hover:text-blue-600 transition">{{ $task->title }}</h4>
+                                                            <div class="flex gap-3 mt-1 text-xs text-slate-400 font-medium">
+                                                                <span class="uppercase tracking-wider">{{ $task->assignment_type == 'quiz' ? 'Kuis Online' : 'Tugas Rumah' }}</span>
+                                                                <span>&bull;</span>
+                                                                <span>{{ \Carbon\Carbon::parse($task->created_at)->translatedFormat('d F Y') }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="p-5 text-right whitespace-nowrap">
+                                                    @if($isGraded)
+                                                        <div class="flex flex-col items-end">
+                                                            <span class="text-2xl font-black {{ $score < 70 ? 'text-rose-500' : 'text-emerald-600' }}">
+                                                                {{ $score }}
+                                                            </span>
+                                                            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Nilai</span>
+                                                        </div>
+                                                    @else
+                                                        <span class="inline-block px-3 py-1 rounded-lg bg-slate-100 text-slate-400 text-xs font-bold">
+                                                            Belum Dinilai
+                                                        </span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-16 text-center group hover:border-blue-300 transition-colors">
+                        <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-50 transition-colors">
+                            <i class="ph-duotone ph-clipboard-text text-4xl text-slate-300 group-hover:text-blue-400 transition-colors"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-lg">Belum Ada Tugas</h3>
+                        <p class="text-slate-500 text-sm mt-2 max-w-xs mx-auto">Saat ini belum ada data tugas atau kuis yang tersedia untuk kelas ini.</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- 3. TAB JURNAL KBM -->
         <div x-show="activeTab === 'kbm'" x-cloak x-transition:enter="transition ease-out duration-300">
             <div class="grid grid-cols-1 gap-6">
                 @if(isset($teaching_journals) && count($teaching_journals) > 0)
@@ -208,7 +286,6 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="text-2xl font-black text-slate-200">{{ \Carbon\Carbon::parse($journal->date)->format('d') }}</p>
-                                    {{-- PERBAIKAN: translatedFormat agar bulan ID --}}
                                     <p class="text-xs font-bold text-slate-400 uppercase">{{ \Carbon\Carbon::parse($journal->date)->translatedFormat('M Y') }}</p>
                                 </div>
                             </div>
@@ -227,7 +304,6 @@
                     </div>
                     @endforeach
                 @else
-                    {{-- PERBAIKAN: Empty State yang Konsisten --}}
                     <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-16 text-center group hover:border-blue-300 transition-colors">
                         <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-50 transition-colors">
                             <i class="ph-duotone ph-notebook text-4xl text-slate-300 group-hover:text-blue-400 transition-colors"></i>
@@ -239,7 +315,7 @@
             </div>
         </div>
 
-        <!-- 3. TAB AKADEMIK -->
+        <!-- 3. TAB AKADEMIK (NILAI RAPOR) -->
         <div x-show="activeTab === 'akademik'" x-cloak x-transition:enter="transition ease-out duration-300">
             @if($academic_record)
                 <!-- Grafik -->
@@ -271,8 +347,8 @@
                              </div>
                         </div>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left border-collapse min-w-[600px]"> {{-- Min width agar tabel bisa discroll --}}
                             <thead class="bg-slate-50/50 text-xs font-bold text-slate-400 uppercase tracking-wider">
                                 <tr>
                                     <th class="px-6 py-4 rounded-tl-2xl">Mata Pelajaran</th>
@@ -548,7 +624,7 @@
              <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Stat Card -->
                 <div class="lg:col-span-1">
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-indigo-100 sticky top-24">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-indigo-100 sticky top-24 h-fit"> {{-- FIX: h-fit agar sticky jalan --}}
                         <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl mb-4">
                             <i class="ph-duotone ph-books"></i>
                         </div>
@@ -584,24 +660,22 @@
                                     <div class="w-12 h-16 bg-slate-200 rounded flex-shrink-0 flex items-center justify-center text-slate-400 shadow-sm">
                                         <i class="ph-fill ph-book-open text-2xl"></i>
                                     </div>
-                                    <div class="flex-grow">
-                                        <h4 class="font-bold text-slate-800 line-clamp-1">{{ $book->title }}</h4>
-                                        <div class="flex items-center gap-3 mt-1 text-xs text-slate-500">
+                                    <div class="flex-grow min-w-0"> {{-- FIX: min-w-0 agar truncate jalan --}}
+                                        <h4 class="font-bold text-slate-800 truncate" title="{{ $book->title }}">{{ $book->title }}</h4>
+                                        <div class="flex flex-wrap items-center gap-3 mt-1 text-xs text-slate-500">
                                             <span class="flex items-center gap-1">
                                                 <i class="ph-bold ph-calendar-blank"></i> 
-                                                {{-- PERBAIKAN: translatedFormat --}}
                                                 Pinjam: {{ \Carbon\Carbon::parse($book->borrow_date)->translatedFormat('d M Y') }}
                                             </span>
                                             @if($book->return_date)
                                                 <span class="flex items-center gap-1">
                                                     <i class="ph-bold ph-check-circle"></i> 
-                                                    {{-- PERBAIKAN: translatedFormat --}}
                                                     Kembali: {{ \Carbon\Carbon::parse($book->return_date)->translatedFormat('d M Y') }}
                                                 </span>
                                             @endif
                                         </div>
                                     </div>
-                                    <div>
+                                    <div class="flex-shrink-0">
                                         @if($book->status == 'Dipinjam')
                                             <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-bold uppercase tracking-wide">Dipinjam</span>
                                         @else

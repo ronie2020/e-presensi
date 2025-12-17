@@ -50,6 +50,26 @@
                         'icon' => 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z' 
                     ],
                 ],
+                'E-Learning (LMS)' => [
+                    [
+                        'name' => 'Materi Pelajaran',
+                        'route' => 'lms.materials.index',
+                        'active_check' => 'lms.materials.*',
+                        'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'
+                    ],
+                    [
+                        'name' => 'Tugas & PR',
+                        'route' => 'lms.assignments.index',
+                        'active_check' => 'lms.assignments.*',
+                        'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'
+                    ],
+                    [
+                        'name' => 'Rekap Nilai', // MENU BARU
+                        'route' => 'lms.grades.index',
+                        'active_check' => 'lms.grades.*',
+                        'icon' => 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'
+                    ],
+                ],
                 'Akademik' => [
                     [
                         'name' => 'Manajemen Kelulusan', // MENU BARU

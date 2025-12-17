@@ -8,44 +8,40 @@ use App\Models\Student;
 
 class StudentAuthController extends Controller
 {
-    // 1. Tampilkan Form Login (Mengarah ke file view yang ada di editor kanan Anda)
+    // 1. Tampilkan Form Login
     public function showLoginForm()
     {
-        // Pastikan Anda sudah login sebagai siswa atau belum
+        // Jika sudah login, langsung lempar ke Dashboard Belajar (LMS)
         if (Auth::guard('student')->check()) {
-            return redirect()->route('student.exam.index');
+            // Update route ke 'students.' (jamak)
+            return redirect()->route('students.learning.index'); 
         }
-        return view('auth.student_login');
+        
+        return redirect()->route('portal.index', ['tab' => 'login']);
     }
 
     // 2. Proses Login
     public function login(Request $request)
     {
-        // Validasi input NISN
         $request->validate([
             'student_id' => 'required|string', 
         ]);
 
-        // Cari siswa di database berdasarkan NISN (student_id)
         $student = Student::where('student_id', $request->student_id)->first();
 
-        // Jika siswa ditemukan
         if ($student) {
-            // LOGIN MANUAL menggunakan Guard 'student'
             Auth::guard('student')->login($student);
-
-            // Regenerate session untuk keamanan
             $request->session()->regenerate();
 
-            // Redirect ke halaman daftar ujian
-            return redirect()->intended(route('student.exam.index'));
+            // ===> PERBAIKAN: Redirect ke route 'students.learning.index' <===
+            return redirect()->intended(route('students.learning.index'));
         }
 
-        // Jika gagal (NISN tidak ditemukan)
         return back()->withErrors([
-            'student_id' => 'NISN tidak terdaftar dalam sistem.',
+            'student_id' => 'NISN tidak terdaftar.',
         ])->withInput();
     }
+
     // 3. Proses Logout
     public function logout(Request $request)
     {
@@ -54,6 +50,6 @@ class StudentAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('student.login');
+        return redirect()->route('portal.index');
     }
 }

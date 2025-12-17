@@ -28,7 +28,7 @@
         /* Custom Animation Definitions */
         .animate-blob { animation: blob 7s infinite; }
         .animation-delay-2000 { animation-delay: 2s; }
-        .animation-delay-4000 { animation-delay: 4s; } /* Tambahan delay baru */
+        .animation-delay-4000 { animation-delay: 4s; }
         
         @keyframes blob {
             0% { transform: translate(0px, 0px) scale(1); }
@@ -187,7 +187,7 @@
                     Platform digital terintegrasi SMPN 3 Lakbok untuk pemantauan akademik, absensi kehadiran, dan literasi siswa secara real-time.
                 </p>
                 
-                <!-- Quick Stats -->
+                <!-- Quick Stats (ABSENSI HARI INI) -->
                 <div class="grid grid-cols-3 gap-4 max-w-md mx-auto lg:mx-0">
                     <div class="bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/10 shadow-lg hover:bg-white/10 transition-colors group cursor-default">
                         <div class="text-3xl font-bold text-emerald-400 mb-1 group-hover:scale-110 transition-transform origin-left">{{ $stats['hadir'] ?? 0 }}</div>
@@ -236,6 +236,7 @@
 
     <!-- MENU AKSES (ANIMATED) -->
     <div class="bg-slate-50 py-16 lg:py-20 relative z-20 -mt-8 lg:-mt-12 overflow-hidden">
+        <!-- ... (Kode menu akses tetap sama) ... -->
         
         <!-- [TAMBAHAN BARU] Animated Background Blobs untuk Menu -->
         <div class="absolute inset-0 pointer-events-none z-0">
@@ -270,8 +271,17 @@
                     <p class="text-slate-500 text-sm leading-relaxed">Cek kehadiran, nilai akademik, dan poin kedisiplinan.</p>
                 </a>
 
+                <!-- E-LEARNING / LMS (BARU) -->
+                <a href="{{ route('student.login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-teal-500/10 border border-slate-100 hover:border-teal-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="150">
+                    <div class="w-16 h-16 bg-teal-50 rounded-2xl flex items-center justify-center text-teal-600 mb-6 group-hover:bg-teal-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
+                        <i class="ph-duotone ph-chalkboard-simple text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-teal-600 transition-colors">E-Learning (LMS)</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">Ruang belajar digital, materi pelajaran, dan pengumpulan tugas.</p>
+                </a>
+
                  <!-- UJIAN CBT (UPDATED LINK) -->                
-                <a href="{{ route('student.login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-rose-500/10 border border-slate-100 hover:border-rose-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="150">
+                <a href="{{ route('student.login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-rose-500/10 border border-slate-100 hover:border-rose-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="200">
                     <div class="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 mb-6 group-hover:bg-rose-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-desktop text-3xl"></i>
                     </div>
@@ -280,7 +290,7 @@
                 </a>
                 
                 <!-- Mesin Absensi -->
-                <a href="{{ route('kiosk.show') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="200">
+                <a href="{{ route('kiosk.show') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="250">
                     <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-qr-code text-3xl"></i>
                     </div>
@@ -298,7 +308,7 @@
                 </a>
                 
                 <!-- Login Guru -->
-                <a href="{{ route('login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-orange-500/10 border border-slate-100 hover:border-orange-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="400">
+                <a href="{{ route('login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-orange-500/10 border border-slate-100 hover:border-orange-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="350">
                     <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 mb-6 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-chalkboard-teacher text-3xl"></i>
                     </div>
@@ -306,8 +316,8 @@
                     <p class="text-slate-500 text-sm leading-relaxed">Panel administrasi untuk Guru, Wali Kelas dan TU.</p>
                 </a>
 
-                <!-- JURNAL MENGAJAR (BARU) -->
-                <a href="{{ route('teaching.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-indigo-500/10 border border-slate-100 hover:border-indigo-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="350">
+                <!-- JURNAL MENGAJAR -->
+                <a href="{{ route('teaching.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-indigo-500/10 border border-slate-100 hover:border-indigo-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="400">
                     <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-presentation-chart text-3xl"></i>
                     </div>
@@ -368,7 +378,7 @@
         </div>
     </div>
 
-    <!-- SECTION: PROFIL SEKOLAH -->
+    <!-- SECTION: PROFIL SEKOLAH (DIPERBARUI DENGAN STATISTIK LMS) -->
     <div id="profil" class="py-24 bg-white relative overflow-hidden border-y border-slate-100">
         <!-- Background Pattern -->
         <div class="absolute right-0 top-0 opacity-5 pointer-events-none">
@@ -391,19 +401,51 @@
                         SMP Negeri 3 Lakbok berkomitmen untuk memberikan layanan pendidikan terbaik yang mengintegrasikan kecerdasan akademik dengan nilai-nilai karakter luhur. Kami hadir untuk mencetak pemimpin masa depan yang kompetitif dan berakhlak mulia.
                     </p>
                     
-                    <!-- Stats Grid -->
-                    <div class="grid grid-cols-3 gap-4">
+                    <!-- Stats Grid (DITAMBAHKAN STATISTIK LMS) -->
+                    @php
+                        // AMBIL DATA STATISTIK (JIKA MODEL ADA)
+                        $siswaCount = \App\Models\Student::count() ?? 542;
+                        $guruCount = \App\Models\User::where('role', 'guru')->count() ?? 32;
+                        $rombelCount = \App\Models\SchoolClass::count() ?? 18;
+                        
+                        // Cek apakah tabel LMS sudah ada untuk menghindari error
+                        $materiCount = 0;
+                        $tugasCount = 0;
+                        try {
+                            if(class_exists('App\Models\LmsMaterial')) {
+                                $materiCount = \App\Models\LmsMaterial::count();
+                            }
+                            if(class_exists('App\Models\LmsAssignment')) {
+                                $tugasCount = \App\Models\LmsAssignment::count();
+                            }
+                        } catch (\Exception $e) {
+                            $materiCount = 0;
+                            $tugasCount = 0;
+                        }
+                    @endphp
+
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                         <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg hover:border-blue-100 transition-all duration-300">
-                            <p class="text-3xl font-black text-slate-800">542</p>
+                            <p class="text-3xl font-black text-slate-800">{{ $siswaCount }}</p>
                             <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Siswa</p>
                         </div>
                         <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg hover:border-blue-100 transition-all duration-300">
-                            <p class="text-3xl font-black text-slate-800">32</p>
+                            <p class="text-3xl font-black text-slate-800">{{ $guruCount }}</p>
                             <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Guru</p>
                         </div>
                         <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg hover:border-blue-100 transition-all duration-300">
-                            <p class="text-3xl font-black text-slate-800">18</p>
+                            <p class="text-3xl font-black text-slate-800">{{ $rombelCount }}</p>
                             <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Rombel</p>
+                        </div>
+                        
+                        <!-- STATISTIK LMS BARU -->
+                        <div class="p-5 bg-teal-50 rounded-2xl border border-teal-100 text-center hover:bg-white hover:shadow-lg hover:border-teal-200 transition-all duration-300">
+                            <p class="text-3xl font-black text-teal-600">{{ $materiCount }}</p>
+                            <p class="text-[10px] font-bold text-teal-400 uppercase mt-1 tracking-wider">Materi Digital</p>
+                        </div>
+                        <div class="p-5 bg-indigo-50 rounded-2xl border border-indigo-100 text-center hover:bg-white hover:shadow-lg hover:border-indigo-200 transition-all duration-300 sm:col-span-2">
+                            <p class="text-3xl font-black text-indigo-600">{{ $tugasCount }}</p>
+                            <p class="text-[10px] font-bold text-indigo-400 uppercase mt-1 tracking-wider">Tugas & Kuis Online</p>
                         </div>
                     </div>
                 </div>
@@ -647,7 +689,7 @@
                                 <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-sm"><i class="ph-bold ph-user"></i></div>
                                 <div>
                                     <p class="text-xs font-bold text-slate-700 line-clamp-1">{{ $prestasi->achiever_name ?? 'Siswa' }}</p>
-                                    <p class="text-[10px] text-slate-400 uppercase font-bold">{{ $prestasi->type ?? 'Siswa' }}</p>
+                                    <p class="text-xs text-slate-400 uppercase font-bold">{{ $prestasi->type ?? 'Siswa' }}</p>
                                 </div>
                             </div>
                         </div>
