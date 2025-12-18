@@ -7,8 +7,30 @@
 
     <div class="py-12">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+            
+            <!-- TAMBAHAN: BLOK ERROR -->
+            @if ($errors->any())
+                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-xl">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <!-- Icon X Circle -->
+                            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-bold text-red-800">Gagal Mengupload Materi:</h3>
+                            <ul class="mt-1 list-disc list-inside text-sm text-red-700">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            @endif
+            
             <div class="bg-white shadow-xl sm:rounded-2xl border border-gray-100 overflow-hidden">
-                
                 <form action="{{ route('lms.materials.store') }}" method="POST" enctype="multipart/form-data" 
                       x-data="{ targetType: 'class', attachments: [{id: 1, type: 'file'}] }">
                     @csrf
@@ -31,7 +53,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="col-span-2">
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Judul Materi <span class="text-red-500">*</span></label>
-                                <input type="text" name="title" required class="w-full rounded-xl border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: Bab 1 - Ekosistem">
+                                <input type="text" name="title" value="{{ old('title') }}" required class="w-full rounded-xl border-gray-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: Bab 1 - Ekosistem">
                             </div>
                             
                             <div>
@@ -39,7 +61,7 @@
                                 <select name="subject_id" required class="w-full rounded-xl border-gray-300 focus:ring-blue-500">
                                     <option value="">-- Pilih Mapel --</option>
                                     @foreach($subjects as $subject)
-                                        <option value="{{ $subject->id }}">{{ $subject->name }}</option>
+                                        <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -57,7 +79,7 @@
                                         <select name="class_id" class="w-full text-sm rounded-lg border-gray-300">
                                             <option value="">-- Pilih Kelas --</option>
                                             @foreach($classes as $class)
-                                                <option value="{{ $class->id }}">{{ $class->name }}</option>
+                                                <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -67,6 +89,7 @@
                                             <option value="8">Kelas 8</option>
                                             <option value="9">Kelas 9</option>
                                         </select>
+                                        <p class="text-[10px] text-gray-500 mt-1">*Sistem akan mencari kelas yang diawali angka ini.</p>
                                     </div>
                                 </div>
                             </div>
@@ -80,7 +103,7 @@
                                 📖 Pengantar & Resume Materi
                                 <span class="text-xs font-normal text-gray-500 ml-1">(Rangkuman yang akan dibaca siswa)</span>
                             </label>
-                            <textarea name="resume" rows="8" class="w-full rounded-xl border-gray-300 focus:ring-blue-500 shadow-sm" placeholder="Tuliskan rangkuman materi, tujuan pembelajaran, atau poin-poin penting disini..."></textarea>
+                            <textarea name="resume" rows="8" class="w-full rounded-xl border-gray-300 focus:ring-blue-500 shadow-sm" placeholder="Tuliskan rangkuman materi, tujuan pembelajaran, atau poin-poin penting disini...">{{ old('resume') }}</textarea>
                             <p class="text-xs text-gray-400 mt-2 text-right">Anda bisa menulis teks panjang disini.</p>
                         </div>
 
@@ -137,7 +160,7 @@
                                 </template>
                             </div>
                             
-                            <p class="text-xs text-gray-500 mt-2 ml-1">Tips: Klik "Tambah Baris" untuk memasukkan banyak file sekaligus.</p>
+                            <p class="text-xs text-gray-500 mt-2 ml-1">Tips: Klik "Tambah Baris" untuk memasukkan banyak file sekaligus. Batas upload file tergantung server (biasanya 20MB).</p>
                         </div>
 
                     </div>
