@@ -6,8 +6,32 @@
     </x-slot>
 
     <div class="py-6">
+        
+        <!-- ===> TAMBAHAN: BLOK NOTIFIKASI ERROR/SUKSES <=== -->
+        @if(session('success'))
+            <div class="mb-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="bg-green-50 border border-green-200 text-green-700 p-4 rounded-xl flex items-center gap-3 shadow-sm">
+                    <i class="ph-fill ph-check-circle text-xl"></i>
+                    <span class="font-bold text-sm">{{ session('success') }}</span>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="mb-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl flex items-center gap-3 shadow-sm">
+                    <i class="ph-fill ph-warning-circle text-xl"></i>
+                    <div>
+                        <span class="font-bold text-sm block">Terjadi Kesalahan:</span>
+                        <span class="text-sm">{{ session('error') }}</span>
+                    </div>
+                </div>
+            </div>
+        @endif
+        <!-- ===> AKHIR TAMBAHAN <=== -->
+
         <!-- HEADER STATS -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 px-4 sm:px-0">
             <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
                 <div class="absolute right-0 top-0 opacity-10 transform translate-x-4 -translate-y-4">
                     <i class="ph-fill ph-chalkboard-teacher text-9xl"></i>
@@ -31,12 +55,12 @@
         </div>
 
         <!-- DAFTAR JADWAL -->
-        <h3 class="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2">
+        <h3 class="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2 px-4 sm:px-0">
             <i class="ph-fill ph-list-dashes text-blue-600"></i> Daftar Kelas Hari Ini
         </h3>
 
         @if($schedules->count() > 0)
-            <div class="grid grid-cols-1 gap-4">
+            <div class="grid grid-cols-1 gap-4 px-4 sm:px-0">
                 @foreach($schedules as $schedule)
                     @php
                         // Cek apakah sesi sudah dibuat hari ini
@@ -100,7 +124,7 @@
                 @endforeach
             </div>
         @else
-            <div class="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+            <div class="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200 mx-4 sm:mx-0">
                 <i class="ph-duotone ph-coffee text-5xl text-gray-300 mb-3"></i>
                 <h3 class="text-gray-500 font-bold text-lg">Tidak ada jadwal mengajar hari ini.</h3>
                 <p class="text-gray-400 text-sm">Nikmati waktu istirahat Anda!</p>

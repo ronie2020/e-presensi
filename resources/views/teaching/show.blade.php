@@ -3,11 +3,8 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     @endpush
 
-    <!-- Mengambil daftar semua siswa di kelas ini untuk ditampilkan -->
     @php
-        // Ambil semua siswa di kelas, urutkan nama
         $allStudents = $session->schedule->schoolClass->students->sortBy('name');
-        // Ambil data absensi yang sudah ada, key by student_id biar gampang dicek
         $attendances = $session->attendances->keyBy('student_id');
     @endphp
 
@@ -16,6 +13,53 @@
             sessionId: {{ $session->id }}, 
             presentCount: {{ $presentCount }} 
          })">
+        
+        <!-- ===> TAMBAHAN 1: BLOK NOTIFIKASI ERROR/SUKSES <=== -->
+        @if(session('success'))
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-xl shadow-sm animate-bounce-in">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="ph-fill ph-check-circle text-green-500 text-xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-bold text-green-800">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm animate-shake">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="ph-fill ph-warning-circle text-red-500 text-xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-bold text-red-800">Gagal Memproses:</p>
+                        <p class="text-sm text-red-700">{{ session('error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-xl shadow-sm">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="ph-fill ph-warning text-red-500 text-xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-bold text-red-800">Mohon Periksa Kembali:</h3>
+                        <ul class="mt-1 list-disc list-inside text-sm text-red-700">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
+        <!-- ===> AKHIR TAMBAHAN <=== -->
         
         <!-- HEADER KELAS -->
         <div class="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
@@ -42,8 +86,9 @@
                 
                 @if($session->status == 'open')
                     <form action="{{ route('teaching.close', $session->id) }}" method="POST" 
-                          onsubmit="return confirm('PERINGATAN: Siswa yang statusnya masih kosong akan otomatis dianggap ALPHA. Lanjutkan?')">
+                          onsubmit="return confirm('PERINGATAN:\n\n1. Pastikan JURNAL sudah disimpan.\n2. Siswa yang belum diabsen akan otomatis ALPHA.\n\nLanjutkan tutup kelas?')">
                         @csrf
+                        <!-- TAMBAHAN: Cek method PUT jika route resource, tapi biasanya POST untuk custom action -->
                         <button type="submit" class="group bg-rose-600 hover:bg-rose-700 text-white pl-4 pr-6 py-3 rounded-xl font-bold shadow-lg shadow-rose-900/30 transition flex items-center gap-3 border border-rose-500">
                             <div class="bg-white/20 p-1.5 rounded-lg group-hover:scale-110 transition-transform">
                                 <i class="ph-bold ph-stop-circle text-xl"></i>
@@ -65,9 +110,14 @@
                 
                 <!-- 1. FORM JURNAL -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="bg-gray-50 px-6 py-3 border-b border-gray-100 flex items-center gap-2">
-                        <i class="ph-fill ph-notebook text-blue-600"></i>
-                        <h3 class="font-bold text-gray-800 text-sm">Jurnal & Bukti Kegiatan</h3>
+                    <div class="bg-gray-50 px-6 py-3 border-b border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="ph-fill ph-notebook text-blue-600"></i>
+                            <h3 class="font-bold text-gray-800 text-sm">Jurnal Kegiatan</h3>
+                        </div>
+                        @if($session->status == 'open')
+                            <span class="text-[10px] text-gray-400 italic">Wajib diisi & disimpan</span>
+                        @endif
                     </div>
                     <div class="p-6">
                         <fieldset {{ $session->status == 'closed' ? 'disabled' : '' }}>
@@ -75,39 +125,40 @@
                                 @csrf @method('PUT')
                                 <div class="space-y-4">
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Topik / Bahasan</label>
-                                        <input type="text" name="topic" value="{{ $session->topic }}" class="w-full rounded-xl border-gray-200 focus:ring-blue-500 focus:border-blue-500 font-semibold text-gray-800 disabled:bg-slate-50" placeholder="Misal: Aljabar Linear Pert. 1">
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Topik / Bahasan <span class="text-red-500">*</span></label>
+                                        <input type="text" name="topic" value="{{ old('topic', $session->topic) }}" class="w-full rounded-xl border-gray-200 focus:ring-blue-500 focus:border-blue-500 font-semibold text-gray-800 disabled:bg-slate-50" placeholder="Misal: Aljabar Linear Pert. 1" required>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Catatan / Tugas</label>
-                                        <textarea name="activities" rows="3" class="w-full rounded-xl border-gray-200 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-700 disabled:bg-slate-50" placeholder="Catatan untuk siswa...">{{ $session->activities }}</textarea>
+                                        <textarea name="activities" rows="3" class="w-full rounded-xl border-gray-200 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-700 disabled:bg-slate-50" placeholder="Catatan untuk siswa...">{{ old('activities', $session->activities) }}</textarea>
                                     </div>
                                     <div class="grid grid-cols-2 gap-3">
                                         <div>
                                             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Link Materi</label>
-                                            <input type="url" name="reference_link" value="{{ $session->reference_link }}" class="w-full rounded-lg border-gray-200 text-xs disabled:bg-slate-50" placeholder="https://...">
+                                            <input type="url" name="reference_link" value="{{ old('reference_link', $session->reference_link) }}" class="w-full rounded-lg border-gray-200 text-xs disabled:bg-slate-50" placeholder="https://...">
                                         </div>
                                         <div>
                                             <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Link Video</label>
-                                            <input type="url" name="video_link" value="{{ $session->video_link }}" class="w-full rounded-lg border-gray-200 text-xs disabled:bg-slate-50" placeholder="https://...">
+                                            <input type="url" name="video_link" value="{{ old('video_link', $session->video_link) }}" class="w-full rounded-lg border-gray-200 text-xs disabled:bg-slate-50" placeholder="https://...">
                                         </div>
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Foto Bukti</label>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Foto Bukti Kegiatan</label>
                                         @if($session->photo_proof)
-                                            <div class="mb-2 relative group w-full h-24 rounded-lg overflow-hidden border border-slate-200">
+                                            <div class="mb-2 relative group w-full h-32 rounded-lg overflow-hidden border border-slate-200 bg-gray-100">
                                                 <img src="{{ asset('storage/' . $session->photo_proof) }}" class="w-full h-full object-cover">
                                                 <div class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                                                    <a href="{{ asset('storage/' . $session->photo_proof) }}" target="_blank" class="text-white text-xs font-bold underline">Lihat</a>
+                                                    <a href="{{ asset('storage/' . $session->photo_proof) }}" target="_blank" class="text-white text-xs font-bold underline px-3 py-1 border border-white rounded">Lihat Full</a>
                                                 </div>
                                             </div>
                                         @endif
                                         @if($session->status == 'open')
-                                            <input type="file" name="photo_proof" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                            <input type="file" name="photo_proof" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                                            <p class="text-[10px] text-gray-400 mt-1">*Format: JPG/PNG, Max 5MB</p>
                                         @endif
                                     </div>
                                     @if($session->status == 'open')
-                                        <button type="submit" class="w-full bg-slate-800 text-white hover:bg-slate-700 font-bold py-2.5 rounded-xl transition shadow-lg shadow-slate-200 flex justify-center items-center gap-2 text-sm">
+                                        <button type="submit" class="w-full bg-slate-800 text-white hover:bg-slate-700 font-bold py-3 rounded-xl transition shadow-lg shadow-slate-200 flex justify-center items-center gap-2 text-sm">
                                             <i class="ph-bold ph-floppy-disk"></i> Simpan Jurnal
                                         </button>
                                     @endif
@@ -155,7 +206,7 @@
                     <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
                         <div>
                             <h3 class="font-bold text-gray-800">Daftar Siswa Kelas {{ $session->schedule->schoolClass->name }}</h3>
-                            <p class="text-xs text-gray-500">Total: {{ $totalStudents }} Siswa</p>
+                            <p class="text-xs text-gray-500">Total: {{ $allStudents->count() }} Siswa</p>
                         </div>
                         <div class="text-right">
                             <span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Hadir</span>
@@ -181,14 +232,14 @@
                                         </div>
                                         <div>
                                             <p class="font-bold text-gray-800 text-sm line-clamp-1">{{ $student->name }}</p>
-                                            <p class="text-[10px] text-gray-500">{{ $student->student_id }}</p>
+                                            <p class="text-[10px] text-gray-500">{{ $student->nisn }}</p>
                                         </div>
                                     </div>
 
                                     {{-- Status / Tombol Aksi --}}
                                     <div class="flex items-center gap-2" id="action-{{ $student->id }}">
                                         @if($status)
-                                            {{-- Jika Sudah Ada Status (Tampilkan Badge) --}}
+                                            {{-- Jika Sudah Ada Status --}}
                                             <div class="flex flex-col items-end">
                                                 @if($status == 'present')
                                                     <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-green-50 text-green-700 text-xs font-bold border border-green-100">
@@ -209,13 +260,12 @@
                                                     </span>
                                                 @endif
                                                 
-                                                {{-- Tombol Ubah (Hanya jika sesi Open) --}}
                                                 @if($session->status == 'open')
                                                     <button @click="resetStatus({{ $student->id }})" class="text-[10px] text-slate-400 hover:text-blue-500 underline mt-1">Ubah</button>
                                                 @endif
                                             </div>
                                         @else
-                                            {{-- Jika Belum Ada Status (Tampilkan Tombol) --}}
+                                            {{-- Jika Belum Ada Status --}}
                                             @if($session->status == 'open')
                                                 <div class="flex gap-1">
                                                     <button @click="setManual({{ $student->id }}, 'present')" class="w-8 h-8 rounded-lg bg-green-50 text-green-600 hover:bg-green-600 hover:text-white border border-green-200 transition flex items-center justify-center" title="Hadir Manual">
@@ -258,7 +308,6 @@
                 showCamera: false,
                 html5QrcodeScanner: null,
 
-                // --- FUNGSI BARU: ABSENSI MANUAL ---
                 async setManual(studentId, status) {
                     try {
                         const response = await fetch('{{ route("teaching.manual") }}', {
@@ -276,24 +325,21 @@
                         
                         const data = await response.json();
                         if(data.status === 'success') {
-                            // Reload halaman agar UI terupdate (Paling aman & mudah)
-                            // Atau update DOM secara manual jika ingin SPA-like
                             window.location.reload(); 
+                        } else {
+                            alert('Gagal: ' + data.message);
                         }
                     } catch (e) {
-                        alert('Gagal menyimpan status.');
+                        alert('Terjadi kesalahan sistem.');
                     }
                 },
 
-                // Reset Status (Hapus absensi agar bisa dipilih ulang) - Opsional logic
                 resetStatus(studentId) {
-                    // Logic ini bisa ditambahkan jika ingin fitur "Batal Absen"
-                    // Untuk sekarang cukup reload atau setManual ke status lain
-                    alert('Silakan pilih status baru.');
-                    this.setManual(studentId, 'alpha'); // Default reset ke Alpha atau logic delete
+                    if(confirm('Ubah status kehadiran siswa ini?')) {
+                        this.setManual(studentId, 'alpha'); // Reset jadi Alpha agar bisa dipilih ulang, atau sesuaikan logic backend
+                    }
                 },
 
-                // --- FUNGSI SCAN OTOMATIS (Existing) ---
                 async submitScan() {
                     if(this.rfidCode.length < 3) return;
                     this.loading = true;
@@ -309,7 +355,7 @@
                         const data = await response.json();
                         if(data.status === 'success') {
                             this.statusMessage = 'BERHASIL: ' + data.student.name;
-                            window.location.reload(); // Reload agar status di list kanan berubah
+                            window.location.reload();
                         } else {
                             this.statusMessage = 'GAGAL: ' + data.message;
                         }
