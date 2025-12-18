@@ -7,92 +7,107 @@
     <title>Ujian Online - {{ $exam->title }}</title>
     
     {{-- 
-      PENTING UNTUK SEB:
-      Jangan gunakan 'npm run dev' saat testing dengan SEB. 
-      Vite server (port 5173) sering diblokir oleh SEB.
-      Gunakan 'npm run build' agar asset menjadi file statis (.css/.js) biasa.
+      PENTING: Gunakan 'npm run build' untuk production/SEB.
+      Kami tambahkan fallback CSS inline agar halaman tidak hancur jika CSS gagal load.
     --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    {{-- CDN Libraries --}}
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {{-- CDN Libraries dengan Error Handling --}}
+    <script src="https://unpkg.com/@phosphor-icons/web" onerror="console.error('Gagal load Icons')"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" onerror="console.error('Gagal load SweetAlert')"></script>
 
     <style>
-        body { 
-            user-select: none; 
-            -webkit-user-select: none; 
-        }
+        /* CSS KRITIS (INLINE) - Agar loading tampil meski app.css gagal */
+        body { font-family: sans-serif; margin: 0; background-color: #f8fafc; color: #1e293b; user-select: none; -webkit-user-select: none; }
         [x-cloak] { display: none !important; }
+        
+        /* Loading Overlay Style */
+        #loading-overlay {
+            position: fixed; inset: 0; background: white; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid #e2e8f0;
+            border-top: 4px solid #2563eb; border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Error Box Style */
+        #fatal-error { display: none; position: fixed; inset: 0; background: #7f1d1d; color: white; z-index: 10000; align-items: center; justify-content: center; flex-direction: column; padding: 20px; text-align: center; }
         
         /* Custom Scrollbar */
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        /* Emergency Error Message (Hidden by default) */
-        #fatal-error { display: none; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased"
+<body class="antialiased"
     x-data="examApp(@json($questions), {{ $timeLeft }}, {{ $sessionId }}, {{ $exam->id }})"
     x-init="initData(); startTimer(); initSecurity(); checkPendingAnswers()"
     @online.window="isOnline = true; syncPendingAnswers()"
     @offline.window="isOnline = false">
 
-    <!-- DETEKSI JS ERROR (Emergency Fallback) -->
-    <!-- Pesan ini akan muncul jika Alpine.js GAGAL dimuat (misal karena npm run dev di SEB) -->
-    <div id="fatal-error" class="fixed inset-0 bg-red-900 z-[10000] flex flex-col items-center justify-center text-white p-8 text-center">
-        <h1 class="text-3xl font-bold mb-4">Sistem Gagal Dimuat</h1>
-        <p class="mb-2">Aplikasi mendeteksi Javascript tidak berjalan.</p>
-        <div class="bg-black/30 p-4 rounded text-left font-mono text-xs mb-6 max-w-lg">
-            <strong>Penyebab Umum:</strong><br>
-            1. Anda menjalankan <code>npm run dev</code> di SEB (Gunakan <code>npm run build</code>).<br>
-            2. CDN (SweetAlert/Phosphor) terblokir firewall.<br>
-            3. Browser memblokir script eksternal.
+    {{-- 1. NOSCRIPT FALLBACK --}}
+    <noscript>
+        <div style="position:fixed; inset:0; background:white; z-index:99999; display:flex; justify-content:center; align-items:center; text-align:center; padding:20px;">
+            <h1 style="color:red; font-size:24px;">Javascript Tidak Aktif</h1>
+            <p>Aplikasi ujian memerlukan Javascript. Mohon aktifkan di pengaturan browser Anda.</p>
         </div>
-        <button onclick="window.location.reload()" class="px-6 py-2 bg-white text-red-900 font-bold rounded">Muat Ulang</button>
+    </noscript>
+
+    {{-- 2. EMERGENCY ERROR SCREEN (Muncul jika JS Crash) --}}
+    <div id="fatal-error">
+        <h1 style="font-size:24px; font-weight:bold; margin-bottom:10px;">Gagal Memuat Aplikasi</h1>
+        <p style="margin-bottom:20px;">Terjadi kesalahan teknis pada peramban ujian.</p>
+        <div style="background:rgba(0,0,0,0.3); padding:15px; border-radius:8px; text-align:left; font-family:monospace; font-size:12px; margin-bottom:20px; max-width:500px;">
+            <strong>Kemungkinan Penyebab:</strong><br>
+            1. Koneksi internet ke server terputus saat loading.<br>
+            2. CDN (SweetAlert/Icon) diblokir oleh SEB.<br>
+            3. File 'app.js' belum di-build (jalankan 'npm run build').
+        </div>
+        <button onclick="window.location.reload()" style="background:white; color:#7f1d1d; border:none; padding:10px 20px; font-weight:bold; border-radius:5px; cursor:pointer;">
+            Coba Muat Ulang
+        </button>
     </div>
 
-    <!-- OVERLAY LOADING (Default State) -->
-    <!-- Diberi ID untuk kontrol manual jika Alpine mati -->
-    <div id="loading-overlay" x-show="!initComplete" 
-         class="fixed inset-0 bg-white z-[9000] flex items-center justify-center flex-col transition-opacity duration-300">
-        <div class="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-3"></div>
-        <span class="text-sm text-slate-500 font-medium">Sedang Menyiapkan Ujian...</span>
+    {{-- 3. LOADING OVERLAY (Default Visible) --}}
+    <div id="loading-overlay" x-show="!initComplete" x-transition.opacity.duration.500ms>
+        <div class="spinner"></div>
+        <span style="font-size:14px; font-weight:bold; color:#64748b;">Menyiapkan Lembar Ujian...</span>
     </div>
 
-    <!-- OVERLAY SECURITY -->
+    {{-- 4. SECURITY ALERT OVERLAY --}}
     <div x-show="showSecurityOverlay" x-transition.opacity
-         class="fixed inset-0 bg-slate-900/95 z-[9999] flex items-center justify-center text-center px-4"
+         class="fixed inset-0 bg-slate-900/95 z-[9000] flex items-center justify-center text-center px-4"
          x-cloak>
         <div class="max-w-md w-full bg-white rounded-2xl p-8 shadow-2xl">
-            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 text-red-600 animate-pulse">
-                <i class="ph-duotone ph-warning-octagon text-5xl"></i>
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
+                <i class="ph-duotone ph-warning-octagon text-4xl"></i>
             </div>
-            <h2 class="text-2xl font-bold text-slate-800 mb-2">PERINGATAN SISTEM!</h2>
-            <p class="text-slate-600 mb-6">
-                Anda terdeteksi meninggalkan halaman ujian. <br>
-                Sisa toleransi pelanggaran: <span class="font-bold text-red-600" x-text="maxViolations - violationCount"></span> kali.
+            <h2 class="text-xl font-bold text-slate-800 mb-2">PERINGATAN PELANGGARAN!</h2>
+            <p class="text-slate-600 mb-6 text-sm">
+                Anda terdeteksi meninggalkan halaman ujian.<br>
+                Sisa toleransi: <span class="font-black text-red-600 text-lg" x-text="maxViolations - violationCount"></span> kali.
             </p>
             <button @click="resumeExam()" 
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition transform active:scale-95">
-                Kembali ke Ujian
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition">
+                Saya Mengerti, Kembali ke Ujian
             </button>
         </div>
     </div>
 
-    <!-- BANNER OFFLINE -->
+    {{-- 5. OFFLINE BANNER --}}
     <div x-show="!isOnline" x-transition 
-         class="fixed top-16 left-0 w-full bg-rose-500 text-white text-center text-xs font-bold py-1 z-40 shadow-md" style="display: none;">
-        <i class="ph-bold ph-wifi-slash"></i> Koneksi Terputus - Jawaban disimpan sementara di perangkat
+         class="fixed top-16 left-0 w-full bg-rose-600 text-white text-center text-xs font-bold py-2 z-40 shadow-md flex justify-center items-center gap-2" 
+         x-cloak>
+        <i class="ph-bold ph-wifi-slash"></i> KONEKSI TERPUTUS - Jawaban disimpan di perangkat Anda
     </div>
 
-    <!-- HEADER -->
-    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md border-b border-slate-200 z-50 h-16 flex items-center justify-between px-4 lg:px-8 shadow-sm">
+    {{-- NAVBAR --}}
+    <nav class="fixed top-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 z-50 h-16 flex items-center justify-between px-4 shadow-sm">
         <div class="flex items-center gap-3 overflow-hidden">
-            <div class="h-9 w-9 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+            <div class="h-9 w-9 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
                 <i class="ph-bold ph-student text-xl"></i>
             </div>
             <div class="hidden md:block truncate">
@@ -101,7 +116,6 @@
             </div>
         </div>
 
-        <!-- TIMER & TOOLS -->
         <div class="flex items-center gap-3">
             <div class="hidden md:flex bg-red-50 text-red-600 px-3 py-1.5 rounded-lg border border-red-100 text-xs font-bold items-center gap-2" 
                  x-show="violationCount > 0" x-cloak>
@@ -109,7 +123,7 @@
                 <span x-text="violationCount + '/' + maxViolations"></span>
             </div>
 
-            <div class="bg-white text-slate-700 px-4 py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2"
+            <div class="bg-white text-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2"
                  :class="timeLeft < 300 ? 'border-red-500 text-red-600 bg-red-50 animate-pulse' : ''">
                 <i class="ph-duotone ph-timer text-xl"></i>
                 <span x-text="formattedTime" class="font-mono font-bold text-lg tracking-widest">00:00:00</span>
@@ -121,59 +135,59 @@
         </div>
     </nav>
 
-    <!-- MAIN CONTENT -->
-    <div class="pt-24 pb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row gap-6 h-[calc(100vh-6rem)]">
+    {{-- MAIN LAYOUT --}}
+    <div class="pt-20 pb-6 max-w-7xl mx-auto px-4 flex flex-col lg:flex-row gap-6 h-[calc(100vh-1rem)]">
         
-        <!-- KOLOM KIRI: Area Soal -->
-        <div class="lg:w-3/4 w-full flex flex-col h-full">
+        <!-- KOLOM KIRI: SOAL -->
+        <div class="lg:w-3/4 w-full flex flex-col h-full pb-16 lg:pb-0">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden relative">
                 
                 <!-- Header Soal -->
-                <div class="bg-white px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
+                <div class="bg-slate-50 px-6 py-3 border-b border-slate-200 flex justify-between items-center shrink-0">
                     <div class="flex items-center gap-3">
-                        <span class="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-md">
-                            NO. <span x-text="currentQuestion + 1"></span>
+                        <span class="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-sm">
+                            SOAL NO. <span x-text="currentQuestion + 1"></span>
                         </span>
                         <label class="flex items-center gap-2 cursor-pointer select-none">
-                            <input type="checkbox" class="form-checkbox w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-500" 
+                            <input type="checkbox" class="w-4 h-4 text-amber-500 rounded border-slate-300 focus:ring-amber-500" 
                                    x-model="markedQuestions[questions[currentQuestion]?.id]">
-                            <span class="text-sm font-bold text-amber-600">Ragu-ragu</span>
+                            <span class="text-xs font-bold text-amber-600 uppercase tracking-wide">Ragu-ragu</span>
                         </label>
                     </div>
                     
                     <div class="text-[10px] font-bold uppercase tracking-wider">
                         <span x-show="saveStatus === 'saving'" class="text-blue-500 flex items-center gap-1">
-                            <i class="ph-bold ph-spinner animate-spin"></i> Menyimpan
+                            <i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...
                         </span>
                         <span x-show="saveStatus === 'saved'" class="text-emerald-500 flex items-center gap-1">
                             <i class="ph-bold ph-check-circle"></i> Tersimpan
                         </span>
                         <span x-show="saveStatus === 'pending'" class="text-amber-500 flex items-center gap-1">
-                            <i class="ph-bold ph-cloud-warning"></i> Pending
+                            <i class="ph-bold ph-cloud-warning"></i> Pending (Offline)
                         </span>
                     </div>
                 </div>
 
-                <!-- Scrollable Content -->
+                <!-- Konten Soal -->
                 <div class="flex-1 overflow-y-auto custom-scroll p-6 lg:p-8">
                     <template x-if="questions.length > 0 && questions[currentQuestion]">
                         <div class="max-w-3xl mx-auto">
                             <!-- Soal Text/Image -->
-                            <div class="prose prose-lg max-w-none text-slate-800 mb-8">
+                            <div class="mb-8">
                                 <template x-if="questions[currentQuestion].image">
-                                    <div class="mb-6 bg-slate-50 p-2 rounded-xl border border-slate-100 inline-block">
+                                    <div class="mb-6">
                                         <img :src="questions[currentQuestion].image" 
-                                             class="max-h-[300px] w-auto rounded-lg object-contain hover:scale-105 transition-transform cursor-zoom-in"
+                                             class="max-h-[300px] w-auto rounded-lg border border-slate-200 shadow-sm object-contain cursor-zoom-in"
                                              onclick="window.open(this.src, '_blank')">
                                     </div>
                                 </template>
-                                <div class="font-medium leading-loose text-lg" x-html="questions[currentQuestion].text"></div>
+                                <div class="text-lg text-slate-800 font-medium leading-loose" x-html="questions[currentQuestion].text"></div>
                             </div>
 
                             <!-- Pilihan Jawaban -->
                             <div class="space-y-3">
                                 <template x-for="(optionText, optionKey) in questions[currentQuestion].options" :key="optionKey">
-                                    <label class="relative flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group"
+                                    <label class="relative flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group"
                                         :class="answers[questions[currentQuestion].id] === optionKey 
                                             ? 'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500' 
                                             : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'">
@@ -183,17 +197,15 @@
                                             x-model="answers[questions[currentQuestion].id]" 
                                             class="peer sr-only">
                                         
-                                        <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-base shrink-0 transition-all shadow-sm border"
+                                        <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm shrink-0 transition-all border mt-0.5"
                                             :class="answers[questions[currentQuestion].id] === optionKey 
-                                                ? 'bg-blue-600 text-white border-blue-600 scale-110' 
+                                                ? 'bg-blue-600 text-white border-blue-600' 
                                                 : 'bg-white text-slate-500 border-slate-200 group-hover:border-blue-300 group-hover:text-blue-600'">
                                             <span x-text="optionKey"></span>
                                         </div>
                                         
-                                        <span class="text-slate-700 font-medium peer-checked:text-slate-900" x-text="optionText"></span>
-                                        
-                                        <div x-show="answers[questions[currentQuestion].id] === optionKey" class="absolute right-4 text-blue-600">
-                                            <i class="ph-fill ph-check-circle text-xl"></i>
+                                        <div class="flex-1">
+                                            <span class="text-slate-700 font-medium peer-checked:text-slate-900 text-sm md:text-base" x-text="optionText"></span>
                                         </div>
                                     </label>
                                 </template>
@@ -205,24 +217,24 @@
                 <!-- Footer Navigasi -->
                 <div class="px-6 py-4 bg-white border-t border-slate-200 flex justify-between items-center shrink-0">
                     <button @click="prevQuestion" :disabled="currentQuestion === 0" 
-                        class="px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed text-slate-600 hover:bg-slate-100 border border-transparent hover:border-slate-200">
+                        class="px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed text-slate-600 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 text-sm">
                         <i class="ph-bold ph-arrow-left"></i> <span class="hidden sm:inline">Sebelumnya</span>
                     </button>
 
                     <button @click="nextQuestion" x-show="currentQuestion < totalQuestions - 1"
-                        class="px-6 py-2.5 rounded-xl font-bold bg-slate-900 text-white hover:bg-blue-600 flex items-center gap-2 shadow-lg shadow-slate-900/10 hover:shadow-blue-600/20 transition-all">
+                        class="px-6 py-2.5 rounded-xl font-bold bg-slate-900 text-white hover:bg-blue-600 flex items-center gap-2 shadow-lg shadow-slate-900/10 hover:shadow-blue-600/20 transition-all text-sm">
                         <span class="hidden sm:inline">Selanjutnya</span> <i class="ph-bold ph-arrow-right"></i>
                     </button>
                     
                     <button @click="finishExam" x-show="currentQuestion === totalQuestions - 1"
-                        class="px-6 py-2.5 rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-2 shadow-lg shadow-emerald-500/30 transition-all">
+                        class="px-6 py-2.5 rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-2 shadow-lg shadow-emerald-500/30 transition-all text-sm">
                         <i class="ph-bold ph-check-circle"></i> Selesai
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- KOLOM KANAN: Navigasi Nomor -->
+        <!-- KOLOM KANAN: NAVIGASI NOMOR -->
         <div class="lg:w-1/4 w-full fixed lg:static inset-0 z-40 lg:z-auto bg-slate-900/50 lg:bg-transparent backdrop-blur-sm lg:backdrop-blur-none"
              x-show="showMobileMap || window.innerWidth >= 1024"
              @click.self="showMobileMap = false"
@@ -236,10 +248,8 @@
                     <button @click="showMobileMap = false" class="text-slate-500"><i class="ph-bold ph-x text-xl"></i></button>
                 </div>
 
-                <div class="bg-blue-50/50 rounded-xl p-4 mb-4 border border-blue-100 hidden lg:block">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2 mb-2">
-                        <i class="ph-fill ph-squares-four text-blue-600"></i> Navigasi Soal
-                    </h3>
+                <div class="bg-blue-50/50 rounded-xl p-3 mb-4 border border-blue-100 hidden lg:block text-center">
+                    <h3 class="font-bold text-blue-800 text-xs uppercase tracking-wide">Navigasi Soal</h3>
                 </div>
                 
                 <div class="grid grid-cols-5 gap-2 content-start">
@@ -258,7 +268,7 @@
                 </div>
                 
                 <div class="mt-auto lg:mt-6 pt-6 border-t border-slate-100">
-                    <button @click="finishExam()" class="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition flex items-center justify-center gap-2">
+                    <button @click="finishExam()" class="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition flex items-center justify-center gap-2 border border-slate-200">
                          Kumpulkan Jawaban
                     </button>
                 </div>
@@ -269,16 +279,15 @@
     <!-- LOGIC SYSTEM -->
     <script>
         // SCRIPT CHECKER: Mendeteksi apakah Alpine/Vite berhasil load
+        // Ini kuncinya: Jika dalam 3 detik Alpine belum siap, tampilkan error fatal.
         setTimeout(function() {
-            // Cek apakah Alpine sudah terdefinisi (artinya app.js sukses load)
-            const isAlpineLoaded = typeof Alpine !== 'undefined' || (document.querySelector('[x-data]') && document.querySelector('[x-data]').__x);
-            
+            const isAlpineLoaded = typeof Alpine !== 'undefined';
             if (!isAlpineLoaded) {
-                console.error("FATAL: Alpine.js tidak terdeteksi. Kemungkinan blokir SEB pada 'npm run dev' atau CDN.");
-                document.getElementById('loading-overlay').style.display = 'none'; // Matikan spinner
-                document.getElementById('fatal-error').style.display = 'flex'; // Munculkan pesan error
+                console.error("FATAL: Alpine.js gagal dimuat.");
+                document.getElementById('loading-overlay').style.display = 'none';
+                document.getElementById('fatal-error').style.display = 'flex';
             }
-        }, 3000); // Tunggu 3 detik
+        }, 3000);
 
         function examApp(initialData, initialTimeLeft, sessionId, examId) {
             return {
@@ -293,27 +302,28 @@
                 sessionId: sessionId,
                 examId: examId,
                 
-                // State UI
                 initComplete: false,
                 isOnline: navigator.onLine,
                 saveStatus: 'idle',
                 showMobileMap: false,
                 
-                // Security State
                 violationCount: 0,
                 maxViolations: 3,
                 showSecurityOverlay: false,
 
                 initData() {
                     try {
-                        if (!this.rawQuestions || !Array.isArray(this.rawQuestions) || this.rawQuestions.length === 0) {
-                            console.error('Data soal kosong!');
+                        if (!this.rawQuestions || !Array.isArray(this.rawQuestions)) {
+                            console.error('Data soal invalid');
+                            return;
                         }
                         this.questions = this.rawQuestions;
                         this.totalQuestions = this.questions.length;
 
+                        // Load progress lokal sebagai cadangan
                         try { this.loadLocalProgress(); } catch (e) { console.warn('LS Error'); }
                         
+                        // Load jawaban dari database (injected via controller)
                         this.questions.forEach(q => {
                             if(q.saved_answer && !this.answers[q.id]) {
                                 this.answers[q.id] = q.saved_answer;
@@ -322,8 +332,9 @@
 
                     } catch (error) {
                         console.error('Critical Error in initData:', error);
+                        alert('Gagal memproses data soal. Silakan refresh.');
                     } finally {
-                        this.initComplete = true; 
+                        this.initComplete = true; // Matikan loading screen
                     }
                 },
 
@@ -341,11 +352,14 @@
 
                     this.saveStatus = 'saving';
                     try {
+                        // Gunakan getAttribute untuk CSRF token agar lebih aman
+                        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                        
                         const response = await fetch("{{ route('student.exam.saveAnswer') }}", {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'X-CSRF-TOKEN': token,
                                 'Accept': 'application/json'
                             },
                             body: JSON.stringify({
@@ -359,6 +373,7 @@
                         setTimeout(() => this.saveStatus = 'saved', 300);
                         
                     } catch (error) {
+                        console.error('Gagal simpan:', error);
                         this.saveStatus = 'pending';
                     }
                 },
@@ -379,7 +394,8 @@
                         const saved = localStorage.getItem(`exam_${this.sessionId}`);
                         if (saved) {
                             const data = JSON.parse(saved);
-                            this.answers = data.answers || {};
+                            // Merge jawaban lokal hanya jika belum ada
+                            this.answers = { ...data.answers, ...this.answers };
                             this.markedQuestions = data.marked || {};
                         }
                     } catch (e) {}
@@ -402,47 +418,40 @@
                     const self = this;
                     if (typeof document.hidden !== "undefined") {
                         document.addEventListener("visibilitychange", () => {
-                            if (document.hidden) self.triggerViolation('Meninggalkan Tab');
+                            if (document.hidden) self.triggerViolation();
                         });
                     }
                     
                     window.addEventListener("blur", () => {
                        setTimeout(() => {
+                           // Abaikan jika fokus ke iframe (misal video youtube embed)
                            if(document.activeElement && document.activeElement.tagName === 'IFRAME') return; 
-                           self.triggerViolation('Kehilangan Fokus');
+                           self.triggerViolation();
                        }, 1000); 
                     });
 
+                    // Cegah Inspect Element standar
                     window.addEventListener('keydown', (e) => {
-                        if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) e.preventDefault();
+                        if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) e.preventDefault();
+                        if (e.key === 'F12') e.preventDefault();
                     });
                 },
 
-                triggerViolation(reason) {
+                triggerViolation() {
                     if (this.showSecurityOverlay) return; 
 
                     this.violationCount++;
                     this.showSecurityOverlay = true;
 
                     if(this.violationCount >= this.maxViolations) {
-                        if (typeof Swal !== 'undefined') {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'DISKUALIFIKASI',
-                                text: 'Pelanggaran batas maksimal.',
-                                allowOutsideClick: false,
-                                confirmButtonText: 'Keluar',
-                                confirmButtonColor: '#d33'
-                            }).then(() => this.submitExam(true));
-                        } else {
-                            alert('DISKUALIFIKASI: Anda melanggar aturan.');
-                            this.submitExam(true);
-                        }
+                        alert('DISKUALIFIKASI: Anda telah melanggar batas aturan ujian. Jawaban akan dikumpulkan otomatis.');
+                        this.submitExam(true);
                     }
                 },
 
                 resumeExam() {
                     this.showSecurityOverlay = false;
+                    // Coba fullscreen ulang
                     try {
                         if (document.documentElement.requestFullscreen) {
                             document.documentElement.requestFullscreen().catch(() => {});
@@ -458,12 +467,18 @@
                             
                             if(this.timeLeft === 300) {
                                 if (typeof Swal !== 'undefined') {
-                                    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
-                                    Toast.fire({ icon: 'warning', title: 'Waktu tinggal 5 menit!' });
+                                    Swal.fire({ 
+                                        toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
+                                        icon: 'warning', title: 'Waktu tinggal 5 menit!' 
+                                    });
+                                } else {
+                                    // Fallback jika SweetAlert gagal load
+                                    alert("Waktu tinggal 5 menit!");
                                 }
                             }
                         } else {
                             clearInterval(timerInterval);
+                            alert("Waktu Habis! Ujian akan dikumpulkan otomatis.");
                             this.submitExam(true);
                         }
                     }, 1000);
@@ -493,7 +508,8 @@
                         html: remaining > 0 ? `Masih ada <b>${remaining}</b> soal kosong.` : "Pastikan semua jawaban benar.",
                         icon: 'question',
                         showCancelButton: true,
-                        confirmButtonText: 'Ya, Kumpulkan'
+                        confirmButtonText: 'Ya, Kumpulkan',
+                        confirmButtonColor: '#059669'
                     }).then((result) => {
                         if (result.isConfirmed) this.submitExam();
                     });
@@ -524,7 +540,7 @@
                     const tokenInput = document.createElement('input');
                     tokenInput.type = 'hidden';
                     tokenInput.name = '_token';
-                    tokenInput.value = document.querySelector('meta[name="csrf-token"]').content;
+                    tokenInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                     form.appendChild(tokenInput);
 
                     document.body.appendChild(form);
