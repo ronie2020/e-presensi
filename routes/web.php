@@ -53,6 +53,11 @@ use App\Http\Controllers\LibraryDashboardController;
 use App\Http\Controllers\LibraryCirculationController;
 use App\Http\Controllers\LibraryKioskController;
 
+// [BARU] Persuratan & Dinas
+use App\Http\Controllers\LetterIncomingController;
+use App\Http\Controllers\SptController;
+use App\Http\Controllers\SppdController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -156,7 +161,7 @@ Route::middleware('auth')->group(function () {
         // Rekap Nilai (Gradebook)
         Route::get('/grades/recap', [LmsGradeController::class, 'index'])->name('grades.index');
         
-        // ===> [PENTING] INI ADALAH ROUTE YANG HILANG <===
+        // Export & Print
         Route::get('/grades/export', [LmsGradeController::class, 'exportExcel'])->name('grades.export');
         Route::get('/grades/print', [LmsGradeController::class, 'printReport'])->name('grades.print');
     });
@@ -289,6 +294,29 @@ Route::middleware('auth')->group(function () {
     Route::delete('/reports/religious', [ReportController::class, 'destroyReligious'])->name('reports.destroyReligious');
     Route::get('/reports/export-religious', [ReportController::class, 'exportReligious'])->name('reports.exportReligious');
     Route::post('/reports/bulk-alpha', [ReportController::class, 'bulkAlpha'])->name('reports.bulkAlpha');
+
+
+    // =========================================================================
+    //  4. PERSURATAN & DINAS (BARU)
+    // =========================================================================
+    
+    // Surat Masuk & Surat Tugas (dalam prefix 'letters')
+    // URL: /letters/incoming, /letters/spt
+    Route::prefix('letters')->name('letters.')->group(function () {
+        Route::resource('incoming', LetterIncomingController::class);
+        
+        // --- ROUTE CETAK SPT (Ditambahkan) ---
+        Route::get('spt/{id}/print', [SptController::class, 'print'])->name('spt.print');
+        
+        Route::resource('spt', SptController::class);
+    });
+
+    // SPPD
+    // URL: /sppd
+    // --- ROUTE CETAK SPPD (Ditambahkan) ---
+    Route::get('sppd/{id}/print', [SppdController::class, 'print'])->name('sppd.print');
+    
+    Route::resource('sppd', SppdController::class);
 
 });
 
