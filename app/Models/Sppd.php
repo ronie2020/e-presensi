@@ -5,15 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Models\SppdFollower; // Import Model Follower
 
 class Sppd extends Model
 {
     use HasFactory;
 
-    // Nama tabel di database (sesuai migration)
     protected $table = 'sppds';
 
-    // Kolom yang boleh diisi (Mass Assignment)
     protected $fillable = [
         'nomor_sppd',
         'user_id',
@@ -27,19 +26,20 @@ class Sppd extends Model
         'instansi_pembayar',
         'mata_anggaran',
         'keterangan_lain',
-        // Data Pejabat Pemberi Perintah
         'pejabat_nama',
         'pejabat_nip',
         'pejabat_pangkat',
         'pejabat_jabatan',
     ];
 
-    /**
-     * Relasi ke Pegawai (User)
-     * Setiap SPPD dimiliki oleh satu Pegawai.
-     */
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // RELASI BARU: PENGIKUT
+    public function followers()
+    {
+        return $this->hasMany(SppdFollower::class, 'sppd_id');
     }
 }

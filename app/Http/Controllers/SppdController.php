@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Sppd;
-use App\Models\LetterSpt; // Pastikan ini sesuai nama model SPT kamu
-use App\Models\User;
+use App\Models\SppdFollower; // Import Model Follower
+use App\Models\LetterSpt; 
+use App\Models\User; 
 use Carbon\Carbon;
 
 class SppdController extends Controller
@@ -18,18 +19,15 @@ class SppdController extends Controller
 
     public function create()
     {
-        // 1. Ambil User untuk Dropdown Manual
         $users = User::orderBy('name', 'asc')->get();
 
-        // 2. Ambil Data SPT untuk Dropdown Otomatis
-        // Pastikan model LetterSpt ada. Jika belum ada, gunakan mock array kosong []
+        // Ambil Data SPT (Safe Mode)
         if (class_exists('App\Models\LetterSpt')) {
             $spts_raw = LetterSpt::with('users')->latest()->get();
         } else {
             $spts_raw = collect([]);
         }
 
-        // 3. Format ke JSON untuk AlpineJS
         $spt_json = $spts_raw->map(function($item) {
             return [
                 'id' => $item->id,
@@ -44,7 +42,6 @@ class SppdController extends Controller
             ];
         });
 
-        // 4. Nomor Otomatis
         $bulan_romawi = $this->getRomawi(date('n'));
         $tahun = date('Y');
         $count = Sppd::whereYear('created_at', $tahun)->count() + 1;
@@ -61,12 +58,15 @@ class SppdController extends Controller
             'tujuan' => 'required',
             'tgl_berangkat' => 'required|date',
             'tgl_kembali' => 'required|date|after_or_equal:tgl_berangkat',
+            // Validasi Array Pengikut (Opsional)
+            'followers.*.nama' => 'required_with:followers',
         ]);
 
         $start = Carbon::parse($request->tgl_berangkat);
         $end = Carbon::parse($request->tgl_kembali);
         $lama_hari = $start->diffInDays($end) + 1;
 
+        // 1. Simpan SPPD Utama
         $sppd = new Sppd();
         $sppd->nomor_sppd = $request->nomor_sppd;
         $sppd->user_id = $request->pegawai_id;
@@ -87,12 +87,28 @@ class SppdController extends Controller
 
         $sppd->save();
 
+        // 2. Simpan Pengikut (Jika Ada)
+        if ($request->has('followers')) {
+            foreach ($request->followers as $followerData) {
+                // Pastikan nama terisi, kalau kosong skip
+                if (!empty($followerData['nama'])) {
+                    SppdFollower::create([
+                        'sppd_id' => $sppd->id,
+                        'nama' => $followerData['nama'],
+                        'nip' => $followerData['nip'] ?? null, // Simpan NIP
+                        'keterangan' => $followerData['keterangan'] ?? null,
+                    ]);
+                }
+            }
+        }
+
         return redirect()->route('sppd.print', $sppd->id);
     }
 
     public function print($id)
     {
-        $sppd = Sppd::with('user')->findOrFail($id);
+        // Include relasi followers saat print
+        $sppd = Sppd::with(['user', 'followers'])->findOrFail($id);
         return view('sppd.print', compact('sppd'));
     }
 
