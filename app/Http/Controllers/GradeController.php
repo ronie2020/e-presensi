@@ -11,14 +11,21 @@ use App\Models\AcademicYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+// Import Library Excel
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\GradesImport;         // Class Import untuk Per Mapel (Harus dibuat)
+use App\Imports\StudentGradesImport;  // Class Import untuk Per Siswa (Harus dibuat)
+
 class GradeController extends Controller
 {
-    // ... (Method index, create, store TETAP SAMA seperti sebelumnya) ...
-
+    /**
+     * Halaman Utama (Dashboard Input Nilai)
+     */
     public function index(Request $request)
     {
         $classes = SchoolClass::orderBy('name')->get();
         $subjects = Subject::orderBy('order')->get();
+        // Mengambil tahun ajaran, urutkan dari yang terbaru
         $years = AcademicYear::select('name')->distinct()->orderBy('name', 'desc')->get();
         $activeYear = AcademicYear::where('is_active', true)->first();
 
@@ -30,6 +37,13 @@ class GradeController extends Controller
         ]);
     }
 
+    // =========================================================================
+    //  MODE 1: INPUT PER MAPEL (Satu Mapel, Banyak Siswa)
+    // =========================================================================
+
+    /**
+     * Form Input Manual Per Mapel
+     */
     public function create(Request $request)
     {
         $request->validate([
@@ -43,6 +57,7 @@ class GradeController extends Controller
         $subject = Subject::findOrFail($request->subject_id);
         $students = Student::where('class_id', $class->id)->orderBy('name')->get();
 
+        // Ambil nilai existing (jika guru edit kembali)
         $existingGrades = [];
         foreach ($students as $student) {
             $record = GradeRecord::where('student_id', $student->id)
@@ -70,6 +85,9 @@ class GradeController extends Controller
         ]);
     }
 
+    /**
+     * Simpan Nilai Per Mapel
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -79,8 +97,10 @@ class GradeController extends Controller
 
         DB::transaction(function () use ($request) {
             foreach ($request->grades as $studentId => $score) {
+                // Skip jika nilai kosong
                 if ($score === null) continue;
 
+                // 1. Buat atau Ambil Record Rapor Utama
                 $record = GradeRecord::firstOrCreate(
                     [
                         'student_id' => $studentId,
@@ -93,6 +113,7 @@ class GradeController extends Controller
                     ]
                 );
 
+                // 2. Simpan Item Nilai (Mapel)
                 GradeItem::updateOrCreate(
                     [
                         'grade_record_id' => $record->id,
@@ -107,19 +128,238 @@ class GradeController extends Controller
             }
         });
 
-        return redirect()->route('grades.index')->with('success', 'Nilai berhasil disimpan!');
+        return redirect()->route('grades.index')->with('success', 'Nilai Mapel berhasil disimpan!');
     }
 
+
+    // =========================================================================
+    //  MODE 2: INPUT PER SISWA (Satu Siswa, Banyak Mapel)
+    // =========================================================================
+
+    /**
+     * Form Input Manual Per Siswa
+     */
+    public function createByStudent(Request $request)
+    {
+        $request->validate([
+            'class_id' => 'required',
+            'academic_year' => 'required',
+            'semester' => 'required',
+        ]);
+
+        $class = SchoolClass::findOrFail($request->class_id);
+        
+        // Ambil siswa sekelas untuk dropdown navigasi
+        $students = Student::where('class_id', $class->id)->orderBy('name')->get();
+
+        if ($students->isEmpty()) {
+            return redirect()->back()->with('error', 'Kelas ini belum memiliki siswa.');
+        }
+
+        // Tentukan siswa target (dari request atau default siswa pertama)
+        $targetStudentId = $request->student_id ?? $students->first()->id;
+        $student = $students->find($targetStudentId);
+
+        if (!$student) {
+             return redirect()->back()->with('error', 'Siswa tidak ditemukan.');
+        }
+
+        $subjects = Subject::orderBy('order')->get();
+
+        // Ambil nilai existing siswa tersebut
+        $existingGrades = [];
+        $record = GradeRecord::where('student_id', $student->id)
+                    ->where('academic_year', $request->academic_year)
+                    ->where('semester', $request->semester)
+                    ->first();
+
+        if ($record) {
+            foreach($record->items as $item) {
+                $existingGrades[$item->subject_id] = $item;
+            }
+        }
+
+        return view('grades.create-by-student', [
+            'class' => $class,
+            'student' => $student,
+            'students' => $students,
+            'subjects' => $subjects,
+            'existingGrades' => $existingGrades,
+            'semester' => $request->semester,
+            'academic_year' => $request->academic_year,
+        ]);
+    }
+
+    /**
+     * Simpan Nilai Per Siswa
+     */
+    public function storeByStudent(Request $request)
+    {
+        $request->validate([
+            'class_id' => 'required',
+            'student_id' => 'required',
+            'academic_year' => 'required',
+            'semester' => 'required',
+            'grades' => 'array', // [subject_id => score]
+        ]);
+
+        DB::transaction(function () use ($request) {
+            // 1. Buat Record Rapor
+            $record = GradeRecord::firstOrCreate(
+                [
+                    'student_id' => $request->student_id,
+                    'academic_year' => $request->academic_year,
+                    'semester' => $request->semester,
+                ],
+                [
+                    'class_name' => SchoolClass::find($request->class_id)->name,
+                    'report_date' => now(),
+                ]
+            );
+
+            // 2. Loop semua mapel
+            foreach ($request->grades as $subjectId => $score) {
+                if ($score === null || $score === '') continue;
+
+                GradeItem::updateOrCreate(
+                    [
+                        'grade_record_id' => $record->id,
+                        'subject_id' => $subjectId,
+                    ],
+                    [
+                        'score' => $score,
+                        'description' => $request->descriptions[$subjectId] ?? null,
+                        'predicate' => $this->calculatePredicate($score),
+                    ]
+                );
+            }
+        });
+
+        // Redirect kembali ke halaman input siswa yang sama
+        return redirect()
+            ->route('grades.create_by_student', [
+                'class_id' => $request->class_id,
+                'student_id' => $request->student_id,
+                'academic_year' => $request->academic_year,
+                'semester' => $request->semester
+            ])
+            ->with('success', 'Nilai untuk siswa ' . Student::find($request->student_id)->name . ' berhasil disimpan!');
+    }
+
+
+    // =========================================================================
+    //  FITUR IMPORT EXCEL & AJAX HELPER
+    // =========================================================================
+
+    /**
+     * [AJAX] Mengambil daftar siswa berdasarkan kelas (Untuk Dropdown Frontend)
+     */
+    public function getStudentsByClass($class_id)
+    {
+        $students = Student::where('class_id', $class_id)
+                           ->select('id', 'name', 'student_id')
+                           ->orderBy('name')
+                           ->get();
+        return response()->json($students);
+    }
+
+    /**
+     * Download Template Excel PER MAPEL
+     */
+    public function downloadTemplate()
+    {
+        $path = public_path('files/template_nilai_mapel.xlsx');
+        return file_exists($path) 
+            ? response()->download($path) 
+            : redirect()->back()->with('error', 'File template mapel belum tersedia di server.');
+    }
+
+    /**
+     * Download Template Excel PER SISWA
+     */
+    public function downloadStudentTemplate()
+    {
+        $path = public_path('files/template_nilai_siswa.xlsx');
+        return file_exists($path) 
+            ? response()->download($path) 
+            : redirect()->back()->with('error', 'File template siswa belum tersedia di server.');
+    }
+
+    /**
+     * Proses Import Excel PER MAPEL
+     */
+    public function importGrades(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls',
+            'class_id' => 'required',
+            'subject_id' => 'required',
+            'academic_year' => 'required',
+            'semester' => 'required',
+        ]);
+
+        try {
+            // Pastikan class GradesImport sudah dibuat di App\Imports
+            Excel::import(new GradesImport(
+                $request->class_id,
+                $request->subject_id,
+                $request->academic_year,
+                $request->semester
+            ), $request->file('file'));
+
+            return redirect()->route('grades.index')->with('success', 'Nilai per Mapel berhasil diimport!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Proses Import Excel PER SISWA
+     */
+    public function importStudentGrades(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls',
+            'class_id' => 'required',
+            'student_id' => 'required',
+            'academic_year' => 'required',
+            'semester' => 'required',
+        ]);
+
+        try {
+            // Pastikan class StudentGradesImport sudah dibuat di App\Imports
+            Excel::import(new StudentGradesImport(
+                $request->class_id,
+                $request->student_id,
+                $request->academic_year,
+                $request->semester
+            ), $request->file('file'));
+
+            return redirect()->route('grades.index')->with('success', 'Nilai per Siswa berhasil diimport!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
+        }
+    }
+
+
+    // =========================================================================
+    //  UTILITIES & REPORTING
+    // =========================================================================
+
+    /**
+     * Helper: Menghitung Predikat Nilai
+     */
     private function calculatePredicate($score)
     {
-        if ($score >= 90) return 'A';
-        if ($score >= 80) return 'B';
+        // Sesuaikan interval ini dengan kebijakan sekolah
+        if ($score >= 92) return 'A';
+        if ($score >= 83) return 'B';
         if ($score >= 75) return 'C';
         return 'D';
     }
 
     /**
-     * [BARU] Menampilkan Daftar Siswa per Kelas untuk Cetak Rapor
+     * Menampilkan Daftar Siswa untuk Cetak Rapor
      */
     public function listStudents(Request $request)
     {
@@ -132,7 +372,7 @@ class GradeController extends Controller
         $class = SchoolClass::findOrFail($request->class_id);
         $students = Student::where('class_id', $class->id)->orderBy('name')->get();
 
-        // Cek kelengkapan nilai per siswa (Opsional, untuk indikator)
+        // Hitung progress kelengkapan nilai
         $progress = [];
         foreach($students as $student) {
             $record = GradeRecord::where('student_id', $student->id)
@@ -140,7 +380,7 @@ class GradeController extends Controller
                         ->where('semester', $request->semester)
                         ->first();
             $count = $record ? $record->items()->count() : 0;
-            $progress[$student->id] = $count; // Jumlah mapel yang sudah dinilai
+            $progress[$student->id] = $count; 
         }
 
         return view('grades.list', [
@@ -153,11 +393,10 @@ class GradeController extends Controller
     }
 
     /**
-     * Halaman Cetak Rapor
+     * Halaman Detail/Preview Rapor Siswa
      */
     public function reportCard($student_id)
     {
-        // Ambil tahun/semester dari request atau default aktif
         $academic_year = request('year') ?? '2024/2025';
         $semester = request('semester') ?? '1';
 
@@ -169,6 +408,7 @@ class GradeController extends Controller
                     ->where('semester', $semester)
                     ->first();
 
+        // Ambil semua mapel, lalu map dengan nilai siswa jika ada
         $subjects = Subject::orderBy('order')->get()->map(function($subject) use ($record) {
             $grade = null;
             if ($record) {
