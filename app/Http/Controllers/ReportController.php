@@ -39,14 +39,14 @@ class ReportController extends Controller
     }
 
     /**
-     * 1. REKAP ABSENSI HARIAN (Masuk/Pulang)
+     * 1. REKAP ABSENSI HARIAN (Web View)
      */
     public function dailyReport(Request $request)
     {
         $dateStr = $request->input('date', Carbon::today()->toDateString());
         $selectedDate_db = Carbon::parse($dateStr); 
 
-        // Data statistik global
+        // Ambil Data Absensi
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
             ->whereDate('attendance_date', $selectedDate_db)
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
@@ -55,17 +55,24 @@ class ReportController extends Controller
         $attendancesHadirRaw = $attendances->whereIn('status', ['Hadir', 'Terlambat']);
         $attendancesLainRaw = $attendances->whereIn('status', ['Sakit', 'Izin', 'Alfa']);
 
+        // Hitung Statistik
         $hadirCount = $attendances->where('status', 'Hadir')->count();
         $terlambatCount = $attendances->where('status', 'Terlambat')->count();
         $sakitCount = $attendances->where('status', 'Sakit')->count();
         $izinCount = $attendances->where('status', 'Izin')->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
+        // Data Belum Absen + SORTING (Kelas -> Nama)
         $existingStudentIds = $attendances->pluck('student_id')->toArray();
-        $belumAbsenList = Student::with('schoolClass')
+        $belumAbsenListRaw = Student::with('schoolClass')
             ->whereNotIn('id', $existingStudentIds)
-            ->orderBy('name')
             ->get();
+            
+        // SORTING: Kelas dulu, baru Nama
+        $belumAbsenList = $belumAbsenListRaw->sortBy([
+            fn ($q) => $q->schoolClass->name ?? 'ZZZ', 
+            fn ($q) => $q->name                        
+        ])->values();
 
         // Mapping Data View
         $mappedHadir = $attendancesHadirRaw->map(function($item) {
@@ -82,9 +89,21 @@ class ReportController extends Controller
             return $item;
         });
 
-        // Pagination untuk View Web
-        $attendancesHadir = $this->paginate($mappedHadir, 20);
-        $attendancesLain = $this->paginate($mappedLain, 20);
+        // SORTING DATA HADIR (Kelas -> Nama)
+        $sortedHadir = $mappedHadir->sortBy([
+            fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
+            fn ($q) => $q->student->name
+        ])->values();
+
+        // SORTING DATA LAIN (Kelas -> Nama)
+        $sortedLain = $mappedLain->sortBy([
+            fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
+            fn ($q) => $q->student->name
+        ])->values();
+
+        // Pagination
+        $attendancesHadir = $this->paginate($sortedHadir, 20);
+        $attendancesLain = $this->paginate($sortedLain, 20);
         
         $attendancesHadir->appends($request->all());
         $attendancesLain->appends($request->all());
@@ -103,35 +122,42 @@ class ReportController extends Controller
     }
 
     /**
-     * FITUR BARU: CETAK LAPORAN HARIAN (Tanpa Pagination)
+     * 2. CETAK LAPORAN HARIAN (Print View)
      */
     public function printDaily(Request $request)
     {
         $dateStr = $request->input('date', Carbon::today()->toDateString());
         $selectedDate_db = Carbon::parse($dateStr); 
 
-        // Ambil SEMUA data tanpa pagination
+        // Ambil Data
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
             ->whereDate('attendance_date', $selectedDate_db)
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
-            ->orderBy('updated_at', 'desc') // Urutkan berdasarkan data terbaru masuk
             ->get();
 
-        // Grouping Data
-        $attendancesHadir = $attendances->whereIn('status', ['Hadir', 'Terlambat']);
-        $attendancesLain = $attendances->whereIn('status', ['Sakit', 'Izin', 'Alfa']);
+        // Grouping & SORTING (Kelas -> Nama)
+        $attendancesHadir = $attendances->whereIn('status', ['Hadir', 'Terlambat'])
+            ->sortBy([
+                fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
+                fn ($q) => $q->student->name
+            ])->values();
+
+        $attendancesLain = $attendances->whereIn('status', ['Sakit', 'Izin', 'Alfa'])
+            ->sortBy([
+                fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
+                fn ($q) => $q->student->name
+            ])->values();
         
-        // Data Belum Absen
+        // Data Belum Absen & SORTING
         $existingStudentIds = $attendances->pluck('student_id')->toArray();
-        
-        // [PERBAIKAN ERROR 42S22 DISINI]
-        // Sebelumnya: orderBy('school_class_id') -> Error karena kolom tidak ada
-        // Sekarang: orderBy('class_id') -> Menggunakan nama kolom standar Laravel
-        $belumAbsenList = Student::with('schoolClass')
+        $belumAbsenListRaw = Student::with('schoolClass')
             ->whereNotIn('id', $existingStudentIds)
-            ->orderBy('class_id') // GANTI INI: school_class_id -> class_id
-            ->orderBy('name')
             ->get();
+
+        $belumAbsenList = $belumAbsenListRaw->sortBy([
+            fn ($q) => $q->schoolClass->name ?? 'ZZZ',
+            fn ($q) => $q->name
+        ])->values();
 
         // Hitung Statistik
         $stats = [
@@ -153,7 +179,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 2. REKAP KEAGAMAAN (Dhuha / Dhuhur)
+     * 3. REKAP KEAGAMAAN (Web View)
      */
     public function religiousReport(Request $request)
     {
@@ -161,6 +187,7 @@ class ReportController extends Controller
         $selectedDate_db = Carbon::parse($dateStr);
         $selectedActivity = $request->input('activity', 'Dhuha'); 
 
+        // Ambil Data
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
             ->whereDate('attendance_date', $selectedDate_db)
             ->where('type', 'Keagamaan')
@@ -170,17 +197,25 @@ class ReportController extends Controller
         $attendancesHadirRaw = $attendances->where('status', 'Hadir');
         $attendancesUzurRaw = $attendances->whereIn('status', ["Uzur Syar'i", "Alfa", "Izin", "Sakit"]);
 
+        // Hitung Statistik
         $hadirCount = $attendancesHadirRaw->count();
         $izinUzurCount = $attendances->whereIn('status', ["Uzur Syar'i", "Izin", "Sakit"])->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
+        // Data Belum Absen + SORTING (Kelas -> Nama)
         $existingIds = $attendances->pluck('student_id')->toArray();
-        $belumAbsenList = Student::with('schoolClass')
+        $belumAbsenListRaw = Student::with('schoolClass')
             ->whereNotIn('id', $existingIds)
-            ->orderBy('name')
             ->get();
+            
+        $belumAbsenList = $belumAbsenListRaw->sortBy([
+            fn ($q) => $q->schoolClass->name ?? 'ZZZ',
+            fn ($q) => $q->name
+        ])->values();
+        
         $belumAbsenCount = $belumAbsenList->count();
 
+        // Mapping
         $mappedHadir = $attendancesHadirRaw->map(function($item) {
             $item->status_final = $item->status;
             $item->notes_final = $item->notes;
@@ -193,8 +228,20 @@ class ReportController extends Controller
             return $item;
         });
 
-        $attendancesHadir = $this->paginate($mappedHadir, 20);
-        $attendancesUzur = $this->paginate($mappedUzur, 20);
+        // SORTING DATA (Kelas -> Nama)
+        $sortedHadir = $mappedHadir->sortBy([
+            fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
+            fn ($q) => $q->student->name
+        ])->values();
+
+        $sortedUzur = $mappedUzur->sortBy([
+            fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
+            fn ($q) => $q->student->name
+        ])->values();
+
+        // Pagination
+        $attendancesHadir = $this->paginate($sortedHadir, 20);
+        $attendancesUzur = $this->paginate($sortedUzur, 20);
 
         $attendancesHadir->appends($request->all());
         $attendancesUzur->appends($request->all());
@@ -213,7 +260,81 @@ class ReportController extends Controller
     }
 
     /**
-     * 3. MONITORING JURNAL MENGAJAR
+     * 4. CETAK LAPORAN KEAGAMAAN (Print View)
+     */
+    public function printReligious(Request $request)
+    {
+        $dateStr = $request->input('date', Carbon::today()->toDateString());
+        $selectedDate_db = Carbon::parse($dateStr);
+        $selectedActivity = $request->input('activity', 'Dhuha'); 
+
+        // Ambil Data
+        $attendances = AttendanceSiswa::with(['student.schoolClass'])
+            ->whereDate('attendance_date', $selectedDate_db)
+            ->where('type', 'Keagamaan')
+            ->where('activity', $selectedActivity)
+            ->get();
+
+        $attendancesHadirRaw = $attendances->where('status', 'Hadir');
+        $attendancesUzurRaw = $attendances->whereIn('status', ["Uzur Syar'i", "Alfa", "Izin", "Sakit"]);
+
+        // Mapping
+        $attendancesHadirMap = $attendancesHadirRaw->map(function($item) {
+            $item->status_final = $item->status;
+            $item->notes_final = $item->notes;
+            return $item;
+        });
+        
+        $attendancesUzurMap = $attendancesUzurRaw->map(function($item) {
+            $item->status_final = $item->status;
+            $item->notes_final = $item->notes;
+            return $item;
+        });
+
+        // SORTING (Kelas -> Nama)
+        $attendancesHadir = $attendancesHadirMap->sortBy([
+            fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
+            fn ($q) => $q->student->name
+        ])->values();
+
+        $attendancesUzur = $attendancesUzurMap->sortBy([
+            fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
+            fn ($q) => $q->student->name
+        ])->values();
+
+        // Statistik
+        $hadirCount = $attendancesHadirRaw->count();
+        $izinUzurCount = $attendances->whereIn('status', ["Uzur Syar'i", "Izin", "Sakit"])->count();
+        $alfaCount = $attendances->where('status', 'Alfa')->count();
+
+        // Data Belum Absen + Sorting
+        $existingIds = $attendances->pluck('student_id')->toArray();
+        $belumAbsenListRaw = Student::with('schoolClass')
+            ->whereNotIn('id', $existingIds)
+            ->get();
+
+        $belumAbsenList = $belumAbsenListRaw->sortBy([
+            fn ($q) => $q->schoolClass->name ?? 'ZZZ',
+            fn ($q) => $q->name
+        ])->values();
+
+        $belumAbsenCount = $belumAbsenList->count();
+
+        return view('reports.print_religious', compact(
+            'selectedDate_db',
+            'selectedActivity',
+            'attendancesHadir',
+            'attendancesUzur',
+            'belumAbsenList',
+            'hadirCount',
+            'izinUzurCount',
+            'alfaCount',
+            'belumAbsenCount'
+        ));
+    }
+
+    /**
+     * 5. MONITORING JURNAL MENGAJAR
      */
     public function teachingJournal(Request $request)
     {
@@ -263,7 +384,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 4. PROSES BULK ALPHA (Tandai Masal)
+     * 6. PROSES BULK ALPHA (Tandai Masal)
      */
     public function bulkAlpha(Request $request)
     {
@@ -325,7 +446,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 5. SIMPAN MANUAL
+     * 7. SIMPAN MANUAL
      */
     public function storeManualEntry(Request $request)
     {
@@ -355,7 +476,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 6. UPDATE DATA
+     * 8. UPDATE DATA
      */
     public function updateAttendance(Request $request, $id)
     {
@@ -370,7 +491,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 7. HAPUS DATA
+     * 9. HAPUS DATA KEAGAMAAN
      */
     public function destroyReligious(Request $request)
     {

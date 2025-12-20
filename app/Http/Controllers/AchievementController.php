@@ -7,19 +7,16 @@ use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Jobs\AddAchievementPointJob; 
+use Barryvdh\DomPDF\Facade\Pdf; // Pastikan import ini ada
 
 class AchievementController extends Controller
 {
     public function index(Request $request)
     {
-        // === PERBAIKAN SORTING SISWA ===
-        // 1. Ambil semua siswa beserta kelasnya
-        // 2. Lakukan sorting koleksi (PHP) agar lebih fleksibel
+        // === PERBAIKAN SORTING SISWA (Logic Asli Anda) ===
         $students = Student::with('schoolClass')
             ->get()
             ->sortBy(function ($student) {
-                // Kunci pengurutan: Nama Kelas + Nama Siswa
-                // Contoh: "7A Ahmad", "7A Budi", "7B Caca"
                 $className = $student->schoolClass->name ?? 'ZZZ'; 
                 return $className . $student->name;
             });
@@ -31,7 +28,8 @@ class AchievementController extends Controller
                   ->orWhere('name_manual', 'like', '%'.$request->search.'%');
             })
             ->orderBy('date', 'desc')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString(); 
 
         return view('achievements.index', compact('students', 'achievements'));
     }
@@ -53,9 +51,12 @@ class AchievementController extends Controller
         if ($request->type === 'Siswa') {
             $request->validate(['student_id' => 'required|exists:students,id']);
             $data['student_id'] = $request->student_id;
+            $student = Student::find($request->student_id);
+            $data['achiever_name'] = $student->name;
         } else {
             $request->validate(['name_manual' => 'required|string']);
             $data['name_manual'] = $request->name_manual;
+            $data['achiever_name'] = $request->name_manual; 
         }
 
         // Upload Foto
@@ -76,12 +77,39 @@ class AchievementController extends Controller
 
     public function destroy(Achievement $achievement)
     {
-        // Hapus foto dari storage jika ada
         if ($achievement->photo_path && Storage::disk('public')->exists($achievement->photo_path)) {
             Storage::disk('public')->delete($achievement->photo_path);
         }
         
         $achievement->delete();
         return redirect()->route('achievements.index')->with('success', 'Data prestasi dihapus.');
+    }
+
+    /**
+     * Export data ke PDF (Menggantikan CSV).
+     */
+    public function export(Request $request)
+    {
+        // Gunakan logic query yang sama persis dengan index()
+        $query = Achievement::with(['student', 'student.schoolClass']);
+
+        if ($request->has('search') && $request->search != '') {
+            $query->where(function($q) use ($request) {
+                $q->where('title', 'like', '%'.$request->search.'%')
+                  ->orWhere('name_manual', 'like', '%'.$request->search.'%');
+            });
+        }
+
+        $achievements = $query->orderBy('date', 'desc')->get();
+        
+        // Generate PDF
+        $pdf = Pdf::loadView('achievements.pdf_export', compact('achievements'));
+        
+        // Atur ukuran kertas (A4 Landscape agar muat tabel lebar)
+        $pdf->setPaper('a4', 'landscape');
+
+        // Stream: Membuka di browser (tab baru)
+        // Jika ingin langsung download, ganti 'stream' dengan 'download'
+        return $pdf->stream('Laporan_Prestasi_' . date('Y-m-d') . '.pdf');
     }
 }

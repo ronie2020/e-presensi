@@ -186,6 +186,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('classes', SchoolClassController::class);
     Route::resource('users', UserController::class);
     Route::resource('subjects', SubjectController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::get('/achievements/export', [AchievementController::class, 'export'])->name('achievements.export');
     Route::resource('achievements', AchievementController::class);
     Route::resource('school-activities', SchoolActivityController::class);
 
@@ -290,6 +291,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/attendance/{attendance}/edit', [ReportController::class, 'editAttendance'])->name('reports.edit');
     Route::put('/reports/attendance/{attendance}', [ReportController::class, 'updateAttendance'])->name('reports.update');
     Route::delete('/reports/attendance/{attendance}', [ReportController::class, 'deleteAttendance'])->name('reports.delete');
+    Route::get('/reports/religious/print', [ReportController::class, 'printReligious'])->name('reports.printReligious');
     Route::get('/reports/religious', [ReportController::class, 'religiousReport'])->name('reports.religious');
     Route::delete('/reports/religious', [ReportController::class, 'destroyReligious'])->name('reports.destroyReligious');
     Route::get('/reports/export-religious', [ReportController::class, 'exportReligious'])->name('reports.exportReligious');

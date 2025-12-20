@@ -3,30 +3,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
 
-    {{-- TAMBAHAN: CSS FIX UNTUK PRINT DI HALAMAN INI --}}
-    <style>
-        @media print {
-            /* Sembunyikan Navigasi & Sidebar */
-            nav, header, aside, .sidebar, .no-print { display: none !important; }
-            
-            /* Reset Layout Konten */
-            body, main, #app, .min-h-screen { 
-                height: auto !important; 
-                width: 100% !important; 
-                overflow: visible !important; 
-                margin: 0 !important; 
-                padding: 0 !important; 
-                background: white !important;
-            }
-
-            /* Pastikan Semua Tab Muncul (Opsional, atau biarkan hanya tab aktif) */
-            /* [x-show] { display: block !important; } */
-
-            /* Perbaikan Tabel */
-            table { width: 100% !important; border-collapse: collapse !important; }
-            th, td { color: black !important; }
-        }
-    </style>
+    {{-- CSS FIX DIHAPUS SAJA KARENA SUDAH PAKAI HALAMAN PRINT KHUSUS --}}
 
     {{-- FIX: Ambil tab aktif dari URL agar tidak reset --}}
     <div class="py-6 sm:py-8" x-data="{ 
@@ -62,11 +39,11 @@
                         </a>
                     </div>
 
-                    {{-- Tombol Cetak --}}
-                    <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 shadow-lg shadow-indigo-200 flex items-center gap-2">
+                    {{-- Tombol Cetak (DIPERBARUI MENGGUNAKAN LINK KE HALAMAN CETAK) --}}
+                    <a href="{{ route('reports.printReligious', request()->all()) }}" target="_blank" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 shadow-lg shadow-indigo-200 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                        <span class="hidden sm:inline">Cetak</span>
-                    </button>
+                        <span class="hidden sm:inline">Cetak Laporan</span>
+                    </a>
                 </div>
             </div>
 
@@ -124,21 +101,6 @@
                     </button>
                 </form>
             </div>
-        </div>
-
-        {{-- JUDUL KHUSUS CETAK --}}
-        <div class="hidden print-only mb-6 text-center border-b-2 border-black pb-4">
-            <h1 class="text-2xl font-black text-black uppercase">Laporan Shalat {{ $selectedActivity }}</h1>
-            <p class="text-sm text-black">
-                Periode: 
-                @if(request('report_type') == 'weekly')
-                    Mingguan ({{ request('week') }})
-                @elseif(request('report_type') == 'monthly')
-                    Bulanan ({{ request('month') }})
-                @else
-                    {{ $selectedDate_db->translatedFormat('d F Y') }}
-                @endif
-            </p>
         </div>
 
         @if (session('success'))
@@ -242,7 +204,7 @@
                     @endif
                 </div>
 
-                {{-- TAB 2: BELUM ABSEN (TETAP SAMA) --}}
+                {{-- TAB 2: BELUM ABSEN --}}
                 <div x-show="activeTab === 'belum'" style="display: none;" class="w-full print:block print:mt-8">
                     <div class="print:mb-4 print:font-bold print:text-lg hidden print:block border-b border-black pb-2">Daftar Belum Absen</div>
 
@@ -304,7 +266,7 @@
                     </div>
                 </div>
 
-                {{-- TAB 3: UZUR / IZIN / ALFA (DATA DARI $attendancesUzur) --}}
+                {{-- TAB 3: UZUR / IZIN / ALFA --}}
                 <div x-show="activeTab === 'uzur'" style="display: none;" class="w-full print:block print:mt-8">
                     <div class="print:mb-4 print:font-bold print:text-lg hidden print:block border-b border-black pb-2">Daftar Uzur / Izin / Alfa</div>
                     <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
@@ -354,7 +316,7 @@
     <div class="hidden print-only mt-8 text-right">
         <p class="text-sm text-black">Dicetak pada: {{ now()->format('d F Y H:i') }}</p>
         <p class="text-sm text-black mt-8">(_______________________)</p>
-        <p class="text-xs text-black">Guru Pendamping</p>
+        <p class="text-xs text-black">Koordinator Keagamaan</p>
     </div>
 
     {{-- MODAL & SCRIPTS --}}

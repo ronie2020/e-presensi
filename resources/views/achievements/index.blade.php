@@ -32,7 +32,7 @@
 
     {{-- Flash Message --}}
     @if (session('success'))
-        <div x-data="{ show: true }" x-show="show" class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
+        <div x-data="{ show: true }" x-show="show" class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm animate-fade-in-down">
             <div class="flex items-center gap-3">
                 <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
                     <i class="ph-bold ph-check"></i>
@@ -57,11 +57,12 @@
                 </div>
 
                 <div class="p-6">
-                    {{-- PERUBAHAN: x-data langsung didefinisikan di sini agar pasti jalan --}}
-                    <form action="{{ route('achievements.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5" x-data="{ type: 'Siswa', imgPreview: null }">
+                    {{-- Form Input --}}
+                    <form action="{{ route('achievements.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5" 
+                          x-data="{ type: '{{ old('type', 'Siswa') }}', imgPreview: null }">
                         @csrf
                         
-                        {{-- Tipe Juara Switcher (PERBAIKAN: Tombol Manual agar lebih stabil) --}}
+                        {{-- Tipe Juara Switcher --}}
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Siapa yang Juara?</label>
                             <div class="grid grid-cols-3 gap-1 p-1 bg-slate-50 rounded-xl border border-slate-200">
@@ -84,49 +85,66 @@
                                     Sekolah
                                 </button>
                             </div>
-                            {{-- Input Hidden untuk mengirim data ke Controller --}}
                             <input type="hidden" name="type" x-model="type">
                         </div>
 
-                        {{-- Input Nama Siswa (Muncul jika type == Siswa) --}}
+                        {{-- Input Nama Siswa --}}
                         <div x-show="type === 'Siswa'" x-transition>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Pilih Siswa</label>
                             <div class="relative">
-                                <select name="student_id" class="w-full pl-3 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white transition-all cursor-pointer appearance-none">
+                                <select name="student_id" 
+                                    class="w-full pl-3 pr-10 py-2.5 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all cursor-pointer appearance-none
+                                    @error('student_id') border-red-500 bg-red-50 text-red-900 @else border-slate-200 @enderror">
                                     <option value="">-- Cari Nama Siswa --</option>
                                     @foreach($students as $student)
-                                        <option value="{{ $student->id }}">{{ $student->name }} ({{ $student->schoolClass->name ?? '-' }})</option>
+                                        <option value="{{ $student->id }}" {{ old('student_id') == $student->id ? 'selected' : '' }}>
+                                            {{ $student->name }} ({{ $student->schoolClass->name ?? '-' }})
+                                        </option>
                                     @endforeach
                                 </select>
                                 <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
                                     <i class="ph-bold ph-caret-down text-xs"></i>
                                 </div>
                             </div>
+                            @error('student_id')
+                                <p class="text-xs text-red-500 mt-1 font-bold">{{ $message }}</p>
+                            @enderror
                         </div>
                         
-                        {{-- Input Manual (Muncul jika type != Siswa) --}}
+                        {{-- Input Manual --}}
                         <div x-show="type !== 'Siswa'" x-transition style="display: none;">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nama Guru / Tim</label>
-                            <input type="text" name="name_manual" placeholder="Contoh: Tim Robotik Guru" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white transition-all">
+                            <input type="text" name="name_manual" 
+                                value="{{ old('name_manual') }}"
+                                placeholder="Contoh: Tim Robotik Guru" 
+                                class="w-full px-3 py-2.5 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all
+                                @error('name_manual') border-red-500 bg-red-50 @else border-slate-200 @enderror">
+                            @error('name_manual')
+                                <p class="text-xs text-red-500 mt-1 font-bold">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         {{-- Judul & Kategori --}}
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Judul Kejuaraan</label>
-                            <input type="text" name="title" required placeholder="Contoh: Juara 1 Lomba Web Design" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white transition-all">
+                            <input type="text" name="title" required 
+                                value="{{ old('title') }}"
+                                placeholder="Contoh: Juara 1 Lomba Web Design" 
+                                class="w-full px-3 py-2.5 bg-slate-50 border rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all
+                                @error('title') border-red-500 bg-red-50 @else border-slate-200 @enderror">
+                            @error('title')
+                                <p class="text-xs text-red-500 mt-1 font-bold">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tingkat</label>
                                 <div class="relative">
-                                    <select name="level" class="w-full pl-3 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white transition-all appearance-none">
-                                        <option value="Sekolah">Sekolah</option>
-                                        <option value="Kecamatan">Kecamatan</option>
-                                        <option value="Kabupaten">Kabupaten</option>
-                                        <option value="Provinsi">Provinsi</option>
-                                        <option value="Nasional">Nasional</option>
-                                        <option value="Internasional">Internasional</option>
+                                    <select name="level" class="w-full pl-3 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all appearance-none">
+                                        @foreach(['Sekolah', 'Kecamatan', 'Kabupaten', 'Provinsi', 'Nasional', 'Internasional'] as $lvl)
+                                            <option value="{{ $lvl }}" {{ old('level') == $lvl ? 'selected' : '' }}>{{ $lvl }}</option>
+                                        @endforeach
                                     </select>
                                     <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
                                         <i class="ph-bold ph-caret-down text-xs"></i>
@@ -135,7 +153,9 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Tanggal</label>
-                                <input type="date" name="date" value="{{ date('Y-m-d') }}" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white transition-all text-slate-600">
+                                <input type="date" name="date" 
+                                    value="{{ old('date', date('Y-m-d')) }}"
+                                    class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all text-slate-600">
                             </div>
                         </div>
 
@@ -148,11 +168,12 @@
                                     @change="imgPreview = URL.createObjectURL($event.target.files[0])"
                                     class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                                 
-                                <div class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center transition-all group-hover:border-yellow-400 group-hover:bg-yellow-50"
+                                <div class="border-2 border-dashed rounded-xl p-4 text-center transition-all group-hover:border-yellow-400 group-hover:bg-yellow-50
+                                     {{ $errors->has('photo') ? 'border-red-400 bg-red-50' : 'border-slate-200' }}"
                                      :class="{'border-yellow-400 bg-yellow-50': imgPreview}">
                                     
                                     <div x-show="!imgPreview" class="space-y-1">
-                                        <i class="ph-duotone ph-cloud-arrow-up text-2xl text-slate-300 group-hover:text-yellow-500 transition-colors"></i>
+                                        <i class="ph-duotone ph-cloud-arrow-up text-2xl group-hover:text-yellow-500 transition-colors {{ $errors->has('photo') ? 'text-red-400' : 'text-slate-300' }}"></i>
                                         <p class="text-xs text-slate-500">Klik / geser foto ke sini</p>
                                     </div>
 
@@ -164,11 +185,18 @@
                                     </div>
                                 </div>
                             </div>
+                            @error('photo')
+                                <p class="text-xs text-red-500 mt-1 font-bold">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Link Video (Opsional)</label>
-                            <input type="url" name="video_link" placeholder="https://youtube.com/..." class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:bg-white transition-all">
+                            <input type="url" name="video_link" 
+                                value="{{ old('video_link') }}"
+                                placeholder="https://youtube.com/..." 
+                                class="w-full px-3 py-2.5 bg-slate-50 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all
+                                @error('video_link') border-red-500 bg-red-50 @else border-slate-200 @enderror">
                         </div>
 
                         <button type="submit" class="w-full py-3.5 px-4 bg-gradient-to-r from-yellow-500 to-amber-500 text-white font-bold rounded-xl hover:from-yellow-600 hover:to-amber-600 transition-all shadow-lg shadow-yellow-500/30 flex items-center justify-center gap-2 transform active:scale-[0.98]">
@@ -185,15 +213,15 @@
             
             {{-- Filter Bar --}}
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row gap-4 justify-between items-center">
-                <div class="relative w-full sm:w-64">
+                <form method="GET" class="relative w-full sm:w-64">
                     <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" placeholder="Cari nama / juara..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all">
-                </div>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama / juara..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all">
+                </form>
                 
-                {{-- Tombol Export --}}
-                <button class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition">
+                {{-- Tombol Export (AKTIF) --}}
+                <a href="{{ route('achievements.export', request()->all()) }}" target="_blank" class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition">
                     <i class="ph-bold ph-export"></i> Export Excel
-                </button>
+                </a>
             </div>
 
             {{-- Table Area --}}
@@ -219,7 +247,7 @@
                                     <td class="py-4 px-6">
                                         <div class="flex items-center gap-3">
                                             {{-- Avatar Logic --}}
-                                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shrink-0
+                                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ring-2 ring-white shadow-sm
                                                 {{ $item->type == 'Siswa' ? 'bg-indigo-100 text-indigo-600' : ($item->type == 'Guru' ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600') }}">
                                                 @if($item->type == 'Siswa')
                                                     {{ substr($item->achiever_name, 0, 2) }}
@@ -269,7 +297,7 @@
                             @empty
                                 <tr>
                                     <td colspan="5" class="py-12 text-center">
-                                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4">
+                                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4 animate-bounce">
                                             <i class="ph-duotone ph-trophy text-3xl text-slate-300"></i>
                                         </div>
                                         <h3 class="text-slate-800 font-bold">Belum ada data prestasi</h3>

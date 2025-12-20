@@ -5,8 +5,10 @@
     
     <!-- Background Accent (Hiasan) -->
     <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-    <div class="absolute bottom-0 w-full text-center py-4 text-gray-600 text-xs">
-        Sistem Absensi Terpadu &copy; {{ date('Y') }} SMP Negeri 3 Lakbok @Ri...
+    
+    <!-- Footer / Copyright (Diperbaiki) -->
+    <div class="absolute bottom-0 w-full text-center py-4 text-gray-600 text-xs z-10">
+        Sistem Absensi Terpadu &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. All Rights Reserved.
     </div>
 
     <div class="w-full max-w-3xl mx-auto text-center p-8 z-10">
@@ -59,7 +61,7 @@
 
         </div>
         
-        <!-- Tombol Kembali (Diberi z-index tinggi agar tidak tertutup) -->
+        <!-- Tombol Kembali -->
         <div class="mt-8 relative z-50">
             <a href="{{ route('landing') }}" class="inline-flex items-center text-sm text-gray-500 hover:text-white transition-colors group px-4 py-2 rounded-lg hover:bg-gray-800">
                 <svg class="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -89,11 +91,25 @@
         const csrfToken = '{{ csrf_token() }}';
         const processUrl = '{{ route('kiosk.process') }}';
 
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        // Inisialisasi Audio Context
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioContext();
         let isProcessing = false;
+
+        // --- 0. AUDIO UNLOCKER (PENTING UNTUK BROWSER MODERN) ---
+        // Browser memblokir audio sampai user berinteraksi. Kita 'pancing' resume saat ada interaksi apapun.
+        function unlockAudio() {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }
+        document.body.addEventListener('click', unlockAudio);
+        document.body.addEventListener('keydown', unlockAudio); // Scanner dianggap keyboard, ini akan memicu audio resume
+        document.body.addEventListener('touchstart', unlockAudio);
 
         // --- 1. FUNGSI AUDIO BEEP ---
         function playBeep(type) {
+            // Pastikan context aktif sebelum mainkan suara
             if (audioContext.state === 'suspended') audioContext.resume();
             
             const oscillator = audioContext.createOscillator();
@@ -127,6 +143,7 @@
             clockElement.textContent = now.toLocaleTimeString('id-ID', { hour12: false });
             dateElement.textContent = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
+            // Refresh halaman otomatis setiap jam 12 malam untuk reset cache/memory
             if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0) {
                 window.location.reload();
             }
@@ -135,40 +152,34 @@
         updateTime();
 
 
-        // --- 3. EVENT LISTENER SCANNER (DIPERBAIKI) ---
+        // --- 3. EVENT LISTENER SCANNER ---
         
         function focusInput() {
             if (!isProcessing) scanInput.focus();
         }
         
-        // Event click document: Cek dulu apakah yang diklik itu Link atau Button
+        // Logic Focus Trap agar scanner selalu aktif
         document.addEventListener('click', function(e) {
-            // JIKA yang diklik adalah <a> (link) atau <button>, JANGAN paksa fokus ke scanner
+            // Jika klik pada link/button, biarkan. Jika klik area kosong, fokuskan ke scanner
             if (e.target.closest('a') || e.target.closest('button')) {
                 return; 
             }
-            // Selain itu, kembalikan fokus ke scanner
             focusInput();
         });
         
-        // Jika input kehilangan fokus (blur), cek apakah fokus pindah ke elemen lain yang valid
         scanInput.addEventListener('blur', () => {
             setTimeout(() => {
-                // Cek elemen apa yang sedang aktif sekarang
                 const activeEl = document.activeElement;
-                
-                // Jika fokusnya hilang ke body (klik kosong) atau null, kembalikan ke scanner.
-                // TAPI jika fokusnya ada di Link/Button, biarkan saja.
                 if (activeEl === document.body || !activeEl) {
                     focusInput();
                 }
-            }, 10);
+            }, 50); // Timeout sedikit diperlambat agar lebih toleran
         });
 
-        // Listener Utama
+        // Listener Input dari Scanner
         scanInput.addEventListener('change', function(e) {
             const scanData = e.target.value.trim();
-            e.target.value = ''; 
+            e.target.value = ''; // Langsung bersihkan input
 
             if (!scanData || isProcessing) return;
 
@@ -179,7 +190,7 @@
         // --- 4. LOGIKA PEMROSESAN DATA ---
         async function processScan(data) {
             isProcessing = true;
-            scanInput.blur();
+            scanInput.blur(); // Hilangkan fokus agar user tidak scan double saat loading
             showUIState('loading');
 
             try {
@@ -208,13 +219,23 @@
             } catch (error) {
                 console.error('Fetch Error:', error);
                 playBeep('error');
-                showResultUI('error', 'Kesalahan Sistem', 'Gagal menghubungi server.');
+                
+                // Cek status koneksi internet
+                let errorTitle = 'Kesalahan Sistem';
+                let errorDesc = 'Gagal menghubungi server.';
+                
+                if (!navigator.onLine) {
+                    errorTitle = 'Koneksi Terputus';
+                    errorDesc = 'Mohon periksa koneksi internet / WiFi.';
+                }
+
+                showResultUI('error', errorTitle, errorDesc);
             } finally {
                 setTimeout(() => {
                     showUIState('standby');
                     isProcessing = false;
-                    scanInput.focus();
-                }, 3000);
+                    scanInput.focus(); // Kembalikan fokus ke scanner
+                }, 3000); // Tampilkan hasil selama 3 detik
             }
         }
 
@@ -227,6 +248,7 @@
             stateResult.classList.add('hidden');
             stateResult.classList.remove('flex');
             
+            // Reset style border
             statusBox.className = "w-full h-64 bg-gray-800 rounded-3xl p-8 border-2 border-dashed border-gray-600 flex flex-col items-center justify-center transition-all duration-300 relative overflow-hidden";
 
             if (state === 'standby') {
@@ -254,7 +276,7 @@
 
             stateResult.innerHTML = `
                 ${icon}
-                <h2 class="text-3xl font-black text-white mb-2 text-center leading-none">${title}</h2>
+                <h2 class="text-3xl font-black text-white mb-2 text-center leading-none tracking-tight">${title}</h2>
                 <p class="text-xl text-white/90 font-medium text-center">${message}</p>
             `;
         }
