@@ -11,10 +11,14 @@ use App\Models\AcademicYear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-// Import Library Excel
+// Library Excel
 use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\GradesImport;         // Class Import untuk Per Mapel (Harus dibuat)
-use App\Imports\StudentGradesImport;  // Class Import untuk Per Siswa (Harus dibuat)
+
+// Import & Export Classes (Pastikan file-file ini sudah dibuat di folder App/Imports dan App/Exports)
+use App\Imports\GradesImport;         
+use App\Imports\StudentGradesImport;  
+use App\Exports\TemplateMapelExport;   
+use App\Exports\TemplateStudentExport; 
 
 class GradeController extends Controller
 {
@@ -264,25 +268,19 @@ class GradeController extends Controller
     }
 
     /**
-     * Download Template Excel PER MAPEL
+     * Download Template Excel PER MAPEL (Versi Otomatis Generate)
      */
     public function downloadTemplate()
     {
-        $path = public_path('files/template_nilai_mapel.xlsx');
-        return file_exists($path) 
-            ? response()->download($path) 
-            : redirect()->back()->with('error', 'File template mapel belum tersedia di server.');
+        return Excel::download(new TemplateMapelExport, 'template_nilai_mapel.xlsx');
     }
 
     /**
-     * Download Template Excel PER SISWA
+     * Download Template Excel PER SISWA (Versi Otomatis Generate)
      */
     public function downloadStudentTemplate()
     {
-        $path = public_path('files/template_nilai_siswa.xlsx');
-        return file_exists($path) 
-            ? response()->download($path) 
-            : redirect()->back()->with('error', 'File template siswa belum tersedia di server.');
+        return Excel::download(new TemplateStudentExport, 'template_nilai_siswa.xlsx');
     }
 
     /**
@@ -299,7 +297,7 @@ class GradeController extends Controller
         ]);
 
         try {
-            // Pastikan class GradesImport sudah dibuat di App\Imports
+            // Menggunakan GradesImport
             Excel::import(new GradesImport(
                 $request->class_id,
                 $request->subject_id,
@@ -307,7 +305,7 @@ class GradeController extends Controller
                 $request->semester
             ), $request->file('file'));
 
-            return redirect()->route('grades.index')->with('success', 'Nilai per Mapel berhasil diimport!');
+            return redirect()->route('grades.index')->with('success', 'Nilai Mapel berhasil diimport!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
         }
@@ -327,7 +325,7 @@ class GradeController extends Controller
         ]);
 
         try {
-            // Pastikan class StudentGradesImport sudah dibuat di App\Imports
+            // Menggunakan StudentGradesImport
             Excel::import(new StudentGradesImport(
                 $request->class_id,
                 $request->student_id,
@@ -335,7 +333,7 @@ class GradeController extends Controller
                 $request->semester
             ), $request->file('file'));
 
-            return redirect()->route('grades.index')->with('success', 'Nilai per Siswa berhasil diimport!');
+            return redirect()->route('grades.index')->with('success', 'Nilai Siswa berhasil diimport!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
         }
