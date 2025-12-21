@@ -5,13 +5,8 @@
                 {{ __('Monitoring Live') }}
             </h2>
             <div class="flex items-center gap-2 md:gap-3">
-                <!-- Auto Refresh -->
-                <div x-data="{ count: 30 }" x-init="setInterval(() => { count > 0 ? count-- : location.reload() }, 1000)" 
-                     class="text-[10px] md:text-xs font-bold text-slate-400 bg-white px-2 py-1 md:px-3 md:py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-1">
-                    <i class="ph-bold ph-arrows-clockwise animate-spin-slow text-blue-500"></i>
-                    <span class="hidden md:inline">Auto-refresh:</span> 
-                    <span x-text="count" class="font-mono text-slate-600">30</span>s
-                </div>
+                <!-- Auto Refresh Logic Diperbaiki -->
+                <!-- x-data dipindah ke wrapper utama agar state 'search' bisa dibaca oleh timer -->
                 <a href="{{ route('cbt.index') }}" class="text-xs md:text-sm font-bold text-slate-500 hover:text-slate-800 transition px-3 py-1.5 bg-slate-100 rounded-lg hover:bg-slate-200">
                     &larr; Kembali
                 </a>
@@ -19,8 +14,52 @@
         </div>
     </x-slot>
 
-    <div class="py-6 md:py-12">
+    <!-- WRAPPER UTAMA DENGAN STATE GLOBAL -->
+    <div class="py-6 md:py-12" 
+         x-data="{ 
+            search: '', 
+            count: 30,
+            isPaused: false,
+            init() {
+                setInterval(() => {
+                    // Hanya hitung mundur jika search kosong (Guru tidak sedang mencari)
+                    if (this.search === '') {
+                        if (this.count > 0) {
+                            this.count--;
+                        } else {
+                            location.reload();
+                        }
+                        this.isPaused = false;
+                    } else {
+                        this.isPaused = true;
+                        this.count = 30; // Reset counter saat mengetik
+                    }
+                }, 1000);
+            }
+         }">
+         
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+
+            <!-- Indikator Refresh (Dipindah ke sini agar terlihat jelas) -->
+            <div class="flex justify-end">
+                <div class="text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-lg border shadow-sm flex items-center gap-2 transition-colors duration-300"
+                     :class="isPaused ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-white text-slate-400 border-slate-200'">
+                    
+                    <template x-if="!isPaused">
+                        <div class="flex items-center gap-1">
+                            <i class="ph-bold ph-arrows-clockwise animate-spin-slow text-blue-500"></i>
+                            <span>Refresh dalam: <span x-text="count" class="font-mono text-slate-700"></span>s</span>
+                        </div>
+                    </template>
+                    
+                    <template x-if="isPaused">
+                        <div class="flex items-center gap-1">
+                            <i class="ph-fill ph-pause-circle text-amber-500"></i>
+                            <span>Auto-refresh dipause (Sedang mencari...)</span>
+                        </div>
+                    </template>
+                </div>
+            </div>
 
             @if (session('success'))
                 <div class="bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-3 rounded-xl shadow-sm flex items-center gap-3">
@@ -63,13 +102,14 @@
             </div>
 
             <!-- TABEL PESERTA -->
-            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden" x-data="{ search: '' }">
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
                     <h4 class="font-bold text-slate-700 flex items-center gap-2">
                         <i class="ph-fill ph-users-three text-blue-500"></i> Daftar Peserta ({{ $stats['total_students'] }})
                     </h4>
                     <div class="relative w-full md:w-64">
                         <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <!-- x-model terhubung ke parent div -->
                         <input type="text" x-model="search" placeholder="Cari nama siswa..." class="w-full pl-9 pr-4 py-2 text-sm border-slate-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm">
                     </div>
                 </div>
@@ -110,7 +150,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-center font-mono text-xs">{{ $student->start_time ?? '-' }}</td>
                                 <td class="px-6 py-4 text-center font-black text-slate-800 text-base">
-                                    {{ $student->score > 0 ? $student->score : '-' }}
+                                    {{ $student->score > 0 ? $student->score : '0' }}
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     @if($student->is_active)
@@ -124,20 +164,13 @@
                                 </td>
                             </tr>
                             @empty
-                            <tr>
-                                <td colspan="6" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center justify-center text-slate-400">
-                                        <i class="ph-duotone ph-users text-4xl mb-2 text-slate-300"></i>
-                                        <p class="font-medium">Belum ada siswa yang login.</p>
-                                    </div>
-                                </td>
-                            </tr>
+                            <tr><td colspan="6" class="px-6 py-12 text-center text-slate-400">Belum ada siswa yang login.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
 
-                <!-- MOBILE LIST (Tetap ada untuk HP) -->
+                <!-- MOBILE LIST -->
                 <div class="md:hidden p-4 space-y-3 bg-slate-50">
                     @forelse($monitoringData as $index => $student)
                     <div x-show="search === '' || '{{ strtolower($student->name) }}'.includes(search.toLowerCase())" 
@@ -161,7 +194,7 @@
 
                             <div class="text-right">
                                 <span class="block text-[10px] text-slate-400 font-bold uppercase mb-0.5">Skor</span>
-                                <span class="block text-xl font-black text-slate-800 leading-none">{{ $student->score }}</span>
+                                <span class="block text-xl font-black text-slate-800 leading-none">{{ $student->score > 0 ? $student->score : '0' }}</span>
                             </div>
                         </div>
                         

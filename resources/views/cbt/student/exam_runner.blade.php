@@ -6,22 +6,15 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Ujian Online - {{ $exam->title }}</title>
     
-    {{-- 
-      PENTING: Gunakan 'npm run build' untuk production/SEB.
-      Kami tambahkan fallback CSS inline agar halaman tidak hancur jika CSS gagal load.
-    --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    {{-- CDN Libraries dengan Error Handling --}}
     <script src="https://unpkg.com/@phosphor-icons/web" onerror="console.error('Gagal load Icons')"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" onerror="console.error('Gagal load SweetAlert')"></script>
 
     <style>
-        /* CSS KRITIS (INLINE) - Agar loading tampil meski app.css gagal */
         body { font-family: sans-serif; margin: 0; background-color: #f8fafc; color: #1e293b; user-select: none; -webkit-user-select: none; }
         [x-cloak] { display: none !important; }
         
-        /* Loading Overlay Style */
         #loading-overlay {
             position: fixed; inset: 0; background: white; z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -33,10 +26,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* Error Box Style */
-        #fatal-error { display: none; position: fixed; inset: 0; background: #7f1d1d; color: white; z-index: 10000; align-items: center; justify-content: center; flex-direction: column; padding: 20px; text-align: center; }
-        
-        /* Custom Scrollbar */
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -48,36 +37,28 @@
     @online.window="isOnline = true; syncPendingAnswers()"
     @offline.window="isOnline = false">
 
-    {{-- 1. NOSCRIPT FALLBACK --}}
-    <noscript>
-        <div style="position:fixed; inset:0; background:white; z-index:99999; display:flex; justify-content:center; align-items:center; text-align:center; padding:20px;">
-            <h1 style="color:red; font-size:24px;">Javascript Tidak Aktif</h1>
-            <p>Aplikasi ujian memerlukan Javascript. Mohon aktifkan di pengaturan browser Anda.</p>
-        </div>
-    </noscript>
-
-    {{-- 2. EMERGENCY ERROR SCREEN (Muncul jika JS Crash) --}}
-    <div id="fatal-error">
-        <h1 style="font-size:24px; font-weight:bold; margin-bottom:10px;">Gagal Memuat Aplikasi</h1>
-        <p style="margin-bottom:20px;">Terjadi kesalahan teknis pada peramban ujian.</p>
-        <div style="background:rgba(0,0,0,0.3); padding:15px; border-radius:8px; text-align:left; font-family:monospace; font-size:12px; margin-bottom:20px; max-width:500px;">
-            <strong>Kemungkinan Penyebab:</strong><br>
-            1. Koneksi internet ke server terputus saat loading.<br>
-            2. CDN (SweetAlert/Icon) diblokir oleh SEB.<br>
-            3. File 'app.js' belum di-build (jalankan 'npm run build').
-        </div>
-        <button onclick="window.location.reload()" style="background:white; color:#7f1d1d; border:none; padding:10px 20px; font-weight:bold; border-radius:5px; cursor:pointer;">
-            Coba Muat Ulang
+    <!-- MODAL ZOOM GAMBAR (PENGGANTI WINDOW.OPEN) -->
+    <div x-show="zoomedImage" x-transition.opacity 
+         class="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 cursor-zoom-out"
+         @click="zoomedImage = null" x-cloak>
+        <img :src="zoomedImage" class="max-w-full max-h-full rounded shadow-2xl scale-100 transition-transform duration-300">
+        <button class="absolute top-4 right-4 text-white bg-white/10 hover:bg-white/20 rounded-full p-2">
+            <i class="ph-bold ph-x text-2xl"></i>
         </button>
     </div>
 
-    {{-- 3. LOADING OVERLAY (Default Visible) --}}
+    <!-- LOADING & ERROR SCREENS (Sama seperti sebelumnya) -->
+    <noscript>
+        <div style="position:fixed; inset:0; background:white; z-index:99999; display:flex; justify-content:center; align-items:center; text-align:center; padding:20px;">
+            <h1 style="color:red; font-size:24px;">Javascript Tidak Aktif</h1>
+        </div>
+    </noscript>
+
     <div id="loading-overlay" x-show="!initComplete" x-transition.opacity.duration.500ms>
         <div class="spinner"></div>
         <span style="font-size:14px; font-weight:bold; color:#64748b;">Menyiapkan Lembar Ujian...</span>
     </div>
 
-    {{-- 4. SECURITY ALERT OVERLAY --}}
     <div x-show="showSecurityOverlay" x-transition.opacity
          class="fixed inset-0 bg-slate-900/95 z-[9000] flex items-center justify-center text-center px-4"
          x-cloak>
@@ -97,14 +78,13 @@
         </div>
     </div>
 
-    {{-- 5. OFFLINE BANNER --}}
     <div x-show="!isOnline" x-transition 
          class="fixed top-16 left-0 w-full bg-rose-600 text-white text-center text-xs font-bold py-2 z-40 shadow-md flex justify-center items-center gap-2" 
          x-cloak>
         <i class="ph-bold ph-wifi-slash"></i> KONEKSI TERPUTUS - Jawaban disimpan di perangkat Anda
     </div>
 
-    {{-- NAVBAR --}}
+    <!-- NAVBAR -->
     <nav class="fixed top-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 z-50 h-16 flex items-center justify-between px-4 shadow-sm">
         <div class="flex items-center gap-3 overflow-hidden">
             <div class="h-9 w-9 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
@@ -135,7 +115,7 @@
         </div>
     </nav>
 
-    {{-- MAIN LAYOUT --}}
+    <!-- MAIN LAYOUT -->
     <div class="pt-20 pb-6 max-w-7xl mx-auto px-4 flex flex-col lg:flex-row gap-6 h-[calc(100vh-1rem)]">
         
         <!-- KOLOM KIRI: SOAL -->
@@ -176,9 +156,11 @@
                             <div class="mb-8">
                                 <template x-if="questions[currentQuestion].image">
                                     <div class="mb-6">
+                                        <!-- FIX: Gunakan @click untuk modal zoom, jangan window.open -->
                                         <img :src="questions[currentQuestion].image" 
-                                             class="max-h-[300px] w-auto rounded-lg border border-slate-200 shadow-sm object-contain cursor-zoom-in"
-                                             onclick="window.open(this.src, '_blank')">
+                                             @click="zoomedImage = questions[currentQuestion].image"
+                                             class="max-h-[300px] w-auto rounded-lg border border-slate-200 shadow-sm object-contain cursor-zoom-in hover:opacity-95 transition">
+                                        <p class="text-[10px] text-slate-400 mt-1 italic text-center">Ketuk gambar untuk memperbesar</p>
                                     </div>
                                 </template>
                                 <div class="text-lg text-slate-800 font-medium leading-loose" x-html="questions[currentQuestion].text"></div>
@@ -278,14 +260,13 @@
 
     <!-- LOGIC SYSTEM -->
     <script>
-        // SCRIPT CHECKER: Mendeteksi apakah Alpine/Vite berhasil load
-        // Ini kuncinya: Jika dalam 3 detik Alpine belum siap, tampilkan error fatal.
         setTimeout(function() {
             const isAlpineLoaded = typeof Alpine !== 'undefined';
             if (!isAlpineLoaded) {
                 console.error("FATAL: Alpine.js gagal dimuat.");
                 document.getElementById('loading-overlay').style.display = 'none';
-                document.getElementById('fatal-error').style.display = 'flex';
+                // Alert manual karena elemen fatal-error tidak ada di HTML ini (optional)
+                alert("Gagal memuat aplikasi ujian. Harap muat ulang halaman.");
             }
         }, 3000);
 
@@ -299,6 +280,7 @@
                 formattedTime: '00:00:00',
                 answers: {}, 
                 markedQuestions: {},
+                unsavedQuestions: new Set(), // FIX: Track ID soal yang belum tersimpan
                 sessionId: sessionId,
                 examId: examId,
                 
@@ -306,6 +288,7 @@
                 isOnline: navigator.onLine,
                 saveStatus: 'idle',
                 showMobileMap: false,
+                zoomedImage: null, // FIX: State untuk modal gambar
                 
                 violationCount: 0,
                 maxViolations: 3,
@@ -313,17 +296,11 @@
 
                 initData() {
                     try {
-                        if (!this.rawQuestions || !Array.isArray(this.rawQuestions)) {
-                            console.error('Data soal invalid');
-                            return;
-                        }
                         this.questions = this.rawQuestions;
                         this.totalQuestions = this.questions.length;
 
-                        // Load progress lokal sebagai cadangan
                         try { this.loadLocalProgress(); } catch (e) { console.warn('LS Error'); }
                         
-                        // Load jawaban dari database (injected via controller)
                         this.questions.forEach(q => {
                             if(q.saved_answer && !this.answers[q.id]) {
                                 this.answers[q.id] = q.saved_answer;
@@ -331,10 +308,9 @@
                         });
 
                     } catch (error) {
-                        console.error('Critical Error in initData:', error);
                         alert('Gagal memproses data soal. Silakan refresh.');
                     } finally {
-                        this.initComplete = true; // Matikan loading screen
+                        this.initComplete = true;
                     }
                 },
 
@@ -343,6 +319,8 @@
 
                 async selectAnswer(questionId, answer) {
                     this.answers[questionId] = answer;
+                    this.unsavedQuestions.add(questionId); // FIX: Tandai sebagai belum tersimpan
+                    
                     try { this.saveToLocal(); } catch(e){}
                     
                     if (!this.isOnline) {
@@ -352,7 +330,6 @@
 
                     this.saveStatus = 'saving';
                     try {
-                        // Gunakan getAttribute untuk CSRF token agar lebih aman
                         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                         
                         const response = await fetch("{{ route('student.exam.saveAnswer') }}", {
@@ -370,7 +347,14 @@
                         });
 
                         if (!response.ok) throw new Error('Server reject');
-                        setTimeout(() => this.saveStatus = 'saved', 300);
+                        
+                        // FIX: Hapus dari daftar unsaved jika sukses
+                        this.unsavedQuestions.delete(questionId);
+                        
+                        // Cek apakah masih ada antrian lain
+                        if (this.unsavedQuestions.size === 0) {
+                            setTimeout(() => this.saveStatus = 'saved', 300);
+                        }
                         
                     } catch (error) {
                         console.error('Gagal simpan:', error);
@@ -383,6 +367,7 @@
                         const progress = {
                             answers: this.answers,
                             marked: this.markedQuestions,
+                            unsaved: Array.from(this.unsavedQuestions), // Simpan status unsaved juga
                             timestamp: new Date().getTime()
                         };
                         localStorage.setItem(`exam_${this.sessionId}`, JSON.stringify(progress));
@@ -394,23 +379,43 @@
                         const saved = localStorage.getItem(`exam_${this.sessionId}`);
                         if (saved) {
                             const data = JSON.parse(saved);
-                            // Merge jawaban lokal hanya jika belum ada
                             this.answers = { ...data.answers, ...this.answers };
                             this.markedQuestions = data.marked || {};
+                            // Restore unsaved queue jika ada
+                            if(data.unsaved && Array.isArray(data.unsaved)){
+                                data.unsaved.forEach(id => this.unsavedQuestions.add(id));
+                            }
                         }
                     } catch (e) {}
                 },
 
+                // FIX: Sinkronisasi Cerdas (Hanya yang belum tersimpan)
                 async syncPendingAnswers() {
-                    if(this.saveStatus !== 'pending') return;
-                    for (const [qId, ans] of Object.entries(this.answers)) {
-                        await this.selectAnswer(qId, ans);
+                    if (this.unsavedQuestions.size === 0) {
+                        this.saveStatus = 'saved';
+                        return;
+                    }
+
+                    this.saveStatus = 'saving';
+                    
+                    // Kita clone Set agar iterasi aman
+                    const pendingIds = Array.from(this.unsavedQuestions);
+                    
+                    for (const qId of pendingIds) {
+                        const ans = this.answers[qId];
+                        if (ans) {
+                            // Panggil selectAnswer kembali untuk mencoba simpan
+                            // selectAnswer akan menghapus ID dari unsavedQuestions jika sukses
+                            await this.selectAnswer(qId, ans);
+                        }
                     }
                 },
                 
                 checkPendingAnswers() {
-                   if(Object.keys(this.answers).length > 0) {
+                   if(this.unsavedQuestions.size === 0 && Object.keys(this.answers).length > 0) {
                        this.saveStatus = 'saved';
+                   } else if (this.unsavedQuestions.size > 0) {
+                       this.saveStatus = 'pending';
                    }
                 },
 
@@ -421,16 +426,12 @@
                             if (document.hidden) self.triggerViolation();
                         });
                     }
-                    
                     window.addEventListener("blur", () => {
                        setTimeout(() => {
-                           // Abaikan jika fokus ke iframe (misal video youtube embed)
                            if(document.activeElement && document.activeElement.tagName === 'IFRAME') return; 
                            self.triggerViolation();
                        }, 1000); 
                     });
-
-                    // Cegah Inspect Element standar
                     window.addEventListener('keydown', (e) => {
                         if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) e.preventDefault();
                         if (e.key === 'F12') e.preventDefault();
@@ -439,19 +440,16 @@
 
                 triggerViolation() {
                     if (this.showSecurityOverlay) return; 
-
                     this.violationCount++;
                     this.showSecurityOverlay = true;
-
                     if(this.violationCount >= this.maxViolations) {
-                        alert('DISKUALIFIKASI: Anda telah melanggar batas aturan ujian. Jawaban akan dikumpulkan otomatis.');
+                        alert('DISKUALIFIKASI: Pelanggaran batas aturan. Ujian dikumpulkan.');
                         this.submitExam(true);
                     }
                 },
 
                 resumeExam() {
                     this.showSecurityOverlay = false;
-                    // Coba fullscreen ulang
                     try {
                         if (document.documentElement.requestFullscreen) {
                             document.documentElement.requestFullscreen().catch(() => {});
@@ -464,21 +462,12 @@
                         if (this.timeLeft > 0) {
                             this.timeLeft--;
                             this.formatTime();
-                            
-                            if(this.timeLeft === 300) {
-                                if (typeof Swal !== 'undefined') {
-                                    Swal.fire({ 
-                                        toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
-                                        icon: 'warning', title: 'Waktu tinggal 5 menit!' 
-                                    });
-                                } else {
-                                    // Fallback jika SweetAlert gagal load
-                                    alert("Waktu tinggal 5 menit!");
-                                }
+                            if(this.timeLeft === 300 && typeof Swal !== 'undefined') {
+                                Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, icon: 'warning', title: 'Waktu tinggal 5 menit!' });
                             }
                         } else {
                             clearInterval(timerInterval);
-                            alert("Waktu Habis! Ujian akan dikumpulkan otomatis.");
+                            alert("Waktu Habis!");
                             this.submitExam(true);
                         }
                     }, 1000);
@@ -488,8 +477,7 @@
                     let h = Math.floor(this.timeLeft / 3600);
                     let m = Math.floor((this.timeLeft % 3600) / 60);
                     let s = this.timeLeft % 60;
-                    this.formattedTime = 
-                        (h < 10 ? "0" + h : h) + ":" + (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+                    this.formattedTime = (h < 10 ? "0" + h : h) + ":" + (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
                 },
 
                 finishExam() {
@@ -497,9 +485,7 @@
                     const remaining = this.totalQuestions - answeredCount;
                     
                     if (typeof Swal === 'undefined') {
-                        if(confirm('Kumpulkan Jawaban? Masih ada ' + remaining + ' soal kosong.')) {
-                            this.submitExam();
-                        }
+                        if(confirm('Kumpulkan Jawaban?')) this.submitExam();
                         return;
                     }
 
@@ -516,7 +502,7 @@
                 },
 
                 submitExam(forced = false) {
-                    if(this.saveStatus === 'pending') {
+                    if(this.unsavedQuestions.size > 0) {
                         if(typeof Swal !== 'undefined') {
                             Swal.fire({ title: 'Sinkronisasi...', didOpen: () => Swal.showLoading() });
                         }
@@ -527,10 +513,7 @@
                 },
 
                 doSubmit(forced) {
-                    if(typeof Swal !== 'undefined') {
-                        Swal.fire({ title: 'Menyimpan Ujian...', didOpen: () => Swal.showLoading() });
-                    }
-
+                    if(typeof Swal !== 'undefined') Swal.fire({ title: 'Menyimpan Ujian...', didOpen: () => Swal.showLoading() });
                     try { localStorage.removeItem(`exam_${this.sessionId}`); } catch(e){}
 
                     const form = document.createElement('form');

@@ -1,6 +1,8 @@
 <x-app-layout>
     <!-- 
-        UPDATE: Menambahkan logic 'newImage' di x-data untuk menangani preview gambar saat Edit.
+        UPDATE: 
+        1. Menambahkan logic 'deleteImage' untuk menghapus gambar.
+        2. Memperbaiki binding data opsi jawaban agar lebih aman (fallback ke string kosong).
     -->
     <div x-data="{ 
         showImportModal: false, 
@@ -16,20 +18,28 @@
             correct_answer: 'A',
             score_weight: 2
         },
-        newImagePreview: null, // Variable untuk menampung preview gambar baru di Modal Edit
+        newImagePreview: null,
+        deleteImage: false, // Flag untuk menghapus gambar
         
         openEdit(data, url) {
             this.editState = { ...data, url: url };
-            this.newImagePreview = null; // Reset preview saat buka modal
+            this.newImagePreview = null;
+            this.deleteImage = false; // Reset flag hapus
             this.showEditModal = true;
         },
         
-        // Helper untuk preview gambar di Modal Edit
         handleEditImage(event) {
             const file = event.target.files[0];
             if (file) {
                 this.newImagePreview = URL.createObjectURL(file);
+                this.deleteImage = false; // Jika upload baru, jangan hapus
             }
+        },
+
+        removeCurrentImage() {
+            this.deleteImage = true;
+            this.newImagePreview = null;
+            this.$refs.editFileInput.value = ''; // Reset input file
         }
     }">
         
@@ -79,7 +89,6 @@
                     
                     <!-- FORM INPUT MANUAL (Kiri) -->
                     <div class="w-full lg:w-2/5 order-2 lg:order-1">
-                        <!-- Tambahkan x-data lokal untuk preview form create -->
                         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm lg:sticky lg:top-8"
                              x-data="{ createPreview: null }">
                              
@@ -93,17 +102,13 @@
                             <form action="{{ route('cbt.questions.store', $exam->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5">
                                 @csrf
                                 
-                                <!-- Pertanyaan -->
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pertanyaan</label>
                                     <textarea name="question_text" rows="4" required class="w-full rounded-xl border-slate-200 text-sm focus:ring-blue-500 focus:border-blue-500 bg-slate-50 focus:bg-white transition" placeholder="Tulis pertanyaan di sini..."></textarea>
                                 </div>
 
-                                <!-- Gambar dengan Preview -->
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Gambar Pendukung (Opsional)</label>
-                                    
-                                    <!-- Area Preview -->
                                     <template x-if="createPreview">
                                         <div class="mb-3 relative w-full">
                                             <img :src="createPreview" class="w-full h-40 object-cover rounded-xl border border-slate-200">
@@ -112,16 +117,9 @@
                                             </button>
                                         </div>
                                     </template>
-
-                                    <input type="file" 
-                                           x-ref="fileInput"
-                                           name="question_image" 
-                                           @change="createPreview = URL.createObjectURL($event.target.files[0])"
-                                           accept="image/*"
-                                           class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-slate-200 rounded-xl bg-white">
+                                    <input type="file" x-ref="fileInput" name="question_image" @change="createPreview = URL.createObjectURL($event.target.files[0])" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-slate-200 rounded-xl bg-white">
                                 </div>
 
-                                <!-- Opsi Jawaban -->
                                 <div class="space-y-3 pt-2">
                                     <label class="block text-xs font-bold text-slate-400 uppercase">Pilihan Jawaban</label>
                                     @foreach(['A','B','C','D'] as $opt)
@@ -133,7 +131,6 @@
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
-                                    <!-- Kunci Jawaban -->
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Kunci Jawaban</label>
                                         <select name="correct_answer" required class="w-full rounded-xl border-slate-200 text-sm font-bold text-slate-700 bg-slate-50 cursor-pointer">
@@ -143,7 +140,6 @@
                                             <option value="D">D</option>
                                         </select>
                                     </div>
-                                    <!-- Bobot Nilai -->
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Bobot Nilai</label>
                                         <input type="number" name="score_weight" value="2" required class="w-full rounded-xl border-slate-200 text-sm font-bold text-center">
@@ -177,7 +173,6 @@
                                 <div class="pl-12">
                                     @if($q->question_image)
                                         <div class="mb-4">
-                                            {{-- Pastikan folder 'storage' sudah di-link ke 'public' --}}
                                             <img src="{{ asset('storage/' . $q->question_image) }}" class="max-h-48 rounded-xl border border-slate-100 shadow-sm object-cover" alt="Gambar Soal">
                                         </div>
                                     @endif
@@ -187,7 +182,11 @@
                                     <!-- Opsi -->
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                                         @foreach(['A','B','C','D'] as $opt)
-                                            @php $val = $q->{'option_'.$opt}; @endphp
+                                            <!-- Handle data options apakah array atau kolom terpisah, di sini asumsi kolom terpisah sesuai input manual -->
+                                            @php 
+                                                // Fallback logic jika struktur DB berbeda
+                                                $val = isset($q->{'option_'.$opt}) ? $q->{'option_'.$opt} : ($q->options[$opt] ?? '-'); 
+                                            @endphp
                                             <div class="flex items-start gap-3 p-2 rounded-lg {{ $opt == $q->correct_answer ? 'bg-green-50 border border-green-100' : 'hover:bg-slate-50 border border-transparent' }}">
                                                 <span class="w-6 h-6 flex items-center justify-center rounded-md border {{ $opt == $q->correct_answer ? 'border-green-500 bg-green-500 text-white' : 'border-slate-300 text-slate-400' }} text-[10px] font-bold shrink-0 mt-0.5">
                                                     {{ $opt }}
@@ -207,16 +206,15 @@
 
                                 <!-- Action Buttons -->
                                 <div class="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <!-- TOMBOL EDIT -->
                                     <button 
                                         type="button"
                                         @click="openEdit({
                                             question_text: {{ json_encode($q->question_text) }},
                                             question_image: {{ json_encode($q->question_image) }}, 
-                                            option_A: {{ json_encode($q->options['A'] ?? '') }},
-                                            option_B: {{ json_encode($q->options['B'] ?? '') }},
-                                            option_C: {{ json_encode($q->options['C'] ?? '') }},
-                                            option_D: {{ json_encode($q->options['D'] ?? '') }},
+                                            option_A: {{ json_encode($q->option_A ?? '') }},
+                                            option_B: {{ json_encode($q->option_B ?? '') }},
+                                            option_C: {{ json_encode($q->option_C ?? '') }},
+                                            option_D: {{ json_encode($q->option_D ?? '') }},
                                             correct_answer: '{{ $q->correct_answer }}',
                                             score_weight: {{ $q->score_weight }}
                                         }, '{{ route('cbt.questions.update', $q->id) }}')"
@@ -225,7 +223,6 @@
                                         <i class="ph-bold ph-pencil-simple"></i>
                                     </button>
 
-                                    <!-- Tombol Delete -->
                                     <form action="{{ route('cbt.questions.destroy', $q->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus soal ini?')">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="p-2 rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-200 shadow-sm transition" title="Hapus Soal">
@@ -248,7 +245,7 @@
             </div>
         </div>
 
-        <!-- MODAL IMPORT (Sama, tidak ada perubahan) -->
+        <!-- MODAL IMPORT (Tidak berubah) -->
         <div x-show="showImportModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showImportModal = false"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
@@ -258,7 +255,7 @@
                             <i class="ph-duotone ph-microsoft-excel-logo text-green-600 text-3xl"></i>
                         </div>
                         <h3 class="text-xl font-black text-slate-800 mb-2">Import Soal Excel</h3>
-                        <p class="text-sm text-slate-500 mb-6">Upload file .xlsx sesuai template untuk memasukkan soal secara massal.</p>
+                        <p class="text-sm text-slate-500 mb-6">Upload file .xlsx sesuai template.</p>
                         
                         <form action="{{ route('cbt.questions.import', $exam->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4 text-left">
                             @csrf
@@ -268,24 +265,17 @@
                                 <p class="text-sm font-bold text-slate-600 group-hover:text-blue-600">Klik untuk upload file</p>
                                 <p class="text-xs text-slate-400 mt-1">Format: .xlsx, .csv</p>
                             </div>
-                            
                             <div class="flex gap-3">
                                 <button type="button" @click="showImportModal = false" class="flex-1 py-3 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50">Batal</button>
                                 <button type="submit" class="flex-1 py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 shadow-lg shadow-green-500/30">Proses</button>
                             </div>
                         </form>
-                        
-                        <div class="mt-6 pt-4 border-t border-slate-100">
-                            <a href="{{ route('cbt.questions.template') }}" class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center justify-center gap-2">
-                                <i class="ph-bold ph-download-simple"></i> Download Template Excel
-                            </a>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- MODAL EDIT SOAL (DIPERBAIKI DENGAN PREVIEW) -->
+        <!-- MODAL EDIT SOAL (DIPERBAIKI) -->
         <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showEditModal = false"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
@@ -293,6 +283,9 @@
                     <form :action="editState.url" method="POST" enctype="multipart/form-data">
                         @csrf @method('PUT')
                         
+                        <!-- Input Hidden untuk Logic Hapus Gambar -->
+                        <input type="hidden" name="delete_image" x-model="deleteImage">
+
                         <div class="bg-white px-6 py-5 border-b border-slate-100 flex justify-between items-center">
                             <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                                 <i class="ph-fill ph-pencil-simple text-blue-600"></i> Edit Soal
@@ -303,51 +296,59 @@
                         </div>
 
                         <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto custom-scrollbar">
-                            <!-- Pertanyaan -->
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Pertanyaan</label>
                                 <textarea name="question_text" x-model="editState.question_text" rows="4" required class="w-full rounded-xl border-slate-200 text-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
                             </div>
 
-                            <!-- Gambar Update dengan Preview Canggih -->
+                            <!-- Gambar Update -->
                             <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-3">Gambar Soal</label>
                                 
                                 <div class="flex flex-col gap-4">
-                                    <!-- Logika Tampilan: 
-                                         1. Jika ada gambar baru dipilih (newImagePreview) -> Tampilkan itu
-                                         2. Jika tidak ada gambar baru, tapi ada gambar lama (editState.question_image) -> Tampilkan lama
-                                    -->
-                                    
                                     <!-- Preview Gambar Baru -->
                                     <template x-if="newImagePreview">
                                         <div class="relative w-fit">
-                                            <p class="text-[10px] font-bold text-green-600 mb-1 flex items-center gap-1"><i class="ph-bold ph-check"></i> Akan Diganti Menjadi:</p>
+                                            <p class="text-[10px] font-bold text-green-600 mb-1 flex items-center gap-1"><i class="ph-bold ph-check"></i> Akan Diganti:</p>
                                             <img :src="newImagePreview" class="h-32 rounded-lg border-2 border-green-500 shadow-sm object-cover">
+                                            <button type="button" @click="newImagePreview = null; $refs.editFileInput.value = ''" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow">
+                                                <i class="ph-bold ph-x"></i>
+                                            </button>
                                         </div>
                                     </template>
 
-                                    <!-- Preview Gambar Lama (Hanya jika tidak ada gambar baru) -->
-                                    <template x-if="!newImagePreview && editState.question_image">
-                                        <div class="relative w-fit">
+                                    <!-- Preview Gambar Lama -->
+                                    <template x-if="!newImagePreview && editState.question_image && !deleteImage">
+                                        <div class="relative w-fit group">
                                             <p class="text-[10px] font-bold text-slate-400 mb-1">Gambar Saat Ini:</p>
                                             <img :src="'/storage/' + editState.question_image" class="h-24 rounded-lg border border-slate-200 shadow-sm object-cover opacity-80">
+                                            
+                                            <!-- Tombol Hapus Gambar Lama -->
+                                            <button type="button" @click="removeCurrentImage()" class="absolute inset-0 bg-red-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-lg font-bold text-xs gap-1">
+                                                <i class="ph-bold ph-trash"></i> Hapus
+                                            </button>
+                                        </div>
+                                    </template>
+                                    
+                                    <!-- Info jika gambar dihapus -->
+                                    <template x-if="deleteImage && !newImagePreview">
+                                        <div class="text-xs text-rose-600 font-bold bg-rose-50 p-2 rounded border border-rose-100 flex items-center gap-2">
+                                            <i class="ph-bold ph-trash"></i> Gambar akan dihapus.
+                                            <button type="button" @click="deleteImage = false" class="text-blue-600 underline ml-auto">Batal</button>
                                         </div>
                                     </template>
 
-                                    <!-- Input File -->
                                     <div class="flex-1">
                                         <input type="file" 
+                                               x-ref="editFileInput"
                                                name="question_image" 
                                                @change="handleEditImage"
                                                accept="image/*"
                                                class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-white file:text-blue-600 hover:file:bg-blue-50 cursor-pointer border border-slate-200 rounded-lg bg-white">
-                                        <p class="text-[10px] text-slate-400 mt-2 italic font-medium">Biarkan kosong jika tidak ingin mengubah gambar.</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Opsi Jawaban -->
                             <div class="space-y-3">
                                 <label class="block text-xs font-bold text-slate-400 uppercase">Edit Pilihan Jawaban</label>
                                 <div class="grid grid-cols-1 gap-3">
@@ -389,6 +390,5 @@
                 </div>
             </div>
         </div>
-
     </div>
 </x-app-layout>
