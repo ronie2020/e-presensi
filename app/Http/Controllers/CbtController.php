@@ -61,6 +61,32 @@ class CbtController extends Controller
     }
 
     /**
+     * HAPUS DATA UJIAN (Jadwal, Soal, & Hasil)
+     * Method ini dipanggil saat tombol hapus di dashboard ditekan.
+     */
+    public function destroy($id)
+    {
+        // Cari ujian beserta soalnya
+        $exam = CbtExam::with('questions')->findOrFail($id);
+
+        // 1. Bersihkan Gambar Fisik Soal (Agar storage tidak penuh sampah)
+        foreach ($exam->questions as $question) {
+            if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
+                Storage::delete('public/' . $question->question_image);
+            }
+        }
+        // 2. Hapus Record Ujian
+        // Database akan otomatis menghapus soal & jawaban siswa jika Foreign Key menggunakan 'onDelete cascade'.
+        // Jika tidak yakin dengan setting database, kita bisa hapus manual relasinya:
+        // $exam->questions()->delete(); 
+        // DB::table('cbt_student_exams')->where('cbt_exam_id', $id)->delete();
+        
+        $exam->delete();
+
+        return redirect()->route('cbt.index')->with('success', 'Data ujian beserta soal dan nilainya berhasil dihapus.');
+    }
+
+    /**
      * Halaman Kelola Soal
      */
     public function manageQuestions($id)
