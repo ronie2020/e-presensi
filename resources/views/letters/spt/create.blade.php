@@ -7,6 +7,18 @@
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
+                    
+                    @if ($errors->any())
+                        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                            <strong class="font-bold">Periksa Kembali Inputan!</strong>
+                            <ul class="mt-2 list-disc list-inside text-sm">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <form action="{{ route('letters.spt.store') }}" method="POST">
                         @csrf
                         
@@ -16,7 +28,8 @@
                             <select name="letter_incoming_id" class="form-select w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                                 <option value="">-- Tanpa Dasar Surat (Langsung) --</option>
                                 @foreach($incoming_letters as $letter)
-                                    <option value="{{ $letter->id }}" {{ (isset($selected_letter_id) && $selected_letter_id == $letter->id) ? 'selected' : '' }}>
+                                    <option value="{{ $letter->id }}" 
+                                        {{ (old('letter_incoming_id', $selected_letter_id) == $letter->id) ? 'selected' : '' }}>
                                         {{ $letter->nomor_surat }} - {{ Str::limit($letter->perihal, 50) }}
                                     </option>
                                 @endforeach
@@ -29,27 +42,36 @@
                             <div class="space-y-4">
                                 <div>
                                     <label class="block font-medium text-sm text-gray-700">Nomor SPT</label>
-                                    <input type="text" name="nomor_spt" value="{{ $nomor_otomatis ?? '' }}" class="form-input rounded-md shadow-sm mt-1 block w-full bg-gray-50" required>
+                                    <input type="text" name="nomor_spt" value="{{ old('nomor_spt', $nomor_otomatis) }}" class="form-input rounded-md shadow-sm mt-1 block w-full bg-gray-50 @error('nomor_spt') border-red-500 @enderror" required>
+                                    @error('nomor_spt')
+                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
                                 <div>
                                     <label class="block font-medium text-sm text-gray-700">Untuk (Maksud Tugas)</label>
-                                    <textarea name="untuk" rows="4" class="form-input rounded-md shadow-sm mt-1 block w-full" placeholder="Contoh: Menghadiri kegiatan Workshop Kurikulum Merdeka..." required></textarea>
+                                    <textarea name="untuk" rows="4" class="form-input rounded-md shadow-sm mt-1 block w-full @error('untuk') border-red-500 @enderror" placeholder="Contoh: Menghadiri kegiatan Workshop Kurikulum Merdeka..." required>{{ old('untuk') }}</textarea>
+                                    @error('untuk')
+                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
                                 <div>
                                     <label class="block font-medium text-sm text-gray-700">Tempat Tujuan</label>
-                                    <input type="text" name="tempat" class="form-input rounded-md shadow-sm mt-1 block w-full" placeholder="Contoh: Aula Dinas Pendidikan Ciamis" required>
+                                    <input type="text" name="tempat" value="{{ old('tempat') }}" class="form-input rounded-md shadow-sm mt-1 block w-full @error('tempat') border-red-500 @enderror" placeholder="Contoh: Aula Dinas Pendidikan Ciamis" required>
+                                    @error('tempat')
+                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block font-medium text-sm text-gray-700">Tgl Berangkat</label>
-                                        <input type="date" name="tgl_berangkat" class="form-input rounded-md shadow-sm mt-1 block w-full" required>
+                                        <input type="date" name="tgl_berangkat" value="{{ old('tgl_berangkat') }}" class="form-input rounded-md shadow-sm mt-1 block w-full @error('tgl_berangkat') border-red-500 @enderror" required>
                                     </div>
                                     <div>
                                         <label class="block font-medium text-sm text-gray-700">Tgl Kembali</label>
-                                        <input type="date" name="tgl_kembali" class="form-input rounded-md shadow-sm mt-1 block w-full" required>
+                                        <input type="date" name="tgl_kembali" value="{{ old('tgl_kembali') }}" class="form-input rounded-md shadow-sm mt-1 block w-full @error('tgl_kembali') border-red-500 @enderror" required>
                                     </div>
                                 </div>
                             </div>
@@ -59,11 +81,13 @@
                                 <label class="block font-bold text-sm text-gray-800 mb-2">Pilih Pegawai yang Ditugaskan</label>
                                 <p class="text-xs text-gray-500 mb-3">Centang pegawai yang akan berangkat (Bisa lebih dari satu).</p>
                                 
-                                <div class="max-h-96 overflow-y-auto border rounded-md bg-white p-2">
-                                    {{-- Menggunakan Data Real dari Controller --}}
+                                <div class="max-h-96 overflow-y-auto border rounded-md bg-white p-2 @error('pegawai_ids') border-red-500 @enderror">
                                     @forelse($users as $user)
                                     <label class="flex items-center p-2 hover:bg-gray-50 cursor-pointer border-b last:border-0">
-                                        <input type="checkbox" name="pegawai_ids[]" value="{{ $user->id }}" class="rounded text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 h-5 w-5">
+                                        {{-- Logika checked: cek apakah ID user ada di array old('pegawai_ids') --}}
+                                        <input type="checkbox" name="pegawai_ids[]" value="{{ $user->id }}" 
+                                            class="rounded text-green-600 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50 h-5 w-5"
+                                            {{ (is_array(old('pegawai_ids')) && in_array($user->id, old('pegawai_ids'))) ? 'checked' : '' }}>
                                         <div class="ml-3">
                                             <span class="block text-sm font-medium text-gray-900">{{ $user->name }}</span>
                                             <span class="block text-xs text-gray-500">{{ $user->pangkat ?? 'NIP. ' . $user->nip }}</span>
@@ -71,7 +95,7 @@
                                     </label>
                                     @empty
                                         <div class="p-4 text-center text-sm text-red-500">
-                                            Data Pegawai Kosong. Silahkan jalankan Seeder.
+                                            Data Pegawai Kosong.
                                         </div>
                                     @endforelse
                                 </div>
@@ -82,8 +106,8 @@
                         </div>
 
                         <div class="mt-8 flex justify-end gap-3 border-t pt-4">
-                            <a href="{{ route('letters.spt.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md font-semibold hover:bg-gray-300">Batal</a>
-                            <button type="submit" class="px-6 py-2 bg-blue-800 text-white rounded-md font-bold hover:bg-blue-900 shadow-lg">
+                            <a href="{{ route('letters.spt.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md font-semibold hover:bg-gray-300 transition">Batal</a>
+                            <button type="submit" class="px-6 py-2 bg-blue-800 text-white rounded-md font-bold hover:bg-blue-900 shadow-lg transition transform hover:-translate-y-0.5">
                                 Simpan SPT & Tugaskan Pegawai
                             </button>
                         </div>

@@ -4,16 +4,32 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Sppd;
-use App\Models\SppdFollower; // Import Model Follower
-use App\Models\LetterSpt; 
-use App\Models\User; 
+use App\Models\SppdFollower;
+use App\Models\LetterSpt;
+use App\Models\User;
 use Carbon\Carbon;
 
 class SppdController extends Controller
 {
-    public function index()
+    // MENAMPILKAN DATA (DENGAN PENCARIAN)
+    public function index(Request $request)
     {
-        $sppds = Sppd::with('user')->latest()->paginate(10);
+        $query = Sppd::with('user');
+
+        // Logika Pencarian
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nomor_sppd', 'like', "%{$search}%")
+                  ->orWhere('tempat_tujuan', 'like', "%{$search}%")
+                  ->orWhere('maksud_perjalanan', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($qUser) use ($search) {
+                      $qUser->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $sppds = $query->latest()->paginate(10);
         return view('sppd.index', compact('sppds'));
     }
 
@@ -42,6 +58,7 @@ class SppdController extends Controller
             ];
         });
 
+        // Generate Nomor Otomatis
         $bulan_romawi = $this->getRomawi(date('n'));
         $tahun = date('Y');
         $count = Sppd::whereYear('created_at', $tahun)->count() + 1;
@@ -58,7 +75,6 @@ class SppdController extends Controller
             'tujuan' => 'required',
             'tgl_berangkat' => 'required|date',
             'tgl_kembali' => 'required|date|after_or_equal:tgl_berangkat',
-            // Validasi Array Pengikut (Opsional)
             'followers.*.nama' => 'required_with:followers',
         ]);
 
@@ -80,6 +96,7 @@ class SppdController extends Controller
         $sppd->instansi_pembayar = $request->instansi_biaya ?? 'SMP Negeri 3 Lakbok';
         $sppd->mata_anggaran = $request->kode_rekening;
         
+        // Pejabat (Bisa dibuat dinamis jika perlu)
         $sppd->pejabat_nama = 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.';
         $sppd->pejabat_nip = '19820928 201101 1 002';
         $sppd->pejabat_pangkat = 'Penata, III/c';
@@ -87,27 +104,48 @@ class SppdController extends Controller
 
         $sppd->save();
 
-        // 2. Simpan Pengikut (Jika Ada)
+        // 2. Simpan Pengikut
         if ($request->has('followers')) {
             foreach ($request->followers as $followerData) {
-                // Pastikan nama terisi, kalau kosong skip
                 if (!empty($followerData['nama'])) {
                     SppdFollower::create([
                         'sppd_id' => $sppd->id,
                         'nama' => $followerData['nama'],
-                        'nip' => $followerData['nip'] ?? null, // Simpan NIP
+                        'nip' => $followerData['nip'] ?? null,
                         'keterangan' => $followerData['keterangan'] ?? null,
                     ]);
                 }
             }
         }
 
-        return redirect()->route('sppd.print', $sppd->id);
+        return redirect()->route('sppd.index')->with('success', 'SPPD berhasil dibuat!');
+    }
+
+    // EDIT DATA
+    public function edit($id)
+    {
+        $sppd = Sppd::with('followers')->findOrFail($id);
+        $users = User::orderBy('name', 'asc')->get();
+        // Kita gunakan view create tapi kirim data edit (atau buat view edit terpisah jika kompleks)
+        // Disini saya asumsikan kita pakai create dengan penyesuaian, tapi lebih aman buat edit.blade.php nanti.
+        // Untuk sekarang, saya redirect back atau tampilkan error jika view edit belum ada.
+        return abort(404, 'Halaman Edit belum dibuat. Silakan tambahkan file edit.blade.php'); 
+    }
+
+    // HAPUS DATA
+    public function destroy($id)
+    {
+        $sppd = Sppd::findOrFail($id);
+        // Hapus pengikut otomatis jika sudah di-set cascade di database, 
+        // tapi manual delete lebih aman di level aplikasi
+        $sppd->followers()->delete(); 
+        $sppd->delete();
+
+        return redirect()->route('sppd.index')->with('success', 'Data SPPD berhasil dihapus!');
     }
 
     public function print($id)
     {
-        // Include relasi followers saat print
         $sppd = Sppd::with(['user', 'followers'])->findOrFail($id);
         return view('sppd.print', compact('sppd'));
     }

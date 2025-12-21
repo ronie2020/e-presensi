@@ -16,59 +16,109 @@
 <head>
     <meta charset="UTF-8">
     <title>Cetak SPPD - {{ $sppd->nomor_sppd }}</title>
+    
+    <!-- Scripts & Styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        /* Pengaturan Kertas F4 (21.5cm x 33cm) */
-        @page { size: 21.5cm 33cm; margin: 1cm 1.5cm; }
+        /* Pengaturan Kertas F4 */
+        @page { size: 21.5cm 33cm; margin: 0; }
         
-        body { font-family: 'Times New Roman', serif; font-size: 10pt; line-height: 1.1; color: #000; margin: 0; padding: 0; }
-        .page { width: 100%; min-height: 29cm; position: relative; padding-top: 10px; }
-        .page-break { page-break-before: always; }
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 11pt;
+            background-color: #f3f4f6;
+            -webkit-print-color-adjust: exact;
+        }
+
+        /* LEMBAR KERTAS (SHEET) */
+        .sheet {
+            background: white;
+            width: 21.5cm;
+            min-height: 33cm;
+            margin: 20px auto;
+            padding: 1.5cm 2cm;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            position: relative;
+            page-break-after: always; /* Pastikan pindah halaman saat diprint */
+        }
         
-        .header { text-align: center; margin-bottom: 5px; }
-        .header h3 { margin: 0; font-size: 14pt; font-weight: bold; text-transform: uppercase; }
-        .header h4 { margin: 0; font-size: 12pt; font-weight: bold; text-transform: uppercase; }
-        .header p { margin: 0; font-size: 10pt; }
-        .line { border-bottom: 3px double black; margin-top: 5px; margin-bottom: 15px; }
+        /* MODE PRINT */
+        @media print {
+            body { background: none; margin: 0; }
+            .sheet { width: 100%; margin: 0; padding: 1cm 2cm; box-shadow: none; border: none; page-break-after: always; }
+            .sheet:last-child { page-break-after: auto; }
+            .no-print { display: none !important; }
+        }
 
-        .judul { text-align: center; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
-        .judul h2 { margin: 0; text-decoration: underline; font-size: 12pt; }
-        .judul p { margin: 0; font-size: 11pt; font-weight: normal; text-transform: none; }
+        /* HELPER CLASSES */
+        .header-text h3 { margin: 0; font-size: 14pt; font-weight: bold; text-transform: uppercase; }
+        .header-text h4 { margin: 0; font-size: 12pt; font-weight: bold; text-transform: uppercase; }
+        .header-text p { margin: 0; font-size: 10pt; }
+        
+        .double-line { border-top: 4px double #000; margin-top: 8px; margin-bottom: 20px; }
+        
+        .judul-surat { text-align: center; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+        .judul-surat h2 { margin: 0; text-decoration: underline; font-size: 12pt; }
+        .judul-surat p { margin: 0; font-size: 11pt; font-weight: normal; text-transform: none; }
 
-        table.data { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        table.data td { vertical-align: top; padding: 4px; border: 1px solid black; }
+        /* TABEL DATA UTAMA */
+        table.data { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 11pt; }
+        table.data td { vertical-align: top; padding: 5px; border: 1px solid black; }
         table.data tr td:first-child { width: 30px; text-align: center; }
-        table.data tr td:nth-child(2) { width: 220px; }
+        table.data tr td:nth-child(2) { width: 35%; }
 
+        /* TABEL VISUM */
         table.visum { width: 100%; border-collapse: collapse; border: 1px solid black; margin-top: 10px; }
-        table.visum td { border: 1px solid black; padding: 5px; vertical-align: top; width: 50%; height: 120px; }
-        
-        .ttd-area { float: right; width: 45%; text-align: left; margin-top: 20px; }
+        table.visum td { border: 1px solid black; padding: 8px; vertical-align: top; width: 50%; height: 140px; }
+
+        .ttd-box { float: right; width: 45%; text-align: left; margin-top: 20px; }
         .clear { clear: both; }
-        .text-center { text-align: center; }
-        .text-bold { font-weight: bold; }
-        .indent { text-indent: 30px; }
-        .label { width: 100px; font-weight: bold; }
-        
-        @media print { .no-print { display: none; } }
+        .indent { margin-left: 30px; text-align: justify; display: block; }
+        .label-section { font-weight: bold; width: 200px; display: inline-block; }
     </style>
 </head>
 <body>
 
-    <div class="no-print" style="position: fixed; top: 0; right: 0; background: #eee; padding: 10px; z-index: 999;">
-        <button onclick="window.print()" style="padding: 10px 20px; background: #1e40af; color: white; border: none; cursor: pointer; font-weight: bold;">🖨️ Cetak</button>
-        <a href="{{ route('sppd.index') }}" style="margin-left: 10px; color: #333;">&larr; Kembali</a>
-    </div>
-
-    <!-- HALAMAN 1: SPPD -->
-    <div class="page">
-        <div class="header">
-            <h3>PEMERINTAH KABUPATEN CIAMIS</h3>
-            <h3>DINAS PENDIDIKAN</h3>
-            <h4>SMP NEGERI 3 LAKBOK</h4>
-            <p>Jalan Mekarjaya No. 199 Sidaharja Kecamatan Lakbok Kabupaten Ciamis</p>
+    <!-- TOOLBAR (Floating) -->
+    <div class="no-print fixed top-0 left-0 right-0 bg-white border-b shadow-sm p-4 flex justify-between items-center z-50">
+        <div class="flex items-center gap-3">
+            <div class="bg-indigo-100 p-2 rounded-full text-indigo-600">
+                <i class="fas fa-car-side text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-gray-800 text-sm md:text-base">Cetak SPPD</h1>
+                <p class="text-xs text-gray-500">Nomor: {{ $sppd->nomor_sppd }}</p>
+            </div>
         </div>
-        <div class="line"></div>
-        <div class="judul">
+        <div class="flex gap-2">
+            <a href="{{ route('sppd.index') }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition shadow-sm">
+                <i class="fas fa-arrow-left mr-2"></i> Kembali
+            </a>
+            <button onclick="window.print()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition shadow-lg flex items-center">
+                <i class="fas fa-print mr-2"></i> Cetak Dokumen
+            </button>
+        </div>
+    </div>
+    <div class="no-print h-20"></div>
+
+    <!-- HALAMAN 1: SPPD DEPAN -->
+    <div class="sheet">
+         <!-- KOP SURAT -->
+        <div class="relative py-2">
+            <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="absolute left-0 top-1 w-16 h-auto object-contain" onerror="this.style.display='none'"> 
+            <div class="text-center header-text mx-auto w-3/4">
+                <h3>PEMERINTAH KABUPATEN CIAMIS</h3>
+                <h3>DINAS PENDIDIKAN</h3>
+                <h4>SMP NEGERI 3 LAKBOK</h4>
+                <p>Jalan Mekarjaya No. 199 Sidaharja Kecamatan Lakbok Kabupaten Ciamis</p>
+            </div>
+            <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="absolute right-0 top-1 w-20 h-auto object-contain" onerror="this.style.display='none'">
+        </div>
+        <div class="double-line"></div>
+
+        <div class="judul-surat">
             <h2>SURAT PERINTAH PERJALANAN DINAS</h2>
             <p>Nomor: {{ $sppd->nomor_sppd }}</p>
         </div>
@@ -82,12 +132,13 @@
             <tr><td>6</td><td>a. Tempat Berangkat<br>b. Tempat Tujuan</td><td colspan="2">a. {{ $sppd->tempat_berangkat }}<br>b. {{ $sppd->tempat_tujuan }}</td></tr>
             <tr><td>7</td><td>a. Lamanya Perjalanan<br>b. Tanggal Berangkat<br>c. Tanggal Kembali</td><td colspan="2">a. {{ $sppd->lama_hari }} ({{ Terbilang($sppd->lama_hari) }}) hari<br>b. {{ \Carbon\Carbon::parse($sppd->tgl_berangkat)->isoFormat('D MMMM Y') }}<br>c. {{ \Carbon\Carbon::parse($sppd->tgl_kembali)->isoFormat('D MMMM Y') }}</td></tr>
             
-            <!-- ROW 8: PENGIKUT -->
+            <!-- PENGIKUT -->
             <tr>
                 <td>8</td>
                 <td>Pengikut: Nama</td>
-                <td style="width: 150px; text-align: center;">NIP / NIK</td>
-                <td>Keterangan</td>
+                <!-- UPDATE: NIP dibuat lebih lebar (35%), Keterangan dibuat lebih kecil (20%) -->
+                <td style="width: 35%; text-align: center;">NIP / NIK</td>
+                <td style="width: 20%; text-align: center;">Keterangan</td>
             </tr>
             @if($sppd->followers->count() > 0)
                 @foreach($sppd->followers as $index => $follower)
@@ -95,7 +146,7 @@
                     <td></td>
                     <td>{{ $index + 1 }}. {{ $follower->nama }}</td>
                     <td style="text-align: center;">{{ $follower->nip ?? '-' }}</td>
-                    <td>{{ $follower->keterangan }}</td>
+                    <td style="text-align: center;">{{ $follower->keterangan }}</td>
                 </tr>
                 @endforeach
             @else
@@ -106,20 +157,19 @@
             <tr><td>10</td><td>Keterangan Lain</td><td colspan="2">{{ $sppd->keterangan_lain ?? '-' }}</td></tr>
         </table>
 
-        <div class="ttd-area">
+        <div class="ttd-box">
             <p>Dikeluarkan di: Lakbok</p>
-            <p>Pada tanggal: {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}</p>
-            <br><p style="font-weight: bold;">{{ $sppd->pejabat_jabatan }}</p><br><br><br><br>
+            <p class="mb-6">Pada tanggal: {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}</p>
+            <p style="font-weight: bold;">{{ $sppd->pejabat_jabatan }}</p>
+            <div style="height: 60px;"></div>
             <p style="font-weight: bold; text-decoration: underline;">{{ $sppd->pejabat_nama }}</p>
             <p>NIP. {{ $sppd->pejabat_nip }}</p>
         </div>
+        <div class="clear"></div>
     </div>
 
-    <!-- HALAMAN 2 & 3 (VISUM & LAPORAN) SAMA SEPERTI SEBELUMNYA -->
-    <!-- (Disalin ulang agar file lengkap) -->
-    
-    <div class="page-break"></div>
-    <div class="page">
+    <!-- HALAMAN 2: VISUM -->
+    <div class="sheet">
         <table class="visum">
             <tr>
                 <td></td>
@@ -148,7 +198,10 @@
                     <p style="margin:0; text-align:center;">( .............................................. )</p><p style="margin:0; text-align:center;">NIP.</p>
                 </td>
             </tr>
-            <tr><td><p>III. Tiba di:</p><br><br><br><br><br><p style="text-align:center;">(..............................................)</p></td><td><p>Berangkat dari:</p><br><br><br><br><br><p style="text-align:center;">(..............................................)</p></td></tr>
+            <tr>
+                <td><p>III. Tiba di:</p><br><br><br><br><br><p style="text-align:center;">(..............................................)</p></td>
+                <td><p>Berangkat dari:</p><br><br><br><br><br><p style="text-align:center;">(..............................................)</p></td>
+            </tr>
             <tr>
                 <td>
                     <p style="margin:0;">IV. Tiba di: {{ $sppd->tempat_berangkat }}</p>
@@ -165,26 +218,54 @@
         </table>
     </div>
 
-    <div class="page-break"></div>
-    <div class="page">
-        <div class="header">
-            <h3>PEMERINTAH KABUPATEN CIAMIS</h3>
-            <h3>DINAS PENDIDIKAN</h3>
-            <h4>SMP NEGERI 3 LAKBOK</h4>
-            <p>Jalan Mekarjaya No. 199 Sidaharja Kecamatan Lakbok Kabupaten Ciamis</p>
+    <!-- HALAMAN 3: LAPORAN -->
+    <div class="sheet">
+        <!-- KOP SURAT -->
+               <div class="relative py-2">
+            <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="absolute left-0 top-1 w-16 h-auto object-contain" onerror="this.style.display='none'"> 
+            <div class="text-center header-text mx-auto w-3/4">
+                <h3>PEMERINTAH KABUPATEN CIAMIS</h3>
+                <h3>DINAS PENDIDIKAN</h3>
+                <h4>SMP NEGERI 3 LAKBOK</h4>
+                <p>Jalan Mekarjaya No. 199 Sidaharja Kecamatan Lakbok Kabupaten Ciamis</p>
+            </div>
+            <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="absolute right-0 top-1 w-20 h-auto object-contain" onerror="this.style.display='none'">
         </div>
-        <div class="line"></div>
-        <div class="judul" style="margin-bottom: 30px;"><h2>LAPORAN PERJALANAN DINAS</h2></div>
-        <div class="content" style="line-height: 1.5;">
-            <p><span class="label">I. DASAR</span><br><span class="indent" style="display:block; margin-left: 30px; text-align: justify;">Surat Perintah Tugas Kepala SMP Negeri 3 Lakbok Nomor: {{ str_replace('090', '094', $sppd->nomor_sppd) }} Tanggal {{ \Carbon\Carbon::parse($sppd->tgl_berangkat)->isoFormat('D MMMM Y') }}.</span></p>
-            <p><span class="label">II. MAKSUD DAN TUJUAN</span><br><span class="indent" style="display:block; margin-left: 30px; text-align: justify;">{{ $sppd->maksud_perjalanan }}</span></p>
-            <p><span class="label">III. WAKTU PELAKSANAAN</span><br><span class="indent" style="display:block; margin-left: 30px; text-align: justify;">Kegiatan dilaksanakan pada hari {{ \Carbon\Carbon::parse($sppd->tgl_berangkat)->isoFormat('dddd') }} tanggal {{ \Carbon\Carbon::parse($sppd->tgl_berangkat)->isoFormat('D MMMM Y') }} bertempat di {{ $sppd->tempat_tujuan }}.</span></p>
-            <p><span class="label">IV. HASIL KEGIATAN</span><br><span class="indent" style="display:block; margin-left: 30px; min-height: 150px; border-bottom: 1px dotted #999;"></span><span class="indent" style="display:block; margin-left: 30px; min-height: 50px; border-bottom: 1px dotted #999;"></span></p>
-            <p><span class="label">V. KESIMPULAN / SARAN</span><br><span class="indent" style="display:block; margin-left: 30px; min-height: 100px; border-bottom: 1px dotted #999;"></span></p>
+        <div class="double-line"></div>
+        
+        <div class="judul-surat" style="margin-bottom: 30px;"><h2>LAPORAN PERJALANAN DINAS</h2></div>
+        
+        <div class="content" style="line-height: 1.6;">
+            <p><span class="label-section">I. DASAR</span></p>
+            <span class="indent">Surat Perintah Tugas Kepala SMP Negeri 3 Lakbok Nomor: {{ str_replace('090', '094', $sppd->nomor_sppd) }} Tanggal {{ \Carbon\Carbon::parse($sppd->tgl_berangkat)->isoFormat('D MMMM Y') }}.</span>
+            
+            <p class="mt-4"><span class="label-section">II. MAKSUD DAN TUJUAN</span></p>
+            <span class="indent">{{ $sppd->maksud_perjalanan }}</span>
+            
+            <p class="mt-4"><span class="label-section">III. WAKTU PELAKSANAAN</span></p>
+            <span class="indent">Kegiatan dilaksanakan pada hari {{ \Carbon\Carbon::parse($sppd->tgl_berangkat)->isoFormat('dddd') }} tanggal {{ \Carbon\Carbon::parse($sppd->tgl_berangkat)->isoFormat('D MMMM Y') }} bertempat di {{ $sppd->tempat_tujuan }}.</span>
+            
+            <p class="mt-4"><span class="label-section">IV. HASIL KEGIATAN</span></p>
+            <div class="indent" style="min-height: 150px; border-bottom: 1px dotted #ccc;"></div>
+            <div class="indent" style="min-height: 50px; border-bottom: 1px dotted #ccc;"></div>
+            
+            <p class="mt-4"><span class="label-section">V. KESIMPULAN / SARAN</span></p>
+            <div class="indent" style="min-height: 100px; border-bottom: 1px dotted #ccc;"></div>
         </div>
+
         <div style="margin-top: 50px;">
-            <div style="float: left; width: 40%; text-align: center;"><p>Mengetahui,<br>Kepala Sekolah</p><br><br><br><br><p style="font-weight: bold; text-decoration: underline;">{{ $sppd->pejabat_nama }}</p><p>NIP. {{ $sppd->pejabat_nip }}</p></div>
-            <div style="float: right; width: 40%; text-align: center;"><p>Lakbok, {{ \Carbon\Carbon::parse($sppd->tgl_kembali)->isoFormat('D MMMM Y') }}<br>Pelapor,</p><br><br><br><br><p style="font-weight: bold; text-decoration: underline;">{{ $sppd->user->name }}</p><p>NIP. {{ $sppd->user->nip ?? '-' }}</p></div>
+            <div style="float: left; width: 40%; text-align: center;">
+                <p>Mengetahui,<br>Kepala Sekolah</p>
+                <div style="height: 60px;"></div>
+                <p style="font-weight: bold; text-decoration: underline;">{{ $sppd->pejabat_nama }}</p>
+                <p>NIP. {{ $sppd->pejabat_nip }}</p>
+            </div>
+            <div style="float: right; width: 40%; text-align: center;">
+                <p>Lakbok, {{ \Carbon\Carbon::parse($sppd->tgl_kembali)->isoFormat('D MMMM Y') }}<br>Pelapor,</p>
+                <div style="height: 60px;"></div>
+                <p style="font-weight: bold; text-decoration: underline;">{{ $sppd->user->name }}</p>
+                <p>NIP. {{ $sppd->user->nip ?? '-' }}</p>
+            </div>
             <div class="clear"></div>
         </div>
     </div>

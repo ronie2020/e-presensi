@@ -10,12 +10,26 @@ use Carbon\Carbon;
 
 class SptController extends Controller
 {
-    // MENAMPILKAN DAFTAR SPT
-    public function index()
+    // MENAMPILKAN DAFTAR SPT (DENGAN PENCARIAN)
+    public function index(Request $request)
     {
-        // Ambil data real dari database dengan relasi users & surat masuk
-        // pastikan tabel 'letter_spts' sudah ada (hasil migrasi)
-        $spts = LetterSpt::with(['users', 'letterIncoming'])->latest()->paginate(10);
+        $query = LetterSpt::with(['users', 'letterIncoming']);
+
+        // Logika Pencarian
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nomor_spt', 'like', "%{$search}%")
+                  ->orWhere('tempat_tujuan', 'like', "%{$search}%")
+                  ->orWhere('untuk', 'like', "%{$search}%")
+                  // Cari berdasarkan nama pegawai yang ditugaskan
+                  ->orWhereHas('users', function($qUser) use ($search) {
+                      $qUser->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $spts = $query->latest()->paginate(10);
         
         return view('letters.spt.index', compact('spts'));
     }
@@ -23,10 +37,10 @@ class SptController extends Controller
     // HALAMAN FORM BUAT SPT
     public function create(Request $request)
     {
-        // 1. AMBIL DATA PEGAWAI REAL (Sama seperti di SPPD)
+        // 1. AMBIL DATA PEGAWAI REAL
         $users = User::orderBy('name', 'asc')->get();
 
-        // 2. AMBIL DATA SURAT MASUK (Untuk dasar surat)
+        // 2. AMBIL DATA SURAT MASUK
         $incoming_letters = LetterIncoming::latest()->get();
 
         // Opsional: Jika link diklik dari halaman surat masuk tertentu
@@ -50,7 +64,7 @@ class SptController extends Controller
     {
         $request->validate([
             'nomor_spt' => 'required',
-            'pegawai_ids' => 'required|array|min:1', // Wajib pilih minimal 1 pegawai
+            'pegawai_ids' => 'required|array|min:1', 
             'untuk' => 'required',
             'tempat' => 'required',
             'tgl_berangkat' => 'required|date',
@@ -64,24 +78,36 @@ class SptController extends Controller
 
         // 1. Simpan Data Utama SPT
         $spt = LetterSpt::create([
-            'letter_incoming_id' => $request->letter_incoming_id, // Bisa null
+            'letter_incoming_id' => $request->letter_incoming_id,
             'nomor_spt' => $request->nomor_spt,
             'untuk' => $request->untuk,
             'tempat_tujuan' => $request->tempat,
             'tgl_berangkat' => $request->tgl_berangkat,
             'tgl_kembali' => $request->tgl_kembali,
             'lama_hari' => $lama_hari,
-            // Pejabat Default (Bisa dibuat inputan jika perlu dinamis)
             'pejabat_nama' => 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.',
             'pejabat_nip' => '19820928 201101 1 002',
         ]);
 
-        // 2. Simpan Relasi Pegawai (Pivot Table)
-        // Fungsi sync/attach ini memerlukan tabel 'letter_spt_user'
+        // 2. Simpan Relasi Pegawai
         $spt->users()->attach($request->pegawai_ids);
 
         return redirect()->route('letters.spt.index')
-            ->with('success', 'Surat Perintah Tugas berhasil dibuat dan disimpan ke database.');
+            ->with('success', 'Surat Perintah Tugas berhasil dibuat!');
+    }
+
+    // HAPUS SPT
+    public function destroy($id)
+    {
+        $spt = LetterSpt::findOrFail($id);
+        
+        // Lepaskan relasi pegawai sebelum hapus (optional, biasanya otomatis via cascading delete di db, tapi aman dilakukan manual)
+        $spt->users()->detach();
+        
+        $spt->delete();
+
+        return redirect()->route('letters.spt.index')
+            ->with('success', 'Surat Perintah Tugas berhasil dihapus!');
     }
 
     // FUNGSI CETAK
