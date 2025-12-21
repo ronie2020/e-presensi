@@ -72,18 +72,20 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-8 font-serif text-gray-900">
+{{-- UPDATED: Background sedikit lebih cerah/biru --}}
+<body class="bg-slate-100 min-h-screen p-8 font-serif text-gray-900">
 
     <!-- TOMBOL AKSI (Tidak tercetak) -->
     <div class="max-w-[210mm] mx-auto mb-6 flex justify-between items-center no-print">
-        <a href="{{ route('students.index') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-bold hover:bg-gray-50 transition">
+        <a href="{{ route('students.index') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-bold text-blue-900 hover:bg-gray-50 transition">
             &larr; Kembali
         </a>
         <div class="flex gap-3">
             <a href="{{ route('students.edit', $student->id) }}" class="px-4 py-2 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-lg shadow-sm text-sm font-bold hover:bg-yellow-100 transition">
                 Edit Data
             </a>
-            <button onclick="window.print()" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-sm text-sm font-bold hover:bg-blue-700 transition flex items-center gap-2">
+            {{-- UPDATED: Tombol Cetak Biru Tua (Blue-900) --}}
+            <button onclick="window.print()" class="px-4 py-2 bg-blue-900 text-white rounded-lg shadow-sm text-sm font-bold hover:bg-blue-800 transition flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                 Cetak / PDF
             </button>
@@ -91,7 +93,7 @@
     </div>
 
     <!-- KERTAS A4 -->
-    <div class="max-w-[210mm] mx-auto bg-white shadow-lg p-[15mm] min-h-[297mm] relative">
+    <div class="max-w-[210mm] mx-auto bg-white shadow-xl p-[15mm] min-h-[297mm] relative">
         
         <!-- KOP -->
         <div class="text-center border-b-2 border-black pb-4 mb-4">

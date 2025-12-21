@@ -8,7 +8,8 @@
         {{-- Header --}}
         <div class="mb-8 px-4 sm:px-0">
             <h1 class="text-3xl font-black text-slate-800 tracking-tight leading-tight flex items-center gap-3">
-                <i class="ph-duotone ph-files text-purple-600"></i> Rekap Kehadiran
+                {{-- UPDATED: Icon Color --}}
+                <i class="ph-duotone ph-files text-blue-900"></i> Rekap Kehadiran
             </h1>
             <p class="text-slate-500 mt-2 text-lg">
                 Pantau histori kehadiran siswa dalam kegiatan ekstrakurikuler.
@@ -35,20 +36,23 @@
                     <!-- Periode Tanggal -->
                     <div class="md:col-span-3">
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Dari Tanggal</label>
-                        <input type="date" name="start_date" value="{{ $startDate }}" class="w-full rounded-xl border-slate-300 focus:border-purple-500 focus:ring-purple-500 text-sm py-2 text-slate-600 font-bold shadow-sm">
+                        {{-- UPDATED: Focus Ring Blue-900 --}}
+                        <input type="date" name="start_date" value="{{ $startDate }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 text-sm py-2 text-slate-600 font-bold shadow-sm">
                     </div>
                     <div class="md:col-span-3">
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Sampai Tanggal</label>
-                        <input type="date" name="end_date" value="{{ $endDate }}" class="w-full rounded-xl border-slate-300 focus:border-purple-500 focus:ring-purple-500 text-sm py-2 text-slate-600 font-bold shadow-sm">
+                        {{-- UPDATED: Focus Ring Blue-900 --}}
+                        <input type="date" name="end_date" value="{{ $endDate }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 text-sm py-2 text-slate-600 font-bold shadow-sm">
                     </div>
 
                     <!-- Action Buttons -->
                     <div class="md:col-span-2 flex gap-2">
-                        <button type="submit" class="flex-1 bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 font-bold text-sm shadow-lg shadow-purple-500/20 transition-all h-[42px] flex items-center justify-center gap-2">
+                        {{-- UPDATED: Button Blue-900 --}}
+                        <button type="submit" class="flex-1 bg-blue-900 text-white px-4 py-2 rounded-xl hover:bg-blue-800 font-bold text-sm shadow-lg shadow-blue-900/20 transition-all h-[42px] flex items-center justify-center gap-2">
                             <i class="ph-bold ph-funnel"></i> Filter
                         </button>
                         @if($selectedEkskulId)
-                            <a href="{{ route('extracurriculars.reports.export', request()->query()) }}" target="_blank" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:text-purple-600 transition-colors h-[42px] flex items-center justify-center shadow-sm" title="Cetak PDF">
+                            <a href="{{ route('extracurriculars.reports.export', request()->query()) }}" target="_blank" class="px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:text-blue-900 hover:border-blue-300 transition-colors h-[42px] flex items-center justify-center shadow-sm" title="Cetak PDF">
                                 <i class="ph-bold ph-printer text-xl"></i>
                             </a>
                         @endif
@@ -78,7 +82,8 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs font-bold">
+                                        {{-- UPDATED: Avatar Blue --}}
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">
                                             {{ substr($log->student->name, 0, 1) }}
                                         </div>
                                         <div>
@@ -88,7 +93,8 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 text-xs font-bold shadow-sm group-hover:border-purple-200 group-hover:text-purple-600 transition-colors">
+                                    {{-- UPDATED: Badge Blue Hover --}}
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 text-xs font-bold shadow-sm group-hover:border-blue-200 group-hover:text-blue-900 transition-colors">
                                         {{ $log->extracurricular->name }}
                                     </span>
                                 </td>

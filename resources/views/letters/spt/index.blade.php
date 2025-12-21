@@ -1,180 +1,182 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Surat Perintah Tugas') }}</h2>
-    </x-slot>
+    {{-- Load SweetAlert --}}
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-8 sm:py-10 font-sans text-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <!-- Toolbar: Pencarian dan Tombol Tambah -->
-            <div class="mb-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <!-- Form Pencarian -->
-                <div class="w-full sm:w-1/3">
-                    <form action="{{ route('letters.spt.index') }}" method="GET" class="relative group">
+            {{-- HERO SECTION --}}
+            <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 mb-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+                <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="text-center md:text-left">
+                        <h1 class="text-3xl font-black tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3">
+                            <span class="text-4xl">✈️</span> Surat Perintah Tugas
+                        </h1>
+                        <p class="text-blue-200 text-sm font-medium leading-relaxed max-w-lg">
+                            Kelola penugasan dinas pegawai, cetak SPT, dan pantau riwayat perjalanan dinas sekolah.
+                        </p>
+                        
+                        <div class="mt-6 flex flex-wrap justify-center md:justify-start gap-3">
+                            <a href="{{ route('letters.spt.create') }}" class="px-6 py-3 bg-white text-blue-900 font-bold rounded-xl shadow-lg hover:bg-blue-50 hover:scale-105 transition-all flex items-center gap-2 transform active:scale-95">
+                                <i class="ph-bold ph-plus-circle text-lg"></i>
+                                <span>Buat SPT Baru</span>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    {{-- Statistik Ringkas --}}
+                    <div class="flex gap-3">
+                        <div class="bg-blue-950/40 backdrop-blur-md px-5 py-4 rounded-2xl border border-blue-400/20 text-center min-w-[120px] shadow-lg">
+                            <span class="block text-3xl font-black text-white">{{ $spts->total() }}</span>
+                            <span class="text-[10px] uppercase font-bold text-blue-300 tracking-wider">Total Data</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Toolbar & Table --}}
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                
+                {{-- Toolbar --}}
+                <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                    <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
+                        <i class="ph-fill ph-list-dashes text-blue-900"></i> Riwayat Penugasan
+                    </h3>
+
+                    <form action="{{ route('letters.spt.index') }}" method="GET" class="relative w-full sm:w-80 group">
+                        <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"></i>
                         <input type="text" name="search" 
                                value="{{ request('search') }}" 
-                               placeholder="Cari No. SPT / Pegawai / Tujuan..." 
-                               class="w-full rounded-full border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50 pl-10 transition-all duration-300">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400 group-focus-within:text-green-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                        </div>
+                               placeholder="Cari Nomor / Pegawai / Tujuan..." 
+                               class="w-full pl-11 pr-4 py-3 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-bold text-slate-600 transition-all">
                     </form>
                 </div>
 
-                <a href="{{ route('letters.spt.create') }}" class="px-5 py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full font-semibold text-xs uppercase tracking-widest hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Buat SPT Baru
-                </a>
-            </div>
-
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-2xl border border-gray-100">
-                <div class="bg-white">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Info SPT & Tujuan</th>
-                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Pegawai Ditugaskan</th>
-                                    <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Dasar Surat</th>
-                                    <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($spts as $spt)
-                                <tr class="hover:bg-green-50 transition-colors duration-200">
-                                    <td class="px-6 py-4">
-                                        <div class="text-sm font-bold text-green-700 font-mono bg-green-50 inline-block px-3 py-1 rounded-lg border border-green-100 mb-2">{{ $spt->nomor_spt }}</div>
-                                        <div class="text-sm text-gray-900 font-semibold">{{ $spt->tempat_tujuan }}</div>
-                                        <div class="text-xs text-gray-500 mt-1">
-                                            <span class="flex items-center gap-1">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                                {{ $spt->tgl_berangkat->format('d/m/Y') }} s.d {{ $spt->tgl_kembali->format('d/m/Y') }}
+                {{-- Tabel Data --}}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-blue-900 text-white text-xs font-bold uppercase tracking-wider">
+                            <tr>
+                                <th class="px-6 py-5">Info SPT & Tujuan</th>
+                                <th class="px-6 py-5">Pegawai Ditugaskan</th>
+                                <th class="px-6 py-5">Dasar Surat</th>
+                                <th class="px-6 py-5 text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-50">
+                            @forelse($spts as $spt)
+                            <tr class="hover:bg-blue-50/40 transition-colors group">
+                                <td class="px-6 py-5 align-top">
+                                    <div class="font-mono font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 inline-block text-xs mb-2">
+                                        {{ $spt->nomor_spt }}
+                                    </div>
+                                    <div class="font-bold text-slate-800 text-sm mb-1">{{ $spt->tempat_tujuan }}</div>
+                                    
+                                    <div class="flex items-center gap-2 text-xs text-slate-500 mt-1">
+                                        <i class="ph-bold ph-calendar-blank"></i>
+                                        <span>{{ $spt->tgl_berangkat->format('d/m/Y') }} s.d {{ $spt->tgl_kembali->format('d/m/Y') }}</span>
+                                        <span class="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold text-[10px]">
+                                            {{ $spt->lama_hari }} Hari
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="text-[11px] text-slate-400 mt-2 italic line-clamp-1 border-t border-slate-100 pt-1">
+                                        "{{ $spt->untuk }}"
+                                    </div>
+                                </td>
+                                <td class="px-6 py-5 align-top">
+                                    <div class="flex flex-wrap gap-1.5">
+                                        @foreach($spt->users as $user)
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white border border-slate-200 text-slate-600 shadow-sm">
+                                                <i class="ph-fill ph-user text-blue-400"></i> {{ $user->name }}
                                             </span>
-                                            <span class="text-green-600 font-medium ml-4">({{ $spt->lama_hari }} Hari)</span>
+                                        @endforeach
+                                    </div>
+                                </td>
+                                <td class="px-6 py-5 align-top">
+                                    @if($spt->letterIncoming)
+                                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 max-w-xs">
+                                            <div class="text-[10px] font-bold text-blue-600 mb-0.5">Ref: Surat Masuk</div>
+                                            <div class="text-xs font-bold text-slate-700 truncate">{{ $spt->letterIncoming->nomor_surat }}</div>
+                                            <div class="text-[10px] text-slate-500 line-clamp-1 italic mt-0.5">{{ $spt->letterIncoming->perihal }}</div>
                                         </div>
-                                        <div class="text-xs text-gray-500 mt-2 italic border-t pt-1 border-gray-100 line-clamp-2">
-                                            "{{ $spt->untuk }}"
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="flex flex-wrap gap-1.5">
-                                            @foreach($spt->users as $user)
-                                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 shadow-sm">
-                                                    {{ $user->name }}
-                                                </span>
-                                            @endforeach
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-sm text-gray-600 max-w-xs">
-                                        @if($spt->letterIncoming)
-                                            <div class="bg-gray-50 p-2 rounded border border-gray-200">
-                                                <div class="text-xs font-bold text-gray-700 mb-1">Ref: {{ $spt->letterIncoming->nomor_surat }}</div>
-                                                <div class="text-xs italic text-gray-500 line-clamp-2">{{ $spt->letterIncoming->perihal }}</div>
-                                            </div>
-                                        @else
-                                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-500">
-                                                - Tanpa Dasar -
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <div class="flex flex-col space-y-2 items-center w-full">
-                                            {{-- TOMBOL CETAK --}}
-                                            <a href="{{ route('letters.spt.print', $spt->id) }}" target="_blank" class="w-full text-center text-white bg-blue-600 hover:bg-blue-700 border border-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-md hover:shadow-lg transition transform hover:-translate-y-0.5">
-                                                <i class="fas fa-print mr-1"></i> Cetak SPT
-                                            </a>
+                                    @else
+                                        <span class="text-xs text-slate-400 italic flex items-center gap-1">
+                                            <i class="ph-bold ph-minus-circle"></i> Tanpa Dasar
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-5 align-top text-right">
+                                    <div class="flex flex-col items-end gap-2">
+                                        <a href="{{ route('letters.spt.print', $spt->id) }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700 rounded-lg text-xs font-bold transition-all shadow-sm shadow-blue-500/30">
+                                            <i class="ph-bold ph-printer"></i> Cetak
+                                        </a>
+                                        
+                                        <div class="flex items-center gap-2">
+                                            {{-- Tombol Edit (Jika ada route edit) --}}
+                                            {{-- <a href="#" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 transition-all">
+                                                <i class="ph-bold ph-pencil-simple text-lg"></i>
+                                            </a> --}}
                                             
-                                            <div class="flex space-x-2 w-full">
-                                                {{-- Edit (Placeholder jika belum ada route edit) --}}
-                                                {{-- <a href="#" class="flex-1 text-center text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-1.5 rounded-lg text-xs transition">Edit</a> --}}
-                                                
-                                                {{-- Tombol Hapus dengan SweetAlert --}}
-                                                <button type="button" onclick="confirmDelete('{{ $spt->id }}')" class="flex-1 text-center text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 border border-red-200 px-2 py-1.5 rounded-lg text-xs transition">
-                                                    Hapus
-                                                </button>
-                                                
-                                                {{-- Form Hapus Tersembunyi --}}
-                                                <form id="delete-form-{{ $spt->id }}" action="{{ route('letters.spt.destroy', $spt->id) }}" method="POST" class="hidden">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                </form>
-                                            </div>
+                                            <button type="button" onclick="confirmDelete('{{ $spt->id }}')" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:shadow-sm transition-all" title="Hapus">
+                                                <i class="ph-bold ph-trash text-lg"></i>
+                                            </button>
                                         </div>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="4" class="px-6 py-16 text-center text-gray-500 bg-white">
-                                        <div class="flex flex-col items-center justify-center">
-                                            <div class="bg-gray-100 rounded-full p-4 mb-4">
-                                                <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                            </div>
-                                            <p class="text-base font-medium text-gray-600">Belum ada Surat Perintah Tugas.</p>
-                                            @if(request('search'))
-                                                <p class="text-sm text-gray-400 mt-1">Tidak ditemukan data dengan kata kunci "{{ request('search') }}"</p>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="p-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
-                        {{ $spts->withQueryString()->links() }}
-                    </div>
+
+                                        <form id="delete-form-{{ $spt->id }}" action="{{ route('letters.spt.destroy', $spt->id) }}" method="POST" class="hidden">
+                                            @csrf @method('DELETE')
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="px-6 py-20 text-center">
+                                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                                        <i class="ph-duotone ph-airplane-tilt text-4xl"></i>
+                                    </div>
+                                    <h3 class="text-slate-700 font-bold text-lg">Belum ada SPT</h3>
+                                    <p class="text-slate-400 text-sm mt-1">Silakan buat surat perintah tugas baru.</p>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-6 border-t border-slate-50 bg-slate-50/50">
+                    {{ $spts->withQueryString()->links() }}
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SWEETALERT 2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Toast Notifikasi
+        // Notifikasi Sukses
         @if(session('success'))
             const Toast = Swal.mixin({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                }
+                toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
+                timerProgressBar: true, customClass: { popup: 'rounded-xl' }
             });
-            Toast.fire({
-                icon: 'success',
-                title: '{{ session('success') }}'
-            });
+            Toast.fire({ icon: 'success', title: '{{ session('success') }}' });
         @endif
 
         // Konfirmasi Hapus
         function confirmDelete(id) {
             Swal.fire({
-                title: 'Hapus SPT?',
-                text: "Data penugasan dan relasi pegawai akan dihapus permanen.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal',
-                background: '#fff',
-                borderRadius: '1rem',
+                title: 'Hapus SPT?', text: "Data penugasan ini akan dihapus permanen.",
+                icon: 'warning', showCancelButton: true,
+                confirmButtonColor: '#e11d48', cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal',
+                borderRadius: '1.5rem',
                 customClass: {
-                    confirmButton: 'px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700',
-                    cancelButton: 'px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 ml-2'
-                },
-                buttonsStyling: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('delete-form-' + id).submit();
+                    popup: 'rounded-[2rem]', confirmButton: 'rounded-xl px-6 py-2.5 font-bold', cancelButton: 'rounded-xl px-6 py-2.5 font-bold'
                 }
+            }).then((result) => {
+                if (result.isConfirmed) document.getElementById('delete-form-' + id).submit();
             })
         }
     </script>

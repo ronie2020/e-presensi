@@ -15,33 +15,37 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cetak SPPD - {{ $sppd->nomor_sppd }}</title>
     
-    <!-- Scripts & Styles -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {{-- Phosphor Icons --}}
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
-        /* Pengaturan Kertas F4 */
-        @page { size: 21.5cm 33cm; margin: 0; }
+        /* PENGATURAN KERTAS F4 (Folio) */
+        @page { 
+            size: 21.5cm 33cm; 
+            margin: 0; 
+        }
         
         body {
             font-family: 'Times New Roman', serif;
             font-size: 11pt;
-            background-color: #f3f4f6;
+            background-color: #f1f5f9; /* Slate-100 */
             -webkit-print-color-adjust: exact;
         }
 
-        /* LEMBAR KERTAS (SHEET) */
+        /* TAMPILAN KERTAS DI LAYAR */
         .sheet {
             background: white;
             width: 21.5cm;
             min-height: 33cm;
-            margin: 20px auto;
+            margin: 30px auto;
             padding: 1.5cm 2cm;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             position: relative;
-            page-break-after: always; /* Pastikan pindah halaman saat diprint */
+            page-break-after: always; 
         }
         
         /* MODE PRINT */
@@ -52,7 +56,7 @@
             .no-print { display: none !important; }
         }
 
-        /* HELPER CLASSES */
+        /* TYPOGRAPHY SURAT */
         .header-text h3 { margin: 0; font-size: 14pt; font-weight: bold; text-transform: uppercase; }
         .header-text h4 { margin: 0; font-size: 12pt; font-weight: bold; text-transform: uppercase; }
         .header-text p { margin: 0; font-size: 10pt; }
@@ -82,26 +86,27 @@
 <body>
 
     <!-- TOOLBAR (Floating) -->
-    <div class="no-print fixed top-0 left-0 right-0 bg-white border-b shadow-sm p-4 flex justify-between items-center z-50">
-        <div class="flex items-center gap-3">
-            <div class="bg-indigo-100 p-2 rounded-full text-indigo-600">
-                <i class="fas fa-car-side text-xl"></i>
+    <!-- UPDATED: Theme Blue-900 -->
+    <div class="no-print fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm p-4 flex justify-between items-center z-50">
+        <div class="flex items-center gap-4">
+            <div class="bg-blue-900 p-2.5 rounded-xl text-white shadow-lg shadow-blue-900/20">
+                <i class="ph-bold ph-car-profile text-xl"></i>
             </div>
             <div>
-                <h1 class="font-bold text-gray-800 text-sm md:text-base">Cetak SPPD</h1>
-                <p class="text-xs text-gray-500">Nomor: {{ $sppd->nomor_sppd }}</p>
+                <h1 class="font-black text-slate-800 text-sm md:text-base font-sans">Pratinjau Cetak SPPD</h1>
+                <p class="text-xs text-slate-500 font-sans font-bold">No: {{ $sppd->nomor_sppd }}</p>
             </div>
         </div>
-        <div class="flex gap-2">
-            <a href="{{ route('sppd.index') }}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition shadow-sm">
-                <i class="fas fa-arrow-left mr-2"></i> Kembali
+        <div class="flex gap-3">
+            <a href="{{ route('sppd.index') }}" class="px-5 py-2.5 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-800 transition shadow-sm font-sans flex items-center gap-2">
+                <i class="ph-bold ph-arrow-left"></i> Kembali
             </a>
-            <button onclick="window.print()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition shadow-lg flex items-center">
-                <i class="fas fa-print mr-2"></i> Cetak Dokumen
+            <button onclick="window.print()" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-900 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/30 font-sans flex items-center gap-2">
+                <i class="ph-bold ph-printer"></i> Cetak Dokumen
             </button>
         </div>
     </div>
-    <div class="no-print h-20"></div>
+    <div class="no-print h-24"></div>
 
     <!-- HALAMAN 1: SPPD DEPAN -->
     <div class="sheet">
@@ -136,7 +141,6 @@
             <tr>
                 <td>8</td>
                 <td>Pengikut: Nama</td>
-                <!-- UPDATE: NIP dibuat lebih lebar (35%), Keterangan dibuat lebih kecil (20%) -->
                 <td style="width: 35%; text-align: center;">NIP / NIK</td>
                 <td style="width: 20%; text-align: center;">Keterangan</td>
             </tr>

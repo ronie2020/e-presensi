@@ -1,245 +1,271 @@
-{{-- Halaman ini adalah tampilan untuk resources/views/users/index.blade.php --}}
 <x-app-layout>
-    <div class="py-6 sm:py-8">
+    <div class="py-8 sm:py-10 font-sans text-slate-800">
         
-        {{-- Header Page --}}
-        <div class="mb-8">
-            <h1 class="text-3xl font-black text-gray-800 tracking-tight leading-tight">
-                Manajemen Pengguna
-            </h1>
-            <p class="text-gray-500 mt-1">
-                Kelola akun akses untuk Guru, Staf, dan Administrator sistem.
-            </p>
+        {{-- HERO SECTION --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
+            <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
+                
+                {{-- Background Decorations --}}
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+                <div class="absolute -top-24 -right-24 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-blue-500/30 transition-all duration-700"></div>
+                
+                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+                    
+                    {{-- Text Content --}}
+                    <div class="max-w-2xl">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm">
+                            <i class="ph-fill ph-users-three"></i> Akses & Keamanan
+                        </div>
+                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-white leading-tight">
+                            Manajemen Pengguna
+                        </h1>
+                        <p class="text-blue-100/80 text-sm md:text-base font-medium leading-relaxed max-w-lg">
+                            Kelola akun akses untuk Guru, Staf, dan Administrator sistem. Atur peran dan hak akses aplikasi.
+                        </p>
+                    </div>
+                    
+                    {{-- Stats Cards --}}
+                    <div class="flex gap-4">
+                        <div class="bg-white/10 backdrop-blur-md px-6 py-5 rounded-2xl border border-white/10 flex-1 md:flex-none min-w-[140px] text-center md:text-left hover:bg-white/15 transition-colors">
+                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-blue-300">
+                                <i class="ph-duotone ph-user-circle text-lg"></i>
+                                <span class="text-[10px] font-bold uppercase tracking-wider">Total Akun</span>
+                            </div>
+                            <span class="block text-3xl font-black text-white tracking-tight">{{ $users->total() }}</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </div>
 
-        {{-- Flash Messages --}}
-        @if (session('success'))
-            <div x-data="{ show: true }" x-show="show" class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
-                <div class="flex items-center gap-3">
-                    <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {{-- Pesan Flash --}}
+            @if (session('success'))
+                <div x-data="{ show: true }" x-show="show" x-transition class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
+                            <i class="ph-bold ph-check-circle text-xl"></i>
+                        </div>
+                        <span class="font-bold text-sm">{{ session('success') }}</span>
                     </div>
-                    <span class="font-medium">{{ session('success') }}</span>
+                    <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-1 rounded-md hover:bg-emerald-100 transition"><i class="ph-bold ph-x"></i></button>
                 </div>
-                <button @click="show = false" class="text-emerald-400 hover:text-emerald-600">&times;</button>
-            </div>
-        @endif
+            @endif
 
-        @if ($errors->any())
-            <div class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl flex items-center gap-3 shadow-sm">
-                <div class="p-2 bg-rose-100 rounded-full text-rose-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            @if ($errors->any())
+                <div x-data="{ show: true }" x-show="show" class="mb-8 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl flex items-center gap-3 shadow-sm">
+                    <div class="p-2 bg-rose-100 rounded-full text-rose-600 shrink-0">
+                        <i class="ph-bold ph-warning-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm mb-1">Terdapat kesalahan input:</p>
+                        <ul class="list-disc list-inside text-xs font-medium">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
-                <div>
-                    <ul class="list-disc list-inside text-sm font-medium">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-        @endif
+            @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-            {{-- KOLOM KIRI: FORM TAMBAH USER --}}
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-3xl shadow-sm border border-cyan-100 overflow-hidden relative group hover:shadow-lg hover:shadow-cyan-100/50 transition-all duration-300 h-fit sticky top-6">
-                    <div class="absolute top-0 left-0 w-1.5 h-full bg-cyan-500"></div>
-                    <div class="p-6 md:p-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                
+                {{-- KOLOM KIRI: FORM TAMBAH USER --}}
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden sticky top-24 relative group hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
                         
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-12 h-12 bg-cyan-50 text-cyan-600 rounded-2xl flex items-center justify-center text-xl shadow-sm border border-cyan-100">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                        {{-- Card Header --}}
+                        <div class="bg-gradient-to-r from-blue-900 to-blue-800 p-8 text-white relative overflow-hidden">
+                            <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
+                                <i class="ph-fill ph-user-plus"></i>
                             </div>
-                            <div>
-                                <h3 class="text-lg font-black text-gray-800">User Baru</h3>
-                                <p class="text-xs text-gray-500">Tambah guru atau staf</p>
-                            </div>
+                            <h3 class="text-xl font-black relative z-10">User Baru</h3>
+                            <p class="text-blue-200 text-sm font-medium relative z-10 mt-1">Registrasi pengguna.</p>
                         </div>
 
-                        {{-- UPDATE: Tambahkan enctype untuk upload file --}}
-                        <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5" x-data="{ role: 'Guru' }">
-                            @csrf
-                            
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
-                                <input type="text" name="name" value="{{ old('name') }}" required placeholder="Contoh: Budi Santoso, S.Pd."
-                                       class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 text-sm py-3 font-bold text-gray-700 transition-colors">
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Email Login</label>
-                                <input type="email" name="email" value="{{ old('email') }}" required placeholder="email@sekolah.sch.id"
-                                       class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 text-sm py-3 font-medium transition-colors">
-                            </div>
-
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Peran (Role)</label>
-                                <div class="relative">
-                                    {{-- x-model="role" digunakan untuk menampilkan field tambahan --}}
-                                    <select name="role" x-model="role" required class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 text-sm py-3 font-medium transition-colors appearance-none">
-                                        <option value="Guru">Guru</option>
-                                        <option value="Wali Kelas">Wali Kelas</option>
-                                        <option value="Guru Piket">Guru Piket</option>
-                                        <option value="Kepala Sekolah">Kepala Sekolah</option>
-                                        <option value="Admin">Admin (IT)</option>
-                                    </select>
-                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- FIELD TAMBAHAN: HANYA MUNCUL JIKA ROLE BUKAN ADMIN --}}
-                            <div x-show="role !== 'Admin'" x-transition class="space-y-5 pt-2 border-t border-dashed border-gray-200">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Jabatan / Mapel</label>
-                                    <input type="text" name="position" placeholder="Contoh: Guru Matematika"
-                                           class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 text-sm py-3 transition-colors">
-                                </div>
+                        <div class="p-8 relative z-10">
+                            <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5" x-data="{ role: 'Guru' }">
+                                @csrf
                                 
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Bio Singkat (Kata Mutiara)</label>
-                                    <textarea name="bio" rows="2" placeholder="Contoh: Mendidik dengan hati..."
-                                           class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 text-sm py-3 transition-colors"></textarea>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Lengkap</label>
+                                    <input type="text" name="name" value="{{ old('name') }}" required placeholder="Contoh: Budi Santoso, S.Pd."
+                                           class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 px-4 transition-colors placeholder:font-normal">
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Foto Profil</label>
-                                    <input type="file" name="photo" accept="image/*"
-                                           class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100">
-                                    <p class="text-[10px] text-gray-400 mt-1">Format: JPG/PNG, Max 2MB. Rasio terbaik 4:5.</p>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Email Login</label>
+                                    <input type="email" name="email" value="{{ old('email') }}" required placeholder="email@sekolah.sch.id"
+                                           class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 px-4 transition-colors placeholder:font-normal">
                                 </div>
-                            </div>
 
-                            <div class="grid grid-cols-2 gap-4 pt-2 border-t border-dashed border-gray-200">
                                 <div>
-                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Password</label>
-                                    <input type="password" name="password" required 
-                                           class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 text-sm py-3 transition-colors">
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Peran (Role)</label>
+                                    <div class="relative">
+                                        <select name="role" x-model="role" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 px-4 transition-colors appearance-none cursor-pointer">
+                                            <option value="Guru">Guru</option>
+                                            <option value="Wali Kelas">Wali Kelas</option>
+                                            <option value="Guru Piket">Guru Piket</option>
+                                            <option value="Kepala Sekolah">Kepala Sekolah</option>
+                                            <option value="Admin">Admin (IT)</option>
+                                        </select>
+                                        <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">Konfirmasi</label>
-                                    <input type="password" name="password_confirmation" required 
-                                           class="w-full rounded-xl border-gray-200 bg-gray-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 text-sm py-3 transition-colors">
-                                </div>
-                            </div>
 
-                            <button type="submit" class="w-full py-3 px-6 bg-cyan-600 text-white font-bold rounded-xl hover:bg-cyan-700 transition-all shadow-lg shadow-cyan-200 flex items-center justify-center gap-2 mt-2 group-hover:translate-y-0.5">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                                Simpan Data
-                            </button>
-                        </form>
+                                {{-- FIELD TAMBAHAN --}}
+                                <div x-show="role !== 'Admin'" x-transition class="space-y-5 pt-4 border-t border-dashed border-slate-200">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Jabatan / Mapel</label>
+                                        <input type="text" name="position" placeholder="Contoh: Guru Matematika"
+                                               class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 px-4 transition-colors placeholder:font-normal">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Bio Singkat</label>
+                                        <textarea name="bio" rows="2" placeholder="Motto atau deskripsi..."
+                                               class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-medium text-slate-700 py-3 px-4 transition-colors placeholder:font-normal"></textarea>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Foto Profil</label>
+                                        <input type="file" name="photo" accept="image/*"
+                                               class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors border border-dashed border-slate-300 rounded-2xl py-3 px-4 cursor-pointer bg-white">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-dashed border-slate-200">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Password</label>
+                                        <input type="password" name="password" required 
+                                               class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 px-4 transition-colors">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Konfirmasi</label>
+                                        <input type="password" name="password_confirmation" required 
+                                               class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 px-4 transition-colors">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="w-full py-3.5 px-6 bg-blue-900 text-white font-bold rounded-2xl hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2 transform active:scale-[0.98] mt-4">
+                                    <i class="ph-bold ph-floppy-disk text-lg"></i>
+                                    Simpan Akun
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                    {{-- Background Decor --}}
-                    <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-cyan-50 rounded-full blur-2xl opacity-50 pointer-events-none"></div>
                 </div>
-            </div>
 
-            {{-- KOLOM KANAN: DAFTAR USER --}}
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden h-full flex flex-col">
-                    
-                    <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-                        <h3 class="text-lg font-black text-gray-800">Daftar Pengguna Aktif</h3>
-                        <span class="text-xs font-bold bg-white px-2 py-1 rounded border border-gray-200 text-gray-500">{{ $users->total() }} Akun</span>
-                    </div>
-                    
-                    <div class="overflow-x-auto flex-1">
-                        <table class="min-w-full text-left border-collapse">
-                            <thead class="bg-white border-b border-gray-100">
-                                <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Identitas</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Peran & Jabatan</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-right">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-50">
-                                @forelse ($users as $user)
-                                    <tr class="hover:bg-cyan-50/30 transition-colors group">
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="flex items-center gap-3">
-                                                {{-- Tampilkan Foto Profil jika ada --}}
-                                                @if($user->photo_path)
-                                                    <img src="{{ asset('storage/' . $user->photo_path) }}" class="w-9 h-9 rounded-full object-cover shadow-sm border border-gray-200">
-                                                @else
-                                                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600 font-bold flex items-center justify-center text-xs group-hover:from-cyan-100 group-hover:to-cyan-200 group-hover:text-cyan-700 transition-all shadow-inner">
-                                                        {{ substr($user->name, 0, 2) }}
-                                                    </div>
-                                                @endif
-                                                <div>
-                                                    <div class="font-bold text-gray-800 text-sm">{{ $user->name }}</div>
-                                                    <div class="text-xs text-gray-400">{{ $user->email }}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            @php
-                                                $badgeClass = match($user->role) {
-                                                    'Admin' => 'bg-rose-100 text-rose-700 border-rose-200',
-                                                    'Kepala Sekolah' => 'bg-purple-100 text-purple-700 border-purple-200',
-                                                    'Wali Kelas' => 'bg-blue-100 text-blue-700 border-blue-200',
-                                                    'Guru Piket' => 'bg-amber-100 text-amber-700 border-amber-200',
-                                                    default => 'bg-emerald-100 text-emerald-700 border-emerald-200',
-                                                };
-                                            @endphp
-                                            <div class="flex flex-col items-start gap-1">
-                                                <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-bold border {{ $badgeClass }}">
-                                                    {{ $user->role }}
-                                                </span>
-                                                @if($user->position)
-                                                    <span class="text-[10px] text-gray-500 font-medium ml-1">
-                                                        {{ $user->position }}
-                                                    </span>
-                                                @endif
-                                            </div>
-                                        </td>
-                                      <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-    @if(Auth::id() != $user->id)
-        
-        {{-- TOMBOL EDIT --}}
-        <a href="{{ route('users.edit', $user->id) }}" class="inline-block p-2 text-gray-300 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-all mr-1" title="Edit Data">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-        </a>
-
-        {{-- TOMBOL HAPUS --}}
-        <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna {{ $user->name }}?');">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="p-2 text-gray-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all" title="Hapus User">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-            </button>
-        </form>
-    @else
-        <span class="text-xs font-bold text-gray-300 italic mr-2 select-none">(Anda)</span>
-        
-        {{-- Tombol Edit Diri Sendiri (Opsional, biasanya lewat menu Profil) --}}
-        <a href="{{ route('profile.edit') }}" class="inline-block p-2 text-cyan-600 hover:bg-cyan-50 rounded-lg transition-all" title="Edit Profil Saya">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-        </a>
-    @endif
-                                        </td>
-                                    </tr>
-                                @empty
+                {{-- KOLOM KANAN: DAFTAR USER --}}
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full min-h-[600px]">
+                        
+                        {{-- Toolbar Table --}}
+                        <div class="p-8 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
+                            <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                                <i class="ph-fill ph-list-dashes text-blue-900"></i> Daftar Pengguna
+                            </h3>
+                            <span class="bg-white border border-slate-200 text-[10px] font-black px-3 py-1.5 rounded-xl text-slate-500 shadow-sm">
+                                {{ $users->total() }} Akun
+                            </span>
+                        </div>
+                        
+                        <div class="overflow-x-auto flex-1 custom-scrollbar">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-slate-50 text-xs font-bold text-slate-400 uppercase tracking-wider">
                                     <tr>
-                                        <td colspan="3" class="px-6 py-12 text-center text-gray-400">
-                                            <div class="flex flex-col items-center justify-center">
-                                                <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                                                    <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                                                </div>
-                                                <p class="text-sm font-medium">Belum ada data pengguna lain.</p>
-                                            </div>
-                                        </td>
+                                        <th class="px-6 py-5">Identitas</th>
+                                        <th class="px-6 py-5">Peran & Jabatan</th>
+                                        <th class="px-6 py-5 text-right">Aksi</th>
                                     </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    {{-- Pagination --}}
-                    <div class="p-4 border-t border-gray-100">
-                        {{ $users->links() }}
+                                </thead>
+                                <tbody class="divide-y divide-slate-50">
+                                    @forelse ($users as $user)
+                                        <tr class="group hover:bg-blue-50/30 transition-colors">
+                                            <td class="px-6 py-5 whitespace-nowrap">
+                                                <div class="flex items-center gap-4">
+                                                    {{-- Avatar --}}
+                                                    <div class="relative shrink-0">
+                                                        @if($user->photo_path)
+                                                            <img src="{{ asset('storage/' . $user->photo_path) }}" class="w-10 h-10 rounded-2xl object-cover shadow-sm border border-slate-200">
+                                                        @else
+                                                            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-100 to-slate-100 flex items-center justify-center text-blue-600 font-black text-sm border border-white shadow-sm">
+                                                                {{ substr($user->name, 0, 2) }}
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                    <div>
+                                                        <div class="font-bold text-slate-800 text-sm group-hover:text-blue-700 transition-colors">{{ $user->name }}</div>
+                                                        <div class="text-xs text-slate-400 font-medium">{{ $user->email }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-5 whitespace-nowrap">
+                                                @php
+                                                    $badgeClass = match($user->role) {
+                                                        'Admin' => 'bg-rose-50 text-rose-600 border-rose-200',
+                                                        'Kepala Sekolah' => 'bg-purple-50 text-purple-600 border-purple-200',
+                                                        'Wali Kelas' => 'bg-blue-50 text-blue-600 border-blue-200',
+                                                        'Guru Piket' => 'bg-amber-50 text-amber-600 border-amber-200',
+                                                        default => 'bg-emerald-50 text-emerald-600 border-emerald-200',
+                                                    };
+                                                @endphp
+                                                <div class="flex flex-col items-start gap-1.5">
+                                                    <span class="inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border {{ $badgeClass }}">
+                                                        {{ $user->role }}
+                                                    </span>
+                                                    @if($user->position)
+                                                        <span class="text-xs text-slate-500 font-bold flex items-center gap-1">
+                                                            <i class="ph-bold ph-briefcase text-slate-300"></i> {{ $user->position }}
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-5 whitespace-nowrap text-right">
+                                                <div class="flex justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                                                    @if(Auth::id() != $user->id)
+                                                        <a href="{{ route('users.edit', $user->id) }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm" title="Edit Data">
+                                                            <i class="ph-bold ph-pencil-simple text-lg"></i>
+                                                        </a>
+
+                                                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna {{ $user->name }}?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm" title="Hapus User">
+                                                                <i class="ph-bold ph-trash text-lg"></i>
+                                                            </button>
+                                                        </form>
+                                                    @else
+                                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 text-xs font-bold select-none cursor-not-allowed">
+                                                            <i class="ph-bold ph-user"></i> Anda
+                                                        </span>
+                                                        <a href="{{ route('profile.edit') }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-blue-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm" title="Edit Profil Saya">
+                                                            <i class="ph-bold ph-gear text-lg"></i>
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="3" class="px-6 py-20 text-center">
+                                                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                                                    <i class="ph-duotone ph-users-three text-4xl"></i>
+                                                </div>
+                                                <p class="text-sm font-bold text-slate-600">Belum ada data pengguna lain.</p>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        {{-- Pagination --}}
+                        <div class="p-6 border-t border-slate-50 bg-slate-50/30">
+                            {{ $users->links() }}
+                        </div>
                     </div>
                 </div>
             </div>

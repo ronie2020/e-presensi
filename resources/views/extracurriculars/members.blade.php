@@ -6,49 +6,97 @@
 
     <div class="py-6 sm:py-8">
         
-        {{-- Header --}}
-        <div class="mb-8 px-4 sm:px-0 flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div>
-                <h1 class="text-3xl font-black text-slate-800 tracking-tight leading-tight flex items-center gap-3">
-                    <i class="ph-duotone ph-users-three text-blue-600"></i> Peserta Ekstrakurikuler
-                </h1>
-                <p class="text-slate-500 mt-2 text-lg">
-                    Kelola keanggotaan siswa dalam setiap kegiatan.
-                </p>
+        {{-- HERO SECTION BARU --}}
+        <div class="mb-10 px-4 sm:px-0 print:hidden">
+            <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
+                
+                {{-- Background Decorations --}}
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+                <div class="absolute -top-24 -right-24 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-blue-500/30 transition-all duration-700"></div>
+                <div class="absolute bottom-0 right-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                
+                {{-- Content Container --}}
+                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+                    
+                    {{-- Left Text --}}
+                    <div class="max-w-2xl">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm">
+                            <i class="ph-fill ph-users-three"></i> Modul Kesiswaan
+                        </div>
+                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-white leading-tight">
+                            Peserta Ekstrakurikuler
+                        </h1>
+                        <p class="text-blue-100/80 text-sm md:text-base font-medium leading-relaxed max-w-lg">
+                            Kelola data keanggotaan siswa. Tambahkan anggota baru, pantau partisipasi, dan cetak daftar hadir per kegiatan.
+                        </p>
+
+                        {{-- Action Button in Hero --}}
+                        @if($selectedEkskulId)
+                            <div class="mt-8">
+                                <button onclick="window.print()" class="px-6 py-3 bg-white text-blue-900 font-bold rounded-xl shadow-lg hover:bg-blue-50 hover:scale-105 transition-all flex items-center gap-2 transform active:scale-95">
+                                    <div class="bg-blue-100 p-1 rounded-md">
+                                        <i class="ph-bold ph-printer"></i>
+                                    </div>
+                                    <span>Cetak Absensi</span>
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                    
+                    {{-- Right Stats Cards --}}
+                    <div class="flex flex-row md:flex-col lg:flex-row gap-4 w-full md:w-auto">
+                        @if($selectedEkskulId)
+                            {{-- Stat: Anggota Ekskul Ini --}}
+                            <div class="bg-white/10 backdrop-blur-md px-6 py-5 rounded-2xl border border-white/10 flex-1 md:flex-none min-w-[160px] text-center md:text-left hover:bg-white/15 transition-colors">
+                                <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-emerald-300">
+                                    <i class="ph-duotone ph-user-check text-lg"></i>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider">Anggota Aktif</span>
+                                </div>
+                                <span class="block text-4xl font-black text-white tracking-tight">{{ $members->total() }}</span>
+                                <span class="text-[10px] text-blue-200 block mt-1 truncate max-w-[140px]">{{ $extracurriculars->find($selectedEkskulId)->name }}</span>
+                            </div>
+                        @else
+                            {{-- Stat: Total Semua --}}
+                            <div class="bg-white/10 backdrop-blur-md px-6 py-5 rounded-2xl border border-white/10 flex-1 md:flex-none min-w-[160px] text-center md:text-left hover:bg-white/15 transition-colors">
+                                <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-blue-300">
+                                    <i class="ph-duotone ph-users text-lg"></i>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider">Total Partisipan</span>
+                                </div>
+                                @php
+                                    $totalAll = $extracurriculars->sum('members_count');
+                                @endphp
+                                <span class="block text-4xl font-black text-white tracking-tight">{{ $totalAll }}</span>
+                                <span class="text-[10px] text-blue-200 block mt-1">Semua Kegiatan</span>
+                            </div>
+                        @endif
+                    </div>
+
+                </div>
             </div>
-            
-            {{-- Tombol Cetak --}}
-            @if($selectedEkskulId)
-            <div>
-                <button onclick="window.print()" class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold py-2 px-4 rounded-xl shadow-sm flex items-center gap-2 transition">
-                    <i class="ph-bold ph-printer"></i> Cetak Absensi
-                </button>
-            </div>
-            @endif
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 px-4 sm:px-0 items-start">
             
             {{-- KOLOM KIRI (FILTER) --}}
             <div class="lg:col-span-1 space-y-6 print:hidden">
-                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden sticky top-24">
-                    <div class="p-6 bg-slate-50 border-b border-slate-100">
-                        <h3 class="font-bold text-slate-800">Pilih Kegiatan</h3>
-                        <p class="text-xs text-slate-500">Pilih ekskul untuk melihat anggota.</p>
+                <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden sticky top-24">
+                    <div class="p-6 bg-slate-50/50 border-b border-slate-100">
+                        <h3 class="font-black text-slate-800 text-lg">Pilih Kegiatan</h3>
+                        <p class="text-xs text-slate-500 font-medium mt-1">Pilih ekskul untuk melihat anggota.</p>
                     </div>
                     <div class="p-4 max-h-[70vh] overflow-y-auto custom-scrollbar">
                         <form method="GET" action="{{ route('extracurriculars.members') }}">
                             <div class="space-y-2">
                                 @foreach($extracurriculars as $ekskul)
                                     <button type="submit" name="ekskul_id" value="{{ $ekskul->id }}" 
-                                        class="w-full flex items-center justify-between p-3 rounded-xl transition-all {{ $selectedEkskulId == $ekskul->id ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30' : 'bg-white hover:bg-slate-50 text-slate-600 border border-slate-100' }}">
-                                        <div class="flex items-center gap-3 text-left">
-                                            <div class="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center {{ $selectedEkskulId == $ekskul->id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }}">
+                                        class="w-full flex items-center justify-between p-3 rounded-2xl transition-all group {{ $selectedEkskulId == $ekskul->id ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/30' : 'bg-white hover:bg-blue-50 text-slate-600 border border-slate-100' }}">
+                                        <div class="flex items-center gap-3 text-left overflow-hidden">
+                                            <div class="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center text-lg {{ $selectedEkskulId == $ekskul->id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-400 group-hover:text-blue-600 group-hover:bg-blue-100' }}">
                                                 <i class="{{ $ekskul->icon && !Str::startsWith($ekskul->icon, 'storage') ? $ekskul->icon : 'ph-fill ph-star' }}"></i>
                                             </div>
-                                            <span class="font-bold text-sm line-clamp-2">{{ $ekskul->name }}</span>
+                                            <span class="font-bold text-sm truncate pr-2">{{ $ekskul->name }}</span>
                                         </div>
-                                        <span class="text-xs font-bold px-2 py-1 rounded-full shrink-0 {{ $selectedEkskulId == $ekskul->id ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500' }}">
+                                        <span class="text-[10px] font-black px-2.5 py-1 rounded-lg shrink-0 {{ $selectedEkskulId == $ekskul->id ? 'bg-white text-blue-900' : 'bg-slate-100 text-slate-500 group-hover:bg-blue-200 group-hover:text-blue-800' }}">
                                             {{ $ekskul->members_count }}
                                         </span>
                                     </button>
@@ -63,99 +111,119 @@
             <div class="lg:col-span-2 space-y-6">
                 @if($selectedEkskulId)
                     <!-- Form Tambah Anggota (FILTER KELAS -> SISWA) -->
-                    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 print:hidden">
-                        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <i class="ph-bold ph-user-plus text-blue-500"></i> Tambah Anggota
-                        </h3>
+                    <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 p-8 print:hidden relative overflow-hidden">
+                        {{-- Aksen Header --}}
+                        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-blue-400"></div>
                         
-                        <form action="{{ route('extracurriculars.members.store') }}" method="POST" class="flex flex-col gap-4">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-blue-100">
+                                <i class="ph-duotone ph-user-plus"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-black text-slate-800 leading-none">Tambah Anggota</h3>
+                                <p class="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wider">Input Siswa Baru</p>
+                            </div>
+                        </div>
+                        
+                        <form action="{{ route('extracurriculars.members.store') }}" method="POST" class="flex flex-col gap-5">
                             @csrf
                             <input type="hidden" name="extracurricular_id" value="{{ $selectedEkskulId }}">
                             
                             {{-- 1. FILTER KELAS --}}
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Langkah 1: Pilih Kelas</label>
-                                <select id="filter-class" class="w-full rounded-xl border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm font-bold text-slate-700">
-                                    <option value="">-- Pilih Kelas --</option>
-                                    @foreach($classes as $c)
-                                        <option value="{{ $c->id }}">{{ $c->name }}</option>
-                                    @endforeach
-                                </select>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Langkah 1: Pilih Kelas</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                                        <i class="ph-bold ph-chalkboard-teacher"></i>
+                                    </div>
+                                    <select id="filter-class" class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm font-bold text-slate-700 py-3 transition-all appearance-none">
+                                        <option value="">-- Pilih Kelas --</option>
+                                        @foreach($classes as $c)
+                                            <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
+                                </div>
                             </div>
 
                             {{-- 2. PILIH SISWA (TomSelect) --}}
                             <div class="relative w-full">
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Langkah 2: Pilih Siswa</label>
-                                <select id="select-students" name="student_ids[]" multiple placeholder="Pilih kelas terlebih dahulu..." autocomplete="off" disabled>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Langkah 2: Pilih Siswa</label>
+                                <select id="select-students" name="student_ids[]" multiple placeholder="Pilih kelas terlebih dahulu..." autocomplete="off" disabled class="rounded-2xl">
                                     {{-- Option akan diisi oleh Javascript --}}
                                 </select>
-                                <p class="text-[10px] text-slate-400 mt-1 italic">* Hanya siswa yang BELUM masuk ekskul ini yang akan muncul.</p>
+                                <p class="text-[10px] text-slate-400 mt-2 font-medium flex items-center gap-1">
+                                    <i class="ph-fill ph-info"></i> Hanya siswa yang BELUM masuk ekskul ini yang akan muncul.
+                                </p>
                             </div>
                             
                             <div class="flex justify-end pt-2">
-                                <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/20 text-sm flex items-center justify-center gap-2">
-                                    <i class="ph-bold ph-plus"></i> Simpan Anggota
+                                <button type="submit" class="w-full sm:w-auto px-8 py-3.5 bg-blue-900 text-white font-bold rounded-2xl hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/20 text-sm flex items-center justify-center gap-2 transform active:scale-95">
+                                    <i class="ph-bold ph-plus-circle text-lg"></i> Simpan Anggota
                                 </button>
                             </div>
                         </form>
                     </div>
 
                     <!-- Tabel Anggota -->
-                    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden print:shadow-none print:border-none">
-                        <div class="p-6 border-b border-slate-50 flex justify-between items-center print:border-b-2 print:border-black">
+                    <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden print:shadow-none print:border-none print:rounded-none">
+                        <div class="p-6 border-b border-slate-50 bg-slate-50/30 flex justify-between items-center print:border-b-2 print:border-black print:bg-white">
                             <div>
-                                <h3 class="font-bold text-slate-800 text-lg">Daftar Anggota Aktif</h3>
-                                <p class="hidden print:block text-sm text-slate-500 mt-1">
+                                <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
+                                    <i class="ph-fill ph-users text-blue-900 print:hidden"></i> Daftar Anggota Aktif
+                                </h3>
+                                <p class="hidden print:block text-sm font-bold text-slate-700 mt-1 uppercase tracking-wide">
                                     Kegiatan: {{ $extracurriculars->find($selectedEkskulId)->name }}
                                 </p>
                                 @if($members->total() > 0)
-                                    <p class="text-xs text-slate-400 mt-1 print:hidden">
+                                    <p class="text-xs text-slate-400 font-bold mt-1 print:hidden">
                                         Menampilkan {{ $members->firstItem() }}-{{ $members->lastItem() }} dari {{ $members->total() }} siswa
                                     </p>
                                 @endif
                             </div>
-                            <span class="bg-slate-100 text-xs font-bold px-3 py-1 rounded-full text-slate-500 print:hidden">
-                                Total {{ $members->total() }}
+                            <span class="bg-white border border-slate-200 text-xs font-black px-3 py-1.5 rounded-xl text-slate-600 print:hidden shadow-sm">
+                                Total: {{ $members->total() }}
                             </span>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
-                                <thead class="bg-slate-50 text-xs font-bold text-slate-400 uppercase print:bg-white print:text-black print:border-b">
+                                <thead class="bg-slate-50/50 text-xs font-bold text-slate-500 uppercase tracking-wider print:bg-white print:text-black print:border-b-2 print:border-black">
                                     <tr>
                                         <th class="px-6 py-4 print:py-2 w-10">No</th>
-                                        <th class="px-6 py-4 print:py-2">Siswa</th>
+                                        <th class="px-6 py-4 print:py-2">Identitas Siswa</th>
                                         <th class="px-6 py-4 print:py-2 text-center">Kelas</th>
-                                        <th class="hidden print:table-cell px-6 py-4 border-l border-black text-center w-32">Paraf</th>
+                                        <th class="hidden print:table-cell px-6 py-4 border-l border-black text-center w-40">Paraf</th>
                                         <th class="px-6 py-4 text-right print:hidden">Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-slate-50 print:divide-slate-200">
+                                <tbody class="divide-y divide-slate-50 print:divide-slate-300">
                                     @forelse($members as $index => $member)
-                                        <tr class="hover:bg-slate-50/50 transition-colors group">
+                                        <tr class="hover:bg-blue-50/30 transition-colors group">
                                             <td class="px-6 py-4 print:py-2 text-xs font-bold text-slate-500">
                                                 {{ $members->firstItem() + $index }}
                                             </td>
                                             <td class="px-6 py-4 print:py-2">
                                                 <div class="flex items-center gap-3">
-                                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-sm print:hidden">
+                                                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-blue-600 font-black text-sm shadow-sm print:hidden group-hover:border-blue-200 transition-colors">
                                                         {{ substr($member->student->name, 0, 2) }}
                                                     </div>
                                                     <div>
-                                                        <span class="font-bold text-slate-700 text-sm block">{{ $member->student->name }}</span>
-                                                        <span class="text-[10px] text-slate-400 font-mono print:hidden">{{ $member->student->nis }}</span>
+                                                        <span class="font-bold text-slate-800 text-sm block group-hover:text-blue-700 transition-colors">{{ $member->student->name }}</span>
+                                                        <span class="text-[10px] text-slate-400 font-mono font-bold bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 print:hidden">{{ $member->student->nis }}</span>
+                                                        <span class="hidden print:inline text-xs">({{ $member->student->nis }})</span>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 print:py-2 text-center">
-                                                <span class="inline-flex px-2 py-1 bg-slate-100 border border-slate-200 rounded text-xs font-bold text-slate-600 print:border-none print:bg-transparent">
+                                                <span class="inline-flex px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-xs font-bold text-slate-600 print:border-none print:bg-transparent print:p-0">
                                                     {{ $member->student->schoolClass->name ?? '-' }}
                                                 </span>
                                             </td>
                                             <td class="hidden print:table-cell border-l border-slate-300"></td>
                                             <td class="px-6 py-4 text-right print:hidden">
-                                                <form action="{{ route('extracurriculars.members.destroy', $member->id) }}" method="POST" class="delete-form">
+                                                <form action="{{ route('extracurriculars.members.destroy', $member->id) }}" method="POST" class="delete-form inline-block">
                                                     @csrf @method('DELETE')
-                                                    <button type="button" class="btn-delete text-slate-300 hover:text-rose-600 transition-colors p-2 rounded-lg hover:bg-rose-50" title="Keluarkan">
+                                                    <button type="button" class="btn-delete w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all" title="Keluarkan">
                                                         <i class="ph-bold ph-sign-out text-lg"></i>
                                                     </button>
                                                 </form>
@@ -163,29 +231,30 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="px-6 py-12 text-center">
-                                                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-300">
-                                                    <i class="ph-duotone ph-users text-3xl"></i>
+                                            <td colspan="5" class="px-6 py-16 text-center">
+                                                <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300 border border-slate-100">
+                                                    <i class="ph-duotone ph-users-three text-4xl"></i>
                                                 </div>
-                                                <p class="text-sm font-bold text-slate-600">Belum ada anggota.</p>
+                                                <p class="text-sm font-bold text-slate-600">Belum ada anggota terdaftar.</p>
+                                                <p class="text-xs text-slate-400 mt-1">Gunakan formulir di atas untuk menambahkan siswa.</p>
                                             </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                             </table>
                         </div>
-                        <div class="p-4 border-t border-slate-50 print:hidden">
+                        <div class="p-6 border-t border-slate-50 print:hidden">
                             {{ $members->links() }} 
                         </div>
                     </div>
                 @else
                     {{-- Empty State --}}
-                    <div class="flex flex-col items-center justify-center h-64 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 text-center px-4">
-                        <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 text-slate-300 shadow-sm">
-                            <i class="ph-duotone ph-hand-pointing text-3xl"></i>
+                    <div class="flex flex-col items-center justify-center h-80 bg-slate-50/50 rounded-[2.5rem] border-2 border-dashed border-slate-200 text-center px-4 group hover:border-blue-200 hover:bg-blue-50/30 transition-all">
+                        <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 text-slate-300 shadow-sm border border-slate-100 group-hover:scale-110 transition-transform duration-300">
+                            <i class="ph-duotone ph-hand-pointing text-5xl"></i>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-600">Pilih Kegiatan Dahulu</h3>
-                        <p class="text-sm text-slate-400 max-w-xs mt-1">Silakan pilih salah satu ekstrakurikuler di menu sebelah kiri untuk mengelola anggotanya.</p>
+                        <h3 class="text-xl font-black text-slate-700 mb-2">Pilih Kegiatan Dahulu</h3>
+                        <p class="text-sm text-slate-400 font-medium max-w-xs mx-auto leading-relaxed">Silakan pilih salah satu ekstrakurikuler di menu sebelah kiri untuk mulai mengelola anggotanya.</p>
                     </div>
                 @endif
             </div>
@@ -196,7 +265,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             
             // --- 1. SETUP DATA SISWA (Dari Laravel ke JS) ---
-            // Kita siapkan datanya di PHP block terpisah agar aman dari parsing error
             @php
                 $studentsData = $students->map(function($s) {
                     return [
@@ -209,7 +277,6 @@
                 })->values();
             @endphp
 
-            // Ambil data yang sudah clean ke variable JS
             const allStudents = @json($studentsData);
 
             // --- 2. SETUP TOM SELECT ---
@@ -226,13 +293,13 @@
                     searchField: ['name', 'nis'],
                     render: {
                         option: function(data, escape) {
-                            return '<div>' +
-                                '<span class="font-bold text-slate-700">' + escape(data.name) + '</span>' +
-                                '<span class="text-xs text-slate-400 ml-2">(' + escape(data.nis || '-') + ')</span>' +
+                            return '<div class="py-1">' +
+                                '<span class="font-bold text-slate-700 block text-sm">' + escape(data.name) + '</span>' +
+                                '<span class="text-xs text-slate-400 font-mono">NIS: ' + escape(data.nis || '-') + '</span>' +
                             '</div>';
                         },
                         item: function(data, escape) {
-                            return '<div>' + escape(data.name) + '</div>';
+                            return '<div title="' + escape(data.name) + '">' + escape(data.name) + '</div>';
                         }
                     }
                 });
@@ -244,30 +311,23 @@
                 classFilter.addEventListener('change', function() {
                     const selectedClassId = this.value;
                     
-                    // Reset Pilihan & Kosongkan Dropdown Siswa
                     studentSelect.clear();
                     studentSelect.clearOptions();
 
                     if(selectedClassId) {
-                        // Filter siswa berdasarkan ID Kelas yang dipilih
                         const filteredStudents = allStudents.filter(s => s.class_id == selectedClassId);
                         
-                        // Masukkan siswa yang lolos filter ke TomSelect
                         filteredStudents.forEach(s => {
                             studentSelect.addOption(s);
                         });
 
-                        // Update Placeholder & Enable
                         studentSelect.settings.placeholder = "Pilih siswa (Total: " + filteredStudents.length + ")";
                         studentSelect.enable();
-                        studentSelect.refreshOptions(false); // Refresh UI
+                        studentSelect.refreshOptions(false); 
                     } else {
-                        // Jika kelas di-unselect (kembali ke default)
                         studentSelect.settings.placeholder = "Pilih kelas terlebih dahulu...";
                         studentSelect.disable();
                     }
-                    
-                    // Force update placeholder text di UI
                     studentSelect.sync();
                 });
             }
@@ -276,7 +336,8 @@
             @if(session('success'))
                 Swal.fire({
                     icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}",
-                    timer: 3000, showConfirmButton: false, toast: true, position: 'top-end'
+                    timer: 3000, showConfirmButton: false, toast: true, position: 'top-end',
+                    customClass: { popup: 'rounded-xl' }
                 });
             @endif
             @if(session('error'))
@@ -291,7 +352,13 @@
                         title: 'Keluarkan Siswa?', text: "Siswa akan dihapus dari daftar anggota ekskul ini.",
                         icon: 'warning', showCancelButton: true,
                         confirmButtonColor: '#e11d48', cancelButtonColor: '#64748b',
-                        confirmButtonText: 'Ya, Keluarkan!', cancelButtonText: 'Batal'
+                        confirmButtonText: 'Ya, Keluarkan!', cancelButtonText: 'Batal',
+                        borderRadius: '1.5rem',
+                        customClass: {
+                            popup: 'rounded-[2rem]',
+                            confirmButton: 'rounded-xl px-6 py-2.5 font-bold',
+                            cancelButton: 'rounded-xl px-6 py-2.5 font-bold'
+                        }
                     }).then((result) => {
                         if (result.isConfirmed) form.submit();
                     });

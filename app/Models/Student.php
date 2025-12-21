@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne; // Pastikan ini di-import
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 
@@ -14,8 +14,17 @@ class Student extends Authenticatable
 {
     use HasFactory, SoftDeletes, Notifiable;
 
+    /**
+     * Atribut yang bisa diisi secara massal (Mass Assignment).
+     * Pastikan semua nama kolom input form ada di sini.
+     */
     protected $fillable = [
-        'student_id', 'name', 'class_id', 'rfid_id', 'parent_wa_number',
+        'student_id',
+        'nis', // <--- SUDAH DITAMBAHKAN (Masalah Anda ada di sini sebelumnya)
+        'name', 
+        'class_id', 
+        'rfid_id', 
+        'parent_wa_number',
         'nickname', 'gender', 'pob', 'dob', 'religion', 'citizenship',
         'birth_order', 'siblings_count', 'step_siblings_count', 'adoptive_siblings_count',
         'orphan_status', 'daily_language', 'address', 'phone', 'living_with',

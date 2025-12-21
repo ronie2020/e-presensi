@@ -1,35 +1,48 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Buat Tugas / Kuis Baru') }}
+        <h2 class="font-semibold text-xl text-slate-800 leading-tight">
+            {{ __('Buat Tugas Baru') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-8 font-sans text-slate-800">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <!-- PESAN ERROR -->
+            {{-- HERO HEADER --}}
+            <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 mb-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+                <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="relative z-10 flex justify-between items-center">
+                    <div>
+                        <h1 class="text-2xl font-extrabold mb-1 tracking-tight">Setting Penugasan</h1>
+                        <p class="text-blue-300 text-sm font-medium">Atur detail tugas, kuis, atau instruksi untuk siswa.</p>
+                    </div>
+                    <a href="{{ route('lms.assignments.index') }}" class="hidden md:flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold backdrop-blur-sm transition text-white border border-white/10">
+                        <i class="ph-bold ph-arrow-left"></i> Kembali
+                    </a>
+                </div>
+            </div>
+
+            {{-- ERROR BLOCK --}}
             @if ($errors->any())
-                <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-xl">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                            </svg>
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-sm font-bold text-red-800">Ada kesalahan input:</h3>
-                            <ul class="mt-1 list-disc list-inside text-sm text-red-700">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
+                <div class="mb-8 bg-rose-50 border border-rose-100 p-5 rounded-[1.5rem] flex items-start gap-4 shadow-sm">
+                    <div class="p-2 bg-rose-100 text-rose-600 rounded-xl shrink-0">
+                        <i class="ph-bold ph-warning-octagon text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black text-rose-800 uppercase tracking-wide mb-1">Gagal Menyimpan</h3>
+                        <ul class="list-disc list-inside text-sm text-rose-700 space-y-1 font-medium">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
             @endif
 
-            <div class="bg-white shadow-xl sm:rounded-2xl border border-gray-100 overflow-hidden">
+            {{-- FORM CARD --}}
+            <div class="bg-white shadow-xl shadow-slate-200/50 rounded-[2rem] border border-slate-100 overflow-hidden">
                 <form action="{{ route('lms.assignments.store') }}" method="POST" 
                       x-data="{ 
                           targetType: 'class', 
@@ -38,135 +51,171 @@
                       }">
                     @csrf
 
-                    <div class="bg-gray-50 px-8 py-6 border-b border-gray-100 flex justify-between items-center">
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-800">Setting Penugasan</h2>
-                            <p class="text-sm text-gray-500">Pilih jenis tugas yang akan diberikan kepada siswa.</p>
-                        </div>
-                        <a href="{{ route('lms.assignments.index') }}" class="text-gray-500 hover:text-gray-700 font-medium text-sm flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                            Kembali
-                        </a>
-                    </div>
-
                     <div class="p-8 space-y-8">
                         
                         <!-- 1. IDENTITAS TUGAS -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="col-span-2">
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Judul Tugas <span class="text-red-500">*</span></label>
-                                <input type="text" name="title" value="{{ old('title') }}" required class="w-full rounded-xl border-gray-300 focus:ring-blue-500" placeholder="Contoh: Ulangan Harian Bab 1">
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Mata Pelajaran <span class="text-red-500">*</span></label>
-                                <select name="subject_id" required class="w-full rounded-xl border-gray-300 focus:ring-blue-500">
-                                    <option value="">-- Pilih Mapel --</option>
-                                    @foreach($subjects as $subject)
-                                        <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Batas Waktu (Deadline) <span class="text-red-500">*</span></label>
-                                <input type="datetime-local" name="deadline" value="{{ old('deadline') }}" required class="w-full rounded-xl border-gray-300 focus:ring-blue-500">
-                            </div>
-
-                            <!-- Opsi Tambahan (DIKEMBALIKAN) -->
-                            <div class="col-span-2">
-                                <label class="inline-flex items-center">
-                                    <input type="checkbox" name="allow_late_submission" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" {{ old('allow_late_submission') ? 'checked' : '' }}>
-                                    <span class="ml-2 text-sm text-gray-600 font-medium">Izinkan pengumpulan terlambat</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <hr class="border-gray-100">
-
-                        <!-- 2. PEMILIHAN TIPE TUGAS -->
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-4">Jenis Penugasan <span class="text-red-500">*</span></label>
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="ph-bold ph-info"></i></div>
+                                <h3 class="text-lg font-black text-slate-800">Informasi Dasar</h3>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="col-span-2">
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Judul Tugas <span class="text-rose-500">*</span></label>
+                                    <input type="text" name="title" value="{{ old('title') }}" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 placeholder:font-normal placeholder:text-slate-400" placeholder="Contoh: Ulangan Harian Bab 1">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Mata Pelajaran <span class="text-rose-500">*</span></label>
+                                    <div class="relative">
+                                        <select name="subject_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 appearance-none">
+                                            <option value="">-- Pilih Mapel --</option>
+                                            @foreach($subjects as $subject)
+                                                <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Deadline <span class="text-rose-500">*</span></label>
+                                    <input type="datetime-local" name="deadline" value="{{ old('deadline') }}" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4">
+                                </div>
+
+                                <div class="col-span-2">
+                                    <label class="inline-flex items-center cursor-pointer group">
+                                        <div class="relative">
+                                            <input type="checkbox" name="allow_late_submission" class="sr-only peer" {{ old('allow_late_submission') ? 'checked' : '' }}>
+                                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </div>
+                                        <span class="ml-3 text-sm font-bold text-slate-600 group-hover:text-blue-700 transition">Izinkan pengumpulan terlambat</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="h-px bg-slate-100"></div>
+
+                        <!-- 2. PILIHAN TIPE TUGAS (CARD SELECTOR) -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 ml-1">Jenis Penugasan <span class="text-rose-500">*</span></label>
+                            
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <label class="cursor-pointer relative">
+                                {{-- Card 1: Upload File --}}
+                                <label class="cursor-pointer group relative">
                                     <input type="radio" name="assignment_type" value="file_upload" x-model="assignmentType" class="peer sr-only">
-                                    <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 hover:bg-gray-50 transition text-center h-full flex flex-col items-center justify-center gap-2">
-                                        <span class="font-bold text-gray-700">Upload File/Foto</span>
-                                        <span class="text-xs text-gray-500">Siswa mengunggah jawaban</span>
+                                    <div class="p-5 rounded-2xl border-2 border-slate-100 bg-white hover:border-blue-200 hover:bg-blue-50/30 transition-all peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:shadow-md flex flex-col items-center justify-center text-center h-full gap-3">
+                                        <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-2xl peer-checked:bg-blue-600 peer-checked:text-white transition-colors">
+                                            <i class="ph-duotone ph-upload-simple"></i>
+                                        </div>
+                                        <div>
+                                            <span class="block font-bold text-slate-800 peer-checked:text-blue-700">Upload File/Foto</span>
+                                            <span class="block text-xs text-slate-500 font-medium mt-1">Siswa mengunggah bukti/jawaban</span>
+                                        </div>
+                                        <div class="absolute top-4 right-4 text-blue-600 opacity-0 peer-checked:opacity-100 transition-opacity"><i class="ph-fill ph-check-circle text-xl"></i></div>
                                     </div>
                                 </label>
 
-                                <label class="cursor-pointer relative">
+                                {{-- Card 2: Kuis Online --}}
+                                <label class="cursor-pointer group relative">
                                     <input type="radio" name="assignment_type" value="quiz" x-model="assignmentType" class="peer sr-only">
-                                    <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 hover:bg-gray-50 transition text-center h-full flex flex-col items-center justify-center gap-2">
-                                        <span class="font-bold text-gray-700">Kuis Online (CBT)</span>
-                                        <span class="text-xs text-gray-500">Buat soal PG/Essai</span>
+                                    <div class="p-5 rounded-2xl border-2 border-slate-100 bg-white hover:border-purple-200 hover:bg-purple-50/30 transition-all peer-checked:border-purple-500 peer-checked:bg-purple-50 peer-checked:shadow-md flex flex-col items-center justify-center text-center h-full gap-3">
+                                        <div class="w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-2xl peer-checked:bg-purple-600 peer-checked:text-white transition-colors">
+                                            <i class="ph-duotone ph-brain"></i>
+                                        </div>
+                                        <div>
+                                            <span class="block font-bold text-slate-800 peer-checked:text-purple-700">Kuis Online (CBT)</span>
+                                            <span class="block text-xs text-slate-500 font-medium mt-1">Buat soal PG atau Essai</span>
+                                        </div>
+                                        <div class="absolute top-4 right-4 text-purple-600 opacity-0 peer-checked:opacity-100 transition-opacity"><i class="ph-fill ph-check-circle text-xl"></i></div>
                                     </div>
                                 </label>
 
-                                <label class="cursor-pointer relative">
+                                {{-- Card 3: Link Eksternal --}}
+                                <label class="cursor-pointer group relative">
                                     <input type="radio" name="assignment_type" value="link" x-model="assignmentType" class="peer sr-only">
-                                    <div class="p-4 rounded-xl border-2 border-gray-200 peer-checked:border-blue-500 peer-checked:bg-blue-50 hover:bg-gray-50 transition text-center h-full flex flex-col items-center justify-center gap-2">
-                                        <span class="font-bold text-gray-700">Link Eksternal</span>
-                                        <span class="text-xs text-gray-500">Quizizz, GForm, dll</span>
+                                    <div class="p-5 rounded-2xl border-2 border-slate-100 bg-white hover:border-sky-200 hover:bg-sky-50/30 transition-all peer-checked:border-sky-500 peer-checked:bg-sky-50 peer-checked:shadow-md flex flex-col items-center justify-center text-center h-full gap-3">
+                                        <div class="w-12 h-12 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-2xl peer-checked:bg-sky-600 peer-checked:text-white transition-colors">
+                                            <i class="ph-duotone ph-link"></i>
+                                        </div>
+                                        <div>
+                                            <span class="block font-bold text-slate-800 peer-checked:text-sky-700">Link Eksternal</span>
+                                            <span class="block text-xs text-slate-500 font-medium mt-1">GForm, Quizizz, YouTube, dll</span>
+                                        </div>
+                                        <div class="absolute top-4 right-4 text-sky-600 opacity-0 peer-checked:opacity-100 transition-opacity"><i class="ph-fill ph-check-circle text-xl"></i></div>
                                     </div>
                                 </label>
                             </div>
                         </div>
 
-                        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200">
+                        <!-- 3. KONTEN DINAMIS -->
+                        <div class="bg-slate-50 rounded-3xl p-6 border border-slate-100">
                             
                             <!-- A. JIKA UPLOAD FILE -->
                             <div x-show="assignmentType === 'file_upload'">
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Instruksi / Soal</label>
-                                <textarea name="description_file" rows="5" class="w-full rounded-xl border-gray-300 focus:ring-blue-500" placeholder="Tuliskan soal atau instruksi pengerjaan disini...">{{ old('description_file') }}</textarea>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Instruksi / Soal</label>
+                                <textarea name="description_file" rows="5" class="w-full rounded-2xl border-slate-200 bg-white focus:ring-blue-500 focus:border-blue-500 p-4 text-slate-700 font-medium placeholder:font-normal placeholder:text-slate-400" placeholder="Tuliskan soal atau instruksi pengerjaan disini...">{{ old('description_file') }}</textarea>
                             </div>
 
                             <!-- B. JIKA LINK EKSTERNAL -->
                             <div x-show="assignmentType === 'link'" style="display: none;">
                                 <div class="mb-4">
-                                    <label class="block text-sm font-bold text-gray-700 mb-2">URL Link Tugas <span class="text-red-500">*</span></label>
-                                    <input type="url" name="link_url" value="{{ old('link_url') }}" class="w-full rounded-xl border-gray-300 focus:ring-blue-500" placeholder="https://...">
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">URL Link Tugas <span class="text-rose-500">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-link"></i></div>
+                                        <input type="url" name="link_url" value="{{ old('link_url') }}" class="w-full rounded-xl border-slate-200 bg-white pl-10 font-bold text-blue-600 focus:ring-blue-500 h-12" placeholder="https://...">
+                                    </div>
                                 </div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Instruksi Tambahan</label>
-                                <textarea name="description_link" rows="3" class="w-full rounded-xl border-gray-300 focus:ring-blue-500" placeholder="Silakan kerjakan link di atas...">{{ old('description_link') }}</textarea>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Instruksi Tambahan</label>
+                                <textarea name="description_link" rows="3" class="w-full rounded-2xl border-slate-200 bg-white focus:ring-blue-500 p-4 font-medium" placeholder="Silakan kerjakan link di atas...">{{ old('description_link') }}</textarea>
                             </div>
 
-                            <!-- C. JIKA KUIS ONLINE (DIKEMBALIKAN INSTRUKSI KUIS) -->
+                            <!-- C. JIKA KUIS ONLINE -->
                             <div x-show="assignmentType === 'quiz'" style="display: none;">
                                 <div class="mb-6 flex flex-col md:flex-row gap-4">
                                     <div class="flex-1">
-                                        <label class="block text-sm font-bold text-gray-700 mb-2">Instruksi Kuis</label>
-                                        <textarea name="description_quiz" rows="2" class="w-full rounded-xl border-gray-300 focus:ring-blue-500" placeholder="Kerjakan dengan jujur...">{{ old('description_quiz') }}</textarea>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Instruksi Kuis</label>
+                                        <textarea name="description_quiz" rows="2" class="w-full rounded-xl border-slate-200 bg-white focus:ring-purple-500 p-3" placeholder="Kerjakan dengan jujur...">{{ old('description_quiz') }}</textarea>
                                     </div>
                                     <div class="w-full md:w-1/3">
-                                        <label class="block text-sm font-bold text-gray-700 mb-2">Durasi (Menit) <span class="text-red-500">*</span></label>
-                                        <input type="number" name="duration_minutes" value="{{ old('duration_minutes', 60) }}" class="w-full rounded-xl border-gray-300 focus:ring-blue-500">
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Durasi (Menit) <span class="text-rose-500">*</span></label>
+                                        <div class="relative">
+                                            <input type="number" name="duration_minutes" value="{{ old('duration_minutes', 60) }}" class="w-full rounded-xl border-slate-200 bg-white font-bold text-slate-800 focus:ring-purple-500 h-11 pl-4 pr-10">
+                                            <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400 text-xs font-bold">MIN</div>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div class="space-y-4 mb-6">
                                     <template x-for="(q, index) in questions" :key="index">
-                                        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm relative">
-                                            <div class="absolute top-4 right-4">
-                                                <button type="button" @click="questions = questions.filter((_, i) => i !== index)" class="text-red-500 hover:text-red-700 transition">Hapus</button>
-                                            </div>
-                                            <div class="flex gap-4 mb-4">
-                                                <span class="bg-blue-100 text-blue-700 w-8 h-8 flex items-center justify-center rounded-full font-bold" x-text="index + 1"></span>
+                                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative group hover:border-purple-200 transition-colors">
+                                            <button type="button" @click="questions = questions.filter((_, i) => i !== index)" class="absolute top-4 right-4 w-8 h-8 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center transition-colors">
+                                                <i class="ph-bold ph-trash"></i>
+                                            </button>
+                                            
+                                            <div class="flex gap-4">
+                                                <span class="bg-purple-100 text-purple-700 w-8 h-8 flex items-center justify-center rounded-lg font-bold text-sm shrink-0" x-text="index + 1"></span>
                                                 <div class="flex-1">
-                                                    <div class="flex gap-4 mb-2">
-                                                        <select :name="'questions['+index+'][type]'" x-model="q.type" class="text-sm rounded-lg border-gray-300">
+                                                    <div class="flex gap-4 mb-3">
+                                                        <select :name="'questions['+index+'][type]'" x-model="q.type" class="text-xs font-bold rounded-lg border-slate-200 bg-slate-50 h-9">
                                                             <option value="multiple_choice">Pilihan Ganda</option>
                                                             <option value="essay">Essai</option>
                                                         </select>
-                                                        <input type="number" :name="'questions['+index+'][points]'" x-model="q.points" class="text-sm rounded-lg border-gray-300 w-24" placeholder="Poin">
+                                                        <input type="number" :name="'questions['+index+'][points]'" x-model="q.points" class="text-xs font-bold rounded-lg border-slate-200 bg-slate-50 w-24 h-9 px-3" placeholder="Poin">
                                                     </div>
-                                                    <textarea :name="'questions['+index+'][text]'" x-model="q.text" rows="2" class="w-full rounded-lg border-gray-300 text-sm mb-3" placeholder="Tuliskan pertanyaan..."></textarea>
                                                     
-                                                    <div x-show="q.type === 'multiple_choice'" class="space-y-2 ml-4">
+                                                    <textarea :name="'questions['+index+'][text]'" x-model="q.text" rows="2" class="w-full rounded-xl border-slate-200 text-sm mb-4 focus:ring-purple-500 font-medium" placeholder="Tuliskan pertanyaan..."></textarea>
+                                                    
+                                                    <div x-show="q.type === 'multiple_choice'" class="space-y-2 ml-1">
                                                         <template x-for="opt in ['A', 'B', 'C', 'D', 'E']">
                                                             <div class="flex items-center gap-3">
-                                                                <input type="radio" :name="'questions['+index+'][correct]'" :value="opt" class="text-green-600">
-                                                                <input type="text" :name="'questions['+index+'][options]['+opt+']'" class="flex-1 rounded-md border-gray-300 text-sm py-1" :placeholder="'Opsi ' + opt">
+                                                                <input type="radio" :name="'questions['+index+'][correct]'" :value="opt" class="text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                                                                <div class="flex-1 relative">
+                                                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold" x-text="opt"></div>
+                                                                    <input type="text" :name="'questions['+index+'][options]['+opt+']'" class="w-full rounded-lg border-slate-200 bg-slate-50 text-sm py-2 pl-8 focus:ring-purple-500" :placeholder="'Pilihan Jawaban ' + opt">
+                                                                </div>
                                                             </div>
                                                         </template>
                                                     </div>
@@ -177,41 +226,68 @@
                                 </div>
 
                                 <button type="button" @click="questions.push({type: 'multiple_choice', text: '', points: 10})" 
-                                        class="w-full py-3 border-2 border-dashed border-blue-300 text-blue-600 rounded-xl font-bold hover:bg-blue-50 transition">
-                                    + Tambah Pertanyaan
+                                        class="w-full py-3 border-2 border-dashed border-purple-200 bg-purple-50 text-purple-600 rounded-xl font-bold text-sm hover:bg-purple-100 hover:border-purple-300 transition flex items-center justify-center gap-2">
+                                    <i class="ph-bold ph-plus"></i> Tambah Pertanyaan
                                 </button>
                             </div>
                         </div>
 
-                        <div class="bg-white p-6 rounded-2xl border border-gray-200">
-                            <label class="block text-sm font-bold text-gray-700 mb-3">Target Penerima <span class="text-red-500">*</span></label>
-                            <div class="space-y-3">
+                        <!-- 4. TARGET PENERIMA -->
+                        <div class="bg-blue-50/50 p-6 rounded-2xl border border-blue-100/50">
+                            <label class="block text-xs font-black text-blue-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                <i class="ph-fill ph-users-three"></i> Target Penerima <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="flex gap-4">
-                                    <label class="inline-flex items-center"><input type="radio" name="target_type" value="class" x-model="targetType" class="text-blue-600"><span class="ml-2 text-sm">Satu Kelas</span></label>
-                                    <label class="inline-flex items-center"><input type="radio" name="target_type" value="grade" x-model="targetType" class="text-blue-600"><span class="ml-2 text-sm">Satu Jenjang</span></label>
+                                    <label class="inline-flex items-center cursor-pointer group">
+                                        <div class="relative flex items-center">
+                                            <input type="radio" name="target_type" value="class" x-model="targetType" class="peer sr-only">
+                                            <div class="w-5 h-5 border-2 border-slate-300 rounded-full peer-checked:border-blue-600 peer-checked:bg-blue-600 transition"></div>
+                                        </div>
+                                        <span class="ml-2 text-sm font-bold text-slate-600 group-hover:text-blue-700 transition">Satu Kelas</span>
+                                    </label>
+                                    <label class="inline-flex items-center cursor-pointer group">
+                                        <div class="relative flex items-center">
+                                            <input type="radio" name="target_type" value="grade" x-model="targetType" class="peer sr-only">
+                                            <div class="w-5 h-5 border-2 border-slate-300 rounded-full peer-checked:border-blue-600 peer-checked:bg-blue-600 transition"></div>
+                                        </div>
+                                        <span class="ml-2 text-sm font-bold text-slate-600 group-hover:text-blue-700 transition">Satu Jenjang</span>
+                                    </label>
                                 </div>
-                                <div x-show="targetType === 'class'">
-                                    <select name="class_id" class="w-full text-sm rounded-lg border-gray-300">
-                                        <option value="">-- Pilih Kelas --</option>
-                                        @foreach($classes as $class)
-                                            <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div x-show="targetType === 'grade'" style="display: none;">
-                                    <select name="target_grade" class="w-full text-sm rounded-lg border-gray-300">
-                                        <option value="7" {{ old('target_grade') == '7' ? 'selected' : '' }}>Kelas 7</option>
-                                        <option value="8" {{ old('target_grade') == '8' ? 'selected' : '' }}>Kelas 8</option>
-                                        <option value="9" {{ old('target_grade') == '9' ? 'selected' : '' }}>Kelas 9</option>
-                                    </select>
+
+                                <div>
+                                    <div x-show="targetType === 'class'">
+                                        <div class="relative">
+                                            <select name="class_id" class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-blue-500 h-11 px-3 appearance-none">
+                                                <option value="">-- Pilih Kelas --</option>
+                                                @foreach($classes as $class)
+                                                    <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
+                                        </div>
+                                    </div>
+                                    <div x-show="targetType === 'grade'" style="display: none;">
+                                        <div class="relative">
+                                            <select name="target_grade" class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-blue-500 h-11 px-3 appearance-none">
+                                                <option value="7" {{ old('target_grade') == '7' ? 'selected' : '' }}>Kelas 7</option>
+                                                <option value="8" {{ old('target_grade') == '8' ? 'selected' : '' }}>Kelas 8</option>
+                                                <option value="9" {{ old('target_grade') == '9' ? 'selected' : '' }}>Kelas 9</option>
+                                            </select>
+                                            <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-gray-50 px-8 py-5 flex justify-end gap-3 border-t border-gray-100">
-                        <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700 transition">
-                            Terbitkan Tugas
+                    <!-- FOOTER ACTIONS -->
+                    <div class="bg-slate-50 px-8 py-6 flex justify-end gap-3 border-t border-slate-100">
+                        <a href="{{ route('lms.assignments.index') }}" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition text-center text-sm">Batal</a>
+                        <button type="submit" class="px-8 py-3 bg-blue-900 text-white font-bold rounded-xl shadow-lg shadow-blue-900/20 hover:bg-blue-800 hover:-translate-y-0.5 transition transform flex items-center justify-center gap-2 text-sm">
+                            <i class="ph-bold ph-paper-plane-tilt text-lg"></i>
+                            <span>Terbitkan Tugas</span>
                         </button>
                     </div>
                 </form>

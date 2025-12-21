@@ -10,7 +10,7 @@
         $isOpen = $session->status == 'open';
     @endphp
 
-    <div class="py-6 sm:py-10" 
+    <div class="py-8 sm:py-10 font-sans text-slate-800" 
          x-data="teachingSession({ 
             sessionId: {{ $session->id }}, 
             presentCount: {{ $presentCount }} 
@@ -34,13 +34,11 @@
                 @endif
             </div>
 
-            {{-- HEADER SESI (GLASSY MODERN) --}}
-            <div class="relative bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-[2.5rem] p-8 md:p-10 text-white shadow-2xl shadow-slate-200 mb-8 overflow-hidden group">
+            {{-- HEADER SESI (DARK BLUE PREMIUM) --}}
+            <div class="relative bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 rounded-[2.5rem] p-8 md:p-10 text-white shadow-2xl shadow-blue-900/30 mb-8 overflow-hidden group border border-white/10">
                 <!-- Decorative Elements -->
-                <div class="absolute right-0 top-0 h-full w-2/3 bg-gradient-to-l from-blue-600/20 to-transparent skew-x-12 transform origin-bottom-right"></div>
-                <div class="absolute -bottom-24 -right-10 text-white/5 rotate-12">
-                    <i class="ph-fill ph-chalkboard-teacher text-[15rem]"></i>
-                </div>
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+                <div class="absolute right-0 top-0 h-full w-2/3 bg-gradient-to-l from-blue-600/10 to-transparent skew-x-12 transform origin-bottom-right"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                     <div class="space-y-4">
@@ -52,9 +50,13 @@
                                 <i class="ph-bold ph-clock"></i> Mulai: {{ \Carbon\Carbon::parse($session->started_at)->format('H:i') }}
                             </span>
                             @if(!$isOpen)
-                                <span class="bg-rose-500/80 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase border border-rose-400/50">Sesi Selesai</span>
+                                <span class="bg-slate-700/80 backdrop-blur text-slate-300 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase border border-slate-600/50 flex items-center gap-1">
+                                    <i class="ph-fill ph-lock-key"></i> Sesi Selesai
+                                </span>
                             @else
-                                <span class="bg-emerald-500/80 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase border border-emerald-400/50 animate-pulse">Sedang Berlangsung</span>
+                                <span class="bg-emerald-500/80 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase border border-emerald-400/50 animate-pulse flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 bg-white rounded-full"></span> Live
+                                </span>
                             @endif
                         </div>
                         <h1 class="text-3xl md:text-5xl font-black tracking-tight leading-none text-white drop-shadow-sm">
@@ -63,10 +65,10 @@
                     </div>
                     
                     @if($isOpen)
-                        {{-- Tombol Tutup Kelas dengan SweetAlert --}}
+                        {{-- Tombol Tutup Kelas --}}
                         <form id="close-session-form" action="{{ route('teaching.close', $session->id) }}" method="POST">
                             @csrf
-                            <button type="button" onclick="confirmCloseClass()" class="group relative overflow-hidden bg-white hover:bg-rose-50 text-rose-600 pl-5 pr-6 py-3.5 rounded-2xl font-bold shadow-xl shadow-slate-900/20 transition-all active:scale-95 flex items-center gap-3">
+                            <button type="button" onclick="confirmCloseClass()" class="group relative overflow-hidden bg-white hover:bg-rose-50 text-rose-600 pl-5 pr-6 py-3.5 rounded-2xl font-bold shadow-xl shadow-slate-900/20 transition-all active:scale-95 flex items-center gap-3 border border-white/20">
                                 <div class="bg-rose-100 p-2 rounded-xl group-hover:bg-rose-200 transition-colors">
                                     <i class="ph-bold ph-power text-xl"></i>
                                 </div>
@@ -85,7 +87,7 @@
                 {{-- KOLOM KIRI (JURNAL & SCANNER) - Width 4/12 --}}
                 <div class="xl:col-span-4 space-y-8 h-fit sticky top-6">
                     
-                    {{-- 1. SCANNER KARTU (Hanya jika Open) --}}
+                    {{-- 1. SCANNER KARTU (Modern Dark Style) --}}
                     @if($isOpen)
                         <div class="bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 p-6 text-center text-white relative overflow-hidden group border border-slate-800">
                             {{-- Background Decoration --}}
@@ -124,12 +126,12 @@
                             </div>
                         </div>
                     @else
-                        <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2.5rem] p-10 text-center">
-                            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                        <div class="bg-white border border-slate-200 rounded-[2.5rem] p-10 text-center shadow-sm">
+                            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
                                 <i class="ph-duotone ph-lock-key text-4xl"></i>
                             </div>
-                            <h3 class="font-bold text-slate-600 text-lg">Absensi Terkunci</h3>
-                            <p class="text-sm text-slate-400">Sesi kelas telah berakhir.</p>
+                            <h3 class="font-bold text-slate-800 text-lg">Absensi Terkunci</h3>
+                            <p class="text-sm text-slate-500">Sesi kelas telah berakhir.</p>
                         </div>
                     @endif
 
@@ -147,17 +149,17 @@
                                     @csrf @method('PUT')
                                     <div class="space-y-6">
                                         <div>
-                                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Topik / Materi <span class="text-rose-500">*</span></label>
-                                            <input type="text" name="topic" value="{{ old('topic', $session->topic) }}" class="w-full rounded-2xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 font-bold text-slate-700 py-3 px-4 disabled:bg-slate-50 disabled:text-slate-500 transition-all" placeholder="Contoh: Aljabar Linear" required>
+                                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Topik / Materi <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="topic" value="{{ old('topic', $session->topic) }}" class="w-full rounded-2xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 font-bold text-slate-700 py-3 px-4 disabled:bg-slate-50 disabled:text-slate-500 transition-all bg-slate-50" placeholder="Contoh: Aljabar Linear" required>
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Catatan Kegiatan</label>
-                                            <textarea name="activities" rows="3" class="w-full rounded-2xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 text-sm text-slate-600 py-3 px-4 disabled:bg-slate-50 transition-all" placeholder="Deskripsi kegiatan pembelajaran...">{{ old('activities', $session->activities) }}</textarea>
+                                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Catatan Kegiatan</label>
+                                            <textarea name="activities" rows="3" class="w-full rounded-2xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 text-sm text-slate-600 py-3 px-4 disabled:bg-slate-50 font-medium bg-slate-50 transition-all" placeholder="Deskripsi kegiatan pembelajaran...">{{ old('activities', $session->activities) }}</textarea>
                                         </div>
                                         
                                         {{-- Upload Foto --}}
                                         <div>
-                                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Foto Dokumentasi</label>
+                                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Foto Dokumentasi</label>
                                             @if($session->photo_proof)
                                                 <div class="relative group h-48 rounded-2xl overflow-hidden border border-slate-200 mb-4 shadow-sm">
                                                     <img src="{{ asset('storage/' . $session->photo_proof) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
@@ -167,7 +169,7 @@
                                                 </div>
                                             @endif
                                             @if($isOpen)
-                                                <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-slate-50 hover:border-blue-300 transition-all group/upload">
+                                                <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all group/upload bg-slate-50">
                                                     <div class="flex flex-col items-center justify-center pt-5 pb-6">
                                                         <i class="ph-duotone ph-image text-2xl text-slate-300 group-hover/upload:text-blue-500 mb-1 transition-colors"></i>
                                                         <p class="text-xs text-slate-400 group-hover/upload:text-slate-600"><span class="font-bold">Klik upload</span> atau drag & drop</p>
@@ -178,7 +180,7 @@
                                         </div>
 
                                         @if($isOpen)
-                                            <button type="submit" class="w-full bg-slate-800 text-white hover:bg-blue-600 hover:shadow-blue-500/30 font-bold py-4 rounded-2xl transition-all shadow-xl shadow-slate-200 flex justify-center items-center gap-2 transform active:scale-95">
+                                            <button type="submit" class="w-full bg-blue-900 text-white hover:bg-blue-800 hover:shadow-lg font-bold py-4 rounded-2xl transition-all shadow-md flex justify-center items-center gap-2 transform active:scale-95">
                                                 <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Jurnal
                                             </button>
                                         @endif
@@ -214,7 +216,7 @@
                         </div>
 
                         {{-- List Siswa --}}
-                        <div class="flex-1 p-6 md:p-8 bg-slate-50/50 overflow-y-auto max-h-[800px] custom-scrollbar">
+                        <div class="flex-1 p-6 md:p-8 bg-slate-50/30 overflow-y-auto max-h-[800px] custom-scrollbar">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 @foreach($allStudents as $student)
                                     @php
@@ -301,7 +303,7 @@
 
     @push('scripts')
     <script>
-        // Fungsi Konfirmasi Tutup Kelas via SweetAlert
+        // Fungsi Konfirmasi Tutup Kelas via SweetAlert (STYLE UPDATED)
         function confirmCloseClass() {
             Swal.fire({
                 title: 'Akhiri Sesi Kelas?',
@@ -337,7 +339,7 @@
                 showCamera: false,
                 html5QrcodeScanner: null,
 
-                // Helper Toast SweetAlert
+                // Helper Toast SweetAlert (STYLE UPDATED)
                 showToast(icon, title) {
                     const Toast = Swal.mixin({
                         toast: true,
@@ -345,6 +347,8 @@
                         showConfirmButton: false,
                         timer: 2000,
                         timerProgressBar: true,
+                        background: '#fff',
+                        customClass: { popup: 'rounded-xl shadow-xl' },
                         didOpen: (toast) => {
                             toast.addEventListener('mouseenter', Swal.stopTimer)
                             toast.addEventListener('mouseleave', Swal.resumeTimer)
@@ -365,8 +369,6 @@
                         });
                         const data = await response.json();
                         if(data.status === 'success') {
-                            // Update UI via Reload (agar sinkron data server) atau update DOM lokal
-                            // Untuk simple, kita reload tapi kasih feedback dulu
                             this.showToast('success', 'Status siswa diperbarui');
                             setTimeout(() => window.location.reload(), 500);
                         }
@@ -387,8 +389,6 @@
                         const data = await response.json();
                         if(data.status === 'success') {
                             this.statusMessage = 'OK: ' + data.student.name;
-                            
-                            // Tampilkan SweetAlert Popup sebentar
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Hadir!',
@@ -396,14 +396,13 @@
                                 timer: 1500,
                                 showConfirmButton: false,
                                 backdrop: `rgba(0,0,0,0.4)`,
-                                customClass: { popup: 'rounded-2xl' }
+                                customClass: { popup: 'rounded-3xl' }
                             }).then(() => {
                                 window.location.reload();
                             });
                         } else {
                             this.statusMessage = 'GAGAL: ' + data.message;
                             this.showToast('error', data.message);
-                            // Fokuskan kembali input agar bisa scan lagi
                             document.getElementById('rfidInput').focus();
                         }
                     } catch (error) { 

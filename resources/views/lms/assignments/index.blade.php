@@ -1,83 +1,142 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-slate-800 leading-tight">
             {{ __('Tugas & PR') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-8 font-sans text-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-800">📝 Manajemen Tugas</h2>
-                    <p class="text-sm text-gray-500">Buat tugas dan nilai pekerjaan siswa.</p>
+            {{-- HERO SECTION --}}
+            <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 mb-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+                <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="text-center md:text-left">
+                        <h2 class="text-3xl font-extrabold tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3">
+                            <span class="text-4xl">📝</span> Manajemen Tugas
+                        </h2>
+                        <p class="text-blue-300 text-sm font-medium max-w-lg leading-relaxed">
+                            Buat tugas, kuis online, atau ulangan harian dan pantau hasil pengerjaan siswa secara real-time.
+                        </p>
+                    </div>
+                    
+                    {{-- Tombol Buat Tugas --}}
+                    <a href="{{ route('lms.assignments.create') }}" class="group bg-white text-blue-900 px-6 py-3.5 rounded-2xl font-bold text-sm shadow-lg hover:bg-blue-50 hover:scale-105 transition-all duration-300 flex items-center gap-2">
+                        <i class="ph-bold ph-plus-circle text-xl group-hover:rotate-90 transition-transform duration-300"></i>
+                        <span>Buat Tugas Baru</span>
+                    </a>
                 </div>
-                <a href="{{ route('lms.assignments.create') }}" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    Buat Tugas Baru
-                </a>
             </div>
 
+            {{-- NOTIFIKASI SUKSES --}}
             @if(session('success'))
-                <div class="mb-6 bg-green-50 border border-green-200 text-green-700 p-4 rounded-xl">
-                    {{ session('success') }}
+                <div x-data="{ show: true }" x-show="show" x-transition class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl font-bold text-sm flex justify-between items-center shadow-sm">
+                    <div class="flex items-center gap-2">
+                        <i class="ph-fill ph-check-circle text-xl"></i>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                    <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-1 rounded-lg hover:bg-emerald-100 transition"><i class="ph-bold ph-x"></i></button>
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl border border-gray-100">
-                <div class="p-6">
-                    @if($assignments->count() > 0)
-                        <div class="grid gap-6">
-                            @foreach($assignments as $task)
-                                <div class="flex flex-col md:flex-row items-start md:items-center justify-between p-4 border border-gray-200 rounded-xl hover:border-blue-300 transition group">
-                                    <div class="flex-1">
-                                        <div class="flex items-center gap-3 mb-1">
-                                            <h3 class="font-bold text-lg text-gray-800">{{ $task->title }}</h3>
-                                            <span class="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-700">
-                                                {{ $task->schoolClass->name ?? 'Kelas' }}
-                                            </span>
-                                        </div>
-                                        <p class="text-sm text-gray-500 mb-2">
-                                            {{ $task->subject->name }} • Deadline: <span class="text-red-600 font-semibold">{{ $task->deadline->format('d M Y, H:i') }}</span>
-                                        </p>
-                                        <div class="flex items-center gap-4 text-xs text-gray-400">
-                                            <span class="flex items-center gap-1">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                                                {{ $task->submissions_count }} Mengumpulkan
-                                            </span>
-                                        </div>
-                                    </div>
+            {{-- LIST TUGAS (GRID SYSTEM) --}}
+            @if($assignments->count() > 0)
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    @foreach($assignments as $task)
+                        @php
+                            // Tentukan Icon & Warna Berdasarkan Tipe
+                            $icon = 'ph-file-text';
+                            $color = 'blue';
+                            if($task->assignment_type == 'quiz') { $icon = 'ph-brain'; $color = 'purple'; }
+                            if($task->assignment_type == 'link') { $icon = 'ph-link'; $color = 'sky'; }
+                            
+                            // Cek Status Deadline
+                            $isExpired = now() > $task->deadline;
+                        @endphp
 
-                                    <div class="mt-4 md:mt-0 flex items-center gap-2">
-                                        <!-- Tombol Periksa -->
-                                        <a href="{{ route('lms.assignments.submissions', $task->id) }}" class="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg font-medium hover:bg-indigo-100 transition flex items-center gap-2">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                                            Periksa / Nilai
-                                        </a>
+                        <div class="group relative bg-white border border-slate-100 rounded-[2rem] p-6 hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-200 transition-all duration-300 flex flex-col h-full">
+                            
+                            {{-- Badge Deadline di Pojok --}}
+                            <div class="absolute top-5 right-5 z-10">
+                                @if($isExpired)
+                                    <span class="bg-slate-100 text-slate-500 border border-slate-200 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                                        <i class="ph-bold ph-lock-key"></i> Ditutup
+                                    </span>
+                                @else
+                                    <span class="bg-rose-50 text-rose-600 border border-rose-100 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 animate-pulse">
+                                        <i class="ph-bold ph-clock"></i> Aktif
+                                    </span>
+                                @endif
+                            </div>
 
-                                        <!-- Hapus -->
-                                        <form action="{{ route('lms.assignments.destroy', $task->id) }}" method="POST" onsubmit="return confirm('Hapus tugas ini? Data nilai siswa juga akan hilang.');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                            </button>
-                                        </form>
-                                    </div>
+                            {{-- Header Card --}}
+                            <div class="flex items-start gap-4 mb-4">
+                                <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 transition-colors duration-300 bg-{{ $color }}-50 text-{{ $color }}-600 group-hover:bg-{{ $color }}-600 group-hover:text-white">
+                                    <i class="ph-duotone {{ $icon }}"></i>
                                 </div>
-                            @endforeach
+                                <div class="pr-20"> {{-- Padding right agar tidak nabrak badge --}}
+                                    <h3 class="font-bold text-lg text-slate-800 group-hover:text-blue-700 transition-colors line-clamp-1">
+                                        {{ $task->title }}
+                                    </h3>
+                                    <p class="text-sm text-slate-500 font-medium mt-0.5">{{ $task->subject->name }}</p>
+                                </div>
+                            </div>
+
+                            {{-- Informasi Detail --}}
+                            <div class="flex flex-wrap gap-2 mb-6">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-50 text-slate-600 border border-slate-100">
+                                    <i class="ph-bold ph-users-three"></i> {{ $task->schoolClass->name ?? 'Semua Kelas' }}
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-50 text-slate-600 border border-slate-100">
+                                    <i class="ph-bold ph-calendar-blank"></i> {{ $task->deadline->format('d M, H:i') }}
+                                </span>
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                                    <i class="ph-bold ph-paper-plane-tilt"></i> {{ $task->submissions_count }} Kumpul
+                                </span>
+                            </div>
+
+                            {{-- Footer Actions --}}
+                            <div class="pt-4 border-t border-slate-50 mt-auto flex items-center justify-between gap-3">
+                                <a href="{{ route('lms.assignments.submissions', $task->id) }}" class="flex-1 bg-slate-800 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 group/btn">
+                                    <i class="ph-bold ph-list-checks text-lg"></i>
+                                    <span>Periksa / Nilai</span>
+                                </a>
+
+                                <form action="{{ route('lms.assignments.destroy', $task->id) }}" method="POST" onsubmit="return confirm('Hapus tugas ini? Data nilai siswa juga akan hilang.');">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="w-11 h-11 rounded-xl bg-white border border-slate-200 text-rose-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-all flex items-center justify-center shadow-sm" title="Hapus Tugas">
+                                        <i class="ph-bold ph-trash text-lg"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-                        <div class="mt-4">
-                            {{ $assignments->links() }}
-                        </div>
-                    @else
-                        <div class="text-center py-12">
-                            <p class="text-gray-500">Belum ada tugas yang dibuat.</p>
-                        </div>
-                    @endif
+                    @endforeach
                 </div>
-            </div>
+
+                {{-- Pagination --}}
+                <div class="mt-8">
+                    {{ $assignments->links() }}
+                </div>
+            @else
+                {{-- Empty State --}}
+                <div class="bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200 p-12 flex flex-col items-center justify-center text-center">
+                    <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-6 animate-pulse">
+                        <i class="ph-duotone ph-clipboard-text text-5xl"></i>
+                    </div>
+                    <h3 class="font-black text-slate-800 text-xl mb-2">Belum Ada Tugas</h3>
+                    <p class="text-slate-500 text-sm max-w-md mx-auto leading-relaxed mb-8">
+                        Anda belum membuat tugas apapun. Mulailah dengan membuat tugas baru untuk dikerjakan siswa.
+                    </p>
+                    <a href="{{ route('lms.assignments.create') }}" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-200 hover:-translate-y-1 transform flex items-center gap-2">
+                        <i class="ph-bold ph-plus"></i> Buat Tugas Pertama
+                    </a>
+                </div>
+            @endif
+
         </div>
     </div>
 </x-app-layout>

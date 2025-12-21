@@ -1,404 +1,349 @@
-{{-- Halaman ini adalah tampilan untuk resources/views/reports/religious.blade.php --}}
 <x-app-layout>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
 
-    {{-- CSS FIX DIHAPUS SAJA KARENA SUDAH PAKAI HALAMAN PRINT KHUSUS --}}
-
-    {{-- FIX: Ambil tab aktif dari URL agar tidak reset --}}
-    <div class="py-6 sm:py-8" x-data="{ 
+    {{-- Wrapper Utama --}}
+    <div class="py-8 font-sans text-slate-800 pb-32" x-data="{ 
         activeTab: '{{ request('activeTab', 'hadir') }}',
         reportType: '{{ request('report_type', 'daily') }}'
     }">
-        
-        {{-- Header & Filter Section --}}
-        <div class="mb-8 flex flex-col justify-between gap-6 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div>
-                    <h1 class="text-3xl font-black text-gray-800 tracking-tight leading-tight">
-                        Rekapitulasi Keagamaan
-                    </h1>
-                    <p class="text-gray-500 mt-1">
-                        Laporan aktivitas ibadah siswa (Shalat Dhuha / Dhuhur).
-                    </p>
-                </div>
+            {{-- HERO SECTION (Split Layout) --}}
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 no-print">
                 
-                {{-- Tombol Cetak & Switcher Activity --}}
-                <div class="flex flex-col sm:flex-row gap-3 items-center">
+                {{-- KARTU KIRI: Judul & Switcher Aktivitas --}}
+                {{-- UPDATED: Warna disesuaikan dengan Navigation (Dark Blue Gradient) --}}
+                <div class="bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 rounded-[2rem] p-6 lg:p-8 text-white shadow-xl shadow-blue-900/30 relative overflow-hidden flex flex-col justify-between min-h-[200px] border border-white/10">
+                    {{-- Dekorasi Pola Kubus (Sama seperti Nav) --}}
+                    <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                     
-                    {{-- Switcher Kegiatan --}}
-                    <div class="bg-white p-1.5 rounded-2xl flex items-center shadow-sm border border-gray-100">
+                    {{-- Dekorasi Blur --}}
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
+                    <div class="absolute -left-10 bottom-0 w-32 h-32 bg-blue-400/10 rounded-full blur-2xl"></div>
+                    
+                    <div class="relative z-10">
+                        <h1 class="text-xl lg:text-2xl font-extrabold mb-1 tracking-tight text-white">Rekap Keagamaan</h1>
+                        <p class="text-blue-300 text-sm font-medium tracking-wide">Laporan ibadah siswa.</p>
+                    </div>
+
+                    {{-- Switcher Dhuha/Dhuhur --}}
+                    <div class="relative z-10 mt-6 bg-slate-900/50 p-1.5 rounded-2xl flex border border-white/10 backdrop-blur-sm">
                         <a href="{{ route('reports.religious', array_merge(request()->all(), ['activity' => 'Dhuha'])) }}" 
-                           class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ $selectedActivity == 'Dhuha' ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
-                        Shalat Dhuha
+                           class="flex-1 text-center py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 {{ $selectedActivity == 'Dhuha' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-blue-300 hover:bg-white/5 hover:text-white' }}">
+                            <i class="ph-bold ph-sun text-lg {{ $selectedActivity == 'Dhuha' ? 'text-yellow-300' : '' }}"></i> 
+                            Dhuha
                         </a>
                         <a href="{{ route('reports.religious', array_merge(request()->all(), ['activity' => 'Dhuhur'])) }}" 
-                           class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ $selectedActivity == 'Dhuhur' ? 'bg-orange-500 text-white shadow-lg shadow-orange-200' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50' }}">
-                        Shalat Dhuhur
+                           class="flex-1 text-center py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 {{ $selectedActivity == 'Dhuhur' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-blue-300 hover:bg-white/5 hover:text-white' }}">
+                            <i class="ph-fill ph-moon-stars text-lg {{ $selectedActivity == 'Dhuhur' ? 'text-white' : '' }}"></i> 
+                            Dhuhur
                         </a>
                     </div>
-
-                    {{-- Tombol Cetak (DIPERBARUI MENGGUNAKAN LINK KE HALAMAN CETAK) --}}
-                    <a href="{{ route('reports.printReligious', request()->all()) }}" target="_blank" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 shadow-lg shadow-indigo-200 flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                        <span class="hidden sm:inline">Cetak Laporan</span>
-                    </a>
-                </div>
-            </div>
-
-            {{-- FILTER CARD --}}
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Filter Periode
-                </h2>
-
-                {{-- Tab Switcher Periode --}}
-                <div class="flex border-b mb-4">
-                    <button @click="reportType = 'daily'" :class="reportType === 'daily' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-2 px-4 -mb-px border-b-2 font-bold text-sm transition-colors">
-                        Harian
-                    </button>
-                    <button @click="reportType = 'weekly'" :class="reportType === 'weekly' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-2 px-4 -mb-px border-b-2 font-bold text-sm transition-colors">
-                        Mingguan
-                    </button>
-                    <button @click="reportType = 'monthly'" :class="reportType === 'monthly' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'" class="py-2 px-4 -mb-px border-b-2 font-bold text-sm transition-colors">
-                        Bulanan
-                    </button>
                 </div>
 
-                {{-- Form Filter --}}
-                <form action="{{ route('reports.religious') }}" method="GET" class="flex flex-col sm:flex-row items-end gap-4">
-                    <input type="hidden" name="activity" value="{{ $selectedActivity }}">
-                    <input type="hidden" name="activeTab" x-model="activeTab">
-                    <input type="hidden" name="report_type" x-model="reportType">
+                {{-- KARTU KANAN: Filter & Cetak --}}
+                <div class="lg:col-span-2 bg-white rounded-[2rem] p-6 lg:p-8 border border-slate-100 shadow-sm relative overflow-hidden">
+                    <div class="absolute inset-0 opacity-40 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:20px_20px]"></div>
                     
-                    {{-- Input Harian --}}
-                    <div x-show="reportType === 'daily'" class="w-full sm:w-auto">
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Pilih Tanggal</label>
-                        <input type="date" name="date" value="{{ request('date', $selectedDate_db->format('Y-m-d')) }}" 
-                               class="block w-full sm:w-64 rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-semibold">
-                    </div>
+                    <div class="relative z-10">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                            <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                {{-- Aksen Kecil Biru Tua --}}
+                                <span class="w-1.5 h-6 bg-blue-900 rounded-full"></span>
+                                Filter Data
+                            </h2>
+                            {{-- Tab Filter Type --}}
+                            <div class="bg-slate-100 p-1 rounded-xl flex w-full md:w-auto">
+                                <button @click="reportType = 'daily'" :class="reportType === 'daily' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'" class="flex-1 px-4 py-2 rounded-lg text-xs font-bold transition-all text-center">Harian</button>
+                                <button @click="reportType = 'weekly'" :class="reportType === 'weekly' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'" class="flex-1 px-4 py-2 rounded-lg text-xs font-bold transition-all text-center">Mingguan</button>
+                                <button @click="reportType = 'monthly'" :class="reportType === 'monthly' ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'" class="flex-1 px-4 py-2 rounded-lg text-xs font-bold transition-all text-center">Bulanan</button>
+                            </div>
+                        </div>
 
-                    {{-- Input Mingguan --}}
-                    <div x-show="reportType === 'weekly'" style="display: none;" class="w-full sm:w-auto">
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Pilih Minggu</label>
-                        <input type="week" name="week" value="{{ request('week') }}" 
-                               class="block w-full sm:w-64 rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-semibold">
-                    </div>
-
-                    {{-- Input Bulanan --}}
-                    <div x-show="reportType === 'monthly'" style="display: none;" class="w-full sm:w-auto">
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Pilih Bulan</label>
-                        <input type="month" name="month" value="{{ request('month') }}" 
-                               class="block w-full sm:w-64 rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm font-semibold">
-                    </div>
-
-                    {{-- Tombol Submit --}}
-                    <button type="submit" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-900 text-white font-bold py-2.5 px-6 rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        Tampilkan
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        @if (session('success'))
-            <div x-data="{ show: true }" x-show="show" x-transition class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl font-medium text-sm flex justify-between items-center shadow-sm no-print">
-                <div class="flex items-center gap-2">
-                    <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>{{ session('success') }}</span>
-                </div>
-                <button @click="show = false" class="text-emerald-400 hover:text-emerald-600">&times;</button>
-            </div>
-        @endif
-
-        {{-- STATISTIK --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 print:gap-4 print:grid-cols-3">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all print:border-black print:p-4">
-                <div class="h-12 w-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform print:hidden">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                </div>
-                <h3 class="text-3xl font-extrabold text-gray-800 print:text-black">{{ $hadirCount }}</h3>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1 print:text-black">Sudah Absen</p>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all print:border-black print:p-4">
-                <div class="h-12 w-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform print:hidden">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-                <h3 class="text-3xl font-extrabold text-gray-800 print:text-black">{{ $izinUzurCount + $alfaCount }}</h3>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1 print:text-black">Izin / Uzur / Alfa</p>
-            </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center group hover:shadow-md transition-all print:border-black print:p-4">
-                <div class="h-12 w-12 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform print:hidden">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </div>
-                <h3 class="text-3xl font-extrabold text-gray-800 print:text-black">{{ $belumAbsenCount }}</h3>
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1 print:text-black">Belum Absen</p>
-            </div>
-        </div>
-
-        {{-- CONTAINER TABEL --}}
-        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden print:border-none print:shadow-none">
-            <div class="flex border-b border-gray-100 overflow-x-auto bg-gray-50/50 p-2 gap-2 flex-nowrap no-scrollbar no-print">
-                <button @click="activeTab = 'hadir'" :class="activeTab === 'hadir' ? 'bg-white text-emerald-600 shadow-sm ring-1 ring-emerald-100' : 'text-gray-500 hover:bg-white/60'" class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">Sudah Absen</button>
-                <button @click="activeTab = 'belum'" :class="activeTab === 'belum' ? 'bg-white text-red-600 shadow-sm ring-1 ring-red-100' : 'text-gray-500 hover:bg-white/60'" class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">Belum Absen <span class="ml-1 px-1.5 py-0.5 bg-red-100 text-red-600 rounded text-[10px]">{{ $belumAbsenCount }}</span></button>
-                <button @click="activeTab = 'uzur'" :class="activeTab === 'uzur' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-blue-100' : 'text-gray-500 hover:bg-white/60'" class="flex-none py-3 px-6 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap">Izin / Uzur / Alfa</button>
-            </div>
-
-            <div class="w-full relative min-h-[300px]">
-                
-                {{-- TAB 1: HADIR --}}
-                <div x-show="activeTab === 'hadir'" class="w-full print:block">
-                    <div class="print:mb-4 print:font-bold print:text-lg hidden print:block border-b border-black pb-2">Daftar Siswa Hadir</div>
-
-                    <div class="p-4 flex justify-between items-center bg-white border-b border-gray-100 no-print">
-                        <h3 class="font-bold text-gray-800">Daftar Siswa Hadir</h3>
-                        
-                        <form id="reset-data-form" method="POST" action="{{ route('reports.destroyReligious') }}" class="hidden">
-                            @csrf @method('DELETE')
-                            <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
+                        <form action="{{ route('reports.religious') }}" method="GET" class="flex flex-col md:flex-row gap-3 w-full">
                             <input type="hidden" name="activity" value="{{ $selectedActivity }}">
-                        </form>
-                        <button type="button" onclick="confirmResetData()" class="text-xs font-bold text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            Reset Data
-                        </button>
-                    </div>
-
-                    <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
-                        <table class="w-full text-left border-collapse" style="min-width: 800px; width: 100%;">
-                            <thead class="bg-gray-50 print:bg-gray-100">
-                                <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3 print:text-black">Nama Siswa</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4 print:text-black">Kelas</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4 print:text-black">Waktu</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap text-right w-1/6 no-print">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-50 print:divide-gray-300">
-                                @forelse ($attendancesHadir as $attendance)
-                                    <tr class="hover:bg-emerald-50/30 transition-colors print:break-inside-avoid">
-                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 print:text-black">{{ $attendance->student->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500 print:text-black">{{ $attendance->student->schoolClass->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap font-mono text-emerald-600 font-bold bg-emerald-50 inline-block rounded px-2 py-0.5 mt-3 ml-6 print:bg-transparent print:text-black print:mt-0 print:ml-0">{{ $attendance->created_at->format('H:i') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right no-print">
-                                            <button onclick="openEditModalReligious({{ $attendance->id }}, '{{ $attendance->student->name }}', '{{ $attendance->status_final }}', `{{ $attendance->notes_final }}`, '{{ $attendance->activity }}')" 
-                                                class="text-gray-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-lg transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4" class="px-6 py-12 text-center text-gray-400">
-                                            <p class="text-sm font-medium">Belum ada data hadir untuk aktivitas ini.</p>
-                                        </td>
-                                    </tr> 
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    @if($attendancesHadir->hasPages())
-                        <div class="p-4 border-t border-gray-100 no-print">{{ $attendancesHadir->appends(request()->query() + ['activeTab' => 'hadir'])->links() }}</div>
-                    @endif
-                </div>
-
-                {{-- TAB 2: BELUM ABSEN --}}
-                <div x-show="activeTab === 'belum'" style="display: none;" class="w-full print:block print:mt-8">
-                    <div class="print:mb-4 print:font-bold print:text-lg hidden print:block border-b border-black pb-2">Daftar Belum Absen</div>
-
-                    @if($belumAbsenList->count() > 0)
-                        <div class="p-4 bg-red-50 border-b border-red-100 flex flex-col md:flex-row justify-between items-center gap-4 no-print">
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-red-100 text-red-600 rounded-lg">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            <input type="hidden" name="activeTab" x-model="activeTab">
+                            <input type="hidden" name="report_type" x-model="reportType">
+                            
+                            <div class="flex-1 w-full">
+                                <div x-show="reportType === 'daily'">
+                                    <input type="date" name="date" value="{{ request('date', $selectedDate_db->format('Y-m-d')) }}" 
+                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900">
                                 </div>
-                                <div>
-                                    <h4 class="font-bold text-red-800 text-sm">Aksi Massal</h4>
-                                    <p class="text-xs text-red-600">Tandai {{ $belumAbsenList->count() }} siswa sebagai Alfa Shalat {{ $selectedActivity }} (Hanya Absensi).</p>
+                                <div x-show="reportType === 'weekly'" style="display: none;">
+                                    <input type="week" name="week" value="{{ request('week') }}" 
+                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900">
+                                </div>
+                                <div x-show="reportType === 'monthly'" style="display: none;">
+                                    <input type="month" name="month" value="{{ request('month') }}" 
+                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900">
                                 </div>
                             </div>
-                            <form id="bulk-alpha-religious-form" action="{{ route('reports.bulkAlpha') }}" method="POST">
-                                @csrf
+
+                            <div class="flex gap-2 w-full md:w-auto">
+                                {{-- Tombol Cari diganti Blue-900 agar matching dengan tema Nav --}}
+                                <button type="submit" class="flex-1 md:flex-none bg-blue-900 hover:bg-slate-900 text-white px-5 rounded-xl h-11 font-bold text-sm shadow-lg flex items-center justify-center gap-2 transition-all">
+                                    <i class="ph-bold ph-magnifying-glass"></i> <span class="md:hidden">Cari</span>
+                                </button>
+                                
+                                <div class="w-px h-11 bg-slate-200 hidden md:block"></div>
+
+                                <a href="{{ route('reports.printReligious', request()->all()) }}" target="_blank" class="flex-1 md:flex-none bg-white border border-slate-200 text-slate-600 hover:text-blue-900 hover:border-blue-900 px-5 rounded-xl h-11 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
+                                    <i class="ph-bold ph-printer text-lg"></i> <span class="md:hidden">Cetak</span>
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {{-- STATISTIK CARDS --}}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-8">
+                <div class="bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all">
+                    <div class="min-w-0">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Sudah Absen</p>
+                        <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate">{{ $hadirCount }}</h3>
+                    </div>
+                    <div class="w-14 h-14 lg:w-16 lg:h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl group-hover:scale-110 transition-transform shrink-0"><i class="ph-fill ph-check-circle"></i></div>
+                </div>
+
+                <div class="bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all">
+                    <div class="min-w-0">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Izin / Uzur</p>
+                        <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate">{{ $izinUzurCount + $alfaCount }}</h3>
+                    </div>
+                    <div class="w-14 h-14 lg:w-16 lg:h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl group-hover:scale-110 transition-transform shrink-0"><i class="ph-fill ph-info"></i></div>
+                </div>
+
+                <div class="bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all">
+                    <div class="min-w-0">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Belum Absen</p>
+                        <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate">{{ $belumAbsenCount }}</h3>
+                    </div>
+                    <div class="w-14 h-14 lg:w-16 lg:h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl group-hover:scale-110 transition-transform shrink-0"><i class="ph-fill ph-x-circle"></i></div>
+                </div>
+            </div>
+
+            {{-- MAIN CONTENT AREA --}}
+            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden min-h-[500px]">
+                
+                {{-- Tabs Header --}}
+                <div class="flex flex-wrap md:flex-nowrap border-b border-slate-100 bg-slate-50/50 p-2 gap-2 sticky top-0 z-20 no-print">
+                    <button @click="activeTab = 'hadir'" :class="activeTab === 'hadir' ? 'bg-white text-blue-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60'" class="flex-1 md:flex-none py-2.5 px-6 rounded-xl text-sm font-bold transition-all whitespace-nowrap">Sudah Absen</button>
+                    <button @click="activeTab = 'belum'" :class="activeTab === 'belum' ? 'bg-white text-blue-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60'" class="flex-1 md:flex-none py-2.5 px-6 rounded-xl text-sm font-bold transition-all whitespace-nowrap">
+                        Belum <span class="hidden sm:inline">Absen</span> <span class="ml-1 px-1.5 py-0.5 bg-rose-100 text-rose-600 rounded-md text-[10px]">{{ $belumAbsenCount }}</span>
+                    </button>
+                    <button @click="activeTab = 'uzur'" :class="activeTab === 'uzur' ? 'bg-white text-blue-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60'" class="flex-1 md:flex-none py-2.5 px-6 rounded-xl text-sm font-bold transition-all whitespace-nowrap">Ket. Lain</button>
+                </div>
+
+                <div class="p-0">
+                    
+                    {{-- TAB HADIR --}}
+                    <div x-show="activeTab === 'hadir'" class="w-full">
+                        {{-- Tombol Reset --}}
+                        <div class="p-4 bg-slate-50 border-b border-slate-100 no-print flex justify-end">
+                            <form id="reset-data-form" method="POST" action="{{ route('reports.destroyReligious') }}">
+                                @csrf @method('DELETE')
                                 <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
-                                <input type="hidden" name="type" value="Keagamaan">
                                 <input type="hidden" name="activity" value="{{ $selectedActivity }}">
-                                <button type="button" onclick="confirmBulkAlphaReligious('{{ $belumAbsenList->count() }}')" 
-                                    class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-red-200 transition-all flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                                    Proses Semua Alpa
+                                <button type="button" onclick="confirmResetData()" class="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2 border border-rose-100">
+                                    <i class="ph-bold ph-trash"></i> Reset Data
                                 </button>
                             </form>
                         </div>
-                    @endif
-                    <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
-                        <table class="w-full text-left border-collapse" style="min-width: 800px; width: 100%;">
-                            <thead class="bg-gray-50 border-b border-gray-100 print:bg-gray-100">
-                                <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3 print:text-black">Nama Siswa</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3 print:text-black">Kelas</th>
-                                    <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider w-1/3 no-print">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-50 print:divide-gray-300">
-                                @forelse ($belumAbsenList as $student)
-                                    <tr class="hover:bg-gray-50 transition-colors print:break-inside-avoid">
-                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 print:text-black">{{ $student->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500 print:text-black">{{ $student->schoolClass->name ?? '-' }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right no-print">
-                                            <button onclick="openManualModalForStudent({{ $student->id }}, '{{ $student->name }}')" 
-                                                    class="inline-flex items-center gap-2 bg-white border border-blue-200 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-50 transition-colors shadow-sm">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                                Beri Keterangan
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="px-6 py-12 text-center text-gray-400">
-                                            <p class="text-sm font-medium text-green-600">Semua siswa sudah tercatat!</p>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
 
-                {{-- TAB 3: UZUR / IZIN / ALFA --}}
-                <div x-show="activeTab === 'uzur'" style="display: none;" class="w-full print:block print:mt-8">
-                    <div class="print:mb-4 print:font-bold print:text-lg hidden print:block border-b border-black pb-2">Daftar Uzur / Izin / Alfa</div>
-                    <div class="overflow-x-auto w-full max-w-[calc(100vw-3rem)] md:max-w-full pb-4">
-                        <table class="w-full text-left border-collapse" style="min-width: 800px; width: 100%;">
-                            <thead class="bg-gray-50 border-b border-gray-100 print:bg-gray-100">
-                                <tr>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/3 print:text-black">Nama Siswa</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4 print:text-black">Kelas</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap w-1/4 print:text-black">Keterangan</th>
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-500 uppercase whitespace-nowrap text-right w-1/6 no-print">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-50 print:divide-gray-300">
-                                @forelse ($attendancesUzur as $attendance)
-                                    <tr class="hover:bg-blue-50/30 transition-colors print:break-inside-avoid">
-                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 print:text-black">{{ $attendance->student->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-gray-500 print:text-black">{{ $attendance->student->schoolClass->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2.5 py-1 rounded-lg bg-blue-100 text-blue-700 text-xs font-bold print:bg-transparent print:p-0 print:text-black">{{ $attendance->status_final }}</span>
-                                            @if($attendance->notes_final)
-                                                <span class="text-xs text-gray-400 ml-2 italic print:text-black">({{ $attendance->notes_final }})</span>
-                                            @endif
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right no-print">
-                                            <button onclick="openEditModalReligious({{ $attendance->id }}, '{{ $attendance->student->name }}', '{{ $attendance->status_final }}', `{{ $attendance->notes_final }}`, '{{ $attendance->activity }}')" 
-                                                class="text-gray-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-lg transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr><td colspan="4" class="px-6 py-8 text-center text-gray-400 italic">Tidak ada data izin/uzur.</td></tr> 
-                                @endforelse
-                            </tbody>
-                        </table>
+                        <div class="grid grid-cols-1 gap-0">
+                            @forelse ($attendancesHadir as $attendance)
+                                <div class="relative p-4 md:p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors group flex items-center justify-between">
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 hidden group-hover:block"></div>
+                                    <div class="flex items-center gap-3 md:gap-4 overflow-hidden">
+                                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0">
+                                            {{ $loop->iteration }}
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h4 class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate">{{ $attendance->student->name }}</h4>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded">{{ $attendance->student->schoolClass->name }}</span>
+                                                <span class="text-xs font-bold text-emerald-600 flex items-center gap-1"><i class="ph-bold ph-clock"></i> {{ $attendance->created_at->format('H:i') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onclick="openEditModalReligious({{ $attendance->id }}, '{{ $attendance->student->name }}', '{{ $attendance->status_final }}', `{{ $attendance->notes_final }}`, '{{ $attendance->activity }}')" class="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all no-print shrink-0">
+                                        <i class="ph-bold ph-pencil-simple text-xl"></i>
+                                    </button>
+                                </div>
+                            @empty
+                                <div class="text-center py-20">
+                                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300"><i class="ph-duotone ph-coffee text-4xl"></i></div>
+                                    <p class="text-slate-400 font-bold">Belum ada data hadir.</p>
+                                </div> 
+                            @endforelse
+                        </div>
+                        <div class="p-4 border-t border-slate-100">
+                            {{ $attendancesHadir->appends(request()->query() + ['activeTab' => 'hadir'])->links() }}
+                        </div>
                     </div>
-                    @if($attendancesUzur->hasPages())
-                        <div class="p-4 border-t border-gray-100 no-print">{{ $attendancesUzur->appends(request()->query() + ['activeTab' => 'uzur'])->links() }}</div>
-                    @endif
-                </div>
 
+                    {{-- TAB BELUM ABSEN --}}
+                    <div x-show="activeTab === 'belum'" style="display: none;" class="w-full">
+                         @if($belumAbsenList->count() > 0)
+                            <div class="p-5 bg-rose-50 border-b border-rose-100 flex flex-col md:flex-row items-center justify-between gap-4 no-print">
+                                <div class="flex items-center gap-3 text-rose-700">
+                                    <div class="p-2 bg-white rounded-lg shadow-sm shrink-0"><i class="ph-fill ph-warning-octagon text-xl"></i></div>
+                                    <div>
+                                        <h4 class="font-bold text-sm">Aksi Massal Diperlukan</h4>
+                                        <p class="text-xs opacity-80">{{ $belumAbsenList->count() }} siswa belum tercatat.</p>
+                                    </div>
+                                </div>
+                                <form id="bulk-alpha-religious-form" action="{{ route('reports.bulkAlpha') }}" method="POST" class="w-full md:w-auto">
+                                    @csrf
+                                    <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
+                                    <input type="hidden" name="type" value="Keagamaan">
+                                    <input type="hidden" name="activity" value="{{ $selectedActivity }}">
+                                    <button type="button" onclick="confirmBulkAlphaReligious('{{ $belumAbsenList->count() }}')" class="w-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-5 py-3 rounded-xl shadow-lg shadow-rose-200 transition-all flex items-center justify-center gap-2">
+                                        <i class="ph-bold ph-check-circle"></i> Tandai Semua Alfa
+                                    </button>
+                                </form>
+                            </div>
+                        @endif
+
+                        <div class="grid grid-cols-1 gap-0">
+                            @forelse ($belumAbsenList as $student)
+                                <div class="relative p-4 md:p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors group flex items-center justify-between">
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-rose-500 hidden group-hover:block"></div>
+                                    <div class="flex items-center gap-4 overflow-hidden">
+                                        <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center font-bold text-xs shrink-0">!</div>
+                                        <div class="min-w-0">
+                                            <h4 class="font-bold text-slate-800 truncate">{{ $student->name }}</h4>
+                                            <p class="text-xs text-slate-500">{{ $student->schoolClass->name ?? '-' }}</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="openManualModalForStudent({{ $student->id }}, '{{ $student->name }}')" class="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 hover:text-blue-600 hover:border-blue-100 transition-all shadow-sm no-print shrink-0">
+                                        Input <span class="hidden md:inline">Manual</span>
+                                    </button>
+                                </div>
+                            @empty
+                                <div class="text-center py-20 text-emerald-600 font-bold">Semua Aman! Tidak ada siswa yang tertinggal.</div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    {{-- TAB UZUR --}}
+                    <div x-show="activeTab === 'uzur'" style="display: none;" class="w-full">
+                         <div class="grid grid-cols-1 gap-0">
+                            @forelse ($attendancesUzur as $attendance)
+                                <div class="relative p-4 md:p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors group flex items-center justify-between">
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 {{ $attendance->status_final == 'Alfa' ? 'bg-rose-500' : 'bg-blue-500' }} hidden group-hover:block"></div>
+                                    <div class="flex items-center gap-4 overflow-hidden">
+                                        <div class="w-10 h-10 rounded-xl {{ $attendance->status_final == 'Alfa' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600' }} flex items-center justify-center font-bold text-xs shrink-0">
+                                            {{ substr($attendance->status_final, 0, 1) }}
+                                        </div>
+                                        <div class="min-w-0">
+                                            <h4 class="font-bold text-slate-800 truncate">{{ $attendance->student->name }}</h4>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $attendance->status_final == 'Alfa' ? 'bg-rose-50 text-rose-700' : 'bg-blue-50 text-blue-700' }} uppercase">{{ $attendance->status_final }}</span>
+                                                @if($attendance->notes_final)
+                                                    <span class="text-xs text-slate-400 italic max-w-[100px] md:max-w-none truncate">"{{ $attendance->notes_final }}"</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onclick="openEditModalReligious({{ $attendance->id }}, '{{ $attendance->student->name }}', '{{ $attendance->status_final }}', `{{ $attendance->notes_final }}`, '{{ $attendance->activity }}')" class="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all no-print shrink-0">
+                                        <i class="ph-bold ph-pencil-simple text-xl"></i>
+                                    </button>
+                                </div>
+                            @empty
+                                <div class="text-center py-20 text-slate-400 italic">Tidak ada data izin/uzur.</div> 
+                            @endforelse
+                        </div>
+                        <div class="p-4 border-t border-slate-100">
+                            {{ $attendancesUzur->appends(request()->query() + ['activeTab' => 'uzur'])->links() }}
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
 
-    {{-- Footer Cetak --}}
-    <div class="hidden print-only mt-8 text-right">
-        <p class="text-sm text-black">Dicetak pada: {{ now()->format('d F Y H:i') }}</p>
-        <p class="text-sm text-black mt-8">(_______________________)</p>
-        <p class="text-xs text-black">Koordinator Keagamaan</p>
-    </div>
+    {{-- MODALS & SCRIPT --}}
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white; }
+            [x-show] { display: block !important; }
+        }
+    </style>
 
-    {{-- MODAL & SCRIPTS --}}
-    <div id="manualInputModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div class="bg-blue-600 px-6 py-4 flex justify-between items-center">
-                <h3 class="font-bold text-white">Input Keterangan Manual</h3>
-                <button onclick="closeManualModal()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>
+    {{-- Modal codes are essentially the same logic, just keeping them clean --}}
+    <div id="manualInputModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
+        <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100">
+            <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-white flex items-center gap-2"><i class="ph-bold ph-pencil-line"></i> Input Manual</h3>
+                <button onclick="closeManualModal()" class="text-white/70 hover:text-white transition"><i class="ph-bold ph-x text-xl"></i></button>
             </div>
-            <form action="{{ route('reports.storeManual') }}" method="POST" class="p-6">
+            <form action="{{ route('reports.storeManual') }}" method="POST" class="p-6 space-y-4">
                 @csrf
                 <input type="hidden" name="attendance_type" value="Keagamaan">
                 <input type="hidden" name="activity" value="{{ $selectedActivity }}">
                 <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Nama Siswa</label>
-                        <input type="text" id="manual-student-name-display" class="w-full bg-gray-50 border-gray-200 rounded-xl text-gray-800 font-bold focus:ring-0" readonly>
-                        <input type="hidden" name="student_id" id="manual-student-id">
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Status</label>
-                        <select name="status" class="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 shadow-sm">
-                            <option value="Hadir">Hadir</option>
-                            <option value="Uzur Syar'i">Uzur Syar'i</option>
-                            <option value="Alfa">Alfa</option> 
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Catatan</label>
-                        <input type="text" name="notes" class="w-full border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 shadow-sm" placeholder="Contoh: Sakit, Izin Lomba">
-                    </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-blue-200 mt-2">Simpan Data</button>
+                
+                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 text-center">
+                    <span class="block text-xs font-bold text-blue-900 uppercase tracking-widest mb-1">Siswa</span>
+                    <input type="text" id="manual-student-name-display" class="w-full bg-transparent border-none text-center text-xl font-black text-blue-900 focus:ring-0 p-0" readonly>
+                    <input type="hidden" name="student_id" id="manual-student-id">
                 </div>
+
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase mb-2 block ml-1">Status Kehadiran</label>
+                    <select name="status" class="w-full border-slate-200 bg-slate-50 rounded-xl focus:ring-blue-900 font-bold text-slate-700 h-12">
+                        <option value="Hadir">Hadir</option>
+                        <option value="Uzur Syar'i">Uzur Syar'i</option>
+                        <option value="Alfa">Alfa</option> 
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase mb-2 block ml-1">Catatan</label>
+                    <input type="text" name="notes" class="w-full border-slate-200 bg-slate-50 rounded-xl focus:ring-blue-900 h-12" placeholder="Contoh: Sakit">
+                </div>
+                <button type="submit" class="w-full bg-blue-900 hover:bg-slate-900 text-white font-bold h-12 rounded-xl transition-colors shadow-lg shadow-blue-200 mt-2">Simpan Data</button>
             </form>
         </div>
     </div>
 
-    <div id="editReligiousModal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div class="bg-gray-800 px-6 py-4 flex justify-between items-center">
-                <h3 class="font-bold text-white">Edit Data Keagamaan</h3>
-                <button onclick="closeEditModalReligious()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>
+    <div id="editReligiousModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
+        <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100">
+            <div class="bg-slate-800 px-6 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-white flex items-center gap-2"><i class="ph-bold ph-pencil-simple"></i> Edit Data</h3>
+                <button onclick="closeEditModalReligious()" class="text-white/70 hover:text-white transition"><i class="ph-bold ph-x text-xl"></i></button>
             </div>
-            <form id="editReligiousForm" method="POST" class="p-6">
+            <form id="editReligiousForm" method="POST" class="p-6 space-y-4">
                 @csrf @method('PUT')
-                <div class="mb-4">
-                    <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Nama Siswa</label>
-                    <p id="modal-religious-student-name" class="text-xl font-bold text-gray-800"></p>
+                <div class="text-center mb-4">
+                    <p class="text-xs font-bold text-slate-400 uppercase mb-1">Mengedit Siswa</p>
+                    <p id="modal-religious-student-name" class="text-xl font-black text-slate-800 truncate px-4"></p>
                 </div>
                 <input type="hidden" name="activity" id="modal-religious-activity">
-                <div class="mb-4">
-                    <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Status</label>
-                    <select name="status" id="modal-religious-status" class="w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase mb-2 block ml-1">Status</label>
+                    <select name="status" id="modal-religious-status" class="w-full border-slate-200 bg-slate-50 rounded-xl font-bold text-slate-700 h-12">
                         <option value="Hadir">Hadir</option>
                         <option value="Uzur Syar'i">Uzur Syar'i</option>
                         <option value="Alfa">Alfa</option>
                     </select>
                 </div>
-                <div class="mb-6">
-                    <label class="text-xs font-bold text-gray-400 uppercase mb-1 block">Catatan</label>
-                    <textarea name="notes" id="modal-religious-notes" class="w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500" rows="3"></textarea>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 uppercase mb-2 block ml-1">Catatan</label>
+                    <textarea name="notes" id="modal-religious-notes" class="w-full border-slate-200 bg-slate-50 rounded-xl" rows="2"></textarea>
                 </div>
-                <div class="flex justify-end gap-3">
-                    <button type="button" onclick="closeEditModalReligious()" class="px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-md">Update</button>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeEditModalReligious()" class="flex-1 h-12 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200">Batal</button>
+                    <button type="submit" class="flex-1 h-12 bg-blue-900 text-white font-bold rounded-xl hover:bg-slate-900 shadow-md">Update</button>
                 </div>
             </form>
         </div>
     </div>
-
-    <style>
-        @media print {
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { background-color: white; }
-            .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; }
-            .rounded-2xl, .rounded-xl, .rounded-lg { border-radius: 0 !important; }
-            table { width: 100% !important; min-width: 0 !important; }
-            [x-show] { display: block !important; }
-        }
-    </style>
 
     <script>
         function openManualModalForStudent(id, name) {
@@ -409,41 +354,36 @@
         function closeManualModal() {
             document.getElementById('manualInputModal').classList.add('hidden');
         }
-        
         function confirmResetData() {
             Swal.fire({
-                title: 'Apakah Anda Yakin?',
-                text: "Semua data kehadiran {{ $selectedActivity }} untuk tanggal ini akan dihapus permanen! Tindakan ini tidak dapat dibatalkan.",
+                title: 'Reset Data Hari Ini?',
+                text: "Semua data kehadiran {{ $selectedActivity }} akan dihapus!",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, Hapus Semua!',
-                cancelButtonText: 'Batal'
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                customClass: { popup: 'rounded-[2rem]' }
             }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('reset-data-form').submit();
-                }
+                if (result.isConfirmed) document.getElementById('reset-data-form').submit();
             })
         }
-
         function confirmBulkAlphaReligious(count) {
             Swal.fire({
                 title: 'Tandai ' + count + ' Siswa Alfa?',
-                text: "Siswa akan ditandai Alfa untuk Shalat {{ $selectedActivity }}. (Tanpa Pengurangan Poin)",
+                text: "Siswa akan ditandai Alfa untuk Shalat {{ $selectedActivity }}.",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
                 confirmButtonText: 'Ya, Proses!',
-                cancelButtonText: 'Batal'
+                cancelButtonText: 'Batal',
+                customClass: { popup: 'rounded-[2rem]' }
             }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('bulk-alpha-religious-form').submit();
-                }
+                if (result.isConfirmed) document.getElementById('bulk-alpha-religious-form').submit();
             })
         }
-
         const religiousModal = document.getElementById('editReligiousModal');
         const religiousForm = document.getElementById('editReligiousForm');
         const religiousStudentNameDisplay = document.getElementById('modal-religious-student-name');
@@ -459,8 +399,6 @@
             religiousNotesInput.value = notes;
             religiousModal.classList.remove('hidden');
         }
-        function closeEditModalReligious() {
-            religiousModal.classList.add('hidden');
-        }
+        function closeEditModalReligious() { religiousModal.classList.add('hidden'); }
     </script>
 </x-app-layout>

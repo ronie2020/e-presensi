@@ -1,97 +1,111 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Input Surat Masuk</h2>
-    </x-slot>
+    <div class="py-8 sm:py-10 font-sans text-slate-800">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            {{-- Tombol Kembali --}}
+            <a href="{{ route('letters.incoming.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 mb-6 transition-colors">
+                <i class="ph-bold ph-arrow-left"></i> Kembali ke Daftar
+            </a>
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    <!-- Tambahkan penanganan error umum jika ada -->
+            {{-- Card Container --}}
+            <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
+                
+                {{-- Card Header --}}
+                <div class="bg-gradient-to-r from-blue-900 to-blue-800 p-8 text-white relative overflow-hidden">
+                    <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
+                        <i class="ph-fill ph-envelope-simple-open"></i>
+                    </div>
+                    <h2 class="text-2xl font-black relative z-10">Registrasi Surat Masuk</h2>
+                    <p class="text-blue-200 text-sm font-medium relative z-10 mt-1">Isi detail surat dinas yang diterima sekolah.</p>
+                </div>
+
+                {{-- Form Content --}}
+                <div class="p-8">
                     @if ($errors->any())
-                        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-                            <strong class="font-bold">Terjadi Kesalahan!</strong>
-                            <ul class="mt-2 list-disc list-inside text-sm">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+                        <div class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl text-sm flex items-start gap-3">
+                            <i class="ph-fill ph-warning-circle text-xl shrink-0 mt-0.5"></i>
+                            <div>
+                                <strong class="font-bold block mb-1">Periksa kembali inputan Anda!</strong>
+                                <ul class="list-disc list-inside">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
                         </div>
                     @endif
 
-                    <form action="{{ route('letters.incoming.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('letters.incoming.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                         @csrf
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             
-                            {{-- Kolom Kiri --}}
-                            <div class="space-y-4">
+                            {{-- KOLOM KIRI --}}
+                            <div class="space-y-5">
                                 <div>
-                                    <label class="block font-medium text-sm text-gray-700">Nomor Surat</label>
-                                    <!-- Tambahkan value old() agar input tidak hilang saat validasi gagal -->
-                                    <input type="text" name="nomor_surat" value="{{ old('nomor_surat') }}" 
-                                           class="form-input rounded-md shadow-sm mt-1 block w-full @error('nomor_surat') border-red-500 @enderror" required>
-                                    <!-- Menampilkan pesan error spesifik field -->
-                                    @error('nomor_surat')
-                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nomor Surat <span class="text-rose-500">*</span></label>
+                                    <div class="relative">
+                                        <i class="ph-bold ph-hash absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                        <input type="text" name="nomor_surat" value="{{ old('nomor_surat') }}" required placeholder="Contoh: 421.2/005/SMP/2024"
+                                               class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 font-bold text-slate-700 transition-all font-mono placeholder:font-sans">
+                                    </div>
                                 </div>
 
                                 <div>
-                                    <label class="block font-medium text-sm text-gray-700">Asal Surat / Pengirim</label>
-                                    <input type="text" name="pengirim" value="{{ old('pengirim') }}" 
-                                           class="form-input rounded-md shadow-sm mt-1 block w-full @error('pengirim') border-red-500 @enderror" required>
-                                    @error('pengirim')
-                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Asal Surat / Pengirim <span class="text-rose-500">*</span></label>
+                                    <div class="relative">
+                                        <i class="ph-bold ph-buildings absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                        <input type="text" name="pengirim" value="{{ old('pengirim') }}" required placeholder="Contoh: Dinas Pendidikan Ciamis"
+                                               class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 font-bold text-slate-700 transition-all">
+                                    </div>
                                 </div>
 
                                 <div>
-                                    <label class="block font-medium text-sm text-gray-700">Tanggal Surat</label>
-                                    <input type="date" name="tgl_surat" value="{{ old('tgl_surat') }}" 
-                                           class="form-input rounded-md shadow-sm mt-1 block w-full @error('tgl_surat') border-red-500 @enderror" required>
-                                    @error('tgl_surat')
-                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tanggal Surat <span class="text-rose-500">*</span></label>
+                                    <div class="relative">
+                                        <input type="date" name="tgl_surat" value="{{ old('tgl_surat') }}" required
+                                               class="w-full px-4 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 font-bold text-slate-700 transition-all">
+                                    </div>
                                 </div>
                             </div>
 
-                            {{-- Kolom Kanan --}}
-                            <div class="space-y-4">
+                            {{-- KOLOM KANAN --}}
+                            <div class="space-y-5">
                                 <div>
-                                    <label class="block font-medium text-sm text-gray-700">Tanggal Diterima</label>
-                                    <input type="date" name="tgl_terima" value="{{ old('tgl_terima', date('Y-m-d')) }}" 
-                                           class="form-input rounded-md shadow-sm mt-1 block w-full @error('tgl_terima') border-red-500 @enderror" required>
-                                    @error('tgl_terima')
-                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tanggal Diterima</label>
+                                    <div class="relative">
+                                        <input type="date" name="tgl_terima" value="{{ old('tgl_terima', date('Y-m-d')) }}" required
+                                               class="w-full px-4 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 font-bold text-slate-700 transition-all">
+                                    </div>
                                 </div>
 
                                 <div>
-                                    <label class="block font-medium text-sm text-gray-700">Perihal / Isi Ringkas</label>
-                                    <textarea name="perihal" rows="3" 
-                                              class="form-input rounded-md shadow-sm mt-1 block w-full @error('perihal') border-red-500 @enderror" required>{{ old('perihal') }}</textarea>
-                                    @error('perihal')
-                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Perihal / Ringkasan <span class="text-rose-500">*</span></label>
+                                    <textarea name="perihal" rows="4" required placeholder="Jelaskan isi ringkas surat..."
+                                              class="w-full px-4 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 font-medium text-slate-700 transition-all">{{ old('perihal') }}</textarea>
                                 </div>
 
                                 <div>
-                                    <label class="block font-medium text-sm text-gray-700">Upload File (PDF/Gambar)</label>
-                                    <!-- Tambahkan accept attribute untuk UX yang lebih baik -->
-                                    <input type="file" name="file_surat" accept=".pdf,.jpg,.jpeg,.png"
-                                           class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 @error('file_surat') text-red-500 @enderror">
-                                    <p class="text-xs text-gray-500 mt-1">*Format: PDF, JPG, PNG (Maks 2MB)</p>
-                                    @error('file_surat')
-                                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Upload File</label>
+                                    <div class="relative group">
+                                        <input type="file" name="file_surat" accept=".pdf,.jpg,.jpeg,.png"
+                                               class="block w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer border border-dashed border-slate-300 rounded-2xl py-3 px-4 hover:border-blue-400 hover:bg-slate-50">
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 mt-2 ml-1 flex items-center gap-1">
+                                        <i class="ph-fill ph-info"></i> PDF / JPG / PNG (Max 2MB)
+                                    </p>
                                 </div>
                             </div>
-
                         </div>
 
-                        <div class="mt-6 flex justify-end gap-3">
-                            <a href="{{ route('letters.incoming.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">Batal</a>
-                            <button type="submit" class="px-4 py-2 bg-blue-800 text-white rounded-md hover:bg-blue-900 transition shadow-lg">Simpan</button>
+                        {{-- Action Buttons --}}
+                        <div class="pt-8 mt-4 border-t border-slate-100 flex items-center justify-end gap-4">
+                            <a href="{{ route('letters.incoming.index') }}" class="px-6 py-3 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-50 hover:text-slate-700 transition-colors">
+                                Batal
+                            </a>
+                            <button type="submit" class="px-8 py-3 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 shadow-lg shadow-blue-900/20 transition-all transform active:scale-95 flex items-center gap-2">
+                                <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Data
+                            </button>
                         </div>
                     </form>
                 </div>

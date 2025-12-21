@@ -32,12 +32,13 @@
         /* Tombol Cetak Cantik */
         .btn-print {
             position: fixed; top: 20px; right: 20px;
-            background: #2563eb; color: white; border: none;
+            /* UPDATED: Blue-900 */
+            background: #1e3a8a; color: white; border: none;
             padding: 10px 20px; border-radius: 8px; cursor: pointer;
             font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             font-family: sans-serif; display: flex; align-items: center; gap: 8px;
         }
-        .btn-print:hover { background: #1d4ed8; }
+        .btn-print:hover { background: #1e40af; }
     </style>
 </head>
 <body>

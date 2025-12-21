@@ -5,50 +5,64 @@
     <style>
         body {
             font-family: sans-serif;
-            font-size: 12px;
+            font-size: 11px;
+            color: #1a202c; /* Slate-900 equivalent */
         }
         .header {
             text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
+            margin-bottom: 25px;
+            border-bottom: 3px double #000;
+            padding-bottom: 15px;
         }
         .header h1 {
-            margin: 0;
-            font-size: 18px;
+            margin: 0 0 5px 0;
+            font-size: 16px;
             text-transform: uppercase;
+            font-weight: 900;
         }
         .header p {
-            margin: 2px 0;
-            font-size: 12px;
-            color: #555;
+            margin: 0;
+            font-size: 11px;
+            color: #4a5568;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 15px;
         }
         th, td {
-            border: 1px solid #333;
-            padding: 6px 8px;
+            border: 1px solid #cbd5e0; /* Slate-300 */
+            padding: 8px 10px;
             text-align: left;
+            vertical-align: top;
         }
         th {
-            background-color: #f2f2f2;
+            background-color: #f1f5f9; /* Slate-100 */
+            color: #0f172a; /* Slate-900 */
             font-weight: bold;
-            text-align: center;
-        }
-        .badge {
-            padding: 2px 5px;
-            border-radius: 3px;
+            text-transform: uppercase;
             font-size: 10px;
-            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f8fafc; /* Slate-50 */
         }
         .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        
         .footer {
-            margin-top: 30px;
+            margin-top: 40px;
             text-align: right;
             font-size: 11px;
+        }
+        .small-text {
+            font-size: 10px;
+            color: #64748b;
+        }
+        .badge {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 9px;
+            color: #2563eb;
         }
     </style>
 </head>
@@ -57,24 +71,25 @@
     <div class="header">
         <h1>Laporan Prestasi & Penghargaan</h1>
         <p>SMP NEGERI 3 LAKBOK</p>
-        <p>Dicetak pada: {{ date('d F Y') }}</p>
+        <p class="small-text">Jalan Raya Lakbok, Kabupaten Ciamis, Jawa Barat</p>
     </div>
 
-    @if(request('search'))
-        <p style="font-style: italic; font-size: 11px;">
-            Filter Pencarian: "{{ request('search') }}"
-        </p>
-    @endif
+    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+        <span class="small-text">Dicetak pada: {{ date('d F Y, H:i') }}</span>
+        @if(request('search'))
+            <span class="small-text" style="float: right;">Filter: "<strong>{{ request('search') }}</strong>"</span>
+        @endif
+    </div>
 
     <table>
         <thead>
             <tr>
-                <th style="width: 5%">No</th>
+                <th style="width: 5%" class="text-center">No</th>
                 <th style="width: 25%">Nama Juara</th>
-                <th style="width: 10%">Tipe</th>
+                <th style="width: 10%" class="text-center">Tipe</th>
                 <th style="width: 30%">Judul Prestasi</th>
-                <th style="width: 15%">Tingkat</th>
-                <th style="width: 15%">Tanggal</th>
+                <th style="width: 15%" class="text-center">Tingkat</th>
+                <th style="width: 15%" class="text-center">Tanggal</th>
             </tr>
         </thead>
         <tbody>
@@ -84,29 +99,35 @@
                     <td>
                         {{-- Logika Nama --}}
                         @if($item->type === 'Siswa' && $item->student)
-                            {{ $item->student->name }} <br>
-                            <small style="color: #666">({{ $item->student->schoolClass->name ?? '-' }})</small>
+                            <strong>{{ $item->student->name }}</strong><br>
+                            <span class="small-text">{{ $item->student->schoolClass->name ?? '-' }}</span>
                         @else
-                            {{ $item->achiever_name ?? $item->name_manual }}
+                            <strong>{{ $item->achiever_name ?? $item->name_manual }}</strong>
                         @endif
                     </td>
-                    <td class="text-center">{{ $item->type }}</td>
+                    <td class="text-center">
+                        <span class="badge">{{ $item->type }}</span>
+                    </td>
                     <td>{{ $item->title }}</td>
                     <td class="text-center">{{ $item->level }}</td>
                     <td class="text-center">{{ \Carbon\Carbon::parse($item->date)->format('d/m/Y') }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="text-center">Tidak ada data prestasi yang ditemukan.</td>
+                    <td colspan="6" class="text-center" style="padding: 20px; font-style: italic; color: #64748b;">
+                        Tidak ada data prestasi yang ditemukan.
+                    </td>
                 </tr>
             @endforelse
         </tbody>
     </table>
 
     <div class="footer">
-        <p>Mengetahui,<br>Kepala Sekolah / Waka Kesiswaan</p>
+        <p>Mengetahui,</p>
+        <p>Kepala Sekolah / Waka Kesiswaan</p>
         <br><br><br>
-        <p>__________________________</p>
+        <p style="font-weight: bold; text-decoration: underline;">( .......................................... )</p>
+        <p>NIP. ..............................</p>
     </div>
 
 </body>
