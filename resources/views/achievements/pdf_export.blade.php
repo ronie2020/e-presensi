@@ -6,12 +6,12 @@
         body {
             font-family: sans-serif;
             font-size: 11px;
-            color: #1a202c; /* Slate-900 equivalent */
+            color: #1e293b; /* Slate-800 */
         }
         .header {
             text-align: center;
             margin-bottom: 25px;
-            border-bottom: 3px double #000;
+            border-bottom: 3px double #0f172a; /* Slate-900 */
             padding-bottom: 15px;
         }
         .header h1 {
@@ -19,11 +19,12 @@
             font-size: 16px;
             text-transform: uppercase;
             font-weight: 900;
+            color: #0f172a;
         }
         .header p {
             margin: 0;
             font-size: 11px;
-            color: #4a5568;
+            color: #475569; /* Slate-600 */
         }
         table {
             width: 100%;
@@ -37,8 +38,8 @@
             vertical-align: top;
         }
         th {
-            background-color: #f1f5f9; /* Slate-100 */
-            color: #0f172a; /* Slate-900 */
+            background-color: #1e3a8a; /* Blue-900 */
+            color: #ffffff;
             font-weight: bold;
             text-transform: uppercase;
             font-size: 10px;
@@ -62,7 +63,10 @@
             font-weight: bold;
             text-transform: uppercase;
             font-size: 9px;
-            color: #2563eb;
+            padding: 2px 4px;
+            border-radius: 4px;
+            background-color: #e2e8f0;
+            color: #1e293b;
         }
     </style>
 </head>
