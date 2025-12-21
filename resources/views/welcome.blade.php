@@ -3,6 +3,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Website Resmi SMP Negeri 3 Lakbok. Informasi akademik, kesiswaan, dan prestasi sekolah terkini.">
+    <meta property="og:title" content="{{ config('app.name', 'SMP Negeri 3 Lakbok') }}">
+    <meta property="og:description" content="Membangun Generasi Cerdas & Berdisiplin. Platform digital terintegrasi SMPN 3 Lakbok.">
+    <meta property="og:image" content="{{ asset('images/logo.png') }}">
+    
     <title>{{ config('app.name', 'SMP Negeri 3 Lakbok') }}</title>
     
     <!-- Fonts -->
@@ -46,6 +51,7 @@
         activeAnnouncement: null,
         scrolled: false,
         showBackToTop: false,
+        ppdbBannerOpen: true,
         
         openAnnouncementByIndex(index) {
             if (window.announcementsData && window.announcementsData[index]) {
@@ -102,8 +108,12 @@
                     <a href="#guru" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Guru</a>
                     <a href="#kegiatan" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Kegiatan</a>
                     <a href="#prestasi" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Prestasi</a>
-                    <a href="#ekskul" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Ekskul</a>
                     
+                    <!-- Search Icon Toggle (Dummy Link) -->
+                    <button class="transition hover:scale-110" :class="{ 'text-slate-700 hover:text-blue-600': scrolled, 'text-slate-200 hover:text-white': !scrolled }">
+                        <i class="ph-bold ph-magnifying-glass text-lg"></i>
+                    </button>
+
                     @auth
                         <a href="{{ url('/dashboard') }}" class="text-sm font-bold px-5 py-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">Dashboard</a>
                     @else
@@ -236,9 +246,8 @@
 
     <!-- MENU AKSES (ANIMATED) -->
     <div class="bg-slate-50 py-16 lg:py-20 relative z-20 -mt-8 lg:-mt-12 overflow-hidden">
-        <!-- ... (Kode menu akses tetap sama) ... -->
         
-        <!-- [TAMBAHAN BARU] Animated Background Blobs untuk Menu -->
+        <!-- Animated Background Blobs untuk Menu -->
         <div class="absolute inset-0 pointer-events-none z-0">
             <div class="absolute top-10 left-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
             <div class="absolute top-10 right-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
@@ -253,7 +262,7 @@
             
             <div class="flex flex-wrap justify-center gap-6 lg:gap-8">
 
-                  <!-- [MENU BARU] PENGUMUMAN KELULUSAN (THEME UNGU SPECIAL) -->
+                  <!-- PENGUMUMAN KELULUSAN -->
                  <a href="{{ route('graduation.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
                     <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-graduation-cap text-3xl"></i>
@@ -271,7 +280,7 @@
                     <p class="text-slate-500 text-sm leading-relaxed">Cek kehadiran, nilai akademik, dan poin kedisiplinan.</p>
                 </a>
 
-                <!-- E-LEARNING / LMS (BARU) -->
+                <!-- E-LEARNING / LMS -->
                 <a href="{{ route('student.login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-teal-500/10 border border-slate-100 hover:border-teal-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="150">
                     <div class="w-16 h-16 bg-teal-50 rounded-2xl flex items-center justify-center text-teal-600 mb-6 group-hover:bg-teal-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-chalkboard-simple text-3xl"></i>
@@ -280,7 +289,7 @@
                     <p class="text-slate-500 text-sm leading-relaxed">Ruang belajar digital, materi pelajaran, dan pengumpulan tugas.</p>
                 </a>
 
-                 <!-- UJIAN CBT (UPDATED LINK) -->                
+                 <!-- UJIAN CBT -->                
                 <a href="{{ route('student.login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-rose-500/10 border border-slate-100 hover:border-rose-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="200">
                     <div class="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 mb-6 group-hover:bg-rose-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-desktop text-3xl"></i>
@@ -346,6 +355,34 @@
         </div>
     </div>
 
+    <!-- [BARU] AREA UNDUHAN (DOWNLOAD CENTER) -->
+    <div class="bg-blue-50 py-12 border-y border-blue-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-4">
+                    <div class="p-4 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-500/30 shrink-0">
+                        <i class="ph-duotone ph-download-simple text-3xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-900">Area Unduhan</h3>
+                        <p class="text-sm text-slate-500">Unduh dokumen akademik dan administrasi sekolah.</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3 w-full md:w-auto">
+                    <a href="#" class="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-bold text-sm hover:border-blue-400 hover:text-blue-600 transition-all shadow-sm">
+                        <i class="ph-fill ph-file-pdf text-red-500 text-lg"></i> Kalender Akademik
+                    </a>
+                    <a href="#" class="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-bold text-sm hover:border-blue-400 hover:text-blue-600 transition-all shadow-sm">
+                        <i class="ph-fill ph-file-pdf text-red-500 text-lg"></i> Jadwal Pelajaran
+                    </a>
+                    <a href="#" class="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-bold text-sm hover:border-blue-400 hover:text-blue-600 transition-all shadow-sm">
+                        <i class="ph-fill ph-file-text text-blue-500 text-lg"></i> Tata Tertib
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- KEPALA SEKOLAH SECTION -->
     <div class="bg-white py-20 border-b border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -353,10 +390,10 @@
                 <!-- Background Decoration -->
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
                 
-                <!-- Foto Kepsek -->
+                <!-- Foto Kepsek (Lazy Loading) -->
                 <div class="relative shrink-0" data-aos="fade-right">
                     <div class="w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-white/20 overflow-hidden shadow-lg bg-white">
-                         <img src="{{ asset('images/kasek.png') }}" alt="Kepala Sekolah" class="w-full h-full object-cover">
+                         <img src="{{ asset('images/kasek.png') }}" loading="lazy" alt="Kepala Sekolah" class="w-full h-full object-cover">
                     </div>
                     <div class="absolute bottom-2 right-2 bg-white text-blue-600 rounded-full p-2 shadow-lg">
                         <i class="ph-fill ph-quotes text-xl"></i>
@@ -378,7 +415,7 @@
         </div>
     </div>
 
-    <!-- SECTION: PROFIL SEKOLAH (DIPERBARUI DENGAN STATISTIK LMS) -->
+    <!-- SECTION: PROFIL SEKOLAH (REFACTORED: Menggunakan Variabel Controller) -->
     <div id="profil" class="py-24 bg-white relative overflow-hidden border-y border-slate-100">
         <!-- Background Pattern -->
         <div class="absolute right-0 top-0 opacity-5 pointer-events-none">
@@ -401,50 +438,28 @@
                         SMP Negeri 3 Lakbok berkomitmen untuk memberikan layanan pendidikan terbaik yang mengintegrasikan kecerdasan akademik dengan nilai-nilai karakter luhur. Kami hadir untuk mencetak pemimpin masa depan yang kompetitif dan berakhlak mulia.
                     </p>
                     
-                    <!-- Stats Grid (DITAMBAHKAN STATISTIK LMS) -->
-                    @php
-                        // AMBIL DATA STATISTIK (JIKA MODEL ADA)
-                        $siswaCount = \App\Models\Student::count() ?? 542;
-                        $guruCount = \App\Models\User::where('role', 'guru')->count() ?? 32;
-                        $rombelCount = \App\Models\SchoolClass::count() ?? 18;
-                        
-                        // Cek apakah tabel LMS sudah ada untuk menghindari error
-                        $materiCount = 0;
-                        $tugasCount = 0;
-                        try {
-                            if(class_exists('App\Models\LmsMaterial')) {
-                                $materiCount = \App\Models\LmsMaterial::count();
-                            }
-                            if(class_exists('App\Models\LmsAssignment')) {
-                                $tugasCount = \App\Models\LmsAssignment::count();
-                            }
-                        } catch (\Exception $e) {
-                            $materiCount = 0;
-                            $tugasCount = 0;
-                        }
-                    @endphp
-
+                    <!-- Stats Grid (REFACTORED) -->
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                         <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg hover:border-blue-100 transition-all duration-300">
-                            <p class="text-3xl font-black text-slate-800">{{ $siswaCount }}</p>
+                            <p class="text-3xl font-black text-slate-800">{{ $schoolStats['siswa'] ?? '-' }}</p>
                             <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Siswa</p>
                         </div>
                         <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg hover:border-blue-100 transition-all duration-300">
-                            <p class="text-3xl font-black text-slate-800">{{ $guruCount }}</p>
+                            <p class="text-3xl font-black text-slate-800">{{ $schoolStats['guru'] ?? '-' }}</p>
                             <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Guru</p>
                         </div>
                         <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg hover:border-blue-100 transition-all duration-300">
-                            <p class="text-3xl font-black text-slate-800">{{ $rombelCount }}</p>
+                            <p class="text-3xl font-black text-slate-800">{{ $schoolStats['rombel'] ?? '-' }}</p>
                             <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Rombel</p>
                         </div>
                         
-                        <!-- STATISTIK LMS BARU -->
+                        <!-- STATISTIK LMS -->
                         <div class="p-5 bg-teal-50 rounded-2xl border border-teal-100 text-center hover:bg-white hover:shadow-lg hover:border-teal-200 transition-all duration-300">
-                            <p class="text-3xl font-black text-teal-600">{{ $materiCount }}</p>
+                            <p class="text-3xl font-black text-teal-600">{{ $schoolStats['materi'] ?? 0 }}</p>
                             <p class="text-[10px] font-bold text-teal-400 uppercase mt-1 tracking-wider">Materi Digital</p>
                         </div>
                         <div class="p-5 bg-indigo-50 rounded-2xl border border-indigo-100 text-center hover:bg-white hover:shadow-lg hover:border-indigo-200 transition-all duration-300 sm:col-span-2">
-                            <p class="text-3xl font-black text-indigo-600">{{ $tugasCount }}</p>
+                            <p class="text-3xl font-black text-indigo-600">{{ $schoolStats['tugas'] ?? 0 }}</p>
                             <p class="text-[10px] font-bold text-indigo-400 uppercase mt-1 tracking-wider">Tugas & Kuis Online</p>
                         </div>
                     </div>
@@ -483,6 +498,7 @@
                                 x-transition:leave="transition ease-in-out duration-1000"
                                 x-transition:leave-start="opacity-100 scale-100"
                                 x-transition:leave-end="opacity-0 scale-100"
+                                loading="lazy"
                                 class="absolute inset-0 w-full h-full object-cover" 
                                 alt="Gedung Sekolah">
                         </template>
@@ -504,7 +520,7 @@
         </div>
     </div>
 
-    <!-- VIDEO PROFIL SEKOLAH -->
+    <!-- VIDEO PROFIL SEKOLAH (Optimasi Load) -->
     <div class="py-24 bg-slate-900 relative overflow-hidden">
         <div class="absolute inset-0 bg-cover bg-center opacity-30" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent"></div>
@@ -525,7 +541,7 @@
                         $embedUrl = str_replace('youtu.be/', 'www.youtube.com/embed/', $rawVideoUrl);
                     }
                 @endphp
-                 <iframe class="w-full h-full" src="{{ $embedUrl }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                 <iframe class="w-full h-full" src="{{ $embedUrl }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
             </div>
         </div>
     </div>
@@ -544,7 +560,7 @@
                     <div class="group relative bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 h-full flex flex-col" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                         <div class="aspect-[3/4] w-full relative overflow-hidden bg-slate-100">
                             @if($teacher->photo_path)
-                                <img src="{{ asset('storage/' . $teacher->photo_path) }}" alt="{{ $teacher->name }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <img src="{{ asset('storage/' . $teacher->photo_path) }}" loading="lazy" alt="{{ $teacher->name }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                 <div class="w-full h-full hidden flex-col items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300 text-slate-500">
                                     <span class="text-6xl font-black opacity-30 select-none uppercase">{{ substr($teacher->name, 0, 2) }}</span>
                                 </div>
@@ -583,7 +599,8 @@
                     <span class="text-indigo-600 font-bold tracking-wider text-sm uppercase mb-2 block">Galeri Sekolah</span>
                     <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900">Aktifitas & Kegiatan Siswa</h2>
                 </div>
-                <a href="#" class="hidden md:inline-flex items-center text-sm font-bold text-indigo-600 hover:text-indigo-800 transition">
+                <!-- [UPDATE LINK] -->
+                <a href="{{ route('public.activities') }}" class="hidden md:inline-flex items-center text-sm font-bold text-indigo-600 hover:text-indigo-800 transition">
                     Lihat Semua Galeri <i class="ph-bold ph-arrow-right ml-2"></i>
                 </a>
             </div>
@@ -594,6 +611,7 @@
                         <div class="relative h-60 overflow-hidden">
                             @if($activity->image_path)
                                 <img src="{{ asset('storage/' . $activity->image_path) }}" 
+                                     loading="lazy"
                                      alt="{{ $activity->title }}" 
                                      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
@@ -615,7 +633,7 @@
                                 </span>
                             </div>
 
-                             <!-- [BARU] BADGE VIDEO JIKA ADA LINK -->
+                             <!-- BADGE VIDEO -->
                             @if($activity->video_url)
                                 <div class="absolute top-4 right-4 z-20">
                                     <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1 animate-pulse">
@@ -633,7 +651,7 @@
                                 {{ $activity->description }}
                             </p>
 
-                            <!-- [BARU] TOMBOL TONTON VIDEO -->
+                            <!-- TOMBOL TONTON VIDEO -->
                             @if($activity->video_url)
                                 <div class="mt-4 pt-4 border-t border-slate-100">
                                     <a href="{{ $activity->video_url }}" target="_blank" class="inline-flex items-center gap-2 text-sm font-bold text-red-600 hover:text-red-700 transition-colors w-full group/video">
@@ -658,7 +676,8 @@
             </div>
             
              <div class="mt-8 text-center md:hidden">
-                <a href="#" class="inline-flex items-center text-sm font-bold text-indigo-600 hover:text-indigo-800 transition">
+                <!-- [UPDATE LINK] -->
+                <a href="{{ route('public.activities') }}" class="inline-flex items-center text-sm font-bold text-indigo-600 hover:text-indigo-800 transition">
                     Lihat Semua Galeri <i class="ph-bold ph-arrow-right ml-2"></i>
                 </a>
             </div>
@@ -686,14 +705,14 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 @forelse($achievements ?? [] as $prestasi)
-                    <!-- [PERBAIKAN FITUR]: Menambahkan toLowerCase() agar filter tidak sensitif huruf besar/kecil -->
+                    <!-- Filter Logic -->
                     <div class="group bg-white rounded-2xl border border-yellow-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-xl hover:shadow-yellow-500/10 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden h-full flex flex-col" 
                          x-show="activeFilter === 'Terbaru' || activeFilter.toLowerCase() === '{{ strtolower($prestasi->level ?? '') }}'"
                          x-transition.duration.500ms
                          data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
                         <div class="h-48 w-full bg-slate-100 relative overflow-hidden group">
                             @if(!empty($prestasi->photo_path))
-                                <img src="{{ asset('storage/' . $prestasi->photo_path) }}" alt="{{ $prestasi->title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <img src="{{ asset('storage/' . $prestasi->photo_path) }}" loading="lazy" alt="{{ $prestasi->title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                 <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-white" style="display: none;"><i class="ph-bold ph-trophy text-4xl"></i></div>
                             @else
                                 <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-white"><i class="ph-bold ph-trophy text-4xl"></i></div>
@@ -719,12 +738,13 @@
                 @endforelse
             </div>
             <div class="mt-12 text-center" data-aos="fade-up">
-                 <a href="#" class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-full hover:bg-yellow-100 hover:text-yellow-800 transition-all shadow-sm">Lihat Arsip Prestasi <i class="ph-bold ph-arrow-right ml-2"></i></a>
+                 <!-- [UPDATE LINK] -->
+                 <a href="{{ route('public.achievements') }}" class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-full hover:bg-yellow-100 hover:text-yellow-800 transition-all shadow-sm">Lihat Arsip Prestasi <i class="ph-bold ph-arrow-right ml-2"></i></a>
             </div>
         </div>
     </div>
     
-    <!-- SECTION: EKSTRAKURIKULER (BARU - DESAIN UPDATE) -->
+    <!-- SECTION: EKSTRAKURIKULER -->
     <div id="ekskul" class="py-24 bg-slate-900 text-white relative overflow-hidden">
         <!-- Decoration -->
         <div class="absolute top-0 right-0 w-96 h-96 bg-purple-600 rounded-full mix-blend-overlay filter blur-[128px] opacity-20"></div>
@@ -749,7 +769,7 @@
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-14 h-14 bg-slate-700 rounded-2xl flex items-center justify-center text-3xl text-purple-400 shadow-lg group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 overflow-hidden shrink-0">
                                 @if(filter_var($ekskul->icon, FILTER_VALIDATE_URL) || preg_match('/\.(jpg|jpeg|png|gif|svg|webp)$/i', $ekskul->icon))
-                                    <img src="{{ asset($ekskul->icon) }}" alt="{{ $ekskul->name }}" class="w-full h-full object-cover">
+                                    <img src="{{ asset($ekskul->icon) }}" loading="lazy" alt="{{ $ekskul->name }}" class="w-full h-full object-cover">
                                 @else
                                     <i class="{{ $ekskul->icon ?? 'ph-fill ph-star' }}"></i>
                                 @endif
@@ -822,7 +842,7 @@
         </div>
     </div>
 
-    <!-- BAGIAN KATA MEREKA / BUKU TAMU (BARU) -->
+    <!-- BAGIAN KATA MEREKA / BUKU TAMU -->
     <div class="py-20 bg-slate-50 border-t border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12" data-aos="fade-up">
@@ -964,7 +984,7 @@
                 </div>
             </div>
 
-            <!-- [FITUR BARU] AGENDA KEGIATAN -->
+            <!-- AGENDA KEGIATAN -->
             <div class="bg-slate-800/50 rounded-3xl p-8 mb-16 border border-slate-700/50 backdrop-blur-md">
                 <div class="flex items-center gap-3 mb-8">
                     <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400">
@@ -980,12 +1000,10 @@
                     {{-- Loop Data Agenda --}}
                     @forelse($agendas as $agenda)
                         @php
-                            // Logika warna border acak/bergantian agar menarik
                             $colors = ['blue', 'green', 'purple', 'orange', 'pink'];
                             $color = $colors[$loop->index % count($colors)];
                         @endphp
                         
-                        <!-- PERBAIKAN TAMPILAN CARD: items-start, flex-1, min-w-0, line-clamp-2 -->
                         <div class="bg-slate-700/50 p-4 rounded-xl border-l-4 border-{{ $color }}-500 flex items-start gap-4 hover:bg-slate-700 transition cursor-default group h-full">
                             <div class="text-center bg-slate-800 p-2 rounded-lg min-w-[60px] shadow-lg group-hover:bg-slate-900 transition-colors shrink-0">
                                 <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">{{ $agenda->event_date->format('M') }}</span>

@@ -53,7 +53,7 @@ use App\Http\Controllers\LibraryDashboardController;
 use App\Http\Controllers\LibraryCirculationController;
 use App\Http\Controllers\LibraryKioskController;
 
-// [BARU] Persuratan & Dinas
+// Persuratan & Dinas
 use App\Http\Controllers\LetterIncomingController;
 use App\Http\Controllers\SptController;
 use App\Http\Controllers\SppdController;
@@ -69,6 +69,11 @@ use App\Http\Controllers\SppdController;
 // =========================================================================
 
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
+
+// [PERBAIKAN] Menggunakan nama 'public.*' agar tidak bentrok dengan admin
+Route::get('/kegiatan', [LandingPageController::class, 'activities'])->name('public.activities');
+Route::get('/prestasi', [LandingPageController::class, 'achievements'])->name('public.achievements');
+
 Route::get('/guru', [LandingPageController::class, 'teachers'])->name('teachers.index');
 Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
 
@@ -150,7 +155,6 @@ Route::middleware('auth')->group(function () {
 
     // ===> LMS GURU (Materi, Tugas, & Nilai) <===
     Route::prefix('lms')->name('lms.')->group(function () {
-        // Materi
         Route::resource('materials', LmsMaterialController::class);
         
         // Tugas & Penilaian
@@ -187,6 +191,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('subjects', SubjectController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::get('/achievements/export', [AchievementController::class, 'export'])->name('achievements.export');
+    
+    // Resource Admin (Nama routenya otomatis achievements.index, activities.index dll)
     Route::resource('achievements', AchievementController::class);
     Route::resource('school-activities', SchoolActivityController::class);
 
@@ -219,52 +225,20 @@ Route::middleware('auth')->group(function () {
     Route::resource('discipline', DisciplineController::class)->only(['index', 'store', 'destroy']);
     Route::resource('discipline-types', DisciplineTypeController::class);
     
-    // ... existing code ...
-    // =========================================================================
-    //  E-RAPOR & PENILAIAN
-    // =========================================================================
-
-    // 1. Dashboard & Input Utama
+    // E-RAPOR & PENILAIAN
     Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
     Route::get('/grades/input', [GradeController::class, 'create'])->name('grades.create');
     Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');
 
-    // 2. Fitur Baru: Input Per Siswa & Import Excel
     Route::get('/grades/template', [GradeController::class, 'downloadTemplate'])->name('grades.template');
     Route::get('/grades/template-student', [GradeController::class, 'downloadStudentTemplate'])->name('grades.template_student');
-    
     Route::post('/grades/import', [GradeController::class, 'importGrades'])->name('grades.import');
     Route::post('/grades/import-student', [GradeController::class, 'importStudentGrades'])->name('grades.import_student');
-    
     Route::get('/grades/students/{class_id}', [GradeController::class, 'getStudentsByClass'])->name('grades.get_students');
-    
     Route::get('/grades/input-student', [GradeController::class, 'createByStudent'])->name('grades.create_by_student');
     Route::post('/grades/store-student', [GradeController::class, 'storeByStudent'])->name('grades.store_by_student');
-
-    // 3. Cetak Rapor & List Siswa (YANG HILANG TADI)
     Route::get('/grades/list', [GradeController::class, 'listStudents'])->name('grades.list');
     Route::get('/report-card/{student_id}', [GradeController::class, 'reportCard'])->name('grades.report');
-
-    Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
-    Route::get('/grades/input', [GradeController::class, 'create'])->name('grades.create');
-    Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');
-
-    // ===> FITUR BARU: IMPORT EXCEL & PER SISWA <===
-    
-    // 1. Download Template
-    Route::get('/grades/template', [GradeController::class, 'downloadTemplate'])->name('grades.template');
-    Route::get('/grades/template-student', [GradeController::class, 'downloadStudentTemplate'])->name('grades.template_student');
-
-    // 2. Import Excel
-    Route::post('/grades/import', [GradeController::class, 'importGrades'])->name('grades.import');
-    Route::post('/grades/import-student', [GradeController::class, 'importStudentGrades'])->name('grades.import_student');
-
-    // 3. Helper: Ambil Siswa per Kelas (AJAX)
-    Route::get('/grades/students/{class_id}', [GradeController::class, 'getStudentsByClass'])->name('grades.get_students');
-
-    // 4. Input Manual Per Siswa
-    Route::get('/grades/input-student', [GradeController::class, 'createByStudent'])->name('grades.create_by_student');
-    Route::post('/grades/store-student', [GradeController::class, 'storeByStudent'])->name('grades.store_by_student');
 
     // Perpustakaan
     Route::prefix('library')->name('library.')->group(function () {
