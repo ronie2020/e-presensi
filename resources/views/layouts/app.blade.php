@@ -7,9 +7,9 @@
 
         <title>{{ config('app.name', 'Netila E-Presensi') }}</title>
 
-        <!-- Fonts -->
+        <!-- Fonts: Plus Jakarta Sans (Konsisten dengan Welcome Page) -->
         <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -18,19 +18,25 @@
         <script src="https://unpkg.com/@phosphor-icons/web"></script>
         
         <style>
-            /* Kustomisasi Scrollbar */
+            /* Global Font Setting */
+            body { font-family: 'Plus Jakarta Sans', sans-serif; }
+            
+            /* Kustomisasi Scrollbar Halus */
             ::-webkit-scrollbar { width: 6px; height: 6px; }
             ::-webkit-scrollbar-track { background: transparent; }
             ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
             ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+            
+            /* Utility Helper */
+            .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+            .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
         </style>
         
-        {{-- [TAMBAHAN PENTING] Stack untuk CSS tambahan jika ada --}}
         @stack('styles')
     </head>
-    <body class="font-sans antialiased bg-blue-700 selection:bg-yellow-300 selection:text-blue-900">
+    <body class="font-sans antialiased bg-slate-50 selection:bg-yellow-300 selection:text-blue-900 text-slate-800">
         
-        <div x-data="{ sidebarOpen: false }" class="h-screen flex overflow-hidden">
+        <div x-data="{ sidebarOpen: false }" class="h-screen flex overflow-hidden bg-slate-900">
             
             <!-- ====== SIDEBAR NAVIGASI ====== -->
             @include('layouts.navigation')
@@ -43,91 +49,88 @@
                  x-transition:leave="transition-opacity ease-linear duration-300" 
                  x-transition:leave-start="opacity-100" 
                  x-transition:leave-end="opacity-0" 
-                 class="fixed inset-0 bg-blue-900/80 backdrop-blur-sm z-40 md:hidden" 
+                 class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-40 md:hidden" 
                  @click="sidebarOpen = false">
             </div>
 
             <!-- ====== KONTEN UTAMA ====== -->
-            <div class="flex-1 flex flex-col h-screen relative z-10 transition-all duration-300">
+            <div class="flex-1 flex flex-col h-screen relative z-10 transition-all duration-300 bg-slate-50 md:rounded-l-[2.5rem] overflow-hidden">
                 
-                <!-- Container Melengkung -->
-                <div class="flex-1 bg-gray-50 md:rounded-l-[2.5rem] md:my-2 md:mr-2 overflow-hidden flex flex-col shadow-[0_0_40px_-10px_rgba(0,0,0,0.2)] relative">
+                <!-- Header -->
+                <header class="bg-white/90 backdrop-blur-md sticky top-0 z-30 border-b border-slate-100 px-6 py-4 flex justify-between items-center shadow-sm">
+                    
+                    <!-- Tombol Hamburger & Judul -->
+                    <div class="flex items-center gap-4">
+                        <button @click="sidebarOpen = true" class="md:hidden text-slate-500 hover:text-blue-600 focus:outline-none transition-colors p-1 rounded-lg hover:bg-blue-50">
+                            <i class="ph-bold ph-list text-2xl"></i>
+                        </button>
 
-                    <!-- Header -->
-                    <header class="bg-white/90 backdrop-blur-md sticky top-0 z-30 border-b border-gray-100 px-6 py-4 flex justify-between items-center">
-                        
-                        <!-- Tombol Hamburger & Judul -->
-                        <div class="flex items-center gap-4">
-                            <button @click="sidebarOpen = true" class="md:hidden text-gray-500 hover:text-blue-600 focus:outline-none transition-colors p-1 rounded-lg hover:bg-blue-50">
-                                <svg class="h-7 w-7" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path>
-                                </svg>
+                        @if (isset($header))
+                            <div class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">
+                                {{ $header }}
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- User Dropdown & Info -->
+                    <div class="flex items-center gap-6">
+                        <div class="hidden md:block text-right border-r border-slate-100 pr-6">
+                            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Tanggal</p>
+                            <p class="text-sm font-bold text-slate-700">{{ \Carbon\Carbon::now()->translatedFormat('d M Y') }}</p>
+                        </div>
+
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" class="flex items-center gap-3 focus:outline-none group">
+                                <div class="text-right hidden sm:block">
+                                    <p class="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{{ Auth::user()->name }}</p>
+                                    <p class="text-xs text-slate-500 font-medium">{{ Auth::user()->role ?? 'Administrator' }}</p>
+                                </div>
+                                <div class="h-10 w-10 rounded-full bg-blue-50 border-2 border-white shadow-md flex items-center justify-center text-blue-600 font-bold text-lg overflow-hidden shrink-0 ring-2 ring-transparent group-hover:ring-blue-100 transition-all">
+                                    @if(Auth::user()->photo_path)
+                                        <img class="h-full w-full object-cover" src="{{ asset('storage/' . Auth::user()->photo_path) }}" alt="Avatar">
+                                    @else
+                                        <span>{{ substr(Auth::user()->name, 0, 1) }}</span>
+                                    @endif
+                                </div>
                             </button>
 
-                            @if (isset($header))
-                                <div class="text-2xl font-bold text-gray-800 tracking-tight">
-                                    {{ $header }}
+                            <div x-show="open" @click.away="open = false" 
+                                 x-transition:enter="transition ease-out duration-100"
+                                 x-transition:enter-start="transform opacity-0 scale-95"
+                                 x-transition:enter-end="transform opacity-100 scale-100"
+                                 class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl py-2 border border-slate-100 z-50 origin-top-right ring-1 ring-black/5"
+                                 style="display: none;">
+                                
+                                <div class="px-4 py-2 border-b border-slate-50 mb-1">
+                                    <p class="text-xs text-slate-400 font-bold uppercase">Akun Saya</p>
                                 </div>
-                            @endif
-                        </div>
 
-                        <!-- User Dropdown -->
-                        <div class="flex items-center gap-4">
-                            <div class="hidden md:block text-right mr-2">
-                                <p class="text-xs font-bold text-blue-600 uppercase tracking-wider">Hari Ini</p>
-                                <p class="text-sm font-semibold text-gray-700">{{ \Carbon\Carbon::now()->translatedFormat('l, d M Y') }}</p>
-                            </div>
-
-                            <div class="relative" x-data="{ open: false }">
-                                <button @click="open = !open" class="flex items-center gap-3 focus:outline-none group">
-                                    <div class="text-right hidden sm:block">
-                                        <p class="text-sm font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{{ Auth::user()->name }}</p>
-                                        <p class="text-xs text-gray-500">{{ Auth::user()->role ?? 'User' }}</p>
-                                    </div>
-                                    <div class="h-10 w-10 rounded-full bg-blue-100 border-2 border-white shadow-sm flex items-center justify-center text-blue-600 font-bold text-lg overflow-hidden">
-                                        <img class="h-full w-full object-cover" src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&color=2563eb&background=dbeafe&bold=true" alt="Avatar">
-                                    </div>
-                                </button>
-
-                                <div x-show="open" @click.away="open = false" 
-                                     x-transition:enter="transition ease-out duration-100"
-                                     x-transition:enter-start="transform opacity-0 scale-95"
-                                     x-transition:enter-end="transform opacity-100 scale-100"
-                                     x-transition:leave="transition ease-in duration-75"
-                                     x-transition:leave-start="transform opacity-100 scale-100"
-                                     x-transition:leave-end="transform opacity-0 scale-95"
-                                     class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg py-2 border border-gray-100 z-50 origin-top-right"
-                                     style="display: none;">
-                                    
-                                    <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium">
-                                        {{ __('Profile') }}
+                                <a href="{{ route('profile.edit') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors">
+                                    <i class="ph-bold ph-user-circle mr-2"></i> {{ __('Profile') }}
+                                </a>
+                                
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <a href="{{ route('logout') }}"
+                                       onclick="event.preventDefault(); this.closest('form').submit();"
+                                       class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-medium transition-colors">
+                                        <i class="ph-bold ph-sign-out mr-2"></i> {{ __('Log Out') }}
                                     </a>
-                                    
-                                    <div class="border-t border-gray-100 my-1"></div>
-
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <a href="{{ route('logout') }}"
-                                           onclick="event.preventDefault(); this.closest('form').submit();"
-                                           class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 font-medium">
-                                            {{ __('Log Out') }}
-                                        </a>
-                                    </form>
-                                </div>
+                                </form>
                             </div>
                         </div>
-                    </header>
+                    </div>
+                </header>
 
-                    <main class="flex-1 overflow-y-auto p-6 md:p-8 scroll-smooth">
-                        <div class="max-w-7xl mx-auto">
-                            {{ $slot }}
-                        </div>
-                    </main>
-                </div>
+                <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth bg-slate-50/50">
+                    <div class="max-w-7xl mx-auto">
+                        {{ $slot }}
+                    </div>
+                    <div class="h-10"></div>
+                </main>
             </div>
         </div>
         
-        {{-- [PERBAIKAN UTAMA] Tambahkan ini agar @push('scripts') di halaman lain berfungsi --}}
         @stack('scripts')
     </body>
 </html>
