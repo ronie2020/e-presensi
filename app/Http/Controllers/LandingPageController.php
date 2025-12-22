@@ -29,31 +29,40 @@ class LandingPageController extends Controller
         $today = Carbon::today();
         
         // --- DEFINISI STATUS (Case Insensitive handling) ---
-        $statusHadir     = ['Hadir', 'hadir', 'Present', 'present', 'Tepat Waktu'];
+        // Kita gunakan array map untuk mencakup variasi penulisan
+        $statusHadir     = ['Hadir', 'hadir', 'Present', 'present', 'Tepat Waktu', 'tepat waktu'];
         $statusTerlambat = ['Terlambat', 'terlambat', 'Late', 'late', 'Telat'];
         $statusSakit     = ['Sakit', 'sakit', 'Sick'];
         $statusIzin      = ['Izin', 'izin', 'Permission'];
         $statusAlpa      = ['Alpa', 'alpa', 'Alpha', 'Absent'];
 
-        // --- 1. STATISTIK HARIAN ---
-        $hadir = AttendanceSiswa::whereDate('attendance_date', $today)->whereIn('status', $statusHadir)->distinct('student_id')->count('student_id');
-        $terlambat = AttendanceSiswa::whereDate('attendance_date', $today)->whereIn('status', $statusTerlambat)->distinct('student_id')->count('student_id');
+        // --- 1. STATISTIK HARIAN (FIX: FILTER HANYA ABSEN SEKOLAH) ---
         
-        $tidakHadir = AttendanceSiswa::whereDate('attendance_date', $today)
-                        ->whereIn('status', array_merge($statusSakit, $statusIzin, $statusAlpa))
-                        ->distinct('student_id')->count('student_id');
+        // Query Dasar: Hari ini & Tipe Sekolah (Harian/Masuk/Pulang)
+        $dailyQuery = AttendanceSiswa::whereDate('attendance_date', $today)
+            ->whereIn('type', ['Harian', 'Masuk', 'Pulang']); // <--- FILTER PENTING INI DITAMBAHKAN
+
+        // Clone query untuk setiap kategori agar efisien
+        $hadirTepat = (clone $dailyQuery)->whereIn('status', $statusHadir)->distinct('student_id')->count('student_id');
+        $terlambat  = (clone $dailyQuery)->whereIn('status', $statusTerlambat)->distinct('student_id')->count('student_id');
+        $tidakHadir = (clone $dailyQuery)->whereIn('status', array_merge($statusSakit, $statusIzin, $statusAlpa))->distinct('student_id')->count('student_id');
 
         $stats = [
-            'hadir'       => $hadir + $terlambat, 
-            'tepat_waktu' => $hadir,
+            'hadir'       => $hadirTepat + $terlambat, // Total Fisik di Sekolah
+            'tepat_waktu' => $hadirTepat,
             'terlambat'   => $terlambat,
             'tidak_hadir' => $tidakHadir
         ];
 
-        // --- 2. CHART KEHADIRAN MINGGUAN ---
+        // --- 2. CHART KEHADIRAN MINGGUAN (FIX: FILTER HANYA ABSEN SEKOLAH) ---
         $startDate = Carbon::today()->subDays(6);
         $endDate = Carbon::today();
         
+        // Ambil data mingguan SEKALIGUS (Eager Loading) dengan filter Tipe Sekolah
+        $weeklyData = AttendanceSiswa::whereBetween('attendance_date', [$startDate, $endDate])
+            ->whereIn('type', ['Harian', 'Masuk', 'Pulang']) // <--- FILTER PENTING DI SINI JUGA
+            ->get();
+
         $chartLabels = [];
         $dataHadir = [];
         $dataTerlambat = [];
@@ -64,11 +73,26 @@ class LandingPageController extends Controller
             $dateStr = $period->toDateString();
             $chartLabels[] = $period->format('d/m'); 
 
-            $dailyAtt = AttendanceSiswa::whereDate('attendance_date', $dateStr)->get();
+            // Filter collection di memori (lebih cepat daripada query berulang di loop)
+            // Gunakan strtolower untuk perbandingan case-insensitive yang aman
+            $dailyAtt = $weeklyData->filter(function ($att) use ($dateStr) {
+                // Pastikan format tanggal cocok
+                $attDate = $att->attendance_date instanceof \Carbon\Carbon 
+                            ? $att->attendance_date->toDateString() 
+                            : substr($att->attendance_date, 0, 10);
+                return $attDate === $dateStr;
+            });
 
-            $dataHadir[] = $dailyAtt->whereIn('status', $statusHadir)->unique('student_id')->count();
-            $dataTerlambat[] = $dailyAtt->whereIn('status', $statusTerlambat)->unique('student_id')->count();
-            $dataAbsen[] = $dailyAtt->whereIn('status', array_merge($statusSakit, $statusIzin, $statusAlpa))->unique('student_id')->count();
+            // Hitung menggunakan helper function sederhana untuk cek status case-insensitive
+            $countStatus = function($collection, $statuses) {
+                return $collection->filter(function ($item) use ($statuses) {
+                    return in_array($item->status, $statuses) || in_array(ucfirst($item->status), $statuses);
+                })->unique('student_id')->count();
+            };
+
+            $dataHadir[] = $countStatus($dailyAtt, $statusHadir);
+            $dataTerlambat[] = $countStatus($dailyAtt, $statusTerlambat);
+            $dataAbsen[] = $countStatus($dailyAtt, array_merge($statusSakit, $statusIzin, $statusAlpa));
 
             $period->addDay();
         }
@@ -133,7 +157,6 @@ class LandingPageController extends Controller
     // --- [BARU] HALAMAN GALERI KEGIATAN ---
     public function activities()
     {
-        // Ambil semua kegiatan, urutkan dari terbaru, paginate 9 per halaman
         $activities = SchoolActivity::latest()->paginate(9);
         return view('activities', compact('activities'));
     }
@@ -143,19 +166,15 @@ class LandingPageController extends Controller
     {
         $query = Achievement::with('student')->orderBy('date', 'desc');
 
-        // Fitur Filter Level (Nasional, Provinsi, dll)
         if ($request->has('level') && $request->level != 'Semua') {
             $query->where('level', $request->level);
         }
 
-        // Fitur Pencarian Judul
         if ($request->has('search') && $request->search != '') {
             $query->where('title', 'like', '%' . $request->search . '%');
         }
 
         $achievements = $query->paginate(12);
-        
-        // Ambil daftar level unik untuk dropdown filter
         $levels = Achievement::select('level')->distinct()->pluck('level');
 
         return view('achievements', compact('achievements', 'levels'));
