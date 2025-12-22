@@ -4,9 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Website Resmi SMP Negeri 3 Lakbok. Informasi akademik, kesiswaan, dan prestasi sekolah terkini.">
-    <meta property="og:title" content="{{ config('app.name', 'SMP Negeri 3 Lakbok') }}">
-    <meta property="og:description" content="Membangun Generasi Cerdas & Berdisiplin. Platform digital terintegrasi SMPN 3 Lakbok.">
-    <meta property="og:image" content="{{ asset('images/logo.png') }}">
     
     <title>{{ config('app.name', 'SMP Negeri 3 Lakbok') }}</title>
     
@@ -30,7 +27,6 @@
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #64748b; }
         
-        /* Custom Animation Definitions */
         .animate-blob { animation: blob 7s infinite; }
         .animation-delay-2000 { animation-delay: 2s; }
         .animation-delay-4000 { animation-delay: 4s; }
@@ -43,7 +39,7 @@
         }
     </style>
 </head>
-<body class="antialiased text-slate-800 bg-slate-50 overflow-x-hidden" 
+<body class="antialiased text-slate-800 bg-slate-50 overflow-x-hidden selection:bg-blue-500 selection:text-white" 
     x-data="{ 
         mobileMenuOpen: false,
         modalOpen: false, 
@@ -51,7 +47,6 @@
         activeAnnouncement: null,
         scrolled: false,
         showBackToTop: false,
-        ppdbBannerOpen: true,
         
         openAnnouncementByIndex(index) {
             if (window.announcementsData && window.announcementsData[index]) {
@@ -72,142 +67,142 @@
         showBackToTop = (window.pageYOffset > 500) ? true : false;
     ">
 
-    <!-- NAVBAR -->
-    <nav :class="{ 'bg-white/90 backdrop-blur-md shadow-lg border-slate-200': scrolled, 'bg-transparent border-transparent': !scrolled }" class="fixed top-0 w-full z-50 transition-all duration-300 border-b">
+    <!-- NAVBAR (TEMA: DARK CORPORATE - HARMONIZED) -->
+    <nav :class="{ 'bg-slate-900/95 backdrop-blur-md shadow-xl border-b border-slate-800': scrolled, 'bg-transparent border-transparent': !scrolled }" class="fixed top-0 w-full z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
-                <!-- Logo -->
-                <div class="flex items-center gap-3 z-50">
-                    <div class="relative w-10 h-10 lg:w-12 lg:h-12 flex-shrink-0">
-                        <img 
-                            src="{{ asset('images/logo.png') }}" 
-                            alt="Logo SMPN 3 Lakbok" 
-                            class="w-full h-full object-contain drop-shadow-md hover:scale-105 transition-transform duration-300"
-                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                        >
-                        <div class="absolute inset-0 bg-blue-600 text-white rounded-xl shadow-lg flex items-center justify-center" style="display: none;">
-                            <i class="ph-bold ph-graduation-cap text-2xl"></i>
-                        </div>
+                
+                <!-- Logo Brand -->
+                <a href="{{ url('/') }}" class="flex items-center gap-3 shrink-0 group z-50">
+                    <div class="relative w-10 h-10 bg-blue-950 border border-blue-800 rounded-xl flex items-center justify-center text-yellow-400 shadow-lg shadow-blue-900/50 group-hover:scale-105 transition-transform overflow-hidden">
+                         <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-6 h-6 object-contain z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                         <i class="ph-bold ph-buildings text-xl hidden z-10"></i>
                     </div>
                     
-                    <div class="flex flex-col">
-                        <span class="block text-lg lg:text-xl font-extrabold leading-none tracking-tight transition-colors duration-300" 
-                              :class="scrolled ? 'text-slate-900' : 'text-white'">
-                            SMPN 3 LAKBOK
-                        </span>
-                        <span class="text-[10px] lg:text-xs font-bold tracking-wide mt-1 transition-colors duration-300"
-                              :class="scrolled ? 'text-blue-600' : 'text-blue-300'">
-                            BERJAYA : <span class="font-medium" :class="scrolled ? 'text-slate-500' : 'text-slate-300'">Berakhlak Mulia * Enerjik * Resilien * Jujur * Arif * Yakin * Adaptif</span>
-                        </span>
+                    <div class="flex flex-col leading-tight">
+                        <span class="font-bold text-white text-lg tracking-tight group-hover:text-blue-200 transition-colors">SMPN 3 LAKBOK</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-yellow-400 transition-colors">Unggul & Berkarakter</span>
                     </div>
-                </div>
+                </a>
 
                 <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="#profil" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Profil</a>
-                    <a href="#guru" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Guru</a>
-                    <a href="#kegiatan" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Kegiatan</a>
-                    <a href="#prestasi" class="text-sm font-semibold transition hover:text-blue-600" :class="{ 'text-slate-700': scrolled, 'text-slate-200 hover:text-white': !scrolled }">Prestasi</a>
-                    
-                    <!-- Search Icon Toggle (Dummy Link) -->
-                    <button class="transition hover:scale-110" :class="{ 'text-slate-700 hover:text-blue-600': scrolled, 'text-slate-200 hover:text-white': !scrolled }">
-                        <i class="ph-bold ph-magnifying-glass text-lg"></i>
-                    </button>
-
-                    @auth
-                        <a href="{{ url('/dashboard') }}" class="text-sm font-bold px-5 py-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">Dashboard</a>
-                    @else
-                        <a href="{{ route('login') }}" class="group relative items-center justify-center px-6 py-2.5 text-sm font-bold text-white transition-all duration-200 bg-blue-600 font-pj rounded-full focus:outline-none hover:bg-blue-700 shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 flex gap-2">
-                            <span>Login Staff</span>
-                            <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                <div class="hidden md:flex items-center gap-8">
+                    <div class="flex items-center gap-6">
+                        <a href="#profil" class="text-sm font-bold text-slate-300 hover:text-yellow-400 transition relative group">
+                            Profil
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 transition-all group-hover:w-full"></span>
                         </a>
-                    @endauth
+                        <a href="#guru" class="text-sm font-bold text-slate-300 hover:text-yellow-400 transition relative group">
+                            Guru
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 transition-all group-hover:w-full"></span>
+                        </a>
+                        <a href="#kegiatan" class="text-sm font-bold text-slate-300 hover:text-yellow-400 transition relative group">
+                            Kegiatan
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 transition-all group-hover:w-full"></span>
+                        </a>
+                        <a href="#prestasi" class="text-sm font-bold text-slate-300 hover:text-yellow-400 transition relative group">
+                            Prestasi
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 transition-all group-hover:w-full"></span>
+                        </a>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="h-6 w-px bg-slate-700"></div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('portal.index') }}" class="text-sm font-bold text-blue-400 hover:text-white transition flex items-center gap-2">
+                            Portal Siswa
+                        </a>
+
+                        @if(Auth::guard('student')->check())
+                            <a href="{{ route('students.learning.index') }}" class="px-5 py-2.5 rounded-full bg-blue-600 text-white text-xs font-bold shadow-lg shadow-blue-900/30 hover:bg-blue-500 transition border border-blue-500 flex items-center gap-2">
+                                <i class="ph-bold ph-student"></i> Dashboard
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" class="px-5 py-2.5 rounded-full bg-slate-800 text-slate-300 text-xs font-bold hover:text-white hover:bg-slate-700 transition border border-slate-700 flex items-center gap-2">
+                                <i class="ph-bold ph-key"></i> Login Staff
+                            </a>
+                        @endif
+                    </div>
                 </div>
 
                 <!-- Mobile Menu Button -->
                 <div class="flex md:hidden items-center z-50">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 rounded-lg transition-colors focus:outline-none" :class="{ 'text-slate-800': scrolled && !mobileMenuOpen, 'text-white': !scrolled || mobileMenuOpen }">
-                        <i class="ph-bold text-3xl" :class="mobileMenuOpen ? 'ph-x' : 'ph-list'"></i>
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 text-slate-300 hover:text-white rounded-lg transition-colors focus:outline-none">
+                        <i class="ph-bold text-2xl" :class="mobileMenuOpen ? 'ph-x' : 'ph-list'"></i>
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- Mobile Menu Overlay -->
-        <div x-show="mobileMenuOpen" 
+        <div x-show="mobileMenuOpen" x-cloak
              x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-10"
+             x-transition:enter-start="opacity-0 -translate-y-5"
              x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 -translate-y-10"
-             class="absolute top-0 left-0 w-full h-screen bg-slate-900/95 backdrop-blur-xl flex flex-col items-center justify-center space-y-8 z-40 md:hidden">
+             class="absolute top-0 left-0 w-full h-screen bg-slate-900/98 backdrop-blur-xl flex flex-col items-center justify-center space-y-8 z-40 md:hidden">
              
-            <nav class="flex flex-col items-center space-y-6 text-center">
-                <a href="#profil" @click="mobileMenuOpen = false" class="text-2xl font-bold text-white hover:text-blue-400 transition">Profil Sekolah</a>
-                <a href="#guru" @click="mobileMenuOpen = false" class="text-2xl font-bold text-white hover:text-blue-400 transition">Guru & Staff</a>
-                <a href="#kegiatan" @click="mobileMenuOpen = false" class="text-2xl font-bold text-white hover:text-blue-400 transition">Kegiatan</a>
-                <a href="#prestasi" @click="mobileMenuOpen = false" class="text-2xl font-bold text-white hover:text-blue-400 transition">Prestasi</a>
-                <a href="#ekskul" @click="mobileMenuOpen = false" class="text-2xl font-bold text-white hover:text-blue-400 transition">Ekskul</a>
+            <nav class="flex flex-col items-center space-y-6 text-center w-full px-8">
+                <a href="#profil" @click="mobileMenuOpen = false" class="text-2xl font-bold text-slate-300 hover:text-yellow-400 transition">Profil Sekolah</a>
+                <a href="#guru" @click="mobileMenuOpen = false" class="text-2xl font-bold text-slate-300 hover:text-yellow-400 transition">Guru & Staff</a>
+                <a href="#kegiatan" @click="mobileMenuOpen = false" class="text-2xl font-bold text-slate-300 hover:text-yellow-400 transition">Kegiatan</a>
+                <a href="#prestasi" @click="mobileMenuOpen = false" class="text-2xl font-bold text-slate-300 hover:text-yellow-400 transition">Prestasi</a>
+                <a href="#ekskul" @click="mobileMenuOpen = false" class="text-2xl font-bold text-slate-300 hover:text-yellow-400 transition">Ekskul</a>
                 
                 <hr class="w-16 border-slate-700">
 
                 <div class="flex flex-col gap-4 w-full">
-                    <a href="{{ route('portal.index') }}" class="text-lg font-medium text-slate-300 hover:text-white">Portal Siswa</a>
-                    <a href="{{ route('library.kiosk.index') }}" class="text-lg font-medium text-slate-300 hover:text-white">E-Library</a>
-                    <a href="https://pemilu-osis.smpn3lakbok.sch.id/" target="_blank" class="text-lg font-medium text-slate-300 hover:text-white">Pemilu OSIS</a>
-                </div>
-                
-                <div class="mt-8">
-                     @auth
-                        <a href="{{ url('/dashboard') }}" class="px-8 py-3 rounded-full bg-blue-600 text-white font-bold text-lg shadow-xl shadow-blue-500/20">Dashboard</a>
+                    <a href="{{ route('portal.index') }}" class="text-lg font-bold text-blue-400">Portal Siswa</a>
+                    @if(Auth::guard('student')->check())
+                        <a href="{{ route('students.learning.index') }}" class="block w-full py-3 rounded-xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-900/30">Dashboard Siswa</a>
                     @else
-                        <a href="{{ route('login') }}" class="px-8 py-3 rounded-full bg-white text-blue-900 font-bold text-lg shadow-xl">Login Staff</a>
-                    @endauth
+                        <a href="{{ route('login') }}" class="block w-full py-3 rounded-xl bg-slate-800 text-white font-bold border border-slate-700">Login Staff</a>
+                    @endif
                 </div>
             </nav>
         </div>
     </nav>
 
-    <!-- HERO SECTION -->
+    <!-- HERO SECTION (Updated to Match Dark Theme) -->
     <div class="relative bg-slate-900 pt-28 pb-12 lg:pt-36 lg:pb-20 overflow-hidden min-h-[85vh] flex items-center">
         <!-- Background -->
         <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
         <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/95 to-blue-900/90"></div>
         
-        <!-- Animated Blobs (Hero) -->
+        <!-- Animated Blobs -->
         <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob"></div>
         <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob animation-delay-2000"></div>
 
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-10 lg:gap-20 z-10 w-full">
             <!-- Text Content -->
             <div class="lg:w-1/2 text-center lg:text-left" data-aos="fade-right" data-aos-duration="1000">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-blue-300 text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-sm">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-900/50 border border-blue-700/50 text-blue-300 text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-sm shadow-sm">
                     <span class="relative flex h-2 w-2">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                     </span>
                     Sistem Informasi Akademik Terpadu
                 </div>
                 <h1 class="text-4xl lg:text-6xl xl:text-7xl font-extrabold text-white tracking-tight mb-6 leading-[1.1] drop-shadow-sm">
                     Membangun Generasi <br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">Cerdas & Berdisiplin</span>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-yellow-300">Cerdas & Berkarakter</span>
                 </h1>
                 <p class="text-slate-300 text-lg mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
                     Platform digital terintegrasi SMPN 3 Lakbok untuk pemantauan akademik, absensi kehadiran, dan literasi siswa secara real-time.
                 </p>
                 
-                <!-- Quick Stats (ABSENSI HARI INI) -->
+                <!-- Quick Stats -->
                 <div class="grid grid-cols-3 gap-4 max-w-md mx-auto lg:mx-0">
-                    <div class="bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/10 shadow-lg hover:bg-white/10 transition-colors group cursor-default">
+                    <div class="bg-slate-800/50 backdrop-blur-md p-4 rounded-2xl border border-slate-700 shadow-lg group cursor-default hover:bg-slate-800 transition">
                         <div class="text-3xl font-bold text-emerald-400 mb-1 group-hover:scale-110 transition-transform origin-left">{{ $stats['hadir'] ?? 0 }}</div>
                         <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Hadir</div>
                     </div>
-                    <div class="bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/10 shadow-lg hover:bg-white/10 transition-colors group cursor-default">
+                    <div class="bg-slate-800/50 backdrop-blur-md p-4 rounded-2xl border border-slate-700 shadow-lg group cursor-default hover:bg-slate-800 transition">
                         <div class="text-3xl font-bold text-amber-400 mb-1 group-hover:scale-110 transition-transform origin-left">{{ $stats['terlambat'] ?? 0 }}</div>
                         <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Terlambat</div>
                     </div>
-                    <div class="bg-white/5 backdrop-blur-sm p-4 rounded-2xl border border-white/10 shadow-lg hover:bg-white/10 transition-colors group cursor-default">
+                    <div class="bg-slate-800/50 backdrop-blur-md p-4 rounded-2xl border border-slate-700 shadow-lg group cursor-default hover:bg-slate-800 transition">
                         <div class="text-3xl font-bold text-rose-400 mb-1 group-hover:scale-110 transition-transform origin-left">{{ $stats['tidak_hadir'] ?? 0 }}</div>
                         <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Absen</div>
                     </div>
@@ -216,19 +211,19 @@
 
             <!-- Chart / Visual Content -->
             <div class="lg:w-1/2 w-full" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
-                <div class="relative bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl p-6 lg:p-8 border border-white/20 transform hover:scale-[1.01] transition duration-500 ring-1 ring-black/5">
-                    <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-4">
-                        <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
-                            <div class="p-2 bg-blue-100 rounded-lg text-blue-600">
+                <div class="relative bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl p-6 lg:p-8 border border-slate-700 ring-1 ring-white/10 transform hover:scale-[1.01] transition duration-500">
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-4">
+                        <h3 class="font-bold text-lg text-white flex items-center gap-2">
+                            <div class="p-2 bg-blue-900/50 rounded-lg text-blue-400 border border-blue-800">
                                 <i class="ph-fill ph-chart-bar text-xl"></i>
                             </div>
                             Statistik Kehadiran
                         </h3>
-                        <span class="text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 px-2 py-1 rounded-md border border-green-200 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse"></span> Live
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-900/30 text-emerald-400 px-2 py-1 rounded-md border border-emerald-800 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live
                         </span>
                     </div>
-                    <!-- Height disesuaikan agar tidak terlalu tinggi -->
+                    <!-- Height disesuaikan -->
                     <div class="h-[260px] lg:h-[280px] w-full relative">
                          <canvas id="publicWeeklyChart"></canvas>
                     </div>
@@ -247,11 +242,10 @@
     <!-- MENU AKSES (ANIMATED) -->
     <div class="bg-slate-50 py-16 lg:py-20 relative z-20 -mt-8 lg:-mt-12 overflow-hidden">
         
-        <!-- Animated Background Blobs untuk Menu -->
+        <!-- Animated Background Blobs -->
         <div class="absolute inset-0 pointer-events-none z-0">
             <div class="absolute top-10 left-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
             <div class="absolute top-10 right-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-            <div class="absolute -bottom-8 left-1/3 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -263,7 +257,7 @@
             <div class="flex flex-wrap justify-center gap-6 lg:gap-8">
 
                   <!-- PENGUMUMAN KELULUSAN -->
-                 <a href="{{ route('graduation.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
+                 <a href="{{ route('graduation.index') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
                     <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-graduation-cap text-3xl"></i>
                     </div>
@@ -272,7 +266,7 @@
                 </a>
 
                 <!-- Portal Siswa -->
-                <a href="{{ route('portal.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-blue-500/10 border border-slate-100 hover:border-blue-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="100">
+                <a href="{{ route('portal.index') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 border border-slate-100 hover:border-blue-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="100">
                     <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-student text-3xl"></i>
                     </div>
@@ -281,7 +275,7 @@
                 </a>
 
                 <!-- E-LEARNING / LMS -->
-                <a href="{{ route('student.login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-teal-500/10 border border-slate-100 hover:border-teal-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="150">
+                <a href="{{ route('student.login') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-teal-500/10 border border-slate-100 hover:border-teal-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="150">
                     <div class="w-16 h-16 bg-teal-50 rounded-2xl flex items-center justify-center text-teal-600 mb-6 group-hover:bg-teal-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-chalkboard-simple text-3xl"></i>
                     </div>
@@ -290,7 +284,7 @@
                 </a>
 
                  <!-- UJIAN CBT -->                
-                <a href="{{ route('student.login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-rose-500/10 border border-slate-100 hover:border-rose-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="200">
+                <a href="{{ route('student.login') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-rose-500/10 border border-slate-100 hover:border-rose-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="200">
                     <div class="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 mb-6 group-hover:bg-rose-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-desktop text-3xl"></i>
                     </div>
@@ -299,7 +293,7 @@
                 </a>
                 
                 <!-- Mesin Absensi -->
-                <a href="{{ route('kiosk.show') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="250">
+                <a href="{{ route('kiosk.show') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="250">
                     <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-qr-code text-3xl"></i>
                     </div>
@@ -308,7 +302,7 @@
                 </a>
                 
                 <!-- E-Library -->
-                <a href="{{ route('library.kiosk.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-emerald-500/10 border border-slate-100 hover:border-emerald-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="300">
+                <a href="{{ route('library.kiosk.index') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-emerald-500/10 border border-slate-100 hover:border-emerald-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="300">
                     <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-books text-3xl"></i>
                     </div>
@@ -317,7 +311,7 @@
                 </a>
                 
                 <!-- Login Guru -->
-                <a href="{{ route('login') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-orange-500/10 border border-slate-100 hover:border-orange-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="350">
+                <a href="{{ route('login') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-orange-500/10 border border-slate-100 hover:border-orange-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="350">
                     <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 mb-6 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-chalkboard-teacher text-3xl"></i>
                     </div>
@@ -326,7 +320,7 @@
                 </a>
 
                 <!-- JURNAL MENGAJAR -->
-                <a href="{{ route('teaching.index') }}" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-indigo-500/10 border border-slate-100 hover:border-indigo-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="400">
+                <a href="{{ route('teaching.index') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 border border-slate-100 hover:border-indigo-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="400">
                     <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-presentation-chart text-3xl"></i>
                     </div>
@@ -335,7 +329,7 @@
                 </a>
 
                 <!-- PEMILU OSIS -->
-                <a href="https://pemilu-osis.smpn3lakbok.sch.id/" target="_blank" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-cyan-500/10 border border-slate-100 hover:border-cyan-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="450">
+                <a href="https://pemilu-osis.smpn3lakbok.sch.id/" target="_blank" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-cyan-500/10 border border-slate-100 hover:border-cyan-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="450">
                     <div class="w-16 h-16 bg-cyan-50 rounded-2xl flex items-center justify-center text-cyan-600 mb-6 group-hover:bg-cyan-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-check-square-offset text-3xl"></i>
                     </div>
@@ -344,7 +338,7 @@
                 </a>
 
                 <!-- BUKU TAMU -->
-                <div @click="guestBookModalOpen = true" class="group bg-white rounded-2xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] hover:shadow-2xl hover:shadow-pink-500/10 border border-slate-100 hover:border-pink-200 transition-all duration-300 hover:-translate-y-2 cursor-pointer w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="500">
+                <div @click="guestBookModalOpen = true" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-pink-500/10 border border-slate-100 hover:border-pink-200 transition-all duration-300 hover:-translate-y-2 cursor-pointer w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="500">
                     <div class="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center text-pink-600 mb-6 group-hover:bg-pink-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-book-open-text text-3xl"></i>
                     </div>
@@ -355,7 +349,7 @@
         </div>
     </div>
 
-    <!-- [BARU] AREA UNDUHAN (DOWNLOAD CENTER) -->
+    <!-- AREA UNDUHAN -->
     <div class="bg-blue-50 py-12 border-y border-blue-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -390,7 +384,6 @@
                 <!-- Background Decoration -->
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
                 
-                <!-- Foto Kepsek (Lazy Loading) -->
                 <div class="relative shrink-0" data-aos="fade-right">
                     <div class="w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-white/20 overflow-hidden shadow-lg bg-white">
                          <img src="{{ asset('images/kasek.png') }}" loading="lazy" alt="Kepala Sekolah" class="w-full h-full object-cover">
@@ -400,7 +393,6 @@
                     </div>
                 </div>
                 
-                <!-- Quote Text -->
                 <div class="text-center md:text-left text-white" data-aos="fade-left">
                     <h3 class="text-2xl md:text-3xl font-bold mb-4">Sambutan Kepala Sekolah</h3>
                     <p class="text-blue-100 text-lg italic leading-relaxed mb-6">
@@ -415,9 +407,8 @@
         </div>
     </div>
 
-    <!-- SECTION: PROFIL SEKOLAH (REFACTORED: Menggunakan Variabel Controller) -->
+    <!-- PROFIL SEKOLAH -->
     <div id="profil" class="py-24 bg-white relative overflow-hidden border-y border-slate-100">
-        <!-- Background Pattern -->
         <div class="absolute right-0 top-0 opacity-5 pointer-events-none">
             <svg width="400" height="400" fill="none" viewBox="0 0 200 200">
                 <defs><pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="2" class="text-slate-900" fill="currentColor"></circle></pattern></defs>
@@ -427,8 +418,6 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                
-                <!-- Kiri: Teks -->
                 <div class="space-y-8" data-aos="fade-right">
                     <div class="space-y-2">
                         <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold uppercase tracking-widest border border-blue-100">Tentang Kami</span>
@@ -438,22 +427,19 @@
                         SMP Negeri 3 Lakbok berkomitmen untuk memberikan layanan pendidikan terbaik yang mengintegrasikan kecerdasan akademik dengan nilai-nilai karakter luhur. Kami hadir untuk mencetak pemimpin masa depan yang kompetitif dan berakhlak mulia.
                     </p>
                     
-                    <!-- Stats Grid (REFACTORED) -->
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg hover:border-blue-100 transition-all duration-300">
+                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg transition-all duration-300">
                             <p class="text-3xl font-black text-slate-800">{{ $schoolStats['siswa'] ?? '-' }}</p>
                             <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Siswa</p>
                         </div>
-                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg hover:border-blue-100 transition-all duration-300">
+                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg transition-all duration-300">
                             <p class="text-3xl font-black text-slate-800">{{ $schoolStats['guru'] ?? '-' }}</p>
                             <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Guru</p>
                         </div>
-                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg hover:border-blue-100 transition-all duration-300">
+                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg transition-all duration-300">
                             <p class="text-3xl font-black text-slate-800">{{ $schoolStats['rombel'] ?? '-' }}</p>
                             <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Rombel</p>
                         </div>
-                        
-                        <!-- STATISTIK LMS -->
                         <div class="p-5 bg-teal-50 rounded-2xl border border-teal-100 text-center hover:bg-white hover:shadow-lg hover:border-teal-200 transition-all duration-300">
                             <p class="text-3xl font-black text-teal-600">{{ $schoolStats['materi'] ?? 0 }}</p>
                             <p class="text-[10px] font-bold text-teal-400 uppercase mt-1 tracking-wider">Materi Digital</p>
@@ -465,7 +451,6 @@
                     </div>
                 </div>
 
-                <!-- Kanan: Slideshow Ilustrasi/Foto -->
                 <div class="relative group" data-aos="fade-left"
                     x-data="{ 
                         currentSlide: 0, 
@@ -477,50 +462,22 @@
                             '{{ asset('images/kka.png') }}', 
                             '{{ asset('images/religi.jpg') }}'
                         ],
-                        init() {
-                            setInterval(() => {
-                                this.currentSlide = (this.currentSlide + 1) % this.slides.length;
-                            }, 4000);
-                        }
-                    }"
-                    x-init="init()">
+                        init() { setInterval(() => { this.currentSlide = (this.currentSlide + 1) % this.slides.length; }, 4000); }
+                    }" x-init="init()">
                     
                     <div class="absolute -inset-4 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-[2.5rem] opacity-20 blur-lg group-hover:opacity-40 transition duration-500"></div>
-                    <div class="absolute inset-0 bg-blue-600 rounded-[2.5rem] rotate-3 opacity-10"></div>
-                    
                     <div class="bg-slate-200 rounded-[2rem] overflow-hidden shadow-2xl relative aspect-video z-10">
                         <template x-for="(slide, index) in slides" :key="index">
-                            <img :src="slide" 
-                                x-show="currentSlide === index"
-                                x-transition:enter="transition ease-in-out duration-1000"
-                                x-transition:enter-start="opacity-0 scale-105"
-                                x-transition:enter-end="opacity-100 scale-100"
-                                x-transition:leave="transition ease-in-out duration-1000"
-                                x-transition:leave-start="opacity-100 scale-100"
-                                x-transition:leave-end="opacity-0 scale-100"
-                                loading="lazy"
-                                class="absolute inset-0 w-full h-full object-cover" 
-                                alt="Gedung Sekolah">
+                            <img :src="slide" x-show="currentSlide === index" x-transition.opacity.duration.1000ms class="absolute inset-0 w-full h-full object-cover" alt="Galeri">
                         </template>
-                        <div class="absolute inset-0 bg-gradient-to-tr from-blue-900/90 to-slate-800/40 flex items-center justify-center z-20">
-                            <div class="flex flex-col items-center justify-center text-white p-8 text-center">
-                                <div class="absolute bottom-6 flex gap-2">
-                                    <template x-for="(_, index) in slides" :key="index">
-                                        <button @click="currentSlide = index" 
-                                                class="h-1.5 rounded-full transition-all duration-500 cursor-pointer hover:bg-white shadow-sm" 
-                                                :class="currentSlide === index ? 'w-8 bg-white' : 'w-2 bg-white/40'">
-                                        </button>
-                                    </template>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-tr from-blue-900/90 to-transparent flex items-center justify-center z-20 pointer-events-none"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- VIDEO PROFIL SEKOLAH (Optimasi Load) -->
+    <!-- VIDEO PROFIL -->
     <div class="py-24 bg-slate-900 relative overflow-hidden">
         <div class="absolute inset-0 bg-cover bg-center opacity-30" style="background-image: url('{{ asset('images/netila.jpg') }}');"></div>
         <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent"></div>
@@ -546,7 +503,7 @@
         </div>
     </div>
 
-    <!-- TEACHER PROFILE SECTION -->
+    <!-- GURU SECTION -->
     <div id="guru" class="py-24 bg-slate-50 relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16" data-aos="fade-up">
@@ -590,7 +547,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- KEGIATAN SEKOLAH -->
     <div id="kegiatan" class="py-24 bg-white relative overflow-hidden border-t border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -599,7 +556,6 @@
                     <span class="text-indigo-600 font-bold tracking-wider text-sm uppercase mb-2 block">Galeri Sekolah</span>
                     <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900">Aktifitas & Kegiatan Siswa</h2>
                 </div>
-                <!-- [UPDATE LINK] -->
                 <a href="{{ route('public.activities') }}" class="hidden md:inline-flex items-center text-sm font-bold text-indigo-600 hover:text-indigo-800 transition">
                     Lihat Semua Galeri <i class="ph-bold ph-arrow-right ml-2"></i>
                 </a>
@@ -633,7 +589,6 @@
                                 </span>
                             </div>
 
-                             <!-- BADGE VIDEO -->
                             @if($activity->video_url)
                                 <div class="absolute top-4 right-4 z-20">
                                     <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1 animate-pulse">
@@ -651,7 +606,6 @@
                                 {{ $activity->description }}
                             </p>
 
-                            <!-- TOMBOL TONTON VIDEO -->
                             @if($activity->video_url)
                                 <div class="mt-4 pt-4 border-t border-slate-100">
                                     <a href="{{ $activity->video_url }}" target="_blank" class="inline-flex items-center gap-2 text-sm font-bold text-red-600 hover:text-red-700 transition-colors w-full group/video">
@@ -664,22 +618,8 @@
                         </div>
                     </div>
                 @empty
-                    <!-- Placeholder Data -->
-                    <div class="group bg-white rounded-3xl overflow-hidden shadow-md border border-slate-100" data-aos="fade-up">
-                        <div class="h-60 bg-slate-200 animate-pulse"></div>
-                        <div class="p-6">
-                            <div class="h-6 bg-slate-200 rounded w-3/4 mb-3 animate-pulse"></div>
-                            <div class="h-4 bg-slate-100 rounded w-full animate-pulse"></div>
-                        </div>
-                    </div>
+                    <div class="col-span-full py-12 text-center text-slate-400">Belum ada aktivitas.</div>
                 @endforelse
-            </div>
-            
-             <div class="mt-8 text-center md:hidden">
-                <!-- [UPDATE LINK] -->
-                <a href="{{ route('public.activities') }}" class="inline-flex items-center text-sm font-bold text-indigo-600 hover:text-indigo-800 transition">
-                    Lihat Semua Galeri <i class="ph-bold ph-arrow-right ml-2"></i>
-                </a>
             </div>
         </div>
     </div>
@@ -705,7 +645,6 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 @forelse($achievements ?? [] as $prestasi)
-                    <!-- Filter Logic -->
                     <div class="group bg-white rounded-2xl border border-yellow-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-xl hover:shadow-yellow-500/10 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden h-full flex flex-col" 
                          x-show="activeFilter === 'Terbaru' || activeFilter.toLowerCase() === '{{ strtolower($prestasi->level ?? '') }}'"
                          x-transition.duration.500ms
@@ -734,19 +673,17 @@
                         </div>
                     </div>
                 @empty
-                    <div class="col-span-full text-center py-4 text-slate-400 text-sm italic">Belum ada data prestasi yang ditampilkan.</div>
+                    <div class="col-span-full text-center py-4 text-slate-400 text-sm italic">Belum ada data prestasi.</div>
                 @endforelse
             </div>
             <div class="mt-12 text-center" data-aos="fade-up">
-                 <!-- [UPDATE LINK] -->
                  <a href="{{ route('public.achievements') }}" class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-full hover:bg-yellow-100 hover:text-yellow-800 transition-all shadow-sm">Lihat Arsip Prestasi <i class="ph-bold ph-arrow-right ml-2"></i></a>
             </div>
         </div>
     </div>
-    
-    <!-- SECTION: EKSTRAKURIKULER -->
+
+    <!-- EKSTRAKURIKULER -->
     <div id="ekskul" class="py-24 bg-slate-900 text-white relative overflow-hidden">
-        <!-- Decoration -->
         <div class="absolute top-0 right-0 w-96 h-96 bg-purple-600 rounded-full mix-blend-overlay filter blur-[128px] opacity-20"></div>
         <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-overlay filter blur-[128px] opacity-20"></div>
 
@@ -764,8 +701,6 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @forelse($extracurriculars as $ekskul)
                     <div class="bg-slate-800/50 backdrop-blur-md border border-slate-700/50 p-6 rounded-3xl hover:border-purple-500/50 transition-all duration-300 group hover:-translate-y-1 flex flex-col h-full" data-aos="fade-up">
-                        
-                        <!-- Header: Icon & Name -->
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-14 h-14 bg-slate-700 rounded-2xl flex items-center justify-center text-3xl text-purple-400 shadow-lg group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 overflow-hidden shrink-0">
                                 @if(filter_var($ekskul->icon, FILTER_VALIDATE_URL) || preg_match('/\.(jpg|jpeg|png|gif|svg|webp)$/i', $ekskul->icon))
@@ -777,7 +712,6 @@
                             <div>
                                 <h3 class="text-lg font-bold text-white leading-tight line-clamp-2">{{ $ekskul->name }}</h3>
                                 <div class="flex items-center gap-1.5 mt-1">
-                                    {{-- Status Keaktifan (Titik Hijau/Abu) --}}
                                     @if($lastActivity = $ekskul->attendances->first())
                                         <span class="relative flex h-2 w-2">
                                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -791,10 +725,7 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Info Details -->
                         <div class="space-y-3 mt-auto">
-                            <!-- Jadwal -->
                             <div class="bg-slate-900/50 rounded-xl p-3 flex items-center gap-3 border border-slate-700/30">
                                 <i class="ph-duotone ph-clock text-purple-400 text-lg"></i>
                                 <div class="flex-1 min-w-0">
@@ -802,8 +733,6 @@
                                     <p class="text-xs text-slate-300 font-mono truncate">{{ $ekskul->schedule ?? '-' }}</p>
                                 </div>
                             </div>
-
-                            <!-- Pembina -->
                             <div class="bg-slate-900/50 rounded-xl p-3 flex items-center gap-3 border border-slate-700/30">
                                 <i class="ph-duotone ph-user-circle text-blue-400 text-lg"></i>
                                 <div class="flex-1 min-w-0">
@@ -812,37 +741,15 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Footer: Stats -->
-                        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-700/50">
-                            <div class="flex items-center gap-2" title="Jumlah Anggota">
-                                <i class="ph-fill ph-users text-slate-400"></i>
-                                <span class="text-sm font-bold text-white">{{ $ekskul->members_count }}</span>
-                                <span class="text-xs text-slate-500">Anggota</span>
-                            </div>
-                            
-                            <div class="text-right">
-                                <p class="text-[9px] text-slate-500 uppercase font-bold">Kegiatan Terakhir</p>
-                                <p class="text-xs font-medium text-slate-300">
-                                    {{ $ekskul->attendances->first() ? \Carbon\Carbon::parse($ekskul->attendances->first()->date)->diffForHumans() : '-' }}
-                                </p>
-                            </div>
-                        </div>
-
                     </div>
                 @empty
-                    <div class="col-span-full py-12 text-center border border-dashed border-slate-700 rounded-3xl bg-slate-800/20">
-                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-800 mb-4 text-slate-600">
-                            <i class="ph-duotone ph-puzzle-piece text-3xl"></i>
-                        </div>
-                        <p class="text-slate-400 font-medium">Belum ada data ekstrakurikuler.</p>
-                    </div>
+                    <div class="col-span-full py-12 text-center text-slate-400">Belum ada data ekstrakurikuler.</div>
                 @endforelse
             </div>
         </div>
     </div>
 
-    <!-- BAGIAN KATA MEREKA / BUKU TAMU -->
+    <!-- KATA MEREKA / BUKU TAMU -->
     <div class="py-20 bg-slate-50 border-t border-slate-100">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12" data-aos="fade-up">
@@ -851,11 +758,9 @@
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- LOGIC LOOPING DATA BUKU TAMU -->
                 @forelse($guestbooks as $guest)
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full flex flex-col" data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
                         <div class="flex items-center gap-3 mb-4">
-                            <!-- Avatar Inisial Nama -->
                             <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold shrink-0 border border-blue-200">
                                 {{ substr($guest->name, 0, 1) }}
                             </div>
@@ -875,7 +780,6 @@
                         </div>
                     </div>
                 @empty
-                    <!-- TAMPILAN JIKA BELUM ADA DATA -->
                     <div class="col-span-3 text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300">
                         <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4 text-slate-400 shadow-sm">
                             <i class="ph-duotone ph-chats-teardrop text-3xl"></i>
@@ -941,9 +845,8 @@
         </div>
     </div>
 
-    <!-- ANNOUNCEMENT & FOOTER SECTION -->
+    <!-- ANNOUNCEMENTS (Bottom) & FOOTER SECTION -->
     <div class="bg-slate-900 text-white pt-24 pb-12 relative overflow-hidden">
-        <!-- Decoration -->
         <div class="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent"></div>
         <div class="absolute -right-20 top-20 w-96 h-96 bg-blue-600 rounded-full mix-blend-overlay filter blur-[100px] opacity-20"></div>
 
@@ -961,17 +864,13 @@
                     @forelse ($announcements as $index => $item)
                         <article class="bg-slate-800/50 backdrop-blur-md rounded-2xl p-6 border border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 hover:bg-slate-800 hover:-translate-y-1 group h-full flex flex-col cursor-pointer" @click="openAnnouncementByIndex({{ $index }})" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                             <div class="flex justify-between items-start mb-4">
-                                <span class="px-2 py-1 rounded bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-wide border border-blue-500/20">Info Sekolah</span>
+                                <span class="px-2 py-1 rounded bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-wide border border-blue-500/20">Info</span>
                                 <span class="text-xs text-slate-500 font-medium flex items-center gap-1">
                                     <i class="ph-fill ph-calendar-blank"></i> {{ $item->created_at->format('d M') }}
                                 </span>
                             </div>
-                            <h3 class="text-lg font-bold text-white mb-3 line-clamp-2 group-hover:text-blue-400 transition-colors">
-                                {{ $item->title }}
-                            </h3>
-                            <p class="text-slate-400 text-sm line-clamp-3 mb-4 flex-1 leading-relaxed">
-                                {{ Str::limit(strip_tags($item->content), 100) }}
-                            </p>
+                            <h3 class="text-lg font-bold text-white mb-3 line-clamp-2 group-hover:text-blue-400 transition-colors">{{ $item->title }}</h3>
+                            <p class="text-slate-400 text-sm line-clamp-3 mb-4 flex-1 leading-relaxed">{{ Str::limit(strip_tags($item->content), 100) }}</p>
                             <div class="flex items-center text-sm text-blue-400 font-semibold mt-auto gap-1 group-hover:gap-2 transition-all">
                                 Baca Selengkapnya <i class="ph-bold ph-arrow-right text-xs"></i>
                             </div>
@@ -997,7 +896,6 @@
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {{-- Loop Data Agenda --}}
                     @forelse($agendas as $agenda)
                         @php
                             $colors = ['blue', 'green', 'purple', 'orange', 'pink'];
@@ -1029,14 +927,14 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16 border-t border-slate-800 pt-16">
                 <div class="col-span-1 md:col-span-2 pr-0 md:pr-12">
                     <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded-lg overflow-hidden bg-white flex items-center justify-center">
-                             <img src="{{ asset('images/logo.png') }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" alt="Logo" class="w-full h-full object-contain p-1">
+                        <div class="w-10 h-10 rounded-lg overflow-hidden bg-white flex items-center justify-center p-1">
+                             <img src="{{ asset('images/logo.png') }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" alt="Logo" class="w-full h-full object-contain">
                              <i class="ph-bold ph-graduation-cap text-xl text-blue-900" style="display: none;"></i>
                         </div>
                         <span class="text-xl font-bold text-white tracking-tight">SMPN 3 LAKBOK</span>
                     </div>
                     <p class="text-slate-400 text-sm leading-relaxed mb-8">
-                    Visi sekolah adalah Terciptanya generasi pemelajar yang beriman dan bertakwa, tangguh, literat, berkecakapan global, serta berkesadaran budaya dan lingkungan.
+                        Visi sekolah adalah Terciptanya generasi pemelajar yang beriman dan bertakwa, tangguh, literat, berkecakapan global, serta berkesadaran budaya dan lingkungan.
                     </p>
                     <div class="flex space-x-4">
                         <a href="#" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-blue-600 transition-all duration-300"><i class="ph-fill ph-facebook-logo text-xl"></i></a>
@@ -1062,7 +960,7 @@
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="ph-fill ph-phone text-blue-500 shrink-0"></i>
-                            <span>+6285135961994</span>
+                            <span>(0265) 1234567</span>
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="ph-fill ph-envelope text-blue-500 shrink-0"></i>
@@ -1096,7 +994,7 @@
         <i class="ph-bold ph-arrow-up text-xl"></i>
     </button>
 
-    <!-- MODAL POPUP -->
+    <!-- MODAL POPUP (ANNOUNCEMENT) -->
     <div x-show="modalOpen" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div x-show="modalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="closeAnnouncement()"></div>
         <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
@@ -1175,21 +1073,15 @@
 
     <!-- SCRIPTS -->
     <script>
-        AOS.init({
-            once: true,
-            offset: 50,
-            duration: 800,
-            easing: 'ease-out-cubic',
-        });
-
+        AOS.init({ once: true, offset: 50, duration: 800 });
         window.announcementsData = @json($announcements);
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Chart Defaults
+            // Chart Default Styling
             Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
-            Chart.defaults.color = '#64748b';
-
-            // Chart 1: Attendance
+            Chart.defaults.color = '#94a3b8';
+            
+            // --- 1. CHART ATTENDANCE ---
             const ctx = document.getElementById('publicWeeklyChart');
             if(ctx) {
                 const chartData = @json($barChartData); 
@@ -1203,43 +1095,17 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         borderRadius: 6,
-                        barThickness: 24, // Sedikit lebih tebal
-                        plugins: {
-                            legend: { 
-                                position: 'bottom', 
-                                labels: { 
-                                    usePointStyle: true,
-                                    padding: 20,
-                                    font: { size: 12, weight: 600 }
-                                } 
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                                padding: 14,
-                                cornerRadius: 8,
-                                titleFont: { size: 13, weight: 700 },
-                                bodyFont: { size: 13 },
-                                displayColors: false
-                            }
-                        },
+                        barThickness: 24,
+                        plugins: { legend: { position: 'bottom' } },
                         scales: {
-                            x: { 
-                                stacked: true, 
-                                grid: { display: false },
-                                ticks: { font: { weight: 600 } }
-                            },
-                            y: { 
-                                beginAtZero: true, 
-                                stacked: true, 
-                                grid: { color: '#f1f5f9', borderDash: [5, 5] },
-                                border: { display: false }
-                            }
+                            x: { grid: { display: false }, ticks: { color: '#cbd5e1' } },
+                            y: { grid: { color: '#334155' }, border: { display: false }, ticks: { color: '#cbd5e1' } }
                         }
                     }
                 });
             }
 
-            // Chart 2: Library
+            // --- 2. CHART LIBRARY ---
             const libCtx = document.getElementById('publicLibraryChart');
             if (libCtx) {
                 const libData = @json($libraryChartData);
@@ -1271,10 +1137,6 @@
                     options: {
                         responsive: true, 
                         maintainAspectRatio: false,
-                        interaction: {
-                            mode: 'index',
-                            intersect: false,
-                        },
                         plugins: { 
                             legend: { display: false },
                             tooltip: {

@@ -32,65 +32,74 @@
     
     @stack('styles')
 </head>
-<body class="antialiased text-slate-800 bg-slate-50 overflow-x-hidden flex flex-col min-h-screen" 
+<body class="antialiased text-slate-800 bg-slate-50 overflow-x-hidden flex flex-col min-h-screen selection:bg-blue-500 selection:text-white" 
     x-data="{ 
         mobileMenuOpen: false,
         scrolled: false
     }" 
     @scroll.window="scrolled = (window.pageYOffset > 20) ? true : false">
 
-    <!-- === NAVBAR === -->
-    <nav class="fixed top-0 w-full z-50 transition-all duration-300 border-b border-slate-200 bg-white/90 backdrop-blur-md shadow-sm">
+    <!-- === NAVBAR (TEMA: DARK CORPORATE - HARMONIZED) === -->
+    <nav class="fixed top-0 w-full z-50 transition-all duration-300 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 shadow-xl shadow-blue-900/10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
                 
-                <!-- Logo -->
-                <a href="{{ url('/') }}" class="flex items-center gap-3 z-50 group">
-                    <div class="relative w-10 h-10 flex-shrink-0">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300">
+                <!-- Logo Brand -->
+                <a href="{{ url('/') }}" class="flex items-center gap-3 shrink-0 group">
+                    <!-- Icon Box (Dark Blue + Gold) -->
+                    <div class="relative w-10 h-10 bg-blue-950 border border-blue-800 rounded-xl flex items-center justify-center text-yellow-400 shadow-lg shadow-blue-900/50 group-hover:scale-105 transition-transform overflow-hidden">
+                         <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-6 h-6 object-contain z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                         <i class="ph-bold ph-buildings text-xl hidden z-10"></i>
+                         <!-- Glow Effect -->
+                         <div class="absolute inset-0 bg-blue-500/20 blur-md rounded-full"></div>
                     </div>
-                    <div class="flex flex-col">
-                        <span class="block text-lg font-extrabold leading-none tracking-tight text-slate-900">
-                            SMPN 3 LAKBOK
-                        </span>
-                        <span class="text-[10px] font-bold tracking-wide mt-1 text-blue-600">
-                            BERJAYA : <span class="font-medium text-slate-500">Unggul, Berkarakter</span>
-                        </span>
+                    
+                    <!-- Text Brand -->
+                    <div class="flex flex-col leading-tight">
+                        <span class="font-bold text-white text-lg tracking-tight group-hover:text-blue-200 transition-colors">SMPN 3 LAKBOK</span>
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-yellow-400 transition-colors">Unggul & Berkarakter</span>
                     </div>
                 </a>
 
-                <!-- Desktop Menu (DIPERBAIKI) -->
-                <!-- Menggunakan 'gap-8' agar jaraknya konsisten -->
+                <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center gap-8">
                     
-                    <!-- Grup 1: Menu Informasi Sekolah -->
+                    <!-- Grup 1: Menu Informasi (Text Light) -->
                     <div class="flex items-center gap-6">
-                        <a href="{{ url('/') }}#profil" class="text-sm font-bold text-slate-500 hover:text-blue-600 transition">Profil</a>
-                        <a href="{{ url('/') }}#guru" class="text-sm font-bold text-slate-500 hover:text-blue-600 transition">Guru</a>
-                        <a href="{{ url('/') }}#prestasi" class="text-sm font-bold text-slate-500 hover:text-blue-600 transition">Prestasi</a>
+                        <a href="{{ url('/') }}#profil" class="text-sm font-bold text-slate-300 hover:text-yellow-400 transition relative group">
+                            Profil
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 transition-all group-hover:w-full"></span>
+                        </a>
+                        <a href="{{ url('/') }}#guru" class="text-sm font-bold text-slate-300 hover:text-yellow-400 transition relative group">
+                            Guru
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 transition-all group-hover:w-full"></span>
+                        </a>
+                        <a href="{{ url('/') }}#prestasi" class="text-sm font-bold text-slate-300 hover:text-yellow-400 transition relative group">
+                            Prestasi
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 transition-all group-hover:w-full"></span>
+                        </a>
                     </div>
 
-                    <!-- Divider (Garis Pemisah Kecil) -->
-                    <div class="h-5 w-px bg-slate-200"></div>
+                    <!-- Divider -->
+                    <div class="h-6 w-px bg-slate-700"></div>
 
                     <!-- Grup 2: Menu Aplikasi -->
                     <div class="flex items-center gap-4">
-                        <a href="{{ route('portal.index') }}" class="text-sm font-bold {{ request()->routeIs('portal.*') ? 'text-blue-600' : 'text-slate-700 hover:text-blue-600' }} transition flex items-center gap-2">
+                        <a href="{{ route('portal.index') }}" class="text-sm font-bold {{ request()->routeIs('portal.*') ? 'text-blue-400' : 'text-slate-300 hover:text-white' }} transition flex items-center gap-2">
                             Portal Siswa
                         </a>
 
-                        {{-- [LOGIKA TOMBOL DINAMIS: CEK SISWA DULU, BARU GURU] --}}
-                        
+                        {{-- [LOGIKA TOMBOL DINAMIS] --}}
                         @if(Auth::guard('student')->check())
                             <!-- Jika Login sebagai SISWA -->
-                            <div class="flex items-center gap-2">
-                                <a href="{{ route('student.exam.index') }}" class="text-sm font-bold px-5 py-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition shadow-lg shadow-blue-500/30">
-                                    Dashboard Siswa
+                            <div class="flex items-center gap-3 pl-2">
+                                <a href="{{ route('students.learning.index') }}" class="text-xs font-bold px-4 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-500 transition shadow-lg shadow-blue-900/30 border border-blue-500 flex items-center gap-2">
+                                    <i class="ph-bold ph-student"></i> Area Siswa
                                 </a>
-                                <!-- Tombol Logout Kecil -->
+                                <!-- Tombol Logout -->
                                 <form method="POST" action="{{ route('student.logout') }}">
                                     @csrf
-                                    <button type="submit" class="p-2.5 text-slate-400 hover:text-red-500 transition" title="Keluar">
+                                    <button type="submit" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-rose-400 hover:bg-slate-700 flex items-center justify-center transition border border-slate-700" title="Keluar">
                                         <i class="ph-bold ph-sign-out text-lg"></i>
                                     </button>
                                 </form>
@@ -98,64 +107,71 @@
 
                         @elseif(Auth::check())
                             <!-- Jika Login sebagai GURU/ADMIN -->
-                            <a href="{{ route('dashboard') }}" class="text-sm font-bold px-5 py-2.5 rounded-full bg-slate-800 text-white hover:bg-slate-700 transition shadow-lg">
+                            <a href="{{ route('dashboard') }}" class="text-xs font-bold px-5 py-2.5 rounded-full bg-slate-700 text-white hover:bg-slate-600 transition shadow-lg border border-slate-600">
                                 Dashboard Guru
                             </a>
 
                         @else
                             <!-- Jika BELUM LOGIN -->
-                            <a href="{{ route('login') }}" class="text-sm font-bold px-5 py-2.5 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition shadow-lg">
+                            <a href="{{ route('login') }}" class="text-xs font-bold px-5 py-2.5 rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition shadow-lg border border-slate-700">
                                 Login Staff
                             </a>
                         @endif
-
                     </div>
                 </div>
 
                 <!-- Mobile Menu Button -->
-                <div class="flex md:hidden items-center z-50">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 text-slate-800 rounded-lg transition-colors focus:outline-none hover:bg-slate-100">
+                <div class="flex md:hidden items-center">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors focus:outline-none">
                         <i class="ph-bold text-2xl" :class="mobileMenuOpen ? 'ph-x' : 'ph-list'"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Mobile Menu Overlay -->
+        <!-- Mobile Menu Overlay (Dark Theme) -->
         <div x-show="mobileMenuOpen" x-cloak
+             @click.away="mobileMenuOpen = false"
              x-transition:enter="transition ease-out duration-200"
              x-transition:enter-start="opacity-0 -translate-y-5"
              x-transition:enter-end="opacity-100 translate-y-0"
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 -translate-y-5"
-             class="absolute top-20 left-0 w-full bg-white border-b border-slate-200 shadow-xl md:hidden">
+             class="absolute top-20 left-0 w-full bg-slate-900 border-b border-slate-800 shadow-2xl md:hidden">
              
             <nav class="flex flex-col p-6 space-y-4">
-                <a href="{{ url('/') }}#profil" class="text-lg font-bold text-slate-600 hover:text-blue-600">Profil Sekolah</a>
-                <a href="{{ url('/') }}#guru" class="text-lg font-bold text-slate-600 hover:text-blue-600">Guru & Staff</a>
-                <a href="{{ route('portal.index') }}" class="text-lg font-bold text-blue-600">Portal Siswa</a>
-                <hr class="border-slate-100">
+                <a href="{{ url('/') }}#profil" class="text-lg font-bold text-slate-300 hover:text-yellow-400">Profil Sekolah</a>
+                <a href="{{ url('/') }}#guru" class="text-lg font-bold text-slate-300 hover:text-yellow-400">Guru & Staff</a>
+                <a href="{{ url('/') }}#prestasi" class="text-lg font-bold text-slate-300 hover:text-yellow-400">Prestasi</a>
+                <a href="{{ route('portal.index') }}" class="text-lg font-bold text-blue-400">Portal Siswa</a>
                 
-                {{-- [LOGIKA MOBILE MENU DINAMIS] --}}
+                <hr class="border-slate-800">
+                
                 @if(Auth::guard('student')->check())
-                    <a href="{{ route('student.exam.index') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-blue-600 text-white font-bold">Dashboard Siswa</a>
+                    <a href="{{ route('students.learning.index') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-900/20">Dashboard Siswa</a>
                     <form method="POST" action="{{ route('student.logout') }}" class="block w-full">
                         @csrf
-                        <button type="submit" class="w-full text-center px-6 py-3 rounded-xl border-2 border-slate-100 text-red-500 font-bold hover:bg-red-50">Keluar</button>
+                        <button type="submit" class="w-full text-center px-6 py-3 rounded-xl border border-rose-900/50 text-rose-400 font-bold hover:bg-rose-900/20">Keluar</button>
                     </form>
                 @elseif(Auth::check())
-                    <a href="{{ route('dashboard') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-slate-800 text-white font-bold">Dashboard Guru</a>
+                    <a href="{{ route('dashboard') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-slate-800 text-white font-bold border border-slate-700">Dashboard Guru</a>
                 @else
-                    <a href="{{ route('login') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-slate-900 text-white font-bold">Login Staff</a>
+                    <a href="{{ route('login') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-slate-800 text-slate-300 font-bold border border-slate-700">Login Staff</a>
                 @endif
-
             </nav>
         </div>
     </nav>
 
-    <!-- === KONTEN UTAMA (YIELD) === -->
+    <!-- === KONTEN UTAMA === -->
+    <!-- pt-24 untuk memberi ruang karena navbar fixed dan lebih tinggi -->
     <main class="flex-grow pt-24 pb-12 relative z-10 min-h-content">
+        <!-- Background Dekorasi Halus -->
+        <div class="fixed inset-0 z-[-1] pointer-events-none">
+             <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[100px] -mr-20 -mt-20"></div>
+             <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] -ml-20 -mb-20"></div>
+        </div>
+
         @hasSection('content')
             @yield('content')
         @else
@@ -169,10 +185,11 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                 <div class="col-span-1 md:col-span-2 pr-0 md:pr-12">
                     <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded-lg overflow-hidden bg-white flex items-center justify-center p-1">
-                             <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-full h-full object-contain">
+                        <div class="w-10 h-10 bg-blue-950 border border-blue-800 rounded-xl flex items-center justify-center text-yellow-400 shadow-lg shadow-blue-900/50">
+                             <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-6 h-6 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                             <i class="ph-bold ph-buildings text-xl hidden"></i>
                         </div>
-                        <span class="text-xl font-bold tracking-tight">SMPN 3 LAKBOK</span>
+                        <span class="text-xl font-bold tracking-tight text-white">SMPN 3 LAKBOK</span>
                     </div>
                     <p class="text-slate-400 text-sm leading-relaxed mb-6">
                         Platform layanan pendidikan digital terintegrasi untuk mendukung kegiatan akademik dan pembentukan karakter siswa.
@@ -181,9 +198,9 @@
                 <div>
                     <h4 class="text-white font-bold mb-6 text-lg">Akses Cepat</h4>
                     <ul class="space-y-3 text-sm text-slate-400">
-                        <li><a href="{{ url('/') }}" class="hover:text-blue-400 transition-colors">Beranda</a></li>
-                        <li><a href="{{ route('portal.index') }}" class="hover:text-blue-400 transition-colors">Portal Siswa</a></li>
-                        <li><a href="{{ route('library.kiosk.index') }}" class="hover:text-blue-400 transition-colors">E-Library</a></li>
+                        <li><a href="{{ url('/') }}" class="hover:text-yellow-400 transition-colors">Beranda</a></li>
+                        <li><a href="{{ route('portal.index') }}" class="hover:text-yellow-400 transition-colors">Portal Siswa</a></li>
+                        <li><a href="{{ route('library.kiosk.index') }}" class="hover:text-yellow-400 transition-colors">E-Library</a></li>
                     </ul>
                 </div>
                 <div>
