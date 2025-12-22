@@ -4,7 +4,7 @@
 
     <div class="py-6 sm:py-8" x-data="{ addModalOpen: false, editModalOpen: false, editData: {} }">
         
-        {{-- HERO SECTION BARU --}}
+        {{-- HERO SECTION --}}
         <div class="mb-10 px-4 sm:px-0">
             <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
                 
@@ -28,7 +28,7 @@
                             Wadahi bakat dan minat siswa. Kelola jadwal latihan, pantau keanggotaan, dan rekap kehadiran kegiatan dalam satu panel.
                         </p>
 
-                        {{-- Action Button in Hero --}}
+                        {{-- Action Button --}}
                         <div class="mt-8 flex flex-wrap gap-3">
                             <button @click="addModalOpen = true" class="px-6 py-3 bg-white text-blue-900 font-bold rounded-xl shadow-lg hover:bg-blue-50 hover:scale-105 transition-all flex items-center gap-2 transform active:scale-95">
                                 <div class="bg-blue-100 p-1 rounded-md">
@@ -42,27 +42,29 @@
                         </div>
                     </div>
                     
-                    {{-- Right Stats Cards --}}
-                    <div class="flex flex-row md:flex-col lg:flex-row gap-4 w-full md:w-auto">
-                        {{-- Stat 1: Total Ekskul --}}
-                        <div class="bg-white/10 backdrop-blur-md px-6 py-5 rounded-2xl border border-white/10 flex-1 md:flex-none min-w-[140px] text-center md:text-left hover:bg-white/15 transition-colors">
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-blue-300">
-                                <i class="ph-duotone ph-trophy text-lg"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-wider">Total Kegiatan</span>
+                    {{-- Right Stats Cards (FIXED RESPONSIVE) --}}
+                    <div class="w-full md:w-auto mt-2 md:mt-0">
+                        <div class="grid grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
+                            {{-- Stat 1: Total Ekskul --}}
+                            <div class="bg-white/10 backdrop-blur-md px-5 py-5 rounded-2xl border border-white/10 text-center md:text-left hover:bg-white/15 transition-colors">
+                                <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center md:justify-start gap-2 mb-1 text-blue-300">
+                                    <i class="ph-duotone ph-trophy text-2xl md:text-xl lg:text-2xl shrink-0"></i>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider">Total Kegiatan</span>
+                                </div>
+                                <span class="block text-3xl font-black text-white tracking-tight mt-1">{{ $extracurriculars->count() }}</span>
                             </div>
-                            <span class="block text-3xl font-black text-white tracking-tight">{{ $extracurriculars->count() }}</span>
-                        </div>
 
-                        {{-- Stat 2: Total Siswa (Hitung Manual dari Collection) --}}
-                        @php
-                            $totalMembers = $extracurriculars->sum('members_count');
-                        @endphp
-                        <div class="bg-white/10 backdrop-blur-md px-6 py-5 rounded-2xl border border-white/10 flex-1 md:flex-none min-w-[140px] text-center md:text-left hover:bg-white/15 transition-colors">
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-emerald-300">
-                                <i class="ph-duotone ph-users-three text-lg"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-wider">Siswa Aktif</span>
+                            {{-- Stat 2: Total Siswa --}}
+                            @php
+                                $totalMembers = $extracurriculars->sum('members_count');
+                            @endphp
+                            <div class="bg-white/10 backdrop-blur-md px-5 py-5 rounded-2xl border border-white/10 text-center md:text-left hover:bg-white/15 transition-colors">
+                                <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center md:justify-start gap-2 mb-1 text-emerald-300">
+                                    <i class="ph-duotone ph-users-three text-2xl md:text-xl lg:text-2xl shrink-0"></i>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider">Siswa Aktif</span>
+                                </div>
+                                <span class="block text-3xl font-black text-white tracking-tight mt-1">{{ $totalMembers }}</span>
                             </div>
-                            <span class="block text-3xl font-black text-white tracking-tight">{{ $totalMembers }}</span>
                         </div>
                     </div>
 
@@ -100,7 +102,8 @@
 
                     {{-- Header Card --}}
                     <div class="flex items-start justify-between mb-6 relative z-10">
-                        <div class="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-900 text-3xl shadow-sm group-hover:shadow-md group-hover:bg-blue-900 group-hover:text-white transition-all duration-300">
+                        {{-- Icon Wrapper with shrink-0 (FIXED) --}}
+                        <div class="w-16 h-16 shrink-0 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-900 text-3xl shadow-sm group-hover:shadow-md group-hover:bg-blue-900 group-hover:text-white transition-all duration-300">
                             @if(Str::startsWith($ekskul->icon, 'storage/'))
                                 <img src="{{ asset($ekskul->icon) }}" class="w-full h-full object-cover rounded-2xl">
                             @elseif(Str::startsWith($ekskul->icon, 'http'))
@@ -116,9 +119,11 @@
                                 <i class="ph-bold ph-dots-three-vertical text-xl"></i>
                             </button>
                             <div x-show="open" class="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 z-20 py-2 ring-1 ring-black/5" style="display: none;" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100">
+                                
+                                {{-- Tombol Edit dengan JSON Safe (FIXED) --}}
                                 <button @click="
                                     editModalOpen = true; 
-                                    editData = {{ json_encode($ekskul) }};
+                                    editData = JSON.parse('{{ json_encode($ekskul, JSON_HEX_APOS | JSON_HEX_QUOT) }}');
                                     open = false;
                                     setTimeout(() => setupEditForm(editData), 50);
                                 " class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-2 transition-colors">
@@ -140,19 +145,19 @@
 
                     {{-- Content --}}
                     <div class="flex-1 relative z-10">
-                        <h3 class="text-xl font-black text-slate-800 mb-1 group-hover:text-blue-900 transition-colors">{{ $ekskul->name }}</h3>
+                        <h3 class="text-xl font-black text-slate-800 mb-1 group-hover:text-blue-900 transition-colors line-clamp-2">{{ $ekskul->name }}</h3>
                         <div class="flex items-center gap-2 text-xs font-bold text-slate-400 mb-6 uppercase tracking-wide">
                             <i class="ph-bold ph-user-circle text-blue-500 text-lg"></i>
-                            <span>{{ $ekskul->coach_name ?? 'Belum ada pembina' }}</span>
+                            <span class="truncate">{{ $ekskul->coach_name ?? 'Belum ada pembina' }}</span>
                         </div>
 
                         <div class="space-y-3">
                             {{-- Jadwal Row --}}
                             <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
                                 <span class="text-[10px] font-bold text-slate-400 uppercase">Jadwal</span>
-                                <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                                    {{ $ekskul->schedule ?? '-' }}
+                                <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5 text-right">
+                                    <div class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></div>
+                                    <span class="truncate max-w-[120px]">{{ $ekskul->schedule ?? '-' }}</span>
                                 </span>
                             </div>
                             
@@ -318,6 +323,8 @@
 
     <script>
         function setupEditForm(ekskul) {
+            if(!ekskul) return; // Guard clause
+
             document.getElementById('edit_name').value = ekskul.name;
             document.getElementById('edit_coach').value = ekskul.coach_name;
             document.getElementById('edit_schedule').value = ekskul.schedule;
@@ -336,6 +343,7 @@
 
         // Handle Delete with SweetAlert
         document.addEventListener('DOMContentLoaded', function() {
+            // Gunakan event delegation untuk element yang mungkin dinamis, atau init ulang
             const deleteButtons = document.querySelectorAll('.btn-delete');
             deleteButtons.forEach(button => {
                 button.addEventListener('click', function(e) {

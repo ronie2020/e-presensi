@@ -65,10 +65,10 @@
         }
     </style>
 
-    <div class="py-8 sm:py-10 font-sans text-slate-800">
+    <div class="py-6 sm:py-8 font-sans text-slate-800">
         
         {{-- HERO SECTION --}}
-        <div class="animate-enter max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
+        <div class="animate-enter max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10">
             <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
                 
                 {{-- Background Decorations & Particles --}}
@@ -78,7 +78,7 @@
                 <div class="absolute -top-24 -right-24 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-blue-500/30 transition-all duration-700 animate-float"></div>
                 <div class="absolute bottom-0 right-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none animate-float-reverse"></div>
                 
-                {{-- Partikel "Bintang/Data" (BARU) --}}
+                {{-- Partikel "Bintang/Data" --}}
                 <div class="absolute top-10 left-20 w-1.5 h-1.5 bg-blue-300 rounded-full animate-twinkle"></div>
                 <div class="absolute top-1/2 right-1/3 w-1 h-1 bg-white rounded-full animate-twinkle delay-200"></div>
                 <div class="absolute bottom-20 left-1/3 w-2 h-2 bg-indigo-300 rounded-full animate-twinkle delay-slow blur-[1px]"></div>
@@ -100,24 +100,28 @@
                         </p>
                     </div>
                     
-                    {{-- Stats Cards --}}
-                    <div class="flex flex-row md:flex-col lg:flex-row gap-4 w-full md:w-auto">
-                        <div class="bg-white/10 backdrop-blur-md px-6 py-5 rounded-2xl border border-white/20 flex-1 md:flex-none min-w-[140px] text-center md:text-left hover:bg-white/15 transition-all hover:scale-105 duration-300 group/card shadow-lg">
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-blue-300">
-                                <i class="ph-duotone ph-book-bookmark text-lg group-hover/card:text-white transition-colors"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-wider">Koleksi Buku</span>
+                    {{-- Stats Cards (FIXED RESPONSIVE) --}}
+                    <div class="w-full md:w-auto mt-4 md:mt-0">
+                        <div class="grid grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
+                            {{-- Card 1: Koleksi Buku --}}
+                            <div class="bg-white/10 backdrop-blur-md px-5 py-5 rounded-2xl border border-white/20 text-center md:text-left hover:bg-white/15 transition-all hover:scale-105 duration-300 group/card shadow-lg">
+                                <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center md:justify-start gap-2 mb-1 text-blue-300">
+                                    <i class="ph-duotone ph-book-bookmark text-2xl md:text-xl lg:text-2xl group-hover/card:text-white transition-colors"></i>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider">Koleksi Buku</span>
+                                </div>
+                                {{-- Angka dengan efek Shimmer --}}
+                                <span class="block text-3xl font-black tracking-tight count-up text-shimmer mt-1" data-target="{{ $totalBooks }}">0</span>
                             </div>
-                            {{-- Angka dengan efek Shimmer (Mengkilap) --}}
-                            <span class="block text-3xl font-black tracking-tight count-up text-shimmer" data-target="{{ $totalBooks }}">0</span>
-                        </div>
 
-                        <div class="bg-orange-500/20 backdrop-blur-md px-6 py-5 rounded-2xl border border-orange-400/30 flex-1 md:flex-none min-w-[140px] text-center md:text-left hover:bg-orange-500/30 transition-all hover:scale-105 duration-300 group/card shadow-lg">
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-orange-300">
-                                <i class="ph-duotone ph-users-three text-lg group-hover/card:text-white transition-colors"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-wider">Pengunjung Hari Ini</span>
+                            {{-- Card 2: Pengunjung Hari Ini --}}
+                            <div class="bg-orange-500/20 backdrop-blur-md px-5 py-5 rounded-2xl border border-orange-400/30 text-center md:text-left hover:bg-orange-500/30 transition-all hover:scale-105 duration-300 group/card shadow-lg">
+                                <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center md:justify-start gap-2 mb-1 text-orange-300">
+                                    <i class="ph-duotone ph-users-three text-2xl md:text-xl lg:text-2xl group-hover/card:text-white transition-colors"></i>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider">Pengunjung</span>
+                                </div>
+                                {{-- Angka dengan efek Shimmer --}}
+                                <span class="block text-3xl font-black tracking-tight count-up text-shimmer mt-1" data-target="{{ $todayVisits }}">0</span>
                             </div>
-                            {{-- Angka dengan efek Shimmer (Mengkilap) --}}
-                            <span class="block text-3xl font-black tracking-tight count-up text-shimmer" data-target="{{ $todayVisits }}">0</span>
                         </div>
                     </div>
 
@@ -132,7 +136,7 @@
                 <div class="lg:col-span-2 space-y-8">
 
                     <!-- 1. Menu Akses Cepat -->
-                    <div class="animate-enter delay-100 bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group/panel">
+                    <div class="animate-enter delay-100 bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group/panel">
                         {{-- Aksen Header dengan animasi gradient flow --}}
                         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 bg-[length:200%_100%] animate-[shimmer_3s_linear_infinite]"></div>
                         
@@ -144,10 +148,9 @@
                             {{-- Button 1 --}}
                             <a href="{{ route('library.circulation.index') }}" class="group flex flex-col items-center justify-center p-5 bg-blue-50/50 hover:bg-blue-600 border border-blue-100 hover:border-blue-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-2 transform">
                                 <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-3 text-blue-600 group-hover:text-blue-600 group-hover:bg-white transition-colors">
-                                    {{-- Icon Wiggle saat hover --}}
                                     <i class="ph-duotone ph-arrows-left-right text-3xl animate-wiggle"></i>
                                 </div>
-                                <span class="font-bold text-slate-600 text-sm group-hover:text-white transition-colors">Sirkulasi</span>
+                                <span class="font-bold text-slate-600 text-sm group-hover:text-white transition-colors text-center">Sirkulasi</span>
                             </a>
                             
                             {{-- Button 2 --}}
@@ -155,16 +158,15 @@
                                 <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-3 text-purple-600 group-hover:text-purple-600 group-hover:bg-white transition-colors">
                                     <i class="ph-duotone ph-user-focus text-3xl animate-wiggle"></i>
                                 </div>
-                                <span class="font-bold text-slate-600 text-sm group-hover:text-white transition-colors">Cari Siswa</span>
+                                <span class="font-bold text-slate-600 text-sm group-hover:text-white transition-colors text-center">Cari Siswa</span>
                             </button>
                             
-                            {{-- Button 3 (FIXED ICON) --}}
+                            {{-- Button 3 --}}
                             <a href="{{ route('library.books.create') }}" class="group flex flex-col items-center justify-center p-5 bg-emerald-50/50 hover:bg-emerald-600 border border-emerald-100 hover:border-emerald-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-2 transform">
                                 <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-3 text-emerald-600 group-hover:text-emerald-600 group-hover:bg-white transition-colors">
-                                    {{-- Mengganti icon ph-book-medical dengan ph-plus-circle agar pasti muncul --}}
                                     <i class="ph-duotone ph-plus-circle text-3xl animate-wiggle"></i>
                                 </div>
-                                <span class="font-bold text-slate-600 text-sm group-hover:text-white transition-colors">Input Buku</span>
+                                <span class="font-bold text-slate-600 text-sm group-hover:text-white transition-colors text-center">Input Buku</span>
                             </a>
                             
                             {{-- Button 4 --}}
@@ -172,14 +174,14 @@
                                 <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-3 text-orange-600 group-hover:text-orange-600 group-hover:bg-white transition-colors">
                                     <i class="ph-duotone ph-desktop text-3xl animate-wiggle"></i>
                                 </div>
-                                <span class="font-bold text-slate-600 text-sm group-hover:text-white transition-colors">Mode Kiosk</span>
+                                <span class="font-bold text-slate-600 text-sm group-hover:text-white transition-colors text-center">Mode Kiosk</span>
                             </a>
                         </div>
                     </div>
                     
                     <!-- 2. Grafik Statistik -->
-                    <div class="animate-enter delay-200 bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 hover:shadow-2xl hover:shadow-blue-900/5 transition-all duration-500">
-                        <div class="flex items-center justify-between mb-8">
+                    <div class="animate-enter delay-200 bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 hover:shadow-2xl hover:shadow-blue-900/5 transition-all duration-500">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
                             <div>
                                 <h2 class="text-lg font-black text-slate-800 flex items-center gap-2">
                                     <i class="ph-fill ph-chart-bar text-blue-900"></i> Statistik Bulanan
@@ -187,12 +189,12 @@
                                 <p class="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wide">Analisa Peminjaman & Kunjungan</p>
                             </div>
                             <!-- Toggle Chart -->
-                            <div class="flex bg-slate-100 p-1.5 rounded-xl border border-slate-200">
-                                <button onclick="toggleChart('loans')" id="btn-loans" class="px-4 py-2 rounded-lg text-xs font-black bg-white shadow-sm text-blue-900 transition-all hover:scale-105 active:scale-95">Peminjaman</button>
-                                <button onclick="toggleChart('visits')" id="btn-visits" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all hover:scale-105 active:scale-95">Kunjungan</button>
+                            <div class="flex bg-slate-100 p-1.5 rounded-xl border border-slate-200 w-full sm:w-auto">
+                                <button onclick="toggleChart('loans')" id="btn-loans" class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-black bg-white shadow-sm text-blue-900 transition-all hover:scale-105 active:scale-95 text-center">Peminjaman</button>
+                                <button onclick="toggleChart('visits')" id="btn-visits" class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all hover:scale-105 active:scale-95 text-center">Kunjungan</button>
                             </div>
                         </div>
-                        <div class="h-72 w-full relative">
+                        <div class="h-64 sm:h-72 w-full relative">
                              <canvas id="mainChart"></canvas>
                         </div>
                     </div>
@@ -202,27 +204,30 @@
                 <div class="lg:col-span-1 space-y-8">
                      
                      <!-- 3. Status Sirkulasi -->
-                     <div class="animate-enter delay-300 bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
+                     <div class="animate-enter delay-300 bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
                         <div class="flex items-center justify-between mb-6">
                             <h3 class="font-black text-slate-800 text-lg">Status Sirkulasi</h3>
                             <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center animate-pulse">
-                                <i class="ph-bold ph-arrows-left-right"></i>
+                                {{-- FIX: Menggunakan ph-duotone untuk konsistensi --}}
+                                <i class="ph-duotone ph-arrows-left-right"></i>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div class="p-5 bg-indigo-50 rounded-3xl text-center border border-indigo-100 hover:bg-indigo-100 transition-colors group cursor-default">
+                            <div class="p-4 sm:p-5 bg-indigo-50 rounded-3xl text-center border border-indigo-100 hover:bg-indigo-100 transition-colors group cursor-default">
                                 <div class="w-10 h-10 mx-auto bg-white text-indigo-600 rounded-full flex items-center justify-center shadow-sm mb-2 group-hover:scale-110 transition-transform">
-                                    <i class="ph-bold ph-hand-holding text-lg"></i>
+                                    {{-- FIX: Mengganti ph-hand-holding (invalid) dengan ph-book-open-text (valid) --}}
+                                    <i class="ph-duotone ph-book-open-text text-lg"></i>
                                 </div>
-                                <p class="text-3xl font-black text-slate-800 count-up" data-target="{{ $borrowedBooks }}">0</p>
+                                <p class="text-2xl sm:text-3xl font-black text-slate-800 count-up" data-target="{{ $borrowedBooks }}">0</p>
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Dipinjam</p>
                             </div>
-                            <div class="p-5 bg-rose-50 rounded-3xl text-center border border-rose-100 hover:bg-rose-100 transition-colors group cursor-default">
+                            <div class="p-4 sm:p-5 bg-rose-50 rounded-3xl text-center border border-rose-100 hover:bg-rose-100 transition-colors group cursor-default">
                                 <div class="w-10 h-10 mx-auto bg-white text-rose-600 rounded-full flex items-center justify-center shadow-sm mb-2 group-hover:scale-110 transition-transform">
-                                    <i class="ph-bold ph-warning-circle text-lg"></i>
+                                    {{-- FIX: ph-warning-circle valid, tapi ubah ke duotone agar konsisten --}}
+                                    <i class="ph-duotone ph-warning-circle text-lg"></i>
                                 </div>
-                                <p class="text-3xl font-black text-slate-800 count-up" data-target="{{ $overdueBooks }}">0</p>
+                                <p class="text-2xl sm:text-3xl font-black text-slate-800 count-up" data-target="{{ $overdueBooks }}">0</p>
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Terlambat</p>
                             </div>
                         </div>
@@ -253,11 +258,13 @@
                                         <div class="shrink-0 mt-1 transition-transform group-hover:scale-110 duration-200">
                                             @if($activity->type == 'visit')
                                                 <div class="w-10 h-10 rounded-2xl bg-orange-50 text-orange-500 border border-orange-100 flex items-center justify-center text-lg shadow-sm">
-                                                    <i class="ph-bold ph-door-open"></i>
+                                                    {{-- FIX: Menggunakan duotone --}}
+                                                    <i class="ph-duotone ph-door-open"></i>
                                                 </div>
                                             @else
                                                 <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-lg shadow-sm border {{ $activity->status == 'returned' ? 'bg-emerald-50 text-emerald-500 border-emerald-100' : 'bg-blue-50 text-blue-500 border-blue-100' }}">
-                                                    <i class="{{ $activity->status == 'returned' ? 'ph-bold ph-arrow-u-down-left' : 'ph-bold ph-arrow-u-right-up' }}"></i>
+                                                    {{-- FIX: Menggunakan duotone --}}
+                                                    <i class="{{ $activity->status == 'returned' ? 'ph-duotone ph-arrow-u-down-left' : 'ph-duotone ph-arrow-u-right-up' }}"></i>
                                                 </div>
                                             @endif
                                         </div>
@@ -328,11 +335,22 @@
             const visitLabels = @json($visitChartLabels);
             const visitData = @json($visitChartData);
 
-            const ctx = document.getElementById('mainChart').getContext('2d');
+            const canvasElement = document.getElementById('mainChart');
+            const ctx = canvasElement.getContext('2d');
             let mainChart;
 
             function renderChart(type) {
-                if(mainChart) mainChart.destroy();
+                // FIX: Menghindari error "Canvas is already in use"
+                const existingChart = Chart.getChart(canvasElement);
+                if (existingChart) {
+                    existingChart.destroy();
+                }
+                
+                // Fallback variabel lokal
+                if (mainChart) {
+                    mainChart.destroy();
+                    mainChart = null;
+                }
                 
                 const isVisit = type === 'visits';
                 const labels = isVisit ? visitLabels : loanLabels;
@@ -399,12 +417,12 @@
                 const btnVisits = document.getElementById('btn-visits');
                 
                 if(type === 'loans') {
-                    btnLoans.className = "px-4 py-2 rounded-lg text-xs font-black bg-white shadow-sm text-blue-900 transition-all hover:scale-105 active:scale-95";
-                    btnVisits.className = "px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all hover:scale-105 active:scale-95";
+                    btnLoans.className = "flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-black bg-white shadow-sm text-blue-900 transition-all hover:scale-105 active:scale-95 text-center";
+                    btnVisits.className = "flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all hover:scale-105 active:scale-95 text-center";
                     renderChart('loans');
                 } else {
-                    btnVisits.className = "px-4 py-2 rounded-lg text-xs font-black bg-white shadow-sm text-slate-800 transition-all hover:scale-105 active:scale-95";
-                    btnLoans.className = "px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all hover:scale-105 active:scale-95";
+                    btnVisits.className = "flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-black bg-white shadow-sm text-slate-800 transition-all hover:scale-105 active:scale-95 text-center";
+                    btnLoans.className = "flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all hover:scale-105 active:scale-95 text-center";
                     renderChart('visits');
                 }
             };

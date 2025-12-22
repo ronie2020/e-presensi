@@ -1,8 +1,11 @@
 <x-app-layout>
-    <div class="py-8 sm:py-10 font-sans text-slate-800">
+    {{-- Load SweetAlert --}}
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <div class="py-6 sm:py-8 font-sans text-slate-800">
         
         {{-- HERO SECTION --}}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10">
             <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
                 
                 {{-- Background Decorations --}}
@@ -25,28 +28,30 @@
                         </p>
                     </div>
                     
-                    {{-- Stats Cards --}}
-                    <div class="flex flex-row md:flex-col lg:flex-row gap-4 w-full md:w-auto">
-                        {{-- Stat 1: Total Galeri --}}
-                        <div class="bg-white/10 backdrop-blur-md px-6 py-5 rounded-2xl border border-white/10 flex-1 md:flex-none min-w-[140px] text-center md:text-left hover:bg-white/15 transition-colors">
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-blue-300">
-                                <i class="ph-duotone ph-images-square text-lg"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-wider">Total Album</span>
+                    {{-- Stats Cards (FIXED RESPONSIVE) --}}
+                    <div class="w-full md:w-auto mt-4 md:mt-0">
+                        <div class="grid grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
+                            {{-- Stat 1: Total Galeri --}}
+                            <div class="bg-white/10 backdrop-blur-md px-5 py-5 rounded-2xl border border-white/10 text-center md:text-left hover:bg-white/15 transition-colors group/stat">
+                                <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center md:justify-start gap-2 mb-1 text-blue-300">
+                                    <i class="ph-duotone ph-images-square text-2xl md:text-xl lg:text-2xl group-hover/stat:scale-110 transition-transform"></i>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider">Total Album</span>
+                                </div>
+                                <span class="block text-3xl font-black text-white tracking-tight mt-1">{{ $activities->total() }}</span>
                             </div>
-                            <span class="block text-3xl font-black text-white tracking-tight">{{ $activities->total() }}</span>
-                        </div>
 
-                        {{-- Stat 2: Live Preview Link (Button Style) --}}
-                        <a href="/" target="_blank" class="bg-indigo-500/20 backdrop-blur-md px-6 py-5 rounded-2xl border border-indigo-400/20 flex-1 md:flex-none min-w-[140px] text-center md:text-left hover:bg-indigo-500/30 transition-colors group/link">
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-indigo-300">
-                                <i class="ph-duotone ph-eye text-lg"></i>
-                                <span class="text-[10px] font-bold uppercase tracking-wider">Halaman Depan</span>
-                            </div>
-                            <div class="flex items-center justify-center md:justify-start gap-1 text-white font-bold text-sm mt-2 group-hover/link:text-indigo-200">
-                                <span>Lihat Web</span>
-                                <i class="ph-bold ph-arrow-right"></i>
-                            </div>
-                        </a>
+                            {{-- Stat 2: Link Web --}}
+                            <a href="/" target="_blank" class="bg-indigo-500/20 backdrop-blur-md px-5 py-5 rounded-2xl border border-indigo-400/20 text-center md:text-left hover:bg-indigo-500/30 transition-colors group/link cursor-pointer">
+                                <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center md:justify-start gap-2 mb-1 text-indigo-300">
+                                    <i class="ph-duotone ph-eye text-2xl md:text-xl lg:text-2xl"></i>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider">Preview</span>
+                                </div>
+                                <div class="flex items-center justify-center md:justify-start gap-1 text-white font-bold text-sm mt-2 group-hover/link:translate-x-1 transition-transform">
+                                    <span>Lihat Web</span>
+                                    <i class="ph-bold ph-arrow-right"></i>
+                                </div>
+                            </a>
+                        </div>
                     </div>
 
                 </div>
@@ -56,17 +61,24 @@
         {{-- Main Content --}}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- Flash Message --}}
-            @if (session('success'))
-                <div x-data="{ show: true }" x-show="show" x-transition class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
-                            <i class="ph-bold ph-check-circle text-xl"></i>
-                        </div>
-                        <span class="font-bold text-sm">{{ session('success') }}</span>
-                    </div>
-                    <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-1 rounded-md hover:bg-emerald-100 transition"><i class="ph-bold ph-x"></i></button>
-                </div>
+            {{-- Flash Messages (SweetAlert Style Toast) --}}
+            @if(session('success'))
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: "{{ session('success') }}",
+                            timer: 3000,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end',
+                            background: '#ecfdf5',
+                            color: '#064e3b',
+                            iconColor: '#10b981'
+                        });
+                    });
+                </script>
             @endif
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -74,7 +86,8 @@
                 {{-- KOLOM KIRI (1/3): FORM INPUT --}}
                 <div class="lg:col-span-1 space-y-6">
                     
-                    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden sticky top-24 relative group hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
+                    {{-- Card Form Upload (Sticky only on Large Screens) --}}
+                    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden lg:sticky lg:top-24 relative group hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
                         
                         {{-- Card Header --}}
                         <div class="bg-gradient-to-r from-blue-900 to-blue-800 p-8 text-white relative overflow-hidden">
@@ -93,15 +106,18 @@
                                 {{-- Judul --}}
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Judul Kegiatan</label>
-                                    <input type="text" name="title" required placeholder="Contoh: Perkemahan Sabtu Minggu" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-800 py-3 px-4 transition-colors placeholder:font-normal">
-                                    @error('title') <span class="text-red-500 text-xs mt-1 block font-bold ml-1">{{ $message }}</span> @enderror
+                                    <div class="relative">
+                                        <i class="ph-bold ph-text-t absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                        <input type="text" name="title" required placeholder="Contoh: Perkemahan Sabtu Minggu" class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-800 py-3 transition-colors placeholder:font-normal">
+                                    </div>
+                                    @error('title') <span class="text-rose-500 text-xs mt-1 block font-bold ml-1">{{ $message }}</span> @enderror
                                 </div>
 
                                 {{-- Deskripsi --}}
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Deskripsi Singkat</label>
                                     <textarea name="description" required rows="3" placeholder="Ceritakan sedikit tentang kegiatan ini..." class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm text-slate-700 placeholder:font-normal p-4 font-medium"></textarea>
-                                    @error('description') <span class="text-red-500 text-xs mt-1 block font-bold ml-1">{{ $message }}</span> @enderror
+                                    @error('description') <span class="text-rose-500 text-xs mt-1 block font-bold ml-1">{{ $message }}</span> @enderror
                                 </div>
 
                                 {{-- Upload Foto (Dengan Preview) --}}
@@ -137,7 +153,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    @error('photo') <span class="text-red-500 text-xs mt-1 block font-bold ml-1">{{ $message }}</span> @enderror
+                                    @error('photo') <span class="text-rose-500 text-xs mt-1 block font-bold ml-1">{{ $message }}</span> @enderror
                                 </div>
 
                                 {{-- Link Video --}}
@@ -204,11 +220,11 @@
                                                 </div>
                                             @endif
 
-                                            <!-- Tombol Hapus (Muncul saat Hover) -->
+                                            <!-- Tombol Hapus (SweetAlert) -->
                                             <div class="absolute top-4 right-4 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 transform translate-x-2 group-hover:translate-x-0">
-                                                <form action="{{ route('school-activities.destroy', $activity->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus kegiatan ini?');">
+                                                <form action="{{ route('school-activities.destroy', $activity->id) }}" method="POST" class="delete-form">
                                                     @csrf @method('DELETE')
-                                                    <button class="bg-white/90 backdrop-blur text-rose-500 p-2.5 rounded-xl shadow-lg hover:bg-rose-500 hover:text-white transition-all" title="Hapus Kegiatan">
+                                                    <button type="button" class="btn-delete bg-white/90 backdrop-blur text-rose-500 p-2.5 rounded-xl shadow-lg hover:bg-rose-500 hover:text-white transition-all" title="Hapus Kegiatan">
                                                         <i class="ph-bold ph-trash text-lg"></i>
                                                     </button>
                                                 </form>
@@ -257,4 +273,36 @@
 
         </div>
     </div>
+
+    {{-- Script untuk SweetAlert Delete --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const form = this.closest('.delete-form');
+                    Swal.fire({
+                        title: 'Hapus Kegiatan?',
+                        text: "Foto dan data kegiatan ini akan dihapus permanen.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e11d48', // Rose-600
+                        cancelButtonColor: '#64748b', // Slate-500
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                        borderRadius: '1.5rem',
+                        customClass: {
+                            popup: 'rounded-[2rem]',
+                            confirmButton: 'rounded-xl px-6 py-2.5 font-bold',
+                            cancelButton: 'rounded-xl px-6 py-2.5 font-bold'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 </x-app-layout>
