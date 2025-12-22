@@ -18,7 +18,7 @@
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div class="text-center md:text-left">
                         <h2 class="text-3xl font-extrabold tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3">
-                            <span class="text-4xl">📊</span> Gradebook Kelas
+                            <span class="text-4xl">📊</span> Rekap Nilai
                         </h2>
                         <p class="text-blue-300 text-sm font-medium max-w-lg leading-relaxed">
                             Pantau perkembangan nilai tugas, kuis, dan ulangan harian siswa dalam satu tampilan matriks terpadu.

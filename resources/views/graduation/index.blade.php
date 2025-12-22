@@ -258,3 +258,5 @@
         }
     }, 1000);
 </script>
+@endif
+@endsection
