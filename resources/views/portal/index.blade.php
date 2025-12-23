@@ -25,53 +25,58 @@
     }
 </style>
 
-<div class="w-full max-w-6xl mx-auto min-h-[85vh] flex flex-col justify-center" x-data="{ mode: 'portal', isLoading: false }">
+<div class="w-full max-w-6xl mx-auto min-h-[85vh] flex flex-col justify-center px-4" x-data="{ mode: 'portal', isLoading: false }">
 
     <!-- 1. HERO SECTION -->
-    <div class="bg-white rounded-[2.5rem] shadow-2xl overflow-hidden mb-10 border border-gray-100 relative min-h-[600px] flex items-center justify-center text-center group transition-all duration-500 hover:shadow-blue-200/50">
+    <div class="bg-slate-900 rounded-[2.5rem] shadow-2xl shadow-blue-900/20 overflow-hidden mb-10 border border-white/10 relative min-h-[600px] flex items-center justify-center text-center group transition-all duration-500">
         
-        <!-- Background Decoration -->
+        <!-- Background Decoration (Consistent with Login/Welcome) -->
         <div class="absolute inset-0 bg-slate-900 z-0">
-            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-30 mix-blend-overlay group-hover:scale-105 transition-transform duration-[3s]"></div>
-            <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950/80 to-slate-900"></div>
+            <!-- Background Image -->
+            <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay group-hover:scale-105 transition-transform duration-[3s]"></div>
+            
+            <!-- Gradient Overlay -->
+            <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950/90 to-slate-900"></div>
+            
             <!-- Pattern Overlay -->
             <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 30px 30px;"></div>
             
             <!-- Animated Blobs -->
-            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/40 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob"></div>
-            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500/40 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob animation-delay-2000"></div>
-            <div class="absolute bottom-10 left-10 w-72 h-72 bg-purple-500/30 rounded-full mix-blend-screen filter blur-[80px] opacity-30 animate-blob animation-delay-4000"></div>
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-blob"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-indigo-500 rounded-full mix-blend-screen filter blur-[100px] opacity-20 animate-blob animation-delay-2000"></div>
+            <div class="absolute bottom-10 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-screen filter blur-[80px] opacity-20 animate-blob animation-delay-4000"></div>
         </div>
 
         <!-- Konten Utama -->
         <div class="relative z-10 w-full max-w-3xl px-6 py-12 flex flex-col items-center">
             
-            <!-- Logo Sekolah -->
-            <div class="mb-6 w-20 h-20 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 shadow-lg" data-aos="fade-down">
-                <img src="{{ asset('images/logo.png') }}" class="w-15 h-12 object-contain" alt="Logo">
+            <!-- Logo Sekolah (Updated Style) -->
+            <div class="mb-8 w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30 border border-white/20" data-aos="fade-down">
+                <img src="{{ asset('images/logo.png') }}" class="w-12 h-12 object-contain" alt="Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                <i class="ph-bold ph-buildings text-3xl hidden"></i>
             </div>
 
             <!-- Judul & Deskripsi -->
             <div class="mb-10" data-aos="fade-down" data-aos-delay="100">
                 <!-- Label Badge -->
                 <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border backdrop-blur-md text-xs font-bold uppercase tracking-widest mb-6 shadow-lg transition-all duration-300"
-                     :class="mode === 'portal' ? 'bg-blue-500/20 border-blue-400/30 text-blue-100 ring-2 ring-blue-500/20' : 'bg-rose-500/20 border-rose-400/30 text-rose-100 ring-2 ring-rose-500/20'">
+                     :class="mode === 'portal' ? 'bg-blue-500/20 border-blue-400/30 text-blue-200 ring-1 ring-blue-500/30' : 'bg-rose-500/20 border-rose-400/30 text-rose-200 ring-1 ring-rose-500/30'">
                     <i class="ph-fill" :class="mode === 'portal' ? 'ph-student' : 'ph-lock-key'"></i>
                     <span x-text="mode === 'portal' ? 'Portal Data Siswa' : 'Area Siswa (Login)'"></span>
                 </div>
 
                 <!-- Main Title with Dynamic Text -->
-                <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight leading-tight mb-4 drop-shadow-lg transition-all duration-300">
+                <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight leading-tight mb-4 drop-shadow-xl">
                     <template x-if="mode === 'portal'">
-                        <span>Cek Progres <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-cyan-200">Akademikmu Disini</span></span>
+                        <span>Cek Progres <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-300">Akademikmu Disini</span></span>
                     </template>
                     <template x-if="mode === 'cbt'">
-                        <span>Masuk Kelas <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-200 to-orange-200">Digital & Ujian</span></span>
+                        <span>Masuk Kelas <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-300 to-orange-300">Digital & Ujian</span></span>
                     </template>
                 </h1>
                 
                 <!-- Subtitle -->
-                <p class="text-lg text-blue-100/80 font-medium leading-relaxed max-w-xl mx-auto min-h-[3.5rem] transition-all duration-300">
+                <p class="text-lg text-slate-300 font-medium leading-relaxed max-w-xl mx-auto min-h-[3.5rem] transition-all duration-300">
                     <span x-show="mode === 'portal'" x-transition.opacity>
                         Akses data kehadiran, nilai rapor, poin pelanggaran, dan riwayat perpustakaan secara realtime tanpa login.
                     </span>
@@ -83,7 +88,7 @@
 
             <!-- TAB SWITCHER & FORM CARD -->
             <div class="glass-effect border border-white/40 p-2.5 rounded-[2rem] shadow-2xl relative w-full max-w-xl mx-auto transition-all duration-500 transform hover:scale-[1.01]" 
-                 :class="mode === 'portal' ? 'shadow-blue-900/30' : 'shadow-rose-900/30'"
+                 :class="mode === 'portal' ? 'shadow-blue-900/50' : 'shadow-rose-900/50'"
                  data-aos="fade-up" data-aos-delay="200">
                 
                 <!-- Tab Buttons -->
@@ -121,7 +126,7 @@
                                 <svg x-show="isLoading" x-cloak class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                             </button>
                         </div>
-                        <p class="text-xs text-slate-400 mt-3 px-4 text-center">Fitur ini untuk orang tua/wali mengecek data tanpa login.</p>
+                        <p class="text-xs text-slate-400 mt-3 px-4 text-center font-medium">Fitur ini untuk orang tua/wali mengecek data tanpa login.</p>
                     </form>
 
                     <!-- MODE 2: Form Login Siswa (LMS & CBT) -->
@@ -142,7 +147,7 @@
                                 <i class="ph-bold ph-sign-in group-hover/btn:translate-x-1 transition-transform"></i>
                             </button>
                         </div>
-                        <p class="text-xs text-rose-400/80 mt-3 px-4 text-center">
+                        <p class="text-xs text-rose-400/80 mt-3 px-4 text-center font-medium">
                             Gunakan NISN Anda untuk login ke LMS dan Ujian.
                         </p>
                     </form>
@@ -160,8 +165,8 @@
 
             <!-- [TOMBOL PINTAS KELULUSAN] -->
             <div class="mt-8 text-center" x-show="mode === 'portal'" x-transition>
-                <a href="{{ route('graduation.index') }}" class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-purple-900/40 border border-purple-500/30 text-purple-200 text-sm font-bold hover:bg-purple-900/60 hover:text-white transition-all backdrop-blur-sm group">
-                    <i class="ph-fill ph-sparkle text-purple-400 group-hover:animate-pulse"></i>
+                <a href="{{ route('graduation.index') }}" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-slate-800/50 border border-slate-700 text-blue-200 text-sm font-bold hover:bg-blue-600 hover:text-white hover:border-blue-500 transition-all backdrop-blur-sm group shadow-lg">
+                    <i class="ph-fill ph-sparkle text-yellow-400 group-hover:animate-pulse"></i>
                     <span>Cek Pengumuman Kelulusan Disini</span>
                     <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                 </a>
@@ -169,60 +174,60 @@
         </div>
         
         <!-- Bottom Decoration -->
-        <div class="absolute bottom-0 w-full text-center pb-6 text-white/30 text-xs font-medium z-10">
-            &copy; {{ date('Y') }} Sistem Informasi Sekolah. All rights reserved.
+        <div class="absolute bottom-0 w-full text-center pb-6 text-slate-500/50 text-xs font-medium z-10 pointer-events-none">
+            &copy; {{ date('Y') }} Sistem Informasi Sekolah.
         </div>
     </div>
 
     <!-- 2. FITUR GRID (Icon di bawah) -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-2 mb-12">
         <!-- Kartu 1: LMS -->
-        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-default" data-aos="fade-up" data-aos-delay="200">
-            <div class="absolute -top-2 -right-2 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110 rotate-12">
-                <i class="ph-fill ph-chalkboard-teacher text-9xl text-green-500"></i>
+        <a href="{{ route('student.login') }}" class="block bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl hover:shadow-green-900/5 hover:-translate-y-2 hover:border-green-200 transition-all duration-300" data-aos="fade-up" data-aos-delay="200">
+            <div class="absolute -top-2 -right-2 p-4 opacity-5 group-hover:opacity-10 transition transform group-hover:scale-110 rotate-12">
+                <i class="ph-fill ph-chalkboard-teacher text-9xl text-green-600"></i>
             </div>
-            <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 mb-5 shadow-sm group-hover:scale-110 transition-transform ring-4 ring-green-50/50">
+            <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 mb-5 shadow-sm group-hover:scale-110 group-hover:bg-green-600 group-hover:text-white transition-all ring-4 ring-green-50/50">
                 <i class="ph-bold ph-chalkboard-teacher text-2xl"></i>
             </div>
             <h3 class="text-slate-800 font-bold text-lg mb-2 group-hover:text-green-600 transition-colors">E-Learning (LMS)</h3>
             <p class="text-slate-500 text-sm leading-relaxed font-medium">Akses materi pelajaran dan kerjakan tugas dari guru secara online.</p>
-        </div>
+        </a>
 
         <!-- Kartu 2: Ujian -->
-        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-default" data-aos="fade-up" data-aos-delay="300">
-            <div class="absolute -top-2 -right-2 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110 rotate-12">
-                <i class="ph-fill ph-desktop text-9xl text-rose-500"></i>
+        <a href="{{ route('student.login') }}" class="block bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl hover:shadow-rose-900/5 hover:-translate-y-2 hover:border-rose-200 transition-all duration-300" data-aos="fade-up" data-aos-delay="300">
+            <div class="absolute -top-2 -right-2 p-4 opacity-5 group-hover:opacity-10 transition transform group-hover:scale-110 rotate-12">
+                <i class="ph-fill ph-desktop text-9xl text-rose-600"></i>
             </div>
-            <div class="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 mb-5 shadow-sm group-hover:scale-110 transition-transform ring-4 ring-rose-50/50">
+            <div class="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 mb-5 shadow-sm group-hover:scale-110 group-hover:bg-rose-600 group-hover:text-white transition-all ring-4 ring-rose-50/50">
                 <i class="ph-bold ph-desktop text-2xl"></i>
             </div>
             <h3 class="text-slate-800 font-bold text-lg mb-2 group-hover:text-rose-600 transition-colors">Ujian CBT</h3>
             <p class="text-slate-500 text-sm leading-relaxed font-medium">Aplikasi Ujian Berbasis Komputer untuk PTS, PAS, dan Ujian Sekolah.</p>
-        </div>
+        </a>
 
         <!-- Kartu 3: Nilai -->
-        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-default" data-aos="fade-up" data-aos-delay="400">
-            <div class="absolute -top-2 -right-2 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110 rotate-12">
-                <i class="ph-fill ph-chart-bar text-9xl text-blue-500"></i>
+        <a href="{{ route('portal.index') }}" class="block bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl hover:shadow-blue-900/5 hover:-translate-y-2 hover:border-blue-200 transition-all duration-300" data-aos="fade-up" data-aos-delay="400">
+            <div class="absolute -top-2 -right-2 p-4 opacity-5 group-hover:opacity-10 transition transform group-hover:scale-110 rotate-12">
+                <i class="ph-fill ph-chart-bar text-9xl text-blue-600"></i>
             </div>
-            <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-5 shadow-sm group-hover:scale-110 transition-transform ring-4 ring-blue-50/50">
+            <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-5 shadow-sm group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all ring-4 ring-blue-50/50">
                 <i class="ph-bold ph-chart-bar text-2xl"></i>
             </div>
             <h3 class="text-slate-800 font-bold text-lg mb-2 group-hover:text-blue-600 transition-colors">Nilai & Rapor</h3>
             <p class="text-slate-500 text-sm leading-relaxed font-medium">Pantau perkembangan nilai tugas, ulangan harian, dan rapor semester.</p>
-        </div>
+        </a>
 
         <!-- Kartu 4: Literasi -->
-        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-default" data-aos="fade-up" data-aos-delay="500">
-            <div class="absolute -top-2 -right-2 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110 rotate-12">
-                <i class="ph-fill ph-books text-9xl text-purple-500"></i>
+        <a href="{{ route('library.kiosk.index') }}" class="block bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-xl hover:shadow-purple-900/5 hover:-translate-y-2 hover:border-purple-200 transition-all duration-300" data-aos="fade-up" data-aos-delay="500">
+            <div class="absolute -top-2 -right-2 p-4 opacity-5 group-hover:opacity-10 transition transform group-hover:scale-110 rotate-12">
+                <i class="ph-fill ph-books text-9xl text-purple-600"></i>
             </div>
-            <div class="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-5 shadow-sm group-hover:scale-110 transition-transform ring-4 ring-purple-50/50">
+            <div class="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-5 shadow-sm group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all ring-4 ring-purple-50/50">
                 <i class="ph-bold ph-books text-2xl"></i>
             </div>
             <h3 class="text-slate-800 font-bold text-lg mb-2 group-hover:text-purple-600 transition-colors">Literasi Sekolah</h3>
             <p class="text-slate-500 text-sm leading-relaxed font-medium">Riwayat kunjungan perpustakaan dan status peminjaman buku.</p>
-        </div>
+        </a>
     </div>
 </div>
 @endsection

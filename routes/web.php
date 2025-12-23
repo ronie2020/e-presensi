@@ -127,7 +127,7 @@ Route::middleware(['auth:student'])->group(function () {
     Route::prefix('student/exam')->name('student.exam.')->group(function () {
         Route::get('/', [StudentExamController::class, 'index'])->name('index');
         Route::middleware(['seb'])->group(function () {
-            Route::get('/{exam}/start', [StudentExamController::class, 'showStart'])->name('showStart');
+            Route::get('/{exam}/start', [StudentExamController::class, 'showStart'])->name('show');
             Route::post('/{exam}/start', [StudentExamController::class, 'start'])->name('start');
             Route::get('/{exam}/run', [StudentExamController::class, 'run'])->name('run');
             Route::post('/answer', [StudentExamController::class, 'saveAnswer'])->name('saveAnswer');
