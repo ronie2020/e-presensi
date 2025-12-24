@@ -778,7 +778,7 @@
                         <div class="relative flex-1 bg-slate-50 p-4 rounded-xl">
                             <i class="ph-fill ph-quotes text-blue-200 text-2xl absolute -top-2 -left-1"></i>
                             <p class="text-slate-600 text-sm italic leading-relaxed relative z-10 pl-2">
-                                "{{ Str::limit($guest->message, 100) }}"
+                                "{{ Str::limit($guest->message, 150) }}"
                             </p>
                         </div>
                         <div class="mt-3 text-[10px] text-slate-400 text-right font-medium">
@@ -1119,7 +1119,7 @@
                                     <span class="block text-[10px] text-slate-400 mt-0.5">{{ $item->purpose ?? '-' }}</span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-slate-600 italic">
-                                    "{{ Str::limit($item->message, 50) }}"
+                                    "{{ $item->message }}"
                                 </td>
                             </tr>
                             @empty
