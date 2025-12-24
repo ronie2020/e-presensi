@@ -44,6 +44,7 @@
         mobileMenuOpen: false,
         modalOpen: false, 
         guestBookModalOpen: false,
+        guestListModalOpen: false,
         activeAnnouncement: null,
         scrolled: false,
         showBackToTop: false,
@@ -754,7 +755,12 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12" data-aos="fade-up">
                 <h2 class="text-2xl font-bold text-slate-900">Kata Mereka</h2>
-                <p class="text-slate-500 mt-2">Pesan dan kesan dari pengunjung sekolah kami.</p>
+                <p class="text-slate-500 mt-2 mb-6">Pesan dan kesan dari pengunjung sekolah kami.</p>
+                
+                <!-- TOMBOL LIHAT SEMUA TAMU (BARU) -->
+                <button @click="guestListModalOpen = true" class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white border border-slate-200 text-slate-600 text-sm font-bold hover:border-blue-400 hover:text-blue-600 transition shadow-sm">
+                    <i class="ph-bold ph-list-dashes"></i> Lihat Semua Tamu
+                </button>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1022,7 +1028,7 @@
         </div>
     </div>
 
-    <!-- GUEST BOOK MODAL -->
+    <!-- GUEST BOOK FORM MODAL -->
     <div x-show="guestBookModalOpen" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div x-show="guestBookModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="guestBookModalOpen = false"></div>
         <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
@@ -1067,6 +1073,69 @@
                         <button type="submit" class="inline-flex justify-center rounded-xl bg-pink-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-pink-700 transition-colors shadow-pink-500/30">Kirim Data</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALL GUESTS LIST MODAL (NEW) -->
+    <div x-show="guestListModalOpen" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div x-show="guestListModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="guestListModalOpen = false"></div>
+        <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+            <div x-show="guestListModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 w-full max-w-4xl border border-slate-200 flex flex-col max-h-[90vh]">
+                <div class="bg-white px-6 py-4 border-b border-slate-100 flex justify-between items-center shrink-0">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-900">Daftar Kunjungan Tamu</h3>
+                        <p class="text-sm text-slate-500">Riwayat pengisian buku tamu sekolah.</p>
+                    </div>
+                    <button type="button" @click="guestListModalOpen = false" class="text-slate-400 hover:text-red-500 transition bg-slate-50 hover:bg-red-50 p-2 rounded-full"><i class="ph-bold ph-x text-xl"></i></button>
+                </div>
+                
+                <div class="p-0 overflow-y-auto flex-1">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 sticky top-0 z-10">
+                            <tr>
+                                <th class="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Waktu</th>
+                                <th class="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Nama Pengunjung</th>
+                                <th class="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Instansi</th>
+                                <th class="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Pesan</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            @forelse($allGuestbooks ?? $guestbooks as $item)
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500">
+                                    {{ $item->created_at->format('d M Y, H:i') }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
+                                            {{ substr($item->name, 0, 1) }}
+                                        </div>
+                                        <span class="text-sm font-bold text-slate-700">{{ $item->name }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                                    {{ $item->institution }}
+                                    <span class="block text-[10px] text-slate-400 mt-0.5">{{ $item->purpose ?? '-' }}</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-slate-600 italic">
+                                    "{{ Str::limit($item->message, 50) }}"
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="4" class="px-6 py-12 text-center text-slate-400">
+                                    Belum ada data buku tamu.
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end shrink-0">
+                    <button type="button" class="px-5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-700 text-sm font-bold hover:bg-slate-50 transition shadow-sm" @click="guestListModalOpen = false">Tutup</button>
+                </div>
             </div>
         </div>
     </div>

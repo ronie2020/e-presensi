@@ -29,38 +29,33 @@ class LandingPageController extends Controller
         $today = Carbon::today();
         
         // --- DEFINISI STATUS (Case Insensitive handling) ---
-        // Kita gunakan array map untuk mencakup variasi penulisan
         $statusHadir     = ['Hadir', 'hadir', 'Present', 'present', 'Tepat Waktu', 'tepat waktu'];
         $statusTerlambat = ['Terlambat', 'terlambat', 'Late', 'late', 'Telat'];
         $statusSakit     = ['Sakit', 'sakit', 'Sick'];
         $statusIzin      = ['Izin', 'izin', 'Permission'];
         $statusAlpa      = ['Alpa', 'alpa', 'Alpha', 'Absent'];
 
-        // --- 1. STATISTIK HARIAN (FIX: FILTER HANYA ABSEN SEKOLAH) ---
-        
-        // Query Dasar: Hari ini & Tipe Sekolah (Harian/Masuk/Pulang)
+        // --- 1. STATISTIK HARIAN ---
         $dailyQuery = AttendanceSiswa::whereDate('attendance_date', $today)
-            ->whereIn('type', ['Harian', 'Masuk', 'Pulang']); // <--- FILTER PENTING INI DITAMBAHKAN
+            ->whereIn('type', ['Harian', 'Masuk', 'Pulang']);
 
-        // Clone query untuk setiap kategori agar efisien
         $hadirTepat = (clone $dailyQuery)->whereIn('status', $statusHadir)->distinct('student_id')->count('student_id');
         $terlambat  = (clone $dailyQuery)->whereIn('status', $statusTerlambat)->distinct('student_id')->count('student_id');
         $tidakHadir = (clone $dailyQuery)->whereIn('status', array_merge($statusSakit, $statusIzin, $statusAlpa))->distinct('student_id')->count('student_id');
 
         $stats = [
-            'hadir'       => $hadirTepat + $terlambat, // Total Fisik di Sekolah
+            'hadir'       => $hadirTepat + $terlambat,
             'tepat_waktu' => $hadirTepat,
             'terlambat'   => $terlambat,
             'tidak_hadir' => $tidakHadir
         ];
 
-        // --- 2. CHART KEHADIRAN MINGGUAN (FIX: FILTER HANYA ABSEN SEKOLAH) ---
+        // --- 2. CHART KEHADIRAN MINGGUAN ---
         $startDate = Carbon::today()->subDays(6);
         $endDate = Carbon::today();
         
-        // Ambil data mingguan SEKALIGUS (Eager Loading) dengan filter Tipe Sekolah
         $weeklyData = AttendanceSiswa::whereBetween('attendance_date', [$startDate, $endDate])
-            ->whereIn('type', ['Harian', 'Masuk', 'Pulang']) // <--- FILTER PENTING DI SINI JUGA
+            ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
             ->get();
 
         $chartLabels = [];
@@ -73,17 +68,13 @@ class LandingPageController extends Controller
             $dateStr = $period->toDateString();
             $chartLabels[] = $period->format('d/m'); 
 
-            // Filter collection di memori (lebih cepat daripada query berulang di loop)
-            // Gunakan strtolower untuk perbandingan case-insensitive yang aman
             $dailyAtt = $weeklyData->filter(function ($att) use ($dateStr) {
-                // Pastikan format tanggal cocok
                 $attDate = $att->attendance_date instanceof \Carbon\Carbon 
                             ? $att->attendance_date->toDateString() 
                             : substr($att->attendance_date, 0, 10);
                 return $attDate === $dateStr;
             });
 
-            // Hitung menggunakan helper function sederhana untuk cek status case-insensitive
             $countStatus = function($collection, $statuses) {
                 return $collection->filter(function ($item) use ($statuses) {
                     return in_array($item->status, $statuses) || in_array(ucfirst($item->status), $statuses);
@@ -144,24 +135,31 @@ class LandingPageController extends Controller
         $activities = SchoolActivity::latest()->take(3)->get();
         $agendas = Agenda::where('event_date', '>=', now()->subDays(1))->orderBy('event_date', 'asc')->limit(4)->get();
         $teachers = User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'])->latest()->take(8)->get();
+        
+        // --- UPDATE DATA BUKU TAMU ---
+        // 1. Ambil 3 data terbaru untuk ditampilkan di card depan
         $guestbooks = GuestBook::latest()->take(3)->get();
+        
+        // 2. [BARU] Ambil 50 data terakhir untuk ditampilkan di Modal (Pop-up)
+        // Kita limit 50 agar loading halaman tidak berat.
+        $allGuestbooks = GuestBook::latest()->take(50)->get();
+
         $extracurriculars = Extracurricular::withCount('members')->with(['attendances' => function($query) { $query->latest('date')->limit(1); }])->get();
 
+        // Jangan lupa sertakan 'allGuestbooks' di compact
         return view('welcome', compact(
             'stats', 'barChartData', 'libraryStats', 'libraryChartData', 
             'announcements', 'achievements', 'activities', 'teachers',
-            'guestbooks', 'extracurriculars', 'agendas', 'schoolStats'
+            'guestbooks', 'allGuestbooks', 'extracurriculars', 'agendas', 'schoolStats'
         ));
     }
 
-    // --- [BARU] HALAMAN GALERI KEGIATAN ---
     public function activities()
     {
         $activities = SchoolActivity::latest()->paginate(9);
         return view('activities', compact('activities'));
     }
 
-    // --- [BARU] HALAMAN ARSIP PRESTASI ---
     public function achievements(Request $request)
     {
         $query = Achievement::with('student')->orderBy('date', 'desc');
