@@ -230,7 +230,31 @@
                                                             <i class="ph-bold ph-pencil-simple text-lg"></i>
                                                         </a>
 
-                                                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengguna {{ $user->name }}?');">
+                                                        {{-- MODIFIED: Menggunakan SweetAlert2 untuk konfirmasi hapus --}}
+                                                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline" 
+                                                              onsubmit="event.preventDefault(); 
+                                                                        const form = this;
+                                                                        Swal.fire({
+                                                                            title: 'Hapus Pengguna?',
+                                                                            text: 'Apakah Anda yakin ingin menghapus pengguna {{ $user->name }}? Data yang dihapus tidak dapat dikembalikan.',
+                                                                            icon: 'warning',
+                                                                            showCancelButton: true,
+                                                                            confirmButtonColor: '#e11d48',
+                                                                            cancelButtonColor: '#94a3b8',
+                                                                            confirmButtonText: 'Ya, Hapus!',
+                                                                            cancelButtonText: 'Batal',
+                                                                            reverseButtons: true,
+                                                                            buttonsStyling: false,
+                                                                            customClass: {
+                                                                                popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
+                                                                                confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
+                                                                                cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                                                                            }
+                                                                        }).then((result) => {
+                                                                            if (result.isConfirmed) {
+                                                                                form.submit();
+                                                                            }
+                                                                        });">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm" title="Hapus User">
@@ -272,4 +296,7 @@
 
         </div>
     </div>
+
+    {{-- SweetAlert2 Library --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </x-app-layout>

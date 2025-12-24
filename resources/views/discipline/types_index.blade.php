@@ -124,7 +124,29 @@
                                             <span class="inline-block px-2.5 py-1 rounded-lg bg-rose-100 text-rose-700 text-xs font-black">-{{ $item->point_value }}</span>
                                         </td>
                                         <td class="px-6 py-4 text-right">
-                                            <form action="{{ route('discipline-types.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus jenis pelanggaran ini?');">
+                                            {{-- MODIFIED: Menggunakan SweetAlert2 --}}
+                                            <form action="{{ route('discipline-types.destroy', $item->id) }}" method="POST" 
+                                                  onsubmit="event.preventDefault(); 
+                                                            const form = this;
+                                                            Swal.fire({
+                                                                title: 'Hapus Item?',
+                                                                text: 'Yakin ingin menghapus jenis pelanggaran ini?',
+                                                                icon: 'warning',
+                                                                showCancelButton: true,
+                                                                confirmButtonColor: '#e11d48',
+                                                                cancelButtonColor: '#94a3b8',
+                                                                confirmButtonText: 'Ya, Hapus!',
+                                                                cancelButtonText: 'Batal',
+                                                                reverseButtons: true,
+                                                                customClass: {
+                                                                    popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
+                                                                    confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
+                                                                    cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                                                                },
+                                                                buttonsStyling: false
+                                                            }).then((result) => {
+                                                                if (result.isConfirmed) form.submit();
+                                                            });">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="text-slate-300 hover:text-rose-500 transition-colors p-2 rounded-lg hover:bg-rose-50">
                                                     <i class="ph-bold ph-trash text-lg"></i>
@@ -165,7 +187,29 @@
                                             <span class="inline-block px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-black">+{{ $item->point_value }}</span>
                                         </td>
                                         <td class="px-6 py-4 text-right">
-                                            <form action="{{ route('discipline-types.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus jenis kebaikan ini?');">
+                                            {{-- MODIFIED: Menggunakan SweetAlert2 --}}
+                                            <form action="{{ route('discipline-types.destroy', $item->id) }}" method="POST" 
+                                                  onsubmit="event.preventDefault(); 
+                                                            const form = this;
+                                                            Swal.fire({
+                                                                title: 'Hapus Item?',
+                                                                text: 'Yakin ingin menghapus jenis kebaikan ini?',
+                                                                icon: 'warning',
+                                                                showCancelButton: true,
+                                                                confirmButtonColor: '#e11d48',
+                                                                cancelButtonColor: '#94a3b8',
+                                                                confirmButtonText: 'Ya, Hapus!',
+                                                                cancelButtonText: 'Batal',
+                                                                reverseButtons: true,
+                                                                customClass: {
+                                                                    popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
+                                                                    confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
+                                                                    cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                                                                },
+                                                                buttonsStyling: false
+                                                            }).then((result) => {
+                                                                if (result.isConfirmed) form.submit();
+                                                            });">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="text-slate-300 hover:text-emerald-500 transition-colors p-2 rounded-lg hover:bg-emerald-50">
                                                     <i class="ph-bold ph-trash text-lg"></i>
@@ -184,4 +228,7 @@
             </div>
         </div>
     </div>
+
+    {{-- SweetAlert2 Library --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </x-app-layout>

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SchoolClass;
-use App\Models\User; // 1. TAMBAHKAN IMPORT USER
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -14,17 +14,16 @@ class SchoolClassController extends Controller
      */
     public function index()
     {
-        // 2. UBAH BAGIAN INI
-        $classes = SchoolClass::with('homeroomTeacher') // Ambil juga relasi Wali Kelas
+        $classes = SchoolClass::with('homeroomTeacher') // Ambil relasi Wali Kelas
             ->orderBy('name', 'asc')
             ->get();
         
-        // 3. Ambil semua user yang memiliki peran 'Wali Kelas'
+        // Ambil guru untuk dropdown tambah kelas
         $teachers = User::where('role', 'Wali Kelas')->orderBy('name', 'asc')->get();
 
         return view('classes.index', [
             'classes' => $classes,
-            'teachers' => $teachers // 4. Kirim data guru ke view
+            'teachers' => $teachers
         ]);
     }
 
@@ -41,7 +40,6 @@ class SchoolClassController extends Controller
      */
     public function store(Request $request)
     {
-        // 5. UBAH BAGIAN INI
         $request->validate([
             'name' => [
                 'required',
@@ -49,12 +47,12 @@ class SchoolClassController extends Controller
                 'max:255',
                 Rule::unique('classes', 'name') // Pastikan nama kelas unik
             ],
-            'homeroom_teacher_id' => 'nullable|integer|exists:users,id' // Validasi Wali Kelas
+            'homeroom_teacher_id' => 'nullable|integer|exists:users,id'
         ]);
 
         SchoolClass::create([
             'name' => $request->name,
-            'homeroom_teacher_id' => $request->homeroom_teacher_id // Simpan ID Wali Kelas
+            'homeroom_teacher_id' => $request->homeroom_teacher_id
         ]);
 
         return redirect()->route('classes.index')->with('success', 'Kelas baru berhasil ditambahkan.');
@@ -63,7 +61,7 @@ class SchoolClassController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(SchoolClass $schoolClass)
+    public function show(SchoolClass $class)
     {
         //
     }
@@ -71,54 +69,62 @@ class SchoolClassController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(SchoolClass $class) // Laravel akan otomatis mencari kelas berdasarkan ID
+    public function edit($id)
     {
-        // Kita juga butuh daftar guru untuk dropdown, sama seperti di 'index'
+        // FIX: Gunakan findOrFail agar jika ID salah langsung 404
+        $class = SchoolClass::findOrFail($id);
+        
         $teachers = User::where('role', 'Wali Kelas')->orderBy('name', 'asc')->get();
 
         return view('classes.edit', [
-            'class' => $class, // Kirim data kelas yang mau diedit
-            'teachers' => $teachers // Kirim data guru untuk dropdown
+            'class' => $class,
+            'teachers' => $teachers
         ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-     public function update(Request $request, SchoolClass $class)
+     public function update(Request $request, $id)
     {
-        // Validasi data (mirip 'store', tapi 'unique' harus mengabaikan ID kelas ini sendiri)
+        // FIX: Cari manual berdasarkan ID
+        $class = SchoolClass::findOrFail($id);
+
         $request->validate([
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('classes', 'name')->ignore($class->id) // Abaikan ID saat ini
+                Rule::unique('classes', 'name')->ignore($class->id)
             ],
             'homeroom_teacher_id' => 'nullable|integer|exists:users,id'
         ]);
 
-        // Update data di database
         $class->update([
             'name' => $request->name,
             'homeroom_teacher_id' => $request->homeroom_teacher_id
         ]);
 
-        // Redirect kembali ke halaman index
         return redirect()->route('classes.index')->with('success', 'Data kelas berhasil diperbarui.');
     }
 
     /**
      * Menghapus data kelas.
      */
-    public function destroy(SchoolClass $schoolClass)
+    public function destroy($id)
     {
+        // PERBAIKAN UTAMA DI SINI
+        // Menggunakan $id manual lebih aman daripada Route Model Binding yang namanya sering mismatch
         try {
-            $schoolClass->delete();
+            $class = SchoolClass::findOrFail($id);
+            $class->delete();
+            
             return redirect()->route('classes.index')->with('success', 'Kelas berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
-            // Tangkap error jika ada foreign key constraint (misal: masih ada siswa di kelas tsb)
-            return redirect()->route('classes.index')->with('error', 'Gagal menghapus kelas. Pastikan tidak ada siswa yang terdaftar di kelas ini.');
+            // Error jika kelas masih memiliki siswa (Foreign Key Constraint)
+            return redirect()->route('classes.index')->with('error', 'Gagal menghapus kelas. Pastikan tidak ada siswa di kelas ini.');
+        } catch (\Exception $e) {
+            return redirect()->route('classes.index')->with('error', 'Terjadi kesalahan saat menghapus data.');
         }
     }
 }

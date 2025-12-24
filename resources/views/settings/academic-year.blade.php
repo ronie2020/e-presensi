@@ -158,9 +158,16 @@
                                                                 <i class="ph-bold ph-power group-hover/btn:text-blue-700"></i> Aktifkan
                                                             </button>
                                                         </form>
-                                                        <form action="{{ route('settings.academic.destroy', $year->id) }}" method="POST" onsubmit="return confirm('Hapus tahun ajaran ini?');">
+                                                        
+                                                        {{-- MODIFIED: SweetAlert2 untuk Hapus --}}
+                                                        <form action="{{ route('settings.academic.destroy', $year->id) }}" 
+                                                              method="POST" 
+                                                              id="delete-form-{{ $year->id }}">
                                                             @csrf @method('DELETE')
-                                                            <button type="submit" class="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 rounded-xl transition-all shadow-sm" title="Hapus">
+                                                            
+                                                            <button type="button" 
+                                                                    onclick="confirmDelete('{{ $year->id }}', '{{ $year->name }} (Sem. {{ $year->semester }})')"
+                                                                    class="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 rounded-xl transition-all shadow-sm" title="Hapus">
                                                                 <i class="ph-bold ph-trash text-lg"></i>
                                                             </button>
                                                         </form>
@@ -182,4 +189,34 @@
 
         </div>
     </div>
+
+    {{-- SweetAlert2 Library --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function confirmDelete(id, name) {
+            Swal.fire({
+                title: 'Hapus Periode?',
+                text: `Yakin ingin menghapus Tahun Ajaran ${name}? Data kelas dan nilai terkait mungkin akan terpengaruh.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
+                    confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
+                    cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById('delete-form-' + id);
+                    if (form) form.submit();
+                }
+            });
+        }
+    </script>
 </x-app-layout>

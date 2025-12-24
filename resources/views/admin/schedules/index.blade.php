@@ -8,15 +8,11 @@
         {{-- HERO SECTION --}}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
             <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
-                
-                {{-- Background Decorations --}}
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 <div class="absolute -top-24 -right-24 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-purple-500/30 transition-all duration-700"></div>
                 <div class="absolute bottom-0 right-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                    
-                    {{-- Text Content --}}
                     <div class="max-w-2xl">
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm">
                             <i class="ph-fill ph-calendar-plus"></i> Akademik & KBM
@@ -29,7 +25,6 @@
                         </p>
                     </div>
                     
-                    {{-- Tab Switcher Modern (Integrated in Hero) --}}
                     <div class="bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/10 flex flex-col sm:flex-row gap-1">
                         <button @click="activeTab = 'mapel'" 
                             :class="activeTab === 'mapel' ? 'bg-white text-blue-900 shadow-lg' : 'text-blue-100 hover:bg-white/10'"
@@ -42,7 +37,6 @@
                             <i class="ph-bold ph-clock"></i> Jam Sekolah
                         </button>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -77,16 +71,13 @@
                 </div>
             @endif
 
-            {{-- ========================================================= --}}
-            {{-- TAB 1: INPUT JADWAL PELAJARAN (MAPEL)                     --}}
-            {{-- ========================================================= --}}
+            {{-- TAB 1: JADWAL MAPEL --}}
             <div x-show="activeTab === 'mapel'" x-transition:enter="transition ease-out duration-300 transform opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                     
-                    {{-- KOLOM KIRI: FORM INPUT (Style Akses Cepat) --}}
+                    {{-- Form Input --}}
                     <div class="lg:col-span-1">
                         <div class="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden sticky top-24">
-                            {{-- Aksen Header --}}
                             <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
                             
                             <div class="flex items-center gap-3 mb-6">
@@ -99,7 +90,6 @@
                             <form action="{{ route('schedules.store') }}" method="POST" class="space-y-4">
                                 @csrf
                                 
-                                {{-- Pilih Kelas --}}
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Kelas</label>
                                     <div class="relative">
@@ -113,7 +103,6 @@
                                     </div>
                                 </div>
 
-                                {{-- Pilih Mapel --}}
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Mata Pelajaran</label>
                                     <div class="relative">
@@ -127,7 +116,6 @@
                                     </div>
                                 </div>
 
-                                {{-- Pilih Guru --}}
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Guru Pengampu</label>
                                     <div class="relative">
@@ -141,7 +129,6 @@
                                     </div>
                                 </div>
 
-                                {{-- Pilih Hari --}}
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Hari</label>
                                     <div class="grid grid-cols-3 gap-2">
@@ -156,7 +143,6 @@
                                     </div>
                                 </div>
 
-                                {{-- Jam --}}
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
                                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Mulai</label>
@@ -176,10 +162,9 @@
                         </div>
                     </div>
 
-                    {{-- KOLOM KANAN: TABEL JADWAL --}}
+                    {{-- Tabel Jadwal --}}
                     <div class="lg:col-span-2">
                         <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col relative min-h-[600px]">
-                            {{-- Aksen Header --}}
                             <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
 
                             <div class="p-8 border-b border-slate-50 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
@@ -193,7 +178,6 @@
                                     </div>
                                 </div>
                                 
-                                {{-- Filter Kelas --}}
                                 <form method="GET" class="w-full sm:w-auto">
                                     <div class="relative">
                                         <select name="class_id" onchange="this.form.submit()" class="w-full sm:w-48 pl-4 pr-10 py-2.5 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm font-bold text-slate-700 transition-all shadow-sm appearance-none cursor-pointer">
@@ -247,12 +231,21 @@
                                                 </div>
                                             </td>
                                             <td class="px-6 py-5 whitespace-nowrap text-right">
-                                                <form action="{{ route('schedules.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus jadwal ini?')">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-300 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm">
-                                                        <i class="ph-bold ph-trash"></i>
-                                                    </button>
-                                                </form>
+                                                {{-- FIX: Added shrink-0 and better alignment --}}
+                                                <div class="flex justify-end items-center">
+                                                    <form action="{{ route('schedules.destroy', $item->id) }}" 
+                                                          method="POST" 
+                                                          id="delete-schedule-{{ $item->id }}"
+                                                          class="shrink-0 block"> {{-- Added shrink-0 --}}
+                                                        @csrf @method('DELETE')
+                                                        
+                                                        <button type="button" 
+                                                                onclick="confirmDelete('delete-schedule-{{ $item->id }}', 'Hapus jadwal mapel {{ $item->subject->name }} di kelas {{ $item->schoolClass->name }}?')"
+                                                                class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-300 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm">
+                                                            <i class="ph-bold ph-trash text-lg leading-none"></i> {{-- Added leading-none --}}
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </td>
                                         </tr>
                                         @empty
@@ -276,13 +269,11 @@
                 </div>
             </div>
 
-            {{-- ========================================================= --}}
-            {{-- TAB 2: PENGATURAN JAM SEKOLAH (BEL)                       --}}
-            {{-- ========================================================= --}}
+            {{-- TAB 2: JAM SEKOLAH --}}
             <div x-show="activeTab === 'jam'" x-cloak x-transition:enter="transition ease-out duration-300 transform opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                     
-                    {{-- KARTU 1: JAM REGULER --}}
+                    {{-- Jam Reguler --}}
                     <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
                         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-purple-500 to-fuchsia-600"></div>
                         
@@ -358,7 +349,7 @@
                         </form>
                     </div>
 
-                    {{-- KARTU 2: JADWAL KHUSUS --}}
+                    {{-- Jadwal Khusus --}}
                     <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative" x-data="{ isHoliday: false }">
                         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-500 to-rose-500"></div>
                         
@@ -384,7 +375,6 @@
                                     <input type="text" name="description" placeholder="Contoh: Rapat Guru" class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-orange-500 focus:ring-orange-500 font-bold text-slate-700 text-sm shadow-sm placeholder:font-normal">
                                 </div>
                                 
-                                {{-- Toggle Libur Modern --}}
                                 <div class="bg-rose-50 p-3 rounded-2xl border border-rose-100 flex items-center gap-4 cursor-pointer hover:bg-rose-100 transition-colors select-none" @click="isHoliday = !isHoliday">
                                     <div class="relative flex items-center ml-1">
                                         <input type="checkbox" name="is_holiday" value="1" class="peer sr-only" x-model="isHoliday">
@@ -395,7 +385,6 @@
                                     </div>
                                 </div>
 
-                                {{-- Jam Khusus --}}
                                 <div x-show="!isHoliday" x-transition class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
                                     <p class="text-[10px] font-black text-center text-slate-400 uppercase tracking-wide border-b border-slate-200 pb-2">Jam Operasional (Opsional)</p>
                                     <div class="grid grid-cols-2 gap-2">
@@ -412,22 +401,29 @@
                                 </button>
                             </form>
 
-                            {{-- List Mini --}}
                             <div>
                                 <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-3 ml-1">Terbaru Ditambahkan</h4>
                                 <div class="space-y-3 max-h-48 overflow-y-auto custom-scrollbar pr-2">
                                     @forelse($specialSchedules as $ss)
                                         <div class="flex items-center justify-between p-4 rounded-2xl border {{ $ss->is_holiday ? 'bg-rose-50 border-rose-100' : 'bg-blue-50 border-blue-100' }}">
-                                            <div>
+                                            <div class="overflow-hidden mr-3"> {{-- FIX: Added overflow-hidden to prevent text pushing --}}
                                                 <p class="text-xs font-black {{ $ss->is_holiday ? 'text-rose-700' : 'text-blue-700' }}">
                                                     {{ \Carbon\Carbon::parse($ss->date)->format('d M Y') }}
                                                 </p>
                                                 <p class="text-[10px] font-bold text-slate-500 truncate max-w-[150px]">{{ $ss->description }}</p>
                                             </div>
-                                            <form action="{{ route('schedules.special.destroy', $ss->id) }}" method="POST" onsubmit="return confirm('Hapus?')">
+                                            
+                                            {{-- FIX: Added shrink-0 and leading-none --}}
+                                            <form action="{{ route('schedules.special.destroy', $ss->id) }}" 
+                                                  method="POST"
+                                                  id="delete-special-{{ $ss->id }}"
+                                                  class="shrink-0 block"> {{-- Added shrink-0 --}}
                                                 @csrf @method('DELETE')
-                                                <button class="w-8 h-8 flex items-center justify-center rounded-xl bg-white/50 hover:bg-white text-slate-400 hover:text-rose-600 transition-all shadow-sm">
-                                                    <i class="ph-bold ph-trash"></i>
+                                                
+                                                <button type="button"
+                                                        onclick="confirmDelete('delete-special-{{ $ss->id }}', 'Hapus agenda {{ $ss->description }} pada tanggal {{ \Carbon\Carbon::parse($ss->date)->format('d M Y') }}?')"
+                                                        class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/50 hover:bg-white text-slate-400 hover:text-rose-600 transition-all shadow-sm">
+                                                    <i class="ph-bold ph-trash text-lg leading-none"></i> {{-- Added leading-none --}}
                                                 </button>
                                             </form>
                                         </div>
@@ -444,4 +440,40 @@
 
         </div>
     </div>
+
+    {{-- SweetAlert2 Library --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        // Fungsi Generic untuk menghapus data di halaman ini
+        function confirmDelete(formId, message) {
+            Swal.fire({
+                title: 'Hapus Data?',
+                text: message,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
+                    confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
+                    cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.getElementById(formId);
+                    if (form) {
+                        form.submit();
+                    } else {
+                        console.error('Form not found:', formId);
+                        Swal.fire('Error', 'Form tidak ditemukan. Silakan refresh halaman.', 'error');
+                    }
+                }
+            });
+        }
+    </script>
 </x-app-layout>

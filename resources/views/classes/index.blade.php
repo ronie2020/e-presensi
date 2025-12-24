@@ -205,10 +205,17 @@
                                                         <i class="ph-bold ph-pencil-simple text-lg"></i>
                                                     </a>
                                                     
-                                                    {{-- Tombol Hapus --}}
-                                                    <form action="{{ route('classes.destroy', $class->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus kelas {{ $class->name }}? Data siswa di dalamnya mungkin akan terpengaruh.');">
-                                                        @csrf @method('DELETE')
-                                                        <button type="submit" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-300 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm" title="Hapus Kelas">
+                                                    {{-- Tombol Hapus (Fix: Menggunakan type="button" dan onclick) --}}
+                                                    <form action="{{ route('classes.destroy', $class->id) }}" 
+                                                          method="POST" 
+                                                          id="delete-form-{{ $class->id }}">
+                                                        @csrf 
+                                                        @method('DELETE')
+                                                        
+                                                        <button type="button" 
+                                                                onclick="confirmDelete('{{ $class->id }}', '{{ $class->name }}')"
+                                                                class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-300 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm" 
+                                                                title="Hapus Kelas">
                                                             <i class="ph-bold ph-trash text-lg"></i>
                                                         </button>
                                                     </form>
@@ -246,4 +253,39 @@
             </div>
         </div>
     </div>
+
+    {{-- SweetAlert2 Library --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        function confirmDelete(id, name) {
+            Swal.fire({
+                title: 'Hapus Kelas?',
+                text: `Yakin ingin menghapus kelas ${name}? Data siswa di dalamnya mungkin akan terpengaruh.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
+                    confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
+                    cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Cari form berdasarkan ID unik dan submit
+                    const form = document.getElementById('delete-form-' + id);
+                    if (form) {
+                        form.submit();
+                    } else {
+                        console.error('Form not found for ID:', id);
+                    }
+                }
+            });
+        }
+    </script>
 </x-app-layout>

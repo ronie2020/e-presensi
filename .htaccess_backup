@@ -5,6 +5,10 @@
 
     RewriteEngine On
 
-    # Arahkan semua request ke folder public
+    # Redirect Trailing Slashes...
+    RewriteRule ^(.*)/$ /$1 [L,R=301]
+
+    # JIKA BUKAN FOLDER PUBLIC, ARAHKAN KE PUBLIC
+    RewriteCond %{REQUEST_URI} !^/public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
