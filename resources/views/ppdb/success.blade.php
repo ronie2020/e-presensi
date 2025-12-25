@@ -27,7 +27,7 @@
         }
 
         @media print {
-            body { background: white; color: black; }
+            body { background: white; color: black; display: block; overflow: visible; height: auto; }
             .bg-slate-900 { background: white !important; }
             .no-print { display: none !important; }
             .print-area { 
@@ -36,6 +36,9 @@
                 background: white !important;
                 backdrop-filter: none !important;
                 color: black !important;
+                margin: 0 auto;
+                width: 100%;
+                max-width: 100%;
             }
             .text-white { color: black !important; }
             .text-slate-300, .text-slate-400, .text-slate-500 { color: #333 !important; }
@@ -44,16 +47,17 @@
         }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-800 antialiased min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
 
-    <!-- BACKGROUND LAYERS (Sama dengan Theme Lain) -->
+<body class="bg-slate-900 text-slate-800 antialiased min-h-screen flex flex-col items-center justify-center p-4 py-10 relative overflow-x-hidden overflow-y-auto">
+
+    <!-- BACKGROUND LAYERS -->
     <div class="fixed inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay pointer-events-none"></div>
     <div class="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-900/95 to-blue-900/90 pointer-events-none"></div>
     <div class="fixed top-0 right-0 w-[500px] h-[500px] bg-blue-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob pointer-events-none"></div>
     <div class="fixed bottom-0 left-0 w-[500px] h-[500px] bg-indigo-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob animation-delay-2000 pointer-events-none"></div>
 
     <!-- Card Bukti -->
-    <div class="print-area w-full max-w-lg relative z-10">
+    <div class="print-area w-full max-w-lg relative z-10 my-auto">
         
         <div class="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-black/30 border border-white/20 overflow-hidden">
             <!-- Header Decoration -->
@@ -102,7 +106,7 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="flex gap-3 no-print">
+                <div class="flex flex-col sm:flex-row gap-3 no-print">
                     <a href="{{ url('/') }}" class="flex-1 py-3.5 bg-slate-100 text-slate-600 font-bold rounded-xl text-sm hover:bg-slate-200 hover:text-slate-800 transition text-center border border-slate-200">
                         Ke Beranda
                     </a>

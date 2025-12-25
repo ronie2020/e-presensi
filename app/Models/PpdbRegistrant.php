@@ -23,18 +23,34 @@ class PpdbRegistrant extends Model
         'religion',
         'school_origin',
         'npsn_school_origin',
+        
+        // DATA ORANG TUA
         'father_name',
         'mother_name',
         'parent_phone',
         'parent_job',
+        'parent_income', // <-- TADI HILANG (Tambahkan ini)
+        
+        // DATA JALUR & NILAI
         'track',
         'average_grade',
         'distance_in_meters',
+        
+        // DATA PRESTASI (TADI HILANG SEMUA - WAJIB DITAMBAHKAN)
+        'achievement_type',
+        'achievement_name',
+        'achievement_level',
+        'achievement_rank',
+        'file_achievement', // <-- INI YANG MENYEBABKAN SERTIFIKAT TIDAK TERSIMPAN
+        
+        // FILE DOKUMEN LAIN
         'file_photo',
         'file_kk',
         'file_akta',
         'file_grades',
         'file_kip',
+        
+        // STATUS
         'status',
         'admin_note',
     ];
