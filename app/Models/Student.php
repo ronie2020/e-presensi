@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne; // <-- TAMBAHKAN INI
 
 class Student extends Authenticatable
 {
@@ -137,6 +138,16 @@ class Student extends Authenticatable
     public function schoolClass(): BelongsTo
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
+    }
+
+    /**
+     * Relasi ke Data Kelulusan (Manajemen SKL & Nilai)
+     * INI YANG MENYEBABKAN ERROR SEBELUMNYA
+     */
+    public function graduation(): HasOne
+    {
+        // Pastikan Model Graduation ada di App\Models\Graduation
+        return $this->hasOne(Graduation::class, 'student_id');
     }
 
     /**
