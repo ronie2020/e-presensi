@@ -6,6 +6,7 @@ use App\Models\PpdbRegistrant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class PpdbController extends Controller
 {
@@ -22,9 +23,8 @@ class PpdbController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validasi Input agar data bersih
+        // Validasi form standar
         $validated = $request->validate([
-            // Data Diri
             'full_name' => 'required|string|max:255',
             'nisn' => 'required|numeric|digits:10|unique:ppdb_registrants,nisn',
             'nik' => 'nullable|numeric|digits:16',
@@ -32,23 +32,15 @@ class PpdbController extends Controller
             'birth_place' => 'required|string|max:100',
             'birth_date' => 'required|date',
             'address' => 'required|string',
-            
-            // Sekolah Asal
             'school_origin' => 'required|string|max:255',
             'npsn_school_origin' => 'nullable|numeric',
-            
-            // Orang Tua
             'father_name' => 'required|string|max:255',
             'mother_name' => 'required|string|max:255',
             'parent_phone' => 'required|numeric',
             'parent_job' => 'nullable|string',
-            
-            // Jalur & Nilai
             'track' => 'required|in:zonasi,prestasi,afirmasi,pindah_tugas',
             'average_grade' => 'required|numeric|between:0,100',
-            
-            // File Upload (Wajib Image/PDF & Maksimal 2MB per file)
-            'file_photo' => 'nullable|image|max:2048', // JPG/PNG
+            'file_photo' => 'nullable|image|max:2048',
             'file_kk' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'file_akta' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
             'file_grades' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
@@ -62,65 +54,91 @@ class PpdbController extends Controller
 
         DB::beginTransaction();
         try {
-            // 2. Handle File Upload ke folder storage
             $paths = [];
             $files = ['file_photo', 'file_kk', 'file_akta', 'file_grades', 'file_kip'];
             
             foreach ($files as $fileKey) {
                 if ($request->hasFile($fileKey)) {
-                    // Simpan di folder: storage/app/public/ppdb/2025
                     $paths[$fileKey] = $request->file($fileKey)->store('ppdb/' . date('Y'), 'public');
                 } else {
                     $paths[$fileKey] = null;
                 }
             }
 
-            // 3. Generate Nomor Pendaftaran Otomatis
-            // Format: REG-YYYY-XXXX (Contoh: REG-2025-0001)
             $year = date('Y');
             $latest = PpdbRegistrant::where('academic_year', $year)->latest()->first();
             $sequence = 1;
             
             if ($latest) {
-                // Ambil 4 digit terakhir nomor registrasi sebelumnya dan tambah 1
                 $lastNumber = intval(substr($latest->registration_number, -4));
                 $sequence = $lastNumber + 1;
             }
             
             $regNumber = 'REG-' . $year . '-' . str_pad($sequence, 4, '0', STR_PAD_LEFT);
 
-            // 4. Simpan Data ke Database
             $registrant = PpdbRegistrant::create([
                 'registration_number' => $regNumber,
                 'academic_year' => $year,
-                'status' => 'pending', // Default status menunggu verifikasi
-                ...$validated,         // Masukkan semua data input form
-                ...$paths,             // Timpa data file dengan path penyimpanan
+                'status' => 'pending', 
+                ...$validated,         
+                ...$paths,             
             ]);
 
             DB::commit();
 
-            // 5. Redirect ke Halaman Sukses dengan membawa kode pendaftaran
+            // Redirect Sukses
             return redirect()->route('ppdb.success', ['code' => $registrant->registration_number])
                              ->with('success', 'Pendaftaran berhasil dikirim! Silakan simpan bukti pendaftaran.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            // Jika error, kembalikan ke form input sebelumnya dengan pesan error
             return back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage())->withInput();
         }
     }
 
     /**
-     * Menampilkan halaman cek status/pengumuman PPDB.
+     * BARU: Menampilkan Halaman Sukses Pendaftaran
+     * Method ini yang sebelumnya hilang menyebabkan error 500
      */
-    public function index()
+    public function success($code)
     {
-        return view('ppdb.check');
+        // Cari data pendaftar berdasarkan nomor registrasi
+        $registrant = PpdbRegistrant::where('registration_number', $code)->firstOrFail();
+        
+        // Tampilkan view success.blade.php
+        return view('ppdb.success', compact('registrant'));
     }
 
     /**
-     * Memproses pencarian status siswa.
+     * Helper untuk mengambil tanggal pengumuman.
+     */
+    private function getAnnouncementDate()
+    {
+        $announcementDate = null;
+        
+        // Cek file settingan dari admin
+        if (Storage::exists('ppdb_schedule.json')) {
+            $data = json_decode(Storage::get('ppdb_schedule.json'), true);
+            if (isset($data['announcement_date'])) {
+                $announcementDate = Carbon::parse($data['announcement_date']);
+            }
+        }
+
+        // Default 1 tahun ke depan jika belum diset admin
+        return $announcementDate ?? Carbon::now()->addYears(1);
+    }
+
+    /**
+     * Menampilkan halaman cek status.
+     */
+    public function index()
+    {
+        $announcementDate = $this->getAnnouncementDate();
+        return view('ppdb.check', compact('announcementDate'));
+    }
+
+    /**
+     * Memproses pencarian status siswa (SOLUSI FIX "NO CHANGE").
      */
     public function search(Request $request)
     {
@@ -128,17 +146,51 @@ class PpdbController extends Controller
             'search' => 'required|string',
         ]);
 
-        $search = $request->search;
+        $announcementDate = $this->getAnnouncementDate();
 
-        // Cari berdasarkan No Pendaftaran ATAU NISN
+        // 1. Cek Apakah Pengumuman Sudah Dibuka?
+        if (Carbon::now()->lessThan($announcementDate)) {
+            // PERBAIKAN: Gunakan return view(), BUKAN redirect()
+            return view('ppdb.check', [
+                'announcementDate' => $announcementDate,
+                'customError' => 'Pengumuman belum dibuka. Harap tunggu waktu hitung mundur selesai.'
+            ]);
+        }
+
+        $search = $request->search;
         $registrant = PpdbRegistrant::where('registration_number', $search)
                                     ->orWhere('nisn', $search)
                                     ->first();
 
+        // 2. Jika Data Tidak Ditemukan
         if (!$registrant) {
-            return back()->with('error', 'Data tidak ditemukan. Pastikan Nomor Pendaftaran atau NISN benar.');
+            // PERBAIKAN: Gunakan return view() agar error tetap muncul meski session diblokir browser
+            return view('ppdb.check', [
+                'announcementDate' => $announcementDate,
+                'customError' => 'Data tidak ditemukan. Pastikan Nomor Pendaftaran atau NISN benar.'
+            ]);
         }
 
-        return view('ppdb.status', compact('registrant'));
+        // 3. Jika Data Ditemukan
+        return view('ppdb.status', compact('registrant', 'announcementDate'));
+    }
+
+    /**
+     * Cetak Surat Kelulusan.
+     */
+    public function printLetter($id)
+    {
+        $registrant = PpdbRegistrant::findOrFail($id);
+
+        if ($registrant->status !== 'accepted') {
+            $announcementDate = $this->getAnnouncementDate();
+            // PERBAIKAN: Return view error langsung
+            return view('ppdb.check', [
+                'announcementDate' => $announcementDate,
+                'customError' => 'Akses ditolak. Surat kelulusan hanya tersedia bagi peserta yang dinyatakan DITERIMA.'
+            ]);
+        }
+
+        return view('ppdb.print-letter', compact('registrant'));
     }
 }

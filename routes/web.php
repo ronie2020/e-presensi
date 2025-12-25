@@ -32,7 +32,7 @@ use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\SchoolActivityController;
 use App\Http\Controllers\TeachingController;
 use App\Http\Controllers\GraduationController; 
-use App\Http\Controllers\PpdbController; // <--- TAMBAHAN: Import Controller PPDB
+use App\Http\Controllers\PpdbController;
 
 // LMS (Learning Management System)
 use App\Http\Controllers\LmsMaterialController;
@@ -72,7 +72,6 @@ use App\Http\Controllers\SppdController;
 
 Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 
-// [PERBAIKAN] Menggunakan nama 'public.*' agar tidak bentrok dengan admin
 Route::get('/kegiatan', [LandingPageController::class, 'activities'])->name('public.activities');
 Route::get('/prestasi', [LandingPageController::class, 'achievements'])->name('public.achievements');
 
@@ -85,9 +84,12 @@ Route::prefix('ppdb')->name('ppdb.')->group(function () {
     Route::post('/store', [PpdbController::class, 'store'])->name('store');
     Route::get('/success/{code}', [PpdbController::class, 'success'])->name('success');
     
-    // TAMBAHAN: Cek Status & Pengumuman
+    // Cek Status & Pengumuman
     Route::get('/check', [PpdbController::class, 'index'])->name('check');
     Route::post('/check', [PpdbController::class, 'search'])->name('search');
+
+    // Route untuk Cetak Surat Kelulusan (Siswa)
+    Route::get('/print-letter/{id}', [PpdbController::class, 'printLetter'])->name('print.letter');
 });
 
 // Kiosk
@@ -169,16 +171,10 @@ Route::middleware('auth')->group(function () {
     // ===> LMS GURU (Materi, Tugas, & Nilai) <===
     Route::prefix('lms')->name('lms.')->group(function () {
         Route::resource('materials', LmsMaterialController::class);
-        
-        // Tugas & Penilaian
         Route::resource('assignments', LmsAssignmentController::class);
         Route::get('/assignments/{assignment}/submissions', [LmsAssignmentController::class, 'submissions'])->name('assignments.submissions');
         Route::post('/submissions/{submission}/grade', [LmsAssignmentController::class, 'grade'])->name('submissions.grade');
-
-        // Rekap Nilai (Gradebook)
         Route::get('/grades/recap', [LmsGradeController::class, 'index'])->name('grades.index');
-        
-        // Export & Print
         Route::get('/grades/export', [LmsGradeController::class, 'exportExcel'])->name('grades.export');
         Route::get('/grades/print', [LmsGradeController::class, 'printReport'])->name('grades.print');
     });
@@ -205,7 +201,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('subjects', SubjectController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::get('/achievements/export', [AchievementController::class, 'export'])->name('achievements.export');
     
-    // Resource Admin (Nama routenya otomatis achievements.index, activities.index dll)
+    // Resource Admin 
     Route::resource('achievements', AchievementController::class);
     Route::resource('school-activities', SchoolActivityController::class);
 
@@ -325,40 +321,38 @@ Route::middleware('auth')->group(function () {
     Route::post('/reports/bulk-alpha', [ReportController::class, 'bulkAlpha'])->name('reports.bulkAlpha');
 
 
-    // =========================================================================
-    //  TAMBAHAN: ROUTE ADMIN PPDB
+   // =========================================================================
+    //  ROUTE ADMIN PPDB
     // =========================================================================
     Route::prefix('admin/ppdb')->name('admin.ppdb.')->group(function () {
         Route::get('/', [AdminPpdbController::class, 'index'])->name('index');
+        
+        // --- BARU: Route untuk Simpan Jadwal Pengumuman ---
+        Route::post('/set-schedule', [AdminPpdbController::class, 'setSchedule'])->name('set_schedule');
+        Route::post('/{id}/promote', [AdminPpdbController::class, 'promoteToStudent'])->name('promote');     
         Route::get('/{id}/show', [AdminPpdbController::class, 'show'])->name('show');
         Route::patch('/{id}/status', [AdminPpdbController::class, 'updateStatus'])->name('update_status');
         Route::delete('/{id}', [AdminPpdbController::class, 'destroy'])->name('destroy');
         Route::get('/{id}/print', [AdminPpdbController::class, 'print'])->name('print');
-        // Placeholder route jika sidebar meminta 'reports' atau 'selection' tapi belum dibuat
+        
         Route::get('/selection', [AdminPpdbController::class, 'index'])->name('selection'); 
-        Route::get('/reports', [AdminPpdbController::class, 'index'])->name('reports');
+        Route::get('/reports', [AdminPpdbController::class, 'reports'])->name('reports');
+
+        // Export & Cetak
+        Route::get('/reports/export-excel', [AdminPpdbController::class, 'exportExcel'])->name('export.excel');
+        Route::get('/reports/print-recap', [AdminPpdbController::class, 'printRecap'])->name('print.recap');
+        Route::get('/reports/print-mass-letters', [AdminPpdbController::class, 'printMassLetters'])->name('print.mass_letters');
     });
 
-    // ===> LMS GURU (Materi, Tugas, & Nilai) <===
-    //  4. PERSURATAN & DINAS (BARU)
-    // =========================================================================
-    
-    // Surat Masuk & Surat Tugas (dalam prefix 'letters')
-    // URL: /letters/incoming, /letters/spt
+
+    // ===> PERSURATAN & DINAS <===
     Route::prefix('letters')->name('letters.')->group(function () {
         Route::resource('incoming', LetterIncomingController::class);
-        
-        // --- ROUTE CETAK SPT (Ditambahkan) ---
         Route::get('spt/{id}/print', [SptController::class, 'print'])->name('spt.print');
-        
         Route::resource('spt', SptController::class);
     });
 
-    // SPPD
-    // URL: /sppd
-    // --- ROUTE CETAK SPPD (Ditambahkan) ---
     Route::get('sppd/{id}/print', [SppdController::class, 'print'])->name('sppd.print');
-    
     Route::resource('sppd', SppdController::class);
 
 });

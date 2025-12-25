@@ -34,16 +34,17 @@ return [
                 'icon' => 'ph-star'
             ],
         ],
-        'Penerimaan Siswa (PPDB)' => [
+       'Penerimaan Siswa (PPDB)' => [
             [
                 'name' => 'Data Pendaftar',
-                'route' => 'admin.ppdb.index',
-                'active_check' => 'admin.ppdb.*',
+                'route' => 'admin.ppdb.index',                
+                'active_check' => ['admin.ppdb.index', 'admin.ppdb.show', 'admin.ppdb.edit', 'admin.ppdb.create'],
                 'icon' => 'ph-users-four'
             ],
             [
                 'name' => 'Laporan PPDB',
-                'route' => 'admin.ppdb.reports',
+                'route' => 'admin.ppdb.reports',             
+                'active_check' => 'admin.ppdb.reports',
                 'icon' => 'ph-printer'
             ],
         ],

@@ -6,31 +6,32 @@
             {{-- Header --}}
             <div class="mb-6 flex justify-between items-end">
                 <div>
-                    {{-- UPDATED: Warna Judul disesuaikan dengan Navigasi (Blue-900) --}}
                     <h1 class="text-3xl font-black text-blue-900 tracking-tight">Edit Buku Induk Siswa</h1>
                     <p class="text-slate-500 text-sm mt-1">Lengkapi data detail siswa: <span class="font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded">{{ $student->name }}</span></p>
                 </div>
-                {{-- UPDATED: Tombol Kembali dengan hover biru tua --}}
                 <a href="{{ route('students.index') }}" class="px-4 py-2 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-900 hover:border-blue-200 transition-all shadow-sm flex items-center gap-2 group">
                     <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali
                 </a>
             </div>
 
-            {{-- Tampilkan Error Validasi --}}
+            {{-- Tampilkan Error Validasi (PENTING: Agar tahu jika ada validasi gagal) --}}
             @if ($errors->any())
                 <div class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-xl text-sm flex items-start gap-3 shadow-sm">
                     <i class="ph-fill ph-warning-circle text-lg shrink-0 mt-0.5"></i>
-                    <ul class="list-disc list-inside font-bold">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                    <div>
+                        <span class="font-bold block mb-1">Gagal Menyimpan Perubahan:</span>
+                        <ul class="list-disc list-inside">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
             @endif
 
             <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden" x-data="{ tab: 'pribadi' }">
                 
-                {{-- TAB NAVIGATION (STYLE UPDATED) --}}
+                {{-- TAB NAVIGATION --}}
                 <div class="bg-blue-50/30 border-b border-slate-200 px-6 pt-4 flex gap-2 overflow-x-auto custom-scrollbar">
                     @foreach(['pribadi' => 'A. Pribadi', 'tempat_tinggal' => 'B. Alamat', 'kesehatan' => 'C. Kesehatan', 'pendidikan' => 'D. Pendidikan', 'orangtua' => 'E. Ortu & Wali', 'tamat' => 'F. Mutasi & Tamat'] as $key => $label)
                         <button type="button" @click="tab = '{{ $key }}'" 
@@ -52,7 +53,7 @@
                     {{-- TAB A: PRIBADI --}}
                     <div x-show="tab === 'pribadi'" class="space-y-8">
                         
-                        {{-- BAGIAN UPLOAD FOTO --}}
+                        {{-- FOTO & IDENTITAS --}}
                         <div class="flex flex-col md:flex-row gap-8 items-start border-b border-slate-100 pb-8">
                             <div class="w-full md:w-1/4 flex flex-col items-center gap-4">
                                 <div class="relative group">
@@ -76,21 +77,23 @@
                             <div class="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Nama Lengkap *</label>
-                                    <input type="text" name="name" value="{{ old('name', $student->name) }}" required class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-bold text-slate-800 transition-colors">
+                                    <input type="text" name="name" value="{{ old('name', $student->name) }}" required class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-bold text-slate-800">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Nama Panggilan</label>
-                                    <input type="text" name="nickname" value="{{ old('nickname', $student->nickname) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 transition-colors">
+                                    <input type="text" name="nickname" value="{{ old('nickname', $student->nickname) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
                                 </div>
                                 
-                                {{-- PERBAIKAN: Pastikan name="nis" sesuai dengan kolom database --}}
+                                {{-- PERBAIKAN: name="nis" sudah benar (sesuai model) --}}
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">NIS (Sekolah)</label>
-                                    <input type="text" name="nis" value="{{ old('nis', $student->nis) }}" placeholder="2021..." class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-mono transition-colors">
+                                    <input type="text" name="nis" value="{{ old('nis', $student->nis) }}" placeholder="Nomor Induk Sekolah" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-mono">
                                 </div>
+                                
+                                {{-- PERBAIKAN: name="student_id" untuk NISN (sesuai logic Controller/Model Anda) --}}
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">NISN (Nasional) *</label>
-                                    <input type="text" name="student_id" value="{{ old('student_id', $student->student_id) }}" required class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-mono bg-blue-50/30 transition-colors text-blue-900 font-bold">
+                                    <input type="text" name="student_id" value="{{ old('student_id', $student->student_id) }}" required class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-mono bg-blue-50/30 text-blue-900 font-bold">
                                 </div>
 
                                 <div>
@@ -180,7 +183,7 @@
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Nomor Telepon/HP</label>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Nomor Telepon/HP (Siswa)</label>
                                 <input type="text" name="phone" value="{{ old('phone', $student->phone) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
                             </div>
                             <div>
@@ -238,9 +241,10 @@
                     <div x-show="tab === 'pendidikan'" class="space-y-6" style="display: none;">
                         <h3 class="text-lg font-bold text-blue-900 border-b border-slate-100 pb-2 mb-4">Pendidikan Sebelumnya</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{-- ERROR FIX: Mengubah name="prev_school_name" menjadi "school_origin" sesuai Model --}}
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Asal Sekolah Dasar (SD)</label>
-                                <input type="text" name="prev_school_name" value="{{ old('prev_school_name', $student->prev_school_name) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                <input type="text" name="school_origin" value="{{ old('school_origin', $student->school_origin) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">No. Ijazah</label>
@@ -254,6 +258,8 @@
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tanggal Diterima di Sekolah Ini</label>
                                 <input type="date" name="accepted_date" value="{{ old('accepted_date', $student->accepted_date) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
                             </div>
+                            
+                            {{-- NOTE: Field ini perlu ditambahkan ke fillable jika belum ada --}}
                             <div class="md:col-span-2">
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Pindahan Dari Sekolah (Jika Pindahan)</label>
                                 <input type="text" name="transfer_from_school" value="{{ old('transfer_from_school', $student->transfer_from_school) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
@@ -265,7 +271,6 @@
                     <div x-show="tab === 'orangtua'" class="space-y-6" style="display: none;">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div class="space-y-4">
-                                {{-- UPDATED: Warna Header Blue-900 --}}
                                 <h4 class="font-bold text-blue-900 border-b border-blue-100 pb-2">Data Ayah Kandung</h4>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Nama Ayah</label>
@@ -333,6 +338,7 @@
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Pekerjaan</label>
                                     <input type="text" name="guardian_job" value="{{ old('guardian_job', $student->guardian_job) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
                                 </div>
+                                {{-- PERHATIKAN: Field guardian_income dan guardian_address HARUS ada di fillable --}}
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Penghasilan / Bulan</label>
                                     <input type="text" name="guardian_income" value="{{ old('guardian_income', $student->guardian_income) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">

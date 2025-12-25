@@ -112,8 +112,8 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center gap-3">
-                        <!-- BUTTON PPDB DI NAVBAR (LOC 1) -->
-                        <a href="{{ route('ppdb.register') }}" class="px-4 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 transition border border-emerald-500 flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                        <!-- BUTTON PPDB DI NAVBAR (Diubah ke Blue-600 agar lebih elegan) -->
+                        <a href="{{ route('ppdb.register') }}" class="px-4 py-2 rounded-full bg-blue-600 text-white text-xs font-bold hover:bg-blue-500 transition border border-blue-500 flex items-center gap-2 shadow-lg shadow-blue-500/20">
                             <i class="ph-bold ph-student"></i> Info PPDB
                         </a>
                         
@@ -152,8 +152,8 @@
              class="absolute top-0 left-0 w-full h-screen bg-slate-900/98 backdrop-blur-xl flex flex-col items-center justify-center space-y-8 z-40 md:hidden">
              
             <nav class="flex flex-col items-center space-y-6 text-center w-full px-8">
-                <!-- Mobile PPDB Link -->
-                <a href="{{ route('ppdb.register') }}" class="w-full py-3 bg-emerald-600 rounded-xl text-white font-bold text-lg shadow-lg">
+                <!-- Mobile PPDB Link (Updated Color) -->
+                <a href="{{ route('ppdb.register') }}" class="w-full py-3 bg-blue-600 rounded-xl text-white font-bold text-lg shadow-lg">
                     <i class="ph-bold ph-student mr-2"></i> Info PPDB 2025
                 </a>
                 
@@ -205,9 +205,9 @@
                     Platform digital terintegrasi SMPN 3 Lakbok untuk pemantauan akademik, absensi kehadiran, dan literasi siswa secara real-time.
                 </p>
                 
-                <!-- BUTTON PPDB HERO SECTION (LOC 2) -->
+                <!-- BUTTON PPDB HERO SECTION (Diubah ke Biru untuk Konsistensi) -->
                 <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-10">
-                    <a href="{{ route('ppdb.register') }}" class="px-8 py-4 rounded-full bg-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 hover:bg-emerald-500 hover:-translate-y-1 transition-all border-2 border-emerald-500 flex items-center justify-center gap-2">
+                    <a href="{{ route('ppdb.register') }}" class="px-8 py-4 rounded-full bg-blue-600 text-white font-bold text-sm shadow-lg shadow-blue-600/30 hover:bg-blue-500 hover:-translate-y-1 transition-all border-2 border-blue-500 flex items-center justify-center gap-2">
                         <i class="ph-bold ph-student text-xl"></i> Daftar PPDB 2025
                     </a>
                      <a href="{{ route('ppdb.check') }}" class="px-8 py-4 rounded-full bg-slate-800 text-white font-bold text-sm shadow-lg hover:bg-slate-700 hover:-translate-y-1 transition-all border border-slate-600 flex items-center justify-center gap-2">
@@ -279,13 +279,13 @@
             
             <div class="flex flex-wrap justify-center gap-6 lg:gap-8">
 
-                <!-- PPDB ONLINE CARD (LOC 3) -->
-                <a href="{{ route('ppdb.register') }}" class="group bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-8 shadow-lg shadow-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-500/40 border border-emerald-500/50 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
-                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-white mb-6 backdrop-blur-sm shadow-inner">
+                <!-- PPDB ONLINE CARD (DIUBAH MENJADI CARD PUTIH/BERSIH) -->
+                <a href="{{ route('ppdb.register') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 border border-slate-100 hover:border-blue-400 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
+                    <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-bold ph-student text-3xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2">PPDB Online</h3>
-                    <p class="text-emerald-100 text-sm leading-relaxed">Pendaftaran siswa baru tahun ajaran 2025/2026. Daftar sekarang!</p>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">PPDB Online</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">Pendaftaran siswa baru tahun ajaran 2025/2026. Daftar sekarang!</p>
                 </a>
 
                   <!-- PENGUMUMAN KELULUSAN -->
@@ -997,7 +997,7 @@
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="ph-fill ph-phone text-blue-500 shrink-0"></i>
-                            <span>(0265) 1234567</span>
+                            <span>+62 85135961994</span>
                         </li>
                         <li class="flex items-center gap-3">
                             <i class="ph-fill ph-envelope text-blue-500 shrink-0"></i>
@@ -1010,7 +1010,7 @@
             <!-- COPYRIGHT -->
             <div class="text-center pt-8 border-t border-slate-800">
                 <p class="text-slate-500 text-sm">
-                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Ri... All rights reserved.
+                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Ri.. All rights reserved.
                 </p>
             </div>
         </div>
