@@ -112,6 +112,11 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center gap-3">
+                        <!-- BUTTON PPDB DI NAVBAR (LOC 1) -->
+                        <a href="#" class="px-4 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 transition border border-emerald-500 flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                            <i class="ph-bold ph-student"></i> Info PPDB
+                        </a>
+
                         <a href="{{ route('portal.index') }}" class="text-sm font-bold text-blue-400 hover:text-white transition flex items-center gap-2">
                             Portal Siswa
                         </a>
@@ -145,6 +150,11 @@
              class="absolute top-0 left-0 w-full h-screen bg-slate-900/98 backdrop-blur-xl flex flex-col items-center justify-center space-y-8 z-40 md:hidden">
              
             <nav class="flex flex-col items-center space-y-6 text-center w-full px-8">
+                <!-- Mobile PPDB Link -->
+                <a href="#" class="w-full py-3 bg-emerald-600 rounded-xl text-white font-bold text-lg shadow-lg">
+                    <i class="ph-bold ph-student mr-2"></i> Info PPDB 2025
+                </a>
+                
                 <a href="#profil" @click="mobileMenuOpen = false" class="text-2xl font-bold text-slate-300 hover:text-yellow-400 transition">Profil Sekolah</a>
                 <a href="#guru" @click="mobileMenuOpen = false" class="text-2xl font-bold text-slate-300 hover:text-yellow-400 transition">Guru & Staff</a>
                 <a href="#kegiatan" @click="mobileMenuOpen = false" class="text-2xl font-bold text-slate-300 hover:text-yellow-400 transition">Kegiatan</a>
@@ -192,6 +202,16 @@
                 <p class="text-slate-300 text-lg mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
                     Platform digital terintegrasi SMPN 3 Lakbok untuk pemantauan akademik, absensi kehadiran, dan literasi siswa secara real-time.
                 </p>
+                
+                <!-- BUTTON PPDB HERO SECTION (LOC 2) -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-10">
+                    <a href="#" class="px-8 py-4 rounded-full bg-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 hover:bg-emerald-500 hover:-translate-y-1 transition-all border-2 border-emerald-500 flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-student text-xl"></i> Daftar PPDB 2025
+                    </a>
+                    <a href="#" class="px-8 py-4 rounded-full bg-slate-800 text-white font-bold text-sm shadow-lg hover:bg-slate-700 hover:-translate-y-1 transition-all border border-slate-600 flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-info text-xl"></i> Panduan Pendaftaran
+                    </a>
+                </div>
                 
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-3 gap-4 max-w-md mx-auto lg:mx-0">
@@ -256,6 +276,15 @@
             </div>
             
             <div class="flex flex-wrap justify-center gap-6 lg:gap-8">
+
+                 <!-- PPDB ONLINE CARD (LOC 3) -->
+                 <a href="#" class="group bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-8 shadow-lg shadow-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-500/40 border border-emerald-500/50 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-white mb-6 backdrop-blur-sm shadow-inner">
+                        <i class="ph-bold ph-student text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">PPDB Online</h3>
+                    <p class="text-emerald-100 text-sm leading-relaxed">Pendaftaran siswa baru tahun ajaran 2025/2026. Daftar sekarang!</p>
+                </a>
 
                   <!-- PENGUMUMAN KELULUSAN -->
                  <a href="{{ route('graduation.index') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
