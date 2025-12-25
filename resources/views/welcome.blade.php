@@ -113,9 +113,11 @@
                     <!-- Action Buttons -->
                     <div class="flex items-center gap-3">
                         <!-- BUTTON PPDB DI NAVBAR (LOC 1) -->
-                        <a href="#" class="px-4 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 transition border border-emerald-500 flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                        <a href="{{ route('ppdb.register') }}" class="px-4 py-2 rounded-full bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 transition border border-emerald-500 flex items-center gap-2 shadow-lg shadow-emerald-500/20">
                             <i class="ph-bold ph-student"></i> Info PPDB
                         </a>
+                        
+                         <!-- PORTAL SISWA & LOGIN STAFF -->
 
                         <a href="{{ route('portal.index') }}" class="text-sm font-bold text-blue-400 hover:text-white transition flex items-center gap-2">
                             Portal Siswa
@@ -151,7 +153,7 @@
              
             <nav class="flex flex-col items-center space-y-6 text-center w-full px-8">
                 <!-- Mobile PPDB Link -->
-                <a href="#" class="w-full py-3 bg-emerald-600 rounded-xl text-white font-bold text-lg shadow-lg">
+                <a href="{{ route('ppdb.register') }}" class="w-full py-3 bg-emerald-600 rounded-xl text-white font-bold text-lg shadow-lg">
                     <i class="ph-bold ph-student mr-2"></i> Info PPDB 2025
                 </a>
                 
@@ -205,11 +207,11 @@
                 
                 <!-- BUTTON PPDB HERO SECTION (LOC 2) -->
                 <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-10">
-                    <a href="#" class="px-8 py-4 rounded-full bg-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 hover:bg-emerald-500 hover:-translate-y-1 transition-all border-2 border-emerald-500 flex items-center justify-center gap-2">
+                    <a href="{{ route('ppdb.register') }}" class="px-8 py-4 rounded-full bg-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 hover:bg-emerald-500 hover:-translate-y-1 transition-all border-2 border-emerald-500 flex items-center justify-center gap-2">
                         <i class="ph-bold ph-student text-xl"></i> Daftar PPDB 2025
                     </a>
-                    <a href="#" class="px-8 py-4 rounded-full bg-slate-800 text-white font-bold text-sm shadow-lg hover:bg-slate-700 hover:-translate-y-1 transition-all border border-slate-600 flex items-center justify-center gap-2">
-                        <i class="ph-bold ph-info text-xl"></i> Panduan Pendaftaran
+                     <a href="{{ route('ppdb.check') }}" class="px-8 py-4 rounded-full bg-slate-800 text-white font-bold text-sm shadow-lg hover:bg-slate-700 hover:-translate-y-1 transition-all border border-slate-600 flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-magnifying-glass text-xl"></i> Cek Kelulusan
                     </a>
                 </div>
                 
@@ -277,8 +279,8 @@
             
             <div class="flex flex-wrap justify-center gap-6 lg:gap-8">
 
-                 <!-- PPDB ONLINE CARD (LOC 3) -->
-                 <a href="#" class="group bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-8 shadow-lg shadow-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-500/40 border border-emerald-500/50 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
+                <!-- PPDB ONLINE CARD (LOC 3) -->
+                <a href="{{ route('ppdb.register') }}" class="group bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-8 shadow-lg shadow-emerald-500/20 hover:shadow-2xl hover:shadow-emerald-500/40 border border-emerald-500/50 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
                     <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-white mb-6 backdrop-blur-sm shadow-inner">
                         <i class="ph-bold ph-student text-3xl"></i>
                     </div>
@@ -287,7 +289,7 @@
                 </a>
 
                   <!-- PENGUMUMAN KELULUSAN -->
-                 <a href="{{ route('graduation.index') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
+                <a href="{{ route('graduation.index') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
                     <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-duotone ph-graduation-cap text-3xl"></i>
                     </div>

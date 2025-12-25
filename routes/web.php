@@ -14,6 +14,7 @@ use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\GuestBookController; 
 use App\Http\Controllers\KioskController;
+use App\Http\Controllers\AdminPpdbController;
 
 // Akademik & Siswa
 use App\Http\Controllers\StudentController;
@@ -31,6 +32,7 @@ use App\Http\Controllers\AchievementController;
 use App\Http\Controllers\SchoolActivityController;
 use App\Http\Controllers\TeachingController;
 use App\Http\Controllers\GraduationController; 
+use App\Http\Controllers\PpdbController; // <--- TAMBAHAN: Import Controller PPDB
 
 // LMS (Learning Management System)
 use App\Http\Controllers\LmsMaterialController;
@@ -76,6 +78,17 @@ Route::get('/prestasi', [LandingPageController::class, 'achievements'])->name('p
 
 Route::get('/guru', [LandingPageController::class, 'teachers'])->name('teachers.index');
 Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
+
+// --- ROUTE PPDB (PENERIMAAN SISWA BARU) ---
+Route::prefix('ppdb')->name('ppdb.')->group(function () {
+    Route::get('/register', [PpdbController::class, 'create'])->name('register');
+    Route::post('/store', [PpdbController::class, 'store'])->name('store');
+    Route::get('/success/{code}', [PpdbController::class, 'success'])->name('success');
+    
+    // TAMBAHAN: Cek Status & Pengumuman
+    Route::get('/check', [PpdbController::class, 'index'])->name('check');
+    Route::post('/check', [PpdbController::class, 'search'])->name('search');
+});
 
 // Kiosk
 Route::get('/kiosk', [KioskController::class, 'showKiosk'])->name('kiosk.show');
@@ -313,6 +326,20 @@ Route::middleware('auth')->group(function () {
 
 
     // =========================================================================
+    //  TAMBAHAN: ROUTE ADMIN PPDB
+    // =========================================================================
+    Route::prefix('admin/ppdb')->name('admin.ppdb.')->group(function () {
+        Route::get('/', [AdminPpdbController::class, 'index'])->name('index');
+        Route::get('/{id}/show', [AdminPpdbController::class, 'show'])->name('show');
+        Route::patch('/{id}/status', [AdminPpdbController::class, 'updateStatus'])->name('update_status');
+        Route::delete('/{id}', [AdminPpdbController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/print', [AdminPpdbController::class, 'print'])->name('print');
+        // Placeholder route jika sidebar meminta 'reports' atau 'selection' tapi belum dibuat
+        Route::get('/selection', [AdminPpdbController::class, 'index'])->name('selection'); 
+        Route::get('/reports', [AdminPpdbController::class, 'index'])->name('reports');
+    });
+
+    // ===> LMS GURU (Materi, Tugas, & Nilai) <===
     //  4. PERSURATAN & DINAS (BARU)
     // =========================================================================
     

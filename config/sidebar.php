@@ -34,6 +34,19 @@ return [
                 'icon' => 'ph-star'
             ],
         ],
+        'Penerimaan Siswa (PPDB)' => [
+            [
+                'name' => 'Data Pendaftar',
+                'route' => 'admin.ppdb.index',
+                'active_check' => 'admin.ppdb.*',
+                'icon' => 'ph-users-four'
+            ],
+            [
+                'name' => 'Laporan PPDB',
+                'route' => 'admin.ppdb.reports',
+                'icon' => 'ph-printer'
+            ],
+        ],
         'E-Learning (LMS)' => [
             [
                 'name' => 'Materi Pelajaran',
