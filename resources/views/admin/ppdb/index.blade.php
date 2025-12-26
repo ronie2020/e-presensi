@@ -1,4 +1,7 @@
 <x-app-layout>
+    {{-- CDN SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -168,9 +171,22 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('admin.ppdb.show', $item->id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-bold text-xs text-slate-600 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition shadow-sm">
-                                        Detail <i class="ph-bold ph-caret-right"></i>
-                                    </a>
+                                    <div class="flex items-center justify-end gap-2">
+                                        {{-- TOMBOL DETAIL --}}
+                                        <a href="{{ route('admin.ppdb.show', $item->id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-bold text-xs text-slate-600 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition shadow-sm" title="Lihat Detail">
+                                            Detail
+                                        </a>
+
+                                        {{-- TOMBOL HAPUS (BARU) --}}
+                                        <form action="{{ route('admin.ppdb.destroy', $item->id) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="btn-delete-confirm inline-flex items-center justify-center w-8 h-8 bg-white border border-slate-200 rounded-lg text-slate-400 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition shadow-sm" 
+                                                data-name="{{ $item->full_name }}" title="Hapus Data">
+                                                <i class="ph-bold ph-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             @empty
@@ -194,4 +210,60 @@
 
         </div>
     </div>
+
+    {{-- SCRIPT SWEETALERT2 --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. FLASH MESSAGES (SUCCESS / ERROR)
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#1e3a8a', // Blue 900
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#e11d48', // Rose 600
+                });
+            @endif
+
+            // 2. KONFIRMASI HAPUS
+            // Menggunakan Event Delegation
+            document.body.addEventListener('click', function(e) {
+                // Cek jika yang diklik adalah tombol delete atau ikon di dalamnya
+                const button = e.target.closest('.btn-delete-confirm');
+                
+                if(button) {
+                    e.preventDefault();
+                    const form = button.closest('form');
+                    const name = button.getAttribute('data-name');
+
+                    Swal.fire({
+                        title: 'Hapus Pendaftar?',
+                        html: `Data pendaftar <b>${name}</b> akan dihapus permanen. <br><span class="text-xs text-rose-500">Berkas upload juga akan dihapus.</span>`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e11d48', // Rose 600
+                        cancelButtonColor: '#64748b',  // Slate 500
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                        reverseButtons: true,
+                        focusCancel: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </x-app-layout>

@@ -1,9 +1,11 @@
 <x-app-layout>
+    {{-- Tambahkan CDN SweetAlert2 di sini --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {{-- HERO SECTION --}}
-            {{-- UPDATED: Gradient disesuaikan dengan Navigation Bar (from-blue-900 via-blue-800 to-slate-900) --}}
             <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 mb-8 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -32,24 +34,7 @@
                 </div>
             </div>
 
-            {{-- Flash Messages --}}
-            @if (session('success'))
-                <div x-data="{ show: true }" x-show="show" class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-[1.5rem] flex items-center justify-between shadow-sm">
-                    <span class="font-bold text-sm flex items-center gap-2">
-                        <i class="ph-fill ph-check-circle text-lg"></i> {{ session('success') }}
-                    </span>
-                    <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-1"><i class="ph-bold ph-x"></i></button>
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div x-data="{ show: true }" x-show="show" class="mb-8 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-[1.5rem] flex items-center justify-between shadow-sm">
-                    <span class="font-bold text-sm flex items-center gap-2">
-                        <i class="ph-fill ph-warning-circle text-lg"></i> {{ session('error') }}
-                    </span>
-                    <button @click="show = false" class="text-rose-400 hover:text-rose-600 p-1"><i class="ph-bold ph-x"></i></button>
-                </div>
-            @endif
+            {{-- NOTE: Flash Message Lama DIHAPUS, diganti Script SweetAlert di paling bawah --}}
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
@@ -59,14 +44,12 @@
                     {{-- WRAPPER STICKY --}}
                     <div class="sticky top-24 space-y-6">
 
-                        <!-- CARD: REGISTRASI CEPAT -->
                         <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
                             {{-- Aksen Header Biru Tua --}}
                             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-900 to-blue-700"></div>
                             
                             <div class="p-6 md:p-8">
                                 <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-100">
-                                    {{-- Icon Style disesuaikan --}}
                                     <div class="w-12 h-12 bg-blue-900 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-blue-900/20">
                                         <i class="ph-duotone ph-user-plus"></i>
                                     </div>
@@ -166,7 +149,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Tombol Simpan disesuaikan dengan warna navigasi --}}
                                     <button type="submit" class="w-full py-3.5 bg-blue-900 text-white font-bold rounded-2xl hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2 transform active:scale-95 mt-4 group">
                                         <i class="ph-bold ph-floppy-disk text-lg group-hover:scale-110 transition-transform"></i>
                                         Simpan Data
@@ -175,7 +157,6 @@
                             </div>
                         </div>
 
-                        <!-- CARD: IMPORT -->
                         <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-[2.5rem] border border-emerald-100 p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                             <div class="relative z-10">
                                 <h3 class="text-sm font-black text-emerald-900 mb-1 flex items-center gap-2">
@@ -200,7 +181,7 @@
                             </div>
                         </div>
 
-                    </div> {{-- Akhir Wrapper Sticky --}}
+                    </div>
                 </div>
 
                 {{-- KOLOM KANAN: DAFTAR SISWA --}}
@@ -240,7 +221,6 @@
                         {{-- Table --}}
                         <div class="flex-1 overflow-x-auto custom-scrollbar">
                             <table class="w-full text-left border-collapse">
-                                {{-- UPDATED: Table Header menggunakan tema gelap biru navigasi --}}
                                 <thead class="bg-blue-900 text-blue-100 border-b border-blue-800">
                                     <tr>
                                         <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider w-1/3">Identitas Siswa</th>
@@ -254,7 +234,6 @@
                                         <tr class="hover:bg-blue-50/50 transition-colors group">
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center gap-4">
-                                                    {{-- Avatar --}}
                                                     <div class="relative shrink-0">
                                                         <div class="w-12 h-12 rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-white flex items-center justify-center group-hover:border-blue-200 transition-colors">
                                                             @if($student->photo_path)
@@ -298,17 +277,14 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right">
                                                 <div class="flex items-center justify-end gap-1">
-                                                    {{-- Cetak --}}
                                                     <a href="{{ route('students.show', $student->id) }}" target="_blank" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 flex items-center justify-center transition-all shadow-sm" title="Cetak Buku Induk">
                                                         <i class="ph-bold ph-printer text-lg"></i>
                                                     </a>
 
-                                                    {{-- Edit --}}
                                                     <a href="{{ route('students.edit', $student->id) }}" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 flex items-center justify-center transition-all shadow-sm" title="Edit Data">
                                                         <i class="ph-bold ph-pencil-simple text-lg"></i>
                                                     </a>
                                                     
-                                                    {{-- Menu Lainnya (Dropdown) --}}
                                                     <div x-data="{ open: false }" class="relative">
                                                         <button @click="open = !open" @click.outside="open = false" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-900 hover:border-blue-300 hover:bg-blue-50 flex items-center justify-center transition-all shadow-sm">
                                                             <i class="ph-bold ph-dots-three-vertical text-lg"></i>
@@ -330,9 +306,11 @@
                                                             </a>
                                                             
                                                             <div class="border-t border-slate-100 my-1"></div>
-                                                            <form action="{{ route('students.destroy', $student->id) }}" method="POST" onsubmit="return confirm('Hapus siswa ini? Data buku induk akan hilang.');">
+                                                            
+                                                            {{-- MODIFIKASI: Tombol Hapus dengan Class untuk SweetAlert --}}
+                                                            <form action="{{ route('students.destroy', $student->id) }}" method="POST">
                                                                 @csrf @method('DELETE')
-                                                                <button type="submit" class="w-full text-left px-4 py-2.5 text-xs font-bold text-rose-500 hover:bg-rose-50 flex items-center gap-2 transition-colors">
+                                                                <button type="button" class="w-full text-left px-4 py-2.5 text-xs font-bold text-rose-500 hover:bg-rose-50 flex items-center gap-2 transition-colors btn-delete-confirm" data-name="{{ $student->name }}">
                                                                     <i class="ph-bold ph-trash text-base"></i> Hapus Siswa
                                                                 </button>
                                                             </form>
@@ -363,7 +341,7 @@
         </div>
     </div>
 
-    {{-- MODAL ABSEN & QR CODE (Styling disesuaikan) --}}
+    {{-- MODAL ABSEN & QR CODE (Tetap) --}}
     <div id="absen-manual-modal" class="fixed inset-0 bg-blue-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-opacity">
         <div class="relative top-20 mx-auto p-0 border-0 w-full max-w-md shadow-2xl rounded-[2rem] bg-white overflow-hidden">
             <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
@@ -436,14 +414,63 @@
         </div>
     </div>
 
+    {{-- SCRIPT SWEETALERT2 --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // 1. FLASH MESSAGES (SUCCESS / ERROR)
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#1e3a8a', // Blue 900
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#e11d48', // Rose 600
+                });
+            @endif
+
+            // 2. KONFIRMASI HAPUS SISWA
+            // Menggunakan Event Delegation agar aman saat ada update DOM
+            document.body.addEventListener('click', function(e) {
+                if(e.target.closest('.btn-delete-confirm')) {
+                    e.preventDefault();
+                    const button = e.target.closest('.btn-delete-confirm');
+                    const form = button.closest('form');
+                    const studentName = button.getAttribute('data-name');
+
+                    Swal.fire({
+                        title: 'Hapus Siswa?',
+                        text: `Data siswa "${studentName}" beserta riwayat absen akan dihapus permanen.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e11d48', // Rose 600
+                        cancelButtonColor: '#64748b',  // Slate 500
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                }
+            });
+
+            // 3. LOGIKA MODAL LAINNYA (ABSEN & QR)
             const absenModal = document.getElementById('absen-manual-modal');
             const qrModal = document.getElementById('qr-code-modal');
 
-            // Event Delegation untuk tombol dalam tabel
+            // Handle Open Absen
             document.addEventListener('click', function(e) {
-                // Handle Open Absen
                 if (e.target.closest('.open-absen-modal')) {
                     const btn = e.target.closest('.open-absen-modal');
                     document.getElementById('absen-modal-student-name').innerText = btn.dataset.studentName;
