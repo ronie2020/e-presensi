@@ -2,6 +2,36 @@
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
+            {{-- === BAGIAN PENTING: ALERT ERROR & SUKSES === --}}
+            {{-- Tanpa bagian ini, Anda tidak akan tahu jika ada error dari Controller --}}
+            
+            @if(session('success'))
+                <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center gap-3 shadow-sm animate-pulse">
+                    <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
+                        <i class="ph-fill ph-check-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-sm block">Berhasil!</span>
+                        <span class="text-xs">{{ session('success') }}</span>
+                    </div>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl flex items-start gap-3 shadow-sm">
+                    <div class="p-2 bg-rose-100 rounded-full text-rose-600 shrink-0">
+                        <i class="ph-fill ph-warning-circle text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="font-bold text-sm block mb-1">Gagal Memproses Permintaan:</span>
+                        <span class="text-xs font-mono bg-rose-100 px-1 py-0.5 rounded">{{ session('error') }}</span>
+                        <p class="text-[10px] mt-1 text-rose-600/70 italic">*Silakan lapor ke teknisi jika error berlanjut.</p>
+                    </div>
+                </div>
+            @endif
+            
+            {{-- === BATAS ALERT === --}}
+
             {{-- HEADER: Navigasi & Judul --}}
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
@@ -113,6 +143,13 @@
                                 <p class="text-xs text-yellow-700 font-bold mb-1">Detail Prestasi:</p>
                                 <p class="text-sm font-bold text-slate-800">{{ $registrant->achievement_name ?? '-' }}</p>
                                 <p class="text-xs text-slate-600">{{ $registrant->achievement_level }} - {{ $registrant->achievement_rank }}</p>
+                                
+                                {{-- Tombol Lihat Sertifikat --}}
+                                @if($registrant->file_achievement)
+                                    <a href="{{ asset('storage/' . $registrant->file_achievement) }}" target="_blank" class="w-full flex items-center justify-center gap-2 bg-white border border-yellow-200 text-yellow-700 px-3 py-2 rounded-lg text-xs font-bold hover:bg-yellow-100 transition shadow-sm mt-2">
+                                        <i class="ph-bold ph-certificate"></i> Lihat Sertifikat
+                                    </a>
+                                @endif
                             </div>
                             @endif
 
