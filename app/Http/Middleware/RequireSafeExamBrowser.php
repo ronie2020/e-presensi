@@ -10,40 +10,49 @@ class RequireSafeExamBrowser
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // 1. Dapatkan User Agent
         $userAgent = $request->header('User-Agent');
 
-        // 2. Definisi Kunci Validasi
-        // 'SEB' -> Default string dari Aplikasi Resmi SEB (Laptop & HP/iOS/Android)
+        // 1. Cek User Agent (SEB Resmi atau App Sekolah)
         $isOfficialSEB = str_contains($userAgent, 'SEB');
-        
-        // Opsional: Jika Anda punya aplikasi custom buatan sendiri
-        $isCustomApp = str_contains($userAgent, 'APLIKASI_UJIAN_SMPN3');
+        $isMobileApp = str_contains($userAgent, 'APLIKASI_UJIAN_SMPN3'); // Opsional
 
-        // 3. Pengecekan (Izinkan jika salah satu benar)
-        if (!$isOfficialSEB && !$isCustomApp) {
-            
-            // Ambil Parameter Ujian dari URL
-            $examParam = $request->route('exam');
-            
-            // FIX: Handle jika Laravel mengembalikan Object Model, bukan ID string
-            $examId = null;
-            if ($examParam instanceof \Illuminate\Database\Eloquent\Model) {
-                $examId = $examParam->id;
-            } elseif (is_string($examParam) || is_numeric($examParam)) {
-                $examId = $examParam;
-            }
+        // 2. LOGIKA BYPASS (SOLUSI 1)
+        // Cek apakah ada request untuk mode darurat (strict_mode) dari URL atau Session
+        $isStrictMode = $request->query('strict_mode') == '1' || session('monitoring_mode') == 'strict_js';
 
-            // Jika ID ujian tidak ketemu, lempar ke dashboard utama
-            if (!$examId) {
-                return redirect()->route('student.exam.index')
-                    ->with('error', 'Akses ditolak. Browser tidak dikenali.');
-            }
-
-            // Lempar ke Halaman Landing Info SEB (yang ada QR Code & Tombol Deep Link)
-            return redirect()->route('cbt.seb_landing', ['exam' => $examId]);
+        // Jika Browser Valid (SEB/App) -> Izinkan & Hapus Mode Strict
+        if ($isOfficialSEB || $isMobileApp) {
+            session()->forget('monitoring_mode');
+            return $next($request);
         }
 
-        return $next($request);
+        // Jika Bukan SEB, tapi Mode Darurat diaktifkan -> Izinkan & Set Session Strict
+        if ($isStrictMode) {
+            session(['monitoring_mode' => 'strict_js']);
+            return $next($request);
+        }
+
+        // ===========================================
+        // JIKA TIDAK MEMENUHI SYARAT DI ATAS -> TOLAK
+        // ===========================================
+        
+        // Ambil Parameter Ujian untuk Redirect
+        $examParam = $request->route('exam');
+        $examId = null;
+
+        if ($examParam instanceof \Illuminate\Database\Eloquent\Model) {
+            $examId = $examParam->id;
+        } elseif (is_string($examParam) || is_numeric($examParam)) {
+            $examId = $examParam;
+        }
+
+        // Jika ID ujian tidak ketemu, kembalikan ke dashboard
+        if (!$examId) {
+            return redirect()->route('student.exam.index')
+                ->with('error', 'Akses ditolak. Browser tidak dikenali.');
+        }
+
+        // Lempar ke Halaman Landing (Pilih Device)
+        return redirect()->route('cbt.seb_landing', ['exam' => $examId]);
     }
 }

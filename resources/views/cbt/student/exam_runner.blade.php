@@ -480,5 +480,50 @@
             }
         }, 5000);
     </script>
+
+    
+{{-- SCRIPT ANTI-CURANG (JAVA SCRIPT GUARD) --}}
+{{-- Hanya aktif jika masuk lewat Mode Darurat --}}
+@if(session('monitoring_mode') == 'strict_js')
+    <script>
+        (function() {
+            let violationCount = 0;
+            const maxViolations = 3; // Batas maksimal pelanggaran
+            const examFinishUrl = "{{ route('student.exam.finish', $exam->id) }}";
+
+            // 1. Deteksi Pindah Tab / Minimize Browser
+            document.addEventListener("visibilitychange", function() {
+                if (document.hidden) {
+                    recordViolation("Terdeteksi meninggalkan halaman ujian (Pindah Tab/Minimize)");
+                }
+            });
+
+            // 2. Deteksi Kehilangan Fokus (Misal buka notifikasi atau Split Screen)
+            window.addEventListener("blur", function() {
+                recordViolation("Terdeteksi membuka aplikasi lain atau notifikasi");
+            });
+
+            function recordViolation(reason) {
+                violationCount++;
+                
+                // Mainkan suara beep peringatan (opsional)
+                // let audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                // audio.play().catch(e => {});
+
+                if (violationCount < maxViolations) {
+                    alert(`⚠️ PERINGATAN PELANGGARAN KE-${violationCount} DARI ${maxViolations}!\n\nAlasan: ${reason}.\n\nJangan coba-coba keluar dari halaman ujian atau membuka notifikasi!`);
+                } else {
+                    // Hentikan Ujian Paksa
+                    alert("⛔ PELANGGARAN BATAS TOLERANSI!\n\nAnda terdeteksi melakukan kecurangan berulang kali. Sistem akan menghentikan ujian Anda sekarang.");
+                    window.location.href = examFinishUrl;
+                }
+            }
+            
+            // 3. Mencegah Klik Kanan (Opsional)
+            document.addEventListener('contextmenu', event => event.preventDefault());
+
+        })();
+    </script>
+@endif
 </body>
 </html>

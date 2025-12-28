@@ -1,6 +1,6 @@
 {{-- 
     FILE TAMPILAN (VIEW)
-    Revisi: Tambah Tombol "Salin Link" untuk Manual Input ke Aplikasi
+    Revisi: Menambahkan Opsi Darurat (Browser Biasa) & Perbaikan JS QR
 --}}
 @component('cbt.seb_landing')
 
@@ -45,62 +45,65 @@
                  x-transition:enter-start="opacity-0 translate-y-4"
                  x-transition:enter-end="opacity-100 translate-y-0">
                 
-                <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                <div class="flex flex-col md:flex-row items-start gap-8 md:gap-12">
                     <div class="flex-1 text-center md:text-left">
-                        <span class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold uppercase tracking-wider mb-4 border border-green-200">Wajib Aplikasi Ujian</span>
+                        <span class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold uppercase tracking-wider mb-4 border border-green-200">Rekomendasi Utama</span>
                         <h4 class="text-2xl font-black text-slate-800 mb-3">Mulai Ujian di HP</h4>
                         <p class="text-slate-500 mb-6 leading-relaxed text-sm">
-                            Gunakan aplikasi <b>Safe Exam Browser (ETH Zurich)</b>. Jika tidak ada, gunakan Exambro lain yang direkomendasikan sekolah.
+                            Gunakan aplikasi <b>Safe Exam Browser (ETH Zurich)</b> atau Exambro sekolah. 
                         </p>
                         
                         <div class="flex flex-col gap-3">
                             @php
-                                // URL Config (Download .seb)
                                 $configUrl = route('cbt.download_seb', $exam->id ?? 0);
-                                // Deep Link (Buka Aplikasi Otomatis)
                                 $deepLink = str_replace(['https://', 'http://'], ['sebs://', 'sebs://'], $configUrl);
-                                // Manual Link (Untuk dicopy paste) - Mengarah ke halaman Start Ujian, bukan download config
+                                // Link Manual (Biasa)
                                 $manualLink = route('student.exam.show', $exam->id ?? 0);
+                                // Link Darurat (Strict Mode) - Menambahkan parameter bypass
+                                $emergencyLink = route('student.exam.show', ['exam' => $exam->id ?? 0, 'strict_mode' => 1]);
                             @endphp
 
                             {{-- Tombol 1: Buka Otomatis (Deep Link) --}}
                             <a href="{{ $deepLink }}" class="flex items-center justify-center px-6 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition shadow-xl shadow-slate-900/20 group w-full">
                                 <i class="ph-bold ph-rocket-launch text-2xl mr-3 group-hover:-translate-y-1 transition"></i>
                                 <div class="text-left">
-                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Cara Cepat</span>
-                                    <span class="block text-lg leading-none">Buka Ujian Otomatis</span>
+                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Paling Aman</span>
+                                    <span class="block text-lg leading-none">Buka Aplikasi SEB</span>
                                 </div>
                             </a>
-
-                            {{-- Tombol 2: Salin Link (Manual) --}}
-                            <div class="relative" x-data="{ copied: false }">
-                                <button @click="navigator.clipboard.writeText('{{ $manualLink }}'); copied = true; setTimeout(() => copied = false, 2000)" 
-                                    class="flex items-center justify-center w-full px-6 py-3 bg-white border-2 border-slate-200 text-slate-600 font-bold rounded-2xl hover:border-slate-400 hover:bg-slate-50 transition">
-                                    <i class="ph-bold ph-copy text-xl mr-2"></i>
-                                    <span x-text="copied ? 'Link Tersalin!' : 'Salin Link Ujian'"></span>
-                                </button>
-                                <p class="text-[10px] text-center text-slate-400 mt-1">
-                                    Gunakan tombol ini jika harus menempel link (paste) di aplikasi Exambro lain.
-                                </p>
-                            </div>
-
+                            
                             {{-- Link Download Aplikasi --}}
-                            <div class="flex justify-center gap-4 mt-2">
+                            <div class="flex justify-center gap-4 mt-2 mb-6">
                                 <a href="https://play.google.com/store/apps/details?id=org.safeexambrowser.app" target="_blank" class="text-xs text-blue-600 hover:underline font-semibold flex items-center">
                                     <i class="ph-fill ph-google-play-logo mr-1"></i> Download SEB Resmi
                                 </a>
                             </div>
+
+                            <hr class="border-slate-200 mb-4">
+
+                            {{-- OPSI DARURAT (SOLUSI 1) --}}
+                            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-left">
+                                <h6 class="font-bold text-amber-800 flex items-center gap-2 text-sm mb-2">
+                                    <i class="ph-bold ph-warning-circle text-lg"></i> HP Tidak Bisa Install App?
+                                </h6>
+                                <p class="text-xs text-amber-700 mb-3 leading-relaxed">
+                                    Gunakan mode darurat via Chrome. Sistem akan mengawasi layar Anda. Jika berpindah tab/keluar, <b>ujian otomatis terkunci</b>.
+                                </p>
+                                <a href="{{ $emergencyLink }}" onclick="return confirm('PERINGATAN KERAS:\n\nSistem pengawasan ketat akan aktif.\nJika Anda mencoba membuka WA, Google, atau Notifikasi, ujian akan langsung DIHENTIKAN.\n\nApakah Anda yakin ingin lanjut?')" 
+                                   class="block w-full py-2.5 bg-white border border-amber-300 hover:bg-amber-100 text-amber-700 font-bold rounded-lg text-sm text-center transition shadow-sm">
+                                    Masuk Mode Darurat (Tanpa Aplikasi)
+                                </a>
+                            </div>
+
                         </div>
                     </div>
                     
-                    {{-- QR Code Section (JS Generated) --}}
+                    {{-- QR Code Section --}}
                     <div class="w-full md:w-auto bg-slate-50 p-6 rounded-[2rem] border border-slate-100 text-center flex flex-col items-center">
                         <h5 class="font-bold text-slate-800 mb-3 text-sm">Scan untuk Masuk</h5>
-                        
                         <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
                             <div id="qrcode" class="w-[140px] h-[140px] flex items-center justify-center"></div>
                         </div>
-
                         <p class="text-[10px] text-slate-400 mt-3 max-w-[150px] leading-tight">
                             Buka kamera HP Anda dan scan QR ini untuk langsung masuk.
                         </p>
@@ -153,10 +156,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Ambil Link Deep Link dari PHP
         var deepLinkUrl = "{{ $deepLink }}";
-
-        // Pastikan elemen ada sebelum render
         var qrContainer = document.getElementById("qrcode");
         
         if (qrContainer) {
