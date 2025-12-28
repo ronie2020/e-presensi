@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\QuestionsImport;
 use App\Exports\CbtScoreExport; 
+use App\Exports\QuestionTemplateExport; 
 use Barryvdh\DomPDF\Facade\Pdf; 
 
 class CbtController extends Controller
@@ -208,28 +209,13 @@ class CbtController extends Controller
 
     /**
      * Download Template
+     * (UPDATED: Menggunakan QuestionTemplateExport)
      */
     public function downloadTemplate()
     {
-        $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=template_soal_cbt.csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
-        ];
-
-        $columns = ['soal', 'opsi_a', 'opsi_b', 'opsi_c', 'opsi_d', 'jawaban', 'bobot'];
-
-        $callback = function() use ($columns) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $columns);
-            fputcsv($file, ['Siapa presiden pertama RI?', 'Soekarno', 'Suharto', 'Habibie', 'Jokowi', 'A', '2']);
-            fputcsv($file, ['Ibu kota Jawa Barat adalah?', 'Bandung', 'Jakarta', 'Surabaya', 'Semarang', 'A', '2']);
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        // Mendownload file dengan nama 'template_soal_ujian.xlsx'
+        // Menggunakan class Export yang baru dibuat
+        return Excel::download(new QuestionTemplateExport, 'template_soal_ujian.xlsx');
     }
 
     /**
@@ -299,8 +285,6 @@ class CbtController extends Controller
 
     /**
      * [BARU] Halaman Rekapitulasi Nilai (Report)
-     * FIX: Menggunakan tabel 'cbt_student_answers' (bukan cbt_exam_answers)
-     * FIX: Menggunakan tabel 'classes' untuk relasi kelas
      */
     public function recap($id)
     {
@@ -326,20 +310,18 @@ class CbtController extends Controller
             ->orderBy('cbt_student_exams.total_score', 'desc')
             ->get();
 
-        // 3. LOGIKA HITUNG MANUAL (Menggunakan tabel cbt_student_answers)
+        // 3. LOGIKA HITUNG MANUAL
         foreach ($results as $row) {
             $correct = 0;
             $wrong = 0;
 
             try {
-                // UPDATE: Menggunakan nama tabel yang BENAR sesuai migrasi
                 $studentAnswers = DB::table('cbt_student_answers')
                     ->where('cbt_student_exam_id', $row->id)
                     ->get();
 
                 foreach ($studentAnswers as $ans) {
                     if (isset($questions[$ans->cbt_question_id])) {
-                        // Bandingkan Jawaban Siswa vs Kunci
                         if (strtoupper($ans->answer) == strtoupper($questions[$ans->cbt_question_id])) {
                             $correct++;
                         } else {
@@ -347,11 +329,8 @@ class CbtController extends Controller
                         }
                     }
                 }
-            } catch (\Exception $e) {
-                // Fallback jika terjadi error query
-            }
+            } catch (\Exception $e) {}
 
-            // Set property untuk ditampilkan di View & Export
             $row->correct_answers = $correct;
             $row->wrong_answers = $wrong;
         }
@@ -376,7 +355,6 @@ class CbtController extends Controller
         $fileName = 'REKAP_NILAI_' . \Illuminate\Support\Str::slug($exam->title) . '_' . date('Y-m-d');
 
         if ($type == 'excel') {
-            // Gunakan logika recap untuk mendapatkan data yang sudah dihitung
             $recapData = $this->recap($id);
             $results = $recapData->getData()['results']; 
 

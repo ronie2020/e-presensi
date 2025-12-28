@@ -258,7 +258,15 @@
                             <i class="ph-duotone ph-microsoft-excel-logo text-emerald-600 text-3xl"></i>
                         </div>
                         <h3 class="text-2xl font-black text-slate-800 mb-2">Import Soal Excel</h3>
-                        <p class="text-sm text-slate-500 mb-8 font-medium">Upload file .xlsx sesuai template yang disediakan.</p>
+                        
+                        {{-- INSTRUKSI & TOMBOL DOWNLOAD TEMPLATE (BARU) --}}
+                        <p class="text-sm text-slate-500 mb-2 font-medium">Silakan download template di bawah ini agar format sesuai.</p>
+                        
+                        <div class="mb-6">
+                            <a href="{{ route('cbt.questions.template') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-200 hover:text-slate-800 transition border border-slate-200">
+                                <i class="ph-bold ph-download-simple text-lg"></i> Download Template Excel
+                            </a>
+                        </div>
                         
                         <form action="{{ route('cbt.questions.import', $exam->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5 text-left">
                             @csrf
