@@ -11,8 +11,9 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\QuestionsImport;
 use App\Exports\CbtScoreExport; 
-use App\Exports\QuestionTemplateExport; 
+use App\Exports\QuestionTemplateExport; // Pastikan ini ada
 use Barryvdh\DomPDF\Facade\Pdf; 
+use Illuminate\Support\Str; // Tambahan untuk Generate Token
 
 class CbtController extends Controller
 {
@@ -209,12 +210,10 @@ class CbtController extends Controller
 
     /**
      * Download Template
-     * (UPDATED: Menggunakan QuestionTemplateExport)
      */
     public function downloadTemplate()
     {
-        // Mendownload file dengan nama 'template_soal_ujian.xlsx'
-        // Menggunakan class Export yang baru dibuat
+        // Menggunakan class Export yang sudah kita buat
         return Excel::download(new QuestionTemplateExport, 'template_soal_ujian.xlsx');
     }
 
@@ -284,7 +283,7 @@ class CbtController extends Controller
     }
 
     /**
-     * [BARU] Halaman Rekapitulasi Nilai (Report)
+     * Halaman Rekapitulasi Nilai (Report)
      */
     public function recap($id)
     {
@@ -347,7 +346,7 @@ class CbtController extends Controller
     }
 
     /**
-     * [BARU] Export Excel / PDF
+     * Export Excel / PDF
      */
     public function export($id, $type)
     {
@@ -453,12 +452,29 @@ class CbtController extends Controller
     public function refreshToken($id)
     {
         $exam = CbtExam::findOrFail($id);
-        $newToken = strtoupper(\Illuminate\Support\Str::random(5));
+        $newToken = strtoupper(Str::random(5));
+        $exam->update(['token' => $newToken]);
+        return back()->with('success', 'Token ujian berhasil diperbarui: ' . $newToken);
+    }
+
+    /**
+     * [BARU] AUTO ROTATE TOKEN (AJAX)
+     * Digunakan oleh halaman Monitoring untuk ganti token otomatis.
+     */
+    public function autoRotateToken($id)
+    {
+        $exam = CbtExam::findOrFail($id);
+        // Generate Token 6 Digit Huruf
+        $newToken = strtoupper(Str::random(6));
         
         $exam->update([
             'token' => $newToken
         ]);
 
-        return back()->with('success', 'Token ujian berhasil diperbarui: ' . $newToken);
+        return response()->json([
+            'status' => 'success',
+            'token' => $newToken,
+            'generated_at' => now()->format('H:i:s')
+        ]);
     }
 }

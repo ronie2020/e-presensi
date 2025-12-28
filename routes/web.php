@@ -236,6 +236,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/monitoring/{exam_id}', [CbtController::class, 'monitoring'])->name('monitoring');
         Route::post('/reset/{exam}/{student}', [CbtController::class, 'resetExam'])->name('reset');
         Route::get('/results', [CbtController::class, 'results'])->name('results');
+
+        // [BARU] Route Auto Rotate Token (AJAX)
+        Route::post('/exam/{exam}/auto-token', [CbtController::class, 'autoRotateToken'])->name('auto_token');
     });
 
     // Kedisiplinan & Penilaian

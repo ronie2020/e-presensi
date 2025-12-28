@@ -5,69 +5,204 @@
         </h2>
     </x-slot>
 
+    {{-- GABUNGAN x-data: Mencakup logika Refresh Halaman (count) DAN Logika Token (timeLeft) --}}
     <div class="py-8 sm:py-10 font-sans text-slate-800" 
          x-data="{ 
+            // LOGIKA LAMA (Refresh Halaman)
             search: '', 
             count: 30,
             isPaused: false,
+            
+            // LOGIKA BARU (Token Otomatis)
+            currentToken: '{{ $exam->token }}',
+            autoRotate: false,
+            intervalMinutes: 15,
+            isLoading: false,
+            tokenTimeLeft: 0,
+            tokenProgress: 100,
+            tokenTimer: null,
+            
             init() {
+                // 1. Jalankan Timer Refresh Halaman (Logika Lama)
                 setInterval(() => {
                     if (this.search === '') {
                         if (this.count > 0) this.count--; else location.reload();
                         this.isPaused = false;
                     } else {
-                        this.isPaused = true;
+                        this.isPaused = true; // Pause refresh jika sedang mengetik search
                         this.count = 30;
                     }
                 }, 1000);
+
+                // 2. Jalankan Timer Token (Logika Baru)
+                // Cek LocalStorage agar timer tidak reset saat halaman reload
+                this.loadTokenState();
+                
+                this.$watch('autoRotate', value => {
+                    if (value) this.startTokenTimer();
+                    else this.stopTokenTimer();
+                    this.saveTokenState();
+                });
+                
+                this.$watch('intervalMinutes', () => {
+                    if (this.autoRotate) this.startTokenTimer(); 
+                    this.saveTokenState();
+                });
+            },
+
+            // --- FUNGSI TOKEN ---
+            loadTokenState() {
+                const savedState = JSON.parse(localStorage.getItem('token_monitor_{{ $exam->id }}'));
+                if (savedState) {
+                    this.autoRotate = savedState.autoRotate;
+                    this.intervalMinutes = savedState.intervalMinutes;
+                    
+                    if (this.autoRotate) {
+                        // Hitung sisa waktu berdasarkan timestamp target
+                        const now = Math.floor(Date.now() / 1000);
+                        if (savedState.targetTime > now) {
+                            this.tokenTimeLeft = savedState.targetTime - now;
+                            this.startTokenTimer(false); // Resume, jangan reset
+                        } else {
+                            this.startTokenTimer(); // Reset baru
+                        }
+                    }
+                }
+            },
+
+            saveTokenState() {
+                const now = Math.floor(Date.now() / 1000);
+                const targetTime = now + this.tokenTimeLeft;
+                localStorage.setItem('token_monitor_{{ $exam->id }}', JSON.stringify({
+                    autoRotate: this.autoRotate,
+                    intervalMinutes: this.intervalMinutes,
+                    targetTime: targetTime
+                }));
+            },
+
+            startTokenTimer(reset = true) {
+                this.stopTokenTimer();
+                let totalSeconds = this.intervalMinutes * 60;
+                
+                if (reset) {
+                    this.tokenTimeLeft = totalSeconds;
+                }
+                
+                this.tokenTimer = setInterval(() => {
+                    this.tokenTimeLeft--;
+                    this.tokenProgress = (this.tokenTimeLeft / totalSeconds) * 100;
+                    this.saveTokenState(); // Simpan state tiap detik agar sinkron saat reload
+
+                    if (this.tokenTimeLeft <= 0) {
+                        this.rotateTokenNow();
+                        this.tokenTimeLeft = totalSeconds; 
+                    }
+                }, 1000);
+            },
+
+            stopTokenTimer() {
+                if (this.tokenTimer) clearInterval(this.tokenTimer);
+                this.tokenProgress = 100;
+                localStorage.removeItem('token_monitor_{{ $exam->id }}');
+            },
+
+            rotateTokenNow() {
+                this.isLoading = true;
+                fetch('{{ route("cbt.auto_token", $exam->id) }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                })
+                .then(r => r.json())
+                .then(d => {
+                    if (d.status === 'success') this.currentToken = d.token;
+                })
+                .finally(() => this.isLoading = false);
             }
          }">
          
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-            {{-- HEADER INFO (DARK BLUE HERO) --}}
-            <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 mb-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            {{-- SECTION ATAS: INFO UJIAN + TOKEN (TAMPILAN BARU DIGABUNG) --}}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div>
+                {{-- KIRI: Info Detail Ujian (Desain Lama) --}}
+                <div class="md:col-span-2 relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
+                    <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+                    <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                    
+                    <div class="relative z-10">
                         <div class="flex items-center gap-3 mb-2">
                             @if($exam->is_active)
                                 <span class="bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider animate-pulse flex items-center gap-1.5">
                                     <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span> Live Active
                                 </span>
                             @else
-                                <span class="bg-white/10 border border-white/10 text-slate-300 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">
-                                    Non-Aktif
-                                </span>
+                                <span class="bg-white/10 border border-white/10 text-slate-300 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">Non-Aktif</span>
                             @endif
                             <span class="text-blue-300 text-xs font-bold uppercase tracking-wider">Kelas {{ $exam->class_level }}</span>
                         </div>
-                        <h1 class="text-3xl font-black tracking-tight leading-none mb-2">{{ $exam->title }}</h1>
-                        <p class="text-blue-200 text-sm font-medium flex items-center gap-2">
-                            Token Akses: <span class="font-mono bg-white/10 px-2 py-0.5 rounded text-white font-bold">{{ $exam->token }}</span>
-                        </p>
+                        <h1 class="text-3xl font-black tracking-tight leading-none mb-4">{{ $exam->title }}</h1>
+                        
+                        {{-- Statistik Ringkas --}}
+                        <div class="flex gap-3">
+                            <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10 text-center min-w-[90px]">
+                                <h4 class="text-2xl font-black text-white leading-none">{{ $stats['working'] }}</h4>
+                                <p class="text-[9px] uppercase font-bold text-blue-300 mt-1">Proses</p>
+                            </div>
+                            <div class="bg-emerald-500/20 backdrop-blur-md px-5 py-3 rounded-2xl border border-emerald-500/30 text-center min-w-[90px]">
+                                <h4 class="text-2xl font-black text-emerald-300 leading-none">{{ $stats['finished'] }}</h4>
+                                <p class="text-[9px] uppercase font-bold text-emerald-200 mt-1">Selesai</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- KANAN: TOKEN DINAMIS (FITUR BARU) --}}
+                <div class="md:col-span-1 bg-white p-6 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col justify-between relative overflow-hidden">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Token Akses</p>
+                            {{-- Indikator Auto --}}
+                            <div class="flex items-center gap-2">
+                                <span x-show="autoRotate" class="animate-pulse w-2 h-2 bg-emerald-500 rounded-full"></span>
+                                <span x-text="autoRotate ? 'Auto: ' + intervalMinutes + 'm' : 'Manual'" class="text-[10px] font-bold text-slate-500"></span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 mb-4">
+                            <h2 class="text-5xl font-mono font-black tracking-widest text-slate-800" x-text="currentToken">
+                                {{ $exam->token ?? '-----' }}
+                            </h2>
+                            <button @click="rotateTokenNow()" :disabled="isLoading" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition disabled:opacity-50">
+                                <i class="ph-bold ph-arrows-clockwise text-xl" :class="isLoading ? 'animate-spin' : ''"></i>
+                            </button>
+                        </div>
+                        
+                        {{-- Progress Bar Token --}}
+                        <div x-show="autoRotate" class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-4">
+                            <div class="bg-emerald-500 h-full transition-all duration-1000 ease-linear" :style="'width: ' + tokenProgress + '%'"></div>
+                        </div>
                     </div>
 
-                    {{-- STATISTIK RINGKAS --}}
-                    <div class="flex gap-3 w-full md:w-auto">
-                        <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10 text-center min-w-[90px]">
-                            <h4 class="text-2xl font-black text-white leading-none">{{ $stats['working'] }}</h4>
-                            <p class="text-[9px] uppercase font-bold text-blue-300 mt-1">Proses</p>
-                        </div>
-                        <div class="bg-emerald-500/20 backdrop-blur-md px-5 py-3 rounded-2xl border border-emerald-500/30 text-center min-w-[90px]">
-                            <h4 class="text-2xl font-black text-emerald-300 leading-none">{{ $stats['finished'] }}</h4>
-                            <p class="text-[9px] uppercase font-bold text-emerald-200 mt-1">Selesai</p>
-                        </div>
+                    {{-- Kontrol Setting Token --}}
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" x-model="autoRotate" class="rounded text-blue-600 focus:ring-blue-500 border-gray-300">
+                            <span class="text-xs font-bold text-slate-600">Auto Ganti</span>
+                        </label>
+                        <select x-model="intervalMinutes" :disabled="!autoRotate" class="text-xs font-bold text-slate-700 bg-transparent border-none focus:ring-0 p-0 cursor-pointer text-right disabled:text-slate-400">
+                            <option value="5">5 Menit</option>
+                            <option value="10">10 Menit</option>
+                            <option value="15">15 Menit</option>
+                        </select>
                     </div>
                 </div>
             </div>
 
-            {{-- TOOLBAR & REFRESH --}}
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+            {{-- TOOLBAR BAWAH & REFRESH STATUS (LOGIKA LAMA) --}}
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <a href="{{ route('cbt.index') }}" class="group inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 transition">
-                    <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali
+                    <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke List
                 </a>
 
                 <div class="text-[10px] font-bold px-3 py-1.5 rounded-full border shadow-sm flex items-center gap-2 transition-colors duration-300"
@@ -75,7 +210,7 @@
                     <template x-if="!isPaused">
                         <div class="flex items-center gap-1.5">
                             <i class="ph-bold ph-arrows-clockwise animate-spin text-blue-500"></i>
-                            <span>Refresh: <span x-text="count" class="font-mono text-slate-700"></span>s</span>
+                            <span>Update Status Peserta: <span x-text="count" class="font-mono text-slate-700"></span>s</span>
                         </div>
                     </template>
                     <template x-if="isPaused">
@@ -87,7 +222,7 @@
                 </div>
             </div>
 
-            <!-- TABEL PESERTA -->
+            <!-- TABEL PESERTA (LOGIKA LAMA - TIDAK BERUBAH) -->
             <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden min-h-[500px]">
                 <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
                     <h4 class="font-bold text-slate-700 flex items-center gap-2 text-lg">
