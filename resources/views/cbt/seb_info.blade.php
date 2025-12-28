@@ -1,30 +1,28 @@
 {{-- 
     FILE TAMPILAN (VIEW)
-    Ini adalah apa yang dilihat siswa jika mereka belum menggunakan Aplikasi Ujian.
+    Revisi: Penambahan Deep Link SEB & QR Code
 --}}
 @component('cbt.seb_landing')
 
     {{-- KONTEN UTAMA --}}
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{ activeTab: 'hp' }">
         
-        <!-- HERO CARD -->
         <div class="text-center mb-10">
             <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-[2rem] shadow-xl shadow-blue-500/30 mb-6 text-white text-4xl transform hover:scale-110 transition duration-500">
                 <i class="ph-duotone ph-shield-check"></i>
             </div>
-            <h3 class="text-3xl md:text-4xl font-black text-slate-800 mb-3 tracking-tight">Portal Ujian Sekolah</h3>
+            <h3 class="text-3xl md:text-4xl font-black text-slate-800 mb-3 tracking-tight">Portal Keamanan Ujian</h3>
             <p class="text-slate-500 text-lg max-w-lg mx-auto leading-relaxed">
-                Silakan pilih perangkat yang Anda gunakan untuk memulai ujian dengan aman.
+                Pilih perangkat yang Anda gunakan. Sistem akan mengunci perangkat selama ujian berlangsung.
             </p>
         </div>
 
-        <!-- SWITCHER DEVICE -->
         <div class="flex justify-center mb-10">
             <div class="bg-white p-1.5 rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-100 flex relative">
                 <button @click="activeTab = 'hp'" 
                     :class="activeTab === 'hp' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'"
                     class="px-8 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2.5">
-                    <i class="ph-bold ph-device-mobile text-lg"></i> HP (Android)
+                    <i class="ph-bold ph-device-mobile text-lg"></i> HP (Android/iOS)
                 </button>
                 <button @click="activeTab = 'laptop'" 
                     :class="activeTab === 'laptop' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'"
@@ -34,12 +32,10 @@
             </div>
         </div>
 
-        <!-- CONTENT AREA -->
         <div class="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 p-8 md:p-12 relative overflow-hidden">
             {{-- Background Accent --}}
             <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-50 to-purple-50 rounded-bl-[10rem] opacity-50 pointer-events-none"></div>
 
-            <!-- TAMPILAN 1: UNTUK PENGGUNA HP (APK) -->
             <div x-show="activeTab === 'hp'" 
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 translate-y-4"
@@ -47,38 +43,58 @@
                 
                 <div class="flex flex-col md:flex-row items-center gap-8 md:gap-12">
                     <div class="flex-1 text-center md:text-left">
-                        <span class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold uppercase tracking-wider mb-4 border border-green-200">Disarankan</span>
-                        <h4 class="text-2xl font-black text-slate-800 mb-3">Aplikasi Exambrowser Android</h4>
-                        <p class="text-slate-500 mb-6 leading-relaxed">
-                            Aplikasi wajib untuk pengguna Android. Mencegah kecurangan, memblokir notifikasi, dan lebih hemat kuota internet.
+                        <span class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-bold uppercase tracking-wider mb-4 border border-green-200">Wajib Safe Exam Browser</span>
+                        <h4 class="text-2xl font-black text-slate-800 mb-3">Mulai Ujian di HP</h4>
+                        <p class="text-slate-500 mb-6 leading-relaxed text-sm">
+                            Pastikan Anda sudah menginstall aplikasi <b>Safe Exam Browser (SEB)</b> dari PlayStore/AppStore. Klik tombol di bawah untuk masuk otomatis.
                         </p>
                         
-                        <div class="flex flex-col sm:flex-row gap-4">
-                            <a href="#" target="_blank" class="flex-1 flex items-center justify-center px-6 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition shadow-xl shadow-slate-900/20 group">
-                                <i class="ph-fill ph-google-play-logo text-2xl mr-3 group-hover:scale-110 transition"></i>
+                        <div class="flex flex-col gap-3">
+                            {{-- LOGIKA UTAMA: Ganti https:// dengan sebs:// --}}
+                            {{-- Asumsi: route 'cbt.download_seb' menghasilkan file .seb / config --}}
+                            @php
+                                // Mengambil URL Config, lalu ubah protokolnya menjadi sebs://
+                                $configUrl = route('cbt.download_seb', $exam->id ?? 0);
+                                $deepLink = str_replace(['https://', 'http://'], ['sebs://', 'sebs://'], $configUrl);
+                            @endphp
+
+                            {{-- Tombol Deep Link (Memicu Aplikasi SEB Terbuka) --}}
+                            <a href="{{ $deepLink }}" class="flex items-center justify-center px-6 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition shadow-xl shadow-slate-900/20 group w-full">
+                                <i class="ph-bold ph-rocket-launch text-2xl mr-3 group-hover:-translate-y-1 transition"></i>
                                 <div class="text-left">
-                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Download via</span>
-                                    <span class="block text-sm leading-none">Google Drive</span>
+                                    <span class="block text-[10px] uppercase font-bold text-slate-400">Sudah Install SEB?</span>
+                                    <span class="block text-lg leading-none">Buka Ujian Sekarang</span>
                                 </div>
+                            </a>
+
+                            {{-- Link Download Aplikasi (Jika belum punya) --}}
+                            <a href="https://play.google.com/store/apps/details?id=org.safeexambrowser.app" target="_blank" class="text-xs text-center text-blue-600 hover:underline font-semibold mt-2">
+                                Belum punya aplikasi? Download SEB di PlayStore
                             </a>
                         </div>
                     </div>
                     
-                    {{-- Opsi Darurat --}}
-                    <div class="w-full md:w-72 bg-slate-50 p-6 rounded-[2rem] border border-slate-100 text-center">
-                        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <i class="ph-bold ph-warning text-2xl"></i>
+                    {{-- QR Code Section --}}
+                    <div class="w-full md:w-auto bg-slate-50 p-6 rounded-[2rem] border border-slate-100 text-center flex flex-col items-center">
+                        <h5 class="font-bold text-slate-800 mb-3 text-sm">Scan untuk Masuk</h5>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                            {{-- Pastikan Anda sudah install library simple-qrcode atau sejenisnya --}}
+                            {{-- Jika belum ada library, ganti ini dengan image statis sementara --}}
+                            @if(class_exists('SimpleSoftwareIO\QrCode\Facades\QrCode'))
+                                {!! SimpleSoftwareIO\QrCode\Facades\QrCode::size(140)->generate($deepLink) !!}
+                            @else
+                                <div class="w-[140px] h-[140px] bg-slate-200 flex items-center justify-center text-xs text-slate-500">
+                                    Library QR Belum Install
+                                </div>
+                            @endif
                         </div>
-                        <h5 class="font-bold text-slate-800 mb-1">Kendala Aplikasi?</h5>
-                        <p class="text-xs text-slate-500 mb-4">Gunakan mode browser biasa dengan pengawasan ketat.</p>
-                        <a href="{{ route('student.login') }}" onclick="return confirm('PERINGATAN: Segala aktivitas membuka aplikasi lain akan tercatat sebagai pelanggaran. Lanjutkan?')" class="block w-full py-2.5 bg-white border-2 border-slate-200 hover:border-amber-400 hover:text-amber-600 text-slate-600 font-bold rounded-xl text-sm transition">
-                            Masuk via Chrome
-                        </a>
+                        <p class="text-[10px] text-slate-400 mt-3 max-w-[150px] leading-tight">
+                            Buka kamera HP Anda dan scan QR ini untuk langsung masuk ke aplikasi ujian.
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <!-- TAMPILAN 2: UNTUK PENGGUNA LAPTOP (SEB) -->
             <div x-show="activeTab === 'laptop'" style="display: none;" 
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 translate-y-4"
@@ -88,8 +104,8 @@
                     <div class="flex-1 text-center md:text-left">
                         <span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold uppercase tracking-wider mb-4 border border-blue-200">Lab Komputer</span>
                         <h4 class="text-2xl font-black text-slate-800 mb-3">Safe Exam Browser (SEB)</h4>
-                        <p class="text-slate-500 mb-6 leading-relaxed">
-                            Mode aman untuk pengguna Laptop/PC. Pastikan software SEB sudah terinstall di komputer Anda sebelum mendownload konfigurasi ini.
+                        <p class="text-slate-500 mb-6 leading-relaxed text-sm">
+                            Pastikan software SEB sudah terinstall. Download file konfigurasi di bawah, lalu buka file tersebut (Double Click).
                         </p>
                         
                         <div class="flex flex-col sm:flex-row gap-4">

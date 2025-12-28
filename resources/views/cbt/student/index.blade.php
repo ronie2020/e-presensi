@@ -89,7 +89,8 @@
                             </h3>
                             <p class="text-xs text-slate-500 font-medium mt-1 flex items-center gap-1">
                                 <i class="ph-fill ph-chalkboard-teacher"></i>
-                                {{ $examItem->subject->name ?? 'Mata Pelajaran' }}
+                                {{-- FIX: Menggunakan subject_name (string) bukan relasi --}}
+                                {{ $examItem->subject_name ?? 'Mata Pelajaran' }}
                             </p>
                         </div>
 
@@ -106,7 +107,8 @@
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <i class="ph-bold ph-list-numbers text-blue-500"></i>
-                                    <span>{{ $examItem->total_questions ?? 0 }} Soal</span>
+                                    {{-- FIX: Menggunakan query langsung agar jumlah soal selalu muncul --}}
+                                    <span>{{ $examItem->questions_count ?? 0 }} Soal</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <i class="ph-bold ph-percent text-blue-500"></i>

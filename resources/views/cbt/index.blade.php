@@ -124,6 +124,11 @@
                                 <i class="ph-bold ph-desktop text-lg mr-2"></i> Monitor
                             </a>
 
+                            <!-- BARU: Tombol Rekap Nilai -->
+                            <a href="{{ route('cbt.recap', $exam->id) }}" class="col-span-2 flex items-center justify-center p-2.5 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-xl text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all">
+                                <i class="ph-bold ph-chart-bar text-lg mr-2"></i> Rekapitulasi & Export
+                            </a>
+
                             <!-- Tombol Hapus (Full Width) -->
                             <button onclick="confirmDelete('{{ $exam->id }}')" class="col-span-2 flex items-center justify-center p-2.5 bg-white border border-rose-100 text-rose-500 rounded-xl text-xs font-bold hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all mt-1">
                                 <i class="ph-bold ph-trash text-lg mr-2"></i> Hapus Jadwal

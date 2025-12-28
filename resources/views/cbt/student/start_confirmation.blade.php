@@ -47,7 +47,8 @@
                     </div>
                     <div>
                         <p class="text-xs text-slate-400 font-bold uppercase">Jumlah Soal</p>
-                        <p class="font-bold text-slate-800">{{ $exam->questions_count ?? '-' }} Soal</p>
+                        {{-- FIX: Menggunakan query count() langsung agar tidak 0 --}}
+                        <p class="font-bold text-slate-800">{{ $exam->questions()->count() }} Soal</p>
                     </div>
                 </div>
             </div>

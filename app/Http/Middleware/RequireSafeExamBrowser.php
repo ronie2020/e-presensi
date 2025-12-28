@@ -10,29 +10,37 @@ class RequireSafeExamBrowser
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // 1. Dapatkan User Agent
         $userAgent = $request->header('User-Agent');
 
-        // KUNCI RAHASIA UNTUK HP (Bisa diganti sesuka hati)
-        // Pastikan kata kunci ini nanti dimasukkan ke settingan aplikasi Android
-        $mobileAppKey = 'APLIKASI_UJIAN_SMPN3'; 
+        // 2. Definisi Kunci Validasi
+        // 'SEB' -> Default string dari Aplikasi Resmi SEB (Laptop & HP/iOS/Android)
+        $isOfficialSEB = str_contains($userAgent, 'SEB');
+        
+        // Opsional: Jika Anda punya aplikasi custom buatan sendiri
+        $isCustomApp = str_contains($userAgent, 'APLIKASI_UJIAN_SMPN3');
 
-        // 1. Cek apakah Browser adalah SEB (Desktop/iOS)
-        $isSEB = str_contains($userAgent, 'SEB');
-
-        // 2. Cek apakah Browser adalah Aplikasi Android Khusus
-        $isMobileApp = str_contains($userAgent, $mobileAppKey);
-
-        // Jika BUKAN SEB dan BUKAN Aplikasi Mobile, tolak akses
-        if (!$isSEB && !$isMobileApp) {
+        // 3. Pengecekan (Izinkan jika salah satu benar)
+        if (!$isOfficialSEB && !$isCustomApp) {
             
-            $examId = $request->route('exam');
-
-            // Jika tidak ada ID ujian, kembalikan ke dashboard siswa
-            if (!$examId) {
-                return redirect()->route('student.exam.index');
+            // Ambil Parameter Ujian dari URL
+            $examParam = $request->route('exam');
+            
+            // FIX: Handle jika Laravel mengembalikan Object Model, bukan ID string
+            $examId = null;
+            if ($examParam instanceof \Illuminate\Database\Eloquent\Model) {
+                $examId = $examParam->id;
+            } elseif (is_string($examParam) || is_numeric($examParam)) {
+                $examId = $examParam;
             }
 
-            // Lempar ke halaman Landing (Suruh download SEB atau APK)
+            // Jika ID ujian tidak ketemu, lempar ke dashboard utama
+            if (!$examId) {
+                return redirect()->route('student.exam.index')
+                    ->with('error', 'Akses ditolak. Browser tidak dikenali.');
+            }
+
+            // Lempar ke Halaman Landing Info SEB (yang ada QR Code & Tombol Deep Link)
             return redirect()->route('cbt.seb_landing', ['exam' => $examId]);
         }
 

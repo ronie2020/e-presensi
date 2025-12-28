@@ -118,6 +118,11 @@ Route::post('/library/kiosk/process', [LibraryKioskController::class, 'process']
 
 // Auth Siswa
 Route::middleware('guest:student')->group(function() {
+    // [BARU] Route Khusus Tampilan Login SEB (Tanpa Header/Footer Portal)
+    Route::get('/seb-login', function () {
+        return view('auth.seb_login');
+    })->name('seb.login');
+
     Route::get('/student/login', [StudentAuthController::class, 'showLoginForm'])->name('student.login');
     Route::post('/student/login', [StudentAuthController::class, 'login'])->name('student.login.post');
 });
@@ -216,6 +221,11 @@ Route::middleware('auth')->group(function () {
     // CBT & Ujian
     Route::prefix('cbt')->name('cbt.')->group(function () {
         Route::resource('/', CbtController::class)->parameters(['' => 'exam']);
+        
+        // [BARU] REKAP NILAI & EXPORT
+        Route::get('/recap/{id}', [CbtController::class, 'recap'])->name('recap');
+        Route::get('/export/{id}/{type}', [CbtController::class, 'export'])->name('export');
+        
         Route::get('/exam/{exam}/questions', [CbtController::class, 'manageQuestions'])->name('questions.manage');
         Route::post('/exam/{exam}/questions', [CbtController::class, 'storeQuestion'])->name('questions.store');
         Route::put('/questions/{question}/update', [CbtController::class, 'updateQuestion'])->name('questions.update');
@@ -327,7 +337,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin/ppdb')->name('admin.ppdb.')->group(function () {
         Route::get('/', [AdminPpdbController::class, 'index'])->name('index');
         
-        // --- BARU: Route untuk Simpan Jadwal Pengumuman ---
+        // --- Route untuk Simpan Jadwal Pengumuman ---
         Route::post('/set-schedule', [AdminPpdbController::class, 'setSchedule'])->name('set_schedule');
         Route::post('/{id}/promote', [AdminPpdbController::class, 'promoteToStudent'])->name('promote');     
         Route::get('/{id}/show', [AdminPpdbController::class, 'show'])->name('show');

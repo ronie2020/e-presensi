@@ -7,9 +7,11 @@ use Illuminate\Support\Facades\DB;
 use App\Models\CbtExam;
 use App\Models\CbtQuestion;
 use App\Models\Student;
-use Illuminate\Support\Facades\Storage; // Tambahkan ini untuk handle hapus gambar
+use Illuminate\Support\Facades\Storage; 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\QuestionsImport;
+use App\Exports\CbtScoreExport; 
+use Barryvdh\DomPDF\Facade\Pdf; 
 
 class CbtController extends Controller
 {
@@ -62,24 +64,16 @@ class CbtController extends Controller
 
     /**
      * HAPUS DATA UJIAN (Jadwal, Soal, & Hasil)
-     * Method ini dipanggil saat tombol hapus di dashboard ditekan.
      */
     public function destroy($id)
     {
-        // Cari ujian beserta soalnya
         $exam = CbtExam::with('questions')->findOrFail($id);
 
-        // 1. Bersihkan Gambar Fisik Soal (Agar storage tidak penuh sampah)
         foreach ($exam->questions as $question) {
             if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
                 Storage::delete('public/' . $question->question_image);
             }
         }
-        // 2. Hapus Record Ujian
-        // Database akan otomatis menghapus soal & jawaban siswa jika Foreign Key menggunakan 'onDelete cascade'.
-        // Jika tidak yakin dengan setting database, kita bisa hapus manual relasinya:
-        // $exam->questions()->delete(); 
-        // DB::table('cbt_student_exams')->where('cbt_exam_id', $id)->delete();
         
         $exam->delete();
 
@@ -116,7 +110,6 @@ class CbtController extends Controller
             $imagePath = $request->file('question_image')->store('soal', 'public');
         }
 
-        // Filter opsi agar dinamis (bisa 4 atau 5 opsi)
         $options = [
             'A' => $request->option_A,
             'B' => $request->option_B,
@@ -140,11 +133,10 @@ class CbtController extends Controller
     }
 
     /**
-     * UPDATE SOAL (BARU DITAMBAHKAN)
+     * UPDATE SOAL
      */
     public function updateQuestion(Request $request, $id)
     {
-        // 1. Validasi
         $request->validate([
             'question_text' => 'required',
             'option_A' => 'required',
@@ -154,20 +146,15 @@ class CbtController extends Controller
             'question_image' => 'nullable|image|max:2048'
         ]);
 
-        // 2. Cari Soal
         $question = CbtQuestion::findOrFail($id);
 
-        // 3. Handle Gambar Baru
         if ($request->hasFile('question_image')) {
-            // Hapus gambar lama jika ada
             if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
                 Storage::delete('public/' . $question->question_image);
             }
-            // Simpan gambar baru
             $question->question_image = $request->file('question_image')->store('soal', 'public');
         }
 
-        // 4. Update Opsi
         $options = [
             'A' => $request->option_A,
             'B' => $request->option_B,
@@ -175,12 +162,10 @@ class CbtController extends Controller
             'D' => $request->option_D,
             'E' => $request->option_E ?? null,
         ];
-        // Filter null values
         $options = array_filter($options, fn($value) => !is_null($value) && $value !== '');
 
-        // 5. Simpan Data Lainnya
         $question->question_text = $request->question_text;
-        $question->options = $options; // Laravel otomatis convert array ke JSON jika di model di-cast
+        $question->options = $options; 
         $question->correct_answer = $request->correct_answer;
         $question->score_weight = $request->score_weight;
         
@@ -196,7 +181,6 @@ class CbtController extends Controller
     {
         $question = CbtQuestion::findOrFail($id);
         
-        // Hapus gambar fisik jika ada
         if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
             Storage::delete('public/' . $question->question_image);
         }
@@ -223,7 +207,7 @@ class CbtController extends Controller
     }
 
     /**
-     * Download Template Excel/CSV
+     * Download Template
      */
     public function downloadTemplate()
     {
@@ -240,7 +224,6 @@ class CbtController extends Controller
         $callback = function() use ($columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
-            // Contoh Data Dummy
             fputcsv($file, ['Siapa presiden pertama RI?', 'Soekarno', 'Suharto', 'Habibie', 'Jokowi', 'A', '2']);
             fputcsv($file, ['Ibu kota Jawa Barat adalah?', 'Bandung', 'Jakarta', 'Surabaya', 'Semarang', 'A', '2']);
             fclose($file);
@@ -250,34 +233,27 @@ class CbtController extends Controller
     }
 
     /**
-     * IMPLEMENTASI MONITORING UJIAN (Real-time)
+     * Monitoring Real-time
      */
     public function monitoring($id)
     {
-        // 1. Ambil Data Ujian
         $exam = CbtExam::withCount('questions')->findOrFail($id);
 
-        // 2. Ambil Siswa yang Seharusnya Mengikuti Ujian
         $students = Student::with('schoolClass')
             ->whereHas('schoolClass', function($query) use ($exam) {
-                // Asumsi: Ada kolom 'level' di tabel school_classes atau sesuaikan dengan struktur database Anda
-                // Jika pakai 'name' (misal 7A, 7B), gunakan: $query->where('name', 'like', $exam->class_level . '%');
                 $query->where('name', 'like', $exam->class_level . '%');
             })
             ->orderBy('name')
             ->get();
 
-        // 3. Ambil Progress Pengerjaan dari tabel 'cbt_student_exams'
         $sessions = DB::table('cbt_student_exams')
             ->where('cbt_exam_id', $id)
             ->get()
             ->keyBy('student_id');
 
-        // 4. Gabungkan Data untuk View
         $monitoringData = $students->map(function($student) use ($sessions) {
             $session = $sessions->get($student->id);
             
-            // Default State
             $status = 'Belum Mengerjakan';
             $badgeColor = 'slate';
             $startTime = '-';
@@ -294,8 +270,8 @@ class CbtController extends Controller
                 } else {
                     $status = 'Sedang Mengerjakan';
                     $badgeColor = 'blue';
-                    $isActive = true; // Flag untuk tombol reset
-                    $score = $session->total_score ?? 0; // Nilai sementara
+                    $isActive = true; 
+                    $score = $session->total_score ?? 0;
                 }
             }
 
@@ -311,7 +287,6 @@ class CbtController extends Controller
             ];
         });
 
-        // 5. Statistik Ringkas Real-time
         $stats = [
             'total_students' => $students->count(),
             'working' => $monitoringData->where('status', 'Sedang Mengerjakan')->count(),
@@ -323,7 +298,100 @@ class CbtController extends Controller
     }
 
     /**
-     * RESET LOGIN SISWA
+     * [BARU] Halaman Rekapitulasi Nilai (Report)
+     * FIX: Menggunakan tabel 'cbt_student_answers' (bukan cbt_exam_answers)
+     * FIX: Menggunakan tabel 'classes' untuk relasi kelas
+     */
+    public function recap($id)
+    {
+        $exam = CbtExam::findOrFail($id);
+
+        // 1. Ambil Kunci Jawaban
+        $questions = DB::table('cbt_questions')
+            ->where('cbt_exam_id', $id)
+            ->pluck('correct_answer', 'id');
+
+        // 2. Ambil Data Ujian Siswa
+        $results = DB::table('cbt_student_exams')
+            ->join('students', 'cbt_student_exams.student_id', '=', 'students.id')
+            ->leftJoin('classes', 'students.class_id', '=', 'classes.id')
+            ->where('cbt_student_exams.cbt_exam_id', $id)
+            ->where('cbt_student_exams.status', 'finished') 
+            ->select(
+                'cbt_student_exams.*',
+                'students.name as student_name',
+                'students.student_id as student_nisn',
+                'classes.name as class_name'
+            )
+            ->orderBy('cbt_student_exams.total_score', 'desc')
+            ->get();
+
+        // 3. LOGIKA HITUNG MANUAL (Menggunakan tabel cbt_student_answers)
+        foreach ($results as $row) {
+            $correct = 0;
+            $wrong = 0;
+
+            try {
+                // UPDATE: Menggunakan nama tabel yang BENAR sesuai migrasi
+                $studentAnswers = DB::table('cbt_student_answers')
+                    ->where('cbt_student_exam_id', $row->id)
+                    ->get();
+
+                foreach ($studentAnswers as $ans) {
+                    if (isset($questions[$ans->cbt_question_id])) {
+                        // Bandingkan Jawaban Siswa vs Kunci
+                        if (strtoupper($ans->answer) == strtoupper($questions[$ans->cbt_question_id])) {
+                            $correct++;
+                        } else {
+                            $wrong++;
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                // Fallback jika terjadi error query
+            }
+
+            // Set property untuk ditampilkan di View & Export
+            $row->correct_answers = $correct;
+            $row->wrong_answers = $wrong;
+        }
+
+        // Hitung Statistik
+        $stats = [
+            'average' => $results->avg('total_score') ?? 0,
+            'max_score' => $results->max('total_score') ?? 0,
+            'min_score' => $results->min('total_score') ?? 0,
+            'passed_count' => $results->where('total_score', '>=', $exam->passing_grade)->count(),
+        ];
+
+        return view('cbt.recap', compact('exam', 'results', 'stats'));
+    }
+
+    /**
+     * [BARU] Export Excel / PDF
+     */
+    public function export($id, $type)
+    {
+        $exam = CbtExam::findOrFail($id);
+        $fileName = 'REKAP_NILAI_' . \Illuminate\Support\Str::slug($exam->title) . '_' . date('Y-m-d');
+
+        if ($type == 'excel') {
+            // Gunakan logika recap untuk mendapatkan data yang sudah dihitung
+            $recapData = $this->recap($id);
+            $results = $recapData->getData()['results']; 
+
+            return Excel::download(new CbtScoreExport($results, $exam->passing_grade), $fileName . '.xlsx');
+        } 
+        
+        if ($type == 'pdf') {
+            return back()->with('error', 'Fitur PDF belum dikonfigurasi sepenuhnya. Gunakan Excel terlebih dahulu.');
+        }
+
+        return back()->with('error', 'Tipe file tidak valid.');
+    }
+
+    /**
+     * Reset Ujian
      */
     public function resetExam($exam_id, $student_id)
     {
@@ -336,19 +404,19 @@ class CbtController extends Controller
     }
 
     /**
-     * DAFTAR HASIL UJIAN
+     * Hasil Ujian (Dashboard Global - Opsional)
      */
     public function results()
     {
         $results = DB::table('cbt_student_exams')
             ->join('students', 'cbt_student_exams.student_id', '=', 'students.id')
             ->join('cbt_exams', 'cbt_student_exams.cbt_exam_id', '=', 'cbt_exams.id')
-            ->leftJoin('school_classes', 'students.school_class_id', '=', 'school_classes.id')
+            ->leftJoin('classes', 'students.class_id', '=', 'classes.id')
             ->where('cbt_student_exams.status', 'finished')
             ->select(
                 'cbt_student_exams.*',
                 'students.name as student_name',
-                'school_classes.name as class_name',
+                'classes.name as class_name',
                 'cbt_exams.title as exam_title',
                 'cbt_exams.subject_name'
             )
@@ -364,12 +432,8 @@ class CbtController extends Controller
     public function download_seb($id)
     {
         $exam = CbtExam::findOrFail($id);
+        $startUrl = route('seb.login'); 
 
-        // [PERBAIKAN] Gunakan route 'student.login' agar mengarah ke Login Siswa
-        // Sebelumnya: route('login') -> mengarah ke Login Guru/Admin
-        $startUrl = route('student.login'); 
-
-        // Generate Config XML
         $sebConfig = '<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -406,14 +470,11 @@ class CbtController extends Controller
     }
 
     /**
-     * [BARU] Refresh Token Manual
+     * Refresh Token Manual
      */
     public function refreshToken($id)
     {
         $exam = CbtExam::findOrFail($id);
-        
-        // Generate Token Baru (Huruf Besar & Angka, 5 Karakter)
-        // Menggunakan Str::upper(Str::random(5)) adalah cara termudah
         $newToken = strtoupper(\Illuminate\Support\Str::random(5));
         
         $exam->update([
