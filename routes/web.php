@@ -202,7 +202,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/students/{student}/card', [StudentController::class, 'card'])->name('students.card');
     Route::resource('students', StudentController::class); 
     Route::resource('classes', SchoolClassController::class);
+    
+    // --- MANAJEMEN USER (GURU & STAFF) ---
+    // Route khusus export/import harus DI ATAS resource route agar tidak dianggap sebagai {id}
+    Route::get('users/export', [UserController::class, 'export'])->name('users.export');
+    Route::post('users/import', [UserController::class, 'import'])->name('users.import');
     Route::resource('users', UserController::class);
+    // -------------------------------------
+
     Route::resource('subjects', SubjectController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::get('/achievements/export', [AchievementController::class, 'export'])->name('achievements.export');
     
@@ -222,7 +229,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('cbt')->name('cbt.')->group(function () {
         Route::resource('/', CbtController::class)->parameters(['' => 'exam']);
         
-        // [BARU] REKAP NILAI & EXPORT
+        // REKAP NILAI & EXPORT
         Route::get('/recap/{id}', [CbtController::class, 'recap'])->name('recap');
         Route::get('/export/{id}/{type}', [CbtController::class, 'export'])->name('export');
         
@@ -237,7 +244,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/reset/{exam}/{student}', [CbtController::class, 'resetExam'])->name('reset');
         Route::get('/results', [CbtController::class, 'results'])->name('results');
 
-        // [BARU] Route Auto Rotate Token (AJAX)
+        // Route Auto Rotate Token (AJAX)
         Route::post('/exam/{exam}/auto-token', [CbtController::class, 'autoRotateToken'])->name('auto_token');
     });
 

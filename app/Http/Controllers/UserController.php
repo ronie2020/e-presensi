@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
+// Import library Excel & Class Export/Import
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\UsersExport;
+use App\Imports\UsersImport;
+
 class UserController extends Controller
 {
     public function index()
@@ -132,5 +137,38 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')->with('success', 'Pengguna berhasil dihapus.');
+    }
+
+    // ===========================================================
+    // FITUR EXPORT & IMPORT EXCEL
+    // ===========================================================
+
+    public function export()
+    {
+        // Mendownload file Excel bernama 'data-pengguna.xlsx'
+        return Excel::download(new UsersExport, 'data-pengguna.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        // Validasi file harus excel
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:5120' // Max 5MB
+        ]);
+
+        try {
+            // Proses import menggunakan Class UsersImport
+            Excel::import(new UsersImport, $request->file('file'));
+            
+            return redirect()->back()->with('success', 'Data pengguna berhasil di-import dari Excel!');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            // Jika ada error validasi di dalam Excel (misal email duplikat)
+             $failures = $e->failures();
+             $errorMsg = "Gagal Import. Baris ke-" . $failures[0]->row() . ": " . implode(', ', $failures[0]->errors());
+             return redirect()->back()->withErrors(['file' => $errorMsg]);
+        } catch (\Exception $e) {
+            // Error umum lainnya
+            return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan saat import: ' . $e->getMessage()]);
+        }
     }
 }

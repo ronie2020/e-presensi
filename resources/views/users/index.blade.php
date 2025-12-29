@@ -159,17 +159,98 @@
                 </div>
 
                 {{-- KOLOM KANAN: DAFTAR USER --}}
-                <div class="lg:col-span-2">
-                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full min-h-[600px]">
+                <div class="lg:col-span-2" x-data="{ showImport: false }">
+                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full min-h-[600px] relative">
                         
                         {{-- Toolbar Table --}}
-                        <div class="p-8 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
+                        <div class="p-8 border-b border-slate-50 bg-slate-50/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
                                 <i class="ph-fill ph-list-dashes text-blue-900"></i> Daftar Pengguna
+                                <span class="bg-white border border-slate-200 text-[10px] font-black px-3 py-1.5 rounded-xl text-slate-500 shadow-sm ml-2">
+                                    {{ $users->total() }}
+                                </span>
                             </h3>
-                            <span class="bg-white border border-slate-200 text-[10px] font-black px-3 py-1.5 rounded-xl text-slate-500 shadow-sm">
-                                {{ $users->total() }} Akun
-                            </span>
+                            
+                            {{-- BUTTON GROUP: EXPORT & IMPORT --}}
+                            <div class="flex items-center gap-2">
+                                {{-- Tombol Export --}}
+                                <a href="{{ route('users.export') }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-100 hover:bg-emerald-100 hover:border-emerald-200 transition-all shadow-sm group">
+                                    <i class="ph-bold ph-file-xls text-lg group-hover:scale-110 transition-transform"></i>
+                                    <span>Export Excel</span>
+                                </a>
+
+                                {{-- Tombol Import --}}
+                                <button @click="showImport = true" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 text-blue-600 text-xs font-bold border border-blue-100 hover:bg-blue-100 hover:border-blue-200 transition-all shadow-sm group">
+                                    <i class="ph-bold ph-upload-simple text-lg group-hover:scale-110 transition-transform"></i>
+                                    <span>Import</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- MODAL IMPORT (POPUP) --}}
+                        <div x-show="showImport" style="display: none;" 
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 backdrop-blur-none"
+                             x-transition:enter-end="opacity-100 backdrop-blur-sm"
+                             x-transition:leave="transition ease-in duration-200"
+                             x-transition:leave-start="opacity-100 backdrop-blur-sm"
+                             x-transition:leave-end="opacity-0 backdrop-blur-none"
+                             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+                            
+                            <div @click.away="showImport = false" 
+                                 x-transition:enter="transition ease-out duration-300"
+                                 x-transition:enter-start="opacity-0 scale-90 translate-y-4"
+                                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                                 x-transition:leave="transition ease-in duration-200"
+                                 x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                                 x-transition:leave-end="opacity-0 scale-90 translate-y-4"
+                                 class="bg-white w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl shadow-blue-900/20 border border-white relative">
+                                
+                                {{-- Close Button --}}
+                                <button @click="showImport = false" class="absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors">
+                                    <i class="ph-bold ph-x"></i>
+                                </button>
+
+                                <div class="text-center mb-8">
+                                    <div class="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-5 text-blue-600 shadow-inner shadow-blue-100">
+                                        <i class="ph-duotone ph-microsoft-excel-logo text-4xl"></i>
+                                    </div>
+                                    <h3 class="text-xl font-black text-slate-800">Import Data User</h3>
+                                    <p class="text-slate-500 text-sm font-medium mt-2 leading-relaxed">
+                                        Upload file Excel (.xlsx) untuk menambahkan user secara massal ke dalam sistem.
+                                    </p>
+                                </div>
+
+                                <form action="{{ route('users.import') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                                    @csrf
+                                    
+                                    {{-- Custom File Input --}}
+                                    <div class="relative group cursor-pointer">
+                                        <input type="file" name="file" required accept=".xlsx, .xls"
+                                               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                               onchange="document.getElementById('fileNameDisplay').innerText = this.files[0].name; document.getElementById('fileIcon').classList.add('text-emerald-500'); document.getElementById('fileContainer').classList.add('border-emerald-400', 'bg-emerald-50');">
+                                        
+                                        <div id="fileContainer" class="border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center group-hover:border-blue-400 group-hover:bg-blue-50/50 transition-all duration-300">
+                                            <i id="fileIcon" class="ph-duotone ph-cloud-arrow-up text-4xl text-slate-300 group-hover:text-blue-500 mb-3 transition-colors"></i>
+                                            <p class="text-sm font-bold text-slate-600 group-hover:text-blue-600 transition-colors" id="fileNameDisplay">
+                                                Klik untuk pilih file Excel
+                                            </p>
+                                            <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Maksimal 5MB</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col gap-3">
+                                        <button type="submit" class="w-full py-4 rounded-2xl bg-blue-900 text-white font-bold shadow-xl shadow-blue-900/20 hover:bg-blue-800 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2">
+                                            <i class="ph-bold ph-upload-simple text-lg"></i> Proses Import
+                                        </button>
+                                        
+                                        {{-- Link Template --}}
+                                        <a href="{{ asset('template/template_users.xlsx') }}" class="w-full py-4 rounded-2xl bg-white border border-slate-200 text-slate-500 font-bold hover:bg-slate-50 hover:text-slate-700 transition-colors text-center text-sm flex items-center justify-center gap-2">
+                                            <i class="ph-bold ph-download-simple"></i> Download Template
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                         
                         <div class="overflow-x-auto flex-1 custom-scrollbar">
