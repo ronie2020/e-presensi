@@ -60,6 +60,9 @@ use App\Http\Controllers\LetterIncomingController;
 use App\Http\Controllers\SptController;
 use App\Http\Controllers\SppdController;
 
+// [PENTING] Import Middleware CheckSebMode
+use App\Http\Middleware\CheckSebMode;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -129,9 +132,11 @@ Route::middleware('guest:student')->group(function() {
 Route::post('/student/logout', [StudentAuthController::class, 'logout'])->name('student.logout');
 
 // Area Privat Siswa (Ujian & Belajar)
-Route::middleware(['auth:student'])->group(function () {
+// [MODIFIKASI] Menambahkan CheckSebMode::class di sini
+Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
     
     // A. LMS SISWA (Belajar & Tugas)
+    // Jika login pakai SEB, akses ke sini akan DITOLAK oleh middleware CheckSebMode
     Route::prefix('students/learning')->name('students.learning.')->group(function () {
         Route::get('/', [StudentLmsController::class, 'index'])->name('index');
         Route::get('/subject/{subject_id}', [StudentLmsController::class, 'showSubject'])->name('subject.show');
@@ -144,8 +149,11 @@ Route::middleware(['auth:student'])->group(function () {
     });
 
     // B. UJIAN SISWA (CBT)
+    // Route ini masuk whitelist CheckSebMode, jadi bisa diakses via SEB
     Route::prefix('student/exam')->name('student.exam.')->group(function () {
         Route::get('/', [StudentExamController::class, 'index'])->name('index');
+        
+        // Middleware 'seb' bawaan Anda tetap ada untuk keamanan ganda (validasi config SEB)
         Route::middleware(['seb'])->group(function () {
             Route::get('/{exam}/start', [StudentExamController::class, 'showStart'])->name('show');
             Route::post('/{exam}/start', [StudentExamController::class, 'start'])->name('start');
