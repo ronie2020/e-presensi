@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Area Siswa') }}</title>
+    <title>{{ config('app.name', 'Ujian Online') }}</title>
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -14,111 +14,84 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        /* Custom Scrollbar untuk menu mobile jika perlu */
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="font-sans antialiased bg-slate-50">
     
-    <nav class="bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 border-b border-slate-800 fixed w-full z-50 top-0 shadow-xl shadow-blue-900/10 transition-all">
+    {{-- NAVBAR: TEMA ROSE/DARK (SERIOUS & ALERT) --}}
+    <nav class="bg-slate-900 border-b border-rose-900/30 fixed w-full z-50 top-0 shadow-2xl shadow-rose-900/10">
+        {{-- Aksen Garis Atas --}}
+        <div class="h-1 w-full bg-gradient-to-r from-rose-500 via-orange-500 to-rose-500"></div>
+        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 
-                <div class="flex items-center gap-8">
-                    <a href="{{ route('students.learning.index') }}" class="flex items-center gap-3 shrink-0 group">
-                        <div class="w-10 h-10 bg-blue-950 border border-blue-800 rounded-xl flex items-center justify-center text-yellow-400 shadow-lg shadow-blue-900/50 group-hover:scale-105 transition-transform">
-                            <i class="ph-bold ph-graduation-cap text-2xl"></i>
+                <div class="flex items-center gap-6">
+                    {{-- Logo Area --}}
+                    <div class="flex items-center gap-3 shrink-0">
+                        <div class="w-9 h-9 bg-rose-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-rose-600/20 animate-pulse">
+                            <i class="ph-bold ph-warning-circle text-xl"></i>
                         </div>
-                        <div class="leading-tight hidden sm:block">
-                            <h1 class="font-bold text-white text-lg tracking-tight group-hover:text-blue-200 transition-colors">Area Siswa</h1>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-yellow-400 transition-colors">SMPN 3 Lakbok</p>
+                        <div class="leading-tight">
+                            <h1 class="font-bold text-white text-lg tracking-tight">Ujian Online</h1>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sistem Terhubung</p>
+                            </div>
                         </div>
-                    </a>
+                    </div>
 
-                    <div class="hidden md:flex space-x-2">
-                        <a href="{{ route('students.learning.index') }}" 
-                           class="px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all border border-transparent
-                           {{ request()->routeIs('students.learning.*') 
-                                ? 'bg-blue-800/50 text-yellow-400 border-blue-700/50 shadow-inner' 
-                                : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
-                            <i class="ph-fill ph-books text-lg {{ request()->routeIs('students.learning.*') ? 'text-yellow-400' : 'text-slate-400' }}"></i>
-                            Ruang Belajar
-                        </a>
-
+                    {{-- Navigation Links (Minimalist) --}}
+                    <div class="hidden md:flex ml-8 border-l border-white/10 pl-8">
                         <a href="{{ route('student.exam.index') }}" 
-                           class="px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all border border-transparent
-                           {{ request()->routeIs('student.exam.*') 
-                                ? 'bg-rose-900/30 text-rose-400 border-rose-800/50 shadow-inner' 
-                                : 'text-slate-300 hover:bg-white/5 hover:text-white' }}">
-                            <i class="ph-fill ph-desktop text-lg {{ request()->routeIs('student.exam.*') ? 'text-rose-400' : 'text-slate-400' }}"></i>
-                            Ujian Online
+                           class="text-rose-400 text-sm font-bold flex items-center gap-2">
+                            <i class="ph-fill ph-list-checks"></i> Daftar Ujian
                         </a>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-5">
-                    <div class="hidden md:block text-right">
-                        <p class="text-sm font-bold text-slate-200 leading-none">{{ Auth::guard('student')->user()->name ?? 'Siswa' }}</p>
-                        <p class="text-[10px] text-blue-300 font-mono mt-1 tracking-wider">{{ Auth::guard('student')->user()->student_id ?? '-' }}</p>
+                {{-- User Info (Simplified) --}}
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs font-bold text-slate-300">{{ Auth::guard('student')->user()->name }}</p>
+                        <p class="text-[10px] text-slate-500">{{ Auth::guard('student')->user()->student_id }}</p>
                     </div>
-
-                    <div class="hidden md:block h-8 w-px bg-slate-700"></div>
-
-                    <form method="POST" action="{{ route('student.logout') }}">
-                        @csrf
-                        <button type="submit" class="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:bg-rose-900/50 hover:text-rose-400 hover:border-rose-800 transition-all group" title="Keluar">
-                            <i class="ph-bold ph-sign-out text-lg group-hover:-translate-x-0.5 transition-transform"></i>
-                        </button>
-                    </form>
+                    
+                    {{-- PERBAIKAN: Tombol Keluar Mode Ujian diarahkan ke PORTAL, bukan Learning --}}
+                    <a href="{{ route('portal.index') }}" class="px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-slate-300 text-xs font-bold hover:bg-white/10 hover:text-white transition-colors flex items-center gap-2" title="Kembali ke Portal Utama">
+                        <i class="ph-bold ph-door-open"></i>
+                        <span class="hidden sm:inline">Keluar Mode Ujian</span>
+                    </a>
                 </div>
             </div>
         </div>
     </nav>
 
-    <div class="md:hidden fixed bottom-0 left-0 w-full bg-slate-900 border-t border-slate-800 z-50 px-6 py-2 flex justify-around shadow-[0_-4px_20px_-1px_rgba(0,0,0,0.3)] backdrop-blur-lg bg-opacity-95">
+    {{-- MOBILE BOTTOM (Exam Focused) --}}
+    <div class="md:hidden fixed bottom-0 left-0 w-full bg-slate-900 border-t border-rose-900/30 z-50 px-6 py-3 flex justify-between items-center">
+        {{-- PERBAIKAN: Tombol Keluar Mobile juga ke PORTAL --}}
+        <a href="{{ route('portal.index') }}" class="flex flex-col items-center gap-1 text-slate-500 hover:text-white">
+            <i class="ph-bold ph-door-open text-xl"></i>
+            <span class="text-[10px] font-bold">Keluar</span>
+        </a>
         
-        <a href="{{ route('students.learning.index') }}" class="flex flex-col items-center gap-1 p-2 rounded-xl transition-all {{ request()->routeIs('students.learning.*') ? 'text-yellow-400' : 'text-slate-500 hover:text-slate-300' }}">
-            <div class="{{ request()->routeIs('students.learning.*') ? 'bg-blue-900/50 px-4 py-1 rounded-full mb-0.5' : '' }}">
-                <i class="ph-fill ph-books text-2xl"></i>
-            </div>
-            <span class="text-[10px] font-bold">Belajar</span>
-        </a>
+        <div class="px-6 py-2 bg-rose-900/20 border border-rose-500/30 rounded-full text-rose-400 flex items-center gap-2">
+            <i class="ph-fill ph-desktop text-lg"></i>
+            <span class="text-xs font-bold">Mode Ujian</span>
+        </div>
 
-        <a href="{{ route('student.exam.index') }}" class="flex flex-col items-center gap-1 p-2 rounded-xl transition-all {{ request()->routeIs('student.exam.*') ? 'text-rose-400' : 'text-slate-500 hover:text-slate-300' }}">
-             <div class="{{ request()->routeIs('student.exam.*') ? 'bg-rose-900/20 px-4 py-1 rounded-full mb-0.5' : '' }}">
-                <i class="ph-fill ph-desktop text-2xl"></i>
-             </div>
-            <span class="text-[10px] font-bold">Ujian</span>
-        </a>
-
-        <form method="POST" action="{{ route('student.logout') }}" class="flex flex-col items-center gap-1 p-2">
-            @csrf
-            <button type="submit" class="flex flex-col items-center text-slate-500 hover:text-red-400">
-                <i class="ph-bold ph-sign-out text-2xl"></i>
-                <span class="text-[10px] font-bold mt-1">Keluar</span>
-            </button>
-        </form>
+        <div class="w-8"></div> {{-- Spacer for symmetry --}}
     </div>
 
-    <div class="pt-16 min-h-screen flex flex-col">
-        @if(isset($header))
-            <header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-4">
-                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-                    {{ $header }}
-                </div>
-            </header>
-        @endif
-
-        <main class="flex-1">
-            @yield('content') {{-- Kompatibel dengan @extends --}}
-            {{ $slot ?? '' }} {{-- Kompatibel dengan Component --}}
+    <div class="pt-20 min-h-screen flex flex-col bg-slate-50">
+        <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+            {{ $slot ?? '' }}
+            @yield('content')
         </main>
 
-        <footer class="text-center py-8 text-slate-400 text-xs font-medium pb-24 md:pb-8">
-            <p>&copy; {{ date('Y') }} SMPN 3 Lakbok. Learning Management System.</p>
+        <footer class="text-center py-6 text-slate-400 text-[10px] font-medium pb-20 md:pb-6">
+            <p>Computer Based Test (CBT) System &copy; {{ date('Y') }}</p>
         </footer>
     </div>
-
 </body>
 </html>

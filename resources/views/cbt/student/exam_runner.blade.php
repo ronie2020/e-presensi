@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" async></script>
 
     <style>
-        body { font-family: sans-serif; margin: 0; background-color: #f8fafc; color: #1e293b; user-select: none; -webkit-user-select: none; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; background-color: #f8fafc; color: #1e293b; user-select: none; -webkit-user-select: none; }
         [x-cloak] { display: none !important; }
 
         /* Loading Overlay */
@@ -22,7 +22,8 @@
         }
         .spinner {
             width: 40px; height: 40px; border: 4px solid #e2e8f0;
-            border-top: 4px solid #2563eb; border-radius: 50%;
+            border-top: 4px solid #e11d48; /* Rose-600 */
+            border-radius: 50%;
             animation: spin 1s linear infinite; margin-bottom: 15px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -32,9 +33,6 @@
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 
-    {{-- 
-        DATA INJECTION & LOGIC
-    --}}
     <script>
         // Data Ujian Disimpan di Variable Global window.examData
         window.examData = {
@@ -47,19 +45,16 @@
         // Definisi Logic Aplikasi (AlpineJS)
         window.examApp = function() {
             return {
-                // Mengambil data dari variable global
                 questions: window.examData.questions || [],
                 timeLeft: window.examData.timeLeft,
                 sessionId: window.examData.sessionId,
                 examId: window.examData.examId,
-
                 currentQuestion: 0,
                 totalQuestions: 0,
                 formattedTime: '00:00:00',
                 answers: {}, 
                 markedQuestions: {},
                 unsavedQuestions: new Set(), 
-                
                 initComplete: false,
                 isOnline: navigator.onLine,
                 saveStatus: 'idle',
@@ -71,35 +66,20 @@
                 endTimeTarget: null,
 
                 initData() {
-                    console.log("Memulai Inisialisasi Ujian...");
                     try {
                         this.totalQuestions = this.questions.length;
-                        if(this.totalQuestions === 0) {
-                            alert('Soal tidak ditemukan! Hubungi proktor.');
-                        }
-
-                        // Timer logic
+                        if(this.totalQuestions === 0) alert('Soal tidak ditemukan! Hubungi proktor.');
                         const now = new Date().getTime();
                         this.endTimeTarget = now + (this.timeLeft * 1000);
-
-                        // Load progress lokal & DB
-                        try { this.loadLocalProgress(); } catch (e) { console.warn('LS Error'); }
+                        try { this.loadLocalProgress(); } catch (e) {}
                         this.questions.forEach(q => {
-                            if(q.saved_answer && !this.answers[q.id]) {
-                                this.answers[q.id] = q.saved_answer;
-                            }
+                            if(q.saved_answer && !this.answers[q.id]) this.answers[q.id] = q.saved_answer;
                         });
-
                     } catch (error) {
-                        console.error('CRITICAL ERROR:', error);
                         alert('Terjadi kesalahan sistem: ' + error.message);
                     } finally {
                         this.initComplete = true;
-                        // Hapus loading overlay
-                        setTimeout(() => {
-                             const overlay = document.getElementById('loading-overlay');
-                             if(overlay) overlay.style.display = 'none';
-                        }, 500);
+                        setTimeout(() => { const overlay = document.getElementById('loading-overlay'); if(overlay) overlay.style.display = 'none'; }, 500);
                     }
                 },
 
@@ -110,11 +90,7 @@
                     this.answers[questionId] = answer;
                     this.unsavedQuestions.add(questionId); 
                     try { this.saveToLocal(); } catch(e){}
-                    
-                    if (!this.isOnline) {
-                        this.saveStatus = 'pending';
-                        return;
-                    }
+                    if (!this.isOnline) { this.saveStatus = 'pending'; return; }
                     this.saveStatus = 'saving';
                     try {
                         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -126,19 +102,12 @@
                         if (!response.ok) throw new Error('Server reject');
                         this.unsavedQuestions.delete(questionId);
                         if (this.unsavedQuestions.size === 0) setTimeout(() => this.saveStatus = 'saved', 300);
-                    } catch (error) {
-                        this.saveStatus = 'pending';
-                    }
+                    } catch (error) { this.saveStatus = 'pending'; }
                 },
 
                 saveToLocal() {
                     try {
-                        const progress = {
-                            answers: this.answers,
-                            marked: this.markedQuestions,
-                            unsaved: Array.from(this.unsavedQuestions),
-                            timestamp: new Date().getTime()
-                        };
+                        const progress = { answers: this.answers, marked: this.markedQuestions, unsaved: Array.from(this.unsavedQuestions), timestamp: new Date().getTime() };
                         localStorage.setItem(`exam_${this.sessionId}`, JSON.stringify(progress));
                     } catch (e) {}
                 },
@@ -173,15 +142,10 @@
                 initSecurity() {
                     const self = this;
                     if (typeof document.hidden !== "undefined") {
-                        document.addEventListener("visibilitychange", () => {
-                            if (document.hidden) self.triggerViolation();
-                        });
+                        document.addEventListener("visibilitychange", () => { if (document.hidden) self.triggerViolation(); });
                     }
                     window.addEventListener("blur", () => {
-                       setTimeout(() => {
-                           if(document.activeElement && document.activeElement.tagName === 'IFRAME') return; 
-                           self.triggerViolation();
-                       }, 1000); 
+                       setTimeout(() => { if(document.activeElement && document.activeElement.tagName === 'IFRAME') return; self.triggerViolation(); }, 1000); 
                     });
                     window.addEventListener('keydown', (e) => {
                         if (e.ctrlKey && ['u','U','s','S'].includes(e.key)) e.preventDefault();
@@ -232,20 +196,16 @@
                 finishExam() {
                     const answeredCount = Object.keys(this.answers).length;
                     const remaining = this.totalQuestions - answeredCount;
-                    if (typeof Swal === 'undefined') {
-                        if(confirm('Kumpulkan Jawaban?')) this.submitExam();
-                        return;
-                    }
+                    if (typeof Swal === 'undefined') { if(confirm('Kumpulkan Jawaban?')) this.submitExam(); return; }
                     Swal.fire({
                         title: 'Kumpulkan Jawaban?',
                         html: remaining > 0 ? `Masih ada <b>${remaining}</b> soal kosong.` : "Pastikan semua jawaban benar.",
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonText: 'Ya, Kumpulkan',
-                        confirmButtonColor: '#059669'
-                    }).then((result) => {
-                        if (result.isConfirmed) this.submitExam();
-                    });
+                        confirmButtonColor: '#e11d48', // Rose color
+                        cancelButtonText: 'Batal'
+                    }).then((result) => { if (result.isConfirmed) this.submitExam(); });
                 },
 
                 submitExam(forced = false) {
@@ -253,9 +213,7 @@
                     if(this.unsavedQuestions.size > 0) {
                         if(typeof Swal !== 'undefined') Swal.fire({ title: 'Sinkronisasi...', didOpen: () => Swal.showLoading() });
                         this.syncPendingAnswers().then(() => this.doSubmit(forced));
-                    } else {
-                        this.doSubmit(forced);
-                    }
+                    } else { this.doSubmit(forced); }
                 },
 
                 doSubmit(forced) {
@@ -298,9 +256,6 @@
     <div id="loading-overlay">
         <div class="spinner"></div>
         <span style="font-size:14px; font-weight:bold; color:#64748b;">Memuat Soal...</span>
-        <button onclick="document.getElementById('loading-overlay').style.display='none'" style="margin-top:20px; font-size:10px; color:#94a3b8; border:none; background:none; text-decoration:underline; cursor:pointer;">
-            Klik jika macet
-        </button>
     </div>
 
     <!-- SECURITY OVERLAY -->
@@ -316,7 +271,7 @@
                 Anda terdeteksi meninggalkan halaman ujian.<br>
                 Sisa toleransi: <span class="font-black text-red-600 text-lg" x-text="maxViolations - violationCount"></span> kali.
             </p>
-            <button @click="resumeExam()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition">Saya Mengerti</button>
+            <button @click="resumeExam()" class="w-full bg-rose-600 hover:bg-rose-700 text-white py-3 rounded-xl font-bold transition">Saya Mengerti</button>
         </div>
     </div>
 
@@ -327,28 +282,28 @@
         <i class="ph-bold ph-wifi-slash"></i> KONEKSI TERPUTUS - Jawaban disimpan di perangkat Anda
     </div>
 
-    <!-- NAVBAR -->
-    <nav class="fixed top-0 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 z-50 h-16 flex items-center justify-between px-4 shadow-sm">
+    <!-- NAVBAR RUNNER (DARK THEME) -->
+    <nav class="fixed top-0 w-full bg-slate-900 border-b border-rose-900/30 z-50 h-16 flex items-center justify-between px-4 shadow-xl shadow-slate-900/20">
         <div class="flex items-center gap-3 overflow-hidden">
-            <div class="h-9 w-9 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+            <div class="h-9 w-9 bg-rose-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-rose-600/30 animate-pulse">
                 <i class="ph-bold ph-student text-xl"></i>
             </div>
-            <div class="hidden md:block truncate">
-                <h1 class="text-sm font-extrabold text-slate-900 leading-tight truncate max-w-[200px]">{{ $exam->title }}</h1>
-                <p class="text-[10px] uppercase tracking-wider font-bold text-slate-500">{{ $exam->subject_name }}</p>
+            <div class="hidden md:block truncate text-white">
+                <h1 class="text-sm font-extrabold leading-tight truncate max-w-[200px]">{{ $exam->title }}</h1>
+                <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400">{{ $exam->subject_name }}</p>
             </div>
         </div>
 
         <div class="flex items-center gap-3">
-            <div class="hidden md:flex bg-red-50 text-red-600 px-3 py-1.5 rounded-lg border border-red-100 text-xs font-bold items-center gap-2" x-show="violationCount > 0" x-cloak>
+            <div class="hidden md:flex bg-rose-500/10 text-rose-400 px-3 py-1.5 rounded-lg border border-rose-500/20 text-xs font-bold items-center gap-2" x-show="violationCount > 0" x-cloak>
                 <i class="ph-fill ph-warning-circle"></i>
                 <span x-text="violationCount + '/' + maxViolations"></span>
             </div>
-            <div class="bg-white text-slate-700 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2" :class="timeLeft < 300 ? 'border-red-500 text-red-600 bg-red-50 animate-pulse' : ''">
-                <i class="ph-duotone ph-timer text-xl"></i>
+            <div class="bg-slate-800 text-white px-4 py-1.5 rounded-lg border border-slate-700 shadow-sm flex items-center gap-2" :class="timeLeft < 300 ? 'border-rose-500 text-rose-500 bg-rose-900/20 animate-pulse' : ''">
+                <i class="ph-duotone ph-timer text-xl" :class="timeLeft < 300 ? 'text-rose-500' : 'text-slate-400'"></i>
                 <span x-text="formattedTime" class="font-mono font-bold text-lg tracking-widest">00:00:00</span>
             </div>
-            <button @click="showMobileMap = !showMobileMap" class="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg">
+            <button @click="showMobileMap = !showMobileMap" class="lg:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg">
                 <i class="ph-bold ph-squares-four text-xl"></i>
             </button>
         </div>
@@ -363,7 +318,7 @@
                 
                 <div class="bg-slate-50 px-6 py-3 border-b border-slate-200 flex justify-between items-center shrink-0">
                     <div class="flex items-center gap-3">
-                        <span class="bg-blue-600 text-white text-xs font-bold px-2.5 py-1 rounded-md shadow-sm">
+                        <span class="bg-slate-800 text-white text-xs font-bold px-3 py-1.5 rounded-md shadow-sm border border-slate-700">
                             SOAL NO. <span x-text="currentQuestion + 1"></span>
                         </span>
                         <label class="flex items-center gap-2 cursor-pointer select-none">
@@ -397,12 +352,15 @@
                             <div class="space-y-3">
                                 <template x-for="(optionText, optionKey) in questions[currentQuestion].options" :key="optionKey">
                                     <label class="relative flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group"
-                                        :class="answers[questions[currentQuestion].id] === optionKey ? 'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500' : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'">
+                                        :class="answers[questions[currentQuestion].id] === optionKey ? 'border-rose-500 bg-rose-50/50 ring-1 ring-rose-500' : 'border-slate-200 hover:border-slate-400 hover:bg-slate-50'">
                                         <input type="radio" :name="'q_' + questions[currentQuestion].id" :value="optionKey" @change="selectAnswer(questions[currentQuestion].id, optionKey)" x-model="answers[questions[currentQuestion].id]" class="peer sr-only">
+                                        
+                                        <!-- Indikator Huruf -->
                                         <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm shrink-0 transition-all border mt-0.5"
-                                            :class="answers[questions[currentQuestion].id] === optionKey ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-500 border-slate-200 group-hover:border-blue-300 group-hover:text-blue-600'">
+                                            :class="answers[questions[currentQuestion].id] === optionKey ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-slate-500 border-slate-200 group-hover:border-slate-400 group-hover:text-slate-700'">
                                             <span x-text="optionKey"></span>
                                         </div>
+                                        
                                         <div class="flex-1">
                                             <span class="text-slate-700 font-medium peer-checked:text-slate-900 text-sm md:text-base" x-text="optionText"></span>
                                         </div>
@@ -418,7 +376,7 @@
                     <button @click="prevQuestion" :disabled="currentQuestion === 0" class="px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed text-slate-600 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 text-sm">
                         <i class="ph-bold ph-arrow-left"></i> <span class="hidden sm:inline">Sebelumnya</span>
                     </button>
-                    <button @click="nextQuestion" x-show="currentQuestion < totalQuestions - 1" class="px-6 py-2.5 rounded-xl font-bold bg-slate-900 text-white hover:bg-blue-600 flex items-center gap-2 shadow-lg shadow-slate-900/10 hover:shadow-blue-600/20 transition-all text-sm">
+                    <button @click="nextQuestion" x-show="currentQuestion < totalQuestions - 1" class="px-6 py-2.5 rounded-xl font-bold bg-slate-900 text-white hover:bg-slate-800 flex items-center gap-2 shadow-lg shadow-slate-900/10 transition-all text-sm">
                         <span class="hidden sm:inline">Selanjutnya</span> <i class="ph-bold ph-arrow-right"></i>
                     </button>
                     <button @click="finishExam" x-show="currentQuestion === totalQuestions - 1" class="px-6 py-2.5 rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 flex items-center gap-2 shadow-lg shadow-emerald-500/30 transition-all text-sm">
@@ -429,7 +387,7 @@
         </div>
 
         <!-- KOLOM KANAN: NAVIGASI NOMOR -->
-        <div class="lg:w-1/4 w-full fixed lg:static inset-0 z-40 lg:z-auto bg-slate-900/50 lg:bg-transparent backdrop-blur-sm lg:backdrop-blur-none"
+        <div class="lg:w-1/4 w-full fixed lg:static inset-0 z-40 lg:z-auto bg-slate-900/80 lg:bg-transparent backdrop-blur-sm lg:backdrop-blur-none"
              x-show="showMobileMap || window.innerWidth >= 1024" @click.self="showMobileMap = false" x-transition.opacity style="display: none;" 
              :style="{'display': (showMobileMap || window.innerWidth >= 1024) ? 'block' : 'none'}">
             <div class="bg-white h-full lg:h-auto lg:rounded-2xl shadow-xl lg:shadow-sm border-l lg:border border-slate-200 p-5 w-3/4 max-w-xs ml-auto lg:w-full lg:ml-0 overflow-y-auto custom-scroll flex flex-col">
@@ -437,23 +395,26 @@
                     <h3 class="font-bold text-slate-800">Daftar Soal</h3>
                     <button @click="showMobileMap = false" class="text-slate-500"><i class="ph-bold ph-x text-xl"></i></button>
                 </div>
-                <div class="bg-blue-50/50 rounded-xl p-3 mb-4 border border-blue-100 hidden lg:block text-center">
-                    <h3 class="font-bold text-blue-800 text-xs uppercase tracking-wide">Navigasi Soal</h3>
+                
+                <div class="bg-rose-50/50 rounded-xl p-3 mb-4 border border-rose-100 hidden lg:block text-center">
+                    <h3 class="font-bold text-rose-800 text-xs uppercase tracking-wide">Navigasi Soal</h3>
                 </div>
+                
                 <div class="grid grid-cols-5 gap-2 content-start">
                     <template x-for="(q, index) in questions" :key="index">
                         <button @click="currentQuestion = index; showMobileMap = false"
                             class="aspect-square rounded-lg flex items-center justify-center font-bold text-sm transition-all border-2 relative"
                             :class="{
-                                'ring-2 ring-offset-1 ring-blue-500 z-10': currentQuestion === index,
-                                'bg-blue-600 text-white border-blue-600': answers[q.id] && !markedQuestions[q.id],
+                                'ring-2 ring-offset-1 ring-slate-800 z-10': currentQuestion === index,
+                                'bg-slate-800 text-white border-slate-800': answers[q.id] && !markedQuestions[q.id],
                                 'bg-amber-400 text-white border-amber-400': markedQuestions[q.id],
-                                'bg-white text-slate-600 border-slate-200 hover:border-blue-300': !answers[q.id] && !markedQuestions[q.id]
+                                'bg-white text-slate-600 border-slate-200 hover:border-rose-300': !answers[q.id] && !markedQuestions[q.id]
                             }">
                             <span x-text="index + 1"></span>
                         </button>
                     </template>
                 </div>
+                
                 <div class="mt-auto lg:mt-6 pt-6 border-t border-slate-100">
                     <button @click="finishExam()" class="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition flex items-center justify-center gap-2 border border-slate-200">
                          Kumpulkan Jawaban
@@ -464,49 +425,33 @@
     </div>
     
     <script>
-        // Safety timeout
         setTimeout(function() {
             var overlay = document.getElementById('loading-overlay');
-            if(overlay && overlay.style.display !== 'none') {
-                console.warn('Force removing loading overlay');
-                overlay.style.display = 'none';
-            }
+            if(overlay && overlay.style.display !== 'none') overlay.style.display = 'none';
         }, 5000);
     </script>
-
     
-    {{-- SCRIPT ANTI-CURANG (JAVA SCRIPT GUARD) --}}
-    {{-- Hanya aktif jika masuk lewat Mode Darurat --}}
     @if(session('monitoring_mode') == 'strict_js')
         <script>
             (function() {
                 let violationCount = 0;
-                const maxViolations = 3; // Batas maksimal pelanggaran
+                const maxViolations = 3; 
                 const examFinishUrl = "{{ route('student.exam.finish', $exam->id) }}";
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                // 1. Deteksi Pindah Tab / Minimize Browser
                 document.addEventListener("visibilitychange", function() {
-                    if (document.hidden) {
-                        recordViolation("Terdeteksi meninggalkan halaman ujian (Pindah Tab/Minimize)");
-                    }
+                    if (document.hidden) recordViolation("Terdeteksi meninggalkan halaman ujian");
                 });
-
-                // 2. Deteksi Kehilangan Fokus (Misal buka notifikasi atau Split Screen)
                 window.addEventListener("blur", function() {
-                    recordViolation("Terdeteksi membuka aplikasi lain atau notifikasi");
+                    recordViolation("Terdeteksi membuka aplikasi lain");
                 });
 
                 function recordViolation(reason) {
                     violationCount++;
-                    
                     if (violationCount < maxViolations) {
-                        alert(`⚠️ PERINGATAN PELANGGARAN KE-${violationCount} DARI ${maxViolations}!\n\nAlasan: ${reason}.\n\nJangan coba-coba keluar dari halaman ujian atau membuka notifikasi!`);
+                        alert(`⚠️ PERINGATAN PELANGGARAN KE-${violationCount} DARI ${maxViolations}!\n\nAlasan: ${reason}.`);
                     } else {
-                        // Hentikan Ujian Paksa
-                        alert("⛔ PELANGGARAN BATAS TOLERANSI!\n\nAnda terdeteksi melakukan kecurangan berulang kali. Sistem akan menghentikan ujian Anda sekarang.");
-                        
-                        // PERBAIKAN: Gunakan POST Request (Form Submit)
+                        alert("⛔ PELANGGARAN BATAS TOLERANSI!\n\nUjian dihentikan.");
                         forceFinishExam();
                     }
                 }
@@ -515,20 +460,15 @@
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = examFinishUrl;
-
                     const tokenInput = document.createElement('input');
                     tokenInput.type = 'hidden';
                     tokenInput.name = '_token';
                     tokenInput.value = csrfToken;
-
                     form.appendChild(tokenInput);
                     document.body.appendChild(form);
                     form.submit();
                 }
-                
-                // 3. Mencegah Klik Kanan (Opsional)
                 document.addEventListener('contextmenu', event => event.preventDefault());
-
             })();
         </script>
     @endif

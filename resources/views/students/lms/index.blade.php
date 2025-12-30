@@ -1,85 +1,101 @@
-@extends('layouts.student')
+<x-student-learning-layout>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {{-- HEADER DASHBOARD: DARK THEME --}}
+        <div class="bg-slate-900 rounded-[2.5rem] p-8 md:p-10 mb-10 relative overflow-hidden shadow-2xl shadow-slate-900/20 border border-slate-800">
+            {{-- Decoration --}}
+            <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-rose-900/20"></div>
+            <div class="absolute top-0 right-0 w-64 h-64 bg-rose-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none"></div>
+            <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+            
+            <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
+                <div class="text-center md:text-left">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-4">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">Tahun Ajaran Aktif</span>
+                    </div>
+                    
+                    <h1 class="text-3xl md:text-5xl font-black text-white mb-2 tracking-tight">
+                        Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-orange-400">{{ explode(' ', Auth::guard('student')->user()->name)[0] }}!</span>
+                    </h1>
+                    
+                    <p class="text-slate-400 font-medium text-sm max-w-lg mb-6 leading-relaxed">
+                        Siap melanjutkan pembelajaran hari ini? Cek tugas prioritasmu di bawah ini atau jelajahi materi baru.
+                    </p>
 
-@section('content')
-<div class="min-h-screen bg-slate-50/50">
-    
-    <div class="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 pb-24 pt-12 px-4 sm:px-6 lg:px-8 overflow-hidden rounded-b-[3rem] shadow-2xl shadow-blue-900/20">
-        <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div class="absolute top-0 right-0 w-96 h-96 bg-blue-600 opacity-10 rounded-full blur-3xl -mr-20 -mt-20"></div>
-        <div class="absolute bottom-0 left-0 w-64 h-64 bg-yellow-500 opacity-5 rounded-full blur-3xl -ml-10 -mb-10"></div>
-
-        <div class="relative max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div class="text-white">
-                <p class="text-blue-200 font-bold text-sm uppercase tracking-widest mb-2 flex items-center gap-2">
-                    <span class="w-8 h-[2px] bg-yellow-400 inline-block"></span> Selamat Datang Kembali
-                </p>
-                <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow-md">
-                    {{ Auth::guard('student')->user()->name ?? 'Siswa' }}
-                </h1>
-                <p class="mt-3 text-slate-300 text-sm md:text-base max-w-lg leading-relaxed">
-                    Siap untuk belajar hal baru hari ini? Cek tugas prioritasmu di bawah ini.
-                </p>
-            </div>
-
-            <div class="flex items-center gap-4 bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl text-white shadow-lg group hover:bg-white/10 transition-colors">
-                <div class="w-14 h-14 rounded-xl bg-blue-950 border border-blue-800 flex items-center justify-center text-2xl shadow-inner text-yellow-400 group-hover:scale-110 transition-transform">
-                    <i class="ph-duotone ph-student"></i>
+                    <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 text-slate-300 text-xs font-bold">
+                        <div class="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700">
+                            <i class="ph-fill ph-student text-rose-400"></i>
+                            <span>Kelas {{ Auth::guard('student')->user()->schoolClass->name ?? 'Umum' }}</span>
+                        </div>
+                        <div class="hidden sm:block w-1 h-1 bg-slate-700 rounded-full"></div>
+                        <div class="flex items-center gap-2 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700">
+                            <i class="ph-fill ph-calendar text-blue-400"></i>
+                            <span>{{ now()->translatedFormat('l, d F Y') }}</span>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Kelas Kamu</p>
-                    <p class="text-2xl font-black tracking-tight">{{ Auth::guard('student')->user()->schoolClass->name ?? 'Umum' }}</p>
+                
+                {{-- Icon Besar Kanan --}}
+                <div class="hidden md:block transform hover:scale-105 transition-transform duration-500">
+                    <div class="w-28 h-28 bg-gradient-to-br from-slate-800 to-slate-900 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-black/20 border border-slate-700/50 relative group">
+                        <div class="absolute inset-0 bg-rose-500/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <i class="ph-duotone ph-read-cv-logo text-6xl text-rose-400 relative z-10"></i>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10 pb-20 space-y-10">
-
-        @if($prioritySubjects->isNotEmpty())
-            <div>
-                <div class="flex items-center justify-between mb-5 px-2">
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2 drop-shadow-md">
-                        <div class="p-1.5 bg-orange-500/20 rounded-lg border border-orange-500/30 backdrop-blur-sm">
-                            <i class="ph-fill ph-fire text-orange-400"></i> 
+        {{-- BAGIAN PRIORITAS (Tugas/Materi Baru) --}}
+        @if(isset($prioritySubjects) && $prioritySubjects->count() > 0)
+            <div class="mb-12">
+                <div class="flex items-center justify-between mb-6 px-1">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shadow-sm">
+                            <i class="ph-fill ph-fire text-xl"></i>
                         </div>
-                        Perlu Perhatianmu
-                    </h2>
+                        <div>
+                            <h2 class="text-xl font-black text-slate-800 leading-none">Prioritas Belajar</h2>
+                            <p class="text-xs font-bold text-slate-400 mt-1">Selesaikan tugas yang tenggat waktunya dekat.</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($prioritySubjects as $subject)
-                        @php $theme = getSubjectTheme($subject->name); @endphp
-                        
-                        <a href="{{ route('students.learning.subject.show', $subject->id) }}" class="group relative bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-blue-900/10 border border-slate-100 transition-all duration-300 overflow-hidden flex flex-col h-full transform hover:-translate-y-1">
+                        <a href="{{ route('students.learning.subject.show', $subject->id) }}" class="group bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 hover:shadow-xl hover:shadow-rose-900/5 hover:border-rose-200 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden">
                             
-                            <div class="h-28 bg-gradient-to-br {{ $theme['bg'] }} relative overflow-hidden">
-                                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-                                <i class="ph-duotone {{ $theme['icon'] }} absolute -bottom-6 -right-6 text-[8rem] text-white opacity-10 transform rotate-12 transition-transform group-hover:rotate-6 group-hover:scale-110"></i>
-                                
-                                <div class="absolute top-3 right-3 flex flex-col items-end gap-1.5">
+                            {{-- Hover Icon Background --}}
+                            <div class="absolute -right-4 -bottom-4 opacity-0 group-hover:opacity-5 transition-opacity duration-300 transform rotate-12">
+                                <i class="ph-duotone ph-notebook text-9xl text-rose-600"></i>
+                            </div>
+                            
+                            <div class="relative z-10">
+                                <div class="flex justify-between items-start mb-5">
+                                    <div class="w-12 h-12 rounded-2xl bg-slate-50 text-slate-600 border border-slate-100 flex items-center justify-center text-2xl group-hover:bg-rose-600 group-hover:text-white group-hover:border-rose-600 transition-all duration-300 shadow-sm">
+                                        <i class="ph-duotone ph-book-bookmark"></i>
+                                    </div>
                                     @if($subject->active_tasks_count > 0)
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 text-rose-600 text-[10px] font-bold shadow-sm backdrop-blur-sm animate-pulse border border-rose-100">
-                                            <i class="ph-fill ph-warning-circle text-xs"></i> {{ $subject->active_tasks_count }} Tugas
-                                        </span>
-                                    @endif
-                                    @if($subject->new_materials_count > 0)
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 text-emerald-600 text-[10px] font-bold shadow-sm backdrop-blur-sm border border-emerald-100">
-                                            <i class="ph-fill ph-sparkle text-xs"></i> Materi Baru
+                                        <span class="bg-rose-50 text-rose-600 border border-rose-100 text-[10px] font-black px-3 py-1 rounded-full animate-pulse flex items-center gap-1">
+                                            <i class="ph-bold ph-warning-circle"></i> {{ $subject->active_tasks_count }} Tugas
                                         </span>
                                     @endif
                                 </div>
-                            </div>
-                            
-                            <div class="absolute top-14 left-6 w-16 h-16 bg-white rounded-2xl shadow-lg flex items-center justify-center text-3xl border-4 border-white {{ $theme['color'] }} group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                                <i class="ph-fill {{ $theme['icon'] }}"></i>
-                            </div>
-
-                            <div class="pt-12 pb-6 px-6 flex-1 flex flex-col">
-                                <h3 class="font-bold text-lg text-slate-900 group-hover:text-blue-900 transition-colors line-clamp-1 mb-1">{{ $subject->name }}</h3>
-                                <p class="text-xs text-slate-500 font-medium flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
-                                    Klik untuk mulai mengerjakan
-                                </p>
+                                
+                                <h3 class="font-bold text-lg text-slate-800 group-hover:text-rose-600 transition-colors mb-2 line-clamp-1">{{ $subject->name }}</h3>
+                                
+                                <div class="flex items-center gap-2 text-xs font-medium border-t border-slate-50 pt-4 mt-2">
+                                    @if($subject->new_materials_count > 0)
+                                        <span class="text-emerald-600 font-bold flex items-center gap-1.5 bg-emerald-50 px-2 py-1 rounded-md">
+                                            <i class="ph-bold ph-check-circle"></i> {{ $subject->new_materials_count }} Materi Baru
+                                        </span>
+                                    @else
+                                        <span class="text-slate-400 flex items-center gap-1.5">
+                                            <i class="ph-bold ph-arrow-right"></i> Lanjutkan belajar
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         </a>
                     @endforeach
@@ -87,81 +103,52 @@
             </div>
         @endif
 
-        <div>
-            <div class="flex items-center gap-3 mb-6 px-2">
-                <div class="p-2.5 bg-white border border-slate-200 shadow-sm text-blue-900 rounded-xl">
-                    <i class="ph-bold ph-books text-xl"></i>
+        {{-- BAGIAN SEMUA MATA PELAJARAN --}}
+        <div class="pb-12">
+            <div class="flex items-center gap-3 mb-6 px-1">
+                <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 shadow-sm">
+                    <i class="ph-fill ph-books text-xl"></i>
                 </div>
-                <h2 class="text-xl font-bold text-slate-800">Semua Mata Pelajaran</h2>
+                <div>
+                    <h2 class="text-xl font-black text-slate-800 leading-none">Mata Pelajaran</h2>
+                    <p class="text-xs font-bold text-slate-400 mt-1">Semua kelas yang kamu ikuti.</p>
+                </div>
             </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                @foreach($allSubjects as $subject)
-                    @php $theme = getSubjectTheme($subject->name); @endphp
-
-                    <a href="{{ route('students.learning.subject.show', $subject->id) }}" class="group bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:border-blue-900/30 hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300 flex items-center gap-4 relative overflow-hidden">
-                        <div class="absolute inset-y-0 left-0 w-1 bg-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-
-                        <div class="w-14 h-14 rounded-xl bg-gradient-to-br {{ $theme['bg'] }} flex items-center justify-center text-white text-2xl shadow-sm shrink-0 group-hover:scale-105 transition-transform">
-                            <i class="ph-duotone {{ $theme['icon'] }}"></i>
-                        </div>
-
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-bold text-slate-800 text-sm group-hover:text-blue-900 transition-colors line-clamp-1">
-                                {{ $subject->name }}
-                            </h3>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wide mt-1 flex items-center gap-1">
-                                <i class="ph-fill ph-chalkboard-teacher"></i>
-                                {{ $subject->teacher_name ?? 'Pengajar Aktif' }}
-                            </p>
-                        </div>
-
-                        <div class="text-slate-300 group-hover:text-yellow-500 transition-colors transform group-hover:translate-x-1">
-                            <i class="ph-bold ph-caret-right"></i>
-                        </div>
-                    </a>
-                @endforeach
-            </div>
-
-            @if($allSubjects->isEmpty())
-                <div class="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-200 group">
-                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300 group-hover:text-blue-900 group-hover:bg-blue-50 transition-all">
+            
+            @if(!isset($allSubjects) || $allSubjects->isEmpty())
+                <div class="bg-white rounded-[2.5rem] p-12 text-center border-2 border-dashed border-slate-200">
+                    <div class="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-4 text-slate-300">
                         <i class="ph-duotone ph-books text-4xl"></i>
                     </div>
                     <h3 class="text-lg font-bold text-slate-700">Belum Ada Mata Pelajaran</h3>
-                    <p class="text-slate-500 text-sm mt-1">Jadwal mata pelajaran belum tersedia untuk kelas ini.</p>
+                    <p class="text-slate-500 text-sm mt-1 max-w-sm mx-auto font-medium">Data mata pelajaran belum ditambahkan oleh admin. Silakan hubungi tata usaha.</p>
+                </div>
+            @else
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    @foreach($allSubjects as $subject)
+                        <a href="{{ route('students.learning.subject.show', $subject->id) }}" class="group bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm hover:border-rose-300 hover:shadow-lg hover:shadow-rose-900/5 transition-all relative overflow-hidden h-full flex flex-col">
+                            
+                            <div class="flex items-center gap-4 mb-4">
+                                <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 border border-slate-200 flex items-center justify-center font-black text-base group-hover:bg-rose-600 group-hover:text-white group-hover:border-rose-600 transition-all duration-300 shrink-0 shadow-inner">
+                                    {{ substr($subject->name, 0, 1) }}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="font-bold text-sm text-slate-700 leading-tight group-hover:text-rose-700 transition-colors line-clamp-2">{{ $subject->name }}</h4>
+                                    <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-wide">Semester 1</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between text-[10px] font-bold text-slate-400 group-hover:text-rose-500 transition-colors">
+                                <span>Buka Kelas</span>
+                                <div class="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-rose-50 flex items-center justify-center transition-colors">
+                                    <i class="ph-bold ph-caret-right text-xs"></i>
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
                 </div>
             @endif
         </div>
 
     </div>
-</div>
-
-{{-- HELPER PHP UNTUK TEMA (Tweak Default Theme to Dark/Gold) --}}
-@php
-    function getSubjectTheme($name) {
-        $name = strtolower($name);
-        // Default: Dark Slate Theme (Harmonized)
-        $theme = ['bg' => 'from-slate-700 to-slate-900', 'icon' => 'ph-books', 'color' => 'text-slate-700'];
-
-        if (Str::contains($name, ['matematika', 'math', 'fisika'])) {
-            $theme = ['bg' => 'from-blue-600 to-indigo-800', 'icon' => 'ph-calculator', 'color' => 'text-blue-700'];
-        } elseif (Str::contains($name, ['bahasa', 'indonesia', 'inggris', 'sunda', 'jawa'])) {
-            $theme = ['bg' => 'from-amber-400 to-orange-600', 'icon' => 'ph-translate', 'color' => 'text-orange-600'];
-        } elseif (Str::contains($name, ['ipa', 'biologi', 'kimia'])) {
-            $theme = ['bg' => 'from-emerald-500 to-teal-700', 'icon' => 'ph-flask', 'color' => 'text-emerald-700'];
-        } elseif (Str::contains($name, ['ips', 'sejarah', 'geografi', 'pkn', 'sosial'])) {
-            $theme = ['bg' => 'from-rose-500 to-red-700', 'icon' => 'ph-globe-hemisphere-west', 'color' => 'text-rose-700'];
-        } elseif (Str::contains($name, ['agama', 'pai', 'quran'])) {
-            $theme = ['bg' => 'from-green-600 to-emerald-800', 'icon' => 'ph-star-and-crescent', 'color' => 'text-green-800'];
-        } elseif (Str::contains($name, ['seni', 'budaya', 'prakarya'])) {
-            $theme = ['bg' => 'from-pink-500 to-fuchsia-700', 'icon' => 'ph-palette', 'color' => 'text-pink-700'];
-        } elseif (Str::contains($name, ['pjok', 'olahraga'])) {
-            $theme = ['bg' => 'from-orange-500 to-red-600', 'icon' => 'ph-basketball', 'color' => 'text-orange-700'];
-        } elseif (Str::contains($name, ['tik', 'informatika', 'komputer'])) {
-            $theme = ['bg' => 'from-violet-600 to-purple-800', 'icon' => 'ph-desktop', 'color' => 'text-violet-800'];
-        }
-        return $theme;
-    }
-@endphp
-@endsection
+</x-student-learning-layout>

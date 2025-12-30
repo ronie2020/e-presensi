@@ -19,16 +19,15 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // 2. MENGATASI ERROR 419 SAAT LOGOUT (CSRF EXCEPTION)
-        // Kita whitelist route logout agar tidak kena validasi token saat sesi habis
         $middleware->validateCsrfTokens(except: [
-            'logout',           // Untuk logout Admin/Guru
-            'student/logout',   // Untuk logout Siswa
+            'logout',           
+            'student/logout',   
         ]);
 
         // 3. LOGIKA REDIRECT USER YANG BELUM LOGIN
         $middleware->redirectGuestsTo(function (Request $request) {
-            // Jika URL yang diakses berawalan "student/...", arahkan ke Login Siswa
-            if ($request->is('student/*') || $request->is('student')) {
+            // Perbaikan: Menambahkan cek untuk 'students/*' (jamak) dan 'portal/*'
+            if ($request->is('student/*') || $request->is('students/*') || $request->is('portal/*')) {
                 return route('student.login');
             }
             

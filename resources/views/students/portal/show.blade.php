@@ -2,7 +2,7 @@
 
 @section('content')
 {{-- 
-    PERBAIKAN: SET LOCALE KE INDONESIA 
+    SET LOCALE KE INDONESIA 
 --}}
 @php
     \Carbon\Carbon::setLocale('id');
@@ -100,11 +100,6 @@
         <div class="bg-white/90 backdrop-blur-xl p-1.5 rounded-2xl shadow-lg border border-gray-100/50 relative group">
             <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden z-10 rounded-r-2xl"></div>
             
-            {{-- 
-               PERBAIKAN UTAMA:
-               1. Mobile: Tetap scrollable (overflow-x-auto)
-               2. Desktop (md): Hilangkan scroll (overflow-visible) dan biarkan WRAP (flex-wrap)
-            --}}
             <div class="overflow-x-auto custom-scrollbar w-full pb-0.5 md:pb-0 scroll-smooth px-1 md:overflow-visible">
                 <div class="flex items-center gap-1 w-max md:w-full md:flex-wrap md:justify-center"> 
                     @php
@@ -124,7 +119,7 @@
                     @foreach($tabs as $key => $tab)
                         <button @click="updateTab('{{ $key }}')" 
                             :class="activeTab === '{{ $key }}' ? 'bg-slate-900 text-white shadow-lg shadow-slate-300 transform scale-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
-                            class="px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 whitespace-nowrap flex-shrink-0 outline-none focus:ring-2 focus:ring-slate-200 mb-1"> {{-- Add mb-1 for wrap spacing --}}
+                            class="px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 whitespace-nowrap flex-shrink-0 outline-none focus:ring-2 focus:ring-slate-200 mb-1">
                             <i class="ph-bold ph-{{ $tab['icon'] }} text-lg"></i> {{ $tab['label'] }}
                         </button>
                     @endforeach
@@ -194,7 +189,8 @@
         <!-- TAB: LMS (TUGAS & KUIS) -->
         <div x-show="activeTab === 'lms'" x-cloak x-transition:enter="transition ease-out duration-300">
             <div class="space-y-6">
-                @if(isset($lms_assignments_grouped) && $lms_assignments_grouped->count() > 0)
+                <!-- Perbaikan: Gunakan count() untuk cek jumlah array/collection -->
+                @if(isset($lms_assignments_grouped) && count($lms_assignments_grouped) > 0)
                     @foreach($lms_assignments_grouped as $subjectName => $assignments)
                         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                             <div class="p-5 border-b border-gray-100 bg-slate-50 flex items-center justify-between">
@@ -202,7 +198,7 @@
                                     <i class="ph-fill ph-book-bookmark text-blue-600"></i> {{ $subjectName }}
                                 </h3>
                                 <span class="text-xs font-bold bg-white px-3 py-1 rounded-full border border-gray-200 text-slate-500">
-                                    {{ $assignments->count() }} Tugas
+                                    {{ count($assignments) }} Tugas
                                 </span>
                             </div>
                             <div class="overflow-x-auto w-full"> 
