@@ -17,15 +17,18 @@ class DashboardController extends Controller
         $period = $request->query('period', 'today'); 
         $dateParam = $request->query('date', Carbon::today()->toDateString());
         
-        $startDate = Carbon::parse($dateParam)->startOfDay();
-        $endDate = Carbon::parse($dateParam)->endOfDay();
+        // Parsing tanggal yang dipilih user
+        $selectedDate = Carbon::parse($dateParam);
+
+        $startDate = $selectedDate->copy()->startOfDay();
+        $endDate = $selectedDate->copy()->endOfDay();
 
         if ($period === 'week') {
-            $startDate = Carbon::parse($dateParam)->startOfWeek();
-            $endDate = Carbon::parse($dateParam)->endOfWeek();
+            $startDate = $selectedDate->copy()->startOfWeek();
+            $endDate = $selectedDate->copy()->endOfWeek();
         } elseif ($period === 'month') {
-            $startDate = Carbon::parse($dateParam)->startOfMonth();
-            $endDate = Carbon::parse($dateParam)->endOfMonth();
+            $startDate = $selectedDate->copy()->startOfMonth();
+            $endDate = $selectedDate->copy()->endOfMonth();
         }
 
         // 2. DATA STATISTIK UTAMA (KPIS)
@@ -33,7 +36,6 @@ class DashboardController extends Controller
         $allAttendances = AttendanceSiswa::whereBetween('attendance_date', [$startDate, $endDate])->get();
 
         // [LOGIKA FILTER] Hanya Absensi Sekolah (Harian/Masuk/Pulang)
-        // Menggunakan strtolower agar tidak sensitif huruf besar/kecil
         $schoolAttendances = $allAttendances->filter(function ($att) {
             return in_array(strtolower($att->type), ['harian', 'masuk', 'pulang']);
         });
@@ -41,17 +43,14 @@ class DashboardController extends Controller
         $totalStudents = Student::count();
         
         // [LOGIKA HADIR & TERLAMBAT]
-        // 1. Hitung Total Hadir (Gabungan Tepat Waktu + Terlambat)
         $presentCount = $schoolAttendances->filter(function ($att) {
             return in_array(strtolower($att->status), ['hadir', 'terlambat', 'tepat waktu']);
         })->unique('student_id')->count();
 
-        // 2. Hitung Khusus Terlambat
         $lateCount = $schoolAttendances->filter(function ($att) {
             return strtolower($att->status) === 'terlambat';
         })->unique('student_id')->count();
         
-        // 3. Hitung Hadir Tepat Waktu (Total Hadir - Terlambat)
         $presentOnTimeCount = max(0, $presentCount - $lateCount);
 
         // Hitung Sakit/Izin/Alpha
@@ -65,10 +64,11 @@ class DashboardController extends Controller
             return str_contains(strtolower($att->notes ?? ''), 'pulang awal');
         })->count();
 
-        // Hitung "Belum Hadir" (Siswa yang belum scan Masuk hari ini sama sekali)
+        // Hitung "Belum Hadir" 
         $notYetScannedCount = 0;
+        // Kita hitung untuk semua periode agar kartu tidak 0 saat mode Week/Month (opsional, tapi logika asli membatasinya)
+        // Jika ingin mengikuti logika asli user:
         if ($period === 'today') {
-             // Siswa yang sudah punya record Harian/Masuk/Pulang (Status apapun)
              $alreadyRecorded = $schoolAttendances->unique('student_id')->count();
              $notYetScannedCount = max(0, $totalStudents - $alreadyRecorded);
         }
@@ -78,65 +78,46 @@ class DashboardController extends Controller
             [
                 'title' => 'Total Siswa',
                 'value' => $totalStudents,
-                'border' => 'border-indigo-500',
-                'text_color' => 'text-gray-800',
-                'icon_color' => 'text-indigo-500',
                 'icon' => 'ph-student',
                 'filter_status' => 'all'
             ],
             [
                 'title' => 'Total Hadir',
-                'value' => $presentCount, // Termasuk yang terlambat
-                'border' => 'border-emerald-500',
-                'text_color' => 'text-gray-800',
-                'icon_color' => 'text-emerald-500',
+                'value' => $presentCount,
                 'icon' => 'ph-check-circle',
+                'percentage' => $totalStudents > 0 ? round(($presentCount / $totalStudents) * 100, 1) : 0,
                 'filter_status' => 'present'
             ],
             [
                 'title' => 'Belum Hadir',
                 'value' => $notYetScannedCount, 
-                'border' => 'border-slate-500',
-                'text_color' => 'text-gray-800',
-                'icon_color' => 'text-slate-500',
                 'icon' => 'ph-minus-circle',
                 'filter_status' => 'absent'
             ],
             [
                 'title' => 'Terlambat',
-                'value' => $lateCount, // Khusus Terlambat
-                'border' => 'border-orange-500',
-                'text_color' => 'text-gray-800',
-                'icon_color' => 'text-orange-500',
+                'value' => $lateCount, 
                 'icon' => 'ph-clock', 
                 'filter_status' => 'late'
             ],
             [
                 'title' => 'Pulang Awal',
                 'value' => $earlyLeaveCount,
-                'border' => 'border-yellow-500',
-                'text_color' => 'text-gray-800',
-                'icon_color' => 'text-yellow-500',
                 'icon' => 'ph-person-simple-run',
                 'filter_status' => 'early_leave'
             ],
             [
                 'title' => 'Sakit / Izin',
                 'value' => $sickPermitCount,
-                'border' => 'border-red-500',
-                'text_color' => 'text-gray-800',
-                'icon_color' => 'text-red-500',
                 'icon' => 'ph-first-aid',
                 'filter_status' => 'excused'
             ]
         ];
 
         // 4. TOP VIOLATORS (Sering Terlambat)
-        // Kita gunakan Query Database langsung agar efisien menghitung frekuensi
         $topLateStudents = AttendanceSiswa::with(['student.schoolClass']) 
-            ->whereIn('type', ['Harian', 'Masuk', 'Pulang']) 
+            ->whereIn('type', ['Harian', 'Masuk', 'Pulang', 'harian', 'masuk', 'pulang']) // Handle case sensitive DB
             ->where(function($query) {
-                // Logika Terlambat yang aman (Case Insensitive di DB level)
                 $query->where('status', 'Terlambat')
                       ->orWhere('status', 'terlambat');
             })
@@ -149,8 +130,8 @@ class DashboardController extends Controller
 
         // 5. TOP PUNCTUAL (Siswa Terrajin)
         $topPunctualStudents = AttendanceSiswa::with(['student.schoolClass'])
-            ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
-            ->whereIn('status', ['Hadir', 'Tepat Waktu'])
+            ->whereIn('type', ['Harian', 'Masuk', 'Pulang', 'harian', 'masuk', 'pulang'])
+            ->whereIn('status', ['Hadir', 'Tepat Waktu', 'hadir', 'tepat waktu'])
             ->whereBetween('attendance_date', [$startDate, $endDate])
             ->select('student_id', DB::raw('count(*) as total_present'))
             ->groupBy('student_id')
@@ -158,9 +139,10 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // 6. LOG AKTIVITAS TERBARU (Live Feed - Termasuk Ekskul & Ibadah)
+        // 6. LOG AKTIVITAS TERBARU (Live Feed)
+        // Menggunakan tanggal yang dipilih user ($dateParam), bukan Carbon::today()
         $recentActivities = AttendanceSiswa::with(['student.schoolClass'])
-            ->whereDate('attendance_date', Carbon::parse($dateParam)->toDateString())
+            ->whereDate('attendance_date', $dateParam)
             ->latest('created_at')
             ->take(6)
             ->get();
@@ -170,8 +152,8 @@ class DashboardController extends Controller
             ->join('students', 'attendances_siswa.student_id', '=', 'students.id')
             ->join('classes', 'students.class_id', '=', 'classes.id')
             ->whereBetween('attendances_siswa.attendance_date', [$startDate, $endDate])
-            ->whereIn('attendances_siswa.type', ['Harian', 'Masuk', 'Pulang'])
-            ->whereIn('attendances_siswa.status', ['Hadir', 'Tepat Waktu', 'Terlambat'])
+            ->whereIn('attendances_siswa.type', ['Harian', 'Masuk', 'Pulang', 'harian', 'masuk', 'pulang'])
+            ->whereIn('attendances_siswa.status', ['Hadir', 'Tepat Waktu', 'Terlambat', 'hadir', 'tepat waktu', 'terlambat'])
             ->whereNull('students.deleted_at')
             ->select('classes.name as class_name', DB::raw('count(DISTINCT attendances_siswa.student_id) as present_count'))
             ->groupBy('classes.name')
@@ -179,24 +161,27 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // 8. DATA GRAFIK
+        // 8. DATA GRAFIK (FIX LOGIC)
         $weeklyPresentData = [];
         $weeklyLateData = [];
         $weeklyAbsentData = [];
         $chartLabels = [];
 
-        $graphStart = ($period === 'today') ? Carbon::today()->subDays(6) : $startDate;
-        $graphEnd   = ($period === 'today') ? Carbon::today() : $endDate;
+        // Jika 'today', tampilkan trend 7 hari terakhir BERAKHIR di tanggal yang dipilih user
+        // Jika 'week'/'month', tampilkan sesuai range periode tersebut
+        $graphStart = ($period === 'today') ? $selectedDate->copy()->subDays(6) : $startDate;
+        $graphEnd   = ($period === 'today') ? $selectedDate : $endDate;
 
         // Ambil data untuk grafik
         $graphAttendances = AttendanceSiswa::whereBetween('attendance_date', [$graphStart, $graphEnd])->get();
 
-        // Filter Sekolah saja (Harian/Masuk/Pulang)
         $graphAttendancesSchool = $graphAttendances->filter(function ($att) {
             return in_array(strtolower($att->type), ['harian', 'masuk', 'pulang']);
         });
 
         $periodLoop = $graphStart->copy();
+        
+        // Loop hari per hari untuk mengisi grafik
         while($periodLoop <= $graphEnd) {
             $dateStr = $periodLoop->format('Y-m-d'); 
             $chartLabels[] = $periodLoop->format('d M'); 
@@ -206,20 +191,21 @@ class DashboardController extends Controller
                 return Carbon::parse($att->attendance_date)->format('Y-m-d') === $dateStr;
             });
 
-            // LOGIKA GRAFIK:
-            // 1. Bar Hijau: Hadir Tepat Waktu
+            // 1. Hadir Tepat Waktu
             $weeklyPresentData[] = $dailyAtt->filter(fn($att) => in_array(strtolower($att->status), ['hadir', 'tepat waktu']))->unique('student_id')->count();
             
-            // 2. Bar Oranye: Khusus Terlambat
+            // 2. Khusus Terlambat
             $weeklyLateData[] = $dailyAtt->filter(fn($att) => strtolower($att->status) === 'terlambat')->unique('student_id')->count();
             
-            // 3. Bar Merah: Absen (Sakit/Izin/Alpha)
+            // 3. Absen (Sakit/Izin/Alpha)
             $weeklyAbsentData[] = $dailyAtt->filter(fn($att) => in_array(strtolower($att->status), ['sakit', 'izin', 'alpa', 'alpha']))->unique('student_id')->count();
 
             $periodLoop->addDay();
         }
 
         return view('dashboard', [
+            'period' => $period, // Kirim variabel ini ke view untuk mencegah error Undefined variable
+            'date' => $dateParam, // Kirim tanggal yang dipilih
             'totalStudents' => $totalStudents,
             'presentOnTimeCount' => $presentOnTimeCount,
             'lateCount' => $lateCount,
