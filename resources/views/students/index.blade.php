@@ -1,6 +1,8 @@
 <x-app-layout>
-    {{-- Tambahkan CDN SweetAlert2 di sini --}}
+    {{-- Tambahkan CDN SweetAlert2 & Flatpickr --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
 
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,8 +35,6 @@
                     </div>
                 </div>
             </div>
-
-            {{-- NOTE: Flash Message Lama DIHAPUS, diganti Script SweetAlert di paling bawah --}}
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 
@@ -341,7 +341,7 @@
         </div>
     </div>
 
-    {{-- MODAL ABSEN & QR CODE (Tetap) --}}
+    {{-- MODAL ABSEN & QR CODE --}}
     <div id="absen-manual-modal" class="fixed inset-0 bg-blue-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-opacity">
         <div class="relative top-20 mx-auto p-0 border-0 w-full max-w-md shadow-2xl rounded-[2rem] bg-white overflow-hidden">
             <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
@@ -360,7 +360,8 @@
 
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Tanggal</label>
-                    <input type="date" name="date" value="{{ date('Y-m-d') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-blue-600 focus:border-blue-600 font-bold text-slate-700">
+                    {{-- MODIFIKASI: Datepicker --}}
+                    <input type="text" name="date" value="{{ date('Y-m-d') }}" class="datepicker w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-blue-600 focus:border-blue-600 font-bold text-slate-700" placeholder="dd/mm/yyyy">
                 </div>
 
                 <div>
@@ -414,9 +415,22 @@
         </div>
     </div>
 
-    {{-- SCRIPT SWEETALERT2 --}}
+    {{-- SCRIPT SWEETALERT2 & Flatpickr --}}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // 0. INISIALISASI FLATPICKR
+            flatpickr(".datepicker", {
+                altInput: true,
+                altFormat: "d/m/Y",
+                dateFormat: "Y-m-d",
+                locale: "id",
+                disableMobile: "true"
+            });
+
             // 1. FLASH MESSAGES (SUCCESS / ERROR)
             @if(session('success'))
                 Swal.fire({
@@ -439,7 +453,6 @@
             @endif
 
             // 2. KONFIRMASI HAPUS SISWA
-            // Menggunakan Event Delegation agar aman saat ada update DOM
             document.body.addEventListener('click', function(e) {
                 if(e.target.closest('.btn-delete-confirm')) {
                     e.preventDefault();

@@ -1,4 +1,13 @@
 <x-app-layout>
+    {{-- MathJax Config (Untuk Rumus Matematika) --}}
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <div x-data="{ 
         showImportModal: false, 
         showEditModal: false,
@@ -95,12 +104,12 @@
                                 </div>
                             </div>
 
-                            <form action="{{ route('cbt.questions.store', $exam->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5">
+                            <form action="{{ route('cbt.questions.store', $exam->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5" id="createQuestionForm">
                                 @csrf
                                 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pertanyaan</label>
-                                    <textarea name="question_text" rows="4" required class="w-full rounded-2xl border-slate-200 text-sm focus:ring-blue-500 focus:border-blue-500 bg-slate-50 focus:bg-white transition p-4 font-medium text-slate-700 leading-relaxed" placeholder="Tulis pertanyaan di sini..."></textarea>
+                                    <textarea name="question_text" rows="4" required class="w-full rounded-2xl border-slate-200 text-sm focus:ring-blue-500 focus:border-blue-500 bg-slate-50 focus:bg-white transition p-4 font-medium text-slate-700 leading-relaxed placeholder:text-slate-400" placeholder="Tulis pertanyaan di sini... (Gunakan $...$ untuk rumus matematika)"></textarea>
                                 </div>
 
                                 <div>
@@ -179,12 +188,20 @@
                                 <!-- Konten -->
                                 <div class="pl-16">
                                     @if($q->question_image)
-                                        <div class="mb-4">
-                                            <img src="{{ asset('storage/' . $q->question_image) }}" class="max-h-48 rounded-2xl border border-slate-100 shadow-sm object-cover" alt="Gambar Soal">
+                                        <div class="mb-4 group/img relative w-fit">
+                                            {{-- Fitur Image Zoom pada Click --}}
+                                            <img src="{{ asset('storage/' . $q->question_image) }}" 
+                                                 class="max-h-48 rounded-2xl border border-slate-100 shadow-sm object-cover cursor-zoom-in hover:opacity-90 transition" 
+                                                 alt="Gambar Soal"
+                                                 onclick="viewImage('{{ asset('storage/' . $q->question_image) }}')">
+                                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover/img:opacity-100 transition">
+                                                <span class="bg-black/50 text-white p-2 rounded-full backdrop-blur-sm"><i class="ph-bold ph-magnifying-glass-plus"></i></span>
+                                            </div>
                                         </div>
                                     @endif
                                     
-                                    <p class="text-slate-800 font-bold text-lg mb-5 leading-relaxed whitespace-pre-line">{{ $q->question_text }}</p>
+                                    {{-- Support MathJax rendering --}}
+                                    <p class="text-slate-800 font-bold text-lg mb-5 leading-relaxed whitespace-pre-line question-text">{{ $q->question_text }}</p>
                                     
                                     <!-- Opsi -->
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
@@ -226,9 +243,10 @@
                                         <i class="ph-bold ph-pencil-simple text-lg"></i>
                                     </button>
 
-                                    <form action="{{ route('cbt.questions.destroy', $q->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus soal ini?')">
+                                    {{-- FORM DELETE DIGANTI AGAR PAKAI SWEETALERT --}}
+                                    <form action="{{ route('cbt.questions.destroy', $q->id) }}" method="POST" class="delete-form">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 shadow-sm flex items-center justify-center transition-all hover:scale-105" title="Hapus">
+                                        <button type="button" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 shadow-sm flex items-center justify-center transition-all hover:scale-105 btn-delete" title="Hapus">
                                             <i class="ph-bold ph-trash text-lg"></i>
                                         </button>
                                     </form>
@@ -259,7 +277,6 @@
                         </div>
                         <h3 class="text-2xl font-black text-slate-800 mb-2">Import Soal Excel</h3>
                         
-                        {{-- INSTRUKSI & TOMBOL DOWNLOAD TEMPLATE (BARU) --}}
                         <p class="text-sm text-slate-500 mb-2 font-medium">Silakan download template di bawah ini agar format sesuai.</p>
                         
                         <div class="mb-6">
@@ -268,7 +285,7 @@
                             </a>
                         </div>
                         
-                        <form action="{{ route('cbt.questions.import', $exam->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5 text-left">
+                        <form action="{{ route('cbt.questions.import', $exam->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5 text-left" id="importQuestionForm">
                             @csrf
                             <label class="block w-full border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center hover:bg-slate-50 hover:border-emerald-300 transition-all cursor-pointer relative group">
                                 <input type="file" name="file" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
@@ -287,12 +304,12 @@
             </div>
         </div>
 
-        <!-- MODAL EDIT SOAL (DIPERBAIKI) -->
+        <!-- MODAL EDIT SOAL -->
         <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showEditModal = false"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
                 <div class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all sm:w-full sm:max-w-2xl border border-slate-100">
-                    <form :action="editState.url" method="POST" enctype="multipart/form-data">
+                    <form :action="editState.url" method="POST" enctype="multipart/form-data" id="editQuestionForm">
                         @csrf @method('PUT')
                         <input type="hidden" name="delete_image" x-model="deleteImage">
 
@@ -398,4 +415,74 @@
             </div>
         </div>
     </div>
+
+    {{-- SCRIPT TAMBAHAN UNTUK UX --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // 1. Fungsi Hapus Soal dengan SweetAlert
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const form = this.closest('.delete-form');
+                    Swal.fire({
+                        title: 'Hapus Soal Ini?',
+                        text: "Soal yang dihapus tidak dapat dikembalikan!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e11d48',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                        customClass: { popup: 'rounded-[2rem]' }
+                    }).then((result) => {
+                        if (result.isConfirmed) form.submit();
+                    });
+                });
+            });
+
+            // 2. Loading State untuk Form Input Manual & Edit
+            const setupLoading = (formId, text = 'Menyimpan Soal...') => {
+                const form = document.getElementById(formId);
+                if(form) {
+                    form.addEventListener('submit', function() {
+                        Swal.fire({
+                            title: text,
+                            allowOutsideClick: false,
+                            didOpen: () => Swal.showLoading(),
+                            customClass: { popup: 'rounded-[2rem]' }
+                        });
+                    });
+                }
+            };
+            setupLoading('createQuestionForm');
+            setupLoading('editQuestionForm', 'Memperbarui Soal...');
+            setupLoading('importQuestionForm', 'Mengimport Soal...');
+
+            // 3. Notifikasi Toast Sukses
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}",
+                    toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
+                    customClass: { popup: 'rounded-xl' }
+                });
+            @endif
+        });
+
+        // 4. Fungsi Lihat Gambar (Lightbox)
+        function viewImage(url) {
+            Swal.fire({
+                imageUrl: url,
+                imageAlt: 'Gambar Soal',
+                showConfirmButton: false,
+                showCloseButton: true,
+                customClass: {
+                    popup: 'rounded-[2rem]',
+                    image: 'rounded-2xl'
+                },
+                width: 'auto'
+            });
+        }
+    </script>
 </x-app-layout>

@@ -18,15 +18,15 @@
                         <h1 class="text-2xl font-extrabold mb-1 tracking-tight">Upload Materi Baru</h1>
                         <p class="text-blue-300 text-sm font-medium">Lengkapi formulir di bawah ini untuk membagikan materi.</p>
                     </div>
-                    <a href="{{ route('lms.materials.index') }}" class="hidden md:flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold backdrop-blur-sm transition text-white border border-white/10">
+                    <a href="{{ route('lms.materials.index') }}" class="hidden md:flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold backdrop-blur-sm transition text-white border border-white/10 btn-cancel-confirm">
                         <i class="ph-bold ph-arrow-left"></i> Kembali
                     </a>
                 </div>
             </div>
 
-            {{-- ERROR BLOCK --}}
+            {{-- ERROR BLOCK (Jika validasi server gagal) --}}
             @if ($errors->any())
-                <div class="mb-8 bg-rose-50 border border-rose-100 p-5 rounded-[1.5rem] flex items-start gap-4 shadow-sm">
+                <div class="mb-8 bg-rose-50 border border-rose-100 p-5 rounded-[1.5rem] flex items-start gap-4 shadow-sm animate-pulse">
                     <div class="p-2 bg-rose-100 text-rose-600 rounded-xl shrink-0">
                         <i class="ph-bold ph-warning-octagon text-xl"></i>
                     </div>
@@ -44,7 +44,8 @@
             {{-- FORM CARD --}}
             <div class="bg-white shadow-xl shadow-slate-200/50 rounded-[2rem] border border-slate-100 overflow-hidden">
                 <form action="{{ route('lms.materials.store') }}" method="POST" enctype="multipart/form-data" 
-                      x-data="{ targetType: 'class', attachments: [{id: 1, type: 'file'}] }">
+                      x-data="{ targetType: 'class', attachments: [{id: 1, type: 'file'}] }"
+                      id="uploadForm">
                     @csrf
 
                     <div class="p-8 space-y-8">
@@ -60,14 +61,14 @@
                                 <div class="col-span-2">
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Judul Materi <span class="text-rose-500">*</span></label>
                                     <input type="text" name="title" value="{{ old('title') }}" required 
-                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 placeholder:font-normal placeholder:text-slate-400" 
+                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 placeholder:font-normal placeholder:text-slate-400 transition-colors" 
                                            placeholder="Contoh: Bab 1 - Ekosistem">
                                 </div>
                                 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Mata Pelajaran <span class="text-rose-500">*</span></label>
                                     <div class="relative">
-                                        <select name="subject_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 appearance-none">
+                                        <select name="subject_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 appearance-none transition-colors">
                                             <option value="">-- Pilih Mapel --</option>
                                             @foreach($subjects as $subject)
                                                 <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
@@ -100,9 +101,12 @@
                                             </label>
                                         </div>
                                         
+                                        <!-- SELECT KELAS (Dinamis Required) -->
                                         <div x-show="targetType === 'class'">
                                             <div class="relative">
-                                                <select name="class_id" class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-blue-500 h-11 px-3 appearance-none">
+                                                <select name="class_id" 
+                                                        :required="targetType === 'class'"
+                                                        class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-blue-500 h-11 px-3 appearance-none">
                                                     <option value="">-- Pilih Kelas Spesifik --</option>
                                                     @foreach($classes as $class)
                                                         <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
@@ -111,9 +115,13 @@
                                                 <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
                                             </div>
                                         </div>
+
+                                        <!-- SELECT JENJANG (Dinamis Required) -->
                                         <div x-show="targetType === 'grade'" style="display: none;">
                                             <div class="relative">
-                                                <select name="target_grade" class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-blue-500 h-11 px-3 appearance-none">
+                                                <select name="target_grade" 
+                                                        :required="targetType === 'grade'"
+                                                        class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-blue-500 h-11 px-3 appearance-none">
                                                     <option value="7">Semua Kelas 7</option>
                                                     <option value="8">Semua Kelas 8</option>
                                                     <option value="9">Semua Kelas 9</option>
@@ -135,7 +143,7 @@
                                 Pengantar & Resume Materi
                             </label>
                             <div class="relative">
-                                <textarea name="resume" rows="6" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:ring-blue-500 focus:border-blue-500 shadow-sm p-4 text-slate-700 leading-relaxed font-medium placeholder:font-normal placeholder:text-slate-400" placeholder="Tuliskan rangkuman materi, tujuan pembelajaran, atau instruksi untuk siswa..."></textarea>
+                                <textarea name="resume" rows="6" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:ring-blue-500 focus:border-blue-500 shadow-sm p-4 text-slate-700 leading-relaxed font-medium placeholder:font-normal placeholder:text-slate-400 transition-colors" placeholder="Tuliskan rangkuman materi, tujuan pembelajaran, atau instruksi untuk siswa..."></textarea>
                                 <div class="absolute bottom-3 right-3 text-slate-300 pointer-events-none"><i class="ph-bold ph-text-aa text-xl"></i></div>
                             </div>
                         </div>
@@ -169,8 +177,8 @@
                                             <div class="md:col-span-3">
                                                 <div class="relative">
                                                     <select :name="'attachments['+index+'][type]'" x-model="att.type" class="w-full text-sm font-bold rounded-lg border-slate-200 focus:ring-blue-500 bg-slate-50 cursor-pointer h-10 px-3 appearance-none">
-                                                        <option value="file">📄 Dokumen (File)</option>
-                                                        <option value="video">📺 Video (YouTube)</option>
+                                                        <option value="file">📂 Dokumen (File)</option>
+                                                        <option value="video">🎥 Video (YouTube)</option>
                                                         <option value="link">🔗 Link Website</option>
                                                     </select>
                                                     <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
@@ -205,7 +213,8 @@
 
                     <!-- FOOTER ACTIONS -->
                     <div class="bg-slate-50 px-8 py-6 flex flex-col md:flex-row justify-end gap-3 border-t border-slate-100">
-                        <a href="{{ route('lms.materials.index') }}" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition text-center text-sm">Batal</a>
+                        <a href="{{ route('lms.materials.index') }}" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition text-center text-sm btn-cancel-confirm">Batal</a>
+                        
                         <button type="submit" class="px-8 py-3 bg-blue-900 text-white font-bold rounded-xl shadow-lg shadow-blue-900/20 hover:bg-blue-800 hover:-translate-y-0.5 transition transform flex items-center justify-center gap-2 text-sm">
                             <i class="ph-bold ph-check-circle text-lg"></i>
                             <span>Simpan & Terbitkan</span>
@@ -216,4 +225,92 @@
             </div>
         </div>
     </div>
+
+    {{-- SCRIPT SWEETALERT2 --}}
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Proteksi Tombol Batal
+            const cancelButtons = document.querySelectorAll('.btn-cancel-confirm');
+            cancelButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+
+                    Swal.fire({
+                        title: 'Batalkan Upload?',
+                        text: "Data yang sudah diisi akan hilang!",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#64748b', 
+                        cancelButtonColor: '#cbd5e1', 
+                        confirmButtonText: 'Ya, Batalkan',
+                        cancelButtonText: 'Lanjut Mengisi',
+                        customClass: {
+                            popup: 'rounded-[2rem]',
+                            confirmButton: 'rounded-xl px-4 py-2 font-bold',
+                            cancelButton: 'rounded-xl px-4 py-2 font-bold text-slate-600'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = href;
+                        }
+                    });
+                });
+            });
+
+            // 2. Logic Submit Form yang Lebih Aman
+            const uploadForm = document.getElementById('uploadForm');
+            if(uploadForm) {
+                uploadForm.addEventListener('submit', function(e) {
+                    // Cegah submit otomatis dulu
+                    e.preventDefault();
+
+                    // Cek validitas form (HTML5 standard)
+                    if (!this.checkValidity()) {
+                        this.reportValidity(); // Tampilkan bubble error browser
+                        return;
+                    }
+
+                    // Jika valid, tampilkan Loading
+                    Swal.fire({
+                        title: 'Sedang Mengupload...',
+                        html: 'Mohon jangan tutup halaman ini.<br>Proses upload file sedang berjalan.',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        customClass: {
+                            popup: 'rounded-[2rem]',
+                            title: 'text-xl font-bold text-slate-800'
+                        }
+                    });
+
+                    // Submit form secara manual setelah jeda singkat
+                    // (Memberi waktu SweetAlert untuk render)
+                    setTimeout(() => {
+                        this.submit();
+                    }, 300);
+                });
+            }
+
+            // 3. Notifikasi Error PHP (Jika validasi server gagal)
+            @if($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Mengupload',
+                    text: 'Silakan periksa kembali isian formulir Anda.',
+                    confirmButtonText: 'Oke, Saya Perbaiki',
+                    confirmButtonColor: '#e11d48',
+                    customClass: {
+                        popup: 'rounded-[2rem]'
+                    }
+                });
+            @endif
+        });
+    </script>
+    @endpush
 </x-app-layout>

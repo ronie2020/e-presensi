@@ -28,11 +28,12 @@
                     {{-- Tombol Aksi (Export/Print) --}}
                     @if($selectedClassId && $selectedSubjectId && !$assignments->isEmpty())
                         <div class="flex flex-wrap justify-center gap-3">
-                            <a href="{{ route('lms.grades.export', ['class_id' => $selectedClassId, 'subject_id' => $selectedSubjectId]) }}" target="_blank" class="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-xl shadow-lg transition-all flex items-center gap-2 group">
+                            {{-- Tambahkan class 'btn-export' untuk trigger SweetAlert --}}
+                            <a href="{{ route('lms.grades.export', ['class_id' => $selectedClassId, 'subject_id' => $selectedSubjectId]) }}" target="_blank" class="btn-export px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-xl shadow-lg transition-all flex items-center gap-2 group">
                                 <i class="ph-bold ph-microsoft-excel-logo text-xl"></i>
                                 <span>Export Excel</span>
                             </a>
-                            <a href="{{ route('lms.grades.print', ['class_id' => $selectedClassId, 'subject_id' => $selectedSubjectId]) }}" target="_blank" class="px-5 py-3 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-xl shadow-lg backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2">
+                            <a href="{{ route('lms.grades.print', ['class_id' => $selectedClassId, 'subject_id' => $selectedSubjectId]) }}" target="_blank" class="btn-print px-5 py-3 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-xl shadow-lg backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2">
                                 <i class="ph-bold ph-printer text-xl"></i>
                                 <span>Cetak</span>
                             </a>
@@ -45,7 +46,8 @@
             <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm mb-8 relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-full -mr-10 -mt-10 opacity-50 pointer-events-none"></div>
                 
-                <form action="{{ route('lms.grades.index') }}" method="GET" class="relative z-10">
+                {{-- Tambahkan ID 'filterForm' untuk script --}}
+                <form action="{{ route('lms.grades.index') }}" method="GET" class="relative z-10" id="filterForm">
                     <div class="flex flex-col md:flex-row gap-5 items-end">
                         
                         <div class="flex-1 w-full">
@@ -209,4 +211,93 @@
 
         </div>
     </div>
+
+    {{-- SCRIPT TAMBAHAN UNTUK UX --}}
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. Loading saat Filter Form dikirim
+            const filterForm = document.getElementById('filterForm');
+            if(filterForm) {
+                filterForm.addEventListener('submit', function(e) {
+                    // Validasi manual sederhana agar loading hanya muncul jika form valid
+                    const selects = this.querySelectorAll('select');
+                    let isValid = true;
+                    selects.forEach(s => { if(s.value === '') isValid = false; });
+
+                    if(isValid) {
+                        Swal.fire({
+                            title: 'Sedang Memuat Data...',
+                            text: 'Mohon tunggu sebentar.',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            },
+                            customClass: {
+                                popup: 'rounded-[1.5rem]',
+                            }
+                        });
+                    }
+                });
+            }
+
+            // 2. Notifikasi Toast saat klik Export Excel
+            const btnExport = document.querySelector('.btn-export');
+            if(btnExport) {
+                btnExport.addEventListener('click', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Mendownload Excel...',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        customClass: {
+                            popup: 'rounded-xl'
+                        }
+                    });
+                });
+            }
+
+            // 3. Notifikasi Toast saat klik Print
+            const btnPrint = document.querySelector('.btn-print');
+            if(btnPrint) {
+                btnPrint.addEventListener('click', function() {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Membuka PDF...',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        customClass: {
+                            popup: 'rounded-xl'
+                        }
+                    });
+                });
+            }
+
+            // 4. Handle Pesan Session (Jika ada error/success dari controller)
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: "{{ session('success') }}",
+                    customClass: { popup: 'rounded-[1.5rem]' }
+                });
+            @endif
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: "{{ session('error') }}",
+                    customClass: { popup: 'rounded-[1.5rem]' }
+                });
+            @endif
+        });
+    </script>
+    @endpush
 </x-app-layout>

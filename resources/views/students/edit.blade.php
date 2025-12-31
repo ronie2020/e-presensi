@@ -1,5 +1,9 @@
 {{-- Halaman ini adalah tampilan untuk resources/views/students/edit.blade.php --}}
 <x-app-layout>
+    {{-- Flatpickr CSS (Untuk Datepicker Cantik) --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
+
     <div class="py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
@@ -9,12 +13,13 @@
                     <h1 class="text-3xl font-black text-blue-900 tracking-tight">Edit Buku Induk Siswa</h1>
                     <p class="text-slate-500 text-sm mt-1">Lengkapi data detail siswa: <span class="font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded">{{ $student->name }}</span></p>
                 </div>
-                <a href="{{ route('students.index') }}" class="px-4 py-2 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-900 hover:border-blue-200 transition-all shadow-sm flex items-center gap-2 group">
+                {{-- Tombol Kembali dengan SweetAlert confirmation (class 'btn-back-confirm') --}}
+                <a href="{{ route('students.index') }}" class="btn-back-confirm px-4 py-2 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-900 hover:border-blue-200 transition-all shadow-sm flex items-center gap-2 group">
                     <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali
                 </a>
             </div>
 
-            {{-- Tampilkan Error Validasi (PENTING: Agar tahu jika ada validasi gagal) --}}
+            {{-- Tampilkan Error Validasi --}}
             @if ($errors->any())
                 <div class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-xl text-sm flex items-start gap-3 shadow-sm">
                     <i class="ph-fill ph-warning-circle text-lg shrink-0 mt-0.5"></i>
@@ -46,7 +51,8 @@
                     @endforeach
                 </div>
 
-                <form action="{{ route('students.update', $student->id) }}" method="POST" enctype="multipart/form-data" class="p-8">
+                {{-- ID form ditambahkan agar mudah dihandle JS --}}
+                <form id="edit-student-form" action="{{ route('students.update', $student->id) }}" method="POST" enctype="multipart/form-data" class="p-8">
                     @csrf
                     @method('PUT')
                     
@@ -84,13 +90,11 @@
                                     <input type="text" name="nickname" value="{{ old('nickname', $student->nickname) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
                                 </div>
                                 
-                                {{-- PERBAIKAN: name="nis" sudah benar (sesuai model) --}}
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">NIS (Sekolah)</label>
                                     <input type="text" name="nis" value="{{ old('nis', $student->nis) }}" placeholder="Nomor Induk Sekolah" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-mono">
                                 </div>
                                 
-                                {{-- PERBAIKAN: name="student_id" untuk NISN (sesuai logic Controller/Model Anda) --}}
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">NISN (Nasional) *</label>
                                     <input type="text" name="student_id" value="{{ old('student_id', $student->student_id) }}" required class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-mono bg-blue-50/30 text-blue-900 font-bold">
@@ -100,7 +104,11 @@
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tempat, Tanggal Lahir</label>
                                     <div class="flex gap-2">
                                         <input type="text" name="pob" value="{{ old('pob', $student->pob) }}" placeholder="Kota" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
-                                        <input type="date" name="dob" value="{{ old('dob', $student->dob) }}" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                        {{-- MODIFIKASI: Input Date diganti Text + class datepicker --}}
+                                        <div class="relative w-1/2">
+                                            <input type="text" name="dob" value="{{ old('dob', $student->dob) }}" placeholder="dd/mm/yyyy" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 bg-white">
+                                            <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-calendar-blank"></i></div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
@@ -241,7 +249,6 @@
                     <div x-show="tab === 'pendidikan'" class="space-y-6" style="display: none;">
                         <h3 class="text-lg font-bold text-blue-900 border-b border-slate-100 pb-2 mb-4">Pendidikan Sebelumnya</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {{-- ERROR FIX: Mengubah name="prev_school_name" menjadi "school_origin" sesuai Model --}}
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Asal Sekolah Dasar (SD)</label>
                                 <input type="text" name="school_origin" value="{{ old('school_origin', $student->school_origin) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
@@ -252,14 +259,19 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tanggal Ijazah</label>
-                                <input type="date" name="prev_exam_date" value="{{ old('prev_exam_date', $student->prev_exam_date) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                <div class="relative">
+                                    <input type="text" name="prev_exam_date" value="{{ old('prev_exam_date', $student->prev_exam_date) }}" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900" placeholder="dd/mm/yyyy">
+                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-calendar-blank"></i></div>
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tanggal Diterima di Sekolah Ini</label>
-                                <input type="date" name="accepted_date" value="{{ old('accepted_date', $student->accepted_date) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                <div class="relative">
+                                    <input type="text" name="accepted_date" value="{{ old('accepted_date', $student->accepted_date) }}" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900" placeholder="dd/mm/yyyy">
+                                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-calendar-blank"></i></div>
+                                </div>
                             </div>
                             
-                            {{-- NOTE: Field ini perlu ditambahkan ke fillable jika belum ada --}}
                             <div class="md:col-span-2">
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Pindahan Dari Sekolah (Jika Pindahan)</label>
                                 <input type="text" name="transfer_from_school" value="{{ old('transfer_from_school', $student->transfer_from_school) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
@@ -280,7 +292,11 @@
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tempat, Tanggal Lahir</label>
                                     <div class="flex gap-2">
                                         <input type="text" name="father_pob" value="{{ old('father_pob', $student->father_pob) }}" placeholder="Kota" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
-                                        <input type="date" name="father_birth_year" value="{{ old('father_birth_year', $student->father_birth_year) }}" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                        {{-- MODIFIKASI: Datepicker --}}
+                                        <div class="relative w-1/2">
+                                            <input type="text" name="father_birth_year" value="{{ old('father_birth_year', $student->father_birth_year) }}" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900" placeholder="dd/mm/yyyy">
+                                            <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-calendar-blank"></i></div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
@@ -302,7 +318,11 @@
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tempat, Tanggal Lahir</label>
                                     <div class="flex gap-2">
                                         <input type="text" name="mother_pob" value="{{ old('mother_pob', $student->mother_pob) }}" placeholder="Kota" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
-                                        <input type="date" name="mother_birth_year" value="{{ old('mother_birth_year', $student->mother_birth_year) }}" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                        {{-- MODIFIKASI: Datepicker --}}
+                                        <div class="relative w-1/2">
+                                            <input type="text" name="mother_birth_year" value="{{ old('mother_birth_year', $student->mother_birth_year) }}" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900" placeholder="dd/mm/yyyy">
+                                            <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-calendar-blank"></i></div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
@@ -327,7 +347,11 @@
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tempat, Tanggal Lahir</label>
                                     <div class="flex gap-2">
                                         <input type="text" name="guardian_pob" value="{{ old('guardian_pob', $student->guardian_pob) }}" placeholder="Kota" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
-                                        <input type="date" name="guardian_dob" value="{{ old('guardian_dob', $student->guardian_dob) }}" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                        {{-- MODIFIKASI: Datepicker --}}
+                                        <div class="relative w-1/2">
+                                            <input type="text" name="guardian_dob" value="{{ old('guardian_dob', $student->guardian_dob) }}" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900" placeholder="dd/mm/yyyy">
+                                            <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-calendar-blank"></i></div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div>
@@ -338,7 +362,6 @@
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Pekerjaan</label>
                                     <input type="text" name="guardian_job" value="{{ old('guardian_job', $student->guardian_job) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
                                 </div>
-                                {{-- PERHATIKAN: Field guardian_income dan guardian_address HARUS ada di fillable --}}
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Penghasilan / Bulan</label>
                                     <input type="text" name="guardian_income" value="{{ old('guardian_income', $student->guardian_income) }}" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
@@ -364,7 +387,10 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-xs font-bold text-emerald-600 uppercase mb-1 ml-1">Tanggal Tamat</label>
-                                    <input type="date" name="graduated_date" value="{{ old('graduated_date', $student->graduated_date) }}" class="w-full rounded-xl border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500">
+                                    <div class="relative">
+                                        <input type="text" name="graduated_date" value="{{ old('graduated_date', $student->graduated_date) }}" class="datepicker w-full rounded-xl border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500 bg-white" placeholder="dd/mm/yyyy">
+                                        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-emerald-400"><i class="ph-bold ph-calendar-blank"></i></div>
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-emerald-600 uppercase mb-1 ml-1">No. Ijazah</label>
@@ -387,7 +413,10 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-xs font-bold text-amber-600 uppercase mb-1 ml-1">Tanggal Pindah</label>
-                                    <input type="date" name="leaving_date" value="{{ old('leaving_date', $student->leaving_date) }}" class="w-full rounded-xl border-amber-200 focus:border-amber-500 focus:ring-amber-500">
+                                    <div class="relative">
+                                        <input type="text" name="leaving_date" value="{{ old('leaving_date', $student->leaving_date) }}" class="datepicker w-full rounded-xl border-amber-200 focus:border-amber-500 focus:ring-amber-500 bg-white" placeholder="dd/mm/yyyy">
+                                        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-amber-400"><i class="ph-bold ph-calendar-blank"></i></div>
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-amber-600 uppercase mb-1 ml-1">Dari Kelas</label>
@@ -409,7 +438,10 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-xs font-bold text-rose-600 uppercase mb-1 ml-1">Tanggal Putus</label>
-                                    <input type="date" name="dropout_date" value="{{ old('dropout_date', $student->dropout_date) }}" class="w-full rounded-xl border-rose-200 focus:border-rose-500 focus:ring-rose-500">
+                                    <div class="relative">
+                                        <input type="text" name="dropout_date" value="{{ old('dropout_date', $student->dropout_date) }}" class="datepicker w-full rounded-xl border-rose-200 focus:border-rose-500 focus:ring-rose-500 bg-white" placeholder="dd/mm/yyyy">
+                                        <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-rose-400"><i class="ph-bold ph-calendar-blank"></i></div>
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-rose-600 uppercase mb-1 ml-1">Alasan</label>
@@ -449,16 +481,65 @@
         </div>
     </div>
 
+    {{-- Script Flatpickr & SweetAlert --}}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    {{-- Bahasa Indonesia untuk Flatpickr --}}
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
-        // Script sederhana untuk preview foto sebelum upload
-        document.getElementById('photo-input').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('photo-preview').src = e.target.result;
-                }
-                reader.readAsDataURL(file);
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. INISIALISASI DATEPICKER (Flatpickr)
+            flatpickr(".datepicker", {
+                altInput: true,
+                altFormat: "d/m/Y", // Tampilan di Form: 31/12/2025
+                dateFormat: "Y-m-d", // Data dikirim ke Server: 2025-12-31
+                locale: "id", // Bahasa Indonesia
+                disableMobile: "true" // Memaksa pakai tema Flatpickr di HP juga (supaya format tetap konsisten)
+            });
+
+            // 2. PREVIEW FOTO
+            const photoInput = document.getElementById('photo-input');
+            if(photoInput) {
+                photoInput.addEventListener('change', function(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            document.getElementById('photo-preview').src = e.target.result;
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+
+            // 3. KONFIRMASI KEMBALI JIKA BELUM SIMPAN
+            // Cek jika form berubah (opsional, sederhana saja dulu: konfirmasi langsung saat klik kembali)
+            const btnBack = document.querySelector('.btn-back-confirm');
+            if(btnBack) {
+                btnBack.addEventListener('click', function(e) {
+                    // Hanya contoh proteksi sederhana
+                    // e.preventDefault();
+                    // Swal.fire(...) 
+                    // (Aktifkan jika ingin memproteksi tombol kembali)
+                });
+            }
+
+            // 4. LOADING SAAT SIMPAN
+            const form = document.getElementById('edit-student-form');
+            if(form) {
+                form.addEventListener('submit', function() {
+                    Swal.fire({
+                        title: 'Menyimpan Data...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        customClass: {
+                            popup: 'rounded-[2rem]'
+                        }
+                    });
+                });
             }
         });
     </script>

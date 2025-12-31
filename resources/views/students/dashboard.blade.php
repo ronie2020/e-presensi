@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Portal Siswa</title>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    {{-- Tambahkan CDN SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-slate-100 min-h-screen flex items-center justify-center p-6">
@@ -55,14 +57,40 @@
 
         <!-- Footer -->
         <div class="mt-12 text-center">
-            <form method="POST" action="{{ route('student.logout') }}">
+            <form method="POST" action="{{ route('student.logout') }}" id="logout-form">
                 @csrf
-                <button type="submit" class="text-slate-400 hover:text-red-500 text-sm font-bold flex items-center gap-2 mx-auto transition-colors">
+                {{-- Tambahkan ID dan type="button" agar bisa di-intercept JS --}}
+                <button type="button" id="btn-logout" class="text-slate-400 hover:text-red-500 text-sm font-bold flex items-center gap-2 mx-auto transition-colors">
                     <i class="ph-bold ph-sign-out"></i> Keluar Aplikasi
                 </button>
             </form>
         </div>
     </div>
+
+    <script>
+        document.getElementById('btn-logout').addEventListener('click', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Ingin Keluar?',
+                text: "Sesi Anda akan diakhiri.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48', // Warna Merah Rose
+                cancelButtonColor: '#64748b', // Warna Abu Slate
+                confirmButtonText: 'Ya, Keluar',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'rounded-[2rem] font-sans',
+                    confirmButton: 'rounded-xl px-4 py-2 font-bold',
+                    cancelButton: 'rounded-xl px-4 py-2 font-bold'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logout-form').submit();
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>

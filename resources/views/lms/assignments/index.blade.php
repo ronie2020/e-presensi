@@ -32,16 +32,12 @@
                 </div>
             </div>
 
-            {{-- NOTIFIKASI SUKSES --}}
+            {{-- ALERT SESSION (Dihapus/Dikomentari karena diganti SweetAlert Toast di bawah) --}}
+            {{-- 
             @if(session('success'))
-                <div x-data="{ show: true }" x-show="show" x-transition class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl font-bold text-sm flex justify-between items-center shadow-sm">
-                    <div class="flex items-center gap-2">
-                        <i class="ph-fill ph-check-circle text-xl"></i>
-                        <span>{{ session('success') }}</span>
-                    </div>
-                    <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-1 rounded-lg hover:bg-emerald-100 transition"><i class="ph-bold ph-x"></i></button>
-                </div>
-            @endif
+               ... kode lama ...
+            @endif 
+            --}}
 
             {{-- LIST TUGAS (GRID SYSTEM) --}}
             @if($assignments->count() > 0)
@@ -106,9 +102,11 @@
                                     <span>Periksa / Nilai</span>
                                 </a>
 
-                                <form action="{{ route('lms.assignments.destroy', $task->id) }}" method="POST" onsubmit="return confirm('Hapus tugas ini? Data nilai siswa juga akan hilang.');">
+                                {{-- FORM HAPUS DENGAN SWEETALERT --}}
+                                <form action="{{ route('lms.assignments.destroy', $task->id) }}" method="POST" class="form-delete-task">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="w-11 h-11 rounded-xl bg-white border border-slate-200 text-rose-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-all flex items-center justify-center shadow-sm" title="Hapus Tugas">
+                                    {{-- Hapus onsubmit, ganti type button, tambah class btn-delete --}}
+                                    <button type="button" class="btn-delete w-11 h-11 rounded-xl bg-white border border-slate-200 text-rose-500 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-all flex items-center justify-center shadow-sm" title="Hapus Tugas">
                                         <i class="ph-bold ph-trash text-lg"></i>
                                     </button>
                                 </form>
@@ -139,4 +137,59 @@
 
         </div>
     </div>
+
+    {{-- SCRIPT SWEETALERT --}}
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Tombol Hapus dengan Konfirmasi
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const form = this.closest('.form-delete-task');
+                    
+                    Swal.fire({
+                        title: 'Hapus Tugas Ini?',
+                        text: "Data nilai dan pengumpulan siswa akan ikut terhapus permanen!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e11d48', // Rose-600
+                        cancelButtonColor: '#64748b', // Slate-500
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                        customClass: {
+                            popup: 'rounded-[2rem]',
+                            confirmButton: 'rounded-xl px-4 py-2 font-bold',
+                            cancelButton: 'rounded-xl px-4 py-2 font-bold'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // 2. Notifikasi Toast Sukses (Pengganti Flash Message)
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'rounded-xl border border-emerald-100 bg-white shadow-lg'
+                    }
+                });
+            @endif
+        });
+    </script>
+    @endpush
 </x-app-layout>

@@ -1,4 +1,7 @@
 <x-student-learning-layout>
+    {{-- CDN SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {{-- HEADER DASHBOARD: DARK THEME --}}
@@ -125,23 +128,45 @@
                 </div>
             @else
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-                    @foreach($allSubjects as $subject)
-                        <a href="{{ route('students.learning.subject.show', $subject->id) }}" class="group bg-white p-5 rounded-[2rem] border border-slate-200 shadow-sm hover:border-rose-300 hover:shadow-lg hover:shadow-rose-900/5 transition-all relative overflow-hidden h-full flex flex-col">
+                    @foreach($allSubjects as $index => $subject)
+                        {{-- LOGIC WARNA WARNI --}}
+                        @php
+                            $colors = [
+                                ['bg' => 'bg-blue-50', 'text' => 'text-blue-600', 'border' => 'border-blue-100', 'hover_border' => 'hover:border-blue-300', 'hover_bg' => 'hover:bg-blue-50', 'icon' => 'ph-globe', 'shadow' => 'hover:shadow-blue-900/10'],
+                                ['bg' => 'bg-purple-50', 'text' => 'text-purple-600', 'border' => 'border-purple-100', 'hover_border' => 'hover:border-purple-300', 'hover_bg' => 'hover:bg-purple-50', 'icon' => 'ph-atom', 'shadow' => 'hover:shadow-purple-900/10'],
+                                ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-600', 'border' => 'border-emerald-100', 'hover_border' => 'hover:border-emerald-300', 'hover_bg' => 'hover:bg-emerald-50', 'icon' => 'ph-plant', 'shadow' => 'hover:shadow-emerald-900/10'],
+                                ['bg' => 'bg-amber-50', 'text' => 'text-amber-600', 'border' => 'border-amber-100', 'hover_border' => 'hover:border-amber-300', 'hover_bg' => 'hover:bg-amber-50', 'icon' => 'ph-calculator', 'shadow' => 'hover:shadow-amber-900/10'],
+                                ['bg' => 'bg-rose-50', 'text' => 'text-rose-600', 'border' => 'border-rose-100', 'hover_border' => 'hover:border-rose-300', 'hover_bg' => 'hover:bg-rose-50', 'icon' => 'ph-palette', 'shadow' => 'hover:shadow-rose-900/10'],
+                                ['bg' => 'bg-cyan-50', 'text' => 'text-cyan-600', 'border' => 'border-cyan-100', 'hover_border' => 'hover:border-cyan-300', 'hover_bg' => 'hover:bg-cyan-50', 'icon' => 'ph-flask', 'shadow' => 'hover:shadow-cyan-900/10'],
+                            ];
+                            $theme = $colors[$index % count($colors)];
+                        @endphp
+
+                        <a href="{{ route('students.learning.subject.show', $subject->id) }}" class="group bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm {{ $theme['shadow'] }} {{ $theme['hover_border'] }} hover:-translate-y-1 transition-all duration-300 relative overflow-hidden h-full flex flex-col justify-between">
                             
-                            <div class="flex items-center gap-4 mb-4">
-                                <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 border border-slate-200 flex items-center justify-center font-black text-base group-hover:bg-rose-600 group-hover:text-white group-hover:border-rose-600 transition-all duration-300 shrink-0 shadow-inner">
+                            {{-- Dekorasi Latar (Icon Pudar Besar) --}}
+                            <div class="absolute -right-6 -top-6 opacity-[0.03] group-hover:opacity-10 transition-opacity duration-500 pointer-events-none transform rotate-12 group-hover:rotate-0 transition-transform">
+                                <i class="ph-duotone {{ $theme['icon'] }} text-[8rem] {{ $theme['text'] }}"></i>
+                            </div>
+
+                            <div class="relative z-10">
+                                {{-- Icon Box --}}
+                                <div class="w-14 h-14 rounded-2xl {{ $theme['bg'] }} {{ $theme['text'] }} {{ $theme['border'] }} border flex items-center justify-center font-bold text-xl mb-4 group-hover:scale-110 transition-transform duration-300 shadow-sm">
                                     {{ substr($subject->name, 0, 1) }}
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <h4 class="font-bold text-sm text-slate-700 leading-tight group-hover:text-rose-700 transition-colors line-clamp-2">{{ $subject->name }}</h4>
-                                    <p class="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-wide">Semester 1</p>
-                                </div>
+                                
+                                {{-- Judul --}}
+                                <h4 class="font-bold text-base text-slate-800 leading-snug group-hover:{{ $theme['text'] }} transition-colors line-clamp-2 mb-1">
+                                    {{ $subject->name }}
+                                </h4>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Semester 1</p>
                             </div>
                             
-                            <div class="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between text-[10px] font-bold text-slate-400 group-hover:text-rose-500 transition-colors">
-                                <span>Buka Kelas</span>
-                                <div class="w-6 h-6 rounded-full bg-slate-50 group-hover:bg-rose-50 flex items-center justify-center transition-colors">
-                                    <i class="ph-bold ph-caret-right text-xs"></i>
+                            {{-- Footer Tombol --}}
+                            <div class="mt-6 pt-4 border-t border-slate-50 flex items-center justify-between">
+                                <span class="text-[10px] font-bold text-slate-400 group-hover:{{ $theme['text'] }} transition-colors">Buka Kelas</span>
+                                <div class="w-8 h-8 rounded-full bg-slate-50 group-hover:{{ $theme['bg'] }} group-hover:{{ $theme['text'] }} flex items-center justify-center transition-all">
+                                    <i class="ph-bold ph-arrow-right text-xs"></i>
                                 </div>
                             </div>
                         </a>
@@ -151,4 +176,41 @@
         </div>
 
     </div>
+
+    {{-- SCRIPT SWEETALERT (TOAST ONLY) --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: "{{ session('success') }}",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'rounded-xl shadow-lg border border-emerald-100 bg-white'
+                    }
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: "{{ session('error') }}",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'rounded-xl shadow-lg border border-rose-100 bg-white'
+                    }
+                });
+            @endif
+        });
+    </script>
 </x-student-learning-layout>

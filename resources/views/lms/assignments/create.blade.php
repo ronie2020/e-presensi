@@ -18,7 +18,7 @@
                         <h1 class="text-2xl font-extrabold mb-1 tracking-tight">Setting Penugasan</h1>
                         <p class="text-blue-300 text-sm font-medium">Atur detail tugas, kuis, atau instruksi untuk siswa.</p>
                     </div>
-                    <a href="{{ route('lms.assignments.index') }}" class="hidden md:flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold backdrop-blur-sm transition text-white border border-white/10">
+                    <a href="{{ route('lms.assignments.index') }}" class="hidden md:flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold backdrop-blur-sm transition text-white border border-white/10 btn-cancel-confirm">
                         <i class="ph-bold ph-arrow-left"></i> Kembali
                     </a>
                 </div>
@@ -26,7 +26,7 @@
 
             {{-- ERROR BLOCK --}}
             @if ($errors->any())
-                <div class="mb-8 bg-rose-50 border border-rose-100 p-5 rounded-[1.5rem] flex items-start gap-4 shadow-sm">
+                <div class="mb-8 bg-rose-50 border border-rose-100 p-5 rounded-[1.5rem] flex items-start gap-4 shadow-sm animate-pulse">
                     <div class="p-2 bg-rose-100 text-rose-600 rounded-xl shrink-0">
                         <i class="ph-bold ph-warning-octagon text-xl"></i>
                     </div>
@@ -43,7 +43,7 @@
 
             {{-- FORM CARD --}}
             <div class="bg-white shadow-xl shadow-slate-200/50 rounded-[2rem] border border-slate-100 overflow-hidden">
-                <form action="{{ route('lms.assignments.store') }}" method="POST" 
+                <form action="{{ route('lms.assignments.store') }}" method="POST" id="createAssignmentForm" 
                       x-data="{ 
                           targetType: 'class', 
                           assignmentType: 'file_upload', 
@@ -63,13 +63,13 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="col-span-2">
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Judul Tugas <span class="text-rose-500">*</span></label>
-                                    <input type="text" name="title" value="{{ old('title') }}" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 placeholder:font-normal placeholder:text-slate-400" placeholder="Contoh: Ulangan Harian Bab 1">
+                                    <input type="text" name="title" value="{{ old('title') }}" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 placeholder:font-normal placeholder:text-slate-400 transition-colors" placeholder="Contoh: Ulangan Harian Bab 1">
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Mata Pelajaran <span class="text-rose-500">*</span></label>
                                     <div class="relative">
-                                        <select name="subject_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 appearance-none">
+                                        <select name="subject_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 appearance-none transition-colors">
                                             <option value="">-- Pilih Mapel --</option>
                                             @foreach($subjects as $subject)
                                                 <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
@@ -81,7 +81,7 @@
 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Deadline <span class="text-rose-500">*</span></label>
-                                    <input type="datetime-local" name="deadline" value="{{ old('deadline') }}" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4">
+                                    <input type="datetime-local" name="deadline" value="{{ old('deadline') }}" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 transition-colors">
                                 </div>
 
                                 <div class="col-span-2">
@@ -98,7 +98,7 @@
 
                         <div class="h-px bg-slate-100"></div>
 
-                        <!-- 2. PILIHAN TIPE TUGAS (CARD SELECTOR) -->
+                        <!-- 2. PILIHAN TIPE TUGAS -->
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 ml-1">Jenis Penugasan <span class="text-rose-500">*</span></label>
                             
@@ -156,7 +156,7 @@
                             <!-- A. JIKA UPLOAD FILE -->
                             <div x-show="assignmentType === 'file_upload'">
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Instruksi / Soal</label>
-                                <textarea name="description_file" rows="5" class="w-full rounded-2xl border-slate-200 bg-white focus:ring-blue-500 focus:border-blue-500 p-4 text-slate-700 font-medium placeholder:font-normal placeholder:text-slate-400" placeholder="Tuliskan soal atau instruksi pengerjaan disini...">{{ old('description_file') }}</textarea>
+                                <textarea name="description_file" rows="5" class="w-full rounded-2xl border-slate-200 bg-white focus:ring-blue-500 focus:border-blue-500 p-4 text-slate-700 font-medium placeholder:font-normal placeholder:text-slate-400 transition-colors" placeholder="Tuliskan soal atau instruksi pengerjaan disini...">{{ old('description_file') }}</textarea>
                             </div>
 
                             <!-- B. JIKA LINK EKSTERNAL -->
@@ -165,11 +165,11 @@
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">URL Link Tugas <span class="text-rose-500">*</span></label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-link"></i></div>
-                                        <input type="url" name="link_url" value="{{ old('link_url') }}" class="w-full rounded-xl border-slate-200 bg-white pl-10 font-bold text-blue-600 focus:ring-blue-500 h-12" placeholder="https://...">
+                                        <input type="url" name="link_url" value="{{ old('link_url') }}" class="w-full rounded-xl border-slate-200 bg-white pl-10 font-bold text-blue-600 focus:ring-blue-500 h-12 transition-colors" placeholder="https://...">
                                     </div>
                                 </div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Instruksi Tambahan</label>
-                                <textarea name="description_link" rows="3" class="w-full rounded-2xl border-slate-200 bg-white focus:ring-blue-500 p-4 font-medium" placeholder="Silakan kerjakan link di atas...">{{ old('description_link') }}</textarea>
+                                <textarea name="description_link" rows="3" class="w-full rounded-2xl border-slate-200 bg-white focus:ring-blue-500 p-4 font-medium transition-colors" placeholder="Silakan kerjakan link di atas...">{{ old('description_link') }}</textarea>
                             </div>
 
                             <!-- C. JIKA KUIS ONLINE -->
@@ -177,12 +177,12 @@
                                 <div class="mb-6 flex flex-col md:flex-row gap-4">
                                     <div class="flex-1">
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Instruksi Kuis</label>
-                                        <textarea name="description_quiz" rows="2" class="w-full rounded-xl border-slate-200 bg-white focus:ring-purple-500 p-3" placeholder="Kerjakan dengan jujur...">{{ old('description_quiz') }}</textarea>
+                                        <textarea name="description_quiz" rows="2" class="w-full rounded-xl border-slate-200 bg-white focus:ring-purple-500 p-3 transition-colors" placeholder="Kerjakan dengan jujur...">{{ old('description_quiz') }}</textarea>
                                     </div>
                                     <div class="w-full md:w-1/3">
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Durasi (Menit) <span class="text-rose-500">*</span></label>
                                         <div class="relative">
-                                            <input type="number" name="duration_minutes" value="{{ old('duration_minutes', 60) }}" class="w-full rounded-xl border-slate-200 bg-white font-bold text-slate-800 focus:ring-purple-500 h-11 pl-4 pr-10">
+                                            <input type="number" name="duration_minutes" value="{{ old('duration_minutes', 60) }}" class="w-full rounded-xl border-slate-200 bg-white font-bold text-slate-800 focus:ring-purple-500 h-11 pl-4 pr-10 transition-colors">
                                             <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400 text-xs font-bold">MIN</div>
                                         </div>
                                     </div>
@@ -258,7 +258,9 @@
                                 <div>
                                     <div x-show="targetType === 'class'">
                                         <div class="relative">
-                                            <select name="class_id" class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-blue-500 h-11 px-3 appearance-none">
+                                            <select name="class_id" 
+                                                    :required="targetType === 'class'"
+                                                    class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-blue-500 h-11 px-3 appearance-none transition-colors">
                                                 <option value="">-- Pilih Kelas --</option>
                                                 @foreach($classes as $class)
                                                     <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
@@ -269,7 +271,9 @@
                                     </div>
                                     <div x-show="targetType === 'grade'" style="display: none;">
                                         <div class="relative">
-                                            <select name="target_grade" class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-blue-500 h-11 px-3 appearance-none">
+                                            <select name="target_grade" 
+                                                    :required="targetType === 'grade'"
+                                                    class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-blue-500 h-11 px-3 appearance-none transition-colors">
                                                 <option value="7" {{ old('target_grade') == '7' ? 'selected' : '' }}>Kelas 7</option>
                                                 <option value="8" {{ old('target_grade') == '8' ? 'selected' : '' }}>Kelas 8</option>
                                                 <option value="9" {{ old('target_grade') == '9' ? 'selected' : '' }}>Kelas 9</option>
@@ -284,7 +288,8 @@
 
                     <!-- FOOTER ACTIONS -->
                     <div class="bg-slate-50 px-8 py-6 flex justify-end gap-3 border-t border-slate-100">
-                        <a href="{{ route('lms.assignments.index') }}" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition text-center text-sm">Batal</a>
+                        <a href="{{ route('lms.assignments.index') }}" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition text-center text-sm btn-cancel-confirm">Batal</a>
+                        
                         <button type="submit" class="px-8 py-3 bg-blue-900 text-white font-bold rounded-xl shadow-lg shadow-blue-900/20 hover:bg-blue-800 hover:-translate-y-0.5 transition transform flex items-center justify-center gap-2 text-sm">
                             <i class="ph-bold ph-paper-plane-tilt text-lg"></i>
                             <span>Terbitkan Tugas</span>
@@ -294,4 +299,69 @@
             </div>
         </div>
     </div>
+
+    {{-- SCRIPT SWEETALERT2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Proteksi Tombol Batal/Kembali
+            const cancelButtons = document.querySelectorAll('.btn-cancel-confirm');
+            cancelButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+
+                    Swal.fire({
+                        title: 'Batalkan Tugas?',
+                        text: "Data yang sudah diisi akan hilang jika Anda keluar.",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#64748b', // Slate-500
+                        cancelButtonColor: '#cbd5e1', // Slate-300
+                        confirmButtonText: 'Ya, Batalkan',
+                        cancelButtonText: 'Lanjut Mengisi',
+                        customClass: {
+                            popup: 'rounded-[2rem]',
+                            confirmButton: 'rounded-xl px-4 py-2 font-bold',
+                            cancelButton: 'rounded-xl px-4 py-2 font-bold text-slate-600'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = href;
+                        }
+                    });
+                });
+            });
+
+            // 2. Loading saat Submit
+            const form = document.getElementById('createAssignmentForm');
+            if(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    if (!this.checkValidity()) {
+                        this.reportValidity();
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Sedang Menerbitkan...',
+                        text: 'Mohon tunggu sebentar.',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        customClass: {
+                            popup: 'rounded-[2rem]'
+                        }
+                    });
+
+                    setTimeout(() => {
+                        this.submit();
+                    }, 500);
+                });
+            }
+        });
+    </script>
 </x-app-layout>

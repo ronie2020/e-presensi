@@ -1,5 +1,4 @@
 <x-app-layout>
-    {{-- Header Judul (Hidden secara visual karena ada di Hero, tapi tetap ada untuk aksesibilitas/breadcrumb jika perlu) --}}
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-slate-800 leading-tight">
             {{ __('Materi Pelajaran') }}
@@ -9,9 +8,8 @@
     <div class="py-8 font-sans text-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION --}}
+            {{-- HERO SECTION (Tidak Berubah) --}}
             <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 mb-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
-                {{-- Dekorasi Latar --}}
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
                 <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -26,7 +24,6 @@
                         </p>
                     </div>
                     
-                    {{-- Tombol Aksi Utama --}}
                     <a href="{{ route('lms.materials.create') }}" class="group bg-white text-blue-900 px-6 py-3.5 rounded-2xl font-bold text-sm shadow-lg hover:bg-blue-50 hover:scale-105 transition-all duration-300 flex items-center gap-2">
                         <i class="ph-bold ph-plus-circle text-xl group-hover:rotate-90 transition-transform duration-300"></i>
                         <span>Upload Materi Baru</span>
@@ -34,24 +31,21 @@
                 </div>
             </div>
 
-            {{-- NOTIFIKASI SUKSES --}}
+            {{-- NOTIFIKASI SUKSES (Bisa dihapus jika ingin menggunakan SweetAlert pop-up saja, atau biarkan sebagai cadangan) --}}
+            {{-- Bagian ini saya hapus/komentar karena sudah diganti script SweetAlert di bawah --}}
+            {{-- 
             @if(session('success'))
-                <div x-data="{ show: true }" x-show="show" x-transition class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl font-bold text-sm flex justify-between items-center shadow-sm">
-                    <div class="flex items-center gap-2">
-                        <i class="ph-fill ph-check-circle text-xl"></i>
-                        <span>{{ session('success') }}</span>
-                    </div>
-                    <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-1 rounded-lg hover:bg-emerald-100 transition"><i class="ph-bold ph-x"></i></button>
-                </div>
-            @endif
+                ... kode lama ...
+            @endif 
+            --}}
 
-            {{-- LIST MATERI (GRID SYSTEM) --}}
+            {{-- LIST MATERI --}}
             @if($materials->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($materials as $material)
                         <div class="group relative bg-white border border-slate-100 rounded-[2rem] p-6 hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-200 transition-all duration-300 flex flex-col h-full">
                             
-                            {{-- Badge Tipe File --}}
+                            {{-- Badge Tipe File (Tidak Berubah) --}}
                             <div class="absolute top-5 right-5 z-10">
                                 @if($material->type == 'document')
                                     <span class="bg-rose-50 text-rose-600 border border-rose-100 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
@@ -68,7 +62,7 @@
                                 @endif
                             </div>
 
-                            {{-- Icon Header --}}
+                            {{-- Icon Header (Tidak Berubah) --}}
                             <div class="mb-4">
                                 <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl transition-colors duration-300
                                     {{ $material->type == 'document' ? 'bg-rose-100 text-rose-600 group-hover:bg-rose-600 group-hover:text-white' : 
@@ -80,7 +74,7 @@
                                 </div>
                             </div>
 
-                            {{-- Judul & Meta --}}
+                            {{-- Judul & Meta (Tidak Berubah) --}}
                             <div class="mb-3">
                                 <h3 class="font-bold text-lg text-slate-800 group-hover:text-blue-700 transition-colors line-clamp-2 leading-tight min-h-[3.5rem]">
                                     {{ $material->title }}
@@ -95,7 +89,7 @@
                                 </div>
                             </div>
 
-                            {{-- Deskripsi --}}
+                            {{-- Deskripsi (Tidak Berubah) --}}
                             <div class="text-sm text-slate-500 mb-6 line-clamp-3 flex-grow leading-relaxed">
                                 {{ $material->description ?? 'Tidak ada deskripsi tambahan untuk materi ini.' }}
                             </div>
@@ -119,10 +113,13 @@
                                         </a>
                                     @endif
 
-                                    {{-- Tombol Hapus --}}
-                                    <form action="{{ route('lms.materials.destroy', $material->id) }}" method="POST" onsubmit="return confirm('Hapus materi ini? File terkait akan hilang permanen.');">
+                                    {{-- ============================== --}}
+                                    {{-- BAGIAN MODIFIKASI TOMBOL HAPUS --}}
+                                    {{-- ============================== --}}
+                                    <form action="{{ route('lms.materials.destroy', $material->id) }}" method="POST" class="form-delete-material">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-600 hover:text-white hover:shadow-lg hover:shadow-rose-200 transition-all flex items-center justify-center" title="Hapus Materi">
+                                        {{-- Tambahkan class 'btn-delete' dan ubah type ke 'button' --}}
+                                        <button type="button" class="btn-delete w-10 h-10 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-600 hover:text-white hover:shadow-lg hover:shadow-rose-200 transition-all flex items-center justify-center" title="Hapus Materi">
                                             <i class="ph-bold ph-trash text-lg"></i>
                                         </button>
                                     </form>
@@ -137,7 +134,7 @@
                     {{ $materials->links() }}
                 </div>
             @else
-                {{-- Empty State --}}
+                {{-- Empty State (Tidak Berubah) --}}
                 <div class="bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200 p-12 flex flex-col items-center justify-center text-center">
                     <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-6 animate-pulse">
                         <i class="ph-duotone ph-books text-5xl"></i>
@@ -154,4 +151,63 @@
 
         </div>
     </div>
+
+    {{-- Script Tambahan --}}
+    {{-- Jika @push tidak jalan, hapus baris @push dan @endpush --}}
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Handler Tombol Hapus
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    // Mencegah submit default
+                    e.preventDefault(); 
+                    
+                    // Mencari form terdekat dari tombol yang diklik
+                    const form = this.closest('.form-delete-material');
+
+                    // Tampilkan SweetAlert
+                    Swal.fire({
+                        title: 'Yakin Hapus Materi?',
+                        text: "Data yang dihapus tidak bisa dikembalikan.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e11d48', // Tailwind Rose-600
+                        cancelButtonColor: '#94a3b8', // Tailwind Slate-400
+                        confirmButtonText: 'Ya, Hapus!',
+                        cancelButtonText: 'Batal',
+                        reverseButtons: true, // Tombol aksi di kanan
+                        customClass: {
+                            popup: 'rounded-[1.5rem] font-sans',
+                            title: 'text-xl font-bold text-slate-800',
+                            htmlContainer: 'text-slate-500',
+                            confirmButton: 'px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-rose-200',
+                            cancelButton: 'px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-slate-100 text-slate-600'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // Handler Flash Message Success
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    showConfirmButton: false,
+                    timer: 2000,
+                    customClass: {
+                        popup: 'rounded-[1.5rem] font-sans'
+                    }
+                });
+            @endif
+        });
+    </script>
+    @endpush
 </x-app-layout>
