@@ -8,12 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Kita hanya mengupdate tabel 'students', BUKAN membuat tabel baru
         Schema::table('students', function (Blueprint $table) {
             // Cek dulu biar tidak error kalau kolomnya ternyata sudah ada
             if (!Schema::hasColumn('students', 'status')) {
-                // Tambahkan kolom 'status' setelah kolom 'join_date'
-                $table->string('status')->default('active')->after('join_date');
+                // [PERBAIKAN] Ubah 'join_date' menjadi 'id' agar aman
+                $table->string('status')->default('active')->after('id');
             }
         });
     }

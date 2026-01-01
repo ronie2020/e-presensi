@@ -81,7 +81,7 @@
                         System Online
                     </div>
                     <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-3">
-                        Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">{{ Auth::user()->name ?? 'Administrator' }}</span> 👋
+                        Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">{{ Auth::user()->name ?? 'Administrator' }}</span> 
                     </h1>
                     <p class="text-blue-100/80 text-sm md:text-base max-w-xl leading-relaxed">
                         Berikut adalah ringkasan aktivitas akademik dan kehadiran siswa untuk periode 

@@ -192,6 +192,13 @@ return [
                 'route' => 'library.books.index',
                 'active_check' => 'library.books.*',
                 'icon' => 'ph-book-bookmark'
+            ],
+            [
+                // --- MENU BARU DITAMBAHKAN DI SINI ---
+                'name' => 'Alat Admin',
+                'route' => 'library.tools.index',
+                'active_check' => 'library.tools.*',
+                'icon' => 'ph-printer'
             ]
         ],
         'Administrasi' => [

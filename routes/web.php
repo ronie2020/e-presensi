@@ -54,6 +54,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\LibraryDashboardController;
 use App\Http\Controllers\LibraryCirculationController;
 use App\Http\Controllers\LibraryKioskController;
+use App\Http\Controllers\LibraryToolController;
 
 // Persuratan & Dinas
 use App\Http\Controllers\LetterIncomingController;
@@ -288,6 +289,22 @@ Route::middleware('auth')->group(function () {
         Route::post('/circulation/search-book', [LibraryCirculationController::class, 'searchBook'])->name('circulation.searchBook');
         Route::post('/circulation/borrow', [LibraryCirculationController::class, 'store'])->name('circulation.store');
         Route::post('/circulation/return', [LibraryCirculationController::class, 'returnBook'])->name('circulation.return');
+     // ==========================================
+        //  [BARU] ROUTE ALAT BANTU & CETAK
+        // ==========================================
+        Route::controller(LibraryToolController::class)->prefix('tools')->name('tools.')->group(function () {
+            // Halaman Utama Menu Tools
+            Route::get('/', 'index')->name('index'); 
+            
+            // Cetak Kartu Anggota
+            Route::get('/print-card', 'printMemberCard')->name('print-card');
+            
+            // Cetak Label Barcode Buku
+            Route::get('/print-label', 'printBookLabel')->name('print-book-label');
+            
+            // Download Laporan PDF
+            Route::get('/report', 'generateReport')->name('report');
+        });    
     });
 
      // Manajemen Kelulusan

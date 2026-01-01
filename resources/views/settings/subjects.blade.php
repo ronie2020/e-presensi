@@ -191,8 +191,8 @@
                                     <tr>
                                         <th class="px-6 py-5 text-center w-20">Urut</th>
                                         <th class="px-6 py-5">Mata Pelajaran</th>
-                                        <th class="px-6 py-5">Kelompok</th>
-                                        <th class="px-6 py-5 text-right">Aksi</th>
+                                        <th class="px-6 py-5 whitespace-nowrap">Kelompok</th> {{-- Added whitespace-nowrap --}}
+                                        <th class="px-6 py-5 text-right whitespace-nowrap">Aksi</th> {{-- Added whitespace-nowrap --}}
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-50">
@@ -212,7 +212,7 @@
                                                     <span class="text-[10px] font-mono font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">{{ $subject->code }}</span>
                                                 @endif
                                             </td>
-                                            <td class="px-6 py-5">
+                                            <td class="px-6 py-5 whitespace-nowrap"> {{-- Added whitespace-nowrap --}}
                                                 @php
                                                     $badgeClass = match($subject->group) {
                                                         'A' => 'bg-blue-50 text-blue-700 border-blue-200',
@@ -226,7 +226,7 @@
                                                     Kelompok {{ $subject->group }}
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-5 text-right">
+                                            <td class="px-6 py-5 text-right whitespace-nowrap"> {{-- Added whitespace-nowrap --}}
                                                 <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0 duration-200">
                                                     
                                                     <button @click="openEdit({{ $subject }})"
