@@ -50,12 +50,18 @@ class AdminAlumniController extends Controller
 
         $alumni = $query->orderBy('name', 'asc')->paginate(20)->withQueryString();
 
-        // Statistik
+        // Statistik (DIPERBAIKI)
         $stats = [
             'total' => Student::where('status', 'graduated')->count(),
-            'kuliah' => AlumniProfile::where('activity_status', 'Kuliah')->count(),
+            
+            // PERBAIKAN: Menghitung yang lanjut ke SMA/SMK/MA/Pesantren
+            // Sebelumnya error karena mencari 'Kuliah'
+            'kuliah' => AlumniProfile::whereIn('activity_status', ['SMA', 'SMK', 'MA', 'Pesantren'])->count(),
+            
             'bekerja' => AlumniProfile::whereIn('activity_status', ['Bekerja', 'Wirausaha'])->count(),
-            'mencari' => AlumniProfile::where('activity_status', 'Mencari Kerja')->count(),
+            
+            // Menghitung yang mencari kerja atau memutuskan tidak lanjut
+            'mencari' => AlumniProfile::whereIn('activity_status', ['Mencari Kerja', 'Tidak Lanjut'])->count(),
         ];
 
         // Kirim variabel 'years' juga agar sesuai dengan view
