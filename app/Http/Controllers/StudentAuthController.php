@@ -41,6 +41,12 @@ class StudentAuthController extends Controller
         Auth::guard('student')->login($student);
         $request->session()->regenerate();
 
+        // === [LOGIKA BARU] CEK STATUS ALUMNI ===
+        if ($student->status === 'graduated') {
+            return redirect()->route('alumni.dashboard')->with('success', 'Selamat datang kembali, Alumni!');
+        }
+        // =======================================
+
         // 4. Redirect sesuai Tujuan (LMS atau CBT)
         // Ini membaca <input type="hidden" name="intended_app" value="..."> dari form
         $intended = $request->input('intended_app');

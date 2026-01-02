@@ -113,7 +113,7 @@ return [
                 'icon' => 'ph-warning-circle'
             ],
             [
-                'name' => 'Data Siswa',
+                'name' => 'Data Siswa Aktif', // Saya ubah sedikit namanya agar jelas
                 'route' => 'students.index',
                 'icon' => 'ph-student'
             ],
@@ -122,6 +122,13 @@ return [
                 'route' => 'achievements.index',
                 'active_check' => 'achievements.*',
                 'icon' => 'ph-trophy'
+            ],
+            // --- MENU BARU ALUMNI ---
+            [
+                'name' => 'Data Alumni',
+                'route' => 'admin.alumni.index', // Pastikan membuat route ini nanti
+                'active_check' => 'admin.alumni.*',
+                'icon' => 'ph-users-three', // Icon berbeda
             ],
         ],
         'Ekstrakurikuler' => [
@@ -194,7 +201,6 @@ return [
                 'icon' => 'ph-book-bookmark'
             ],
             [
-                // --- MENU BARU DITAMBAHKAN DI SINI ---
                 'name' => 'Alat Admin',
                 'route' => 'library.tools.index',
                 'active_check' => 'library.tools.*',

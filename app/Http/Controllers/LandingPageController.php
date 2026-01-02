@@ -17,6 +17,8 @@ use App\Models\Student;
 use App\Models\SchoolClass;
 use App\Models\LmsMaterial;
 use App\Models\LmsAssignment;
+// [BARU] Import Model Alumni
+use App\Models\AlumniProfile; 
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -136,24 +138,46 @@ class LandingPageController extends Controller
         $agendas = Agenda::where('event_date', '>=', now()->subDays(1))->orderBy('event_date', 'asc')->limit(4)->get();
         $teachers = User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'])->latest()->take(8)->get();
         
-        // --- UPDATE DATA BUKU TAMU ---
-        // 1. Ambil 3 data terbaru untuk ditampilkan di card depan
+        // Data Buku Tamu
         $guestbooks = GuestBook::latest()->take(3)->get();
-        
-        // 2. [BARU] Ambil 50 data terakhir untuk ditampilkan di Modal (Pop-up)
-        // Kita limit 50 agar loading halaman tidak berat.
         $allGuestbooks = GuestBook::latest()->take(50)->get();
 
         $extracurriculars = Extracurricular::withCount('members')->with(['attendances' => function($query) { $query->latest('date')->limit(1); }])->get();
 
-        // Jangan lupa sertakan 'allGuestbooks' di compact
+        // ==========================================
+        // [BARU] 6. DATA ALUMNI UNTUK LANDING PAGE
+        // ==========================================
+        
+        // A. Statistik Sebaran Alumni
+        $alumniStats = [
+            'total' => Student::where('status', 'graduated')->count(),
+            'sma' => AlumniProfile::where('activity_status', 'SMA')->count(),
+            'smk' => AlumniProfile::where('activity_status', 'SMK')->count(),
+            'ma' => AlumniProfile::where('activity_status', 'MA')->count(),
+            'pesantren' => AlumniProfile::where('activity_status', 'Pesantren')->count(),
+            // Hitung Bekerja dan Wirausaha sebagai satu kategori 'Bekerja'
+            'bekerja' => AlumniProfile::whereIn('activity_status', ['Bekerja', 'Wirausaha', 'Lainnya'])->count(),
+        ];
+
+        // B. Testimoni Alumni (Hanya yang ada isinya)
+        $alumniTestimonials = AlumniProfile::whereNotNull('testimony')
+            ->where('testimony', '!=', '') // Pastikan tidak kosong
+            ->with('student') // Load relasi siswa untuk ambil nama & foto
+            ->latest()
+            ->take(6) // Ambil 6 testimoni terbaru
+            ->get();
+
+        // Jangan lupa sertakan 'alumniStats' dan 'alumniTestimonials' di compact
         return view('welcome', compact(
             'stats', 'barChartData', 'libraryStats', 'libraryChartData', 
             'announcements', 'achievements', 'activities', 'teachers',
-            'guestbooks', 'allGuestbooks', 'extracurriculars', 'agendas', 'schoolStats'
+            'guestbooks', 'allGuestbooks', 'extracurriculars', 'agendas', 'schoolStats',
+            // Variabel Baru:
+            'alumniStats', 'alumniTestimonials'
         ));
     }
 
+    // Method lainnya tetap sama...
     public function activities()
     {
         $activities = SchoolActivity::latest()->paginate(9);

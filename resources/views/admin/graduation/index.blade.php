@@ -15,424 +15,220 @@
                 <div class="absolute bottom-0 right-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
                 
                 <div class="relative z-10 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8">
-                    
-                    {{-- Text Content --}}
-                    <div class="max-w-xl">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm">
-                            <i class="ph-fill ph-graduation-cap"></i> Akademik & Kelulusan
+                    <div class="space-y-2">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-widest backdrop-blur-sm">
+                            <i class="ph-fill ph-graduation-cap"></i> Manajemen Akademik
                         </div>
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-white leading-tight">
-                            Manajemen Kelulusan
+                        <h1 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
+                            Kelulusan & <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-emerald-200">SKL Digital</span>
                         </h1>
-                        <p class="text-blue-100/80 text-sm md:text-base font-medium leading-relaxed">
-                            Kelola status kelulusan siswa, nilai rata-rata, nomor SKL, dan jadwal pengumuman secara terpusat.
+                        <p class="text-blue-200/80 text-sm sm:text-base max-w-xl font-medium">
+                            Kelola status kelulusan siswa tingkat akhir, generate SKL, dan publikasi pengumuman secara terpusat.
                         </p>
                     </div>
-                    
-                    {{-- Stats Grid (4 Cards) --}}
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full xl:w-auto">
-                        {{-- Total Siswa --}}
-                        <div class="bg-white/10 backdrop-blur-md px-4 py-4 rounded-2xl border border-white/10 text-center hover:bg-white/15 transition-colors">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-blue-200 block mb-1">Total Siswa</span>
-                            <span class="text-2xl font-black text-white">{{ $students->total() }}</span>
-                        </div>
+
+                    {{-- GLOBAL ACTIONS --}}
+                    <div class="flex flex-wrap gap-3 w-full xl:w-auto">
+                        <!-- Tombol Set Tanggal -->
+                        <button onclick="document.getElementById('modalGlobalDate').showModal()" class="flex-1 xl:flex-none btn-secondary bg-white/10 hover:bg-white/20 border-white/10 text-white backdrop-blur-md px-5 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                            <i class="ph-bold ph-calendar-check text-lg"></i>
+                            <span>Set Tanggal</span>
+                        </button>
                         
-                        {{-- Lulus --}}
-                        <div class="bg-emerald-500/20 backdrop-blur-md px-4 py-4 rounded-2xl border border-emerald-400/20 text-center hover:bg-emerald-500/30 transition-colors">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-200 block mb-1">Lulus</span>
-                            <span class="text-2xl font-black text-emerald-100">{{ \App\Models\Graduation::where('status', 'LULUS')->count() }}</span>
-                        </div>
+                        <!-- Tombol Import -->
+                        <button onclick="document.getElementById('modalImport').showModal()" class="flex-1 xl:flex-none btn-secondary bg-white/10 hover:bg-white/20 border-white/10 text-white backdrop-blur-md px-5 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                            <i class="ph-bold ph-file-csv text-lg"></i>
+                            <span>Import CSV</span>
+                        </button>
 
-                        {{-- Tidak Lulus --}}
-                        <div class="bg-rose-500/20 backdrop-blur-md px-4 py-4 rounded-2xl border border-rose-400/20 text-center hover:bg-rose-500/30 transition-colors">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-rose-200 block mb-1">Tidak Lulus</span>
-                            <span class="text-2xl font-black text-rose-100">{{ \App\Models\Graduation::where('status', 'TIDAK LULUS')->count() }}</span>
-                        </div>
-
-                        {{-- Ditunda --}}
-                        <div class="bg-amber-500/20 backdrop-blur-md px-4 py-4 rounded-2xl border border-amber-400/20 text-center hover:bg-amber-500/30 transition-colors">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-200 block mb-1">Ditunda</span>
-                            <span class="text-2xl font-black text-amber-100">{{ \App\Models\Graduation::where('status', 'DITUNDA')->count() }}</span>
-                        </div>
+                        <!-- [BARU] Tombol Pindahkan ke Alumni -->
+                        <form action="{{ route('admin.graduation.process_alumni') }}" method="POST" onsubmit="return confirm('PERINGATAN: \n\nSiswa dengan status LULUS akan dipindahkan menjadi ALUMNI.\n- Akun mereka akan dikeluarkan dari kelas.\n- Login mereka akan diarahkan ke Dashboard Alumni.\n\nLanjutkan?');">
+                            @csrf
+                            <button type="submit" class="w-full xl:w-auto btn-primary bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-900/20 px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 border border-emerald-400/50">
+                                <i class="ph-bold ph-users-three text-lg"></i>
+                                <span>Pindahkan ke Alumni</span>
+                            </button>
+                        </form>
                     </div>
-
                 </div>
             </div>
         </div>
 
-        {{-- Main Content Container --}}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-
-            {{-- Flash Messages --}}
-            @if(session('success'))
-                <div x-data="{ show: true }" x-show="show" x-transition class="p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-[2rem] flex items-center justify-between shadow-sm">
-                    <div class="flex items-center gap-3 px-2">
-                        <div class="p-2 bg-emerald-100 rounded-full text-emerald-600"><i class="ph-bold ph-check-circle text-xl"></i></div>
-                        <span class="font-bold text-sm">{{ session('success') }}</span>
-                    </div>
-                    <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-2"><i class="ph-bold ph-x"></i></button>
-                </div>
-            @endif
-            @if(session('error'))
-                <div x-data="{ show: true }" x-show="show" x-transition class="p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-[2rem] flex items-center justify-between shadow-sm">
-                    <div class="flex items-center gap-3 px-2">
-                        <div class="p-2 bg-rose-100 rounded-full text-rose-600"><i class="ph-bold ph-warning-circle text-xl"></i></div>
-                        <span class="font-bold text-sm">{{ session('error') }}</span>
-                    </div>
-                    <button @click="show = false" class="text-rose-400 hover:text-rose-600 p-2"><i class="ph-bold ph-x"></i></button>
-                </div>
-            @endif
-
-            {{-- SECTION: KONTROL PANEL (Jadwal & Aksi) --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {{-- FILTER & SEARCH BAR --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-4 justify-between items-center">
                 
-                {{-- 1. PENGATURAN JADWAL --}}
-                @php
-                    $sampleSchedule = \App\Models\Graduation::whereNotNull('announcement_date')->orderBy('updated_at', 'desc')->value('announcement_date');
-                    $scheduleCarbon = $sampleSchedule ? \Carbon\Carbon::parse($sampleSchedule) : null;
-                    $isSet = $scheduleCarbon != null;
-                    $isPast = $isSet && \Carbon\Carbon::now()->greaterThanOrEqualTo($scheduleCarbon);
-                @endphp
-                <div class="lg:col-span-2 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden p-8">
-                    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
-                    
-                    <div class="flex flex-col md:flex-row gap-8 items-start">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-xl shadow-sm border border-indigo-100">
-                                    <i class="ph-duotone ph-calendar-check"></i>
-                                </div>
-                                <h3 class="text-lg font-black text-slate-800">Jadwal Pengumuman</h3>
-                            </div>
-                            
-                            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200">
-                                @if($isSet)
-                                    <div class="flex items-center gap-3 mb-2">
-                                        <span class="relative flex h-3 w-3">
-                                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $isPast ? 'bg-emerald-400' : 'bg-blue-400' }} opacity-75"></span>
-                                          <span class="relative inline-flex rounded-full h-3 w-3 {{ $isPast ? 'bg-emerald-500' : 'bg-blue-500' }}"></span>
-                                        </span>
-                                        <span class="text-xs font-black uppercase tracking-wider {{ $isPast ? 'text-emerald-600' : 'text-blue-600' }}">
-                                            {{ $isPast ? 'Sudah Dibuka' : 'Terjadwal' }}
-                                        </span>
-                                    </div>
-                                    <p class="text-slate-600 text-sm font-medium">
-                                        Pengumuman diset pada: <br>
-                                        <strong class="text-slate-900 text-lg">{{ $scheduleCarbon->isoFormat('D MMMM Y, HH:mm') }} WIB</strong>
-                                    </p>
-                                @else
-                                    <div class="flex items-center gap-3 mb-2">
-                                        <span class="h-3 w-3 rounded-full bg-amber-400"></span>
-                                        <span class="text-xs font-black uppercase tracking-wider text-amber-600">Belum Diatur</span>
-                                    </div>
-                                    <p class="text-slate-400 text-sm italic">Siswa belum dapat melihat hasil kelulusan.</p>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="w-full md:w-1/2">
-                            <form action="{{ route('admin.graduation.set_date') }}" method="POST" class="space-y-3">
-                                @csrf
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Atur Waktu Serentak</label>
-                                <div class="relative group">
-                                    <i class="ph-bold ph-clock absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"></i>
-                                    <input type="datetime-local" name="global_date" required 
-                                           value="{{ $isSet ? $scheduleCarbon->format('Y-m-d\TH:i') : '' }}"
-                                           class="block w-full pl-9 pr-4 py-2.5 rounded-xl border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-500 text-sm font-bold text-slate-700 shadow-sm">
-                                </div>
-                                <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all text-sm flex items-center justify-center gap-2">
-                                    <i class="ph-bold ph-floppy-disk"></i> Simpan Jadwal
-                                </button>
-                                <p class="text-[10px] text-slate-400 text-center">*Berlaku untuk semua siswa Kelas 9</p>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- 2. AKSI CEPAT --}}
-                <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden p-8 flex flex-col justify-center gap-4">
-                    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
-                    <h3 class="text-lg font-black text-slate-800 mb-2 flex items-center gap-2">
-                        <i class="ph-duotone ph-lightning text-amber-500"></i> Aksi Cepat
-                    </h3>
-                    
-                    <button onclick="openModal('modalGenerate')" class="group w-full py-4 px-6 bg-slate-50 hover:bg-slate-800 border border-slate-200 hover:border-slate-800 rounded-2xl transition-all duration-300 flex items-center gap-4">
-                        <div class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-600 group-hover:text-slate-800 transition-colors">
-                            <i class="ph-duotone ph-magic-wand text-xl"></i>
-                        </div>
-                        <div class="text-left">
-                            <span class="block text-sm font-black text-slate-700 group-hover:text-white">Auto Generate SKL</span>
-                            <span class="block text-[10px] text-slate-400 group-hover:text-slate-400">Buat nomor otomatis</span>
-                        </div>
-                    </button>
-
-                    <button onclick="openModal('modalImport')" class="group w-full py-4 px-6 bg-emerald-50 hover:bg-emerald-600 border border-emerald-100 hover:border-emerald-600 rounded-2xl transition-all duration-300 flex items-center gap-4">
-                        <div class="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-emerald-600 transition-colors">
-                            <i class="ph-duotone ph-file-csv text-xl"></i>
-                        </div>
-                        <div class="text-left">
-                            <span class="block text-sm font-black text-emerald-800 group-hover:text-white">Import Nilai (CSV)</span>
-                            <span class="block text-[10px] text-emerald-600/70 group-hover:text-emerald-100">Upload data massal</span>
-                        </div>
-                    </button>
-                </div>
-            </div>
-
-            {{-- SECTION: TABEL DATA SISWA --}}
-            <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative min-h-[600px] flex flex-col">
-                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
-
-                {{-- Toolbar --}}
-                <div class="p-8 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl shadow-sm border border-blue-100">
-                            <i class="ph-duotone ph-student"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-black text-slate-800">Data Kelulusan</h3>
-                            <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Edit data per siswa atau massal</p>
-                        </div>
-                    </div>
-
-                    <form method="GET" class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                        <select name="class_id" onchange="this.form.submit()" class="rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-slate-600 focus:ring-blue-500 focus:border-blue-500 py-2.5">
-                            <option value="">-- Semua Kelas --</option>
-                            @foreach($classes as $cls)
-                                <option value="{{ $cls->id }}" {{ request('class_id') == $cls->id ? 'selected' : '' }}>{{ $cls->name }}</option>
+                {{-- Filter Kelas --}}
+                <form method="GET" class="w-full sm:w-auto flex items-center gap-2">
+                    <div class="relative w-full sm:w-64">
+                        <i class="ph-bold ph-chalkboard-teacher absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <select name="class_id" onchange="this.form.submit()" class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-slate-700 focus:ring-blue-500 focus:border-blue-500 appearance-none cursor-pointer">
+                            <option value="">Semua Kelas 9</option>
+                            @foreach($classes as $class)
+                                <option value="{{ $class->id }}" {{ request('class_id') == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
                             @endforeach
                         </select>
-                        <div class="relative">
-                            <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input type="text" name="search" placeholder="Cari Nama / NISN..." value="{{ request('search') }}" 
-                                   class="pl-9 pr-4 py-2.5 rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-slate-600 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-64">
-                        </div>
-                        <button type="submit" class="bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all">
-                            Filter
-                        </button>
-                    </form>
-                </div>
+                        <i class="ph-bold ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    </div>
+                </form>
 
-                {{-- Form Bulk Update --}}
-                <form action="{{ route('admin.graduation.bulk_update') }}" method="POST" class="flex-1 flex flex-col">
-                    @csrf
-                    <div class="overflow-x-auto flex-1 custom-scrollbar">
-                        <table class="w-full text-sm text-left text-slate-600">
-                            <thead class="text-xs font-bold text-slate-400 uppercase bg-slate-50/80 sticky top-0 backdrop-blur-sm z-10">
+                {{-- Search --}}
+                <form method="GET" class="w-full sm:w-auto relative">
+                    @if(request('class_id')) 
+                        <input type="hidden" name="class_id" value="{{ request('class_id') }}"> 
+                    @endif
+                    <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Siswa / NISN..." 
+                           class="w-full sm:w-72 pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-slate-50 text-sm font-bold focus:ring-blue-500 focus:border-blue-500 transition-all">
+                </form>
+            </div>
+        </div>
+
+        {{-- MAIN CONTENT: TABEL SISWA --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <form action="{{ route('admin.graduation.bulk_update') }}" method="POST" id="bulkForm">
+                @csrf
+                <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
+                    
+                    {{-- Table Header --}}
+                    <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold">Total: {{ $students->total() }} Siswa</span>
+                        </div>
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-blue-500/30 transition flex items-center gap-2">
+                            <i class="ph-bold ph-floppy-disk"></i> Simpan Perubahan Masal
+                        </button>
+                    </div>
+
+                    {{-- Table Body --}}
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-slate-50 text-xs uppercase font-bold text-slate-400 tracking-wider">
                                 <tr>
-                                    <th class="px-6 py-4">Identitas Siswa</th>
-                                    <th class="px-6 py-4 text-center">Status</th>
+                                    <th class="px-6 py-4 rounded-tl-2xl">Identitas Siswa</th>
+                                    <th class="px-6 py-4">Status Kelulusan</th>
                                     <th class="px-6 py-4 text-center">Nilai Rata-rata</th>
-                                    <th class="px-6 py-4 text-center">Nomor SKL</th>
-                                    <th class="px-6 py-4 text-center">Waktu Pengumuman</th>
-                                    <th class="px-6 py-4 text-center">Aksi</th>
+                                    <th class="px-6 py-4">No. SKL</th>
+                                    <th class="px-6 py-4 rounded-tr-2xl text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-50">
-                                @foreach($students as $student)
+                            <tbody class="divide-y divide-slate-100 text-sm">
+                                @forelse($students as $student)
                                 <tr class="hover:bg-blue-50/30 transition-colors group">
-                                    {{-- Kolom Identitas --}}
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 text-slate-500 flex items-center justify-center text-xs font-black border border-slate-200">
-                                                {{ substr($student->name, 0, 2) }}
+                                            <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs shrink-0 overflow-hidden">
+                                                @if($student->photo_path)
+                                                    <img src="{{ asset('storage/'.$student->photo_path) }}" class="w-full h-full object-cover">
+                                                @else
+                                                    {{ substr($student->name, 0, 2) }}
+                                                @endif
                                             </div>
                                             <div>
-                                                <div class="font-black text-slate-700 text-sm">{{ $student->name }}</div>
-                                                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
-                                                    {{ $student->student_id }} <span class="mx-1">•</span> {{ $student->schoolClass->name ?? '-' }}
-                                                </div>
+                                                <div class="font-bold text-slate-800 group-hover:text-blue-600 transition">{{ $student->name }}</div>
+                                                <div class="text-xs text-slate-400 font-medium">{{ $student->student_id }} &bull; {{ $student->schoolClass->name ?? '-' }}</div>
                                             </div>
                                         </div>
+                                        @if($student->status == 'graduated')
+                                            <span class="mt-1 inline-block px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded">Sudah Alumni</span>
+                                        @endif
                                     </td>
-                                    
-                                    {{-- Status Dropdown --}}
-                                    <td class="px-6 py-4 text-center">
-                                        <select name="students[{{ $student->id }}][status]" id="status_{{ $student->id }}" 
-                                                class="text-xs font-bold rounded-lg border-slate-200 bg-white focus:ring-blue-500 focus:border-blue-500 py-1.5 px-2 cursor-pointer shadow-sm
-                                                {{ ($student->graduation->status ?? '') == 'LULUS' ? 'text-emerald-600 bg-emerald-50 border-emerald-200' : '' }}
-                                                {{ ($student->graduation->status ?? '') == 'TIDAK LULUS' ? 'text-rose-600 bg-rose-50 border-rose-200' : '' }}
-                                                {{ ($student->graduation->status ?? '') == 'DITUNDA' ? 'text-amber-600 bg-amber-50 border-amber-200' : '' }}">
-                                            <option value="LULUS" {{ ($student->graduation->status ?? '') == 'LULUS' ? 'selected' : '' }}>LULUS</option>
-                                            <option value="TIDAK LULUS" {{ ($student->graduation->status ?? '') == 'TIDAK LULUS' ? 'selected' : '' }}>TIDAK LULUS</option>
-                                            <option value="DITUNDA" {{ ($student->graduation->status ?? '') == 'DITUNDA' ? 'selected' : '' }}>DITUNDA</option>
+                                    <td class="px-6 py-4">
+                                        <select name="students[{{ $student->id }}][status]" class="w-32 py-1.5 px-3 rounded-lg text-xs font-bold border-slate-200 focus:ring-blue-500 focus:border-blue-500 cursor-pointer
+                                            {{ $student->graduation?->status == 'LULUS' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : '' }}
+                                            {{ $student->graduation?->status == 'TIDAK LULUS' ? 'bg-rose-50 text-rose-700 border-rose-200' : '' }}">
+                                            <option value="DITUNDA" {{ ($student->graduation?->status ?? 'DITUNDA') == 'DITUNDA' ? 'selected' : '' }}>Ditunda</option>
+                                            <option value="LULUS" {{ ($student->graduation?->status ?? '') == 'LULUS' ? 'selected' : '' }}>Lulus</option>
+                                            <option value="TIDAK LULUS" {{ ($student->graduation?->status ?? '') == 'TIDAK LULUS' ? 'selected' : '' }}>Tidak Lulus</option>
                                         </select>
                                     </td>
-                                    
-                                    {{-- Input Nilai --}}
                                     <td class="px-6 py-4 text-center">
-                                        <input type="number" step="0.01" name="students[{{ $student->id }}][average_score]" id="score_{{ $student->id }}" 
-                                               value="{{ $student->graduation->average_score ?? 0 }}" 
-                                               class="w-20 text-center text-xs font-bold border-slate-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-slate-50 focus:bg-white transition-all">
+                                        <input type="number" step="0.01" name="students[{{ $student->id }}][average_score]" value="{{ $student->graduation?->average_score }}" 
+                                            class="w-20 text-center py-1.5 rounded-lg border-slate-200 text-xs font-bold focus:ring-blue-500 focus:border-blue-500 bg-slate-50 focus:bg-white transition" placeholder="0.00">
                                     </td>
-                                    
-                                    {{-- Input No SKL --}}
-                                    <td class="px-6 py-4 text-center">
-                                        <input type="text" name="students[{{ $student->id }}][skl_number]" id="skl_{{ $student->id }}" 
-                                               value="{{ $student->graduation->skl_number ?? '' }}" 
-                                               placeholder="Nomor SKL..."
-                                               class="w-40 text-xs font-bold border-slate-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-slate-50 focus:bg-white transition-all text-center">
+                                    <td class="px-6 py-4">
+                                        <input type="text" name="students[{{ $student->id }}][skl_number]" value="{{ $student->graduation?->skl_number }}" 
+                                            class="w-32 py-1.5 rounded-lg border-slate-200 text-xs font-medium focus:ring-blue-500 focus:border-blue-500 bg-slate-50 focus:bg-white transition" placeholder="No. SKL">
+                                        
+                                        {{-- Hidden date field untuk menjaga tanggal pengumuman per siswa jika ada --}}
+                                        <input type="hidden" name="students[{{ $student->id }}][announcement_date]" value="{{ $student->graduation?->announcement_date }}">
                                     </td>
-                                    
-                                    {{-- Input Waktu Personal --}}
                                     <td class="px-6 py-4 text-center">
-                                        <input type="datetime-local" name="students[{{ $student->id }}][announcement_date]" id="date_{{ $student->id }}" 
-                                               value="{{ isset($student->graduation->announcement_date) ? \Carbon\Carbon::parse($student->graduation->announcement_date)->format('Y-m-d\TH:i') : '' }}" 
-                                               class="w-full text-xs font-medium border-slate-200 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-slate-50 focus:bg-white text-slate-500">
-                                    </td>
-
-                                    {{-- Tombol Save Row --}}
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="relative flex items-center justify-center gap-2">
-                                            <button type="button" onclick="saveRow({{ $student->id }})" 
-                                                    class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white border border-indigo-100 transition-all flex items-center justify-center shadow-sm" title="Simpan Baris Ini">
-                                                <i class="ph-bold ph-floppy-disk"></i>
+                                        <div class="flex items-center justify-center gap-2">
+                                            <button type="button" onclick="saveSingle('{{ $student->id }}')" class="p-2 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition" title="Simpan Baris Ini">
+                                                <i class="ph-bold ph-check"></i>
                                             </button>
-                                            <span id="msg_{{ $student->id }}" class="hidden absolute top-full mt-1 left-1/2 -translate-x-1/2 text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded shadow-sm whitespace-nowrap z-20">
-                                                Tersimpan!
-                                            </span>
+                                            {{-- Tombol Cetak PDF --}}
+                                            @if($student->graduation?->status == 'LULUS')
+                                                <a href="{{ route('graduation.print', $student->id) }}" target="_blank" class="p-2 rounded-lg text-emerald-500 hover:bg-emerald-50 transition" title="Cetak SKL">
+                                                    <i class="ph-bold ph-printer"></i>
+                                                </a>
+                                            @endif
+                                        </div>
+                                        <span id="msg_{{ $student->id }}" class="text-[10px] text-emerald-600 font-bold hidden animate-pulse">Tersimpan!</span>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-12 text-center text-slate-400">
+                                        <div class="flex flex-col items-center justify-center gap-2">
+                                            <i class="ph-duotone ph-student text-3xl"></i>
+                                            <span class="font-medium">Tidak ada data siswa kelas 9 ditemukan.</span>
                                         </div>
                                     </td>
                                 </tr>
-                                @endforeach
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
                     
-                    {{-- Sticky Footer Pagination & Save All --}}
-                    <div class="p-6 border-t border-slate-100 bg-white flex flex-col md:flex-row justify-between items-center gap-4 sticky bottom-0 z-20 shadow-[0_-5px_20px_rgba(0,0,0,0.02)]">
-                        <div class="w-full md:w-auto">
-                            {{ $students->links() }}
-                        </div>
-                        <button type="submit" class="w-full md:w-auto py-3 px-8 bg-blue-900 text-white font-bold rounded-2xl hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 transform active:scale-[0.98]">
-                            <i class="ph-bold ph-floppy-disk-back"></i>
-                            Simpan Perubahan (Massal)
-                        </button>
+                    {{-- Pagination --}}
+                    <div class="px-6 py-4 border-t border-slate-100 bg-slate-50">
+                        {{ $students->links() }}
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    {{-- MODAL 1: IMPORT CSV --}}
-    <div id="modalImport" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        {{-- Backdrop --}}
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal('modalImport')"></div>
-        
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="relative bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full overflow-hidden transform transition-all border border-slate-100">
-                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
-                
-                <div class="p-8">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl shadow-sm">
-                            <i class="ph-duotone ph-file-csv"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-black text-slate-800">Import Nilai</h3>
-                            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Format CSV: NISN, Status, Nilai</p>
-                        </div>
-                    </div>
-
-                    <form action="{{ route('admin.graduation.import') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
-                        @csrf
-                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 border-dashed text-center hover:bg-white hover:border-emerald-400 transition-colors group">
-                            <i class="ph-duotone ph-upload-simple text-4xl text-slate-300 group-hover:text-emerald-500 mb-2 transition-colors"></i>
-                            <div class="space-y-2">
-                                <label class="block text-sm font-bold text-slate-600 cursor-pointer hover:text-emerald-600">
-                                    <span>Pilih File CSV</span>
-                                    <input type="file" name="file" accept=".csv, .txt" class="hidden">
-                                </label>
-                                <p class="text-xs text-slate-400">atau drag & drop file ke sini</p>
-                            </div>
-                        </div>
-                        
-                        <div class="flex justify-between items-center">
-                            <a href="{{ route('admin.graduation.template') }}" class="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1">
-                                <i class="ph-bold ph-download-simple"></i> Download Template
-                            </a>
-                        </div>
-
-                        <div class="flex gap-3 pt-4">
-                            <button type="button" onclick="closeModal('modalImport')" class="flex-1 py-3 bg-white text-slate-600 font-bold rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors">
-                                Batal
-                            </button>
-                            <button type="submit" class="flex-1 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 hover:bg-emerald-700 transition-colors">
-                                Import Data
-                            </button>
-                        </div>
-                    </form>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 
-    {{-- MODAL 2: AUTO GENERATE SKL --}}
-    <div id="modalGenerate" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        {{-- Backdrop --}}
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeModal('modalGenerate')"></div>
-        
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="relative bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full overflow-hidden transform transition-all border border-slate-100">
-                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
-                
-                <div class="p-8">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl shadow-sm">
-                            <i class="ph-duotone ph-magic-wand"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-black text-slate-800">Auto Generate SKL</h3>
-                            <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Otomatisasi Nomor Surat</p>
-                        </div>
-                    </div>
-
-                    <form action="{{ route('admin.graduation.auto_generate') }}" method="POST" class="space-y-5">
-                        @csrf
-                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 text-sm text-blue-800 font-medium">
-                            <p>Sistem akan membuat nomor SKL berurutan berdasarkan abjad nama siswa.</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Format Nomor</label>
-                            <input type="text" name="format" value="421.3/{no}/SMP.03/{year}" class="w-full px-4 py-3 rounded-xl border-slate-200 bg-slate-50 font-mono text-sm text-slate-700 font-bold focus:ring-blue-500 focus:border-blue-500" required>
-                            <p class="text-[10px] text-slate-400 mt-1 ml-1">Variabel: <code class="bg-slate-100 px-1 rounded text-slate-600">{no}</code> (Urut), <code class="bg-slate-100 px-1 rounded text-slate-600">{year}</code> (Tahun)</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nomor Mulai</label>
-                            <input type="number" name="start_number" value="1" class="w-24 px-4 py-3 rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-700 focus:ring-blue-500 focus:border-blue-500" required>
-                        </div>
-
-                        <div class="flex gap-3 pt-4">
-                            <button type="button" onclick="closeModal('modalGenerate')" class="flex-1 py-3 bg-white text-slate-600 font-bold rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors">
-                                Batal
-                            </button>
-                            <button type="submit" class="flex-1 py-3 bg-blue-900 text-white font-bold rounded-xl shadow-lg shadow-blue-900/30 hover:bg-blue-800 transition-colors">
-                                Generate
-                            </button>
-                        </div>
-                    </form>
-                </div>
+    {{-- MODAL IMPORT & SET DATE (Masih sama, disembunyikan untuk ringkas) --}}
+    <dialog id="modalGlobalDate" class="modal rounded-3xl p-0 backdrop:bg-slate-900/50">
+        <form action="{{ route('admin.graduation.set_date') }}" method="POST" class="bg-white p-8 w-full max-w-md rounded-3xl shadow-2xl">
+            @csrf
+            <h3 class="text-lg font-bold mb-4">Set Tanggal Pengumuman Serentak</h3>
+            @if(request('class_id')) <input type="hidden" name="class_filter" value="{{ request('class_id') }}"> @endif
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Tanggal & Jam Buka</label>
+                <input type="datetime-local" name="global_date" required class="w-full rounded-xl border-slate-200 font-bold">
             </div>
-        </div>
-    </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="this.closest('dialog').close()" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50">Batal</button>
+                <button type="submit" class="px-6 py-2 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700">Simpan</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="modalImport" class="modal rounded-3xl p-0 backdrop:bg-slate-900/50">
+        <form action="{{ route('admin.graduation.import') }}" method="POST" enctype="multipart/form-data" class="bg-white p-8 w-full max-w-md rounded-3xl shadow-2xl">
+            @csrf
+            <h3 class="text-lg font-bold mb-2">Import Data CSV</h3>
+            <p class="text-xs text-slate-500 mb-6">Format: NISN, STATUS (LULUS/TIDAK), NILAI</p>
+            <input type="file" name="file" accept=".csv" required class="w-full mb-6 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            <div class="flex justify-end gap-2">
+                <button type="button" onclick="this.closest('dialog').close()" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50">Batal</button>
+                <button type="submit" class="px-6 py-2 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700">Upload</button>
+            </div>
+        </form>
+    </dialog>
 
     <script>
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
+        function saveSingle(studentId) {
+            const row = document.querySelector(`input[name="students[${studentId}][average_score]"]`).closest('tr');
+            const status = row.querySelector(`select[name="students[${studentId}][status]"]`).value;
+            const score = row.querySelector(`input[name="students[${studentId}][average_score]"]`).value;
+            const skl = row.querySelector(`input[name="students[${studentId}][skl_number]"]`).value;
+            const date = row.querySelector(`input[name="students[${studentId}][announcement_date]"]`).value;
 
-        // FUNGSI SIMPAN AJAX PER BARIS
-        function saveRow(studentId) {
-            const status = document.getElementById('status_' + studentId).value;
-            const score = document.getElementById('score_' + studentId).value;
-            const skl = document.getElementById('skl_' + studentId).value;
-            const date = document.getElementById('date_' + studentId).value;
-            
-            // Efek Loading pada tombol
             const btn = event.currentTarget;
             const originalIcon = btn.innerHTML;
             btn.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i>'; 

@@ -6,6 +6,9 @@
 --}}
 @php
     \Carbon\Carbon::setLocale('id');
+    
+    // Cek apakah siswa ini ALUMNI
+    $isAlumni = $student->status === 'graduated';
 @endphp
 
 <!-- X-DATA: Menangani Tab & Resize Chart -->
@@ -31,12 +34,14 @@
         <!-- Background Banner -->
         <div class="absolute top-0 left-0 w-full h-40 sm:h-52 z-0 overflow-hidden bg-slate-900">
             <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
-            <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-blue-900/80 to-slate-900"></div>
+            
+            {{-- Ubah warna background jika Alumni --}}
+            <div class="absolute inset-0 bg-gradient-to-r {{ $isAlumni ? 'from-slate-900 via-amber-900/80 to-slate-900' : 'from-slate-900 via-blue-900/80 to-slate-900' }}"></div>
+            
             <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
             
             <!-- Dekorasi Blur -->
-            <div class="absolute top-0 right-0 w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] bg-blue-600 rounded-full mix-blend-overlay filter blur-[60px] sm:blur-[80px] opacity-20 -mr-10 -mt-10"></div>
-            <div class="absolute bottom-0 left-0 w-[150px] sm:w-[300px] h-[150px] sm:h-[300px] bg-indigo-600 rounded-full mix-blend-overlay filter blur-[60px] sm:blur-[80px] opacity-20 -ml-10 -mb-10"></div>
+            <div class="absolute top-0 right-0 w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] {{ $isAlumni ? 'bg-amber-600' : 'bg-blue-600' }} rounded-full mix-blend-overlay filter blur-[60px] sm:blur-[80px] opacity-20 -mr-10 -mt-10"></div>
         </div>
         
         <!-- Content Container -->
@@ -54,9 +59,17 @@
                         @endif
                     </div>
                 </div>
-                <div class="absolute bottom-1 right-1 z-20 bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full border-2 border-white shadow-sm flex items-center gap-1.5">
-                    <div class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div> AKTIF
-                </div>
+                
+                {{-- BADGE STATUS --}}
+                @if($isAlumni)
+                    <div class="absolute bottom-1 right-1 z-20 bg-amber-500 text-slate-900 text-[10px] font-black px-3 py-1 rounded-full border-2 border-white shadow-sm flex items-center gap-1.5">
+                        <i class="ph-fill ph-graduation-cap"></i> ALUMNI {{ $student->graduation_year ?? \Carbon\Carbon::parse($student->graduated_date)->year ?? '' }}
+                    </div>
+                @else
+                    <div class="absolute bottom-1 right-1 z-20 bg-emerald-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full border-2 border-white shadow-sm flex items-center gap-1.5">
+                        <div class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></div> AKTIF
+                    </div>
+                @endif
             </div>
             
             <!-- Detail Siswa -->
@@ -65,10 +78,13 @@
                     {{ strtolower($student->name) }}
                 </h1>
                 <div class="flex flex-wrap justify-center md:justify-start gap-2 text-xs sm:text-sm font-medium">
+                    @if(!$isAlumni)
                     <span class="flex items-center bg-blue-600 px-3 sm:px-4 py-1.5 rounded-full text-white shadow-lg shadow-blue-900/30 border border-blue-500 transition hover:bg-blue-500 hover:scale-105">
                         <i class="ph-fill ph-chalkboard-teacher mr-2 text-base sm:text-lg text-blue-200"></i>
                         <span>Kelas <strong class="font-bold text-white">{{ $student->schoolClass->name ?? 'Unassigned' }}</strong></span>
                     </span>
+                    @endif
+                    
                     <span x-data="{ copied: false }" 
                           @click="navigator.clipboard.writeText('{{ $student->student_id }}'); copied = true; setTimeout(() => copied = false, 2000)" 
                           class="flex items-center bg-blue-600 px-3 sm:px-4 py-1.5 rounded-full text-white shadow-lg shadow-blue-900/30 border border-blue-500 font-mono transition hover:bg-blue-500 hover:scale-105 cursor-pointer select-none relative" 
@@ -81,9 +97,11 @@
 
             <!-- Action Buttons -->
             <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2 mt-2 md:mt-0 md:pb-4">
+                @if(!$isAlumni)
                 <a href="{{ route('portal.card', $student->id) }}" target="_blank" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-2.5 bg-emerald-500/80 backdrop-blur-md border border-emerald-400/30 rounded-xl text-xs sm:text-sm font-bold text-white hover:bg-emerald-500 transition-all shadow-lg hover:shadow-emerald-500/20 group">
                     <i class="ph-bold ph-identification-card mr-2 group-hover:animate-bounce"></i> Kartu OSIS
                 </a>
+                @endif
 
                 <button onclick="window.print()" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-xs sm:text-sm font-bold text-white hover:bg-white hover:text-slate-900 transition-all shadow-lg">
                     <i class="ph-bold ph-printer mr-2"></i> Biodata
@@ -103,17 +121,26 @@
             <div class="overflow-x-auto custom-scrollbar w-full pb-0.5 md:pb-0 scroll-smooth px-1 md:overflow-visible">
                 <div class="flex items-center gap-1 w-max md:w-full md:flex-wrap md:justify-center"> 
                     @php
+                        // Filter Tab berdasarkan Status Siswa
                         $tabs = [
                             'ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan'],
-                            'lms' => ['icon' => 'clipboard-text', 'label' => 'Tugas & Kuis'],
-                            'kbm' => ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'],
-                            'akademik' => ['icon' => 'exam', 'label' => 'Nilai Rapor'],
-                            'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Kehadiran'],
-                            'keagamaan' => ['icon' => 'book-open-text', 'label' => 'Keagamaan'],
-                            'disiplin' => ['icon' => 'warning-circle', 'label' => 'Disiplin'],
-                            'prestasi' => ['icon' => 'trophy', 'label' => 'Prestasi'],
-                            'perpustakaan' => ['icon' => 'books', 'label' => 'Pustaka'],
                         ];
+
+                        if ($isAlumni) {
+                            // Tab Khusus Alumni
+                            $tabs['prestasi'] = ['icon' => 'trophy', 'label' => 'Riwayat Prestasi'];
+                            $tabs['perpustakaan'] = ['icon' => 'books', 'label' => 'Riwayat Pustaka'];
+                        } else {
+                            // Tab Siswa Aktif
+                            $tabs['lms'] = ['icon' => 'clipboard-text', 'label' => 'Tugas & Kuis'];
+                            $tabs['kbm'] = ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'];
+                            $tabs['akademik'] = ['icon' => 'exam', 'label' => 'Nilai Rapor'];
+                            $tabs['kehadiran'] = ['icon' => 'calendar-check', 'label' => 'Kehadiran'];
+                            $tabs['keagamaan'] = ['icon' => 'book-open-text', 'label' => 'Keagamaan'];
+                            $tabs['disiplin'] = ['icon' => 'warning-circle', 'label' => 'Disiplin'];
+                            $tabs['prestasi'] = ['icon' => 'trophy', 'label' => 'Prestasi'];
+                            $tabs['perpustakaan'] = ['icon' => 'books', 'label' => 'Pustaka'];
+                        }
                     @endphp
 
                     @foreach($tabs as $key => $tab)
@@ -134,30 +161,82 @@
         <!-- 1. TAB RINGKASAN -->
         <div x-show="activeTab === 'ringkasan'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Card Kehadiran -->
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i class="ph-fill ph-chart-pie-slice text-9xl text-blue-500"></i></div>
-                    <div class="relative z-10">
-                        <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">Persentase Kehadiran</h3>
-                        <div class="flex items-baseline gap-2 mb-4">
-                            @php 
-                                $total_hari = ($hadir ?? 0) + ($sakit ?? 0) + ($izin ?? 0) + ($alpa ?? 0); 
-                                $persen = $total_hari > 0 ? round(($hadir/$total_hari)*100) : 0; 
-                            @endphp
-                            <span class="text-5xl font-black text-slate-800">{{ $persen }}<span class="text-2xl text-slate-400">%</span></span>
+                
+                @if($isAlumni)
+                    {{-- 
+                        =============================================
+                        CARD KHUSUS ALUMNI (DENGAN TOMBOL TRACER) 
+                        =============================================
+                    --}}
+                    <div class="md:col-span-3 bg-amber-50 border border-amber-200 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
+                        {{-- Hiasan background --}}
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -mr-16 -mt-16"></div>
+
+                        <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-4xl shrink-0 z-10 shadow-inner">
+                            <i class="ph-duotone ph-graduation-cap"></i>
                         </div>
-                        <div class="flex gap-2">
-                            <span class="px-3 py-1.5 bg-green-50 text-green-700 border border-green-100 rounded-lg text-xs font-bold flex items-center gap-1"><div class="w-1.5 h-1.5 rounded-full bg-green-500"></div> Hadir: {{ $hadir ?? 0 }}</span>
-                            <span class="px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-100 rounded-lg text-xs font-bold flex items-center gap-1"><div class="w-1.5 h-1.5 rounded-full bg-rose-500"></div> Alpa: {{ $alpa ?? 0 }}</span>
+                        <div class="flex-1 text-center md:text-left z-10 w-full">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <h3 class="text-xl font-black text-amber-900 mb-1">Status Alumni</h3>
+                                    <p class="text-amber-800/80 text-sm">
+                                        Siswa ini dinyatakan <strong>LULUS</strong> pada tahun {{ $student->graduation_year ?? \Carbon\Carbon::parse($student->graduated_date)->year }}.
+                                    </p>
+                                </div>
+
+                                {{-- 
+                                    LOGIKA TOMBOL TRACER STUDY 
+                                    Pastikan route 'alumni.tracer' sudah ada di web.php
+                                --}}
+                                <div class="flex flex-wrap justify-center gap-3">
+                                    @if($student->alumniProfile)
+                                        {{-- Jika SUDAH mengisi Tracer Study --}}
+                                        <div class="inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-amber-200 shadow-sm">
+                                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Saat ini:</span>
+                                            <span class="font-bold text-amber-600">{{ $student->alumniProfile->activity_status }}</span>
+                                        </div>
+                                        <a href="{{ route('alumni.tracer') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold shadow-lg shadow-amber-600/20 transition-all hover:-translate-y-0.5">
+                                            <i class="ph-bold ph-pencil-simple"></i> Update Data
+                                        </a>
+                                    @else
+                                        {{-- Jika BELUM mengisi Tracer Study --}}
+                                        <div class="flex flex-col md:flex-row items-center gap-3">
+                                            <span class="text-xs font-bold text-amber-700/60 hidden md:block">Anda belum mengisi data kelulusan</span>
+                                            <a href="{{ route('alumni.tracer') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold shadow-xl shadow-amber-600/30 transition-all animate-bounce hover:animate-none">
+                                                <i class="ph-bold ph-clipboard-text"></i> Isi Tracer Study
+                                            </a>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                @else
+                    <!-- Card Kehadiran (HANYA SISWA AKTIF) -->
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i class="ph-fill ph-chart-pie-slice text-9xl text-blue-500"></i></div>
+                        <div class="relative z-10">
+                            <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-2">Persentase Kehadiran</h3>
+                            <div class="flex items-baseline gap-2 mb-4">
+                                @php 
+                                    $total_hari = ($hadir ?? 0) + ($sakit ?? 0) + ($izin ?? 0) + ($alpa ?? 0); 
+                                    $persen = $total_hari > 0 ? round(($hadir/$total_hari)*100) : 0; 
+                                @endphp
+                                <span class="text-5xl font-black text-slate-800">{{ $persen }}<span class="text-2xl text-slate-400">%</span></span>
+                            </div>
+                            <div class="flex gap-2">
+                                <span class="px-3 py-1.5 bg-green-50 text-green-700 border border-green-100 rounded-lg text-xs font-bold flex items-center gap-1"><div class="w-1.5 h-1.5 rounded-full bg-green-500"></div> Hadir: {{ $hadir ?? 0 }}</span>
+                                <span class="px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-100 rounded-lg text-xs font-bold flex items-center gap-1"><div class="w-1.5 h-1.5 rounded-full bg-rose-500"></div> Alpa: {{ $alpa ?? 0 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @endif
                 
-                <!-- Card Poin -->
+                <!-- Card Poin (SEMUA BISA LIHAT HISTORIS) -->
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i class="ph-fill ph-star text-9xl text-yellow-500"></i></div>
                     <div class="relative z-10">
-                        <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4">Poin Karakter</h3>
+                        <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-4">Poin Karakter {{ $isAlumni ? '(Akhir)' : '' }}</h3>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="bg-green-50/50 p-3 rounded-xl border border-green-100/50">
                                 <p class="text-[10px] text-green-600 font-bold mb-1 uppercase">Kebaikan</p>
@@ -186,7 +265,8 @@
             </div>
         </div>
 
-        <!-- TAB: LMS (TUGAS & KUIS) -->
+        @if(!$isAlumni)
+        <!-- TAB: LMS (TUGAS & KUIS) - HANYA SISWA AKTIF -->
         <div x-show="activeTab === 'lms'" x-cloak x-transition:enter="transition ease-out duration-300">
             <div class="space-y-6">
                 <!-- Perbaikan: Gunakan count() untuk cek jumlah array/collection -->
@@ -709,6 +789,7 @@
                 </div>
              </div>
         </div>
+        @endif
         
     </div>
 </div>

@@ -8,7 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne; // <-- TAMBAHKAN INI
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Student extends Authenticatable
 {
@@ -82,7 +82,6 @@ class Student extends Authenticatable
         'guardian_pob', 
         'guardian_dob', 
         'guardian_citizenship',
-        // --- TAMBAHAN (Wajib ada agar tersimpan) ---
         'guardian_address', 
         'guardian_income',
         
@@ -96,7 +95,6 @@ class Student extends Authenticatable
         'prev_diploma_no', 
         'prev_exam_date', 
         'accepted_date',
-        // --- TAMBAHAN (Wajib ada agar tersimpan) ---
         'transfer_from_school',
         
         // 10. PRESTASI & BEASISWA
@@ -142,11 +140,9 @@ class Student extends Authenticatable
 
     /**
      * Relasi ke Data Kelulusan (Manajemen SKL & Nilai)
-     * INI YANG MENYEBABKAN ERROR SEBELUMNYA
      */
     public function graduation(): HasOne
     {
-        // Pastikan Model Graduation ada di App\Models\Graduation
         return $this->hasOne(Graduation::class, 'student_id');
     }
 
@@ -164,5 +160,23 @@ class Student extends Authenticatable
     public function disciplineRecords(): HasMany
     {
         return $this->hasMany(DisciplineRecord::class, 'student_id');
+    }
+
+    /**
+     * Relasi ke Data Alumni (Tracer Study)
+     */
+    public function alumniProfile(): HasOne
+    {
+        return $this->hasOne(AlumniProfile::class, 'student_id');
+    }
+
+    /**
+     * Relasi ke Prestasi (Achievement)
+     * [TAMBAHAN UNTUK MENGATASI ERROR]
+     */
+    public function achievements(): HasMany
+    {
+        // Pastikan Model Achievement ada di App\Models\Achievement
+        return $this->hasMany(Achievement::class, 'student_id');
     }
 }

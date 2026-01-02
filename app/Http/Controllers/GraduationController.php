@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use App\Models\Graduation;
 use App\Models\SchoolClass;
+use App\Models\AlumniProfile; // Pastikan import model ini
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +13,7 @@ use Carbon\Carbon;
 
 class GraduationController extends Controller
 {
-    // ... (Bagian Public Check & Print SKL tetap sama seperti sebelumnya) ...
+    // --- HALAMAN SISWA (Cek Kelulusan & SKL) ---
     public function index()
     {
         $firstGraduation = Graduation::whereNotNull('announcement_date')->orderBy('announcement_date', 'asc')->first();
@@ -62,8 +63,7 @@ class GraduationController extends Controller
         $students = $query->paginate(20)->withQueryString();
         return view('admin.graduation.index', compact('students', 'classes'));
     }
-
-    // --- [MODIFIED] STORE SINGLE DATA (AJAX SUPPORT) ---
+    
     public function store(Request $request)
     {
         // Validasi input
@@ -93,8 +93,7 @@ class GraduationController extends Controller
                 'announcement_date' => $announcementDate
             ]
         );
-
-        // Jika request dari AJAX (Tombol Simpan Kecil), kembalikan JSON
+        
         if ($request->wantsJson()) {
             return response()->json(['message' => 'Data berhasil disimpan!', 'success' => true]);
         }
@@ -108,10 +107,10 @@ class GraduationController extends Controller
         $request->validate(['file' => 'required|mimes:csv,txt|max:2048']);
         $file = $request->file('file');
         $handle = fopen($file->getPathname(), "r");
-        fgetcsv($handle); // Skip header
+        fgetcsv($handle); 
 
         $count = 0;
-        $defaultDate = Carbon::parse('2025-05-05 10:00:00')->format('Y-m-d H:i:s'); // Default jika kosong
+        $defaultDate = Carbon::parse('2025-05-05 10:00:00')->format('Y-m-d H:i:s'); 
 
         DB::transaction(function () use ($handle, &$count, $defaultDate) {
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
@@ -140,11 +139,10 @@ class GraduationController extends Controller
     }
     
     // --- AUTO GENERATE ---
-    public function autoGenerate(Request $request) { /* ... (Kode sama spt sebelumnya) ... */ 
-       // Gunakan kode autoGenerate dari percakapan sebelumnya jika diperlukan
+    public function autoGenerate(Request $request) { 
        return back()->with('success', 'Fitur Auto Generate dipanggil');
     }
-    public function downloadTemplate() { /* ... (Kode sama spt sebelumnya) ... */ }
+    public function downloadTemplate() { /* ... */ }
     
     // --- BULK UPDATE ---
     public function bulkUpdate(Request $request) {
@@ -178,5 +176,40 @@ class GraduationController extends Controller
             Graduation::updateOrCreate(['student_id' => $student->id], ['announcement_date' => $date, 'academic_year' => date('Y').'/'.(date('Y')+1)]);
         }
         return back()->with('success', 'Jadwal berhasil diupdate.');
+    }
+
+    // ===> PINDAHKAN SISWA LULUS KE ALUMNI <===
+    public function processAlumni(Request $request)
+    {
+        // 1. Cari siswa yang status kelulusannya "LULUS" dan masih "active"
+        $students = Student::whereHas('graduation', function($q) {
+                $q->where('status', 'LULUS');
+            })
+            ->where('status', '!=', 'graduated') 
+            ->get();
+
+        if ($students->isEmpty()) {
+            return back()->with('error', 'Tidak ada siswa berstatus LULUS yang belum diproses.');
+        }
+
+        $count = 0;
+        DB::transaction(function () use ($students, &$count) {
+            foreach ($students as $student) {
+                // Update status siswa ALUMNI
+                $student->update([
+                    'status' => 'graduated',
+                    'class_id' => null,
+                    'graduated_date' => $student->graduation->announcement_date ?? now(),
+                ]);
+
+                if (!AlumniProfile::where('student_id', $student->id)->exists()) {
+                    AlumniProfile::create(['student_id' => $student->id]);
+                }
+
+                $count++;
+            }
+        });
+
+        return back()->with('success', "Berhasil memindahkan $count siswa ke Database Alumni.");
     }
 }

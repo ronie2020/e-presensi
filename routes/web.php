@@ -33,6 +33,7 @@ use App\Http\Controllers\SchoolActivityController;
 use App\Http\Controllers\TeachingController;
 use App\Http\Controllers\GraduationController; 
 use App\Http\Controllers\PpdbController;
+use App\Http\Controllers\AlumniController;
 
 // LMS (Learning Management System)
 use App\Http\Controllers\LmsMaterialController;
@@ -63,6 +64,8 @@ use App\Http\Controllers\SppdController;
 
 // [PENTING] Import Middleware CheckSebMode
 use App\Http\Middleware\CheckSebMode;
+
+use App\Http\Controllers\AdminAlumniController;
 
 /*
 |--------------------------------------------------------------------------
@@ -121,8 +124,7 @@ Route::post('/library/kiosk/process', [LibraryKioskController::class, 'process']
 // =========================================================================
 
 // Auth Siswa
-Route::middleware('guest:student')->group(function() {
-    // [BARU] Route Khusus Tampilan Login SEB (Tanpa Header/Footer Portal)
+Route::middleware('guest:student')->group(function() {   
     Route::get('/seb-login', function () {
         return view('auth.seb_login');
     })->name('seb.login');
@@ -132,12 +134,21 @@ Route::middleware('guest:student')->group(function() {
 });
 Route::post('/student/logout', [StudentAuthController::class, 'logout'])->name('student.logout');
 
-// Area Privat Siswa (Ujian & Belajar)
-// [MODIFIKASI] Menambahkan CheckSebMode::class di sini
+// =========================================================================
+//  AREA ALUMNI (SETELAH LULUS)
+// =========================================================================
+Route::middleware(['auth:student'])->prefix('alumni')->name('alumni.')->group(function () {
+    Route::get('/dashboard', [AlumniController::class, 'index'])->name('dashboard');
+    Route::get('/tracer', [AlumniController::class, 'tracer'])->name('tracer');
+    Route::post('/tracer', [AlumniController::class, 'storeTracer'])->name('store_tracer');
+});
+
+// =========================================================================
+//  AREA PRIVAT SISWA AKTIF (LMS & UJIAN - DENGAN SEB CHECK)
+// =========================================================================
 Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
     
-    // A. LMS SISWA (Belajar & Tugas)
-    // Jika login pakai SEB, akses ke sini akan DITOLAK oleh middleware CheckSebMode
+    // A. LMS SISWA (Belajar & Tugas)  
     Route::prefix('students/learning')->name('students.learning.')->group(function () {
         Route::get('/', [StudentLmsController::class, 'index'])->name('index');
         Route::get('/subject/{subject_id}', [StudentLmsController::class, 'showSubject'])->name('subject.show');
@@ -149,12 +160,9 @@ Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
         Route::post('/assignment/{id}/quiz', [StudentLmsController::class, 'submitQuiz'])->name('assignment.quiz.submit');
     });
 
-    // B. UJIAN SISWA (CBT)
-    // Route ini masuk whitelist CheckSebMode, jadi bisa diakses via SEB
+    // B. UJIAN SISWA (CBT)    
     Route::prefix('student/exam')->name('student.exam.')->group(function () {
-        Route::get('/', [StudentExamController::class, 'index'])->name('index');
-        
-        // Middleware 'seb' bawaan Anda tetap ada untuk keamanan ganda (validasi config SEB)
+        Route::get('/', [StudentExamController::class, 'index'])->name('index');   
         Route::middleware(['seb'])->group(function () {
             Route::get('/{exam}/start', [StudentExamController::class, 'showStart'])->name('show');
             Route::post('/{exam}/start', [StudentExamController::class, 'start'])->name('start');
@@ -165,10 +173,8 @@ Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
     });
 });
 
-// SEB Utilities
 Route::get('/exam/{exam}/seb-landing', [SebController::class, 'landing'])->name('cbt.seb_landing');
 Route::get('/exam/{id}/download-seb', [CbtController::class, 'download_seb'])->name('cbt.download_seb');
-
 
 // =========================================================================
 //  3. DASHBOARD ADMIN & GURU (Perlu Login)
@@ -213,7 +219,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('classes', SchoolClassController::class);
     
     // --- MANAJEMEN USER (GURU & STAFF) ---
-    // Route khusus export/import harus DI ATAS resource route agar tidak dianggap sebagai {id}
+    // -------------------------------------
     Route::get('users/export', [UserController::class, 'export'])->name('users.export');
     Route::post('users/import', [UserController::class, 'import'])->name('users.import');
     Route::resource('users', UserController::class);
@@ -289,25 +295,23 @@ Route::middleware('auth')->group(function () {
         Route::post('/circulation/search-book', [LibraryCirculationController::class, 'searchBook'])->name('circulation.searchBook');
         Route::post('/circulation/borrow', [LibraryCirculationController::class, 'store'])->name('circulation.store');
         Route::post('/circulation/return', [LibraryCirculationController::class, 'returnBook'])->name('circulation.return');
-     // ==========================================
-        //  [BARU] ROUTE ALAT BANTU & CETAK
+     
+        // ==========================================
+        //  ALAT BANTU & CETAK
         // ==========================================
         Route::controller(LibraryToolController::class)->prefix('tools')->name('tools.')->group(function () {
             // Halaman Utama Menu Tools
-            Route::get('/', 'index')->name('index'); 
-            
+            Route::get('/', 'index')->name('index');             
             // Cetak Kartu Anggota
-            Route::get('/print-card', 'printMemberCard')->name('print-card');
-            
+            Route::get('/print-card', 'printMemberCard')->name('print-card');            
             // Cetak Label Barcode Buku
-            Route::get('/print-label', 'printBookLabel')->name('print-book-label');
-            
+            Route::get('/print-label', 'printBookLabel')->name('print-book-label');            
             // Download Laporan PDF
             Route::get('/report', 'generateReport')->name('report');
         });    
     });
 
-     // Manajemen Kelulusan
+    // Manajemen Kelulusan
     Route::prefix('admin/graduation')->name('admin.graduation.')->group(function() {
         Route::get('/', [GraduationController::class, 'adminIndex'])->name('index');
         Route::post('/store', [GraduationController::class, 'store'])->name('store'); 
@@ -316,7 +320,28 @@ Route::middleware('auth')->group(function () {
         Route::post('/import', [GraduationController::class, 'import'])->name('import');
         Route::post('/auto-generate', [GraduationController::class, 'autoGenerate'])->name('auto_generate');
         Route::get('/template', [GraduationController::class, 'downloadTemplate'])->name('template');
+        
+        Route::post('/process-alumni', [GraduationController::class, 'processAlumni'])->name('process_alumni');
     });    
+
+    // =========================================================================
+//  [UPDATE] ROUTE ADMIN ALUMNI 
+// =========================================================================
+
+     Route::prefix('admin/alumni')->name('admin.alumni.')->group(function() {
+        Route::get('/', [AdminAlumniController::class, 'index'])->name('index'); 
+        
+        // Route Import (BARU)
+        Route::get('/import', [AdminAlumniController::class, 'import'])->name('import');
+        Route::post('/import', [AdminAlumniController::class, 'processImport'])->name('import.process');
+        Route::get('/template', [AdminAlumniController::class, 'downloadTemplate'])->name('template');
+
+        Route::get('/{id}/edit', [AdminAlumniController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [AdminAlumniController::class, 'update'])->name('update');
+        Route::get('/{id}', [AdminAlumniController::class, 'show'])->name('show');
+        Route::get('/export/pdf', [AdminAlumniController::class, 'exportPdf'])->name('export_pdf');
+    });
+
 
     // Ekstrakurikuler
     Route::prefix('extracurriculars')->name('extracurriculars.')->group(function () {
