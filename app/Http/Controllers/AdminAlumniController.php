@@ -116,6 +116,21 @@ class AdminAlumniController extends Controller
         return redirect()->route('admin.alumni.index')->with('success', 'Data alumni berhasil diperbarui.');
     }
 
+    /**
+     * Halaman Rekap Testimoni Alumni
+     */
+    public function testimonials()
+    {
+        // Ambil data profil alumni yang testimoninya TIDAK KOSONG
+        $testimonials = AlumniProfile::with('student')
+            ->whereNotNull('testimony')
+            ->where('testimony', '!=', '')
+            ->latest('updated_at') // Urutkan dari yang terbaru update
+            ->paginate(12);
+
+        return view('admin.alumni.testimonials', compact('testimonials'));
+    }
+
     // =========================================================================
     //  FITUR IMPORT ALUMNI
     // =========================================================================
