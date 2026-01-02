@@ -28,18 +28,20 @@ class AdminAlumniController extends Controller
                   ->orWhereHas('graduation', fn($g) => $g->where('status', 'LULUS'));
             });
 
+        // Filter Pencarian
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
                 $q->where('name', 'like', '%'.$request->search.'%')
                   ->orWhere('student_id', 'like', '%'.$request->search.'%');
-                  // CATATAN: Pencarian 'nisn' dihapus sementara karena kolom tidak ada di DB fisik
             });
         }
 
+        // Filter Tahun
         if ($request->filled('year')) {
             $query->whereYear('graduated_date', $request->year);
         }
 
+        // Filter Aktivitas
         if ($request->filled('activity')) {
             $query->whereHas('alumniProfile', function($q) use ($request) {
                 $q->where('activity_status', $request->activity);
@@ -48,6 +50,7 @@ class AdminAlumniController extends Controller
 
         $alumni = $query->orderBy('name', 'asc')->paginate(20)->withQueryString();
 
+        // Statistik
         $stats = [
             'total' => Student::where('status', 'graduated')->count(),
             'kuliah' => AlumniProfile::where('activity_status', 'Kuliah')->count(),
@@ -55,17 +58,39 @@ class AdminAlumniController extends Controller
             'mencari' => AlumniProfile::where('activity_status', 'Mencari Kerja')->count(),
         ];
 
+        // Kirim variabel 'years' juga agar sesuai dengan view
         $years = $graduationYears; 
 
         return view('admin.alumni.index', compact('alumni', 'graduationYears', 'years', 'stats'));
     }
 
+    /**
+     * Halaman Rekap Testimoni Alumni (FITUR BARU)
+     */
+    public function testimonials()
+    {
+        // Ambil data profil alumni yang testimoninya TIDAK KOSONG
+        $testimonials = AlumniProfile::with('student')
+            ->whereNotNull('testimony')
+            ->where('testimony', '!=', '')
+            ->latest('updated_at') // Urutkan dari yang terbaru update
+            ->paginate(12);
+
+        return view('admin.alumni.testimonials', compact('testimonials'));
+    }
+
+    /**
+     * Detail Alumni
+     */
     public function show($id)
     {
         $student = Student::with(['alumniProfile', 'graduation', 'achievements'])->findOrFail($id);
         return view('admin.alumni.show', compact('student'));
     }
 
+    /**
+     * Export PDF Laporan
+     */
     public function exportPdf(Request $request)
     {
         $query = Student::with(['alumniProfile'])
@@ -82,12 +107,18 @@ class AdminAlumniController extends Controller
         return $pdf->stream('Laporan_Alumni_'.$year.'.pdf');
     }
 
+    /**
+     * Form Edit Data Alumni (Manual Input oleh Admin)
+     */
     public function edit($id)
     {
         $student = Student::with('alumniProfile')->findOrFail($id);
         return view('admin.alumni.edit', compact('student'));
     }
 
+    /**
+     * Proses Simpan Data Alumni (Oleh Admin)
+     */
     public function update(Request $request, $id)
     {
         $student = Student::findOrFail($id);
@@ -116,30 +147,21 @@ class AdminAlumniController extends Controller
         return redirect()->route('admin.alumni.index')->with('success', 'Data alumni berhasil diperbarui.');
     }
 
+    // =========================================================================
+    //  FITUR IMPORT ALUMNI (LEGACY DATA)
+    // =========================================================================
+
     /**
-     * Halaman Rekap Testimoni Alumni
+     * Menampilkan Halaman Import
      */
-    public function testimonials()
-    {
-        // Ambil data profil alumni yang testimoninya TIDAK KOSONG
-        $testimonials = AlumniProfile::with('student')
-            ->whereNotNull('testimony')
-            ->where('testimony', '!=', '')
-            ->latest('updated_at') // Urutkan dari yang terbaru update
-            ->paginate(12);
-
-        return view('admin.alumni.testimonials', compact('testimonials'));
-    }
-
-    // =========================================================================
-    //  FITUR IMPORT ALUMNI
-    // =========================================================================
-
     public function import()
     {
         return view('admin.alumni.import');
     }
 
+    /**
+     * Download Template CSV
+     */
     public function downloadTemplate()
     {
         $headers = [
@@ -162,7 +184,10 @@ class AdminAlumniController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
-    
+
+    /**
+     * Proses Import CSV Data Alumni
+     */
     public function processImport(Request $request)
     {
         $request->validate([
@@ -172,7 +197,7 @@ class AdminAlumniController extends Controller
         $file = $request->file('file');
         $filePath = $file->getRealPath();
         
-        // 1. Deteksi Separator (Koma atau Titik Koma)
+        // 1. Deteksi Separator (Koma atau Titik Koma untuk Excel Indo)
         $firstLine = fgets(fopen($filePath, 'r'));
         $separator = (substr_count($firstLine, ';') > substr_count($firstLine, ',')) ? ';' : ',';
 
@@ -201,21 +226,18 @@ class AdminAlumniController extends Controller
 
                 if (empty($nisn)) continue;
 
-                /* PERBAIKAN ERROR:
-                   Meskipun file migrasi ada 'nisn', database fisik menolak kolom itu.
-                   Jadi kita simpan NISN ke 'student_id' dan 'nis' yang pasti ada.
-                */
+                // Simpan Data
                 Student::updateOrCreate(
                     ['student_id' => $nisn], 
                     [
-                        // 'nisn' => $nisn,  <-- BARIS INI KITA MATIKAN AGAR TIDAK ERROR
                         'nis' => $nisn,      
                         'student_id' => $nisn, 
                         'name' => $name,
                         'gender' => $gender,
                         'status' => 'graduated',
                         'graduated_date' => $year . '-05-20',
-                        'password' => Hash::make($nisn),
+                        'graduation_year' => $year,
+                        'password' => Hash::make($nisn), // Password Default = NISN
                         'email' => null, 
                         'class_id' => null, 
                     ]
