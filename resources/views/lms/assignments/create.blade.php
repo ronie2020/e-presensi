@@ -201,13 +201,15 @@
                                                     <div class="flex gap-4 mb-3">
                                                         <select :name="'questions['+index+'][type]'" x-model="q.type" class="text-xs font-bold rounded-lg border-slate-200 bg-slate-50 h-9">
                                                             <option value="multiple_choice">Pilihan Ganda</option>
-                                                            <option value="essay">Essai</option>
+                                                            <option value="essay">Essai / Jawaban Panjang</option>
                                                         </select>
                                                         <input type="number" :name="'questions['+index+'][points]'" x-model="q.points" class="text-xs font-bold rounded-lg border-slate-200 bg-slate-50 w-24 h-9 px-3" placeholder="Poin">
                                                     </div>
                                                     
+                                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Pertanyaan / Soal</label>
                                                     <textarea :name="'questions['+index+'][text]'" x-model="q.text" rows="2" class="w-full rounded-xl border-slate-200 text-sm mb-4 focus:ring-purple-500 font-medium" placeholder="Tuliskan pertanyaan..."></textarea>
                                                     
+                                                    <!-- UI UNTUK PILIHAN GANDA -->
                                                     <div x-show="q.type === 'multiple_choice'" class="space-y-2 ml-1">
                                                         <template x-for="opt in ['A', 'B', 'C', 'D', 'E']">
                                                             <div class="flex items-center gap-3">
@@ -219,6 +221,27 @@
                                                             </div>
                                                         </template>
                                                     </div>
+
+                                                    <!-- UI UNTUK ESSAY (BARU) -->
+                                                    <div x-show="q.type === 'essay'" class="mt-4">
+                                                        <div class="bg-amber-50 border border-amber-100 rounded-xl p-4">
+                                                            <div class="flex items-start gap-3">
+                                                                <div class="p-2 bg-amber-100 text-amber-600 rounded-lg shrink-0">
+                                                                    <i class="ph-bold ph-pencil-simple-line"></i>
+                                                                </div>
+                                                                <div class="w-full">
+                                                                    <h4 class="font-bold text-amber-800 text-sm mb-1">Referensi Jawaban (Opsional)</h4>
+                                                                    <p class="text-xs text-amber-600 mb-2">Anda dapat memasukkan poin-poin penting dari jawaban yang diharapkan. (Hanya terlihat oleh Guru)</p>
+                                                                    <textarea 
+                                                                        :name="'questions['+index+'][answer_key]'" 
+                                                                        rows="3" 
+                                                                        class="w-full rounded-lg border-amber-200 bg-white text-sm focus:ring-amber-500 text-slate-700"
+                                                                        placeholder="Contoh: Jawaban harus mencakup definisi fotosintesis dan menyebutkan peran klorofil..."></textarea>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
                                                 </div>
                                             </div>
                                         </div>
