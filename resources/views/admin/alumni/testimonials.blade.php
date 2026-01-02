@@ -73,7 +73,8 @@
                                 "{{ Str::limit($item->testimony, 150) }}"
                             </p>
                             @if(strlen($item->testimony) > 150)
-                                <button type="button" onclick="alert('{{ js_escape($item->testimony) }}')" class="text-xs font-bold text-blue-500 hover:text-blue-700 mt-1 cursor-pointer">
+                                {{-- PERBAIKAN: Menggunakan json_encode agar aman dan tidak perlu fungsi helper js_escape --}}
+                                <button type="button" onclick="alert({{ json_encode($item->testimony) }})" class="text-xs font-bold text-blue-500 hover:text-blue-700 mt-1 cursor-pointer">
                                     Baca selengkapnya
                                 </button>
                             @endif
@@ -109,11 +110,4 @@
 
         </div>
     </div>
-    
-    {{-- Helper untuk escape JS string (Simpan di file helpers atau php block) --}}
-    @php
-        function js_escape($str) {
-            return str_replace(["\r", "\n", "'"], [' ', '\\n', "\\'"], $str);
-        }
-    @endphp
 </x-app-layout>
