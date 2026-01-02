@@ -17,7 +17,6 @@ use App\Models\Student;
 use App\Models\SchoolClass;
 use App\Models\LmsMaterial;
 use App\Models\LmsAssignment;
-// [BARU] Import Model Alumni
 use App\Models\AlumniProfile; 
 
 use Carbon\Carbon;
@@ -138,46 +137,37 @@ class LandingPageController extends Controller
         $agendas = Agenda::where('event_date', '>=', now()->subDays(1))->orderBy('event_date', 'asc')->limit(4)->get();
         $teachers = User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'])->latest()->take(8)->get();
         
-        // Data Buku Tamu
         $guestbooks = GuestBook::latest()->take(3)->get();
         $allGuestbooks = GuestBook::latest()->take(50)->get();
 
         $extracurriculars = Extracurricular::withCount('members')->with(['attendances' => function($query) { $query->latest('date')->limit(1); }])->get();
 
-        // ==========================================
-        // [BARU] 6. DATA ALUMNI UNTUK LANDING PAGE
-        // ==========================================
-        
-        // A. Statistik Sebaran Alumni
+        // 6. DATA ALUMNI UNTUK LANDING PAGE
         $alumniStats = [
             'total' => Student::where('status', 'graduated')->count(),
             'sma' => AlumniProfile::where('activity_status', 'SMA')->count(),
             'smk' => AlumniProfile::where('activity_status', 'SMK')->count(),
             'ma' => AlumniProfile::where('activity_status', 'MA')->count(),
             'pesantren' => AlumniProfile::where('activity_status', 'Pesantren')->count(),
-            // Hitung Bekerja dan Wirausaha sebagai satu kategori 'Bekerja'
             'bekerja' => AlumniProfile::whereIn('activity_status', ['Bekerja', 'Wirausaha', 'Lainnya'])->count(),
         ];
 
-        // B. Testimoni Alumni (Hanya yang ada isinya)
+        // Ambil Testimoni (Limit 6 untuk halaman depan)
         $alumniTestimonials = AlumniProfile::whereNotNull('testimony')
-            ->where('testimony', '!=', '') // Pastikan tidak kosong
-            ->with('student') // Load relasi siswa untuk ambil nama & foto
+            ->where('testimony', '!=', '') 
+            ->with('student') 
             ->latest()
-            ->take(6) // Ambil 6 testimoni terbaru
+            ->take(6) 
             ->get();
 
-        // Jangan lupa sertakan 'alumniStats' dan 'alumniTestimonials' di compact
         return view('welcome', compact(
             'stats', 'barChartData', 'libraryStats', 'libraryChartData', 
             'announcements', 'achievements', 'activities', 'teachers',
             'guestbooks', 'allGuestbooks', 'extracurriculars', 'agendas', 'schoolStats',
-            // Variabel Baru:
             'alumniStats', 'alumniTestimonials'
         ));
     }
 
-    // Method lainnya tetap sama...
     public function activities()
     {
         $activities = SchoolActivity::latest()->paginate(9);
@@ -212,5 +202,22 @@ class LandingPageController extends Controller
         }
         $teachers = $query->orderBy('name', 'asc')->paginate(12);
         return view('teachers', compact('teachers'));
+    }
+
+    /**
+     * [BARU] Halaman Semua Testimoni
+     * Menampilkan semua testimoni dengan pagination
+     */
+    public function testimonials()
+    {
+        // Mengambil semua testimoni yang tidak kosong, diurutkan terbaru
+        $testimonials = AlumniProfile::with('student')
+            ->whereNotNull('testimony')
+            ->where('testimony', '!=', '') 
+            ->latest('updated_at') 
+            ->paginate(12); // Menampilkan 12 per halaman
+
+        // Pastikan Anda sudah membuat file view 'testimonials.blade.php'
+        return view('testimonials', compact('testimonials'));
     }
 }

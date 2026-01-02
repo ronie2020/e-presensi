@@ -22,9 +22,15 @@
                     <div class="flex gap-4">
                         <div class="text-center px-4 py-3 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
                             <span class="block text-2xl font-black text-blue-400">
-                                {{ isset($stats['kuliah']) ? $stats['kuliah'] : $alumni->total() }}
+                                {{ isset($stats['total']) ? $stats['total'] : $alumni->total() }}
                             </span>
-                            <span class="text-[10px] text-slate-400 uppercase font-bold">Total Data</span>
+                            <span class="text-[10px] text-slate-400 uppercase font-bold">Total Alumni</span>
+                        </div>
+                        <div class="text-center px-4 py-3 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm hidden sm:block">
+                            <span class="block text-2xl font-black text-emerald-400">
+                                {{ $stats['kuliah'] ?? 0 }}
+                            </span>
+                            <span class="text-[10px] text-slate-400 uppercase font-bold">Lanjut Sekolah</span>
                         </div>
                     </div>
                 </div>
@@ -52,22 +58,27 @@
                     </select>
                 </form>
 
-                <div class="flex gap-2 w-full md:w-auto">
-                    {{-- Search --}}
-                    <form method="GET" class="relative w-full md:w-48 lg:w-64">
+                <div class="flex flex-wrap gap-2 w-full md:w-auto justify-end">
+                    {{-- Search Form --}}
+                    <form method="GET" class="relative w-full md:w-48 lg:w-56">
                         <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Nama / NISN..." 
                                class="w-full pl-9 pr-4 py-2.5 rounded-xl border-slate-200 bg-slate-50 text-sm font-bold focus:ring-amber-500 focus:border-amber-500">
                     </form>
                     
+                    {{-- TOMBOL TESTIMONI (BARU) --}}
+                    <a href="{{ route('admin.alumni.testimonials') }}" class="px-4 py-2.5 bg-amber-100 text-amber-700 border border-amber-200 rounded-xl font-bold text-sm hover:bg-amber-200 flex items-center gap-2 transition-colors" title="Lihat Testimoni">
+                        <i class="ph-bold ph-quotes"></i> <span class="hidden lg:inline">Testimoni</span>
+                    </a>
+
                     {{-- TOMBOL IMPORT --}}
-                    <a href="{{ route('admin.alumni.import') }}" class="px-4 py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl font-bold text-sm hover:bg-emerald-100 flex items-center gap-2 transition-colors">
-                        <i class="ph-bold ph-upload-simple"></i> Import
+                    <a href="{{ route('admin.alumni.import') }}" class="px-4 py-2.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl font-bold text-sm hover:bg-emerald-100 flex items-center gap-2 transition-colors" title="Import Data Excel/CSV">
+                        <i class="ph-bold ph-upload-simple"></i>
                     </a>
 
                     {{-- TOMBOL PDF --}}
-                    <a href="{{ route('admin.alumni.export_pdf', request()->all()) }}" target="_blank" class="px-4 py-2.5 bg-rose-50 text-rose-600 border border-rose-100 rounded-xl font-bold text-sm hover:bg-rose-100 flex items-center gap-2 transition-colors">
-                        <i class="ph-bold ph-file-pdf"></i> PDF
+                    <a href="{{ route('admin.alumni.export_pdf', request()->all()) }}" target="_blank" class="px-4 py-2.5 bg-rose-50 text-rose-600 border border-rose-100 rounded-xl font-bold text-sm hover:bg-rose-100 flex items-center gap-2 transition-colors" title="Export Laporan PDF">
+                        <i class="ph-bold ph-file-pdf"></i>
                     </a>
                 </div>
             </div>
@@ -99,14 +110,14 @@
                                         </div>
                                         <div>
                                             <div class="font-bold text-slate-800">{{ $student->name }}</div>
-                                            <div class="text-xs text-slate-400 font-medium">{{ $student->nisn ?? $student->student_id }}</div>
+                                            <div class="text-xs text-slate-400 font-medium font-mono">{{ $student->nisn ?? $student->student_id }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="inline-flex items-center gap-1 text-xs font-bold text-slate-500">
                                         <i class="ph-fill ph-graduation-cap"></i> 
-                                        {{ $student->graduation_year ?? \Carbon\Carbon::parse($student->graduated_date)->year }}
+                                        {{ $student->graduation_year ?? (\Carbon\Carbon::parse($student->graduated_date)->year ?? '-') }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
@@ -120,7 +131,7 @@
                                             {{ $status == 'Bekerja' ? 'bg-slate-100 text-slate-600 border-slate-200' : '' }}">
                                             {{ $status }}
                                         </span>
-                                        <div class="text-xs text-slate-500 font-medium mt-1">
+                                        <div class="text-xs text-slate-500 font-medium mt-1 truncate max-w-[200px]" title="{{ $student->alumniProfile->campus_name ?? $student->alumniProfile->company_name }}">
                                             {{ $student->alumniProfile->campus_name ?? $student->alumniProfile->company_name ?? '-' }}
                                         </div>
                                     @else
@@ -145,7 +156,7 @@
                                         <a href="{{ route('admin.alumni.show', $student->id) }}" class="inline-flex w-8 h-8 items-center justify-center rounded-lg bg-blue-50 border border-blue-200 text-blue-600 hover:bg-blue-500 hover:text-white transition-colors shadow-sm" title="Lihat Detail">
                                             <i class="ph-bold ph-eye"></i>
                                         </a>
-                                        <a href="{{ route('admin.alumni.edit', $student->id) }}" class="inline-flex w-8 h-8 items-center justify-center rounded-lg bg-amber-50 border border-amber-200 text-amber-600 hover:bg-amber-500 hover:text-white transition-colors shadow-sm" title="Edit">
+                                        <a href="{{ route('admin.alumni.edit', $student->id) }}" class="inline-flex w-8 h-8 items-center justify-center rounded-lg bg-amber-50 border border-amber-200 text-amber-600 hover:bg-amber-500 hover:text-white transition-colors shadow-sm" title="Edit Data">
                                             <i class="ph-bold ph-pencil-simple"></i>
                                         </a>
                                     </div>
@@ -165,7 +176,7 @@
                     </table>
                 </div>
                 <div class="p-4 border-t border-slate-100">
-                    {{ $alumni->links() }}
+                    {{ $alumni->withQueryString()->links() }}
                 </div>
             </div>
 

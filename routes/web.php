@@ -82,6 +82,8 @@ Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 Route::get('/kegiatan', [LandingPageController::class, 'activities'])->name('public.activities');
 Route::get('/prestasi', [LandingPageController::class, 'achievements'])->name('public.achievements');
 
+Route::get('/testimoni', [LandingPageController::class, 'testimonials'])->name('public.testimonials'); 
+
 Route::get('/guru', [LandingPageController::class, 'teachers'])->name('teachers.index');
 Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
 
@@ -323,25 +325,24 @@ Route::middleware('auth')->group(function () {
         
         Route::post('/process-alumni', [GraduationController::class, 'processAlumni'])->name('process_alumni');
     });    
-
     // =========================================================================
-//  [UPDATE] ROUTE ADMIN ALUMNI 
-// =========================================================================
+    //  [UPDATE] ROUTE ADMIN ALUMNI
+    // =========================================================================
 
-     Route::prefix('admin/alumni')->name('admin.alumni.')->group(function() {
-        Route::get('/', [AdminAlumniController::class, 'index'])->name('index'); 
-        
-        // Route Import (BARU)
+    Route::prefix('admin/alumni')->name('admin.alumni.')->group(function() {
+        // 1. Route Khusus (Taruh paling atas)
+        Route::get('/testimonials', [AdminAlumniController::class, 'testimonials'])->name('testimonials'); // <--- FITUR BARU
+        Route::get('/export/pdf', [AdminAlumniController::class, 'exportPdf'])->name('export_pdf');
         Route::get('/import', [AdminAlumniController::class, 'import'])->name('import');
         Route::post('/import', [AdminAlumniController::class, 'processImport'])->name('import.process');
         Route::get('/template', [AdminAlumniController::class, 'downloadTemplate'])->name('template');
 
+        // 2. Route Resource/Standar
+        Route::get('/', [AdminAlumniController::class, 'index'])->name('index'); 
         Route::get('/{id}/edit', [AdminAlumniController::class, 'edit'])->name('edit');
         Route::put('/{id}', [AdminAlumniController::class, 'update'])->name('update');
         Route::get('/{id}', [AdminAlumniController::class, 'show'])->name('show');
-        Route::get('/export/pdf', [AdminAlumniController::class, 'exportPdf'])->name('export_pdf');
     });
-
 
     // Ekstrakurikuler
     Route::prefix('extracurriculars')->name('extracurriculars.')->group(function () {

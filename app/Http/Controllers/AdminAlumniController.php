@@ -147,7 +147,7 @@ class AdminAlumniController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
-
+    
     public function processImport(Request $request)
     {
         $request->validate([

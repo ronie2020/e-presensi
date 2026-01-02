@@ -872,6 +872,14 @@
                     <span class="text-xs text-indigo-300 font-medium">Geser untuk melihat testimoni</span>
                     <i class="ph-bold ph-arrow-right text-indigo-400 animate-pulse"></i>
                 </div>
+
+                 {{-- TOMBOL LIHAT SEMUA --}}
+                <div class="mt-12 text-center" data-aos="fade-up">
+                    <a href="{{ route('public.testimonials') }}" class="inline-flex items-center justify-center px-8 py-3 text-sm font-bold text-indigo-100 bg-indigo-800/50 border border-indigo-500/50 rounded-full hover:bg-indigo-700 hover:text-white transition-all shadow-lg hover:shadow-indigo-500/30 group">
+                        Lihat Semua Testimoni 
+                        <i class="ph-bold ph-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
             @else
                 <div class="text-center py-12 border border-dashed border-indigo-800/30 rounded-3xl bg-indigo-900/20">
                     <p class="text-indigo-300 italic">Belum ada testimoni alumni yang ditampilkan.</p>
