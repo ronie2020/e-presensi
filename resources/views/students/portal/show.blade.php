@@ -132,6 +132,9 @@
                             $tabs['perpustakaan'] = ['icon' => 'books', 'label' => 'Riwayat Pustaka'];
                         } else {
                             // Tab Siswa Aktif
+                            // [BARU] Tambahkan Tab Jadwal di sini
+                            $tabs['jadwal'] = ['icon' => 'calendar-blank', 'label' => 'Jadwal Pelajaran']; 
+                            
                             $tabs['lms'] = ['icon' => 'clipboard-text', 'label' => 'Tugas & Kuis'];
                             $tabs['kbm'] = ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'];
                             $tabs['akademik'] = ['icon' => 'exam', 'label' => 'Nilai Rapor'];
@@ -163,11 +166,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 @if($isAlumni)
-                    {{-- 
-                        =============================================
-                        CARD KHUSUS ALUMNI (DENGAN TOMBOL TRACER) 
-                        =============================================
-                    --}}
+                    {{-- [KONTEN ALUMNI - TIDAK BERUBAH] --}}
                     <div class="md:col-span-3 bg-amber-50 border border-amber-200 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
                         {{-- Hiasan background --}}
                         <div class="absolute top-0 right-0 w-32 h-32 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -mr-16 -mt-16"></div>
@@ -183,14 +182,8 @@
                                         Siswa ini dinyatakan <strong>LULUS</strong> pada tahun {{ $student->graduation_year ?? \Carbon\Carbon::parse($student->graduated_date)->year }}.
                                     </p>
                                 </div>
-
-                                {{-- 
-                                    LOGIKA TOMBOL TRACER STUDY 
-                                    Pastikan route 'alumni.tracer' sudah ada di web.php
-                                --}}
                                 <div class="flex flex-wrap justify-center gap-3">
                                     @if($student->alumniProfile)
-                                        {{-- Jika SUDAH mengisi Tracer Study --}}
                                         <div class="inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-amber-200 shadow-sm">
                                             <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Saat ini:</span>
                                             <span class="font-bold text-amber-600">{{ $student->alumniProfile->activity_status }}</span>
@@ -199,7 +192,6 @@
                                             <i class="ph-bold ph-pencil-simple"></i> Update Data
                                         </a>
                                     @else
-                                        {{-- Jika BELUM mengisi Tracer Study --}}
                                         <div class="flex flex-col md:flex-row items-center gap-3">
                                             <span class="text-xs font-bold text-amber-700/60 hidden md:block">Anda belum mengisi data kelulusan</span>
                                             <a href="{{ route('alumni.tracer') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold shadow-xl shadow-amber-600/30 transition-all animate-bounce hover:animate-none">
@@ -266,6 +258,75 @@
         </div>
 
         @if(!$isAlumni)
+        {{-- ================================================================= --}}
+        {{-- [BARU] TAB JADWAL PELAJARAN                                       --}}
+        {{-- Mengambil data dari relasi $student->schoolClass->schedules       --}}
+        {{-- ================================================================= --}}
+        <div x-show="activeTab === 'jadwal'" x-cloak x-transition:enter="transition ease-out duration-300">
+            @php
+                // Ambil jadwal lewat relasi class (jika ada)
+                $classSchedules = $student->schoolClass ? $student->schoolClass->schedules : collect();
+                // Urutkan berdasarkan jam mulai
+                $classSchedules = $classSchedules->sortBy('start_time');
+                // Grouping berdasarkan Hari
+                $grouped = $classSchedules->groupBy('day');
+                
+                // Urutan hari untuk loop
+                $daysOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            @endphp
+
+            @if($classSchedules->count() > 0)
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach($daysOrder as $day)
+                        @if(isset($grouped[$day]))
+                        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all">
+                            <!-- Header Hari -->
+                            <div class="px-6 py-4 border-b border-gray-100 bg-slate-50 flex justify-between items-center">
+                                <h3 class="font-bold text-slate-800 text-lg">{{ $day }}</h3>
+                                <span class="text-xs font-bold px-2 py-1 rounded bg-white border border-slate-200 text-slate-500">
+                                    {{ $grouped[$day]->count() }} Mapel
+                                </span>
+                            </div>
+                            <!-- List Mapel -->
+                            <div class="divide-y divide-gray-50">
+                                @foreach($grouped[$day] as $sched)
+                                <div class="p-5 flex gap-4 group hover:bg-blue-50/30 transition-colors">
+                                    <!-- Waktu -->
+                                    <div class="flex flex-col items-center justify-center w-14 shrink-0 text-slate-400">
+                                        <span class="text-xs font-bold">{{ \Carbon\Carbon::parse($sched->start_time)->format('H:i') }}</span>
+                                        <div class="h-4 w-px bg-slate-200 my-0.5"></div>
+                                        <span class="text-xs font-bold">{{ \Carbon\Carbon::parse($sched->end_time)->format('H:i') }}</span>
+                                    </div>
+                                    <!-- Detail -->
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                                            {{ $sched->subject->name ?? 'Mata Pelajaran' }}
+                                        </h4>
+                                        <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                                            <i class="ph-fill ph-user-circle"></i> 
+                                            {{ $sched->teacher->name ?? 'Guru Pengampu' }}
+                                        </p>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                    @endforeach
+                </div>
+            @else
+                <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-16 text-center group hover:border-blue-300 transition-colors">
+                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-50 transition-colors">
+                        <i class="ph-duotone ph-calendar-slash text-4xl text-slate-300 group-hover:text-blue-400 transition-colors"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg">Jadwal Belum Tersedia</h3>
+                    <p class="text-slate-500 text-sm mt-2 max-w-xs mx-auto">
+                        Jadwal pelajaran untuk kelas <strong class="text-slate-700">{{ $student->schoolClass->name ?? '' }}</strong> belum diatur oleh admin.
+                    </p>
+                </div>
+            @endif
+        </div>
+
         <!-- TAB: LMS (TUGAS & KUIS) - HANYA SISWA AKTIF -->
         <div x-show="activeTab === 'lms'" x-cloak x-transition:enter="transition ease-out duration-300">
             <div class="space-y-6">

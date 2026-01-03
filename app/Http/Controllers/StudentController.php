@@ -7,6 +7,7 @@ use App\Models\SchoolClass;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash; // WAJIB DI-IMPORT
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\StudentsImport;
@@ -96,13 +97,17 @@ class StudentController extends Controller
         // 2. Ambil semua data input kecuali token, method, dan photo
         $data = $request->except(['_token', '_method', 'photo']);
 
-        // 3. Proses Upload Foto (Jika Ada)
+        // 3. FIX: Generate Default Password (NISN)
+        // Agar siswa manual bisa login nantinya jika sistem password diaktifkan
+        $data['password'] = Hash::make($request->student_id);
+
+        // 4. Proses Upload Foto (Jika Ada)
         if ($request->hasFile('photo')) {
             $path = $request->file('photo')->store('students', 'public');
             $data['photo_path'] = $path;
         }
 
-        // 4. Simpan ke Database
+        // 5. Simpan ke Database
         Student::create($data);
 
         return redirect()->route('students.index')->with('success', 'Siswa berhasil ditambahkan.');
@@ -126,6 +131,7 @@ class StudentController extends Controller
             'classes' => $classes
         ]);
     }
+    
     /**
      * Update data siswa (Buku Induk + Foto).
      */
@@ -138,13 +144,17 @@ class StudentController extends Controller
             'class_id' => 'required|integer|exists:classes,id',
             'rfid_id' => ['nullable', Rule::unique('students', 'rfid_id')->ignore($student->id)->whereNotNull('rfid_id')],
             'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            // Tambahkan validasi lain sesuai kebutuhan
         ];
         
         $request->validate($rules);
 
         // Ambil data input
-        $data = $request->except(['_token', '_method', 'photo']);
+        $data = $request->except(['_token', '_method', 'photo', 'password']); // Jangan update password sembarangan
+
+        // Opsional: Jika ada input password baru (Logic Reset Password Manual)
+        // if ($request->filled('password')) {
+        //     $data['password'] = Hash::make($request->password);
+        // }
 
         // 2. Proses Upload Foto
         if ($request->hasFile('photo')) {
@@ -169,9 +179,9 @@ class StudentController extends Controller
     public function destroy(Student $student)
     {
         // Hapus foto jika ada (opsional, tergantung kebijakan soft delete)
-        // if ($student->photo_path && Storage::disk('public')->exists($student->photo_path)) {
-        //    Storage::disk('public')->delete($student->photo_path);
-        // }
+        if ($student->photo_path && Storage::disk('public')->exists($student->photo_path)) {
+           Storage::disk('public')->delete($student->photo_path);
+        }
 
         $student->delete();
         return redirect()->route('students.index')->with('success', 'Siswa berhasil dihapus.');
@@ -211,7 +221,6 @@ class StudentController extends Controller
 
     public function card(Student $student)
     {
-    
         return view('students.osis_card', compact('student')); 
     }
 }

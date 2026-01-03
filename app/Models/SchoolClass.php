@@ -39,4 +39,14 @@ class SchoolClass extends Model
     {
         return $this->belongsTo(User::class, 'homeroom_teacher_id');
     }
+
+    /**
+     * [BARU] Hubungan: Satu Kelas memiliki BANYAK Jadwal Pelajaran.
+     * Relasi ini PENTING agar $student->schoolClass->schedules bisa berjalan.
+     */
+    public function schedules(): HasMany
+    {
+        // Pastikan 'school_class_id' sesuai dengan nama kolom foreign key di tabel schedules
+        return $this->hasMany(Schedule::class, 'school_class_id');
+    }
 }

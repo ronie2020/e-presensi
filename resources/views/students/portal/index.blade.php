@@ -154,8 +154,14 @@
 
                             <!-- Tombol Dinamis Sesuai Mode -->
                             <div x-show="mode === 'portal'">
-                                <a href="{{ route('portal.show', Auth::guard('student')->id()) }}" class="w-full block py-4 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2">
+                                {{-- Tombol Buka Profil --}}
+                                <a href="{{ route('portal.show', Auth::guard('student')->id()) }}" class="w-full block py-4 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2 mb-3">
                                     <i class="ph-bold ph-user-circle text-xl"></i> Buka Profil Saya
+                                </a>
+
+                                {{-- [BARU] Tombol Lihat Jadwal Pelajaran --}}
+                                <a href="{{ route('student.schedule.index') }}" class="w-full block py-4 bg-white border-2 border-slate-100 hover:border-blue-200 text-slate-700 hover:text-blue-600 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                                    <i class="ph-bold ph-calendar-blank text-xl"></i> Lihat Jadwal Pelajaran
                                 </a>
                             </div>
 

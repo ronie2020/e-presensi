@@ -29,6 +29,8 @@ class StudentAuthController extends Controller
         ]);
 
         // 2. Cari Siswa
+        // CATATAN: Login ini 'Bypass Password' (hanya cek NISN). 
+        // Jika ingin pakai password, gunakan: Auth::guard('student')->attempt(['student_id' => ..., 'password' => ...])
         $student = Student::where('student_id', $request->student_id)
                     ->orWhere('nis', $request->student_id)
                     ->first();
@@ -48,7 +50,6 @@ class StudentAuthController extends Controller
         // =======================================
 
         // 4. Redirect sesuai Tujuan (LMS atau CBT)
-        // Ini membaca <input type="hidden" name="intended_app" value="..."> dari form
         $intended = $request->input('intended_app');
 
         // Jika tujuannya CBT, lempar ke halaman Ujian
@@ -56,7 +57,11 @@ class StudentAuthController extends Controller
             return redirect()->route('student.exam.index')->with('success', 'Selamat datang di Ruang Ujian.');
         } 
         
-        // Default ke LMS (Ruang Belajar)
+        // REKOMENDASI: Jika ingin siswa langsung melihat Jadwal Pelajaran
+        // Pastikan Anda sudah membuat route dengan nama 'student.schedule.index'
+        // return redirect()->route('student.schedule.index')->with('success', 'Selamat datang di Portal Siswa.');
+
+        // Default ke LMS (Ruang Belajar) - Sesuai kode lama
         return redirect()->route('students.learning.index')->with('success', 'Selamat datang di Ruang Belajar.');
     }
 

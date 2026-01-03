@@ -49,6 +49,8 @@ use App\Http\Controllers\SebController;
 use App\Http\Controllers\StudentPortalController;
 use App\Http\Controllers\StudentAuthController;
 use App\Http\Controllers\StudentExamController;
+// [BARU] Import Controller Jadwal Siswa
+use App\Http\Controllers\StudentScheduleController; 
 
 // Perpustakaan
 use App\Http\Controllers\BookController;
@@ -105,7 +107,7 @@ Route::prefix('ppdb')->name('ppdb.')->group(function () {
 Route::get('/kiosk', [KioskController::class, 'showKiosk'])->name('kiosk.show');
 Route::post('/kiosk/process', [KioskController::class, 'processKioskScan'])->name('kiosk.process');
 
-// Portal Informasi Siswa
+// Portal Informasi Siswa (Publik/Orang Tua)
 Route::get('/portal', [StudentPortalController::class, 'index'])->name('portal.index');
 Route::post('/portal/search', [StudentPortalController::class, 'search'])->name('portal.search');
 Route::get('/portal/{student_id}', [StudentPortalController::class, 'show'])->name('portal.show');
@@ -135,6 +137,15 @@ Route::middleware('guest:student')->group(function() {
     Route::post('/student/login', [StudentAuthController::class, 'login'])->name('student.login.post');
 });
 Route::post('/student/logout', [StudentAuthController::class, 'logout'])->name('student.logout');
+
+// =========================================================================
+//  [BARU] AREA SISWA GENERAL (Tanpa SEB Restriction)
+//  Cocok untuk Jadwal, Profil, dll yang boleh diakses via HP
+// =========================================================================
+Route::middleware(['auth:student'])->group(function () {
+    // Route Jadwal Pelajaran Siswa
+    Route::get('/portal/jadwal', [StudentScheduleController::class, 'index'])->name('student.schedule.index');
+});
 
 // =========================================================================
 //  AREA ALUMNI (SETELAH LULUS)
