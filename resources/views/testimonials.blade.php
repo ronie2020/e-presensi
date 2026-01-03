@@ -3,17 +3,36 @@
 @section('content')
 <div class="bg-slate-50 min-h-screen py-12">
     
-    {{-- HEADER --}}
-    <div class="bg-indigo-900 pt-24 pb-20 rounded-b-[3rem] shadow-xl relative overflow-hidden -mt-20 mb-12">
-        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-        <div class="absolute top-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl pointer-events-none translate-x-1/2 -translate-y-1/2"></div>
+    {{-- HEADER WITH SCHOOL BACKGROUND --}}
+    <div class="relative bg-slate-900 pt-24 pb-20 rounded-b-[3rem] shadow-xl overflow-hidden -mt-20 mb-12">
         
+        {{-- 1. BACKGROUND IMAGE --}}
+        <div class="absolute inset-0 z-0">
+            {{-- 
+                TIPS: Ganti src di bawah ini dengan foto sekolah Anda sendiri.
+                Contoh: src="{{ asset('img/foto-sekolah.jpg') }}"
+            --}}
+            <img src="{{ asset('images/netila.jpg') }}" 
+                 alt="Background Sekolah" 
+                 class="w-full h-full object-cover">
+            
+            {{-- 2. OVERLAY GELAP (Agar teks terbaca) --}}
+            <div class="absolute inset-0 bg-gradient-to-b from-slate-900/90 via-slate-900/70 to-slate-900/90"></div>
+            
+            {{-- 3. Pattern Halus (Opsional, untuk tekstur) --}}
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
+        </div>
+
+        {{-- Dekorasi Blur (Opsional) --}}
+        <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-500/30 rounded-full blur-3xl pointer-events-none translate-x-1/2 -translate-y-1/2 mix-blend-overlay"></div>
+        
+        {{-- KONTEN HEADER --}}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            <span class="px-3 py-1 bg-indigo-800 text-indigo-200 rounded-full text-xs font-bold uppercase tracking-widest border border-indigo-700/50 mb-4 inline-block">
+            <span class="px-3 py-1 bg-white/10 text-indigo-100 rounded-full text-xs font-bold uppercase tracking-widest border border-white/20 mb-4 inline-block backdrop-blur-sm">
                 Kata Alumni
             </span>
-            <h1 class="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">Apa Kata Mereka?</h1>
-            <p class="text-indigo-200 text-lg max-w-2xl mx-auto">
+            <h1 class="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight drop-shadow-lg">Apa Kata Mereka?</h1>
+            <p class="text-slate-200 text-lg max-w-2xl mx-auto drop-shadow-md font-medium">
                 Kumpulan kisah sukses dan kenangan manis para alumni selama menempuh pendidikan di SMPN 3 Lakbok.
             </p>
         </div>
