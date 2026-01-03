@@ -9,10 +9,8 @@ use App\Models\ScheduleSpecial;
 use App\Models\Extracurricular;
 use App\Models\ExtracurricularMember;
 use App\Models\ExtracurricularAttendance;
-// --- TAMBAHAN MODEL UNTUK POIN KEDISIPLINAN ---
 use App\Models\DisciplineRecord;
 use App\Models\DisciplineType;
-// ----------------------------------------------
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log; 

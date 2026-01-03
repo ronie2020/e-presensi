@@ -22,11 +22,10 @@ class AcademicYearController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string', // Contoh: 2025/2026
+            'name' => 'required|string', // Contoh: "2025/2026"
             'semester' => 'required|in:Ganjil,Genap',
         ]);
 
-        // Cek duplikat
         $exists = AcademicYear::where('name', $request->name)
                               ->where('semester', $request->semester)
                               ->exists();

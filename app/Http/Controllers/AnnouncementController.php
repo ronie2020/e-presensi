@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Announcement;
 use App\Models\SchoolClass;
 use App\Models\Student;
-use App\Models\Agenda; // [PENTING] Jangan lupa import model Agenda
+use App\Models\Agenda; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Jobs\SendGeneralWaJob;
@@ -17,7 +17,7 @@ class AnnouncementController extends Controller
         // Ambil data pengumuman
         $announcements = Announcement::with('author')->latest()->get();
         
-        // [BARU] Ambil data agenda (H-1 ke depan)
+        // Ambil data agenda (H-1 ke depan)
         $agendas = Agenda::where('event_date', '>=', now()->subDays(1))
                         ->orderBy('event_date', 'asc')
                         ->get();
@@ -45,7 +45,7 @@ class AnnouncementController extends Controller
     }
 
     /**
-     * [BARU] Fungsi khusus untuk menu 'Agenda Kegiatan'
+     * Fungsi khusus untuk menu 'Agenda Kegiatan'
      * Menggunakan tampilan yang sama dengan index karena data agenda sudah ada disana.
      */
     public function agendas()
@@ -76,7 +76,7 @@ class AnnouncementController extends Controller
         return back()->with('success', 'Pengumuman dihapus.');
     }
 
-    // -- [BARU] LOGIKA AGENDA --
+    // -- LOGIKA AGENDA --
     public function storeAgenda(Request $request)
     {
         $request->validate([

@@ -390,16 +390,16 @@
                         <i class="ph-duotone ph-download-simple text-3xl"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-slate-900">Area Unduhan</h3>
-                        <p class="text-sm text-slate-500">Unduh dokumen akademik dan administrasi sekolah.</p>
+                        <h3 class="text-xl font-bold text-slate-900">Area Unduhan & Akses</h3>
+                        <p class="text-sm text-slate-500">Dokumen akademik dan fitur cepat untuk siswa.</p>
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-3 w-full md:w-auto">
-                    <a href="#" class="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-bold text-sm hover:border-blue-400 hover:text-blue-600 transition-all shadow-sm">
-                        <i class="ph-fill ph-file-pdf text-red-500 text-lg"></i> Kalender Akademik
+                    <a href="{{ route('student.login') }}" class="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-bold text-sm hover:border-blue-400 hover:text-blue-600 transition-all shadow-sm">
+                        <i class="ph-fill ph-calendar-blank text-blue-500 text-lg"></i> Cek Jadwal Pelajaran
                     </a>
                     <a href="#" class="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-bold text-sm hover:border-blue-400 hover:text-blue-600 transition-all shadow-sm">
-                        <i class="ph-fill ph-file-pdf text-red-500 text-lg"></i> Jadwal Pelajaran
+                        <i class="ph-fill ph-file-pdf text-red-500 text-lg"></i> Kalender Akademik
                     </a>
                     <a href="#" class="flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 rounded-xl text-slate-700 font-bold text-sm hover:border-blue-400 hover:text-blue-600 transition-all shadow-sm">
                         <i class="ph-fill ph-file-text text-blue-500 text-lg"></i> Tata Tertib

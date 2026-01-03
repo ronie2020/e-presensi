@@ -52,10 +52,8 @@ class AdminAlumniController extends Controller
 
         // Statistik (DIPERBAIKI)
         $stats = [
-            'total' => Student::where('status', 'graduated')->count(),
-            
-            // PERBAIKAN: Menghitung yang lanjut ke SMA/SMK/MA/Pesantren
-            // Sebelumnya error karena mencari 'Kuliah'
+            'total' => Student::where('status', 'graduated')->count(),            
+           
             'kuliah' => AlumniProfile::whereIn('activity_status', ['SMA', 'SMK', 'MA', 'Pesantren'])->count(),
             
             'bekerja' => AlumniProfile::whereIn('activity_status', ['Bekerja', 'Wirausaha'])->count(),
@@ -64,7 +62,7 @@ class AdminAlumniController extends Controller
             'mencari' => AlumniProfile::whereIn('activity_status', ['Mencari Kerja', 'Tidak Lanjut'])->count(),
         ];
 
-        // Kirim variabel 'years' juga agar sesuai dengan view
+        // Kirim variabel 'years' untuk filter tahun
         $years = $graduationYears; 
 
         return view('admin.alumni.index', compact('alumni', 'graduationYears', 'years', 'stats'));
@@ -79,7 +77,7 @@ class AdminAlumniController extends Controller
         $testimonials = AlumniProfile::with('student')
             ->whereNotNull('testimony')
             ->where('testimony', '!=', '')
-            ->latest('updated_at') // Urutkan dari yang terbaru update
+            ->latest('updated_at') 
             ->paginate(12);
 
         return view('admin.alumni.testimonials', compact('testimonials'));

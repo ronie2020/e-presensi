@@ -31,16 +31,29 @@ class DashboardController extends Controller
             $endDate = $selectedDate->copy()->endOfMonth();
         }
 
+        // =====================================================================
+        // FILTER ALUMNI (CORE FIX)
+        // Kita buat kondisi reuseable agar kode lebih rapi
+        // =====================================================================
+        $filterActiveStudent = function($query) {
+            $query->where('status', '!=', 'graduated'); // Pastikan bukan alumni
+        };
+
         // 2. DATA STATISTIK UTAMA (KPIS)
-        // Ambil SEMUA data dalam range tanggal
-        $allAttendances = AttendanceSiswa::whereBetween('attendance_date', [$startDate, $endDate])->get();
+        
+        // [FIX 1] Hitung Total Siswa (Hanya yang Aktif)
+        $totalStudents = Student::where($filterActiveStudent)->count();
+
+        // [FIX 2] Ambil data absensi hanya milik siswa AKTIF
+        $allAttendances = AttendanceSiswa::with('student')
+            ->whereHas('student', $filterActiveStudent) // Filter relasi
+            ->whereBetween('attendance_date', [$startDate, $endDate])
+            ->get();
 
         // [LOGIKA FILTER] Hanya Absensi Sekolah (Harian/Masuk/Pulang)
         $schoolAttendances = $allAttendances->filter(function ($att) {
             return in_array(strtolower($att->type), ['harian', 'masuk', 'pulang']);
         });
-
-        $totalStudents = Student::count();
         
         // [LOGIKA HADIR & TERLAMBAT]
         $presentCount = $schoolAttendances->filter(function ($att) {
@@ -64,19 +77,19 @@ class DashboardController extends Controller
             return str_contains(strtolower($att->notes ?? ''), 'pulang awal');
         })->count();
 
-        // Hitung "Belum Hadir" 
+        // Hitung "Belum Hadir" (Sisa siswa aktif yang belum scan)
         $notYetScannedCount = 0;
-        // Kita hitung untuk semua periode agar kartu tidak 0 saat mode Week/Month (opsional, tapi logika asli membatasinya)
-        // Jika ingin mengikuti logika asli user:
         if ($period === 'today') {
+             // Hitung siswa yang sudah ada record absensinya hari ini
              $alreadyRecorded = $schoolAttendances->unique('student_id')->count();
+             // Sisanya adalah yang belum hadir
              $notYetScannedCount = max(0, $totalStudents - $alreadyRecorded);
         }
 
         // 3. DATA KARTU (Cards)
         $cards = [
             [
-                'title' => 'Total Siswa',
+                'title' => 'Total Siswa Aktif', // Ubah label agar jelas
                 'value' => $totalStudents,
                 'icon' => 'ph-student',
                 'filter_status' => 'all'
@@ -114,9 +127,10 @@ class DashboardController extends Controller
             ]
         ];
 
-        // 4. TOP VIOLATORS (Sering Terlambat)
+        // 4. TOP VIOLATORS (Sering Terlambat) - [FIX 3] Tambah whereHas
         $topLateStudents = AttendanceSiswa::with(['student.schoolClass']) 
-            ->whereIn('type', ['Harian', 'Masuk', 'Pulang', 'harian', 'masuk', 'pulang']) // Handle case sensitive DB
+            ->whereHas('student', $filterActiveStudent) // Hanya siswa aktif
+            ->whereIn('type', ['Harian', 'Masuk', 'Pulang', 'harian', 'masuk', 'pulang'])
             ->where(function($query) {
                 $query->where('status', 'Terlambat')
                       ->orWhere('status', 'terlambat');
@@ -128,8 +142,9 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // 5. TOP PUNCTUAL (Siswa Terrajin)
+        // 5. TOP PUNCTUAL (Siswa Terrajin) - [FIX 4] Tambah whereHas
         $topPunctualStudents = AttendanceSiswa::with(['student.schoolClass'])
+            ->whereHas('student', $filterActiveStudent) // Hanya siswa aktif
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang', 'harian', 'masuk', 'pulang'])
             ->whereIn('status', ['Hadir', 'Tepat Waktu', 'hadir', 'tepat waktu'])
             ->whereBetween('attendance_date', [$startDate, $endDate])
@@ -139,18 +154,19 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // 6. LOG AKTIVITAS TERBARU (Live Feed)
-        // Menggunakan tanggal yang dipilih user ($dateParam), bukan Carbon::today()
+        // 6. LOG AKTIVITAS TERBARU (Live Feed) - [FIX 5] Tambah whereHas
         $recentActivities = AttendanceSiswa::with(['student.schoolClass'])
+            ->whereHas('student', $filterActiveStudent) // Hanya siswa aktif
             ->whereDate('attendance_date', $dateParam)
             ->latest('created_at')
             ->take(6)
             ->get();
 
-        // 7. RANKING KEHADIRAN PER KELAS
+        // 7. RANKING KEHADIRAN PER KELAS - [FIX 6] Tambah where status != graduated
         $classRanks = DB::table('attendances_siswa') 
             ->join('students', 'attendances_siswa.student_id', '=', 'students.id')
             ->join('classes', 'students.class_id', '=', 'classes.id')
+            ->where('students.status', '!=', 'graduated') // Filter Alumni di Query Builder
             ->whereBetween('attendances_siswa.attendance_date', [$startDate, $endDate])
             ->whereIn('attendances_siswa.type', ['Harian', 'Masuk', 'Pulang', 'harian', 'masuk', 'pulang'])
             ->whereIn('attendances_siswa.status', ['Hadir', 'Tepat Waktu', 'Terlambat', 'hadir', 'tepat waktu', 'terlambat'])
@@ -161,19 +177,21 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // 8. DATA GRAFIK (FIX LOGIC)
+        // 8. DATA GRAFIK
         $weeklyPresentData = [];
         $weeklyLateData = [];
         $weeklyAbsentData = [];
         $chartLabels = [];
 
-        // Jika 'today', tampilkan trend 7 hari terakhir BERAKHIR di tanggal yang dipilih user
-        // Jika 'week'/'month', tampilkan sesuai range periode tersebut
+        // Jika 'today', tampilkan trend 7 hari terakhir
         $graphStart = ($period === 'today') ? $selectedDate->copy()->subDays(6) : $startDate;
         $graphEnd   = ($period === 'today') ? $selectedDate : $endDate;
 
-        // Ambil data untuk grafik
-        $graphAttendances = AttendanceSiswa::whereBetween('attendance_date', [$graphStart, $graphEnd])->get();
+        // Ambil data untuk grafik - [FIX 7] Tambah whereHas
+        $graphAttendances = AttendanceSiswa::with('student')
+            ->whereHas('student', $filterActiveStudent)
+            ->whereBetween('attendance_date', [$graphStart, $graphEnd])
+            ->get();
 
         $graphAttendancesSchool = $graphAttendances->filter(function ($att) {
             return in_array(strtolower($att->type), ['harian', 'masuk', 'pulang']);
@@ -181,7 +199,6 @@ class DashboardController extends Controller
 
         $periodLoop = $graphStart->copy();
         
-        // Loop hari per hari untuk mengisi grafik
         while($periodLoop <= $graphEnd) {
             $dateStr = $periodLoop->format('Y-m-d'); 
             $chartLabels[] = $periodLoop->format('d M'); 
@@ -204,8 +221,8 @@ class DashboardController extends Controller
         }
 
         return view('dashboard', [
-            'period' => $period, // Kirim variabel ini ke view untuk mencegah error Undefined variable
-            'date' => $dateParam, // Kirim tanggal yang dipilih
+            'period' => $period, 
+            'date' => $dateParam, 
             'totalStudents' => $totalStudents,
             'presentOnTimeCount' => $presentOnTimeCount,
             'lateCount' => $lateCount,

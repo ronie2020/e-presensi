@@ -7,13 +7,13 @@ use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Jobs\AddAchievementPointJob; 
-use Barryvdh\DomPDF\Facade\Pdf; // Pastikan import ini ada
+use Barryvdh\DomPDF\Facade\Pdf; 
 
 class AchievementController extends Controller
 {
     public function index(Request $request)
     {
-        // === PERBAIKAN SORTING SISWA (Logic Asli Anda) ===
+        // === SORTING SISWA ===
         $students = Student::with('schoolClass')
             ->get()
             ->sortBy(function ($student) {

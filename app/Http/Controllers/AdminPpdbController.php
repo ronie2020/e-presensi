@@ -84,8 +84,7 @@ class AdminPpdbController extends Controller
     {
         $registrant = PpdbRegistrant::findOrFail($id);
         
-        // Cek apakah sudah dipromosikan (berdasarkan NISN)
-        // Kita asumsikan tabel students sudah diperbarui dengan kolom nisn
+        // Cek apakah sudah dipromosikan (berdasarkan NISN)        
         $isPromoted = false;
         if (Schema::hasColumn('students', 'nisn')) {
             $isPromoted = Student::where('nisn', $registrant->nisn)->exists();
@@ -166,7 +165,7 @@ class AdminPpdbController extends Controller
                 'mother_name' => $registrant->mother_name,
                 'father_job' => $registrant->parent_job,
                 'parent_phone' => $registrant->parent_phone,
-                'parent_wa_number' => $registrant->parent_phone, // Asumsi WA sama dengan HP
+                'parent_wa_number' => $registrant->parent_phone, 
                 'parent_income' => $registrant->parent_income,
                 
                 // Akademik

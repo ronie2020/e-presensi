@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use App\Models\AlumniProfile;
-use App\Models\Achievement; // Pastikan Model ini ada
+use App\Models\Achievement; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,8 +21,7 @@ class AlumniController extends Controller
         $profile = AlumniProfile::where('student_id', $student->id)->first();
         $isTracerFilled = $profile ? true : false;
 
-        // 2. Data Histori Prestasi
-        // PERBAIKAN: Menggunakan query manual agar tidak error jika relasi di Student.php belum ada
+        // 2. Data Histori Prestasi        
         $achievements = [];
         $total_merit_points = 0;
 
@@ -42,7 +41,7 @@ class AlumniController extends Controller
         $library_history = [];
         $library_visits = 0;
 
-        // Jika Anda punya Model LibraryLoan, uncomment kode di bawah ini:
+        //  Model LibraryLoan, jika ada:
         /*
         if (class_exists(\App\Models\LibraryLoan::class)) {
              $library_history = \App\Models\LibraryLoan::where('student_id', $student->id)
