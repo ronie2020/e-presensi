@@ -4,12 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 // --- 1. IMPORT MODEL YANG DIBUTUHKAN ---
-use App\Models\Schedule;        // Model Jadwal Pelajaran
-use App\Models\ScheduleRegular; // Model Jam Bel Reguler
-use App\Models\ScheduleSpecial; // Model Jam Bel Khusus
-use App\Models\SchoolClass;     // Model Kelas (PENTING: Pastikan ini ada)
-use App\Models\Subject;         // Model Mata Pelajaran
-use App\Models\User;            // Model User (untuk Guru)
+use App\Models\Schedule;        
+use App\Models\ScheduleRegular; 
+use App\Models\ScheduleSpecial; 
+use App\Models\SchoolClass;     
+use App\Models\Subject;         
+use App\Models\User;            
 use Carbon\Carbon;
 
 class ScheduleController extends Controller
@@ -59,9 +59,9 @@ class ScheduleController extends Controller
 
         // --- D. KIRIM SEMUA VARIABEL KE VIEW ---
         return view('admin.schedules.index', [
-            'classes'   => $classes,   // <-- Variabel ini wajib ada agar dropdown Kelas muncul
-            'subjects'  => $subjects,  // <-- Agar dropdown Mapel muncul
-            'teachers'  => $teachers,  // <-- Agar dropdown Guru muncul
+            'classes'   => $classes,   
+            'subjects'  => $subjects,  
+            'teachers'  => $teachers,  
             'schedules' => $schedules,
             'regularSchedules' => $regularSchedules,
             'specialSchedules' => $specialSchedules,

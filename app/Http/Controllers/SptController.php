@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\LetterSpt;      // Model SPT
-use App\Models\LetterIncoming; // Model Surat Masuk
-use App\Models\User;           // Model User/Pegawai
+use App\Models\LetterSpt;      
+use App\Models\LetterIncoming; 
+use App\Models\User;           
 use Carbon\Carbon;
 
 class SptController extends Controller

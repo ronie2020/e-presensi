@@ -46,8 +46,11 @@ class ReportController extends Controller
         $dateStr = $request->input('date', Carbon::today()->toDateString());
         $selectedDate_db = Carbon::parse($dateStr); 
 
-        // Ambil Data Absensi
+        // [FIX] Ambil Data Absensi HANYA untuk siswa AKTIF (bukan alumni)
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
+            ->whereHas('student', function($q) {
+                $q->where('status', '!=', 'graduated');
+            })
             ->whereDate('attendance_date', $selectedDate_db)
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
             ->get();
@@ -62,9 +65,10 @@ class ReportController extends Controller
         $izinCount = $attendances->where('status', 'Izin')->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
-        // Data Belum Absen + SORTING (Kelas -> Nama)
+        // [FIX] Data Belum Absen: Hanya ambil siswa yang statusnya != graduated
         $existingStudentIds = $attendances->pluck('student_id')->toArray();
         $belumAbsenListRaw = Student::with('schoolClass')
+            ->where('status', '!=', 'graduated') // Filter Alumni
             ->whereNotIn('id', $existingStudentIds)
             ->get();
             
@@ -129,8 +133,11 @@ class ReportController extends Controller
         $dateStr = $request->input('date', Carbon::today()->toDateString());
         $selectedDate_db = Carbon::parse($dateStr); 
 
-        // Ambil Data
+        // [FIX] Filter Alumni di Print
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
+            ->whereHas('student', function($q) {
+                $q->where('status', '!=', 'graduated');
+            })
             ->whereDate('attendance_date', $selectedDate_db)
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
             ->get();
@@ -148,9 +155,10 @@ class ReportController extends Controller
                 fn ($q) => $q->student->name
             ])->values();
         
-        // Data Belum Absen & SORTING
+        // [FIX] Data Belum Absen (Filter Alumni)
         $existingStudentIds = $attendances->pluck('student_id')->toArray();
         $belumAbsenListRaw = Student::with('schoolClass')
+            ->where('status', '!=', 'graduated') // Filter Alumni
             ->whereNotIn('id', $existingStudentIds)
             ->get();
 
@@ -187,8 +195,11 @@ class ReportController extends Controller
         $selectedDate_db = Carbon::parse($dateStr);
         $selectedActivity = $request->input('activity', 'Dhuha'); 
 
-        // Ambil Data
+        // [FIX] Ambil Data (Filter Alumni)
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
+            ->whereHas('student', function($q) {
+                $q->where('status', '!=', 'graduated');
+            })
             ->whereDate('attendance_date', $selectedDate_db)
             ->where('type', 'Keagamaan')
             ->where('activity', $selectedActivity)
@@ -202,9 +213,10 @@ class ReportController extends Controller
         $izinUzurCount = $attendances->whereIn('status', ["Uzur Syar'i", "Izin", "Sakit"])->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
-        // Data Belum Absen + SORTING (Kelas -> Nama)
+        // [FIX] Data Belum Absen (Filter Alumni)
         $existingIds = $attendances->pluck('student_id')->toArray();
         $belumAbsenListRaw = Student::with('schoolClass')
+            ->where('status', '!=', 'graduated') // Filter Alumni
             ->whereNotIn('id', $existingIds)
             ->get();
             
@@ -268,8 +280,11 @@ class ReportController extends Controller
         $selectedDate_db = Carbon::parse($dateStr);
         $selectedActivity = $request->input('activity', 'Dhuha'); 
 
-        // Ambil Data
+        // [FIX] Ambil Data (Filter Alumni)
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
+            ->whereHas('student', function($q) {
+                $q->where('status', '!=', 'graduated');
+            })
             ->whereDate('attendance_date', $selectedDate_db)
             ->where('type', 'Keagamaan')
             ->where('activity', $selectedActivity)
@@ -307,9 +322,10 @@ class ReportController extends Controller
         $izinUzurCount = $attendances->whereIn('status', ["Uzur Syar'i", "Izin", "Sakit"])->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
-        // Data Belum Absen + Sorting
+        // [FIX] Data Belum Absen (Filter Alumni)
         $existingIds = $attendances->pluck('student_id')->toArray();
         $belumAbsenListRaw = Student::with('schoolClass')
+            ->where('status', '!=', 'graduated') // Filter Alumni
             ->whereNotIn('id', $existingIds)
             ->get();
 
@@ -400,7 +416,11 @@ class ReportController extends Controller
         }
 
         $presentIds = $query->pluck('student_id')->toArray();
-        $absentStudents = Student::whereNotIn('id', $presentIds)->get();
+        
+        // [FIX] Bulk Alpha: Jangan tandai alumni sebagai alfa
+        $absentStudents = Student::where('status', '!=', 'graduated') // Filter Alumni
+            ->whereNotIn('id', $presentIds)
+            ->get();
 
         $insertData = [];
         $now = now();

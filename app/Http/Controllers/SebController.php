@@ -13,10 +13,7 @@ class SebController extends Controller
      */
     public function landing(CbtExam $exam)
     {
-        // PERBAIKAN:
-        // Panggil 'cbt.seb_info' (Halaman Konten), BUKAN 'cbt.seb_landing' (Layout).
-        // File seb_info.blade.php adalah file yang barusan kita buat (yang ada pilihan Laptop/HP).
-        
+       
         return view('cbt.seb_info', compact('exam'));
     }
 }

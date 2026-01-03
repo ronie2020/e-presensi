@@ -14,7 +14,7 @@ class SchoolClassController extends Controller
      */
     public function index()
     {
-        $classes = SchoolClass::with('homeroomTeacher') // Ambil relasi Wali Kelas
+        $classes = SchoolClass::with('homeroomTeacher') 
             ->orderBy('name', 'asc')
             ->get();
         
@@ -45,7 +45,7 @@ class SchoolClassController extends Controller
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('classes', 'name') // Pastikan nama kelas unik
+                Rule::unique('classes', 'name') 
             ],
             'homeroom_teacher_id' => 'nullable|integer|exists:users,id'
         ]);
@@ -71,7 +71,7 @@ class SchoolClassController extends Controller
      */
     public function edit($id)
     {
-        // FIX: Gunakan findOrFail agar jika ID salah langsung 404
+        // Gunakan findOrFail agar jika ID salah langsung 404
         $class = SchoolClass::findOrFail($id);
         
         $teachers = User::where('role', 'Wali Kelas')->orderBy('name', 'asc')->get();
@@ -114,14 +114,12 @@ class SchoolClassController extends Controller
     public function destroy($id)
     {
         // PERBAIKAN UTAMA DI SINI
-        // Menggunakan $id manual lebih aman daripada Route Model Binding yang namanya sering mismatch
         try {
             $class = SchoolClass::findOrFail($id);
             $class->delete();
             
             return redirect()->route('classes.index')->with('success', 'Kelas berhasil dihapus.');
         } catch (\Illuminate\Database\QueryException $e) {
-            // Error jika kelas masih memiliki siswa (Foreign Key Constraint)
             return redirect()->route('classes.index')->with('error', 'Gagal menghapus kelas. Pastikan tidak ada siswa di kelas ini.');
         } catch (\Exception $e) {
             return redirect()->route('classes.index')->with('error', 'Terjadi kesalahan saat menghapus data.');
