@@ -140,7 +140,6 @@ Route::post('/student/logout', [StudentAuthController::class, 'logout'])->name('
 
 // =========================================================================
 //  [BARU] AREA SISWA GENERAL (Tanpa SEB Restriction)
-//  Cocok untuk Jadwal, Profil, dll yang boleh diakses via HP
 // =========================================================================
 Route::middleware(['auth:student'])->group(function () {
     // Route Jadwal Pelajaran Siswa
@@ -337,7 +336,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/process-alumni', [GraduationController::class, 'processAlumni'])->name('process_alumni');
     });    
     // =========================================================================
-    //  [UPDATE] ROUTE ADMIN ALUMNI
+    //  ROUTE ADMIN ALUMNI
     // =========================================================================
 
     Route::prefix('admin/alumni')->name('admin.alumni.')->group(function() {
@@ -411,6 +410,10 @@ Route::middleware('auth')->group(function () {
         
         // --- Route untuk Simpan Jadwal Pengumuman ---
         Route::post('/set-schedule', [AdminPpdbController::class, 'setSchedule'])->name('set_schedule');
+        
+        // Route Bulk Promote (Pindah Massal)
+        Route::post('/bulk-promote', [AdminPpdbController::class, 'bulkPromote'])->name('bulk_promote');
+
         Route::post('/{id}/promote', [AdminPpdbController::class, 'promoteToStudent'])->name('promote');     
         Route::get('/{id}/show', [AdminPpdbController::class, 'show'])->name('show');
         Route::patch('/{id}/status', [AdminPpdbController::class, 'updateStatus'])->name('update_status');

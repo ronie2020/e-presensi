@@ -2,36 +2,6 @@
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- === BAGIAN PENTING: ALERT ERROR & SUKSES === --}}
-            {{-- Tanpa bagian ini, Anda tidak akan tahu jika ada error dari Controller --}}
-            
-            @if(session('success'))
-                <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl flex items-center gap-3 shadow-sm animate-pulse">
-                    <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
-                        <i class="ph-fill ph-check-circle text-xl"></i>
-                    </div>
-                    <div>
-                        <span class="font-bold text-sm block">Berhasil!</span>
-                        <span class="text-xs">{{ session('success') }}</span>
-                    </div>
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl flex items-start gap-3 shadow-sm">
-                    <div class="p-2 bg-rose-100 rounded-full text-rose-600 shrink-0">
-                        <i class="ph-fill ph-warning-circle text-xl"></i>
-                    </div>
-                    <div>
-                        <span class="font-bold text-sm block mb-1">Gagal Memproses Permintaan:</span>
-                        <span class="text-xs font-mono bg-rose-100 px-1 py-0.5 rounded">{{ session('error') }}</span>
-                        <p class="text-[10px] mt-1 text-rose-600/70 italic">*Silakan lapor ke teknisi jika error berlanjut.</p>
-                    </div>
-                </div>
-            @endif
-            
-            {{-- === BATAS ALERT === --}}
-
             {{-- HEADER: Navigasi & Judul --}}
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                 <div>
@@ -103,9 +73,11 @@
                                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 text-center">Tindak Lanjut</label>
                                 
                                 @if(!$isPromoted)
-                                    <form action="{{ route('admin.ppdb.promote', $registrant->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin? Data siswa dan foto akan disalin ke Data Induk Siswa.');">
+                                    {{-- FORM DENGAN ID UNTUK SWEETALERT --}}
+                                    <form id="promoteForm" action="{{ route('admin.ppdb.promote', $registrant->id) }}" method="POST">
                                         @csrf
-                                        <button type="submit" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 group">
+                                        {{-- Ubah type="button" dan tambah onclick --}}
+                                        <button type="button" onclick="confirmPromote()" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 group">
                                             <i class="ph-bold ph-user-plus text-lg group-hover:scale-110 transition-transform"></i>
                                             Pindahkan ke Data Siswa
                                         </button>
@@ -269,4 +241,63 @@
             </div>
         </div>
     </div>
+
+    {{-- SWEETALERT2 SCRIPT --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // NOTIFIKASI SUKSES DARI SESSION
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    confirmButtonColor: '#10b981', // Emerald-500
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        popup: 'rounded-3xl'
+                    }
+                });
+            @endif
+
+            // NOTIFIKASI ERROR DARI SESSION
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: "{{ session('error') }}",
+                    confirmButtonColor: '#f43f5e', // Rose-500
+                    confirmButtonText: 'Tutup',
+                    customClass: {
+                        popup: 'rounded-3xl'
+                    }
+                });
+            @endif
+        });
+
+        // KONFIRMASI PINDAH DATA (PROMOTE)
+        function confirmPromote() {
+            Swal.fire({
+                title: 'Konfirmasi Pindah Data',
+                text: "Data calon siswa ini beserta fotonya akan disalin ke Data Induk Siswa (Siswa Aktif). Apakah Anda yakin data sudah benar?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#059669', // Emerald-600
+                cancelButtonColor: '#64748b', // Slate-500
+                confirmButtonText: 'Ya, Pindahkan!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-3xl font-sans',
+                    confirmButton: 'px-4 py-2 rounded-xl',
+                    cancelButton: 'px-4 py-2 rounded-xl'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit form jika dikonfirmasi
+                    document.getElementById('promoteForm').submit();
+                }
+            });
+        }
+    </script>
 </x-app-layout>

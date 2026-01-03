@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash; 
 
 class AdminPpdbController extends Controller
 {
@@ -113,7 +114,7 @@ class AdminPpdbController extends Controller
     }
 
     /**
-     * FITUR UTAMA: Promote ke Data Siswa
+     * FITUR UTAMA: Promote ke Data Siswa (Single)
      */
     public function promoteToStudent($id)
     {
@@ -146,7 +147,6 @@ class AdminPpdbController extends Controller
             $generatedNis = $yearShort . str_pad($newSequence, 3, '0', STR_PAD_LEFT);
 
             // 3. Simpan ke Students
-            // Kita mapping kolom PPDB ke kolom Students yang baru dibuat
             $student = Student::create([
                 'student_id' => $generatedNis, // ID Sistem (bisa sama dengan NIS)
                 'nis' => $generatedNis,        // NIS Lokal
@@ -185,6 +185,99 @@ class AdminPpdbController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal memindahkan data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * [BARU] FITUR BULK PROMOTE (Pindah Massal)
+     */
+    public function bulkPromote(Request $request)
+    {
+        // 1. Validasi Input (Array ID yang dipilih)
+        $request->validate([
+            'selected_ids' => 'required|array',
+            'selected_ids.*' => 'exists:ppdb_registrants,id', 
+        ]);
+
+        $ids = $request->selected_ids;
+        $successCount = 0;
+        $failCount = 0;
+
+        DB::beginTransaction();
+        try {
+            // 2. Ambil data pendaftar yang dipilih (Hanya yang DITERIMA)
+            $registrants = PpdbRegistrant::whereIn('id', $ids)
+                ->where('status', 'accepted') 
+                ->get();
+
+            // Persiapan sequence NIS untuk mass insert
+            $yearShort = date('y');
+            $lastStudent = Student::where('nis', 'like', $yearShort . '%')->orderBy('nis', 'desc')->first();
+            $sequence = $lastStudent ? intval(substr($lastStudent->nis, -3)) + 1 : 1;
+
+            foreach ($registrants as $registrant) {
+                // Cek Duplikasi NISN
+                if (Student::where('nisn', $registrant->nisn)->exists()) {
+                    $failCount++;
+                    continue;
+                }
+
+                // Copy Foto
+                $newPhotoPath = null;
+                if ($registrant->file_photo && Storage::disk('public')->exists($registrant->file_photo)) {
+                    $ext = pathinfo($registrant->file_photo, PATHINFO_EXTENSION);
+                    $newFileName = 'students/' . $registrant->nisn . '_' . time() . '.' . $ext;
+                    Storage::disk('public')->copy($registrant->file_photo, $newFileName);
+                    $newPhotoPath = $newFileName;
+                }
+
+                // Generate NIS Unik
+                $generatedNis = $yearShort . str_pad($sequence, 3, '0', STR_PAD_LEFT);
+                $sequence++; // Increment sequence untuk siswa berikutnya
+
+                // Simpan Data
+                Student::create([
+                    'student_id' => $generatedNis,
+                    'nis' => $generatedNis,
+                    'nisn' => $registrant->nisn,
+                    'name' => $registrant->full_name,
+                    'nik' => $registrant->nik,
+                    'gender' => $registrant->gender,
+                    'birth_place' => $registrant->birth_place,
+                    'birth_date' => $registrant->birth_date,
+                    'religion' => $registrant->religion ?? 'Islam',
+                    'address' => $registrant->address,
+                    'phone' => $registrant->student_phone,
+                    'father_name' => $registrant->father_name,
+                    'mother_name' => $registrant->mother_name,
+                    'father_job' => $registrant->parent_job,
+                    'parent_phone' => $registrant->parent_phone,
+                    'parent_wa_number' => $registrant->parent_phone,
+                    'parent_income' => $registrant->parent_income,
+                    'school_origin' => $registrant->school_origin,
+                    'join_date' => now(),
+                    'status' => 'active',
+                    'class_id' => null,
+                    'photo_path' => $newPhotoPath,
+                    'general_notes' => 'Masuk Jalur ' . ucfirst($registrant->track) . ' (' . $registrant->academic_year . ')',
+                    'password' => Hash::make($generatedNis), // Default password = NIS/NISN
+                ]);
+
+                $successCount++;
+            }
+
+            DB::commit();
+
+            $message = "Berhasil memindahkan $successCount siswa.";
+            if ($failCount > 0) {
+                $message .= " ($failCount siswa dilewati karena duplikat NISN).";
+            }
+
+            return redirect()->back()->with('success', $message);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 

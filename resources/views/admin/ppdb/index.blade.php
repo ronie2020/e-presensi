@@ -116,7 +116,7 @@
                 <div class="p-8 border-b border-slate-50 bg-slate-50/30 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
                     
                     {{-- Filter Tabs --}}
-                    <div class="flex flex-wrap gap-2">
+                    <div class="flex flex-wrap gap-2 items-center">
                         @php
                             $btnBase = "px-5 py-2.5 text-xs font-bold rounded-xl border transition-all shadow-sm flex items-center gap-2";
                             $activeClass = "bg-blue-900 text-white border-blue-900 shadow-blue-900/20";
@@ -139,6 +139,11 @@
                            class="{{ $btnBase }} {{ request('status') == 'accepted' ? 'bg-emerald-500 text-white border-emerald-500' : $inactiveClass }}">
                            <i class="ph-bold ph-medal"></i> Diterima
                         </a>
+
+                        {{-- TOMBOL BULK PROMOTE (Hanya muncul jika tidak filter Pending/Verified) --}}
+                        <button type="button" onclick="submitBulk()" class="ml-2 px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-bold text-xs hover:bg-emerald-700 transition flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                            <i class="ph-bold ph-users-three"></i> Pindahkan Terpilih
+                        </button>
                     </div>
                     
                     {{-- Search --}}
@@ -152,106 +157,133 @@
 
                 {{-- Tabel --}}
                 <div class="overflow-x-auto flex-1 custom-scrollbar">
-                    <table class="w-full text-sm text-left text-slate-600">
-                        <thead class="bg-slate-50 text-xs font-bold text-slate-400 uppercase tracking-wider sticky top-0 z-10">
-                            <tr>
-                                <th class="px-6 py-5 whitespace-nowrap">No. Daftar</th>
-                                <th class="px-6 py-5 whitespace-nowrap">Identitas Siswa</th>
-                                <th class="px-6 py-5 text-center whitespace-nowrap">Jalur</th>
-                                <th class="px-6 py-5 text-center whitespace-nowrap">Nilai</th>
-                                <th class="px-6 py-5 text-center whitespace-nowrap">Status</th>
-                                <th class="px-6 py-5 text-right whitespace-nowrap">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-50">
-                            @forelse($registrants as $item)
-                            <tr class="hover:bg-blue-50/30 transition-colors group">
-                                <td class="px-6 py-5">
-                                    <span class="font-mono font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded text-xs border border-slate-200">
-                                        {{ $item->registration_number }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-5">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-600 flex items-center justify-center font-black text-sm border border-blue-200">
-                                            {{ substr($item->full_name, 0, 1) }}
-                                        </div>
-                                        <div>
-                                            <div class="font-bold text-slate-800 text-base mb-0.5">{{ $item->full_name }}</div>
-                                            <div class="text-xs text-slate-400 font-bold flex items-center gap-1">
-                                                <i class="ph-bold ph-graduation-cap"></i> {{ $item->school_origin }}
+                    
+                    {{-- WRAPPER FORM BULK ACTION --}}
+                    <form action="{{ route('admin.ppdb.bulk_promote') }}" method="POST" id="bulkForm">
+                        @csrf
+                        
+                        <table class="w-full text-sm text-left text-slate-600">
+                            <thead class="bg-slate-50 text-xs font-bold text-slate-400 uppercase tracking-wider sticky top-0 z-10">
+                                <tr>
+                                    {{-- CHECKBOX ALL --}}
+                                    <th class="px-6 py-5 w-10 text-center">
+                                        <input type="checkbox" id="checkAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer">
+                                    </th>
+                                    <th class="px-6 py-5 whitespace-nowrap">No. Daftar</th>
+                                    <th class="px-6 py-5 whitespace-nowrap">Identitas Siswa</th>
+                                    <th class="px-6 py-5 text-center whitespace-nowrap">Jalur</th>
+                                    <th class="px-6 py-5 text-center whitespace-nowrap">Nilai</th>
+                                    <th class="px-6 py-5 text-center whitespace-nowrap">Status</th>
+                                    <th class="px-6 py-5 text-right whitespace-nowrap">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-50">
+                                @forelse($registrants as $item)
+                                <tr class="hover:bg-blue-50/30 transition-colors group">
+                                    {{-- CHECKBOX ITEM --}}
+                                    <td class="px-6 py-5 text-center">
+                                        @if($item->status == 'accepted')
+                                            <input type="checkbox" name="selected_ids[]" value="{{ $item->id }}" class="check-item rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer">
+                                        @else
+                                            <span class="text-slate-300 cursor-not-allowed" title="Hanya siswa DITERIMA yang bisa dipindahkan">
+                                                <i class="ph-bold ph-minus"></i>
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span class="font-mono font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded text-xs border border-slate-200">
+                                            {{ $item->registration_number }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-600 flex items-center justify-center font-black text-sm border border-blue-200">
+                                                {{ substr($item->full_name, 0, 1) }}
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-slate-800 text-base mb-0.5">{{ $item->full_name }}</div>
+                                                <div class="text-xs text-slate-400 font-bold flex items-center gap-1">
+                                                    <i class="ph-bold ph-graduation-cap"></i> {{ $item->school_origin }}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-5 text-center whitespace-nowrap">
-                                    @php
-                                        $trackClass = match($item->track) {
-                                            'prestasi' => 'text-purple-600 bg-purple-50 border-purple-200',
-                                            'afirmasi' => 'text-orange-600 bg-orange-50 border-orange-200',
-                                            default => 'text-blue-600 bg-blue-50 border-blue-200'
-                                        };
-                                    @endphp
-                                    <span class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border {{ $trackClass }}">
-                                        {{ $item->track }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-5 text-center">
-                                    <span class="font-black text-slate-700 text-base">{{ $item->average_grade }}</span>
-                                </td>
-                                <td class="px-6 py-5 text-center whitespace-nowrap">
-                                    @if($item->status == 'pending')
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-yellow-50 text-yellow-700 border border-yellow-200">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></span> Menunggu
+                                    </td>
+                                    <td class="px-6 py-5 text-center whitespace-nowrap">
+                                        @php
+                                            $trackClass = match($item->track) {
+                                                'prestasi' => 'text-purple-600 bg-purple-50 border-purple-200',
+                                                'afirmasi' => 'text-orange-600 bg-orange-50 border-orange-200',
+                                                default => 'text-blue-600 bg-blue-50 border-blue-200'
+                                            };
+                                        @endphp
+                                        <span class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase border {{ $trackClass }}">
+                                            {{ $item->track }}
                                         </span>
-                                    @elseif($item->status == 'verified')
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                                            <i class="ph-fill ph-check-circle"></i> Terverifikasi
-                                        </span>
-                                    @elseif($item->status == 'accepted')
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                            <i class="ph-fill ph-medal"></i> Diterima
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                            <i class="ph-fill ph-x-circle"></i> Ditolak
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-5 text-right whitespace-nowrap">
-                                    <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0 duration-200">
-                                        {{-- TOMBOL DETAIL --}}
-                                        <a href="{{ route('admin.ppdb.show', $item->id) }}" 
-                                           class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm" title="Lihat Detail">
-                                            <i class="ph-bold ph-eye text-lg"></i>
-                                        </a>
+                                    </td>
+                                    <td class="px-6 py-5 text-center">
+                                        <span class="font-black text-slate-700 text-base">{{ $item->average_grade }}</span>
+                                    </td>
+                                    <td class="px-6 py-5 text-center whitespace-nowrap">
+                                        @if($item->status == 'pending')
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-yellow-50 text-yellow-700 border border-yellow-200">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"></span> Menunggu
+                                            </span>
+                                        @elseif($item->status == 'verified')
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                                <i class="ph-fill ph-check-circle"></i> Terverifikasi
+                                            </span>
+                                        @elseif($item->status == 'accepted')
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                <i class="ph-fill ph-medal"></i> Diterima
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                                <i class="ph-fill ph-x-circle"></i> Ditolak
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-5 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-2 group-hover:translate-x-0 duration-200">
+                                            {{-- TOMBOL DETAIL --}}
+                                            <a href="{{ route('admin.ppdb.show', $item->id) }}" 
+                                            class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm" title="Lihat Detail">
+                                                <i class="ph-bold ph-eye text-lg"></i>
+                                            </a>
 
-                                        {{-- TOMBOL HAPUS --}}
-                                        <form action="{{ route('admin.ppdb.destroy', $item->id) }}" method="POST" id="delete-form-{{ $item->id }}">
-                                            @csrf
-                                            @method('DELETE')
+                                            {{-- TOMBOL HAPUS --}}
+                                            {{-- Note: Karena di dalam form besar, form delete harus dikeluarkan atau menggunakan teknik submit JS terpisah --}}
+                                            {{-- Opsi terbaik: Biarkan tombol ini trigger form delete yang ada di luar loop jika perlu, tapi untuk simpel kita gunakan button type="button" yang men-submit form delete spesifik via ID --}}
                                             <button type="button" 
                                                 onclick="confirmDelete('{{ $item->id }}', '{{ $item->full_name }}')"
                                                 class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm" title="Hapus Data">
                                                 <i class="ph-bold ph-trash text-lg"></i>
                                             </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="6" class="px-6 py-20 text-center">
-                                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
-                                        <i class="ph-duotone ph-folder-open text-5xl"></i>
-                                    </div>
-                                    <p class="text-sm font-bold text-slate-600">Belum ada data pendaftar.</p>
-                                    <p class="text-xs text-slate-400 mt-1">Data siswa yang mendaftar akan muncul di sini.</p>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="7" class="px-6 py-20 text-center">
+                                        <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+                                            <i class="ph-duotone ph-folder-open text-5xl"></i>
+                                        </div>
+                                        <p class="text-sm font-bold text-slate-600">Belum ada data pendaftar.</p>
+                                        <p class="text-xs text-slate-400 mt-1">Data siswa yang mendaftar akan muncul di sini.</p>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </form> {{-- END BULK FORM --}}
+
+                    {{-- Form Delete (Hidden Loop) - Agar tidak konflik dengan form bulk --}}
+                    @foreach($registrants as $item)
+                        <form action="{{ route('admin.ppdb.destroy', $item->id) }}" method="POST" id="delete-form-{{ $item->id }}" class="hidden">
+                            @csrf
+                            @method('DELETE')
+                        </form>
+                    @endforeach
+
                 </div>
                 
                 {{-- Pagination --}}
@@ -300,9 +332,59 @@
                     buttonsStyling: false
                 });
             @endif
+
+            // LOGIC CHECKBOX "SELECT ALL"
+            const checkAll = document.getElementById('checkAll');
+            const checkItems = document.querySelectorAll('.check-item');
+
+            if(checkAll) {
+                checkAll.addEventListener('change', function() {
+                    checkItems.forEach(item => {
+                        item.checked = this.checked;
+                    });
+                });
+            }
         });
 
-        // FUNGSI KONFIRMASI HAPUS (Sama dengan subjects.blade.php)
+        // LOGIC SUBMIT BULK ACTION
+        function submitBulk() {
+            const selected = document.querySelectorAll('.check-item:checked').length;
+            
+            if(selected === 0) {
+                Swal.fire({
+                    title: 'Belum Ada Data Dipilih',
+                    text: 'Silakan centang minimal satu siswa yang berstatus DITERIMA.',
+                    icon: 'warning',
+                    confirmButtonColor: '#f59e0b',
+                    confirmButtonText: 'Oke',
+                    customClass: { popup: 'rounded-[2rem] font-sans' }
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: `Pindahkan ${selected} Siswa?`,
+                text: "Data siswa yang dipilih akan disalin ke Data Induk Siswa Aktif.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#059669',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Proses!',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
+                    confirmButton: 'bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-emerald-700 transition-colors mx-2 shadow-lg shadow-emerald-500/20',
+                    cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('bulkForm').submit();
+                }
+            });
+        }
+
+        // FUNGSI KONFIRMASI HAPUS
         function confirmDelete(id, name) {
             Swal.fire({
                 title: 'Hapus Pendaftar?',
