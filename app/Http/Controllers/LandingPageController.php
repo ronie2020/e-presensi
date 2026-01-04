@@ -37,8 +37,12 @@ class LandingPageController extends Controller
         $statusAlpa      = ['Alpa', 'alpa', 'Alpha', 'Absent'];
 
         // --- 1. STATISTIK HARIAN ---
+        // [FIX] Tambahkan filter whereHas agar alumni tidak terhitung
         $dailyQuery = AttendanceSiswa::whereDate('attendance_date', $today)
-            ->whereIn('type', ['Harian', 'Masuk', 'Pulang']);
+            ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
+            ->whereHas('student', function($q) {
+                $q->where('status', '!=', 'graduated');
+            });
 
         $hadirTepat = (clone $dailyQuery)->whereIn('status', $statusHadir)->distinct('student_id')->count('student_id');
         $terlambat  = (clone $dailyQuery)->whereIn('status', $statusTerlambat)->distinct('student_id')->count('student_id');
@@ -55,8 +59,12 @@ class LandingPageController extends Controller
         $startDate = Carbon::today()->subDays(6);
         $endDate = Carbon::today();
         
+        // [FIX] Tambahkan filter whereHas agar alumni tidak terhitung di grafik
         $weeklyData = AttendanceSiswa::whereBetween('attendance_date', [$startDate, $endDate])
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
+            ->whereHas('student', function($q) {
+                $q->where('status', '!=', 'graduated');
+            })
             ->get();
 
         $chartLabels = [];
@@ -118,12 +126,15 @@ class LandingPageController extends Controller
         ];
 
         // --- 4. CACHE STATISTIK ---
-        $schoolStats = Cache::remember('school_profile_stats', 60 * 60, function () {
+        // [FIX] Ganti nama key cache jadi 'school_profile_stats_v2' agar data langsung refresh
+        $schoolStats = Cache::remember('school_profile_stats_v2', 60 * 60, function () {
             $materiCount = class_exists('App\Models\LmsMaterial') ? \App\Models\LmsMaterial::count() : 0;
             $tugasCount = class_exists('App\Models\LmsAssignment') ? \App\Models\LmsAssignment::count() : 0;
+            
             return [
-                'siswa' => Student::count(),
-                'guru'  => User::where('role', 'guru')->count(),
+                // [FIX] Tambahkan filter status != graduated
+                'siswa' => Student::where('status', '!=', 'graduated')->count(),
+                'guru'  => User::whereIn('role', ['Guru', 'Kepala Sekolah'])->count(),
                 'rombel'=> SchoolClass::count(),
                 'materi'=> $materiCount,
                 'tugas' => $tugasCount,
@@ -217,7 +228,6 @@ class LandingPageController extends Controller
             ->latest('updated_at') 
             ->paginate(12); // Menampilkan 12 per halaman
 
-        // Pastikan Anda sudah membuat file view 'testimonials.blade.php'
         return view('testimonials', compact('testimonials'));
     }
 }
