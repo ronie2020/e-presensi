@@ -28,14 +28,14 @@ class DisciplineTypeController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|in:Pelanggaran,Kebaikan',
             'point_value' => 'required|integer|min:1',
-            'description' => 'nullable|string', // Tambahkan validasi deskripsi
+            // Baris validasi 'description' dihapus karena kolom tidak ada di database hosting
         ]);
 
         DisciplineType::create([
             'name' => $request->name,
             'type' => $request->type,
             'point_value' => $request->point_value,
-            'description' => $request->description, // Simpan deskripsi
+            // Baris 'description' dihapus untuk mencegah error "Column not found: 1054"
         ]);
 
         return redirect()->back()->with('success', 'Jenis ' . $request->type . ' berhasil ditambahkan.');
