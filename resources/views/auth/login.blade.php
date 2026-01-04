@@ -2,8 +2,12 @@
     <!-- Session Status -->
     <x-auth-session-status class="mb-4 bg-emerald-50 text-emerald-600 px-4 py-3 rounded-xl text-sm font-medium border border-emerald-100 flex items-center gap-2" :status="session('status')" />
 
-    <!-- Form Login -->
-    <form method="POST" action="{{ route('login') }}" class="space-y-5">
+    <!-- 
+        MODIFIKASI 1: 
+        Menambahkan x-data="{ isLoggingIn: false }" untuk state loading
+        Menambahkan @submit="isLoggingIn = true" untuk memicu loading saat form dikirim
+    -->
+    <form method="POST" action="{{ route('login') }}" class="space-y-5" x-data="{ isLoggingIn: false }" @submit="isLoggingIn = true">
         @csrf
 
         <!-- Email Address -->
@@ -53,13 +57,29 @@
             @endif
         </div>
 
-        <!-- Submit Button -->
-        <button type="submit" class="group relative flex w-full justify-center rounded-xl bg-slate-900 py-3.5 px-4 text-sm font-bold text-white transition-all hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-900/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 overflow-hidden transform active:scale-[0.98]">
-            <span class="relative z-10 flex items-center gap-2">
+        <!-- 
+            MODIFIKASI 2: Button Submit
+            - Menambahkan :disabled untuk mencegah klik ganda
+            - Menambahkan dynamic class untuk efek visual saat disabled
+            - Membagi konten menjadi dua bagian dengan x-show (Normal & Loading)
+        -->
+        <button type="submit" 
+                :disabled="isLoggingIn"
+                :class="{ 'opacity-75 cursor-wait': isLoggingIn, 'hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-900/30 active:scale-[0.98]': !isLoggingIn }"
+                class="group relative flex w-full justify-center rounded-xl bg-slate-900 py-3.5 px-4 text-sm font-bold text-white transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 overflow-hidden transform">
+            
+            <!-- Tampilan Normal (Muncul jika isLoggingIn == false) -->
+            <span x-show="!isLoggingIn" class="relative z-10 flex items-center gap-2">
                 Masuk Sekarang <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
             </span>
-            <!-- Efek Kilau saat hover (Opsional) -->
-            <div class="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent z-0"></div>
+
+            <!-- Tampilan Loading (Muncul jika isLoggingIn == true) -->
+            <span x-show="isLoggingIn" class="relative z-10 flex items-center gap-2" style="display: none;">
+                <i class="ph-bold ph-spinner animate-spin text-lg"></i> Memverifikasi...
+            </span>
+
+            <!-- Efek Kilau (Hanya muncul saat tidak loading) -->
+            <div x-show="!isLoggingIn" class="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent z-0"></div>
         </button>
     </form>
 </x-guest-layout>

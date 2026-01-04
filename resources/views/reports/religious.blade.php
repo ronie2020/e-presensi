@@ -2,48 +2,98 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
 
+    {{-- CUSTOM STYLES (Sama seperti Dashboard & Daily) --}}
+    <style>
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        /* Animasi Wiggle untuk ikon saat hover */
+        @keyframes wiggle { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
+        .group:hover .animate-wiggle { animation: wiggle 0.5s ease-in-out; }
+
+        /* Utility Printing */
+        @media print {
+            .no-print { display: none !important; }
+            body { background-color: white; }
+            [x-show] { display: block !important; }
+        }
+    </style>
+
     {{-- Wrapper Utama --}}
-    <div class="py-8 font-sans text-slate-800 pb-32" x-data="{ 
+    <div class="py-6 md:py-8 font-sans text-slate-800 pb-32" x-data="{ 
         activeTab: '{{ request('activeTab', 'hadir') }}',
-        reportType: '{{ request('report_type', 'daily') }}'
+        reportType: '{{ request('report_type', 'daily') }}',
+        loading: false, // State untuk loading overlay
+        
+        // Fungsi untuk navigasi (switcher) atau submit filter dengan animasi loading
+        navigate(url) {
+            this.loading = true;
+            setTimeout(() => { window.location.href = url; }, 200);
+        },
+        submitFilter() {
+            this.loading = true;
+            setTimeout(() => { this.$el.closest('form').submit(); }, 200);
+        }
     }">
+
+        {{-- LOADING OVERLAY (Modern) --}}
+        <div x-show="loading" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             style="display: none;" 
+             class="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center">
+            
+            <div class="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center transform transition-all scale-100">
+                <div class="relative w-12 h-12 mb-4">
+                    <div class="absolute inset-0 rounded-full border-4 border-slate-100"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+                </div>
+                <span class="text-xs font-bold text-slate-700 tracking-wider uppercase animate-pulse">Memuat Data...</span>
+            </div>
+        </div>
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {{-- HERO SECTION (Split Layout) --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 no-print">
                 
                 {{-- KARTU KIRI: Judul & Switcher Aktivitas --}}
-                {{-- UPDATED: Warna disesuaikan dengan Navigation (Dark Blue Gradient) --}}
-                <div class="bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 rounded-[2rem] p-6 lg:p-8 text-white shadow-xl shadow-blue-900/30 relative overflow-hidden flex flex-col justify-between min-h-[200px] border border-white/10">
-                    {{-- Dekorasi Pola Kubus (Sama seperti Nav) --}}
+                <div class="animate-enter bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 rounded-[2rem] p-6 lg:p-8 text-white shadow-xl shadow-blue-900/30 relative overflow-hidden flex flex-col justify-between min-h-[180px] lg:min-h-[200px] border border-white/10 group">
+                    {{-- Dekorasi Pola --}}
                     <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                     
                     {{-- Dekorasi Blur --}}
-                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
-                    <div class="absolute -left-10 bottom-0 w-32 h-32 bg-blue-400/10 rounded-full blur-2xl"></div>
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-all duration-700"></div>
+                    <div class="absolute -left-10 bottom-0 w-32 h-32 bg-blue-400/10 rounded-full blur-2xl group-hover:bg-blue-400/20 transition-all duration-700"></div>
                     
                     <div class="relative z-10">
-                        <h1 class="text-xl lg:text-2xl font-extrabold mb-1 tracking-tight text-white">Rekap Keagamaan</h1>
+                        <h1 class="text-xl lg:text-2xl font-extrabold mb-1 tracking-tight text-white flex items-center gap-2">
+                            Rekap Keagamaan
+                        </h1>
                         <p class="text-blue-300 text-sm font-medium tracking-wide">Laporan ibadah siswa.</p>
                     </div>
 
                     {{-- Switcher Dhuha/Dhuhur --}}
                     <div class="relative z-10 mt-6 bg-slate-900/50 p-1.5 rounded-2xl flex border border-white/10 backdrop-blur-sm">
-                        <a href="{{ route('reports.religious', array_merge(request()->all(), ['activity' => 'Dhuha'])) }}" 
+                        <button @click="navigate('{{ route('reports.religious', array_merge(request()->all(), ['activity' => 'Dhuha'])) }}')" 
                            class="flex-1 text-center py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 {{ $selectedActivity == 'Dhuha' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-blue-300 hover:bg-white/5 hover:text-white' }}">
                             <i class="ph-bold ph-sun text-lg {{ $selectedActivity == 'Dhuha' ? 'text-yellow-300' : '' }}"></i> 
                             Dhuha
-                        </a>
-                        <a href="{{ route('reports.religious', array_merge(request()->all(), ['activity' => 'Dhuhur'])) }}" 
+                        </button>
+                        <button @click="navigate('{{ route('reports.religious', array_merge(request()->all(), ['activity' => 'Dhuhur'])) }}')" 
                            class="flex-1 text-center py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 {{ $selectedActivity == 'Dhuhur' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-blue-300 hover:bg-white/5 hover:text-white' }}">
                             <i class="ph-fill ph-moon-stars text-lg {{ $selectedActivity == 'Dhuhur' ? 'text-white' : '' }}"></i> 
                             Dhuhur
-                        </a>
+                        </button>
                     </div>
                 </div>
 
                 {{-- KARTU KANAN: Filter & Cetak --}}
-                <div class="lg:col-span-2 bg-white rounded-[2rem] p-6 lg:p-8 border border-slate-100 shadow-sm relative overflow-hidden">
+                <div class="animate-enter lg:col-span-2 bg-white rounded-[2rem] p-6 lg:p-8 border border-slate-100 shadow-sm relative overflow-hidden" style="animation-delay: 100ms">
                     <div class="absolute inset-0 opacity-40 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:20px_20px]"></div>
                     
                     <div class="relative z-10">
@@ -61,7 +111,7 @@
                             </div>
                         </div>
 
-                        <form action="{{ route('reports.religious') }}" method="GET" class="flex flex-col md:flex-row gap-3 w-full">
+                        <form action="{{ route('reports.religious') }}" method="GET" class="flex flex-col md:flex-row gap-3 w-full" @submit.prevent="submitFilter">
                             <input type="hidden" name="activity" value="{{ $selectedActivity }}">
                             <input type="hidden" name="activeTab" x-model="activeTab">
                             <input type="hidden" name="report_type" x-model="reportType">
@@ -69,27 +119,27 @@
                             <div class="flex-1 w-full">
                                 <div x-show="reportType === 'daily'">
                                     <input type="date" name="date" value="{{ request('date', $selectedDate_db->format('Y-m-d')) }}" 
-                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900">
+                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900 shadow-sm">
                                 </div>
                                 <div x-show="reportType === 'weekly'" style="display: none;">
                                     <input type="week" name="week" value="{{ request('week') }}" 
-                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900">
+                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900 shadow-sm">
                                 </div>
                                 <div x-show="reportType === 'monthly'" style="display: none;">
                                     <input type="month" name="month" value="{{ request('month') }}" 
-                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900">
+                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900 shadow-sm">
                                 </div>
                             </div>
 
                             <div class="flex gap-2 w-full md:w-auto">
                                 {{-- Tombol Cari diganti Blue-900 agar matching dengan tema Nav --}}
-                                <button type="submit" class="flex-1 md:flex-none bg-blue-900 hover:bg-slate-900 text-white px-5 rounded-xl h-11 font-bold text-sm shadow-lg flex items-center justify-center gap-2 transition-all">
+                                <button type="submit" class="flex-1 md:flex-none bg-blue-900 hover:bg-slate-900 text-white px-5 rounded-xl h-11 font-bold text-sm shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95">
                                     <i class="ph-bold ph-magnifying-glass"></i> <span class="md:hidden">Cari</span>
                                 </button>
                                 
                                 <div class="w-px h-11 bg-slate-200 hidden md:block"></div>
 
-                                <a href="{{ route('reports.printReligious', request()->all()) }}" target="_blank" class="flex-1 md:flex-none bg-white border border-slate-200 text-slate-600 hover:text-blue-900 hover:border-blue-900 px-5 rounded-xl h-11 font-bold text-sm flex items-center justify-center gap-2 transition-colors">
+                                <a href="{{ route('reports.printReligious', request()->all()) }}" target="_blank" class="flex-1 md:flex-none bg-white border border-slate-200 text-slate-600 hover:text-blue-900 hover:border-blue-900 px-5 rounded-xl h-11 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-95">
                                     <i class="ph-bold ph-printer text-lg"></i> <span class="md:hidden">Cetak</span>
                                 </a>
                             </div>
@@ -100,41 +150,41 @@
 
             {{-- STATISTIK CARDS --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-8">
-                <div class="bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all">
+                <div class="animate-enter bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all" style="animation-delay: 200ms">
                     <div class="min-w-0">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Sudah Absen</p>
                         <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate">{{ $hadirCount }}</h3>
                     </div>
-                    <div class="w-14 h-14 lg:w-16 lg:h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl group-hover:scale-110 transition-transform shrink-0"><i class="ph-fill ph-check-circle"></i></div>
+                    <div class="w-14 h-14 lg:w-16 lg:h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-check-circle"></i></div>
                 </div>
 
-                <div class="bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all">
+                <div class="animate-enter bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all" style="animation-delay: 300ms">
                     <div class="min-w-0">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Izin / Uzur</p>
                         <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate">{{ $izinUzurCount + $alfaCount }}</h3>
                     </div>
-                    <div class="w-14 h-14 lg:w-16 lg:h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl group-hover:scale-110 transition-transform shrink-0"><i class="ph-fill ph-info"></i></div>
+                    <div class="w-14 h-14 lg:w-16 lg:h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-info"></i></div>
                 </div>
 
-                <div class="bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all">
+                <div class="animate-enter bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all" style="animation-delay: 400ms">
                     <div class="min-w-0">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Belum Absen</p>
                         <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate">{{ $belumAbsenCount }}</h3>
                     </div>
-                    <div class="w-14 h-14 lg:w-16 lg:h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl group-hover:scale-110 transition-transform shrink-0"><i class="ph-fill ph-x-circle"></i></div>
+                    <div class="w-14 h-14 lg:w-16 lg:h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-x-circle"></i></div>
                 </div>
             </div>
 
             {{-- MAIN CONTENT AREA --}}
-            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden min-h-[500px]">
+            <div class="animate-enter bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden min-h-[500px]" style="animation-delay: 500ms">
                 
                 {{-- Tabs Header --}}
                 <div class="flex flex-wrap md:flex-nowrap border-b border-slate-100 bg-slate-50/50 p-2 gap-2 sticky top-0 z-20 no-print">
-                    <button @click="activeTab = 'hadir'" :class="activeTab === 'hadir' ? 'bg-white text-blue-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60'" class="flex-1 md:flex-none py-2.5 px-6 rounded-xl text-sm font-bold transition-all whitespace-nowrap">Sudah Absen</button>
-                    <button @click="activeTab = 'belum'" :class="activeTab === 'belum' ? 'bg-white text-blue-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60'" class="flex-1 md:flex-none py-2.5 px-6 rounded-xl text-sm font-bold transition-all whitespace-nowrap">
+                    <button @click="activeTab = 'hadir'" :class="activeTab === 'hadir' ? 'bg-white text-blue-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60'" class="flex-1 md:flex-none py-2.5 px-4 md:px-6 rounded-xl text-xs md:text-sm font-bold transition-all whitespace-nowrap">Sudah Absen</button>
+                    <button @click="activeTab = 'belum'" :class="activeTab === 'belum' ? 'bg-white text-blue-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60'" class="flex-1 md:flex-none py-2.5 px-4 md:px-6 rounded-xl text-xs md:text-sm font-bold transition-all whitespace-nowrap">
                         Belum <span class="hidden sm:inline">Absen</span> <span class="ml-1 px-1.5 py-0.5 bg-rose-100 text-rose-600 rounded-md text-[10px]">{{ $belumAbsenCount }}</span>
                     </button>
-                    <button @click="activeTab = 'uzur'" :class="activeTab === 'uzur' ? 'bg-white text-blue-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60'" class="flex-1 md:flex-none py-2.5 px-6 rounded-xl text-sm font-bold transition-all whitespace-nowrap">Ket. Lain</button>
+                    <button @click="activeTab = 'uzur'" :class="activeTab === 'uzur' ? 'bg-white text-blue-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60'" class="flex-1 md:flex-none py-2.5 px-4 md:px-6 rounded-xl text-xs md:text-sm font-bold transition-all whitespace-nowrap">Ket. Lain</button>
                 </div>
 
                 <div class="p-0">
@@ -147,7 +197,7 @@
                                 @csrf @method('DELETE')
                                 <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
                                 <input type="hidden" name="activity" value="{{ $selectedActivity }}">
-                                <button type="button" onclick="confirmResetData()" class="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2 border border-rose-100">
+                                <button type="button" onclick="confirmResetData()" class="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2 border border-rose-100 active:scale-95">
                                     <i class="ph-bold ph-trash"></i> Reset Data
                                 </button>
                             </form>
@@ -169,7 +219,8 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <button onclick="openEditModalReligious({{ $attendance->id }}, '{{ $attendance->student->name }}', '{{ $attendance->status_final }}', `{{ $attendance->notes_final }}`, '{{ $attendance->activity }}')" class="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all no-print shrink-0">
+                                    <button onclick="openEditModalReligious({{ $attendance->id }}, '{{ $attendance->student->name }}', '{{ $attendance->status_final }}', `{{ $attendance->notes_final }}`, '{{ $attendance->activity }}')" 
+                                        class="p-2 ml-2 md:ml-4 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all no-print shrink-0 active:scale-95">
                                         <i class="ph-bold ph-pencil-simple text-xl"></i>
                                     </button>
                                 </div>
@@ -201,7 +252,8 @@
                                     <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
                                     <input type="hidden" name="type" value="Keagamaan">
                                     <input type="hidden" name="activity" value="{{ $selectedActivity }}">
-                                    <button type="button" onclick="confirmBulkAlphaReligious('{{ $belumAbsenList->count() }}')" class="w-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-5 py-3 rounded-xl shadow-lg shadow-rose-200 transition-all flex items-center justify-center gap-2">
+                                    <button type="button" onclick="confirmBulkAlphaReligious('{{ $belumAbsenList->count() }}')" 
+                                        class="w-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-5 py-3 rounded-xl shadow-lg shadow-rose-200 transition-all flex items-center justify-center gap-2 active:scale-95">
                                         <i class="ph-bold ph-check-circle"></i> Tandai Semua Alfa
                                     </button>
                                 </form>
@@ -219,7 +271,8 @@
                                             <p class="text-xs text-slate-500">{{ $student->schoolClass->name ?? '-' }}</p>
                                         </div>
                                     </div>
-                                    <button onclick="openManualModalForStudent({{ $student->id }}, '{{ $student->name }}')" class="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 hover:text-blue-600 hover:border-blue-100 transition-all shadow-sm no-print shrink-0">
+                                    <button onclick="openManualModalForStudent({{ $student->id }}, '{{ $student->name }}')" 
+                                        class="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 hover:text-blue-600 hover:border-blue-100 transition-all shadow-sm no-print shrink-0 active:scale-95">
                                         Input <span class="hidden md:inline">Manual</span>
                                     </button>
                                 </div>
@@ -249,7 +302,8 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <button onclick="openEditModalReligious({{ $attendance->id }}, '{{ $attendance->student->name }}', '{{ $attendance->status_final }}', `{{ $attendance->notes_final }}`, '{{ $attendance->activity }}')" class="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all no-print shrink-0">
+                                    <button onclick="openEditModalReligious({{ $attendance->id }}, '{{ $attendance->student->name }}', '{{ $attendance->status_final }}', `{{ $attendance->notes_final }}`, '{{ $attendance->activity }}')" 
+                                        class="p-2 ml-2 md:ml-4 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all no-print shrink-0 active:scale-95">
                                         <i class="ph-bold ph-pencil-simple text-xl"></i>
                                     </button>
                                 </div>
@@ -268,17 +322,10 @@
     </div>
 
     {{-- MODALS & SCRIPT --}}
-    <style>
-        @media print {
-            .no-print { display: none !important; }
-            body { background-color: white; }
-            [x-show] { display: block !important; }
-        }
-    </style>
-
-    {{-- Modal codes are essentially the same logic, just keeping them clean --}}
+    
+    {{-- Modal Manual Input --}}
     <div id="manualInputModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
-        <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100">
+        <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-enter">
             <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
                 <h3 class="font-bold text-white flex items-center gap-2"><i class="ph-bold ph-pencil-line"></i> Input Manual</h3>
                 <button onclick="closeManualModal()" class="text-white/70 hover:text-white transition"><i class="ph-bold ph-x text-xl"></i></button>
@@ -307,13 +354,14 @@
                     <label class="text-xs font-bold text-slate-400 uppercase mb-2 block ml-1">Catatan</label>
                     <input type="text" name="notes" class="w-full border-slate-200 bg-slate-50 rounded-xl focus:ring-blue-900 h-12" placeholder="Contoh: Sakit">
                 </div>
-                <button type="submit" class="w-full bg-blue-900 hover:bg-slate-900 text-white font-bold h-12 rounded-xl transition-colors shadow-lg shadow-blue-200 mt-2">Simpan Data</button>
+                <button type="submit" class="w-full bg-blue-900 hover:bg-slate-900 text-white font-bold h-12 rounded-xl transition-colors shadow-lg shadow-blue-200 mt-2 active:scale-95">Simpan Data</button>
             </form>
         </div>
     </div>
 
+    {{-- Modal Edit --}}
     <div id="editReligiousModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
-        <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100">
+        <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-enter">
             <div class="bg-slate-800 px-6 py-4 flex justify-between items-center">
                 <h3 class="font-bold text-white flex items-center gap-2"><i class="ph-bold ph-pencil-simple"></i> Edit Data</h3>
                 <button onclick="closeEditModalReligious()" class="text-white/70 hover:text-white transition"><i class="ph-bold ph-x text-xl"></i></button>
@@ -339,7 +387,7 @@
                 </div>
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="closeEditModalReligious()" class="flex-1 h-12 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200">Batal</button>
-                    <button type="submit" class="flex-1 h-12 bg-blue-900 text-white font-bold rounded-xl hover:bg-slate-900 shadow-md">Update</button>
+                    <button type="submit" class="flex-1 h-12 bg-blue-900 text-white font-bold rounded-xl hover:bg-slate-900 shadow-md active:scale-95">Update</button>
                 </div>
             </form>
         </div>

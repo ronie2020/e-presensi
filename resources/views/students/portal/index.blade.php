@@ -27,7 +27,7 @@
      x-data="{ mode: 'portal', isLoading: false }">
 
     <!-- 1. HERO SECTION (DYNAMIC THEME) -->
-    <div class="rounded-[2.5rem] shadow-2xl overflow-hidden mb-10 border border-white/10 relative min-h-[600px] flex items-center justify-center text-center group transition-all duration-700"
+    <div class="rounded-[2.5rem] shadow-2xl overflow-hidden mb-10 border border-white/10 relative min-h-[500px] md:min-h-[600px] flex items-center justify-center text-center group transition-all duration-700"
          :class="{
             'bg-slate-900 shadow-blue-900/20': mode === 'portal',
             'bg-blue-950 shadow-blue-900/30': mode === 'lms',
@@ -51,9 +51,9 @@
             <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 30px 30px;"></div>
             
             <!-- Animated Blobs (Colors change with mode) -->
-            <div class="absolute top-1/4 left-1/4 w-96 h-96 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob transition-colors duration-700"
+            <div class="absolute top-1/4 left-1/4 w-64 h-64 md:w-96 md:h-96 rounded-full mix-blend-screen filter blur-[80px] md:blur-[100px] opacity-30 animate-blob transition-colors duration-700"
                  :class="mode === 'cbt' ? 'bg-rose-600' : 'bg-blue-500'"></div>
-            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-blob animation-delay-2000 transition-colors duration-700"
+            <div class="absolute bottom-1/4 right-1/4 w-64 h-64 md:w-96 md:h-96 rounded-full mix-blend-screen filter blur-[80px] md:blur-[100px] opacity-30 animate-blob animation-delay-2000 transition-colors duration-700"
                  :class="mode === 'cbt' ? 'bg-orange-600' : 'bg-indigo-500'"></div>
         </div>
 
@@ -61,7 +61,7 @@
         <div class="relative z-10 w-full max-w-3xl px-6 py-12 flex flex-col items-center">
             
             <!-- Logo Sekolah -->
-            <div class="mb-8 w-24 h-24 rounded-3xl flex items-center justify-center text-white shadow-2xl border-2 border-white/20 backdrop-blur-md transition-all duration-500"
+            <div class="mb-8 w-20 h-20 md:w-24 md:h-24 rounded-3xl flex items-center justify-center text-white shadow-2xl border-2 border-white/20 backdrop-blur-md transition-all duration-500"
                  :class="{
                     'bg-gradient-to-br from-slate-700 to-slate-900 shadow-slate-500/20': mode === 'portal',
                     'bg-gradient-to-br from-blue-500 to-indigo-700 shadow-blue-500/30': mode === 'lms',
@@ -69,7 +69,7 @@
                  }" data-aos="fade-down">
                 
                  <!-- Icon Ganti-ganti sesuai mode -->
-                 <i class="ph-fill text-5xl transition-all duration-300 transform"
+                 <i class="ph-fill text-4xl md:text-5xl transition-all duration-300 transform"
                     :class="{
                         'ph-buildings': mode === 'portal',
                         'ph-books': mode === 'lms',
@@ -80,7 +80,7 @@
             <!-- Judul & Deskripsi -->
             <div class="mb-10 transition-all duration-500" data-aos="fade-down" data-aos-delay="100">
                 <!-- Label Badge -->
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-md text-xs font-bold uppercase tracking-widest mb-6 shadow-lg transition-all duration-300"
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border backdrop-blur-md text-[10px] md:text-xs font-bold uppercase tracking-widest mb-6 shadow-lg transition-all duration-300"
                      :class="{
                         'bg-slate-500/20 border-slate-400/30 text-slate-200 ring-1 ring-slate-500/30': mode === 'portal',
                         'bg-blue-500/20 border-blue-400/30 text-blue-200 ring-1 ring-blue-500/30': mode === 'lms',
@@ -90,7 +90,7 @@
                 </div>
 
                 <!-- Main Title -->
-                <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight leading-tight mb-4 drop-shadow-xl min-h-[5rem]">
+                <h1 class="text-3xl sm:text-4xl md:text-6xl font-black text-white tracking-tight leading-tight mb-4 drop-shadow-xl min-h-[4rem] md:min-h-[5rem]">
                     <span x-show="mode === 'portal'" x-transition:enter.duration.500ms>
                         Pusat Informasi <br> <span class="text-transparent bg-clip-text bg-gradient-to-r from-slate-200 to-gray-400">Data Akademik</span>
                     </span>
@@ -103,7 +103,7 @@
                 </h1>
                 
                 <!-- Subtitle -->
-                <p class="text-lg text-slate-300 font-medium leading-relaxed max-w-xl mx-auto min-h-[3.5rem] transition-all duration-300">
+                <p class="text-sm md:text-lg text-slate-300 font-medium leading-relaxed max-w-xl mx-auto min-h-[3rem] md:min-h-[3.5rem] transition-all duration-300 px-2">
                     <span x-show="mode === 'portal'" x-transition.opacity>
                         Cek data kehadiran, pelanggaran, nilai, dan informasi siswa lainnya secara publik.
                     </span>
@@ -117,7 +117,7 @@
             </div>
 
             <!-- TAB SWITCHER & FORM CARD -->
-            <div class="glass-effect border border-white/60 p-3 rounded-[2.5rem] shadow-2xl relative w-full max-w-2xl mx-auto transition-all duration-500 transform hover:scale-[1.01]" 
+            <div class="glass-effect border border-white/60 p-3 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl relative w-full max-w-2xl mx-auto transition-all duration-500 transform hover:scale-[1.01]" 
                  :class="{
                     'shadow-slate-900/50': mode === 'portal',
                     'shadow-blue-900/50': mode === 'lms',
@@ -126,20 +126,20 @@
                  data-aos="fade-up" data-aos-delay="200">
                 
                 <!-- 3 Tab Buttons -->
-                <div class="grid grid-cols-3 gap-2 mb-3 p-1.5 bg-slate-100/80 rounded-[2rem] border border-slate-200">
-                    <button @click="mode = 'portal'" class="py-3 rounded-[1.5rem] text-xs sm:text-sm font-bold transition-all duration-300 flex flex-col sm:flex-row items-center justify-center gap-2" :class="mode === 'portal' ? 'bg-white text-slate-800 shadow-md scale-100 ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'">
-                        <i class="ph-bold ph-magnifying-glass text-lg"></i> <span>Cek Data</span>
+                <div class="grid grid-cols-3 gap-2 mb-3 p-1.5 bg-slate-100/80 rounded-[1.5rem] md:rounded-[2rem] border border-slate-200">
+                    <button @click="mode = 'portal'" class="py-2 md:py-3 rounded-[1.2rem] md:rounded-[1.5rem] text-[10px] md:text-sm font-bold transition-all duration-300 flex flex-col sm:flex-row items-center justify-center gap-1 md:gap-2" :class="mode === 'portal' ? 'bg-white text-slate-800 shadow-md scale-100 ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'">
+                        <i class="ph-bold ph-magnifying-glass text-lg md:text-xl"></i> <span>Cek Data</span>
                     </button>
-                    <button @click="mode = 'lms'" class="py-3 rounded-[1.5rem] text-xs sm:text-sm font-bold transition-all duration-300 flex flex-col sm:flex-row items-center justify-center gap-2" :class="mode === 'lms' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 scale-100' : 'text-slate-500 hover:text-blue-600 hover:bg-white/50'">
-                        <i class="ph-bold ph-books text-lg"></i> <span>Masuk Kelas</span>
+                    <button @click="mode = 'lms'" class="py-2 md:py-3 rounded-[1.2rem] md:rounded-[1.5rem] text-[10px] md:text-sm font-bold transition-all duration-300 flex flex-col sm:flex-row items-center justify-center gap-1 md:gap-2" :class="mode === 'lms' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30 scale-100' : 'text-slate-500 hover:text-blue-600 hover:bg-white/50'">
+                        <i class="ph-bold ph-books text-lg md:text-xl"></i> <span>Masuk Kelas</span>
                     </button>
-                    <button @click="mode = 'cbt'" class="py-3 rounded-[1.5rem] text-xs sm:text-sm font-bold transition-all duration-300 flex flex-col sm:flex-row items-center justify-center gap-2" :class="mode === 'cbt' ? 'bg-rose-600 text-white shadow-md shadow-rose-500/30 scale-100' : 'text-slate-500 hover:text-rose-600 hover:bg-white/50'">
-                        <i class="ph-bold ph-desktop text-lg"></i> <span>Masuk Ujian</span>
+                    <button @click="mode = 'cbt'" class="py-2 md:py-3 rounded-[1.2rem] md:rounded-[1.5rem] text-[10px] md:text-sm font-bold transition-all duration-300 flex flex-col sm:flex-row items-center justify-center gap-1 md:gap-2" :class="mode === 'cbt' ? 'bg-rose-600 text-white shadow-md shadow-rose-500/30 scale-100' : 'text-slate-500 hover:text-rose-600 hover:bg-white/50'">
+                        <i class="ph-bold ph-desktop text-lg md:text-xl"></i> <span>Masuk Ujian</span>
                     </button>
                 </div>
 
                 <!-- FORM CONTAINER -->
-                <div class="relative bg-white rounded-[2rem] p-4 transition-colors duration-300 ring-1 ring-slate-100 shadow-inner">
+                <div class="relative bg-white rounded-[1.5rem] md:rounded-[2rem] p-4 transition-colors duration-300 ring-1 ring-slate-100 shadow-inner">
                     
                     @if(Auth::guard('student')->check())
                         {{-- ================================================= --}}
@@ -192,17 +192,28 @@
                         {{-- STATE 2: JIKA BELUM LOGIN (FORM INPUT NISN)       --}}
                         {{-- ================================================= --}}
                         
+                        <!-- 
+                            PERBAIKAN RESPONSIVITAS INPUT:
+                            - Input: Padding kiri dikurangi di HP (pl-12) dan kanan dikurangi (pr-14) agar teks muat.
+                            - Button: Pada HP (hidden md:inline), teks dihilangkan dan hanya ikon yang muncul.
+                            - Padding tombol: px-0 w-11 (kotak) di HP, px-8 (lebar) di Desktop.
+                        -->
+
                         <!-- 1. FORM PORTAL (Search) -->
                         <form x-show="mode === 'portal'" @submit="isLoading = true" action="{{ route('portal.search') }}" method="POST" class="relative">
                             @csrf
                             <div class="relative group">
-                                <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                                    <i class="ph-bold ph-identification-card text-2xl text-slate-400 group-focus-within:text-slate-700 transition-colors"></i>
+                                <div class="absolute inset-y-0 left-0 pl-4 md:pl-6 flex items-center pointer-events-none">
+                                    <i class="ph-bold ph-identification-card text-xl md:text-2xl text-slate-400 group-focus-within:text-slate-700 transition-colors"></i>
                                 </div>
-                                <input type="text" name="student_id" class="block w-full pl-16 pr-32 py-5 bg-slate-50 text-slate-800 text-lg font-bold rounded-2xl focus:ring-4 focus:ring-slate-200 focus:bg-white transition-all placeholder:text-slate-400 border-none outline-none" placeholder="Masukkan NISN Siswa" required autocomplete="off">
-                                <button type="submit" :disabled="isLoading" class="absolute right-2 top-2 bottom-2 bg-slate-800 hover:bg-slate-900 disabled:bg-slate-400 text-white px-8 rounded-xl font-bold transition-all shadow-lg shadow-slate-800/20 flex items-center gap-2 group/btn">
-                                    <span x-show="!isLoading">Cari</span>
-                                    <i x-show="!isLoading" class="ph-bold ph-arrow-right group-hover/btn:translate-x-1 transition-transform"></i>
+                                
+                                {{-- PERBAIKAN: pl-12 pr-14 di Mobile --}}
+                                <input type="text" name="student_id" class="block w-full pl-12 md:pl-16 pr-14 md:pr-32 py-4 md:py-5 bg-slate-50 text-slate-800 text-base md:text-lg font-bold rounded-2xl focus:ring-4 focus:ring-slate-200 focus:bg-white transition-all placeholder:text-slate-400 border-none outline-none" placeholder="Masukkan NISN Siswa" required autocomplete="off">
+                                
+                                {{-- PERBAIKAN: Tombol jadi kotak kecil di HP --}}
+                                <button type="submit" :disabled="isLoading" class="absolute right-2 top-2 bottom-2 bg-slate-800 hover:bg-slate-900 disabled:bg-slate-400 text-white w-11 md:w-auto px-0 md:px-8 rounded-xl font-bold transition-all shadow-lg shadow-slate-800/20 flex items-center justify-center gap-2 group/btn">
+                                    <span x-show="!isLoading" class="hidden md:inline">Cari</span>
+                                    <i x-show="!isLoading" class="ph-bold ph-arrow-right text-lg md:text-base group-hover/btn:translate-x-1 transition-transform"></i>
                                     <svg x-show="isLoading" x-cloak class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 </button>
                             </div>
@@ -214,13 +225,17 @@
                             @csrf
                             <input type="hidden" name="intended_app" value="lms">
                             <div class="relative group">
-                                <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                                    <i class="ph-bold ph-student text-2xl text-blue-400 group-focus-within:text-blue-600 transition-colors"></i>
+                                <div class="absolute inset-y-0 left-0 pl-4 md:pl-6 flex items-center pointer-events-none">
+                                    <i class="ph-bold ph-student text-xl md:text-2xl text-blue-400 group-focus-within:text-blue-600 transition-colors"></i>
                                 </div>
-                                <input type="text" name="student_id" class="block w-full pl-16 pr-36 py-5 bg-blue-50/50 text-slate-800 text-lg font-bold rounded-2xl focus:ring-4 focus:ring-blue-100 focus:bg-white transition-all placeholder:text-blue-300 border-none outline-none" placeholder="NISN Siswa" required autocomplete="off">
-                                <button type="submit" class="absolute right-2 top-2 bottom-2 bg-blue-600 hover:bg-blue-700 text-white px-6 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20 flex items-center gap-2 group/btn">
-                                    <span>Masuk Kelas</span>
-                                    <i class="ph-bold ph-sign-in group-hover/btn:translate-x-1 transition-transform"></i>
+                                
+                                {{-- PERBAIKAN: pl-12 pr-14 di Mobile --}}
+                                <input type="text" name="student_id" class="block w-full pl-12 md:pl-16 pr-14 md:pr-40 py-4 md:py-5 bg-blue-50/50 text-slate-800 text-base md:text-lg font-bold rounded-2xl focus:ring-4 focus:ring-blue-100 focus:bg-white transition-all placeholder:text-blue-300 border-none outline-none" placeholder="NISN Siswa" required autocomplete="off">
+                                
+                                {{-- PERBAIKAN: Tombol jadi kotak kecil di HP --}}
+                                <button type="submit" class="absolute right-2 top-2 bottom-2 bg-blue-600 hover:bg-blue-700 text-white w-11 md:w-auto px-0 md:px-6 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 group/btn">
+                                    <span class="hidden md:inline">Masuk Kelas</span>
+                                    <i class="ph-bold ph-sign-in text-lg md:text-base group-hover/btn:translate-x-1 transition-transform"></i>
                                 </button>
                             </div>
                             <p class="text-xs text-blue-400/80 mt-3 px-4 text-center font-medium">Masuk untuk mengakses materi pelajaran dan tugas.</p>
@@ -231,13 +246,17 @@
                             @csrf
                             <input type="hidden" name="intended_app" value="cbt">
                             <div class="relative group">
-                                <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                                    <i class="ph-bold ph-lock-key text-2xl text-rose-400 group-focus-within:text-rose-600 transition-colors"></i>
+                                <div class="absolute inset-y-0 left-0 pl-4 md:pl-6 flex items-center pointer-events-none">
+                                    <i class="ph-bold ph-lock-key text-xl md:text-2xl text-rose-400 group-focus-within:text-rose-600 transition-colors"></i>
                                 </div>
-                                <input type="text" name="student_id" class="block w-full pl-16 pr-36 py-5 bg-rose-50/50 text-slate-800 text-lg font-bold rounded-2xl focus:ring-4 focus:ring-rose-100 focus:bg-white transition-all placeholder:text-rose-300 border-none outline-none" placeholder="NISN Siswa" required autocomplete="off">
-                                <button type="submit" class="absolute right-2 top-2 bottom-2 bg-rose-600 hover:bg-rose-700 text-white px-6 rounded-xl font-bold transition-all shadow-lg shadow-rose-600/20 flex items-center gap-2 group/btn">
-                                    <span>Mulai Ujian</span>
-                                    <i class="ph-bold ph-arrow-right group-hover/btn:translate-x-1 transition-transform"></i>
+                                
+                                {{-- PERBAIKAN: pl-12 pr-14 di Mobile --}}
+                                <input type="text" name="student_id" class="block w-full pl-12 md:pl-16 pr-14 md:pr-40 py-4 md:py-5 bg-rose-50/50 text-slate-800 text-base md:text-lg font-bold rounded-2xl focus:ring-4 focus:ring-rose-100 focus:bg-white transition-all placeholder:text-rose-300 border-none outline-none" placeholder="NISN Siswa" required autocomplete="off">
+                                
+                                {{-- PERBAIKAN: Tombol jadi kotak kecil di HP --}}
+                                <button type="submit" class="absolute right-2 top-2 bottom-2 bg-rose-600 hover:bg-rose-700 text-white w-11 md:w-auto px-0 md:px-6 rounded-xl font-bold transition-all shadow-lg shadow-rose-600/20 flex items-center justify-center gap-2 group/btn">
+                                    <span class="hidden md:inline">Mulai Ujian</span>
+                                    <i class="ph-bold ph-arrow-right text-lg md:text-base group-hover/btn:translate-x-1 transition-transform"></i>
                                 </button>
                             </div>
                             <p class="text-xs text-rose-400/80 mt-3 px-4 text-center font-bold"><i class="ph-fill ph-warning-circle"></i> Pastikan Anda berada di ruangan ujian yang benar.</p>

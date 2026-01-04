@@ -13,7 +13,19 @@
         
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        <script src="https://unpkg.com/@phosphor-icons/web"></script>
+        
+        <!-- 
+             OPTIMASI 1: Tambahkan 'defer'
+             Agar script icon tidak menunda tampilan halaman muncul
+        -->
+        <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+
+        <!-- 
+             OPTIMASI 2 (Opsional): Alpine.js CDN 
+             Aktifkan baris di bawah ini HANYA jika animasi loading di tombol login tidak jalan.
+             Biasanya Laravel Breeze sudah menyertakan ini di app.js.
+        -->
+        <!-- <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> -->
 
         <!-- Styles untuk Animasi Blob -->
         <style>
@@ -46,13 +58,13 @@
         <div class="min-h-screen flex items-center justify-center p-4 sm:p-6 relative z-10">
             
             <!-- === MAIN CARD CONTAINER === -->
-            <div class="w-full max-w-4xl bg-white rounded-3xl md:rounded-[2rem] shadow-xl md:shadow-2xl shadow-blue-900/10 overflow-hidden flex flex-col md:flex-row border border-white/50 ring-1 ring-slate-100">
+            <!-- 
+                OPTIMASI 3: max-h-[90vh] untuk Desktop
+                Agar card tidak terlalu tinggi di layar monitor kecil
+            -->
+            <div class="w-full max-w-4xl bg-white rounded-3xl md:rounded-[2rem] shadow-xl md:shadow-2xl shadow-blue-900/10 overflow-hidden flex flex-col md:flex-row border border-white/50 ring-1 ring-slate-100 md:max-h-[90vh]">
 
-                <!-- 
-                    KOLOM KIRI (BRANDING) 
-                    Mobile: Jadi Header Tipis (Hanya Logo)
-                    Desktop: Sidebar Penuh dengan Teks
-                -->
+                <!-- KOLOM KIRI (BRANDING) -->
                 <div class="w-full md:w-5/12 bg-slate-900 relative flex flex-col justify-between p-6 md:p-10 text-white overflow-hidden shrink-0 transition-all">
                     
                     <!-- Background Decoration -->
@@ -67,6 +79,7 @@
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-900/50 border border-white/20 shrink-0">
                                 <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-6 h-6 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                                <!-- Fallback Icon jika gambar gagal load -->
                                 <i class="ph-bold ph-buildings text-xl hidden"></i>
                             </div>
                             <div class="flex flex-col leading-tight">
@@ -75,11 +88,7 @@
                             </div>
                         </div>
 
-                        <!-- 
-                            Hero Text & Description
-                            HIDDEN ON MOBILE (hidden md:block)
-                            Agar tampilan di HP tidak terlalu panjang ke bawah
-                        -->
+                        <!-- Hero Text & Description -->
                         <div class="hidden md:flex flex-col my-auto space-y-4">
                             <div class="inline-flex self-start items-center gap-2 px-3 py-1 rounded-full bg-blue-900/50 border border-blue-700/50 text-blue-300 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
                                 <span class="relative flex h-1.5 w-1.5">
@@ -112,9 +121,10 @@
 
                 <!-- 
                     KOLOM KANAN (FORM)
-                    Padding disesuaikan: p-6 (Mobile) -> p-12 (Desktop)
+                    OPTIMASI 4: overflow-y-auto
+                    Agar jika form sangat panjang, user tetap bisa scroll di dalam card
                 -->
-                <div class="w-full md:w-7/12 p-6 sm:p-8 md:p-12 flex flex-col justify-center bg-white relative">
+                <div class="w-full md:w-7/12 p-6 sm:p-8 md:p-12 flex flex-col justify-center bg-white relative overflow-y-auto">
                     <div class="w-full max-w-sm mx-auto">
                         
                         <!-- Greeting Header -->

@@ -32,18 +32,30 @@
             period: new URLSearchParams(window.location.search).get('period') || 'today',
             date: new URLSearchParams(window.location.search).get('date') || new Date().toISOString().split('T')[0],
             loading: false,
+            loadingTarget: '',
+            
             updateFilter(newPeriod) {
                 this.loading = true;
+                this.loadingTarget = newPeriod;
                 this.period = newPeriod;
-                window.location.href = '?period=' + this.period + '&date=' + this.date;
+                setTimeout(() => {
+                    window.location.href = '?period=' + this.period + '&date=' + this.date;
+                }, 300); 
             },
             changeDate(days) {
+                this.loading = true;
+                this.loadingTarget = 'date';
                 let d = new Date(this.date);
                 d.setDate(d.getDate() + days);
                 this.date = d.toISOString().split('T')[0];
-                this.updateFilter(this.period);
+                window.location.href = '?period=' + this.period + '&date=' + this.date;
             },
-            printDashboard() { window.print(); }
+            printDashboard() { window.print(); },
+            navigate(url) {
+                this.loading = true;
+                this.loadingTarget = 'page';
+                window.location.href = url;
+            }
         }" class="relative space-y-6 md:space-y-8 min-h-screen pb-10 font-sans text-slate-800">
         
         {{-- HEADER CETAK --}}
@@ -54,18 +66,28 @@
         </div>
 
         {{-- LOADING OVERLAY --}}
-        <div x-show="loading" style="display: none;" 
-             class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center transition-opacity">
-            <div class="bg-white p-5 rounded-2xl shadow-2xl flex flex-col items-center animate-bounce">
-                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mb-3">
-                    <i class="ph-bold ph-spinner animate-spin text-xl text-white"></i>
+        <div x-show="loading" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             style="display: none;" 
+             class="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center">
+            
+            <div class="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center transform transition-all scale-100">
+                <div class="relative w-12 h-12 mb-4">
+                    <div class="absolute inset-0 rounded-full border-4 border-slate-100"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
                 </div>
-                <span class="text-xs font-bold text-slate-700 tracking-wide uppercase">Memuat Data...</span>
+                <span class="text-xs font-bold text-slate-700 tracking-wider uppercase animate-pulse">Memproses Data...</span>
             </div>
         </div>
 
         {{-- HERO SECTION --}}
-        <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-r from-blue-900 via-slate-800 to-slate-900 p-8 md:p-10 mb-6 text-white shadow-2xl shadow-blue-900/20 overflow-hidden group border border-white/10 card-print">
+        <!-- PERBAIKAN 1: Padding dikurangi di mobile (p-6) agar konten lebih muat -->
+        <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-r from-blue-900 via-slate-800 to-slate-900 p-6 md:p-10 mb-6 text-white shadow-2xl shadow-blue-900/20 overflow-hidden group border border-white/10 card-print">
             
             <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 no-print"></div>
             <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 no-print"></div>
@@ -80,7 +102,8 @@
                         </span>
                         System Online
                     </div>
-                    <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-3">
+                    <!-- Judul responsif -->
+                    <h1 class="text-2xl md:text-5xl font-extrabold text-white tracking-tight mb-3">
                         Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">{{ Auth::user()->name ?? 'Administrator' }}</span> 
                     </h1>
                     <p class="text-blue-100/80 text-sm md:text-base max-w-xl leading-relaxed">
@@ -90,35 +113,53 @@
                 </div>
                 
                 {{-- FILTER CONTROLS --}}
-                <div class="flex flex-col gap-3 w-full md:w-auto min-w-[320px] filter-group no-print">
-                    <div class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-xl p-1 border border-white/10 mb-1">
-                        <button @click="changeDate(-1)" class="p-2 hover:bg-white/20 rounded-lg text-white transition" title="Sebelumnya">
+                <!-- PERBAIKAN 2: w-full di mobile, md:w-auto di desktop. Hapus min-w fix di mobile. -->
+                <div class="flex flex-col gap-3 w-full md:w-auto md:min-w-[320px] filter-group no-print">
+                    <div class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-xl p-1 border border-white/10 mb-1 relative">
+                        <!-- Loading indicator -->
+                        <div x-show="loadingTarget === 'date'" class="absolute inset-0 bg-slate-900/50 rounded-lg flex items-center justify-center z-10">
+                            <i class="ph-bold ph-spinner animate-spin text-white"></i>
+                        </div>
+
+                        <button @click="changeDate(-1)" :disabled="loading" class="p-2 hover:bg-white/20 rounded-lg text-white transition disabled:opacity-50" title="Sebelumnya">
                             <i class="ph-bold ph-caret-left"></i>
                         </button>
                         <div class="relative group/date flex-1 mx-2">
                              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <i class="ph-bold ph-calendar text-blue-300 group-hover/date:text-white transition-colors"></i>
                             </div>
-                            <input type="date" x-model="date" @change="updateFilter(period)" 
+                            <input type="date" x-model="date" @change="loading = true; loadingTarget = 'date'; updateFilter(period)" 
                                 class="w-full bg-transparent border-none text-white text-xs font-bold text-center focus:ring-0 cursor-pointer placeholder-blue-200">
                         </div>
-                        <button @click="changeDate(1)" class="p-2 hover:bg-white/20 rounded-lg text-white transition" title="Berikutnya">
+                        <button @click="changeDate(1)" :disabled="loading" class="p-2 hover:bg-white/20 rounded-lg text-white transition disabled:opacity-50" title="Berikutnya">
                             <i class="ph-bold ph-caret-right"></i>
                         </button>
                     </div>
 
-                    <div class="bg-slate-900/50 backdrop-blur-md p-1.5 rounded-xl flex border border-white/10 shadow-lg">
-                        <button @click="updateFilter('today')" 
+                    <!-- Tombol Periode -->
+                    <div class="bg-slate-900/50 backdrop-blur-md p-1.5 rounded-xl flex border border-white/10 shadow-lg overflow-x-auto">
+                        <button @click="updateFilter('today')" :disabled="loading"
                             :class="period === 'today' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-blue-200 hover:text-white hover:bg-white/5'" 
-                            class="flex-1 py-2.5 px-4 text-xs font-bold rounded-lg transition-all duration-300">Harian</button>
-                        <button @click="updateFilter('week')" 
+                            class="flex-1 py-2.5 px-3 md:px-4 text-[10px] md:text-xs font-bold rounded-lg transition-all duration-300 flex justify-center items-center gap-1 md:gap-2 whitespace-nowrap">
+                            <i x-show="loading && loadingTarget === 'today'" class="ph-bold ph-spinner animate-spin"></i>
+                            <span x-text="(loading && loadingTarget === 'today') ? '' : 'Harian'"></span>
+                        </button>
+
+                        <button @click="updateFilter('week')" :disabled="loading"
                             :class="period === 'week' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-blue-200 hover:text-white hover:bg-white/5'" 
-                            class="flex-1 py-2.5 px-4 text-xs font-bold rounded-lg transition-all duration-300">Mingguan</button>
-                        <button @click="updateFilter('month')" 
+                            class="flex-1 py-2.5 px-3 md:px-4 text-[10px] md:text-xs font-bold rounded-lg transition-all duration-300 flex justify-center items-center gap-1 md:gap-2 whitespace-nowrap">
+                            <i x-show="loading && loadingTarget === 'week'" class="ph-bold ph-spinner animate-spin"></i>
+                            <span x-text="(loading && loadingTarget === 'week') ? '' : 'Mingguan'"></span>
+                        </button>
+
+                        <button @click="updateFilter('month')" :disabled="loading"
                             :class="period === 'month' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-blue-200 hover:text-white hover:bg-white/5'" 
-                            class="flex-1 py-2.5 px-4 text-xs font-bold rounded-lg transition-all duration-300">Bulanan</button>
+                            class="flex-1 py-2.5 px-3 md:px-4 text-[10px] md:text-xs font-bold rounded-lg transition-all duration-300 flex justify-center items-center gap-1 md:gap-2 whitespace-nowrap">
+                            <i x-show="loading && loadingTarget === 'month'" class="ph-bold ph-spinner animate-spin"></i>
+                            <span x-text="(loading && loadingTarget === 'month') ? '' : 'Bulanan'"></span>
+                        </button>
                         
-                        <button @click="printDashboard()" class="ml-2 bg-white/10 text-white p-2.5 rounded-lg hover:bg-white/20 hover:scale-105 active:scale-95 transition-all shadow-sm border border-white/10" title="Cetak">
+                        <button @click="printDashboard()" class="ml-2 bg-white/10 text-white p-2.5 rounded-lg hover:bg-white/20 hover:scale-105 active:scale-95 transition-all shadow-sm border border-white/10 shrink-0" title="Cetak">
                             <i class="ph-bold ph-printer text-lg"></i>
                         </button>
                     </div>
@@ -128,28 +169,28 @@
 
         {{-- QUICK ACTIONS --}}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 no-print animate-enter quick-actions" style="animation-delay: 100ms">
-            <a href="{{ route('students.index') }}" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-blue-200">
+            <a href="{{ route('students.index') }}" @click.prevent="navigate('{{ route('students.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-student text-xl"></i>
                 </div>
                 <div class="text-sm font-bold text-slate-700 group-hover:text-blue-700">Data Siswa</div>
             </a>
             
-            <a href="{{ route('cbt.index') }}" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-purple-200">
+            <a href="{{ route('cbt.index') }}" @click.prevent="navigate('{{ route('cbt.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-purple-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-monitor-play text-xl"></i>
                 </div>
                 <div class="text-sm font-bold text-slate-700 group-hover:text-purple-700">Ujian CBT</div>
             </a>
 
-            <a href="{{ route('lms.assignments.index') }}" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-rose-200">
+            <a href="{{ route('lms.assignments.index') }}" @click.prevent="navigate('{{ route('lms.assignments.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-rose-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-pencil-simple text-xl"></i>
                 </div>
                 <div class="text-sm font-bold text-slate-700 group-hover:text-rose-700">Tugas & PR</div>
             </a>
 
-            <a href="{{ route('lms.grades.index') }}" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-emerald-200">
+            <a href="{{ route('lms.grades.index') }}" @click.prevent="navigate('{{ route('lms.grades.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-chart-bar text-xl"></i>
                 </div>
@@ -208,37 +249,39 @@
         {{-- GRAFIK & KOMPOSISI --}}
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
             {{-- Grafik Batang --}}
-            <div class="animate-enter xl:col-span-2 bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 card-print" style="animation-delay: 600ms">
+            <!-- PERBAIKAN 3: Padding responsif -->
+            <div class="animate-enter xl:col-span-2 bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 card-print" style="animation-delay: 600ms">
+                <!-- PERBAIKAN 4: Header flex-col di mobile agar legenda turun ke bawah -->
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <div>
                         <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                             <i class="ph-fill ph-chart-bar text-blue-600"></i> Analisis Tren Kehadiran
                         </h3>
-                        {{-- PERBAIKAN DI SINI: Menggunakan x-text dari Alpine.js --}}
                         <p class="text-xs text-slate-400 font-bold uppercase tracking-wide mt-1">
                             Statistik <span x-text="period === 'month' ? 'Bulanan' : 'Mingguan'"></span>
                         </p>
                     </div>
-                    <div class="flex gap-2 no-print">
+                    <!-- PERBAIKAN 5: Flex-wrap agar legenda tidak terpotong di layar sempit -->
+                    <div class="flex flex-wrap gap-2 no-print">
                         <div class="px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center gap-2 text-[10px] font-bold text-emerald-700 uppercase"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Hadir</div>
                         <div class="px-3 py-1 rounded-lg bg-amber-50 border border-amber-100 flex items-center gap-2 text-[10px] font-bold text-amber-700 uppercase"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Telat</div>
                         <div class="px-3 py-1 rounded-lg bg-rose-50 border border-rose-100 flex items-center gap-2 text-[10px] font-bold text-rose-700 uppercase"><span class="w-2 h-2 rounded-full bg-rose-500"></span> Absen</div>
                     </div>
                 </div>
-                <div class="relative h-72 w-full">
+                <div class="relative h-64 md:h-72 w-full">
                     <canvas id="weeklyChart"></canvas>
                 </div>
             </div>
 
             {{-- Donut Chart --}}
-            <div class="animate-enter bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col h-full card-print" style="animation-delay: 700ms">
+            <div class="animate-enter bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col h-full card-print" style="animation-delay: 700ms">
                 <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
                     <i class="ph-fill ph-chart-pie-slice text-purple-500"></i> Komposisi Hari Ini
                 </h3>
                 <div class="relative h-56 w-full flex items-center justify-center mb-6">
                     <canvas id="dailyDonutChart"></canvas>
                     <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <span class="text-4xl font-black text-slate-800 count-up" data-target="{{ $totalStudents ?? 0 }}">0</span>
+                        <span class="text-3xl md:text-4xl font-black text-slate-800 count-up" data-target="{{ $totalStudents ?? 0 }}">0</span>
                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Total Siswa</span>
                     </div>
                 </div>
