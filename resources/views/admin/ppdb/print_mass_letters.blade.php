@@ -221,8 +221,8 @@
             
             <div style="height: 70px;"></div>
             
-            <p style="font-weight: bold; text-decoration: underline;">TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.</p>
-            <p>NIP. 197xxxxxx...</p>
+            <p style="font-weight: bold; text-decoration: underline;">TANTAN SUTANDI NUGRAHA,S.Si,M.Pd.</p>
+            <p>NIP.1982........</p>
         </div>
 
         <div style="clear: both;"></div>
