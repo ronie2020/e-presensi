@@ -163,7 +163,7 @@
     <!-- FOOTER -->
     <footer class="bg-white border-t border-slate-200 py-10 mt-auto">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-slate-500 text-sm font-medium">&copy; {{ date('Y') }} SMP Negeri 3 Lakbok. All rights reserved.</p>
+            <p class="text-slate-500 text-sm font-medium">&copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Ri... All rights reserved.</p>
         </div>
     </footer>
 

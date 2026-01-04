@@ -206,14 +206,14 @@
                 <div>
                     <h4 class="text-white font-bold mb-6 text-lg">Kontak</h4>
                     <ul class="space-y-3 text-sm text-slate-400">
-                        <li class="flex items-center gap-3"><i class="ph-fill ph-phone text-blue-500"></i> (0265) 1234567</li>
+                        <li class="flex items-center gap-3"><i class="ph-fill ph-phone text-blue-500"></i> +62 85135961994</li>
                         <li class="flex items-center gap-3"><i class="ph-fill ph-envelope text-blue-500"></i> admin@smpn3lakbok.sch.id</li>
                     </ul>
                 </div>
             </div>
             <div class="text-center pt-8 border-t border-slate-800">
                 <p class="text-slate-500 text-sm">
-                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. All rights reserved.
+                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Ri... All rights reserved.
                 </p>
             </div>
         </div>
