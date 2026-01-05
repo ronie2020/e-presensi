@@ -59,7 +59,7 @@
                     
                     <div class="relative z-10 max-w-lg">
                         <h3 class="font-black text-slate-800 text-2xl mb-2 flex items-center gap-2">
-                            Halo, {{ Auth::user()->name }}! <span class="animate-wave origin-bottom-right inline-block">👋</span>
+                            Halo, {{ Auth::user()->name }}! <span class="animate-wave origin-bottom-right inline-block"></span>
                         </h3>
                         <p class="text-slate-500 leading-relaxed font-medium text-sm">
                             Sudah siap mengajar hari ini? Pastikan jurnal terisi dan absensi siswa tercatat dengan baik.

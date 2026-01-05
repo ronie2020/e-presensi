@@ -41,7 +41,7 @@
                     <div class="absolute inset-0 bg-slate-50/50 opacity-0 md:opacity-100 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px]"></div>
                     
                     <div class="relative z-10 max-w-lg mb-6 md:mb-0 text-center md:text-left">
-                        <h3 class="font-black text-slate-800 text-2xl mb-2">Halo, {{ Auth::user()->name }}! 🚀</h3>
+                        <h3 class="font-black text-slate-800 text-2xl mb-2">Halo, {{ Auth::user()->name }}! </h3>
                         <p class="text-slate-500 leading-relaxed font-medium text-sm">
                             Kelola ujian berbasis komputer dengan mudah. Pantau nilai siswa dan aktivasi token ujian di sini.
                         </p>
