@@ -10,7 +10,6 @@
             <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 <div class="absolute -top-24 -right-24 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-purple-500/30 transition-all duration-700"></div>
-                <div class="absolute bottom-0 right-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     <div class="max-w-2xl">
@@ -21,7 +20,7 @@
                             Atur Jadwal
                         </h1>
                         <p class="text-blue-100/80 text-sm md:text-base font-medium leading-relaxed max-w-lg">
-                            Kelola jadwal pelajaran (KBM) per kelas dan pengaturan jam masuk/pulang (bel sekolah).
+                            Kelola jadwal pelajaran (KBM) per kelas dengan format Jam Pelajaran (JP).
                         </p>
                     </div>
                     
@@ -145,12 +144,26 @@
 
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Mulai</label>
-                                        <input type="time" name="start_time" required value="{{ old('start_time') }}" class="w-full text-center py-3 rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 focus:ring-blue-500">
+                                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Mulai Jam Ke-</label>
+                                        <div class="relative">
+                                            <select name="start_time" required class="w-full text-center py-3 rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 focus:ring-blue-500 appearance-none cursor-pointer">
+                                                @for ($i = 1; $i <= 12; $i++)
+                                                    <option value="{{ $i }}" {{ old('start_time') == $i ? 'selected' : '' }}>Jam {{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                            <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                                        </div>
                                     </div>
                                     <div>
-                                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Selesai</label>
-                                        <input type="time" name="end_time" required value="{{ old('end_time') }}" class="w-full text-center py-3 rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 focus:ring-blue-500">
+                                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Selesai Jam Ke-</label>
+                                        <div class="relative">
+                                            <select name="end_time" required class="w-full text-center py-3 rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 focus:ring-blue-500 appearance-none cursor-pointer">
+                                                @for ($i = 1; $i <= 12; $i++)
+                                                    <option value="{{ $i }}" {{ old('end_time') == $i ? 'selected' : '' }}>Jam {{ $i }}</option>
+                                                @endfor
+                                            </select>
+                                            <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -195,7 +208,7 @@
                                 <table class="min-w-full text-left text-sm text-slate-600">
                                     <thead class="bg-slate-50 text-xs font-bold text-slate-400 uppercase tracking-wider sticky top-0 z-10">
                                         <tr>
-                                            <th class="px-6 py-5">Hari & Jam</th>
+                                            <th class="px-6 py-5">Hari & Jam Pelajaran</th>
                                             <th class="px-6 py-5">Kelas</th>
                                             <th class="px-6 py-5">Mata Pelajaran</th>
                                             <th class="px-6 py-5">Guru</th>
@@ -208,9 +221,17 @@
                                             <td class="px-6 py-5 whitespace-nowrap">
                                                 <div class="flex flex-col">
                                                     <span class="font-black text-slate-800 text-sm mb-1">{{ $item->day }}</span>
+                                                    {{-- TAMPILAN JAM YANG DIPERBAIKI --}}
+                                                    @php
+                                                        // Pembersihan format "00:00:01" -> 1
+                                                        $s_clean = str_contains($item->start_time, ':') ? \Carbon\Carbon::parse($item->start_time)->second : $item->start_time;
+                                                        $e_clean = str_contains($item->end_time, ':') ? \Carbon\Carbon::parse($item->end_time)->second : $item->end_time;
+                                                        if($s_clean == 0) $s_clean = intval($item->start_time);
+                                                        if($e_clean == 0) $e_clean = intval($item->end_time);
+                                                    @endphp
                                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-mono font-bold border border-blue-100 w-fit">
                                                         <i class="ph-bold ph-clock"></i>
-                                                        {{ \Carbon\Carbon::parse($item->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($item->end_time)->format('H:i') }}
+                                                        JP {{ $s_clean }} - {{ $e_clean }}
                                                     </span>
                                                 </div>
                                             </td>
@@ -231,18 +252,17 @@
                                                 </div>
                                             </td>
                                             <td class="px-6 py-5 whitespace-nowrap text-right">
-                                                {{-- FIX: Added shrink-0 and better alignment --}}
                                                 <div class="flex justify-end items-center">
                                                     <form action="{{ route('schedules.destroy', $item->id) }}" 
                                                           method="POST" 
                                                           id="delete-schedule-{{ $item->id }}"
-                                                          class="shrink-0 block"> {{-- Added shrink-0 --}}
+                                                          class="shrink-0 block">
                                                         @csrf @method('DELETE')
                                                         
                                                         <button type="button" 
                                                                 onclick="confirmDelete('delete-schedule-{{ $item->id }}', 'Hapus jadwal mapel {{ $item->subject->name }} di kelas {{ $item->schoolClass->name }}?')"
                                                                 class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-300 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm">
-                                                            <i class="ph-bold ph-trash text-lg leading-none"></i> {{-- Added leading-none --}}
+                                                            <i class="ph-bold ph-trash text-lg leading-none"></i>
                                                         </button>
                                                     </form>
                                                 </div>
@@ -269,7 +289,7 @@
                 </div>
             </div>
 
-            {{-- TAB 2: JAM SEKOLAH --}}
+            {{-- TAB 2: JAM SEKOLAH (BEL) --}}
             <div x-show="activeTab === 'jam'" x-cloak x-transition:enter="transition ease-out duration-300 transform opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                     
@@ -283,7 +303,7 @@
                             </div>
                             <div>
                                 <h3 class="text-lg font-black text-slate-800">Jam Sekolah Reguler</h3>
-                                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Setting Jam Masuk & Pulang</p>
+                                <p class="text-xs text-slate-500 font-bold uppercase tracking-wider">Setting Bel Masuk & Pulang</p>
                             </div>
                         </div>
 
@@ -406,24 +426,23 @@
                                 <div class="space-y-3 max-h-48 overflow-y-auto custom-scrollbar pr-2">
                                     @forelse($specialSchedules as $ss)
                                         <div class="flex items-center justify-between p-4 rounded-2xl border {{ $ss->is_holiday ? 'bg-rose-50 border-rose-100' : 'bg-blue-50 border-blue-100' }}">
-                                            <div class="overflow-hidden mr-3"> {{-- FIX: Added overflow-hidden to prevent text pushing --}}
+                                            <div class="overflow-hidden mr-3"> 
                                                 <p class="text-xs font-black {{ $ss->is_holiday ? 'text-rose-700' : 'text-blue-700' }}">
                                                     {{ \Carbon\Carbon::parse($ss->date)->format('d M Y') }}
                                                 </p>
                                                 <p class="text-[10px] font-bold text-slate-500 truncate max-w-[150px]">{{ $ss->description }}</p>
                                             </div>
                                             
-                                            {{-- FIX: Added shrink-0 and leading-none --}}
                                             <form action="{{ route('schedules.special.destroy', $ss->id) }}" 
                                                   method="POST"
                                                   id="delete-special-{{ $ss->id }}"
-                                                  class="shrink-0 block"> {{-- Added shrink-0 --}}
+                                                  class="shrink-0 block">
                                                 @csrf @method('DELETE')
                                                 
                                                 <button type="button"
                                                         onclick="confirmDelete('delete-special-{{ $ss->id }}', 'Hapus agenda {{ $ss->description }} pada tanggal {{ \Carbon\Carbon::parse($ss->date)->format('d M Y') }}?')"
                                                         class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/50 hover:bg-white text-slate-400 hover:text-rose-600 transition-all shadow-sm">
-                                                    <i class="ph-bold ph-trash text-lg leading-none"></i> {{-- Added leading-none --}}
+                                                    <i class="ph-bold ph-trash text-lg leading-none"></i>
                                                 </button>
                                             </form>
                                         </div>

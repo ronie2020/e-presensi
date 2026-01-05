@@ -15,7 +15,7 @@
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div class="text-center md:text-left">
                         <h1 class="text-3xl font-black tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3">
-                            <span class="text-4xl">👨‍🎓</span> Data Induk Siswa
+                            <span class="text-4xl"></span> Data Induk Siswa
                         </h1>
                         <p class="text-blue-200 text-sm font-medium leading-relaxed max-w-lg">
                             Kelola data siswa, registrasi peserta didik baru, dan cetak kartu identitas dalam satu panel terintegrasi.

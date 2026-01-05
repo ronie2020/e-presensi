@@ -16,48 +16,35 @@ class ScheduleController extends Controller
 {
     /**
      * Menampilkan halaman Manajemen Jadwal.
-     * Mengirimkan data: Jadwal Mapel, Daftar Kelas, Daftar Mapel, Daftar Guru, & Jam Bel.
      */
     public function index(Request $request)
     {
         // --- A. AMBIL DATA MASTER (UNTUK DROPDOWN) ---
-        
-        // 1. Ambil Data KELAS (Ini yang Anda tanyakan)
-        // Diurutkan berdasarkan nama agar rapi di dropdown
         $classes = SchoolClass::orderBy('name', 'asc')->get(); 
-
-        // 2. Ambil Data MATA PELAJARAN
         $subjects = Subject::orderBy('name', 'asc')->get();
         
-        // 3. Ambil Data GURU
-        // Filter user yang punya role 'Guru', 'Wali Kelas', atau 'Kepala Sekolah'
         $teachers = User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah'])
                     ->orderBy('name', 'asc')
                     ->get();
         
-        // Fallback: Jika belum ada user dengan role guru, ambil semua user (opsional)
         if($teachers->isEmpty()) {
             $teachers = User::all();
         }
 
-        // --- B. AMBIL DATA JADWAL PELAJARAN (UNTUK TABEL) ---
+        // --- B. AMBIL DATA JADWAL PELAJARAN ---
         $query = Schedule::with(['schoolClass', 'subject', 'teacher'])
                  ->orderByRaw("FIELD(day, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu')")
-                 ->orderBy('start_time');
+                 ->orderBy('start_time'); // Urutkan berdasarkan jam ke-
 
-        // Fitur Filter per Kelas (jika user memilih filter di halaman)
         if ($request->has('class_id') && $request->class_id != '') {
             $query->where('school_class_id', $request->class_id);
         }
         $schedules = $query->get();
 
-
-        // --- C. AMBIL DATA JAM BEL (FITUR LAMA) ---
+        // --- C. AMBIL DATA JAM BEL ---
         $regularSchedules = ScheduleRegular::all()->keyBy('day_type');
         $specialSchedules = ScheduleSpecial::orderBy('date', 'desc')->get();
 
-
-        // --- D. KIRIM SEMUA VARIABEL KE VIEW ---
         return view('admin.schedules.index', [
             'classes'   => $classes,   
             'subjects'  => $subjects,  
@@ -69,7 +56,7 @@ class ScheduleController extends Controller
     }
 
     /**
-     * Menyimpan Jadwal Pelajaran Baru.
+     * Menyimpan Jadwal Pelajaran Baru (DENGAN PERBAIKAN VALIDASI).
      */
     public function store(Request $request)
     {
@@ -79,25 +66,28 @@ class ScheduleController extends Controller
             'subject_id'      => 'required|exists:subjects,id',
             'teacher_id'      => 'required|exists:users,id',
             'day'             => 'required',
-            'start_time'      => 'required',
-            'end_time'        => 'required|after:start_time',
+            // PERBAIKAN: Gunakan integer dan gt (greater than) untuk angka jam pelajaran
+            'start_time'      => 'required|integer|min:1|max:15',
+            'end_time'        => 'required|integer|gt:start_time|max:15', 
+        ], [
+            'end_time.gt' => 'Jam selesai harus lebih besar dari jam mulai.', // Pesan error custom
         ]);
 
-        // Cek Tabrakan Jadwal (Guru tidak boleh mengajar di 2 tempat sekaligus)
+        // Cek Tabrakan Jadwal (Bentrok Guru)
+        // Logika disesuaikan untuk angka (Range overlapping)
         $clash = Schedule::where('teacher_id', $request->teacher_id)
                 ->where('day', $request->day)
                 ->where(function($q) use ($request) {
-                    $q->whereBetween('start_time', [$request->start_time, $request->end_time])
-                      ->orWhereBetween('end_time', [$request->start_time, $request->end_time])
-                      ->orWhere(function($sub) use ($request) {
-                          $sub->where('start_time', '<=', $request->start_time)
-                              ->where('end_time', '>=', $request->end_time);
-                      });
+                    // Cek jika range waktu yang baru beririsan dengan yang sudah ada
+                    $q->where(function($sub) use ($request) {
+                        $sub->where('start_time', '<=', $request->end_time)
+                            ->where('end_time', '>=', $request->start_time);
+                    });
                 })
                 ->exists();
 
         if ($clash) {
-            return back()->with('error', 'Gagal! Guru tersebut sudah memiliki jadwal mengajar di jam yang sama.');
+            return back()->with('error', 'Gagal! Guru tersebut sudah memiliki jadwal mengajar di jam pelajaran tersebut.');
         }
 
         // Simpan Data
@@ -121,6 +111,7 @@ class ScheduleController extends Controller
 
     public function storeRegular(Request $request)
     {
+        // Validasi Jam Bel tetap menggunakan format Waktu (H:i) karena ini jam dinding asli
         $request->validate([
             'day_type.*' => 'required|string|in:Biasa,Jumat',
             'start_in.*' => 'required', 

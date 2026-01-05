@@ -32,7 +32,7 @@
             {{-- HEADER DASHBOARD --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
                 
-                {{-- Kartu Hari Ini (Dark Blue Premium) --}}
+                {{-- Kartu Hari Ini --}}
                 <div class="bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 rounded-[2rem] p-8 text-white shadow-xl shadow-blue-900/30 relative overflow-hidden group border border-white/10">
                     <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                     <div class="absolute right-0 top-0 opacity-10 transform translate-x-8 -translate-y-8 group-hover:scale-110 transition-transform duration-500">
@@ -53,7 +53,7 @@
                     </div>
                 </div>
                 
-                {{-- Kartu Welcome (Light Clean) --}}
+                {{-- Kartu Welcome --}}
                 <div class="lg:col-span-2 bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex items-center justify-between relative overflow-hidden">
                     <div class="absolute inset-0 bg-slate-50/50 opacity-0 md:opacity-100 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px]"></div>
                     
@@ -62,7 +62,7 @@
                             Halo, {{ Auth::user()->name }}! <span class="animate-wave origin-bottom-right inline-block">👋</span>
                         </h3>
                         <p class="text-slate-500 leading-relaxed font-medium text-sm">
-                            Sudah siap mengajar hari ini? Pastikan jurnal terisi dan absensi siswa tercatat dengan baik. Semangat mencerdaskan bangsa!
+                            Sudah siap mengajar hari ini? Pastikan jurnal terisi dan absensi siswa tercatat dengan baik.
                         </p>
                     </div>
                     
@@ -80,9 +80,6 @@
                     <div class="w-1.5 h-6 bg-blue-600 rounded-full"></div>
                     Agenda Hari Ini
                 </h3>
-                <span class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
-                    {{ \Carbon\Carbon::now()->format('d M Y') }}
-                </span>
             </div>
 
             @if($schedules->count() > 0)
@@ -93,19 +90,34 @@
                                         ->whereDate('date', \Carbon\Carbon::today())
                                         ->first();
                             
-                            // Logika Status & Warna
+                            // --- LOGIKA PEMBERSIHAN FORMAT JAM ---
+                            // Jika formatnya "00:00:01" (karena tipe kolom TIME), kita ambil detiknya saja sebagai angka jam ke-
+                            // Jika formatnya sudah angka "1", gunakan langsung.
+                            $startJP = str_contains($schedule->start_time, ':') 
+                                        ? \Carbon\Carbon::parse($schedule->start_time)->second // Ambil detik (krn input 1 jadi 00:00:01)
+                                        : $schedule->start_time;
+                                        
+                            $endJP = str_contains($schedule->end_time, ':') 
+                                        ? \Carbon\Carbon::parse($schedule->end_time)->second 
+                                        : $schedule->end_time;
+
+                            // Fallback jika hasilnya 0 (berarti parsing gagal atau jam ke-0)
+                            if($startJP == 0) $startJP = intval($schedule->start_time);
+                            if($endJP == 0) $endJP = intval($schedule->end_time);
+
+                            // Logika Status
                             if (!$session) {
-                                $status = 'waiting'; // Belum Mulai
+                                $status = 'waiting'; 
                                 $borderClass = 'border-l-4 border-l-blue-500';
                                 $bgIcon = 'bg-blue-50 text-blue-600';
                                 $btnClass = 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/30';
                             } elseif ($session->status == 'open') {
-                                $status = 'ongoing'; // Sedang Jalan
+                                $status = 'ongoing';
                                 $borderClass = 'border-l-4 border-l-emerald-500 ring-2 ring-emerald-500/20';
                                 $bgIcon = 'bg-emerald-50 text-emerald-600';
                                 $btnClass = 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30';
                             } else {
-                                $status = 'done'; // Selesai
+                                $status = 'done';
                                 $borderClass = 'border-l-4 border-l-slate-300 bg-slate-50/50';
                                 $bgIcon = 'bg-slate-100 text-slate-500';
                             }
@@ -117,7 +129,11 @@
                             <div class="flex items-center gap-5 w-full md:w-auto z-10">
                                 <div class="flex flex-col items-center justify-center w-20 h-20 rounded-2xl {{ $bgIcon }} shrink-0 shadow-sm border border-white/50">
                                     <span class="text-[10px] font-bold uppercase tracking-wider opacity-60">Jam Ke</span>
-                                    <span class="text-3xl font-black leading-none">{{ $loop->iteration }}</span>
+                                    {{-- TAMPILKAN ANGKA BERSIH --}}
+                                    <span class="text-3xl font-black leading-none">{{ $startJP }}</span>
+                                    @if($startJP != $endJP)
+                                        <span class="text-xs font-bold -mt-1 opacity-60">- {{ $endJP }}</span>
+                                    @endif
                                 </div>
                                 <div>
                                     <h4 class="font-black text-slate-800 text-xl group-hover:text-blue-600 transition-colors">{{ $schedule->subject->name }}</h4>
@@ -125,8 +141,11 @@
                                         <span class="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
                                             <i class="ph-bold ph-users-three"></i> Kelas {{ $schedule->schoolClass->name }}
                                         </span>
+                                        
+                                        {{-- LABEL JAM --}}
                                         <span class="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                                            <i class="ph-bold ph-clock"></i> {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}
+                                            <i class="ph-bold ph-clock"></i> 
+                                            JP {{ $startJP }} - {{ $endJP }}
                                         </span>
                                     </div>
                                 </div>

@@ -50,7 +50,7 @@
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
                     <div class="text-center md:text-left">
                         <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2 flex items-center justify-center md:justify-start gap-2">
-                            Scan QR Aktifitas <span class="animate-pulse">📸</span>
+                            Scan QR Aktifitas <span class="animate-pulse"></span>
                         </h2>
                         <div class="flex flex-wrap justify-center md:justify-start gap-2 items-center text-blue-300 text-xs md:text-sm font-medium">
                             @if(isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false))
