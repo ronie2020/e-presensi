@@ -100,7 +100,7 @@
                 <!-- Subtitle -->
                 <p class="text-sm md:text-lg text-slate-300 font-medium leading-relaxed max-w-xl mx-auto min-h-[3rem] md:min-h-[3.5rem] transition-all duration-300 px-2">
                     <span x-show="mode === 'portal'" x-transition.opacity>
-                        Layanan terpadu untuk pengecekan data siswa, absensi, dan informasi sekolah lainnya.
+                        Cek data kehadiran, pelanggaran, nilai, dan informasi siswa lainnya secara publik.
                     </span>
                     <span x-show="mode === 'lms'" x-cloak x-transition.opacity>
                         Login untuk mengakses materi pelajaran, mengumpulkan tugas, dan berdiskusi dengan guru.
@@ -140,33 +140,58 @@
                         
                         
                         
-                        <div class="text-center py-8">
-                            <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-                                <i class="ph-fill ph-student text-4xl text-emerald-600"></i>
+                        <div class="text-center py-6">
+                            <div class="inline-block p-2 px-4 rounded-full bg-emerald-100 text-emerald-700 font-bold text-xs uppercase mb-4 animate-pulse">
+                                <i class="ph-fill ph-check-circle"></i> Anda Sedang Login
                             </div>
-                            
-                            <h3 class="text-2xl font-black text-slate-800 mb-1">Halo, <?php echo e(Auth::guard('student')->user()->name); ?>!</h3>
-                            <p class="text-slate-500 text-sm mb-8 font-medium">Akun kamu sedang aktif. Siap untuk belajar hari ini?</p>
+                            <h3 class="text-xl font-bold text-slate-800 mb-1">Halo, <?php echo e(Auth::guard('student')->user()->name); ?></h3>
+                            <p class="text-slate-400 text-sm mb-6">Silakan pilih layanan untuk melanjutkan:</p>
 
-                            <!-- Tombol Utama ke Student Hub -->
-                            <a href="<?php echo e(route('student.habits.dashboard')); ?>" class="group relative w-full block py-5 bg-slate-900 hover:bg-blue-600 text-white rounded-[1.5rem] font-black shadow-xl shadow-slate-900/20 transition-all hover:shadow-blue-600/30 overflow-hidden mb-3">
-                                <div class="relative z-10 flex items-center justify-center gap-3">
-                                    <span>Buka Dashboard Siswa</span>
-                                    <i class="ph-bold ph-arrow-right text-xl group-hover:translate-x-1 transition-transform"></i>
-                                </div>
+                            <!-- Tombol Dinamis Sesuai Mode -->
+                            <div x-show="mode === 'portal'" class="space-y-3">
                                 
-                                <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                            </a>
-
-                            <!-- Opsi Sekunder -->
-                            <div class="grid grid-cols-2 gap-3">
-                                <a href="<?php echo e(route('portal.show', Auth::guard('student')->id())); ?>" class="py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
-                                    <i class="ph-bold ph-user-circle text-lg"></i> Profil Publik
+                                <a href="<?php echo e(route('portal.show', Auth::guard('student')->id())); ?>" class="w-full block py-4 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2">
+                                    <i class="ph-bold ph-user-circle text-xl"></i> Buka Profil Saya
                                 </a>
+
+                                
+                                <a href="<?php echo e(route('student.schedule.index')); ?>" class="w-full block py-4 bg-white border-2 border-slate-100 hover:border-blue-200 text-slate-700 hover:text-blue-600 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                                    <i class="ph-bold ph-calendar-blank text-xl"></i> Lihat Jadwal Pelajaran
+                                </a>
+
+                                
+                                <a href="<?php echo e(route('student.liaison.index')); ?>" class="w-full block py-4 bg-white border-2 border-indigo-100 hover:border-indigo-300 text-indigo-700 hover:text-indigo-800 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                                    <i class="ph-bold ph-chat-circle-text text-xl"></i> Buku Penghubung & Chat
+                                </a>
+
+                                
+                                <a href="<?php echo e(route('student.complaints.index')); ?>" class="w-full block py-4 bg-white border-2 border-rose-100 hover:border-rose-300 text-rose-700 hover:text-rose-800 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                                    <i class="ph-bold ph-warning-circle text-xl"></i> Layanan Pengaduan
+                                </a>
+
+                                
+                                <a href="<?php echo e(route('student.habits.dashboard')); ?>" class="w-full block py-4 bg-white border-2 border-emerald-100 hover:border-emerald-300 text-emerald-700 hover:text-emerald-800 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                                    <i class="ph-bold ph-check-square-offset text-xl"></i> Jurnal Kebiasaan
+                                </a>
+                            </div>
+
+                            <div x-show="mode === 'lms'" x-cloak>
+                                <a href="<?php echo e(route('students.learning.index')); ?>" class="w-full block py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
+                                    <i class="ph-bold ph-books text-xl"></i> Masuk Ruang Belajar
+                                </a>
+                            </div>
+
+                            <div x-show="mode === 'cbt'" x-cloak>
+                                <a href="<?php echo e(route('student.exam.index')); ?>" class="w-full block py-4 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold shadow-lg shadow-rose-600/20 transition-all flex items-center justify-center gap-2">
+                                    <i class="ph-bold ph-desktop text-xl"></i> Masuk Ruang Ujian
+                                </a>
+                            </div>
+
+                            <div class="mt-4 pt-4 border-t border-slate-100">
                                 <form method="POST" action="<?php echo e(route('student.logout')); ?>">
                                     <?php echo csrf_field(); ?>
-                                    <button type="submit" class="w-full py-3 px-4 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition-colors">
-                                        <i class="ph-bold ph-sign-out text-lg"></i> Logout
+                                    <button type="submit" class="text-xs font-bold text-rose-500 hover:text-rose-700 hover:underline">
+                                        Bukan Anda? Keluar Akun
                                     </button>
                                 </form>
                             </div>
@@ -177,21 +202,23 @@
                         
                         
                         
-                        <!-- 1. FORM PORTAL (Search Data Publik) -->
+                        <!-- 1. FORM PORTAL (Search) -->
                         <form x-show="mode === 'portal'" @submit="isLoading = true" action="<?php echo e(route('portal.search')); ?>" method="POST" class="relative">
                             <?php echo csrf_field(); ?>
                             <div class="relative group">
                                 <div class="absolute inset-y-0 left-0 pl-4 md:pl-6 flex items-center pointer-events-none">
                                     <i class="ph-bold ph-identification-card text-xl md:text-2xl text-slate-400 group-focus-within:text-slate-700 transition-colors"></i>
                                 </div>
+                                
                                 <input type="text" name="student_id" class="block w-full pl-12 md:pl-16 pr-14 md:pr-32 py-4 md:py-5 bg-slate-50 text-slate-800 text-base md:text-lg font-bold rounded-2xl focus:ring-4 focus:ring-slate-200 focus:bg-white transition-all placeholder:text-slate-400 border-none outline-none" placeholder="Masukkan NISN Siswa" required autocomplete="off">
+                                
                                 <button type="submit" :disabled="isLoading" class="absolute right-2 top-2 bottom-2 bg-slate-800 hover:bg-slate-900 disabled:bg-slate-400 text-white w-11 md:w-auto px-0 md:px-8 rounded-xl font-bold transition-all shadow-lg shadow-slate-800/20 flex items-center justify-center gap-2 group/btn">
                                     <span x-show="!isLoading" class="hidden md:inline">Cari</span>
                                     <i x-show="!isLoading" class="ph-bold ph-arrow-right text-lg md:text-base group-hover/btn:translate-x-1 transition-transform"></i>
                                     <svg x-show="isLoading" x-cloak class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 </button>
                             </div>
-                            <p class="text-xs text-slate-400 mt-3 px-4 text-center font-medium">Masukkan NISN untuk melihat data kehadiran & prestasi siswa secara publik.</p>
+                            <p class="text-xs text-slate-400 mt-3 px-4 text-center font-medium">Fitur ini untuk Orang Tua mengecek data siswa tanpa perlu login.</p>
                         </form>
 
                         <!-- 2. FORM LOGIN LMS (Biru) -->
@@ -202,13 +229,15 @@
                                 <div class="absolute inset-y-0 left-0 pl-4 md:pl-6 flex items-center pointer-events-none">
                                     <i class="ph-bold ph-student text-xl md:text-2xl text-blue-400 group-focus-within:text-blue-600 transition-colors"></i>
                                 </div>
+                                
                                 <input type="text" name="student_id" class="block w-full pl-12 md:pl-16 pr-14 md:pr-40 py-4 md:py-5 bg-blue-50/50 text-slate-800 text-base md:text-lg font-bold rounded-2xl focus:ring-4 focus:ring-blue-100 focus:bg-white transition-all placeholder:text-blue-300 border-none outline-none" placeholder="NISN Siswa" required autocomplete="off">
+                                
                                 <button type="submit" class="absolute right-2 top-2 bottom-2 bg-blue-600 hover:bg-blue-700 text-white w-11 md:w-auto px-0 md:px-6 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 group/btn">
                                     <span class="hidden md:inline">Masuk Kelas</span>
                                     <i class="ph-bold ph-sign-in text-lg md:text-base group-hover/btn:translate-x-1 transition-transform"></i>
                                 </button>
                             </div>
-                            <p class="text-xs text-blue-400/80 mt-3 px-4 text-center font-medium">Gunakan NISN untuk masuk ke ruang belajar digital.</p>
+                            <p class="text-xs text-blue-400/80 mt-3 px-4 text-center font-medium">Masuk untuk mengakses materi pelajaran dan tugas.</p>
                         </form>
 
                         <!-- 3. FORM LOGIN CBT (Merah) -->
@@ -219,7 +248,9 @@
                                 <div class="absolute inset-y-0 left-0 pl-4 md:pl-6 flex items-center pointer-events-none">
                                     <i class="ph-bold ph-lock-key text-xl md:text-2xl text-rose-400 group-focus-within:text-rose-600 transition-colors"></i>
                                 </div>
+                                
                                 <input type="text" name="student_id" class="block w-full pl-12 md:pl-16 pr-14 md:pr-40 py-4 md:py-5 bg-rose-50/50 text-slate-800 text-base md:text-lg font-bold rounded-2xl focus:ring-4 focus:ring-rose-100 focus:bg-white transition-all placeholder:text-rose-300 border-none outline-none" placeholder="NISN Siswa" required autocomplete="off">
+                                
                                 <button type="submit" class="absolute right-2 top-2 bottom-2 bg-rose-600 hover:bg-rose-700 text-white w-11 md:w-auto px-0 md:px-6 rounded-xl font-bold transition-all shadow-lg shadow-rose-600/20 flex items-center justify-center gap-2 group/btn">
                                     <span class="hidden md:inline">Mulai Ujian</span>
                                     <i class="ph-bold ph-arrow-right text-lg md:text-base group-hover/btn:translate-x-1 transition-transform"></i>
@@ -249,4 +280,4 @@
     </div>
 </div>
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('layouts.public', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/students/portal/index.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.public', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH D:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/students/portal/index.blade.php ENDPATH**/ ?>

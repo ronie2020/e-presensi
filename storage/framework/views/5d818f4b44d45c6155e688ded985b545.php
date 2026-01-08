@@ -1,5 +1,14 @@
-<x-app-layout>
-    {{-- CUSTOM STYLES --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -27,7 +36,7 @@
         .print-header { display: none; }
     </style>
 
-    {{-- WRAPPER UTAMA --}}
+    
     <div x-data="{ 
             period: new URLSearchParams(window.location.search).get('period') || 'today',
             date: new URLSearchParams(window.location.search).get('date') || new Date().toISOString().split('T')[0],
@@ -58,14 +67,14 @@
             }
         }" class="relative space-y-6 md:space-y-8 min-h-screen pb-10 font-sans text-slate-800">
         
-        {{-- HEADER CETAK --}}
+        
         <div class="print-header">
             <h1 class="text-2xl font-bold uppercase tracking-wide">Laporan Monitoring Harian</h1>
             <p class="text-sm">SMK DIGITAL INDONESIA</p>
-            <p class="text-xs mt-2">Dicetak pada: {{ now()->format('d F Y H:i') }} oleh {{ Auth::user()->name }}</p>
+            <p class="text-xs mt-2">Dicetak pada: <?php echo e(now()->format('d F Y H:i')); ?> oleh <?php echo e(Auth::user()->name); ?></p>
         </div>
 
-        {{-- LOADING OVERLAY --}}
+        
         <div x-show="loading" 
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
@@ -85,7 +94,8 @@
             </div>
         </div>
 
-        {{-- HERO SECTION --}}
+        
+        <!-- PERBAIKAN 1: Padding dikurangi di mobile (p-6) agar konten lebih muat -->
         <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-r from-blue-900 via-slate-800 to-slate-900 p-6 md:p-10 mb-6 text-white shadow-2xl shadow-blue-900/20 overflow-hidden group border border-white/10 card-print">
             
             <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 no-print"></div>
@@ -101,8 +111,9 @@
                         </span>
                         System Online
                     </div>
+                    <!-- Judul responsif -->
                     <h1 class="text-2xl md:text-5xl font-extrabold text-white tracking-tight mb-3">
-                        Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">{{ Auth::user()->name ?? 'Administrator' }}</span> 
+                        Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white"><?php echo e(Auth::user()->name ?? 'Administrator'); ?></span> 
                     </h1>
                     <p class="text-blue-100/80 text-sm md:text-base max-w-xl leading-relaxed">
                         Berikut adalah ringkasan aktivitas akademik dan kehadiran siswa untuk periode 
@@ -110,9 +121,11 @@
                     </p>
                 </div>
                 
-                {{-- FILTER CONTROLS --}}
+                
+                <!-- PERBAIKAN 2: w-full di mobile, md:w-auto di desktop. Hapus min-w fix di mobile. -->
                 <div class="flex flex-col gap-3 w-full md:w-auto md:min-w-[320px] filter-group no-print">
                     <div class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-xl p-1 border border-white/10 mb-1 relative">
+                        <!-- Loading indicator -->
                         <div x-show="loadingTarget === 'date'" class="absolute inset-0 bg-slate-900/50 rounded-lg flex items-center justify-center z-10">
                             <i class="ph-bold ph-spinner animate-spin text-white"></i>
                         </div>
@@ -132,6 +145,7 @@
                         </button>
                     </div>
 
+                    <!-- Tombol Periode -->
                     <div class="bg-slate-900/50 backdrop-blur-md p-1.5 rounded-xl flex border border-white/10 shadow-lg overflow-x-auto">
                         <button @click="updateFilter('today')" :disabled="loading"
                             :class="period === 'today' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-blue-200 hover:text-white hover:bg-white/5'" 
@@ -162,30 +176,30 @@
             </div>
         </div>
 
-        {{-- QUICK ACTIONS --}}
+        
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 no-print animate-enter quick-actions" style="animation-delay: 100ms">
-            <a href="{{ route('students.index') }}" @click.prevent="navigate('{{ route('students.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer">
+            <a href="<?php echo e(route('students.index')); ?>" @click.prevent="navigate('<?php echo e(route('students.index')); ?>')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-student text-xl"></i>
                 </div>
                 <div class="text-sm font-bold text-slate-700 group-hover:text-blue-700">Data Siswa</div>
             </a>
             
-            <a href="{{ route('cbt.index') }}" @click.prevent="navigate('{{ route('cbt.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-purple-200 cursor-pointer">
+            <a href="<?php echo e(route('cbt.index')); ?>" @click.prevent="navigate('<?php echo e(route('cbt.index')); ?>')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-purple-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-monitor-play text-xl"></i>
                 </div>
                 <div class="text-sm font-bold text-slate-700 group-hover:text-purple-700">Ujian CBT</div>
             </a>
 
-            <a href="{{ route('lms.assignments.index') }}" @click.prevent="navigate('{{ route('lms.assignments.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-rose-200 cursor-pointer">
+            <a href="<?php echo e(route('lms.assignments.index')); ?>" @click.prevent="navigate('<?php echo e(route('lms.assignments.index')); ?>')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-rose-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-pencil-simple text-xl"></i>
                 </div>
                 <div class="text-sm font-bold text-slate-700 group-hover:text-rose-700">Tugas & PR</div>
             </a>
 
-            <a href="{{ route('lms.grades.index') }}" @click.prevent="navigate('{{ route('lms.grades.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer">
+            <a href="<?php echo e(route('lms.grades.index')); ?>" @click.prevent="navigate('<?php echo e(route('lms.grades.index')); ?>')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-chart-bar text-xl"></i>
                 </div>
@@ -193,10 +207,10 @@
             </a>
         </div>
 
-        {{-- KPI CARDS --}}
+        
         <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-5">
-            @foreach($cards ?? [] as $index => $card)
-            @php
+            <?php $__currentLoopData = $cards; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $card): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php
                 $titleLower = strtolower($card['title']);
                 $rawIcon = $card['icon'] ?? ''; 
                 if (str_contains($titleLower, 'hadir') && !str_contains($titleLower, 'belum')) { $iconClass = 'ph-check-circle'; $colorKey = 'emerald'; } 
@@ -217,34 +231,36 @@
                     'slate' => ['bg' => 'bg-slate-100', 'text' => 'text-slate-600', 'hover_bg' => 'group-hover:bg-slate-600', 'hover_border' => 'hover:border-slate-300'],
                     default => ['bg' => 'bg-blue-50', 'text' => 'text-blue-600', 'hover_bg' => 'group-hover:bg-blue-600', 'hover_border' => 'hover:border-blue-200'],
                 };
-            @endphp
+            ?>
 
-            <a href="{{ url('attendance') }}?status={{ $card['filter_status'] ?? '' }}&period={{ request('period', 'today') }}" 
-               class="animate-enter group bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] hover:shadow-xl hover:shadow-slate-200 {{ $theme['hover_border'] }} transition-all duration-300 hover:-translate-y-1 relative overflow-hidden flex flex-col justify-between h-full card-print"
-               style="animation-delay: {{ ($index + 1) * 100 }}ms">
-                <i class="ph-duotone {{ $iconClass }} absolute -right-4 -bottom-4 text-[5rem] opacity-[0.03] text-slate-900 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-500 no-print"></i>
+            <a href="<?php echo e(url('attendance')); ?>?status=<?php echo e($card['filter_status'] ?? ''); ?>&period=<?php echo e(request('period', 'today')); ?>" 
+               class="animate-enter group bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] hover:shadow-xl hover:shadow-slate-200 <?php echo e($theme['hover_border']); ?> transition-all duration-300 hover:-translate-y-1 relative overflow-hidden flex flex-col justify-between h-full card-print"
+               style="animation-delay: <?php echo e(($index + 1) * 100); ?>ms">
+                <i class="ph-duotone <?php echo e($iconClass); ?> absolute -right-4 -bottom-4 text-[5rem] opacity-[0.03] text-slate-900 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-500 no-print"></i>
                 <div class="flex justify-between items-start mb-4 relative z-10">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm transition-all duration-300 {{ $theme['bg'] }} {{ $theme['text'] }} {{ $theme['hover_bg'] }} group-hover:text-white group-hover:scale-110">
-                        <i class="ph-duotone {{ $iconClass }} text-2xl animate-wiggle"></i>
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm transition-all duration-300 <?php echo e($theme['bg']); ?> <?php echo e($theme['text']); ?> <?php echo e($theme['hover_bg']); ?> group-hover:text-white group-hover:scale-110">
+                        <i class="ph-duotone <?php echo e($iconClass); ?> text-2xl animate-wiggle"></i>
                     </div>
-                    @if(isset($card['percentage']))
-                    <span class="text-[10px] font-bold px-2 py-1 rounded-lg border {{ $card['percentage'] > 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100' }}">
-                        {{ $card['percentage'] > 0 ? '+' : '' }}{{ $card['percentage'] }}%
+                    <?php if(isset($card['percentage'])): ?>
+                    <span class="text-[10px] font-bold px-2 py-1 rounded-lg border <?php echo e($card['percentage'] > 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'); ?>">
+                        <?php echo e($card['percentage'] > 0 ? '+' : ''); ?><?php echo e($card['percentage']); ?>%
                     </span>
-                    @endif
+                    <?php endif; ?>
                 </div>
                 <div class="relative z-10 mt-auto">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 truncate {{ str_replace('text-', 'group-hover:text-', $theme['text']) }} transition-colors">{{ $card['title'] }}</p>
-                    <h3 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight count-up" data-target="{{ $card['value'] }}">0</h3>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 truncate <?php echo e(str_replace('text-', 'group-hover:text-', $theme['text'])); ?> transition-colors"><?php echo e($card['title']); ?></p>
+                    <h3 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight count-up" data-target="<?php echo e($card['value']); ?>">0</h3>
                 </div>
             </a>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
 
-        {{-- GRAFIK & KOMPOSISI --}}
+        
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {{-- Grafik Batang --}}
+            
+            <!-- PERBAIKAN 3: Padding responsif -->
             <div class="animate-enter xl:col-span-2 bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 card-print" style="animation-delay: 600ms">
+                <!-- PERBAIKAN 4: Header flex-col di mobile agar legenda turun ke bawah -->
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <div>
                         <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -254,6 +270,7 @@
                             Statistik <span x-text="period === 'month' ? 'Bulanan' : 'Mingguan'"></span>
                         </p>
                     </div>
+                    <!-- PERBAIKAN 5: Flex-wrap agar legenda tidak terpotong di layar sempit -->
                     <div class="flex flex-wrap gap-2 no-print">
                         <div class="px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center gap-2 text-[10px] font-bold text-emerald-700 uppercase"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Hadir</div>
                         <div class="px-3 py-1 rounded-lg bg-amber-50 border border-amber-100 flex items-center gap-2 text-[10px] font-bold text-amber-700 uppercase"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Telat</div>
@@ -265,7 +282,7 @@
                 </div>
             </div>
 
-            {{-- Donut Chart --}}
+            
             <div class="animate-enter bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col h-full card-print" style="animation-delay: 700ms">
                 <h3 class="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
                     <i class="ph-fill ph-chart-pie-slice text-purple-500"></i> Komposisi Hari Ini
@@ -273,22 +290,22 @@
                 <div class="relative h-56 w-full flex items-center justify-center mb-6">
                     <canvas id="dailyDonutChart"></canvas>
                     <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <span class="text-3xl md:text-4xl font-black text-slate-800 count-up" data-target="{{ $totalStudents ?? 0 }}">0</span>
+                        <span class="text-3xl md:text-4xl font-black text-slate-800 count-up" data-target="<?php echo e($totalStudents ?? 0); ?>">0</span>
                         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Total Siswa</span>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3 mt-auto">
-                    <div class="bg-emerald-50/50 p-3 rounded-xl border border-emerald-100"><span class="block text-[10px] font-bold text-emerald-600 uppercase mb-1">Hadir Tepat</span><span class="text-lg font-black text-slate-800">{{ $presentOnTimeCount ?? 0 }}</span></div>
-                    <div class="bg-amber-50/50 p-3 rounded-xl border border-amber-100"><span class="block text-[10px] font-bold text-amber-600 uppercase mb-1">Terlambat</span><span class="text-lg font-black text-slate-800">{{ $lateCount ?? 0 }}</span></div>
-                    <div class="bg-rose-50/50 p-3 rounded-xl border border-rose-100"><span class="block text-[10px] font-bold text-rose-600 uppercase mb-1">Alfa/Belum</span><span class="text-lg font-black text-slate-800">{{ $absentCount ?? 0 }}</span></div>
-                     <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100"><span class="block text-[10px] font-bold text-blue-600 uppercase mb-1">Izin/Sakit</span><span class="text-lg font-black text-slate-800">{{ $sickPermitCount ?? 0 }}</span></div>
+                    <div class="bg-emerald-50/50 p-3 rounded-xl border border-emerald-100"><span class="block text-[10px] font-bold text-emerald-600 uppercase mb-1">Hadir Tepat</span><span class="text-lg font-black text-slate-800"><?php echo e($presentOnTimeCount ?? 0); ?></span></div>
+                    <div class="bg-amber-50/50 p-3 rounded-xl border border-amber-100"><span class="block text-[10px] font-bold text-amber-600 uppercase mb-1">Terlambat</span><span class="text-lg font-black text-slate-800"><?php echo e($lateCount ?? 0); ?></span></div>
+                    <div class="bg-rose-50/50 p-3 rounded-xl border border-rose-100"><span class="block text-[10px] font-bold text-rose-600 uppercase mb-1">Alfa/Belum</span><span class="text-lg font-black text-slate-800"><?php echo e($absentCount ?? 0); ?></span></div>
+                     <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100"><span class="block text-[10px] font-bold text-blue-600 uppercase mb-1">Izin/Sakit</span><span class="text-lg font-black text-slate-800"><?php echo e($sickPermitCount ?? 0); ?></span></div>
                 </div>
             </div>
         </div>
 
-        {{-- TABLES SECTION --}}
+        
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 page-break-inside-avoid">
-            {{-- Activity Log --}}
+            
             <div class="animate-enter bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col h-full card-print" style="animation-delay: 800ms" x-data="{ tab: 'activity' }">
                 <div class="flex items-center justify-between mb-6 no-print">
                     <div class="flex gap-6 border-b border-slate-100 w-full">
@@ -298,19 +315,15 @@
                 </div>
 
                 <div x-show="tab === 'activity'" class="flex-1 overflow-y-auto max-h-[400px] custom-scrollbar pr-2">
-                    @if(isset($recentActivities) && count($recentActivities) > 0)
+                    <?php if(isset($recentActivities) && count($recentActivities) > 0): ?>
                         <div class="relative pl-6 border-l-2 border-slate-100 space-y-6 py-2 ml-2">
-                            @foreach($recentActivities as $log)
-                                @php
+                            <?php $__currentLoopData = $recentActivities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $log): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                     $type = $log->type;
                                     $statusText = $log->status;
                                     $subText = 'Absensi Sekolah';
                                     $theme = ['bg_icon' => 'bg-emerald-50', 'border_icon' => 'border-emerald-100', 'text_icon' => 'text-emerald-600', 'dot' => 'bg-emerald-400', 'bg_badge' => 'bg-emerald-100', 'text_badge' => 'text-emerald-700'];
                                     $icon = 'ph-check-circle';
-                                    
-                                    // FIX 2: Gunakan Null Safe Operator (?->) agar tidak crash jika siswa terhapus
-                                    $studentName = $log->student?->name ?? 'Siswa Tidak Ditemukan';
-                                    $className = $log->student?->schoolClass?->name ?? '-';
 
                                     if ($type === 'Keagamaan') {
                                         $icon = 'ph-moon-stars'; $statusText = $log->activity; $subText = 'Ibadah';
@@ -326,61 +339,61 @@
                                             $icon = 'ph-person-simple-walk'; $statusText = 'Pulang'; $subText = 'Selesai KBM';
                                             $theme = ['bg_icon' => 'bg-blue-50', 'border_icon' => 'border-blue-100', 'text_icon' => 'text-blue-600', 'dot' => 'bg-blue-400', 'bg_badge' => 'bg-blue-100', 'text_badge' => 'text-blue-700'];
                                         } else {
-                                            $subText = $className;
+                                            $subText = $log->student->schoolClass->name ?? '-';
                                         }
                                     }
-                                @endphp
+                                ?>
                             <div class="relative group">
-                                <div class="absolute -left-[31px] top-1.5 h-4 w-4 rounded-full border-[3px] border-white ring-1 ring-slate-200 {{ $theme['dot'] }}"></div>
+                                <div class="absolute -left-[31px] top-1.5 h-4 w-4 rounded-full border-[3px] border-white ring-1 ring-slate-200 <?php echo e($theme['dot']); ?>"></div>
                                 <div class="flex items-start justify-between gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors -mt-2 -ml-2">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-xl {{ $theme['bg_icon'] }} border {{ $theme['border_icon'] }} flex items-center justify-center {{ $theme['text_icon'] }} font-bold text-xs shrink-0">
-                                            <i class="ph-bold {{ $icon }} text-lg"></i>
+                                        <div class="w-10 h-10 rounded-xl <?php echo e($theme['bg_icon']); ?> border <?php echo e($theme['border_icon']); ?> flex items-center justify-center <?php echo e($theme['text_icon']); ?> font-bold text-xs shrink-0">
+                                            <i class="ph-bold <?php echo e($icon); ?> text-lg"></i>
                                         </div>
                                         <div>
-                                            <p class="text-sm font-bold text-slate-800 line-clamp-1 group-hover:text-blue-700 transition-colors">{{ $studentName }}</p>
-                                            <p class="text-[10px] text-slate-500 font-bold px-2 py-0.5 rounded-md inline-block mt-1 border border-slate-100 bg-white">{{ $subText }}</p>
+                                            <p class="text-sm font-bold text-slate-800 line-clamp-1 group-hover:text-blue-700 transition-colors"><?php echo e($log->student->name ?? 'Siswa'); ?></p>
+                                            <p class="text-[10px] text-slate-500 font-bold px-2 py-0.5 rounded-md inline-block mt-1 border border-slate-100 bg-white"><?php echo e($subText); ?></p>
                                         </div>
                                     </div>
                                     <div class="text-right shrink-0">
-                                        <p class="text-xs font-bold font-mono text-slate-600 mb-1">{{ \Carbon\Carbon::parse($log->created_at)->format('H:i') }}</p>
-                                        <span class="text-[10px] font-bold px-2 py-1 rounded-lg {{ $theme['bg_badge'] }} {{ $theme['text_badge'] }}">{{ $statusText }}</span>
+                                        <p class="text-xs font-bold font-mono text-slate-600 mb-1"><?php echo e(\Carbon\Carbon::parse($log->created_at)->format('H:i')); ?></p>
+                                        <span class="text-[10px] font-bold px-2 py-1 rounded-lg <?php echo e($theme['bg_badge']); ?> <?php echo e($theme['text_badge']); ?>"><?php echo e($statusText); ?></span>
                                     </div>
                                 </div>
                             </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
-                    @else
+                    <?php else: ?>
                         <div class="flex flex-col items-center justify-center h-40 text-center text-slate-400">
                             <i class="ph-duotone ph-coffee text-4xl mb-3 opacity-30"></i>
                             <p class="text-xs font-bold">Belum ada aktivitas hari ini.</p>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div> 
 
                 <div x-show="tab === 'late_recap'" style="display: none;" class="flex-1 overflow-y-auto max-h-[400px] custom-scrollbar">
-                    @if(isset($topLateStudents) && count($topLateStudents) > 0)
+                    <?php if(isset($topLateStudents) && count($topLateStudents) > 0): ?>
                         <div class="space-y-3">
-                            @foreach($topLateStudents as $index => $student)
+                            <?php $__currentLoopData = $topLateStudents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="flex items-center justify-between p-3 rounded-2xl border border-slate-50 hover:bg-red-50/30 transition-colors">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 font-bold text-xs flex items-center justify-center border border-slate-200">#{{ $index + 1 }}</div>
+                                    <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 font-bold text-xs flex items-center justify-center border border-slate-200">#<?php echo e($index + 1); ?></div>
                                     <div>
-                                        <div class="text-xs font-bold text-slate-800 line-clamp-1">{{ $student->student?->name ?? 'Siswa Terhapus' }}</div>
-                                        <div class="text-[10px] text-slate-400">{{ $student->student?->schoolClass?->name ?? '-' }}</div>
+                                        <div class="text-xs font-bold text-slate-800 line-clamp-1"><?php echo e($student->student->name ?? 'Siswa'); ?></div>
+                                        <div class="text-[10px] text-slate-400"><?php echo e($student->student->schoolClass->name ?? '-'); ?></div>
                                     </div>
                                 </div>
-                                <span class="text-xs font-black text-red-600 bg-red-50 px-3 py-1 rounded-xl border border-red-100">{{ $student->total_late }}x</span>
+                                <span class="text-xs font-black text-red-600 bg-red-50 px-3 py-1 rounded-xl border border-red-100"><?php echo e($student->total_late); ?>x</span>
                             </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
-                    @else
+                    <?php else: ?>
                         <div class="text-center py-10 text-slate-400 text-xs font-bold">Tidak ada siswa terlambat signifikan.</div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
 
-            {{-- Class Rank Table --}}
+            
             <div class="animate-enter bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 h-full card-print" style="animation-delay: 900ms">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -388,49 +401,45 @@
                     </h3>
                     <span class="text-[10px] bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-1 rounded-lg font-bold uppercase tracking-wide">Terajin</span>
                 </div>
-                @if(isset($classRanks) && count($classRanks) > 0)
+                <?php if(isset($classRanks) && count($classRanks) > 0): ?>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <tbody class="divide-y divide-slate-50">
-                            @foreach($classRanks as $index => $rank)
+                            <?php $__currentLoopData = $classRanks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $rank): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr class="group hover:bg-slate-50 transition-colors">
                                 <td class="py-4 pl-1 w-10">
-                                    @if($index == 0) <i class="ph-fill ph-medal text-yellow-400 text-2xl drop-shadow-sm"></i>
-                                    @elseif($index == 1) <i class="ph-fill ph-medal text-slate-300 text-xl"></i>
-                                    @elseif($index == 2) <i class="ph-fill ph-medal text-amber-600 text-xl"></i>
-                                    @else <span class="font-bold text-slate-300 ml-1.5">#{{ $index + 1 }}</span> @endif
+                                    <?php if($index == 0): ?> <i class="ph-fill ph-medal text-yellow-400 text-2xl drop-shadow-sm"></i>
+                                    <?php elseif($index == 1): ?> <i class="ph-fill ph-medal text-slate-300 text-xl"></i>
+                                    <?php elseif($index == 2): ?> <i class="ph-fill ph-medal text-amber-600 text-xl"></i>
+                                    <?php else: ?> <span class="font-bold text-slate-300 ml-1.5">#<?php echo e($index + 1); ?></span> <?php endif; ?>
                                 </td>
                                 <td class="py-4">
-                                    <div class="font-bold text-slate-700 mb-1">{{ $rank->class_name }}</div>
+                                    <div class="font-bold text-slate-700 mb-1"><?php echo e($rank->class_name); ?></div>
                                     <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden max-w-[150px]">
-                                        {{-- 
-                                            NOTE: Pembagi 40 di bawah ini adalah estimasi. 
-                                            Idealnya diganti dengan variabel total siswa per kelas ($rank->total_students) jika tersedia. 
-                                        --}}
-                                        @php $percent = min(100, ($rank->present_count / 40) * 100); @endphp
-                                        <div class="h-1.5 rounded-full {{ $index == 0 ? 'bg-yellow-400' : 'bg-emerald-500' }}" style="width: {{ $percent }}%"></div>
+                                        <?php $percent = min(100, ($rank->present_count / 40) * 100); ?>
+                                        <div class="h-1.5 rounded-full <?php echo e($index == 0 ? 'bg-yellow-400' : 'bg-emerald-500'); ?>" style="width: <?php echo e($percent); ?>%"></div>
                                     </div>
                                 </td>
                                 <td class="py-4 text-right pr-2">
-                                    <div class="font-black text-slate-800">{{ number_format($percent, 0) }}%</div>
-                                    <div class="text-[10px] text-slate-400 font-bold whitespace-nowrap">{{ $rank->present_count }} Hadir</div>
+                                    <div class="font-black text-slate-800"><?php echo e(number_format($percent, 0)); ?>%</div>
+                                    <div class="text-[10px] text-slate-400 font-bold whitespace-nowrap"><?php echo e($rank->present_count); ?> Hadir</div>
                                 </td>
                             </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
                 </div>
-                @else
+                <?php else: ?>
                  <div class="flex flex-col items-center justify-center h-40 text-center text-slate-400"><p class="text-xs font-bold">Belum ada data peringkat.</p></div>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
     </div>
 
-    {{-- SCRIPT CHART.JS --}}
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    {{-- SCRIPT INITIALIZATION --}}
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Animasi Angka
@@ -450,10 +459,10 @@
             Chart.defaults.color = '#94a3b8';
 
             // Data
-            const rawPresent = @json($weeklyPresentData ?? []);
-            const rawLate = @json($weeklyLateData ?? []);
-            const rawAbsent = @json($weeklyAbsentData ?? []);
-            const labels = @json($chartLabels ?? []);
+            const rawPresent = <?php echo json_encode($weeklyPresentData ?? [], 15, 512) ?>;
+            const rawLate = <?php echo json_encode($weeklyLateData ?? [], 15, 512) ?>;
+            const rawAbsent = <?php echo json_encode($weeklyAbsentData ?? [], 15, 512) ?>;
+            const labels = <?php echo json_encode($chartLabels ?? [], 15, 512) ?>;
             
             // Bar Chart
             const ctxBar = document.getElementById('weeklyChart');
@@ -504,7 +513,7 @@
                     data: {
                         labels: ['Hadir', 'Telat', 'Absen', 'Izin'],
                         datasets: [{ 
-                            data: [{{ $presentOnTimeCount ?? 0 }}, {{ $lateCount ?? 0 }}, {{ $absentCount ?? 0 }}, {{ $sickPermitCount ?? 0 }}], 
+                            data: [<?php echo e($presentOnTimeCount ?? 0); ?>, <?php echo e($lateCount ?? 0); ?>, <?php echo e($absentCount ?? 0); ?>, <?php echo e($sickPermitCount ?? 0); ?>], 
                             backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#3b82f6'], 
                             borderWidth: 0 
                         }]
@@ -517,4 +526,13 @@
             }
         });
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH D:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/dashboard.blade.php ENDPATH**/ ?>

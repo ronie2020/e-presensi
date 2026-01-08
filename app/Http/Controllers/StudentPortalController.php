@@ -7,21 +7,21 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 
-// --- IMPORT MODELS YANG BENAR ---
+// --- IMPORT MODELS ---
 use App\Models\Student;
 use App\Models\SchoolClass;
-use App\Models\AttendanceSiswa; // Pastikan nama model attendance Anda benar (misal: Attendance)
+use App\Models\AttendanceSiswa; 
 use App\Models\LmsAssignment;
 use App\Models\LmsSubmission;
 use App\Models\Complaint;       
-use App\Models\LiaisonBook;     // <--- [FIX] Gunakan LiaisonBook, bukan LiaisonMessage
-use App\Models\StudentHabit;    // <--- [BARU] Tambahkan ini untuk fitur 7 Kebiasaan
+use App\Models\LiaisonBook;     
+use App\Models\StudentHabit;    
 
 // Model Opsional 
 use App\Models\LibraryLoan;      
 use App\Models\DisciplineRecord; 
 use App\Models\AcademicRecord;   
-use App\Models\TeachingJournal; // Pastikan model ini ada jika ingin fitur KBM jalan
+use App\Models\TeachingJournal; 
 
 class StudentPortalController extends Controller
 {
@@ -68,31 +68,29 @@ class StudentPortalController extends Controller
              return redirect()->route('portal.index')->with('error', 'Akses ditolak.');
         }
 
-        $student = Student::with('schoolClass')->findOrFail($id);
+        // Set Locale Indonesia
+        Carbon::setLocale('id');
 
-        // ------------------------------------------------------------------
-        // 1. DATA PENGHUBUNG (PERBAIKAN UTAMA)
-        // ------------------------------------------------------------------
+        $student = Student::with(['schoolClass', 'alumniProfile'])->findOrFail($id);
+
+        // --- [LOGIKA VIEW DIPINDAHKAN KE SINI] ---
+        $isAlumni = $student->status === 'graduated';
+
+        // 1. DATA PENGHUBUNG
         $liaison_messages = collect([]);
-        // [FIX] Cek class LiaisonBook, bukan LiaisonMessage
         if (class_exists(LiaisonBook::class)) { 
             try {
                 $liaison_messages = LiaisonBook::with('teacher')
                     ->where('student_id', $student->id)
                     ->latest()
                     ->paginate(5);
-            } catch (\Exception $e) {
-                // Log error jika perlu
-            }
+            } catch (\Exception $e) {}
         }
 
-        // ------------------------------------------------------------------
         // 2. DATA KEHADIRAN (ATTENDANCE)
-        // ------------------------------------------------------------------
         $hadir = 0; $sakit = 0; $izin = 0; $alpa = 0;
         $attendance_history = collect([]);
 
-        // Cek nama model Attendance yang Anda pakai (AttendanceSiswa atau Attendance)
         $attendanceModel = class_exists(AttendanceSiswa::class) ? AttendanceSiswa::class : (class_exists(\App\Models\Attendance::class) ? \App\Models\Attendance::class : null);
 
         if ($attendanceModel) {
@@ -103,7 +101,6 @@ class StudentPortalController extends Controller
             $izin  = (clone $attendanceQuery)->where('status', 'Izin')->count();
             $alpa  = (clone $attendanceQuery)->where('status', 'Alpa')->count();
             
-            // Cek nama kolom tanggal (attendance_date atau created_at)
             $dateCol = \Schema::hasColumn((new $attendanceModel)->getTable(), 'attendance_date') ? 'attendance_date' : 'created_at';
             $attendance_history = (clone $attendanceQuery)->latest($dateCol)->take(5)->get();
         }
@@ -112,14 +109,15 @@ class StudentPortalController extends Controller
             'hadir' => $hadir, 'sakit' => $sakit, 'izin' => $izin, 'alpa' => $alpa
         ];
 
-        // ------------------------------------------------------------------
+        // [BARU] Hitung Persentase Kehadiran
+        $total_hari = $hadir + $sakit + $izin + $alpa;
+        $attendancePercentage = $total_hari > 0 ? round(($hadir / $total_hari) * 100) : 0;
+
         // 3. DATA LMS (TUGAS & KUIS)
-        // ------------------------------------------------------------------
         $lms_assignments_grouped = [];
         $lms_grades = [];
         
         if ($student->school_class_id && class_exists(LmsAssignment::class)) {
-            // Perbaikan: gunakan school_class_id atau class_id sesuai struktur DB
             $colClassId = \Schema::hasColumn('students', 'school_class_id') ? 'school_class_id' : 'class_id';
             
             $assignments = LmsAssignment::with('subject')
@@ -139,9 +137,7 @@ class StudentPortalController extends Controller
             }
         }
 
-        // ------------------------------------------------------------------
         // 4. DATA DISIPLIN & PRESTASI
-        // ------------------------------------------------------------------
         $violations = collect([]);
         $achievements = collect([]);
         $total_violation_points = 0;
@@ -149,7 +145,6 @@ class StudentPortalController extends Controller
 
         if (class_exists(DisciplineRecord::class)) {
             try {
-                // Gunakan eager loading disciplineType
                 $baseQuery = DisciplineRecord::with('disciplineType')->where('student_id', $id);
 
                 $violations = (clone $baseQuery)
@@ -166,9 +161,7 @@ class StudentPortalController extends Controller
             } catch (QueryException $e) { }
         }
 
-        // ------------------------------------------------------------------
         // 5. PERPUSTAKAAN
-        // ------------------------------------------------------------------
         $library_visits = 0; 
         $library_history = collect([]);
         
@@ -183,9 +176,7 @@ class StudentPortalController extends Controller
             } catch (\Exception $e) {}
         }
 
-        // ------------------------------------------------------------------
         // 6. AKADEMIK (NILAI RAPOR)
-        // ------------------------------------------------------------------
         $academic_record = null;
         $chartData = ['labels' => [], 'scores' => []];
 
@@ -205,9 +196,7 @@ class StudentPortalController extends Controller
             } catch (\Exception $e) {}
         }
 
-        // ------------------------------------------------------------------
         // 7. JURNAL KBM & KEAGAMAAN
-        // ------------------------------------------------------------------
         $teaching_journals = [];
         $sholat_dhuha = 0;
         $sholat_dhuhur = 0;
@@ -218,9 +207,7 @@ class StudentPortalController extends Controller
                                  })->latest()->take(5)->get();
         }
 
-        // ------------------------------------------------------------------
         // 8. DATA PENGADUAN
-        // ------------------------------------------------------------------
         $complaints = collect([]);
         if (class_exists(Complaint::class)) {
             try {
@@ -228,9 +215,7 @@ class StudentPortalController extends Controller
             } catch (\Exception $e) {}
         }
 
-        // ------------------------------------------------------------------
-        // 9. [BARU] CEK JURNAL 7 KEBIASAAN HARI INI
-        // ------------------------------------------------------------------
+        // 9. CEK JURNAL 7 KEBIASAAN HARI INI
         $todayEntry = null;
         if (class_exists(StudentHabit::class)) {
             $todayEntry = StudentHabit::where('student_id', $id)
@@ -238,10 +223,31 @@ class StudentPortalController extends Controller
                             ->first();
         }
 
-        // ------------------------------------------------------------------
-        // RETURN VIEW
-        // ------------------------------------------------------------------
-        
+        // --- [BARU] DEFINISI TABS MENU ---
+        $tabs = [
+            'ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan'],
+        ];
+
+        if ($isAlumni) {
+            $tabs['prestasi'] = ['icon' => 'trophy', 'label' => 'Riwayat Prestasi'];
+            $tabs['perpustakaan'] = ['icon' => 'books', 'label' => 'Riwayat Pustaka'];
+        } else {
+            $tabs = array_merge($tabs, [
+                'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan'],
+                'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
+                'pengaduan' => ['icon' => 'megaphone', 'label' => 'Pengaduan'],
+                'jadwal' => ['icon' => 'calendar-blank', 'label' => 'Jadwal'], 
+                'lms' => ['icon' => 'clipboard-text', 'label' => 'Tugas & Kuis'],
+                'kbm' => ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'],
+                'akademik' => ['icon' => 'exam', 'label' => 'Nilai Rapor'],
+                'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Kehadiran'],
+                'disiplin' => ['icon' => 'warning-circle', 'label' => 'Disiplin'],
+                'prestasi' => ['icon' => 'trophy', 'label' => 'Prestasi'],
+                'perpustakaan' => ['icon' => 'books', 'label' => 'Pustaka'],
+            ]);
+        }
+
+        // 10. RETURN VIEW
         $viewName = 'portal.show';
         if (view()->exists('students.portal.show')) {
             $viewName = 'students.portal.show';
@@ -251,24 +257,19 @@ class StudentPortalController extends Controller
         
         return view($viewName, compact(
             'student', 
-            // Penghubung (FIXED)
+            'isAlumni', // Dikirim dari controller
+            'tabs', // Dikirim dari controller
+            'attendancePercentage', // Dikirim dari controller
             'liaison_messages', 
-            // Kehadiran
             'hadir', 'sakit', 'izin', 'alpa', 'attendance_history', 'attendanceChart',
-            // LMS
             'lms_assignments_grouped', 'lms_grades',
-            // Disiplin
             'violations', 'total_violation_points', 
             'achievements', 'total_merit_points',
-            // Perpustakaan
             'library_visits', 'library_history',
-            // Akademik
             'academic_record', 'chartData',
-            // Lainnya
             'teaching_journals',
             'sholat_dhuha', 'sholat_dhuhur',
             'complaints', 
-            // 7 Kebiasaan (ADDED)
             'todayEntry'
         ));
     }
