@@ -113,7 +113,7 @@ return [
                 'icon' => 'ph-warning-circle'
             ],
             [
-                'name' => 'Data Siswa Aktif', // Saya ubah sedikit namanya agar jelas
+                'name' => 'Data Siswa Aktif', 
                 'route' => 'students.index',
                 'icon' => 'ph-student'
             ],
@@ -123,12 +123,11 @@ return [
                 'active_check' => 'achievements.*',
                 'icon' => 'ph-trophy'
             ],
-            // --- MENU BARU ALUMNI ---
             [
                 'name' => 'Data Alumni',
-                'route' => 'admin.alumni.index', // Pastikan membuat route ini nanti
+                'route' => 'admin.alumni.index', 
                 'active_check' => 'admin.alumni.*',
-                'icon' => 'ph-users-three', // Icon berbeda
+                'icon' => 'ph-users-three', 
             ],
         ],
         'Ekstrakurikuler' => [
@@ -141,6 +140,27 @@ return [
                 'name' => 'Peserta Ekskul',
                 'route' => 'extracurriculars.members',
                 'icon' => 'ph-users-three'
+            ],
+        ],
+        'Pusat Layanan Siswa' => [
+            [
+                'name' => 'Buku Penghubung',
+                'route' => 'liaison.index', 
+                'active_check' => 'liaison.*',
+                'icon' => 'ph-book-open-user', 
+            ],
+            [
+                'name' => 'Kotak Pengaduan',
+                'route' => 'complaints.index', 
+                'active_check' => 'complaints.*',
+                'icon' => 'ph-mailbox', 
+            ],
+            // [BARU] MENU JURNAL KEBIASAAN
+            [
+                'name' => 'Monitoring Kebiasaan',
+                'route' => 'teacher.habits.index',
+                'active_check' => 'teacher.habits.*',
+                'icon' => 'ph-check-square-offset', 
             ],
         ],
         'Persuratan & Dinas' => [

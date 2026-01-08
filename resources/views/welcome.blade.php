@@ -306,6 +306,15 @@
                     <p class="text-slate-500 text-sm leading-relaxed">Cek kehadiran, nilai akademik, dan poin kedisiplinan.</p>
                 </a>
 
+                <!-- LAYANAN PENGADUAN SISWA (BARU) -->
+                <a href="{{ route('student.complaints.index') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-rose-500/10 border border-slate-100 hover:border-rose-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="120">
+                    <div class="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 mb-6 group-hover:bg-rose-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
+                        <i class="ph-duotone ph-megaphone text-3xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-rose-600 transition-colors">Layanan Pengaduan</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">Laporkan masalah, bullying, atau kehilangan secara aman dan rahasia.</p>
+                </a>
+
                 <!-- E-LEARNING / LMS -->
                 <a href="{{ route('student.login') }}" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-teal-500/10 border border-slate-100 hover:border-teal-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="150">
                     <div class="w-16 h-16 bg-teal-50 rounded-2xl flex items-center justify-center text-teal-600 mb-6 group-hover:bg-teal-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">

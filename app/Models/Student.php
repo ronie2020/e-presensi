@@ -179,4 +179,13 @@ class Student extends Authenticatable
         // Pastikan Model Achievement ada di App\Models\Achievement
         return $this->hasMany(Achievement::class, 'student_id');
     }
+
+     /**
+     * Relasi ke Chat Liaison (Pesan Ortu)
+     * [FIX: Ditambahkan agar controller bisa memanggil 'liaisonChats']
+     */
+    public function liaisonChats(): HasMany
+    {
+        return $this->hasMany(LiaisonChat::class, 'student_id');
+    }
 }

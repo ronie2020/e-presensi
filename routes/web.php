@@ -49,8 +49,8 @@ use App\Http\Controllers\SebController;
 use App\Http\Controllers\StudentPortalController;
 use App\Http\Controllers\StudentAuthController;
 use App\Http\Controllers\StudentExamController;
-// [BARU] Import Controller Jadwal Siswa
-use App\Http\Controllers\StudentScheduleController; 
+use App\Http\Controllers\StudentScheduleController;
+use App\Http\Controllers\StudentHabitController; // [BARU]
 
 // Perpustakaan
 use App\Http\Controllers\BookController;
@@ -64,10 +64,15 @@ use App\Http\Controllers\LetterIncomingController;
 use App\Http\Controllers\SptController;
 use App\Http\Controllers\SppdController;
 
-// [PENTING] Import Middleware CheckSebMode
+// CheckSebMode
 use App\Http\Middleware\CheckSebMode;
 
 use App\Http\Controllers\AdminAlumniController;
+
+// Buku Penghubung, Pengaduan & Kebiasaan Guru
+use App\Http\Controllers\LiaisonBookController;
+use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\TeacherHabitController; // [BARU]
 
 /*
 |--------------------------------------------------------------------------
@@ -110,6 +115,7 @@ Route::post('/kiosk/process', [KioskController::class, 'processKioskScan'])->nam
 // Portal Informasi Siswa (Publik/Orang Tua)
 Route::get('/portal', [StudentPortalController::class, 'index'])->name('portal.index');
 Route::post('/portal/search', [StudentPortalController::class, 'search'])->name('portal.search');
+// [PERHATIAN] Route wildcard ini menangkap semua URL /portal/{sesuatu}
 Route::get('/portal/{student_id}', [StudentPortalController::class, 'show'])->name('portal.show');
 Route::get('/portal/student/{id}/card', [StudentPortalController::class, 'printCard'])->name('portal.card');
 
@@ -139,11 +145,41 @@ Route::middleware('guest:student')->group(function() {
 Route::post('/student/logout', [StudentAuthController::class, 'logout'])->name('student.logout');
 
 // =========================================================================
-//  [BARU] AREA SISWA GENERAL (Tanpa SEB Restriction)
+//  AREA SISWA GENERAL (Tanpa SEB Restriction)
 // =========================================================================
 Route::middleware(['auth:student'])->group(function () {
-    // Route Jadwal Pelajaran Siswa
-    Route::get('/portal/jadwal', [StudentScheduleController::class, 'index'])->name('student.schedule.index');
+    
+    // --- 1. ROUTE BUKU PENGHUBUNG (SISI SISWA) ---
+    Route::get('/student/penghubung', [LiaisonBookController::class, 'indexStudent'])
+        ->name('student.liaison.index');
+    
+    // --- 2. ROUTE PENGADUAN / LAPOR (SISI SISWA) ---
+    Route::prefix('student/pengaduan')->name('student.complaints.')->group(function() {
+        Route::get('/', [ComplaintController::class, 'history'])->name('index'); 
+        Route::get('/buat', [ComplaintController::class, 'create'])->name('create'); 
+        Route::post('/', [ComplaintController::class, 'store'])->name('store'); 
+    });
+
+    // --- 3. Route Jadwal Pelajaran Siswa ---
+    Route::get('/student/jadwal', [StudentScheduleController::class, 'index'])->name('student.schedule.index');
+    
+    // API Chat Siswa
+    Route::get('/student/api/chat/messages', [LiaisonBookController::class, 'getStudentChatMessages'])->name('student.liaison.chat.messages');
+    Route::post('/student/api/chat/send', [LiaisonBookController::class, 'sendStudentChatMessage'])->name('student.liaison.chat.send');
+
+    // --- 4. JURNAL KEBIASAAN BAIK (7 HABITS) ---
+    // Update Struktur Route agar lebih rapi
+    Route::prefix('student/kebiasaan')->name('student.habits.')->group(function() {
+        
+        // A. DASHBOARD UTAMA (Route Baru)
+        Route::get('/dashboard', [StudentHabitController::class, 'dashboard'])->name('dashboard');
+
+        // B. FORM PENGISIAN JURNAL (Route Lama)
+        // Saya ubah URL-nya sedikit agar tidak bentrok, tapi name-nya tetap 'index' 
+        // agar kode lain tidak perlu diubah banyak.
+        Route::get('/isi-jurnal', [StudentHabitController::class, 'index'])->name('index');
+        Route::post('/simpan', [StudentHabitController::class, 'store'])->name('store');
+    });
 });
 
 // =========================================================================
@@ -231,11 +267,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('classes', SchoolClassController::class);
     
     // --- MANAJEMEN USER (GURU & STAFF) ---
-    // -------------------------------------
     Route::get('users/export', [UserController::class, 'export'])->name('users.export');
     Route::post('users/import', [UserController::class, 'import'])->name('users.import');
     Route::resource('users', UserController::class);
-    // -------------------------------------
 
     Route::resource('subjects', SubjectController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::get('/achievements/export', [AchievementController::class, 'export'])->name('achievements.export');
@@ -308,17 +342,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/circulation/borrow', [LibraryCirculationController::class, 'store'])->name('circulation.store');
         Route::post('/circulation/return', [LibraryCirculationController::class, 'returnBook'])->name('circulation.return');
      
-        // ==========================================
-        //  ALAT BANTU & CETAK
-        // ==========================================
+        // ALAT BANTU & CETAK
         Route::controller(LibraryToolController::class)->prefix('tools')->name('tools.')->group(function () {
-            // Halaman Utama Menu Tools
             Route::get('/', 'index')->name('index');             
-            // Cetak Kartu Anggota
             Route::get('/print-card', 'printMemberCard')->name('print-card');            
-            // Cetak Label Barcode Buku
             Route::get('/print-label', 'printBookLabel')->name('print-book-label');            
-            // Download Laporan PDF
             Route::get('/report', 'generateReport')->name('report');
         });    
     });
@@ -335,19 +363,15 @@ Route::middleware('auth')->group(function () {
         
         Route::post('/process-alumni', [GraduationController::class, 'processAlumni'])->name('process_alumni');
     });    
-    // =========================================================================
-    //  ROUTE ADMIN ALUMNI
-    // =========================================================================
-
+    
+    // Route Admin Alumni
     Route::prefix('admin/alumni')->name('admin.alumni.')->group(function() {
-        // 1. Route Khusus (Taruh paling atas)
-        Route::get('/testimonials', [AdminAlumniController::class, 'testimonials'])->name('testimonials'); // <--- FITUR BARU
+        Route::get('/testimonials', [AdminAlumniController::class, 'testimonials'])->name('testimonials');
         Route::get('/export/pdf', [AdminAlumniController::class, 'exportPdf'])->name('export_pdf');
         Route::get('/import', [AdminAlumniController::class, 'import'])->name('import');
         Route::post('/import', [AdminAlumniController::class, 'processImport'])->name('import.process');
         Route::get('/template', [AdminAlumniController::class, 'downloadTemplate'])->name('template');
 
-        // 2. Route Resource/Standar
         Route::get('/', [AdminAlumniController::class, 'index'])->name('index'); 
         Route::get('/{id}/edit', [AdminAlumniController::class, 'edit'])->name('edit');
         Route::put('/{id}', [AdminAlumniController::class, 'update'])->name('update');
@@ -402,35 +426,25 @@ Route::middleware('auth')->group(function () {
     Route::post('/reports/bulk-alpha', [ReportController::class, 'bulkAlpha'])->name('reports.bulkAlpha');
 
 
-   // =========================================================================
-    //  ROUTE ADMIN PPDB
-    // =========================================================================
+   // Route Admin PPDB
     Route::prefix('admin/ppdb')->name('admin.ppdb.')->group(function () {
         Route::get('/', [AdminPpdbController::class, 'index'])->name('index');
-        
-        // --- Route untuk Simpan Jadwal Pengumuman ---
         Route::post('/set-schedule', [AdminPpdbController::class, 'setSchedule'])->name('set_schedule');
-        
-        // Route Bulk Promote (Pindah Massal)
         Route::post('/bulk-promote', [AdminPpdbController::class, 'bulkPromote'])->name('bulk_promote');
-
         Route::post('/{id}/promote', [AdminPpdbController::class, 'promoteToStudent'])->name('promote');     
         Route::get('/{id}/show', [AdminPpdbController::class, 'show'])->name('show');
         Route::patch('/{id}/status', [AdminPpdbController::class, 'updateStatus'])->name('update_status');
         Route::delete('/{id}', [AdminPpdbController::class, 'destroy'])->name('destroy');
         Route::get('/{id}/print', [AdminPpdbController::class, 'print'])->name('print');
-        
         Route::get('/selection', [AdminPpdbController::class, 'index'])->name('selection'); 
         Route::get('/reports', [AdminPpdbController::class, 'reports'])->name('reports');
-
-        // Export & Cetak
         Route::get('/reports/export-excel', [AdminPpdbController::class, 'exportExcel'])->name('export.excel');
         Route::get('/reports/print-recap', [AdminPpdbController::class, 'printRecap'])->name('print.recap');
         Route::get('/reports/print-mass-letters', [AdminPpdbController::class, 'printMassLetters'])->name('print.mass_letters');
     });
 
 
-    // ===> PERSURATAN & DINAS <===
+    // Persuratan
     Route::prefix('letters')->name('letters.')->group(function () {
         Route::resource('incoming', LetterIncomingController::class);
         Route::get('spt/{id}/print', [SptController::class, 'print'])->name('spt.print');
@@ -439,6 +453,36 @@ Route::middleware('auth')->group(function () {
 
     Route::get('sppd/{id}/print', [SppdController::class, 'print'])->name('sppd.print');
     Route::resource('sppd', SppdController::class);
+
+
+    // =========================================================================
+    //  MANAJEMEN BUKU PENGHUBUNG & PENGADUAN (GURU/ADMIN)
+    // =========================================================================
+    Route::prefix('communication')->group(function() {
+        
+        // 1. Buku Penghubung
+        Route::resource('liaison', LiaisonBookController::class);
+        
+        // API untuk mengambil siswa per kelas (Dipakai di Form Create Liaison)
+        Route::get('/api/students-by-class/{classId}', [LiaisonBookController::class, 'getStudentsByClass'])
+            ->name('liaison.get_students');
+            
+        // 2. Pengaduan Siswa
+        Route::resource('complaints', ComplaintController::class);
+        // Route khusus untuk menandai pengaduan selesai
+        Route::post('/complaints/{id}/resolve', [ComplaintController::class, 'markAsResolved'])
+            ->name('complaints.resolve');
+
+        // API CHAT
+        Route::get('/api/chat/contacts', [LiaisonBookController::class, 'getChatContacts'])->name('liaison.chat.contacts');
+        Route::get('/api/chat/messages/{studentId}', [LiaisonBookController::class, 'getChatMessages'])->name('liaison.chat.messages');
+        Route::post('/api/chat/send', [LiaisonBookController::class, 'sendChatMessage'])->name('liaison.chat.send');
+    });
+
+    // MONITORING 7 KEBIASAAN (GURU)
+    Route::get('/teacher/habits', [TeacherHabitController::class, 'index'])->name('teacher.habits.index');
+    Route::get('/teacher/habits/detail/{id}', [TeacherHabitController::class, 'show'])->name('teacher.habits.show');
+    Route::post('/teacher/habits/feedback/{id}', [TeacherHabitController::class, 'feedback'])->name('teacher.habits.feedback');
 
 });
 

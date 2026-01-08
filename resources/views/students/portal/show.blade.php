@@ -127,19 +127,17 @@
                         ];
 
                         if ($isAlumni) {
-                            // Tab Khusus Alumni
                             $tabs['prestasi'] = ['icon' => 'trophy', 'label' => 'Riwayat Prestasi'];
                             $tabs['perpustakaan'] = ['icon' => 'books', 'label' => 'Riwayat Pustaka'];
                         } else {
-                            // Tab Siswa Aktif
-                            // [BARU] Tambahkan Tab Jadwal di sini
-                            $tabs['jadwal'] = ['icon' => 'calendar-blank', 'label' => 'Jadwal Pelajaran']; 
-                            
+                            $tabs['kebiasaan'] = ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan'];
+                            $tabs['penghubung'] = ['icon' => 'notebook', 'label' => 'Buku Penghubung'];
+                            $tabs['pengaduan'] = ['icon' => 'megaphone', 'label' => 'Pengaduan'];
+                            $tabs['jadwal'] = ['icon' => 'calendar-blank', 'label' => 'Jadwal']; 
                             $tabs['lms'] = ['icon' => 'clipboard-text', 'label' => 'Tugas & Kuis'];
                             $tabs['kbm'] = ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'];
                             $tabs['akademik'] = ['icon' => 'exam', 'label' => 'Nilai Rapor'];
                             $tabs['kehadiran'] = ['icon' => 'calendar-check', 'label' => 'Kehadiran'];
-                            $tabs['keagamaan'] = ['icon' => 'book-open-text', 'label' => 'Keagamaan'];
                             $tabs['disiplin'] = ['icon' => 'warning-circle', 'label' => 'Disiplin'];
                             $tabs['prestasi'] = ['icon' => 'trophy', 'label' => 'Prestasi'];
                             $tabs['perpustakaan'] = ['icon' => 'books', 'label' => 'Pustaka'];
@@ -166,11 +164,8 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 @if($isAlumni)
-                    {{-- [KONTEN ALUMNI - TIDAK BERUBAH] --}}
                     <div class="md:col-span-3 bg-amber-50 border border-amber-200 rounded-3xl p-6 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
-                        {{-- Hiasan background --}}
                         <div class="absolute top-0 right-0 w-32 h-32 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -mr-16 -mt-16"></div>
-
                         <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-4xl shrink-0 z-10 shadow-inner">
                             <i class="ph-duotone ph-graduation-cap"></i>
                         </div>
@@ -188,23 +183,16 @@
                                             <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Saat ini:</span>
                                             <span class="font-bold text-amber-600">{{ $student->alumniProfile->activity_status }}</span>
                                         </div>
-                                        <a href="{{ route('alumni.tracer') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold shadow-lg shadow-amber-600/20 transition-all hover:-translate-y-0.5">
-                                            <i class="ph-bold ph-pencil-simple"></i> Update Data
-                                        </a>
                                     @else
-                                        <div class="flex flex-col md:flex-row items-center gap-3">
-                                            <span class="text-xs font-bold text-amber-700/60 hidden md:block">Anda belum mengisi data kelulusan</span>
-                                            <a href="{{ route('alumni.tracer') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold shadow-xl shadow-amber-600/30 transition-all animate-bounce hover:animate-none">
-                                                <i class="ph-bold ph-clipboard-text"></i> Isi Tracer Study
-                                            </a>
-                                        </div>
+                                        <a href="{{ route('alumni.tracer') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold shadow-xl shadow-amber-600/30 transition-all animate-bounce hover:animate-none">
+                                            <i class="ph-bold ph-clipboard-text"></i> Isi Tracer Study
+                                        </a>
                                     @endif
                                 </div>
                             </div>
                         </div>
                     </div>
                 @else
-                    <!-- Card Kehadiran (HANYA SISWA AKTIF) -->
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
                         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i class="ph-fill ph-chart-pie-slice text-9xl text-blue-500"></i></div>
                         <div class="relative z-10">
@@ -224,7 +212,7 @@
                     </div>
                 @endif
                 
-                <!-- Card Poin (SEMUA BISA LIHAT HISTORIS) -->
+                <!-- Card Poin -->
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-lg transition-all duration-300">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i class="ph-fill ph-star text-9xl text-yellow-500"></i></div>
                     <div class="relative z-10">
@@ -258,46 +246,373 @@
         </div>
 
         @if(!$isAlumni)
-        {{-- ================================================================= --}}
-        {{-- [BARU] TAB JADWAL PELAJARAN                                       --}}
-        {{-- Mengambil data dari relasi $student->schoolClass->schedules       --}}
-        {{-- ================================================================= --}}
+
+        {{-- TAB 7 KEBIASAAN (TRANSFORMED TO DASHBOARD) --}}
+        <div x-show="activeTab === 'kebiasaan'" x-cloak x-transition:enter="transition ease-out duration-300"
+             x-data="{
+                habitsChecked: {
+                    h1: {{ isset($todayEntry) && $todayEntry->check_1 ? 'true' : 'false' }},
+                    h2: {{ isset($todayEntry) && $todayEntry->check_2 ? 'true' : 'false' }},
+                    h3: {{ isset($todayEntry) && $todayEntry->check_3 ? 'true' : 'false' }},
+                    h4: {{ isset($todayEntry) && $todayEntry->check_4 ? 'true' : 'false' }},
+                    h5: {{ isset($todayEntry) && $todayEntry->check_5 ? 'true' : 'false' }},
+                    h6: {{ isset($todayEntry) && $todayEntry->check_6 ? 'true' : 'false' }},
+                    h7: {{ isset($todayEntry) && $todayEntry->check_7 ? 'true' : 'false' }}
+                },
+                get totalDone() {
+                    return Object.values(this.habitsChecked).filter(v => v === true).length;
+                },
+                get progress() {
+                    return Math.round((this.totalDone / 7) * 100);
+                }
+             }">
+            <div class="space-y-6">
+                
+                <!-- 1. DASHBOARD SUMMARY: Visual Progress -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <!-- Progress Card -->
+                    <div class="md:col-span-2 bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-[80px] -mr-32 -mt-32"></div>
+                        <div class="relative z-10">
+                            <h2 class="text-2xl font-black tracking-tight mb-1">Misi Karakter Hari Ini</h2>
+                            <p class="text-slate-400 text-sm mb-6">"Karaktermu dibentuk oleh apa yang kamu lakukan hari ini."</p>
+                            
+                            <div class="flex items-center gap-6">
+                                <div class="relative w-24 h-24 shrink-0">
+                                    <svg class="w-full h-full transform -rotate-90">
+                                        <circle cx="48" cy="48" r="40" stroke="currentColor" stroke-width="8" fill="transparent" class="text-slate-800"></circle>
+                                        <circle cx="48" cy="48" r="40" stroke="currentColor" stroke-width="8" fill="transparent" 
+                                                class="text-emerald-500 transition-all duration-1000 ease-out"
+                                                :stroke-dasharray="251.2"
+                                                :stroke-dashoffset="251.2 - (251.2 * progress / 100)"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span class="text-xl font-black text-white" x-text="progress + '%'"></span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Status Misi</p>
+                                    <p class="text-lg font-black" x-text="totalDone === 7 ? 'Sempurna! ✨' : (totalDone >= 4 ? 'Hampir Selesai!' : 'Ayo Mulai Misi!')"></p>
+                                    <p class="text-sm text-slate-500 mt-1"><span x-text="totalDone"></span> dari 7 kebiasaan tercatat.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Poin Merit Summary -->
+                    <div class="bg-white rounded-[2.5rem] p-6 border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center">
+                        <div class="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center text-3xl mb-3 shadow-inner">
+                            <i class="ph-fill ph-shield-check"></i>
+                        </div>
+                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Poin Merit</h4>
+                        <span class="text-4xl font-black text-slate-800">+{{ $total_merit_points ?? 0 }}</span>
+                    </div>
+
+                    <!-- Documentation Summary -->
+                    <div class="bg-white rounded-[2.5rem] p-2 border border-slate-100 shadow-sm relative overflow-hidden group">
+                        @if(isset($todayEntry) && $todayEntry->habit_photo)
+                            <img src="{{ asset('storage/' . $todayEntry->habit_photo) }}" class="w-full h-full object-cover rounded-[1.8rem] group-hover:scale-110 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span class="text-[10px] font-bold text-white uppercase tracking-wider">Dokumentasi Hari Ini</span>
+                            </div>
+                        @else
+                            <div class="w-full h-full flex flex-col items-center justify-center bg-slate-50 rounded-[1.8rem] border-2 border-dashed border-slate-200">
+                                <i class="ph-duotone ph-camera text-4xl text-slate-300"></i>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase mt-2">Belum Ada Bukti</span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- 2. BENTO GRID: Checklist Habits -->
+                <form action="{{ route('student.habits.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    @csrf
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" x-data="{ openDetail: null }">
+                        
+                        <!-- 1. BANGUN PAGI -->
+                        <label :class="habitsChecked.h1 ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-100'"
+                               class="relative flex flex-col items-center justify-center p-6 rounded-[2.2rem] border-2 cursor-pointer transition-all hover:shadow-md group">
+                            <input type="checkbox" name="check_1" x-model="habitsChecked.h1" class="peer hidden" {{ isset($todayEntry) && $todayEntry->check_1 ? 'disabled' : '' }}>
+                            <div class="w-14 h-14 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center text-3xl mb-3 transition-transform group-hover:rotate-6">
+                                <i class="ph-duotone ph-sun-horizon"></i>
+                            </div>
+                            <span class="text-xs font-black text-slate-700 text-center leading-tight">1. Bangun Pagi & Ibadah</span>
+                            <div class="mt-2" x-show="habitsChecked.h1" x-collapse>
+                                <input type="time" name="habit_1_time" value="{{ $todayEntry->habit_1_time ?? '' }}" 
+                                       class="text-[10px] bg-white/50 border-none rounded-lg p-1 w-20 text-center focus:ring-orange-500" 
+                                       placeholder="Jam" {{ isset($todayEntry) ? 'readonly' : '' }}>
+                            </div>
+                            <div x-show="habitsChecked.h1" class="absolute top-3 right-3 text-orange-500"><i class="ph-fill ph-check-circle text-xl"></i></div>
+                        </label>
+
+                        <!-- 2. MANDI & RAPI -->
+                        <label :class="habitsChecked.h2 ? 'bg-cyan-50 border-cyan-200' : 'bg-white border-slate-100'"
+                               class="relative flex flex-col items-center justify-center p-6 rounded-[2.2rem] border-2 cursor-pointer transition-all hover:shadow-md group">
+                            <input type="checkbox" name="check_2" x-model="habitsChecked.h2" class="peer hidden" {{ isset($todayEntry) && $todayEntry->check_2 ? 'disabled' : '' }}>
+                            <div class="w-14 h-14 rounded-2xl bg-cyan-100 text-cyan-600 flex items-center justify-center text-3xl mb-3 transition-transform group-hover:rotate-6">
+                                <i class="ph-duotone ph-drop"></i>
+                            </div>
+                            <span class="text-xs font-black text-slate-700 text-center leading-tight">2. Mandi & Rapi</span>
+                            <div x-show="habitsChecked.h2" class="absolute top-3 right-3 text-cyan-500"><i class="ph-fill ph-check-circle text-xl"></i></div>
+                        </label>
+
+                        <!-- 3. OLAHRAGA -->
+                        <label :class="habitsChecked.h3 ? 'bg-rose-50 border-rose-200' : 'bg-white border-slate-100'"
+                               class="relative flex flex-col items-center justify-center p-6 rounded-[2.2rem] border-2 cursor-pointer transition-all hover:shadow-md group">
+                            <input type="checkbox" name="check_3" x-model="habitsChecked.h3" class="peer hidden" {{ isset($todayEntry) && $todayEntry->check_3 ? 'disabled' : '' }}>
+                            <div class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-3xl mb-3 transition-transform group-hover:rotate-6">
+                                <i class="ph-duotone ph-sneaker-move"></i>
+                            </div>
+                            <span class="text-xs font-black text-slate-700 text-center leading-tight">3. Olahraga</span>
+                            <div class="mt-2 w-full" x-show="habitsChecked.h3" x-collapse>
+                                <input type="text" name="habit_3_activity" value="{{ $todayEntry->habit_3_activity ?? '' }}" 
+                                       class="text-[10px] bg-white/50 border-none rounded-lg p-2 w-full text-center focus:ring-rose-500" 
+                                       placeholder="Jenis (Cth: Jogging)" {{ isset($todayEntry) ? 'readonly' : '' }}>
+                            </div>
+                            <div x-show="habitsChecked.h3" class="absolute top-3 right-3 text-rose-500"><i class="ph-fill ph-check-circle text-xl"></i></div>
+                        </label>
+
+                        <!-- 4. BELAJAR -->
+                        <label :class="habitsChecked.h4 ? 'bg-indigo-50 border-indigo-200' : 'bg-white border-slate-100'"
+                               class="relative flex flex-col items-center justify-center p-6 rounded-[2.2rem] border-2 cursor-pointer transition-all hover:shadow-md group">
+                            <input type="checkbox" name="check_4" x-model="habitsChecked.h4" class="peer hidden" {{ isset($todayEntry) && $todayEntry->check_4 ? 'disabled' : '' }}>
+                            <div class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl mb-3 transition-transform group-hover:rotate-6">
+                                <i class="ph-duotone ph-book-open-text"></i>
+                            </div>
+                            <span class="text-xs font-black text-slate-700 text-center leading-tight">4. Belajar Mandiri</span>
+                            <div class="mt-2 w-full" x-show="habitsChecked.h4" x-collapse>
+                                <input type="text" name="habit_4_subject" value="{{ $todayEntry->habit_4_subject ?? '' }}" 
+                                       class="text-[10px] bg-white/50 border-none rounded-lg p-2 w-full text-center focus:ring-indigo-500" 
+                                       placeholder="Mata Pelajaran" {{ isset($todayEntry) ? 'readonly' : '' }}>
+                            </div>
+                            <div x-show="habitsChecked.h4" class="absolute top-3 right-3 text-indigo-500"><i class="ph-fill ph-check-circle text-xl"></i></div>
+                        </label>
+
+                        <!-- 5. MAKAN SEHAT -->
+                        <label :class="habitsChecked.h5 ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-100'"
+                               class="relative flex flex-col items-center justify-center p-6 rounded-[2.2rem] border-2 cursor-pointer transition-all hover:shadow-md group">
+                            <input type="checkbox" name="check_5" x-model="habitsChecked.h5" class="peer hidden" {{ isset($todayEntry) && $todayEntry->check_5 ? 'disabled' : '' }}>
+                            <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mb-3 transition-transform group-hover:rotate-6">
+                                <i class="ph-duotone ph-carrot"></i>
+                            </div>
+                            <span class="text-xs font-black text-slate-700 text-center leading-tight">5. Makan Sehat</span>
+                            <div x-show="habitsChecked.h5" class="absolute top-3 right-3 text-emerald-500"><i class="ph-fill ph-check-circle text-xl"></i></div>
+                        </label>
+
+                        <!-- 6. BERMASYARAKAT -->
+                        <label :class="habitsChecked.h6 ? 'bg-purple-50 border-purple-200' : 'bg-white border-slate-100'"
+                               class="relative flex flex-col items-center justify-center p-6 rounded-[2.2rem] border-2 cursor-pointer transition-all hover:shadow-md group">
+                            <input type="checkbox" name="check_6" x-model="habitsChecked.h6" class="peer hidden" {{ isset($todayEntry) && $todayEntry->check_6 ? 'disabled' : '' }}>
+                            <div class="w-14 h-14 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-3xl mb-3 transition-transform group-hover:rotate-6">
+                                <i class="ph-duotone ph-users-three"></i>
+                            </div>
+                            <span class="text-xs font-black text-slate-700 text-center leading-tight">6. Bermasyarakat</span>
+                            <div x-show="habitsChecked.h6" class="absolute top-3 right-3 text-purple-500"><i class="ph-fill ph-check-circle text-xl"></i></div>
+                        </label>
+
+                        <!-- 7. TIDUR CUKUP -->
+                        <label :class="habitsChecked.h7 ? 'bg-slate-800 border-slate-900 text-slate-100' : 'bg-white border-slate-100'"
+                               class="relative flex flex-col items-center justify-center p-6 rounded-[2.2rem] border-2 cursor-pointer transition-all hover:shadow-md group col-span-2">
+                            <input type="checkbox" name="check_7" x-model="habitsChecked.h7" class="peer hidden" {{ isset($todayEntry) && $todayEntry->check_7 ? 'disabled' : '' }}>
+                            <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-800 flex items-center justify-center text-3xl mb-3 transition-transform group-hover:rotate-6">
+                                <i class="ph-duotone ph-moon-stars"></i>
+                            </div>
+                            <span class="text-xs font-black text-center leading-tight" :class="habitsChecked.h7 ? 'text-white' : 'text-slate-700'">7. Tidur Cukup (Istirahat Berkualitas)</span>
+                            <div class="mt-2" x-show="habitsChecked.h7" x-collapse>
+                                <input type="time" name="habit_7_time" value="{{ $todayEntry->habit_7_time ?? '' }}" 
+                                       class="text-[10px] bg-white text-slate-900 border-none rounded-lg p-1 w-24 text-center focus:ring-indigo-500" 
+                                       placeholder="Jam Tidur" {{ isset($todayEntry) ? 'readonly' : '' }}>
+                            </div>
+                            <div x-show="habitsChecked.h7" class="absolute top-3 right-3 text-emerald-400"><i class="ph-fill ph-check-circle text-xl"></i></div>
+                        </label>
+                    </div>
+
+                    @if(!isset($todayEntry))
+                        <!-- UPLOAD BUKTI (FOOTER) -->
+                        <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 text-center" x-data="{ preview: null }">
+                            <h3 class="font-black text-slate-800 text-lg mb-4">Lengkapi Dokumentasi Misi</h3>
+                            <div class="flex flex-col md:flex-row items-center gap-6">
+                                <label class="w-full md:w-1/2 h-40 border-2 border-dashed border-slate-300 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 transition relative overflow-hidden group">
+                                    <img x-show="preview" :src="preview" class="absolute inset-0 w-full h-full object-cover">
+                                    <div class="relative z-10 flex flex-col items-center" :class="preview ? 'bg-white/80 p-4 rounded-xl backdrop-blur-sm' : ''">
+                                        <i class="ph-duotone ph-camera-plus text-3xl text-slate-400 mb-2"></i>
+                                        <span class="text-xs font-bold text-slate-500">Ambil Foto Kegiatan</span>
+                                    </div>
+                                    <input type="file" name="habit_photo" class="hidden" accept="image/*" required
+                                           @change="const file = $event.target.files[0]; if (file) { preview = URL.createObjectURL(file); }">
+                                </label>
+                                <div class="w-full md:w-1/2 text-left">
+                                    <p class="text-sm text-slate-600 leading-relaxed mb-4 italic">
+                                        "Unggah kolase foto saat kamu melakukan kebiasaan baik hari ini untuk mendapatkan poin merit tambahan."
+                                    </p>
+                                    <button type="submit" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl shadow-xl hover:bg-emerald-600 transition-all flex items-center justify-center gap-3">
+                                        <i class="ph-bold ph-paper-plane-right"></i>
+                                        Selesaikan Misi Hari Ini
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <div class="bg-emerald-50 p-6 rounded-[2.5rem] border border-emerald-100 text-center">
+                            <p class="text-emerald-800 font-bold text-sm">
+                                <i class="ph-fill ph-seal-check text-xl mr-2"></i> Kamu telah menyelesaikan semua misi untuk hari ini. Luar biasa!
+                            </p>
+                        </div>
+                    @endif
+                </form>
+            </div>
+        </div>
+
+        {{-- TAB BUKU PENGHUBUNG --}}
+        <div x-show="activeTab === 'penghubung'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div x-data="studentLiaisonHandler()" class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden min-h-[600px] flex flex-col">
+                <div class="bg-indigo-600 pt-8 pb-12 px-8 relative overflow-hidden shrink-0">
+                    <div class="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                    <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                        <div>
+                            <h2 class="text-2xl font-black text-white tracking-tight">Buku Penghubung</h2>
+                            <p class="text-indigo-200 text-sm font-medium">Komunikasi Orang Tua & Wali Kelas</p>
+                        </div>
+                        <div class="flex bg-white/10 backdrop-blur-md p-1 rounded-xl border border-white/10">
+                            <button @click="mode = 'note'" 
+                                :class="mode === 'note' ? 'bg-white text-indigo-600 shadow-lg' : 'text-indigo-100 hover:bg-white/10'"
+                                class="px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
+                                <i class="ph-fill ph-notebook"></i> Catatan Guru
+                            </button>
+                            <button @click="mode = 'chat'; fetchMessages()" 
+                                :class="mode === 'chat' ? 'bg-emerald-400 text-white shadow-lg' : 'text-indigo-100 hover:bg-white/10'"
+                                class="px-6 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
+                                <i class="ph-fill ph-chat-circle-text"></i> Chat
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 bg-slate-50 relative">
+                    <div x-show="mode === 'note'" class="p-6 md:p-8" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                        @if(isset($liaison_messages) && $liaison_messages->count() > 0)
+                            <div class="space-y-4">
+                                @foreach($liaison_messages as $msg)
+                                    @php
+                                        $style = match($msg->type ?? 'info') {
+                                            'warning' => ['icon' => 'ph-warning', 'border' => 'border-l-amber-500', 'bg' => 'bg-white', 'icon_color' => 'text-amber-500'],
+                                            'achievement' => ['icon' => 'ph-trophy', 'border' => 'border-l-emerald-500', 'bg' => 'bg-white', 'icon_color' => 'text-emerald-500'],
+                                            'call' => ['icon' => 'ph-phone-call', 'border' => 'border-l-rose-500', 'bg' => 'bg-rose-50', 'icon_color' => 'text-rose-500'],
+                                            default => ['icon' => 'ph-info', 'border' => 'border-l-blue-500', 'bg' => 'bg-white', 'icon_color' => 'text-blue-500'],
+                                        };
+                                    @endphp
+                                    <div class="rounded-xl shadow-sm border border-slate-100 overflow-hidden {{ $style['bg'] }} border-l-4 {{ $style['border'] }}">
+                                        <div class="p-5">
+                                            <div class="flex items-start justify-between mb-2">
+                                                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-100 px-2 py-1 rounded">
+                                                    {{ $msg->created_at->format('d M Y') }}
+                                                </span>
+                                                <i class="ph-fill {{ $style['icon'] }} text-xl {{ $style['icon_color'] }}"></i>
+                                            </div>
+                                            <h3 class="font-bold text-slate-800 text-lg mb-1">{{ $msg->title }}</h3>
+                                            <p class="text-sm text-slate-600 leading-relaxed">{{ $msg->message }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="flex flex-col items-center justify-center py-16 text-center">
+                                <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 text-slate-300 shadow-sm border border-slate-100">
+                                    <i class="ph-duotone ph-notebook text-4xl"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800">Belum Ada Catatan</h3>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div x-show="mode === 'chat'" x-cloak class="absolute inset-0 flex flex-col bg-slate-50">
+                        <div class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar" x-ref="chatBox">
+                            <template x-for="msg in messages" :key="msg.id">
+                                <div class="flex w-full" :class="msg.sender_type === 'parent' || msg.sender_type === 'student' ? 'justify-end' : 'justify-start'">
+                                    <div class="max-w-[85%]">
+                                        <div class="p-3 rounded-2xl text-sm leading-relaxed shadow-sm"
+                                             :class="msg.sender_type === 'parent' || msg.sender_type === 'student' ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-white text-slate-700 border border-slate-200 rounded-bl-none'">
+                                            <p x-text="msg.message"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="p-4 bg-white border-t border-slate-200">
+                            <form @submit.prevent="sendMessage()" class="flex items-center gap-3">
+                                <input x-model="newMessage" type="text" placeholder="Tulis pesan..." class="flex-1 bg-slate-100 border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-indigo-500">
+                                <button type="submit" class="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-lg"><i class="ph-bold ph-paper-plane-right"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- TAB PENGADUAN --}}
+        <div x-show="activeTab === 'pengaduan'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div class="space-y-6">
+                <div class="bg-gradient-to-r from-rose-600 to-pink-600 rounded-[2.5rem] p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h2 class="text-2xl font-black mb-2">Layanan Pengaduan</h2>
+                        <p class="text-rose-100 text-sm">Privasi kamu terjamin aman. Laporkan perundungan atau masalah fasilitas.</p>
+                    </div>
+                    <a href="{{ route('student.complaints.create') }}" class="bg-white text-rose-600 px-6 py-3 rounded-xl font-bold shadow-lg">Buat Laporan</a>
+                </div>
+            </div>
+        </div>
+
+        {{-- JADWAL --}}
         <div x-show="activeTab === 'jadwal'" x-cloak x-transition:enter="transition ease-out duration-300">
             @php
-                // Ambil jadwal lewat relasi class (jika ada)
-                $classSchedules = $student->schoolClass ? $student->schoolClass->schedules : collect();
-                // Urutkan berdasarkan jam mulai
-                $classSchedules = $classSchedules->sortBy('start_time');
-                // Grouping berdasarkan Hari
-                $grouped = $classSchedules->groupBy('day');
-                
-                // Urutan hari untuk loop
+                $classSchedules = $student->schoolClass ? $student->schoolClass->schedules->sortBy('start_time')->groupBy('day') : collect();
+                $daysOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            @endphp
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($daysOrder as $day)
+                    @if(isset($classSchedules[$day]))
+                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 bg-slate-50 font-bold text-slate-800">{{ $day }}</div>
+                        <div class="divide-y divide-gray-50">
+                            @foreach($classSchedules[$day] as $sched)
+                            <div class="p-5 flex gap-4">
+                                <div class="text-xs font-bold text-slate-400 shrink-0">{{ \Carbon\Carbon::parse($sched->start_time)->format('H:i') }}</div>
+                                <div class="font-bold text-slate-700">{{ $sched->subject->name ?? 'Mapel' }}</div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+
+               {{-- [BARU] TAB JADWAL PELAJARAN --}}
+        <div x-show="activeTab === 'jadwal'" x-cloak x-transition:enter="transition ease-out duration-300">
+            @php
+                $classSchedules = $student->schoolClass ? $student->schoolClass->schedules->sortBy('start_time')->groupBy('day') : collect();
                 $daysOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
             @endphp
 
             @if($classSchedules->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach($daysOrder as $day)
-                        @if(isset($grouped[$day]))
+                        @if(isset($classSchedules[$day]))
                         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all">
-                            <!-- Header Hari -->
                             <div class="px-6 py-4 border-b border-gray-100 bg-slate-50 flex justify-between items-center">
                                 <h3 class="font-bold text-slate-800 text-lg">{{ $day }}</h3>
                                 <span class="text-xs font-bold px-2 py-1 rounded bg-white border border-slate-200 text-slate-500">
-                                    {{ $grouped[$day]->count() }} Mapel
+                                    {{ $classSchedules[$day]->count() }} Mapel
                                 </span>
                             </div>
-                            <!-- List Mapel -->
                             <div class="divide-y divide-gray-50">
-                                @foreach($grouped[$day] as $sched)
+                                @foreach($classSchedules[$day] as $sched)
                                 <div class="p-5 flex gap-4 group hover:bg-blue-50/30 transition-colors">
-                                    <!-- Waktu -->
                                     <div class="flex flex-col items-center justify-center w-14 shrink-0 text-slate-400">
                                         <span class="text-xs font-bold">{{ \Carbon\Carbon::parse($sched->start_time)->format('H:i') }}</span>
                                         <div class="h-4 w-px bg-slate-200 my-0.5"></div>
                                         <span class="text-xs font-bold">{{ \Carbon\Carbon::parse($sched->end_time)->format('H:i') }}</span>
                                     </div>
-                                    <!-- Detail -->
                                     <div>
                                         <h4 class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
                                             {{ $sched->subject->name ?? 'Mata Pelajaran' }}
@@ -327,10 +642,9 @@
             @endif
         </div>
 
-        <!-- TAB: LMS (TUGAS & KUIS) - HANYA SISWA AKTIF -->
+        {{-- TAB: LMS --}}
         <div x-show="activeTab === 'lms'" x-cloak x-transition:enter="transition ease-out duration-300">
             <div class="space-y-6">
-                <!-- Perbaikan: Gunakan count() untuk cek jumlah array/collection -->
                 @if(isset($lms_assignments_grouped) && count($lms_assignments_grouped) > 0)
                     @foreach($lms_assignments_grouped as $subjectName => $assignments)
                         <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
@@ -400,7 +714,7 @@
             </div>
         </div>
 
-        <!-- 3. TAB JURNAL KBM -->
+        {{-- TAB JURNAL KBM --}}
         <div x-show="activeTab === 'kbm'" x-cloak x-transition:enter="transition ease-out duration-300">
             <div class="grid grid-cols-1 gap-6">
                 @if(isset($teaching_journals) && count($teaching_journals) > 0)
@@ -430,13 +744,6 @@
                                 <p class="text-xs font-bold text-slate-400 uppercase mb-2">Aktivitas / Tugas:</p>
                                 <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-line">{{ $journal->activities ?? '-' }}</p>
                             </div>
-                            @if($journal->reference_link)
-                            <div class="flex justify-between items-center pt-2 border-t border-gray-50">
-                                <a href="{{ $journal->reference_link }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline">
-                                    <i class="ph-bold ph-link"></i> Buka Materi / Link
-                                </a>
-                            </div>
-                            @endif
                         </div>
                     </div>
                     @endforeach
@@ -446,46 +753,22 @@
                             <i class="ph-duotone ph-notebook text-4xl text-slate-300 group-hover:text-blue-400 transition-colors"></i>
                         </div>
                         <h3 class="font-bold text-slate-800 text-lg">Belum Ada Riwayat KBM</h3>
-                        <p class="text-slate-500 text-sm mt-2 max-w-xs mx-auto">Data jurnal kegiatan belajar mengajar belum tersedia untuk kelas ini.</p>
                     </div>
                 @endif
             </div>
         </div>
 
-        <!-- 3. TAB AKADEMIK (NILAI RAPOR) -->
+        {{-- TAB AKADEMIK --}}
         <div x-show="activeTab === 'akademik'" x-cloak x-transition:enter="transition ease-out duration-300">
             @if($academic_record)
-                <!-- Grafik -->
                 <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 mb-6 relative overflow-hidden">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600"><i class="ph-fill ph-chart-bar"></i></div>
-                            Grafik Capaian Kompetensi
-                        </h3>
-                    </div>
                     <div class="h-72 w-full relative">
                         <canvas id="academicChart"></canvas>
                     </div>
                 </div>
-
-                <!-- Tabel Nilai -->
                 <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50/50 to-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                            <h3 class="font-bold text-slate-800 text-lg">Rincian Nilai Rapor</h3>
-                            <p class="text-sm text-slate-500 mt-1">Laporan hasil belajar siswa.</p>
-                        </div>
-                        <div class="flex gap-3 text-xs font-bold">
-                             <div class="px-4 py-2 bg-white border border-blue-100 rounded-xl text-blue-700 shadow-sm">
-                                TA: {{ $academic_record->academic_year }}
-                             </div>
-                             <div class="px-4 py-2 bg-white border border-blue-100 rounded-xl text-blue-700 shadow-sm">
-                                SM: {{ $academic_record->semester }}
-                             </div>
-                        </div>
-                    </div>
                     <div class="overflow-x-auto w-full">
-                        <table class="w-full text-left border-collapse min-w-[600px]"> {{-- Min width agar tabel bisa discroll --}}
+                        <table class="w-full text-left border-collapse min-w-[600px]">
                             <thead class="bg-slate-50/50 text-xs font-bold text-slate-400 uppercase tracking-wider">
                                 <tr>
                                     <th class="px-6 py-4 rounded-tl-2xl">Mata Pelajaran</th>
@@ -523,23 +806,15 @@
                 </div>
             @else
                 <div class="bg-white rounded-3xl border-2 border-dashed border-slate-200 p-16 text-center group hover:border-blue-300 transition-colors">
-                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-50 transition-colors">
-                        <i class="ph-duotone ph-exam text-4xl text-slate-300 group-hover:text-blue-400 transition-colors"></i>
-                    </div>
-                    <h3 class="font-bold text-slate-800 text-lg">Belum Ada Data Nilai</h3>
-                    <p class="text-slate-500 text-sm mt-2 max-w-xs mx-auto">Data nilai akademik untuk semester ini belum tersedia atau belum dipublikasikan.</p>
+                     <h3 class="font-bold text-slate-800 text-lg">Belum Ada Data Nilai</h3>
                 </div>
             @endif
         </div>
 
-        <!-- 4. TAB KEHADIRAN -->
+        {{-- TAB KEHADIRAN --}}
         <div x-show="activeTab === 'kehadiran'" x-cloak x-transition:enter="transition ease-out duration-300">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <!-- GRAFIK DONUT -->
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 lg:col-span-1 flex flex-col justify-center items-center relative">
-                    <h3 class="font-bold text-slate-800 mb-2 flex items-center gap-2 self-start w-full border-b border-gray-50 pb-4">
-                        <i class="ph-fill ph-chart-pie-slice text-blue-600"></i> Statistik Kehadiran
-                    </h3>
                     <div class="h-56 w-full relative mt-2">
                         <canvas id="attendanceChart"></canvas>
                         <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-4">
@@ -548,8 +823,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- KARTU STATISTIK GRID -->
                 <div class="lg:col-span-2 grid grid-cols-2 gap-4">
                     <div class="bg-gradient-to-br from-emerald-50 to-white p-5 rounded-2xl border border-emerald-100 flex flex-col justify-center text-center h-full hover:shadow-md transition-shadow">
                         <div class="text-4xl font-black text-emerald-600 mb-1">{{ $hadir ?? 0 }}</div>
@@ -569,13 +842,7 @@
                     </div>
                 </div>
             </div>
-
-            <!-- TABEL RIWAYAT -->
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-800">Riwayat Kehadiran Terakhir</h3>
-                    <button class="text-xs font-bold text-blue-600 hover:text-blue-700">Lihat Semua</button>
-                </div>
                 <div class="divide-y divide-gray-100">
                     @forelse($attendance_history as $log)
                     <div class="px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:bg-slate-50 transition gap-3">
@@ -590,94 +857,54 @@
                                        (($log->status == 'Izin') ? 'ph-file-text' : 'ph-x')) }}"></i>
                             </div>
                             <div>
-                                {{-- PERBAIKAN: Gunakan translatedFormat untuk hari Bahasa Indonesia --}}
                                 <p class="font-bold text-slate-800">{{ \Carbon\Carbon::parse($log->attendance_date)->translatedFormat('l, d F Y') }}</p>
                                 <p class="text-xs text-slate-500 font-mono">
                                     IN: <span class="font-bold text-slate-700">{{ $log->time_in ? \Carbon\Carbon::parse($log->time_in)->format('H:i') : '--:--' }}</span>
-                                    <span class="mx-1 text-slate-300">|</span>
-                                    OUT: <span class="font-bold text-slate-700">{{ $log->time_out ? \Carbon\Carbon::parse($log->time_out)->format('H:i') : '--:--' }}</span>
+                                    | OUT: <span class="font-bold text-slate-700">{{ $log->time_out ? \Carbon\Carbon::parse($log->time_out)->format('H:i') : '--:--' }}</span>
                                 </p>
                             </div>
                         </div>
-                        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase ring-1 ring-inset
-                             {{ ($log->status == 'Hadir' || $log->status == 'Masuk' || $log->status == 'Terlambat') ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 
-                                ($log->status == 'Sakit' ? 'bg-blue-50 text-blue-700 ring-blue-200' : 
-                                ($log->status == 'Izin' ? 'bg-amber-50 text-amber-700 ring-amber-200' : 'bg-rose-50 text-rose-700 ring-rose-200')) }}">
-                             {{ $log->status }}
-                        </span>
                     </div>
                     @empty
-                    <div class="p-12 text-center text-slate-400 flex flex-col items-center justify-center">
-                        <i class="ph-duotone ph-calendar-x text-3xl mb-2 text-slate-300"></i>
-                        <p>Belum ada data kehadiran bulan ini.</p>
-                    </div>
+                    <div class="p-12 text-center text-slate-400">Belum ada data kehadiran bulan ini.</div>
                     @endforelse
                 </div>
             </div>
         </div>
 
-        <!-- 5. TAB DISIPLIN (REKAP PELANGGARAN) -->
+        {{-- TAB DISIPLIN --}}
         <div x-show="activeTab === 'disiplin'" x-cloak x-transition:enter="transition ease-out duration-300">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Summary Card -->
+             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-1">
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-rose-100 sticky top-24">
-                        <div class="w-16 h-16 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-3xl mb-4">
-                            <i class="ph-duotone ph-warning-circle"></i>
-                        </div>
                         <h3 class="text-lg font-bold text-slate-800 mb-1">Catatan Indisipliner</h3>
-                        <p class="text-sm text-slate-500 mb-6">Rekapitulasi pelanggaran tata tertib sekolah.</p>
-                        
-                        <div class="bg-rose-50 rounded-2xl p-5 border border-rose-100 text-center">
-                            <p class="text-xs font-bold text-rose-500 uppercase tracking-widest mb-1">Total Poin</p>
+                        <div class="bg-rose-50 rounded-2xl p-5 border border-rose-100 text-center mt-4">
                             <p class="text-5xl font-black text-rose-600">{{ $total_violation_points ?? 0 }}</p>
-                            <p class="text-xs text-rose-400 mt-2 font-medium">Semakin kecil semakin baik</p>
+                            <p class="text-xs text-rose-400 mt-2 font-medium">Total Poin</p>
                         </div>
                     </div>
                 </div>
-
-                <!-- Timeline List -->
                 <div class="lg:col-span-2">
-                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden min-h-[300px]">
-                        <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-                            <h3 class="font-bold text-slate-800">Riwayat Pelanggaran</h3>
-                        </div>
+                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="divide-y divide-gray-50">
                             @if(isset($violations) && count($violations) > 0)
                                 @foreach($violations as $record)
                                 <div class="p-6 hover:bg-rose-50/30 transition-colors group flex gap-4 items-start">
                                     <div class="flex-shrink-0 w-16 text-center">
-                                        <div class="text-2xl font-black text-slate-300 group-hover:text-rose-400 transition-colors">
-                                            {{ \Carbon\Carbon::parse($record->date)->format('d') }}
-                                        </div>
-                                        {{-- PERBAIKAN: translatedFormat --}}
-                                        <div class="text-[10px] font-bold text-slate-400 uppercase">
-                                            {{ \Carbon\Carbon::parse($record->date)->translatedFormat('M Y') }}
-                                        </div>
+                                        <div class="text-2xl font-black text-slate-300 group-hover:text-rose-400 transition-colors">{{ \Carbon\Carbon::parse($record->date)->format('d') }}</div>
+                                        <div class="text-[10px] font-bold text-slate-400 uppercase">{{ \Carbon\Carbon::parse($record->date)->translatedFormat('M Y') }}</div>
                                     </div>
                                     <div class="flex-grow">
-                                        <div class="flex justify-between items-start">
-                                            <h4 class="font-bold text-slate-800 text-lg">{{ $record->disciplineType->name ?? 'Pelanggaran Dihapus' }}</h4>
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-rose-100 text-rose-700">
-                                                -{{ $record->disciplineType->point_value ?? 0 }} Poin
-                                            </span>
-                                        </div>
+                                        <h4 class="font-bold text-slate-800 text-lg">{{ $record->disciplineType->name ?? 'Pelanggaran Dihapus' }}</h4>
                                         @if($record->notes)
-                                            <div class="mt-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 italic">
-                                                "{{ $record->notes }}"
-                                            </div>
+                                            <div class="mt-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 italic">"{{ $record->notes }}"</div>
                                         @endif
                                     </div>
                                 </div>
                                 @endforeach
                             @else
-                                {{-- PERBAIKAN: Empty State Konsisten --}}
-                                <div class="p-12 text-center flex flex-col items-center justify-center">
-                                    <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <i class="ph-duotone ph-shield-check text-4xl text-emerald-400"></i>
-                                    </div>
+                                <div class="p-12 text-center">
                                     <h3 class="font-bold text-slate-800">Siswa Teladan!</h3>
-                                    <p class="text-slate-500 text-sm mt-1">Tidak ada catatan pelanggaran yang tercatat.</p>
                                 </div>
                             @endif
                         </div>
@@ -686,68 +913,39 @@
             </div>
         </div>
 
-        <!-- 6. TAB PRESTASI (REKAP KEBAIKAN) -->
+        {{-- TAB PRESTASI --}}
         <div x-show="activeTab === 'prestasi'" x-cloak x-transition:enter="transition ease-out duration-300">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Summary Card -->
+             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-1">
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-emerald-100 sticky top-24">
-                        <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mb-4">
-                            <i class="ph-duotone ph-trophy"></i>
-                        </div>
                         <h3 class="text-lg font-bold text-slate-800 mb-1">Catatan Prestasi</h3>
-                        <p class="text-sm text-slate-500 mb-6">Rekapitulasi kebaikan dan pencapaian.</p>
-                        
-                        <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-100 text-center">
-                            <p class="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-1">Total Poin</p>
+                        <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5 border border-emerald-100 text-center mt-4">
                             <p class="text-5xl font-black text-emerald-600">+{{ $total_merit_points ?? 0 }}</p>
-                            <p class="text-xs text-emerald-500 mt-2 font-medium">Terus tingkatkan kebaikanmu!</p>
+                            <p class="text-xs text-emerald-500 mt-2 font-medium">Total Poin</p>
                         </div>
                     </div>
                 </div>
-
-                <!-- Timeline List -->
                 <div class="lg:col-span-2">
-                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden min-h-[300px]">
-                        <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-                            <h3 class="font-bold text-slate-800">Jejak Kebaikan</h3>
-                        </div>
+                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="divide-y divide-gray-50">
-                            @if(isset($achievements) && count($achievements) > 0)
+                             @if(isset($achievements) && count($achievements) > 0)
                                 @foreach($achievements as $record)
                                 <div class="p-6 hover:bg-emerald-50/30 transition-colors group flex gap-4 items-start">
                                     <div class="flex-shrink-0 w-16 text-center">
-                                        <div class="text-2xl font-black text-slate-300 group-hover:text-emerald-500 transition-colors">
-                                            {{ \Carbon\Carbon::parse($record->date)->format('d') }}
-                                        </div>
-                                        {{-- PERBAIKAN: translatedFormat --}}
-                                        <div class="text-[10px] font-bold text-slate-400 uppercase">
-                                            {{ \Carbon\Carbon::parse($record->date)->translatedFormat('M Y') }}
-                                        </div>
+                                        <div class="text-2xl font-black text-slate-300 group-hover:text-emerald-500 transition-colors">{{ \Carbon\Carbon::parse($record->date)->format('d') }}</div>
+                                        <div class="text-[10px] font-bold text-slate-400 uppercase">{{ \Carbon\Carbon::parse($record->date)->translatedFormat('M Y') }}</div>
                                     </div>
                                     <div class="flex-grow">
-                                        <div class="flex justify-between items-start">
-                                            <h4 class="font-bold text-slate-800 text-lg">{{ $record->disciplineType->name ?? 'Data Dihapus' }}</h4>
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-700">
-                                                +{{ $record->disciplineType->point_value ?? 0 }} Poin
-                                            </span>
-                                        </div>
+                                        <h4 class="font-bold text-slate-800 text-lg">{{ $record->disciplineType->name ?? 'Data Dihapus' }}</h4>
                                         @if($record->notes)
-                                            <div class="mt-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                                {{ $record->notes }}
-                                            </div>
+                                            <div class="mt-2 text-sm text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100">{{ $record->notes }}</div>
                                         @endif
                                     </div>
                                 </div>
                                 @endforeach
                             @else
-                                {{-- PERBAIKAN: Empty State Konsisten --}}
-                                <div class="p-12 text-center flex flex-col items-center justify-center">
-                                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <i class="ph-duotone ph-star text-4xl text-slate-300"></i>
-                                    </div>
+                                <div class="p-12 text-center">
                                     <h3 class="font-bold text-slate-800">Ayo Berprestasi!</h3>
-                                    <p class="text-slate-500 text-sm mt-1">Belum ada catatan kebaikan yang tercatat semester ini.</p>
                                 </div>
                             @endif
                         </div>
@@ -756,40 +954,22 @@
             </div>
         </div>
 
-        <!-- 7. TAB PUSTAKA (LIBRARY) -->
+        {{-- TAB PUSTAKA --}}
         <div x-show="activeTab === 'perpustakaan'" x-cloak x-transition:enter="transition ease-out duration-300">
              <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Stat Card -->
                 <div class="lg:col-span-1">
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-indigo-100 sticky top-24 h-fit"> {{-- FIX: h-fit agar sticky jalan --}}
-                        <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl mb-4">
-                            <i class="ph-duotone ph-books"></i>
-                        </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-indigo-100 sticky top-24 h-fit">
                         <h3 class="text-lg font-bold text-slate-800 mb-1">Perpustakaan</h3>
-                        <p class="text-sm text-slate-500 mb-6">Riwayat literasi dan peminjaman buku.</p>
-                        
-                        <div class="space-y-3">
+                        <div class="space-y-3 mt-4">
                             <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                                 <span class="text-xs font-bold text-slate-500 uppercase">Total Bacaan</span>
                                 <span class="text-xl font-black text-slate-800">{{ $library_visits ?? 0 }}</span>
                             </div>
-                            <div class="flex items-center justify-between p-3 bg-indigo-50 rounded-xl">
-                                <span class="text-xs font-bold text-indigo-600 uppercase">Sedang Dipinjam</span>
-                                <span class="text-xl font-black text-indigo-700">
-                                    {{ collect($library_history ?? [])->where('status', 'Dipinjam')->count() }}
-                                </span>
-                            </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Book List -->
                 <div class="lg:col-span-2">
-                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden min-h-[300px]">
-                        <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                            <h3 class="font-bold text-slate-800">Riwayat Peminjaman</h3>
-                            <button class="text-xs font-bold text-blue-600 hover:underline">Katalog Buku</button>
-                        </div>
+                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="divide-y divide-gray-50">
                             @if(isset($library_history) && count($library_history) > 0)
                                 @foreach($library_history as $book)
@@ -797,38 +977,17 @@
                                     <div class="w-12 h-16 bg-slate-200 rounded flex-shrink-0 flex items-center justify-center text-slate-400 shadow-sm">
                                         <i class="ph-fill ph-book-open text-2xl"></i>
                                     </div>
-                                    <div class="flex-grow min-w-0"> {{-- FIX: min-w-0 agar truncate jalan --}}
+                                    <div class="flex-grow min-w-0">
                                         <h4 class="font-bold text-slate-800 truncate" title="{{ $book->title }}">{{ $book->title }}</h4>
                                         <div class="flex flex-wrap items-center gap-3 mt-1 text-xs text-slate-500">
-                                            <span class="flex items-center gap-1">
-                                                <i class="ph-bold ph-calendar-blank"></i> 
-                                                Pinjam: {{ \Carbon\Carbon::parse($book->borrow_date)->translatedFormat('d M Y') }}
-                                            </span>
-                                            @if($book->return_date)
-                                                <span class="flex items-center gap-1">
-                                                    <i class="ph-bold ph-check-circle"></i> 
-                                                    Kembali: {{ \Carbon\Carbon::parse($book->return_date)->translatedFormat('d M Y') }}
-                                                </span>
-                                            @endif
+                                            <span class="flex items-center gap-1">Pinjam: {{ \Carbon\Carbon::parse($book->borrow_date)->translatedFormat('d M Y') }}</span>
                                         </div>
-                                    </div>
-                                    <div class="flex-shrink-0">
-                                        @if($book->status == 'Dipinjam')
-                                            <span class="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-bold uppercase tracking-wide">Dipinjam</span>
-                                        @else
-                                            <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold uppercase tracking-wide">Kembali</span>
-                                        @endif
                                     </div>
                                 </div>
                                 @endforeach
                             @else
-                                {{-- PERBAIKAN: Empty State Konsisten --}}
-                                <div class="p-12 text-center flex flex-col items-center justify-center">
-                                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <i class="ph-duotone ph-book-bookmark text-4xl text-slate-300"></i>
-                                    </div>
+                                <div class="p-12 text-center">
                                     <h3 class="font-bold text-slate-800">Ayo Membaca!</h3>
-                                    <p class="text-slate-500 text-sm mt-1">Kunjungi perpustakaan dan pinjam buku pertamamu.</p>
                                 </div>
                             @endif
                         </div>
@@ -837,7 +996,7 @@
              </div>
         </div>
 
-        <!-- 8. TAB KEAGAMAAN -->
+        {{-- TAB KEAGAMAAN --}}
         <div x-show="activeTab === 'keagamaan'" x-cloak>
              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div class="bg-white p-6 rounded-3xl border border-teal-100 shadow-sm flex items-center gap-6 group hover:border-teal-200 transition-colors">
@@ -854,105 +1013,58 @@
         
     </div>
 </div>
-
 <style>
     .custom-scrollbar::-webkit-scrollbar { height: 0px; background: transparent; }
     .custom-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     [x-cloak] { display: none !important; }
-    
-    /* Styling tambahan untuk icon agar rata tengah secara vertikal */
     .ph-fill, .ph-duotone, .ph-bold { vertical-align: middle; }
 </style>
 
-<!-- SCRIPTS: Chart Logic (Diperbarui untuk mengatasi ParseError) -->
+<!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // --- 1. SETUP ACADEMIC CHART ---
-        const academicCanvas = document.getElementById('academicChart');
-        
-        // [FIX] Menggunakan null coalescing sederhana agar tidak ada koma yang membingungkan Blade
-        // Data sudah dijamin oleh controller, jika null kita fallback ke null JS dan cek nanti
-        const academicData = @json($chartData ?? null);
+    function studentLiaisonHandler() {
+        return {
+            mode: 'note',
+            messages: [],
+            newMessage: '',
+            loading: false,
+            fetchMessages() {
+                const url = "{{ route('student.liaison.chat.messages') }}?student_id={{ $student->id }}";
+                fetch(url).then(res => res.json()).then(data => { this.messages = data; this.scrollToBottom(); });
+            },
+            sendMessage() {
+                if (!this.newMessage.trim()) return;
+                const payload = { message: this.newMessage, student_id: "{{ $student->id }}" };
+                this.messages.push({ message: this.newMessage, sender_type: 'student' });
+                this.newMessage = '';
+                fetch("{{ route('student.liaison.chat.send') }}", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                    body: JSON.stringify(payload)
+                });
+            },
+            scrollToBottom() { setTimeout(() => { const b = this.$refs.chatBox; if(b) b.scrollTop = b.scrollHeight; }, 100); }
+        }
+    }
 
-        // Pastikan data valid sebelum render chart
-        if (academicCanvas && typeof Chart !== 'undefined' && academicData && academicData.labels && academicData.labels.length > 0) {
+    document.addEventListener('DOMContentLoaded', function() {
+        const academicCanvas = document.getElementById('academicChart');
+        const academicData = @json($chartData ?? null);
+        if (academicCanvas && academicData) {
             new Chart(academicCanvas, {
                 type: 'bar',
                 data: {
                     labels: academicData.labels,
                     datasets: [{
-                        label: 'Nilai Akhir',
+                        label: 'Nilai',
                         data: academicData.scores,
-                        backgroundColor: 'rgba(37, 99, 235, 0.2)', 
+                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
                         borderColor: 'rgba(37, 99, 235, 1)',
-                        borderWidth: 2,
-                        borderRadius: 6,
-                        barThickness: 20, 
-                        maxBarThickness: 30
+                        borderWidth: 2
                     }]
                 },
-                options: {
-                    indexAxis: 'y', 
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { beginAtZero: true, max: 100, grid: { color: '#f1f5f9', borderDash: [4, 4] }, border: { display: false } },
-                        y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold', size: 11 } } }
-                    }
-                }
-            });
-        }
-
-        // --- 2. SETUP ATTENDANCE CHART ---
-        const attendCanvas = document.getElementById('attendanceChart');
-        // [FIX] Menggunakan null coalescing sederhana
-        const attendData = @json($attendanceChart ?? null);
-        
-        // Hitung total hanya jika data ada
-        let totalAttend = 0;
-        if(attendData) {
-            totalAttend = (attendData.hadir || 0) + (attendData.sakit || 0) + (attendData.izin || 0) + (attendData.alpa || 0);
-        }
-
-        if (attendCanvas && typeof Chart !== 'undefined' && totalAttend > 0) {
-            new Chart(attendCanvas, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Hadir', 'Sakit', 'Izin', 'Alpa'],
-                    datasets: [{
-                        data: [attendData.hadir, attendData.sakit, attendData.izin, attendData.alpa],
-                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
-                        borderWidth: 0,
-                        hoverOffset: 10
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '75%', 
-                    plugins: {
-                        legend: { 
-                            position: 'bottom', 
-                            labels: { usePointStyle: true, padding: 20, font: { family: 'inherit', size: 11, weight: 'bold' } } 
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                            padding: 12,
-                            cornerRadius: 8,
-                            displayColors: false,
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    let value = context.raw || 0;
-                                    let percentage = Math.round((value / totalAttend) * 100) + '%';
-                                    return label + ': ' + value + ' Hari (' + percentage + ')';
-                                }
-                            }
-                        }
-                    }
-                }
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
             });
         }
     });

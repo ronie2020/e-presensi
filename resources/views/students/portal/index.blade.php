@@ -153,15 +153,30 @@
                             <p class="text-slate-400 text-sm mb-6">Silakan pilih layanan untuk melanjutkan:</p>
 
                             <!-- Tombol Dinamis Sesuai Mode -->
-                            <div x-show="mode === 'portal'">
+                            <div x-show="mode === 'portal'" class="space-y-3">
                                 {{-- Tombol Buka Profil --}}
-                                <a href="{{ route('portal.show', Auth::guard('student')->id()) }}" class="w-full block py-4 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2 mb-3">
+                                <a href="{{ route('portal.show', Auth::guard('student')->id()) }}" class="w-full block py-4 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2">
                                     <i class="ph-bold ph-user-circle text-xl"></i> Buka Profil Saya
                                 </a>
 
-                                {{-- [BARU] Tombol Lihat Jadwal Pelajaran --}}
+                                {{-- Tombol Lihat Jadwal Pelajaran --}}
                                 <a href="{{ route('student.schedule.index') }}" class="w-full block py-4 bg-white border-2 border-slate-100 hover:border-blue-200 text-slate-700 hover:text-blue-600 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
                                     <i class="ph-bold ph-calendar-blank text-xl"></i> Lihat Jadwal Pelajaran
+                                </a>
+
+                                {{-- Tombol Buku Penghubung & Chat --}}
+                                <a href="{{ route('student.liaison.index') }}" class="w-full block py-4 bg-white border-2 border-indigo-100 hover:border-indigo-300 text-indigo-700 hover:text-indigo-800 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                                    <i class="ph-bold ph-chat-circle-text text-xl"></i> Buku Penghubung & Chat
+                                </a>
+
+                                {{-- Tombol Layanan Pengaduan --}}
+                                <a href="{{ route('student.complaints.index') }}" class="w-full block py-4 bg-white border-2 border-rose-100 hover:border-rose-300 text-rose-700 hover:text-rose-800 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                                    <i class="ph-bold ph-warning-circle text-xl"></i> Layanan Pengaduan
+                                </a>
+
+                                {{-- [PERBAIKAN] Mengarahkan ke Dashboard, bukan Form Index Lama --}}
+                                <a href="{{ route('student.habits.dashboard') }}" class="w-full block py-4 bg-white border-2 border-emerald-100 hover:border-emerald-300 text-emerald-700 hover:text-emerald-800 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
+                                    <i class="ph-bold ph-check-square-offset text-xl"></i> Jurnal Kebiasaan
                                 </a>
                             </div>
 
@@ -192,13 +207,6 @@
                         {{-- STATE 2: JIKA BELUM LOGIN (FORM INPUT NISN)       --}}
                         {{-- ================================================= --}}
                         
-                        <!-- 
-                            PERBAIKAN RESPONSIVITAS INPUT:
-                            - Input: Padding kiri dikurangi di HP (pl-12) dan kanan dikurangi (pr-14) agar teks muat.
-                            - Button: Pada HP (hidden md:inline), teks dihilangkan dan hanya ikon yang muncul.
-                            - Padding tombol: px-0 w-11 (kotak) di HP, px-8 (lebar) di Desktop.
-                        -->
-
                         <!-- 1. FORM PORTAL (Search) -->
                         <form x-show="mode === 'portal'" @submit="isLoading = true" action="{{ route('portal.search') }}" method="POST" class="relative">
                             @csrf
@@ -207,10 +215,8 @@
                                     <i class="ph-bold ph-identification-card text-xl md:text-2xl text-slate-400 group-focus-within:text-slate-700 transition-colors"></i>
                                 </div>
                                 
-                                {{-- PERBAIKAN: pl-12 pr-14 di Mobile --}}
                                 <input type="text" name="student_id" class="block w-full pl-12 md:pl-16 pr-14 md:pr-32 py-4 md:py-5 bg-slate-50 text-slate-800 text-base md:text-lg font-bold rounded-2xl focus:ring-4 focus:ring-slate-200 focus:bg-white transition-all placeholder:text-slate-400 border-none outline-none" placeholder="Masukkan NISN Siswa" required autocomplete="off">
                                 
-                                {{-- PERBAIKAN: Tombol jadi kotak kecil di HP --}}
                                 <button type="submit" :disabled="isLoading" class="absolute right-2 top-2 bottom-2 bg-slate-800 hover:bg-slate-900 disabled:bg-slate-400 text-white w-11 md:w-auto px-0 md:px-8 rounded-xl font-bold transition-all shadow-lg shadow-slate-800/20 flex items-center justify-center gap-2 group/btn">
                                     <span x-show="!isLoading" class="hidden md:inline">Cari</span>
                                     <i x-show="!isLoading" class="ph-bold ph-arrow-right text-lg md:text-base group-hover/btn:translate-x-1 transition-transform"></i>
@@ -229,10 +235,8 @@
                                     <i class="ph-bold ph-student text-xl md:text-2xl text-blue-400 group-focus-within:text-blue-600 transition-colors"></i>
                                 </div>
                                 
-                                {{-- PERBAIKAN: pl-12 pr-14 di Mobile --}}
                                 <input type="text" name="student_id" class="block w-full pl-12 md:pl-16 pr-14 md:pr-40 py-4 md:py-5 bg-blue-50/50 text-slate-800 text-base md:text-lg font-bold rounded-2xl focus:ring-4 focus:ring-blue-100 focus:bg-white transition-all placeholder:text-blue-300 border-none outline-none" placeholder="NISN Siswa" required autocomplete="off">
                                 
-                                {{-- PERBAIKAN: Tombol jadi kotak kecil di HP --}}
                                 <button type="submit" class="absolute right-2 top-2 bottom-2 bg-blue-600 hover:bg-blue-700 text-white w-11 md:w-auto px-0 md:px-6 rounded-xl font-bold transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 group/btn">
                                     <span class="hidden md:inline">Masuk Kelas</span>
                                     <i class="ph-bold ph-sign-in text-lg md:text-base group-hover/btn:translate-x-1 transition-transform"></i>
@@ -250,10 +254,8 @@
                                     <i class="ph-bold ph-lock-key text-xl md:text-2xl text-rose-400 group-focus-within:text-rose-600 transition-colors"></i>
                                 </div>
                                 
-                                {{-- PERBAIKAN: pl-12 pr-14 di Mobile --}}
                                 <input type="text" name="student_id" class="block w-full pl-12 md:pl-16 pr-14 md:pr-40 py-4 md:py-5 bg-rose-50/50 text-slate-800 text-base md:text-lg font-bold rounded-2xl focus:ring-4 focus:ring-rose-100 focus:bg-white transition-all placeholder:text-rose-300 border-none outline-none" placeholder="NISN Siswa" required autocomplete="off">
                                 
-                                {{-- PERBAIKAN: Tombol jadi kotak kecil di HP --}}
                                 <button type="submit" class="absolute right-2 top-2 bottom-2 bg-rose-600 hover:bg-rose-700 text-white w-11 md:w-auto px-0 md:px-6 rounded-xl font-bold transition-all shadow-lg shadow-rose-600/20 flex items-center justify-center gap-2 group/btn">
                                     <span class="hidden md:inline">Mulai Ujian</span>
                                     <i class="ph-bold ph-arrow-right text-lg md:text-base group-hover/btn:translate-x-1 transition-transform"></i>

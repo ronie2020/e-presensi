@@ -15,29 +15,33 @@ class StudentScheduleController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Ambil Data Kelas untuk Dropdown Filter
+        // 1. Ambil Data Kelas untuk Dropdown Filter (untuk Admin/Umum)
         $classes = SchoolClass::orderBy('name', 'asc')->get();
 
         // 2. Siapkan Query Jadwal
-        // Load relasi subject (mapel), teacher (guru), dan schoolClass (kelas)
         $query = Schedule::with(['subject', 'teacher', 'schoolClass']);
 
-        // 3. Logika Filter Kelas
-        if ($request->filled('class_id')) {
-            // Jika user memilih filter dropdown, gunakan itu
-            $query->where('school_class_id', $request->class_id);
-        } elseif (Auth::guard('student')->check()) {
-            // Jika user adalah siswa login & punya kelas, otomatis filter jadwal kelasnya
+        // 3. Logika Filter Otomatis untuk Siswa Login
+        if (Auth::guard('student')->check()) {
             $student = Auth::guard('student')->user();
-            if ($student->class_id) {
-                $query->where('school_class_id', $student->class_id);
+            
+            // Cek apakah kolomnya school_class_id atau class_id
+            $classId = $student->school_class_id ?? $student->class_id;
+
+            if ($classId) {
+                $query->where('school_class_id', $classId);
             }
         }
 
-        // 4. Ambil data (Urutkan berdasarkan jam mulai)
+        // 4. Jika ada filter manual dari request (opsional)
+        if ($request->filled('class_id')) {
+            $query->where('school_class_id', $request->class_id);
+        }
+
+        // 5. Ambil data
         $schedules = $query->orderBy('start_time', 'asc')->get();
 
-        // 5. Tampilkan View
-        return view('student.schedule.index', compact('schedules', 'classes'));
+        // 6. PERBAIKAN: Menggunakan 'students' (dengan s) sesuai struktur folder kamu
+        return view('students.schedule.index', compact('schedules', 'classes'));
     }
 }
