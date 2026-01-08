@@ -199,7 +199,8 @@
                                             <span class="text-[8px] font-black text-slate-300" x-text="formatTime(contact.last_message_time)"></span>
                                         </div>
                                         
-                                        <p class="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-1" x-text="contact.school_class ? contact.school_class.name : (contact.classroom ? contact.classroom.name : '-')"></p>
+                                        <p class="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-1" x-text="getClassName(contact)"></p>
+                                        
                                         <p class="text-[11px] text-slate-400 truncate font-medium" 
                                            :class="contact.unread_count > 0 ? 'font-black text-slate-800' : ''"
                                            x-text="contact.last_message ? contact.last_message : 'Mulai obrolan baru'"></p>
@@ -228,9 +229,16 @@
                                     </div>
                                     <div>
                                         <h3 class="font-black text-slate-800 text-base uppercase tracking-tight" x-text="activeContact?.name"></h3>
-                                        <p class="text-[10px] text-emerald-500 font-black uppercase tracking-widest flex items-center gap-1.5 mt-0.5">
-                                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Online
-                                        </p>
+                                        
+                                        
+                                        <div class="flex items-center gap-2 mt-0.5">
+                                            <p class="text-[10px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md uppercase tracking-wide" 
+                                               x-text="getClassName(activeContact)"></p>
+                                            
+                                            <p class="text-[10px] text-emerald-500 font-black uppercase tracking-widest flex items-center gap-1.5">
+                                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Online
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -293,7 +301,8 @@
                     if (this.chatSearch) url += "?search=" + this.chatSearch;
                     fetch(url, { headers: { 'Accept': 'application/json' }})
                     .then(res => res.json()).then(data => { 
-                        // Perbaikan: Ambil data dari key 'data' jika ada pagination
+                        // Debugging: Cek data di Console Browser (Tekan F12 -> Console)
+                        console.log('Data Kontak:', data);
                         this.chatContacts = data.data || data; 
                     });
                 },
@@ -331,7 +340,20 @@
                     let d = new Date(iso);
                     return onlyTime ? d.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}) : d.toLocaleDateString('id-ID', {day:'numeric', month:'short'});
                 },
-                getInitials(n) { return n ? n.split(' ').map(x => x[0]).join('').substring(0, 2).toUpperCase() : ''; }
+                getInitials(n) { return n ? n.split(' ').map(x => x[0]).join('').substring(0, 2).toUpperCase() : ''; },
+                
+                // Helper untuk mengambil nama kelas dengan berbagai kemungkinan
+                getClassName(contact) {
+                    if (!contact) return '-';
+                    // Cek relasi standar Laravel (biasanya snake_case di JSON)
+                    if (contact.school_class && contact.school_class.name) return contact.school_class.name;
+                    // Cek jika relasi bernama classroom
+                    if (contact.classroom && contact.classroom.name) return contact.classroom.name;
+                    // Cek jika data ada langsung di atribut (flat)
+                    if (contact.class_name) return contact.class_name;
+                    if (contact.kelas) return contact.kelas;
+                    return '-';
+                }
             }
         }
     </script>

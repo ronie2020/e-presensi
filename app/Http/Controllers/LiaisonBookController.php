@@ -140,7 +140,9 @@ class LiaisonBookController extends Controller
             $query->where('name', 'like', '%' . $search . '%');
         }
 
+        // PERBAIKAN DI SINI: Menambahkan ->with('schoolClass')
         $students = $query->select('id', 'name', $classColumn)
+            ->with('schoolClass') // <--- PENTING: Memuat relasi agar nama kelas muncul
             ->withCount(['liaisonChats as unread_count' => function($q) {
                 $q->where('sender_type', '!=', 'teacher')->where('is_read', false);
             }])
