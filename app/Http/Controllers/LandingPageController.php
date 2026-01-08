@@ -18,6 +18,7 @@ use App\Models\SchoolClass;
 use App\Models\LmsMaterial;
 use App\Models\LmsAssignment;
 use App\Models\AlumniProfile; 
+use App\Models\StudentHabit; 
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -37,7 +38,6 @@ class LandingPageController extends Controller
         $statusAlpa      = ['Alpa', 'alpa', 'Alpha', 'Absent'];
 
         // --- 1. STATISTIK HARIAN ---
-        // [FIX] Tambahkan filter whereHas agar alumni tidak terhitung
         $dailyQuery = AttendanceSiswa::whereDate('attendance_date', $today)
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
             ->whereHas('student', function($q) {
@@ -55,11 +55,30 @@ class LandingPageController extends Controller
             'tidak_hadir' => $tidakHadir
         ];
 
-        // --- 2. CHART KEHADIRAN MINGGUAN ---
+        // --- 2. [BARU] LOGIKA 7 KEBIASAAN ANAK ---
+        $totalStudentsActive = Student::where('status', '!=', 'graduated')->count();
+        $habitsToday = StudentHabit::whereDate('report_date', $today)->count();
+        $habitPercentage = $totalStudentsActive > 0 ? round(($habitsToday / $totalStudentsActive) * 100) : 0;
+        
+        $habitStats = [
+            'submitted' => $habitsToday,
+            'missing'   => max(0, $totalStudentsActive - $habitsToday),
+            'percentage'=> $habitPercentage
+        ];
+
+        // Data Grafik Kebiasaan (7 Hari Terakhir)
+        $habitLabels = [];
+        $habitData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::today()->subDays($i);
+            $habitLabels[] = $date->translatedFormat('D'); // Nama hari singkat
+            $habitData[] = StudentHabit::whereDate('report_date', $date)->count();
+        }
+
+        // --- 3. CHART KEHADIRAN MINGGUAN ---
         $startDate = Carbon::today()->subDays(6);
         $endDate = Carbon::today();
         
-        // [FIX] Tambahkan filter whereHas agar alumni tidak terhitung di grafik
         $weeklyData = AttendanceSiswa::whereBetween('attendance_date', [$startDate, $endDate])
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
             ->whereHas('student', function($q) {
@@ -106,7 +125,7 @@ class LandingPageController extends Controller
             ]
         ];
 
-        // --- 3. CHART PERPUSTAKAAN ---
+        // --- 4. CHART PERPUSTAKAAN ---
         $libLabels = [];
         $libData = [];
         $periodLib = $startDate->copy();
@@ -125,14 +144,12 @@ class LandingPageController extends Controller
             'books_borrowed' => Borrowing::where('status', 'borrowed')->count()
         ];
 
-        // --- 4. CACHE STATISTIK ---
-        // [FIX] Ganti nama key cache jadi 'school_profile_stats_v2' agar data langsung refresh
+        // --- 5. CACHE STATISTIK ---
         $schoolStats = Cache::remember('school_profile_stats_v2', 60 * 60, function () {
             $materiCount = class_exists('App\Models\LmsMaterial') ? \App\Models\LmsMaterial::count() : 0;
             $tugasCount = class_exists('App\Models\LmsAssignment') ? \App\Models\LmsAssignment::count() : 0;
             
             return [
-                // [FIX] Tambahkan filter status != graduated
                 'siswa' => Student::where('status', '!=', 'graduated')->count(),
                 'guru'  => User::whereIn('role', ['Guru', 'Kepala Sekolah'])->count(),
                 'rombel'=> SchoolClass::count(),
@@ -141,7 +158,7 @@ class LandingPageController extends Controller
             ];
         });
 
-        // --- 5. DATA LAINNYA ---
+        // --- 6. DATA LAINNYA ---
         $announcements = Announcement::orderBy('created_at', 'desc')->limit(3)->get();
         $achievements = Achievement::with('student')->orderBy('date', 'desc')->limit(6)->get();
         $activities = SchoolActivity::latest()->take(3)->get();
@@ -153,7 +170,7 @@ class LandingPageController extends Controller
 
         $extracurriculars = Extracurricular::withCount('members')->with(['attendances' => function($query) { $query->latest('date')->limit(1); }])->get();
 
-        // 6. DATA ALUMNI UNTUK LANDING PAGE
+        // 7. DATA ALUMNI
         $alumniStats = [
             'total' => Student::where('status', 'graduated')->count(),
             'sma' => AlumniProfile::where('activity_status', 'SMA')->count(),
@@ -163,7 +180,6 @@ class LandingPageController extends Controller
             'bekerja' => AlumniProfile::whereIn('activity_status', ['Bekerja', 'Wirausaha', 'Lainnya'])->count(),
         ];
 
-        // Ambil Testimoni (Limit 6 untuk halaman depan)
         $alumniTestimonials = AlumniProfile::whereNotNull('testimony')
             ->where('testimony', '!=', '') 
             ->with('student') 
@@ -175,7 +191,7 @@ class LandingPageController extends Controller
             'stats', 'barChartData', 'libraryStats', 'libraryChartData', 
             'announcements', 'achievements', 'activities', 'teachers',
             'guestbooks', 'allGuestbooks', 'extracurriculars', 'agendas', 'schoolStats',
-            'alumniStats', 'alumniTestimonials'
+            'alumniStats', 'alumniTestimonials', 'habitLabels', 'habitData', 'habitStats'
         ));
     }
 
@@ -215,18 +231,13 @@ class LandingPageController extends Controller
         return view('teachers', compact('teachers'));
     }
 
-    /**
-     * [BARU] Halaman Semua Testimoni
-     * Menampilkan semua testimoni dengan pagination
-     */
     public function testimonials()
     {
-        // Mengambil semua testimoni yang tidak kosong, diurutkan terbaru
         $testimonials = AlumniProfile::with('student')
             ->whereNotNull('testimony')
             ->where('testimony', '!=', '') 
             ->latest('updated_at') 
-            ->paginate(12); // Menampilkan 12 per halaman
+            ->paginate(12);
 
         return view('testimonials', compact('testimonials'));
     }
