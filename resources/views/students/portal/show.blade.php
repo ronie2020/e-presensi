@@ -274,6 +274,9 @@
                     <div class="md:col-span-2 bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden group">
                         <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-[80px] -mr-32 -mt-32"></div>
                         <div class="relative z-10">
+                             <a href="{{ route('student.habits.dashboard') }}" class="inline-flex items-center gap-2 text-blue-300 hover:text-white transition-colors mb-4 text-[10px] font-bold uppercase tracking-[0.2em]">
+                                <i class="ph-bold ph-arrow-left"></i> Kembali ke Dashboard
+                            </a>
                             <h2 class="text-2xl font-black tracking-tight mb-1">Misi Karakter Hari Ini</h2>
                             <p class="text-slate-400 text-sm mb-6">"Karaktermu dibentuk oleh apa yang kamu lakukan hari ini."</p>
                             

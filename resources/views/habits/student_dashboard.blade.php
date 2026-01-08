@@ -3,195 +3,332 @@
 @section('content')
     @php \Carbon\Carbon::setLocale('id'); @endphp
 
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 pb-20 pt-24">
+    <style>
+        @import url('https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap');
+        .font-jakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .bottom-nav { box-shadow: 0 -4px 20px rgba(0,0,0,0.05); }
+        [x-cloak] { display: none !important; }
         
-        {{-- SECTION 1: WELCOME HERO (Beralih ke Deep Blue) --}}
-        <div class="relative bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 rounded-[2.5rem] p-8 md:p-12 overflow-hidden shadow-2xl shadow-blue-900/30 mb-10 text-white border border-white/10">
-            {{-- Background Decoration --}}
-            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-2xl"></div>
+        /* Hide scrollbar for clean UI */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 
-            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                <div class="text-center md:text-left">
-                    <span class="inline-block py-1 px-3 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold tracking-wider uppercase mb-3 border border-white/10 text-blue-200">
-                        Dashboard Siswa
-                    </span>
-                    <h1 class="text-3xl md:text-5xl font-black mb-4 leading-tight tracking-tight">
-                        Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-200">{{ Auth::guard('student')->user()->name ?? 'Sahabat' }}!</span> 👋
-                    </h1>
-                    <p class="text-blue-100/80 text-lg max-w-xl">
-                        Ayo teruskan langkahmu menjadi <span class="font-bold text-white">Anak Indonesia Hebat</span>. Pantau aktivitasmu di sini setiap hari!
-                    </p>
+    <div class="font-jakarta bg-slate-50 min-h-screen pb-32 md:pb-12" 
+         x-data="{ 
+            activeSection: 'overview',
+            habitsChecked: {
+                h1: {{ isset($todayEntry) && $todayEntry->check_1 ? 'true' : 'false' }},
+                h2: {{ isset($todayEntry) && $todayEntry->check_2 ? 'true' : 'false' }},
+                h3: {{ isset($todayEntry) && $todayEntry->check_3 ? 'true' : 'false' }},
+                h4: {{ isset($todayEntry) && $todayEntry->check_4 ? 'true' : 'false' }},
+                h5: {{ isset($todayEntry) && $todayEntry->check_5 ? 'true' : 'false' }},
+                h6: {{ isset($todayEntry) && $todayEntry->check_6 ? 'true' : 'false' }},
+                h7: {{ isset($todayEntry) && $todayEntry->check_7 ? 'true' : 'false' }}
+            },
+            get totalDone() {
+                return Object.values(this.habitsChecked).filter(v => v === true).length;
+            },
+            get progress() {
+                return Math.round((this.totalDone / 7) * 100);
+            }
+         }">
+
+        <!-- 1. TOP HEADER (STICKY) -->
+        <header class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-100 transition-all duration-300">
+            <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                        <i class="ph-fill ph-student text-2xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">Anak Hebat Hub</p>
+                        <h2 class="text-sm font-bold text-slate-800 leading-none">{{ Auth::guard('student')->user()->name }}</h2>
+                    </div>
+                </div>
+                <a href="{{ route('portal.show', Auth::guard('student')->id()) }}" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                    <i class="ph-bold ph-user"></i>
+                </a>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto px-4 pt-6">
+            
+            <!-- 2. OVERVIEW SECTION -->
+            <div x-show="activeSection === 'overview'" x-transition:enter.duration.500ms>
+                
+                <!-- Welcome Banner & Progress -->
+                <div class="relative bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 rounded-[2.5rem] p-8 mb-8 text-white shadow-2xl shadow-blue-900/30 overflow-hidden border border-white/10">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -mr-20 -mt-20"></div>
                     
-                    <div class="mt-8 flex flex-wrap gap-4 justify-center md:justify-start">
-                        @if(!$todayEntry)
-                            <a href="{{ route('student.habits.index') }}" class="group relative px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl shadow-lg shadow-blue-600/30 transition-all hover:-translate-y-1 hover:shadow-xl flex items-center gap-3 border border-blue-400">
-                                <i class="ph-bold ph-rocket-launch text-xl group-hover:rotate-12 transition-transform"></i>
-                                Isi Jurnal Hari Ini
-                            </a>
+                    <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div class="text-center md:text-left flex-1">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-[10px] font-bold uppercase tracking-widest mb-3">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
+                            </div>
+                            <h1 class="text-2xl md:text-4xl font-black mb-2 tracking-tight leading-tight">Apa misimu hari ini? 🚀</h1>
+                            <p class="text-blue-100/70 text-sm max-w-sm mx-auto md:mx-0">
+                                Selesaikan 7 kebiasaan baikmu untuk membuka potensi terbaik dirimu.
+                            </p>
+                        </div>
+                        
+                        <!-- Progress Circle -->
+                        <div class="shrink-0 relative group cursor-pointer" @click="document.getElementById('habitSection').scrollIntoView({behavior: 'smooth'})">
+                            <div class="w-32 h-32 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md border border-white/10 relative shadow-inner">
+                                <svg class="w-full h-full transform -rotate-90">
+                                    <circle cx="50%" cy="50%" r="42%" stroke="currentColor" stroke-width="8" fill="transparent" class="text-slate-900/30"></circle>
+                                    <circle cx="50%" cy="50%" r="42%" stroke="currentColor" stroke-width="8" fill="transparent" 
+                                            class="text-emerald-400 transition-all duration-1000 ease-out"
+                                            :stroke-dasharray="264"
+                                            :stroke-dashoffset="264 - (264 * progress / 100)"></circle>
+                                </svg>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span class="text-2xl font-black" x-text="progress + '%'"></span>
+                                    <span class="text-[8px] font-bold uppercase tracking-widest text-blue-200">Selesai</span>
+                                </div>
+                            </div>
+                            <!-- Tooltip -->
+                            <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold text-white bg-slate-900 px-2 py-1 rounded">
+                                Klik untuk isi
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Widgets Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8">
+                    
+                    <!-- 1. Jadwal Widget -->
+                    <a href="{{ route('student.schedule.index') }}" class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 group hover:border-blue-200 transition-all">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-black text-slate-400 text-[10px] uppercase tracking-widest flex items-center gap-2">
+                                <i class="ph-fill ph-calendar text-blue-500 text-base"></i> Jadwal Pelajaran
+                            </h3>
+                            <i class="ph-bold ph-arrow-right text-slate-300 group-hover:text-blue-500 transition-colors"></i>
+                        </div>
+                        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 group-hover:bg-blue-50/50 group-hover:border-blue-100 transition-colors">
+                            @php
+                                // Logika sederhana untuk jadwal (bisa disesuaikan dengan data real dari controller)
+                                $today = \Carbon\Carbon::now()->locale('id')->dayName;
+                                $schedule = Auth::guard('student')->user()->schoolClass->schedules->where('day', $today)->sortBy('start_time')->first();
+                            @endphp
+                            
+                            @if($schedule)
+                                <p class="text-xs font-black text-blue-600 mb-0.5">{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }} WIB</p>
+                                <h4 class="font-bold text-slate-800 leading-tight line-clamp-1">{{ $schedule->subject->name }}</h4>
+                                <p class="text-[10px] text-slate-400 mt-1 line-clamp-1">{{ $schedule->teacher->name }}</p>
+                            @else
+                                <div class="text-center py-2">
+                                    <p class="text-xs font-bold text-slate-400 italic">Tidak ada jadwal aktif saat ini.</p>
+                                </div>
+                            @endif
+                        </div>
+                    </a>
+
+                    <!-- 2. Poin Merit Widget -->
+                    <div class="bg-emerald-600 p-5 rounded-[2rem] shadow-xl shadow-emerald-900/10 text-white relative overflow-hidden group">
+                        <div class="absolute -right-6 -bottom-6 text-9xl text-white/10 group-hover:rotate-12 transition-transform duration-500">
+                            <i class="ph-fill ph-crown"></i>
+                        </div>
+                        <h3 class="font-bold text-emerald-200 text-[10px] uppercase tracking-widest mb-4">Poin Karakter (Merit)</h3>
+                        <div class="flex items-baseline gap-2 relative z-10">
+                            <span class="text-5xl font-black tracking-tighter">{{ number_format($totalPoints ?? 0) }}</span>
+                            <span class="text-xs font-bold text-emerald-200 bg-white/20 px-2 py-0.5 rounded">XP</span>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-white/20 relative z-10">
+                            <p class="text-[10px] text-emerald-50 font-medium italic flex items-center gap-1">
+                                <i class="ph-fill ph-trend-up"></i> Pertahankan prestasimu!
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3. Pesan Sekolah Widget -->
+                    <a href="{{ route('student.liaison.index') }}" class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 group hover:border-indigo-200 transition-all">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-black text-slate-400 text-[10px] uppercase tracking-widest flex items-center gap-2">
+                                <i class="ph-fill ph-chat-circle-text text-indigo-500 text-base"></i> Pesan Masuk
+                            </h3>
+                            @if(isset($liaison_messages) && $liaison_messages->count() > 0)
+                                <span class="w-2 h-2 bg-rose-500 rounded-full animate-pulse"></span>
+                            @endif
+                        </div>
+                        
+                        @php $lastMsg = isset($liaison_messages) ? $liaison_messages->first() : null; @endphp
+                        
+                        @if($lastMsg)
+                            <div class="bg-indigo-50/50 rounded-2xl p-4 border border-indigo-100 group-hover:bg-indigo-50 transition-colors h-24 flex flex-col justify-center">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-[9px] font-bold bg-white text-indigo-600 px-1.5 py-0.5 rounded border border-indigo-100 shadow-sm uppercase">Info</span>
+                                    <p class="text-[10px] font-black text-slate-700 line-clamp-1">{{ $lastMsg->title }}</p>
+                                </div>
+                                <p class="text-[10px] text-slate-500 line-clamp-2 font-medium italic leading-relaxed">"{{ $lastMsg->message }}"</p>
+                            </div>
                         @else
-                            <button disabled class="px-8 py-4 bg-slate-800 text-blue-400 font-bold rounded-2xl shadow-lg flex items-center gap-3 opacity-90 cursor-not-allowed border border-blue-500/30">
-                                <i class="ph-fill ph-check-circle text-2xl"></i>
-                                Sudah Lapor Hari Ini
-                            </button>
+                            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 h-24 flex flex-col items-center justify-center text-center">
+                                <i class="ph-duotone ph-envelope-open text-2xl text-slate-300 mb-1"></i>
+                                <p class="text-[10px] font-bold text-slate-400">Tidak ada pesan baru</p>
+                            </div>
+                        @endif
+                    </a>
+                </div>
+
+                <!-- FORM 7 KEBIASAAN (Full Integrated) -->
+                <div id="habitSection" class="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm scroll-mt-24">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                        <div>
+                            <h3 class="text-xl font-black text-slate-800 flex items-center gap-2">
+                                <i class="ph-fill ph-list-checks text-blue-500"></i> Checklist Kebiasaan
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-1">Klik pada kartu untuk menandai selesai.</p>
+                        </div>
+                        @if(isset($todayEntry))
+                            <div class="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-xs font-bold border border-emerald-100 flex items-center gap-2">
+                                <i class="ph-fill ph-check-circle"></i> Laporan Hari Ini Tersimpan
+                            </div>
                         @endif
                     </div>
-                </div>
 
-                {{-- Total Poin Circle --}}
-                <div class="shrink-0 relative">
-                    <div class="w-48 h-48 md:w-64 md:h-64 bg-slate-900/50 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10 shadow-inner">
-                        <div class="text-center">
-                            <p class="text-blue-300 text-sm font-bold uppercase mb-1">Total Poin</p>
-                            <h2 class="text-6xl font-black text-white tracking-tighter">{{ number_format($totalPoints ?? 0) }}</h2>
-                            <p class="text-xs text-blue-400 mt-2 font-bold">LEVEL 1</p>
+                    <form action="{{ route('student.habits.store') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        
+                        {{-- Hidden Checkboxes synced with UI --}}
+                        <input type="checkbox" name="check_1" x-model="habitsChecked.h1" class="hidden">
+                        <input type="checkbox" name="check_2" x-model="habitsChecked.h2" class="hidden">
+                        <input type="checkbox" name="check_3" x-model="habitsChecked.h3" class="hidden">
+                        <input type="checkbox" name="check_4" x-model="habitsChecked.h4" class="hidden">
+                        <input type="checkbox" name="check_5" x-model="habitsChecked.h5" class="hidden">
+                        <input type="checkbox" name="check_6" x-model="habitsChecked.h6" class="hidden">
+                        <input type="checkbox" name="check_7" x-model="habitsChecked.h7" class="hidden">
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            @php
+                                $habitsList = [
+                                    ['id' => 'h1', 'icon' => 'sun-horizon', 'color' => 'blue', 'label' => 'Bangun Pagi'],
+                                    ['id' => 'h2', 'icon' => 'drop', 'color' => 'cyan', 'label' => 'Mandi Rapi'],
+                                    ['id' => 'h3', 'icon' => 'sneaker-move', 'color' => 'indigo', 'label' => 'Olahraga'],
+                                    ['id' => 'h4', 'icon' => 'book-open-text', 'color' => 'blue', 'label' => 'Belajar'],
+                                    ['id' => 'h5', 'icon' => 'carrot', 'color' => 'emerald', 'label' => 'Makan Sehat'],
+                                    ['id' => 'h6', 'icon' => 'users-three', 'color' => 'purple', 'label' => 'Sosial'],
+                                    ['id' => 'h7', 'icon' => 'moon-stars', 'color' => 'slate', 'label' => 'Tidur Cukup'],
+                                ];
+                            @endphp
+
+                            @foreach($habitsList as $h)
+                                <div @if(!isset($todayEntry)) @click="habitsChecked.{{ $h['id'] }} = !habitsChecked.{{ $h['id'] }}" @endif
+                                     :class="habitsChecked.{{ $h['id'] }} ? 'bg-{{ $h['color'] }}-50 border-{{ $h['color'] }}-200 ring-1 ring-{{ $h['color'] }}-200' : 'bg-white border-slate-100 hover:border-{{ $h['color'] }}-200'"
+                                     class="relative p-5 rounded-[1.8rem] border-2 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all active:scale-95 group overflow-hidden {{ isset($todayEntry) ? 'opacity-80 pointer-events-none' : '' }}">
+                                    
+                                    {{-- Checkmark Animation --}}
+                                    <div x-show="habitsChecked.{{ $h['id'] }}" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="scale-0" x-transition:enter-end="scale-100" class="absolute top-3 right-3 text-{{ $h['color'] }}-500">
+                                        <i class="ph-fill ph-check-circle text-xl bg-white rounded-full"></i>
+                                    </div>
+
+                                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl transition-transform group-hover:scale-110"
+                                         :class="habitsChecked.{{ $h['id'] }} ? 'bg-white text-{{ $h['color'] }}-500 shadow-sm' : 'bg-{{ $h['color'] }}-50 text-{{ $h['color'] }}-500'">
+                                        <i class="ph-duotone ph-{{ $h['icon'] }}"></i>
+                                    </div>
+                                    <span class="text-[10px] font-black text-slate-700 text-center uppercase tracking-tight leading-tight">{{ $h['label'] }}</span>
+                                </div>
+                            @endforeach
+                            
+                            {{-- Card Tambahan untuk upload jika belum lapor --}}
+                            @if(!isset($todayEntry))
+                                <label class="relative p-5 rounded-[1.8rem] border-2 border-dashed border-slate-300 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-50 hover:border-slate-400 transition-all group bg-slate-50/50">
+                                    <div class="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-blue-500 shadow-sm">
+                                        <i class="ph-bold ph-camera"></i>
+                                    </div>
+                                    <span class="text-[9px] font-bold text-slate-400 uppercase text-center group-hover:text-blue-500">Upload Bukti</span>
+                                    <input type="file" name="habit_photo" class="hidden" accept="image/*" required onchange="alert('Foto terpilih!')">
+                                </label>
+                            @endif
                         </div>
-                    </div>
-                    {{-- Floating Trophy --}}
-                    <div class="absolute -bottom-4 -right-4 bg-blue-600 text-white px-4 py-2 rounded-xl shadow-lg font-bold text-sm flex items-center gap-2 animate-bounce border border-blue-400">
-                        <i class="ph-fill ph-trophy text-yellow-400 text-lg"></i>
-                        Hebat!
-                    </div>
+
+                        {{-- Action Buttons --}}
+                        @if(!isset($todayEntry))
+                            <div x-show="totalDone > 0" x-transition class="flex justify-end">
+                                <button type="submit" class="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-blue-600 transition-all flex items-center gap-3 active:scale-95">
+                                    <span>Simpan Laporan</span>
+                                    <i class="ph-bold ph-paper-plane-right text-lg"></i>
+                                </button>
+                            </div>
+                        @endif
+                    </form>
                 </div>
             </div>
-        </div>
 
-        {{-- SECTION 2: STATS & MISI --}}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="space-y-6">
-                {{-- Card Statistik --}}
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform duration-500">
-                        <i class="ph-fill ph-calendar-check text-8xl text-blue-600"></i>
-                    </div>
-                    <p class="text-slate-500 text-sm font-bold uppercase mb-1">Laporan Bulan Ini</p>
-                    <h3 class="text-4xl font-black text-slate-800 mb-2">{{ $monthlyCount ?? 0 }} <span class="text-lg text-slate-400 font-medium">Hari</span></h3>
-                    <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
-                        <div class="bg-blue-600 h-full rounded-full" style="width: {{ min((($monthlyCount ?? 0)/30)*100, 100) }}%"></div>
-                    </div>
+            <!-- 3. MENU SECTION (Grid Navigation) -->
+            <div x-show="activeSection === 'menu'" x-cloak x-transition:enter.duration.500ms>
+                <div class="grid grid-cols-2 gap-4">
+                    <a href="{{ route('student.schedule.index') }}" class="p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center gap-4 group hover:bg-blue-600 transition-all">
+                        <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center text-3xl group-hover:bg-white/20 group-hover:text-white transition-colors">
+                            <i class="ph-fill ph-calendar-blank"></i>
+                        </div>
+                        <span class="text-xs font-black text-slate-700 group-hover:text-white uppercase tracking-widest">Jadwal Pelajaran</span>
+                    </a>
+                    <a href="{{ route('student.liaison.index') }}" class="p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center gap-4 group hover:bg-indigo-600 transition-all">
+                        <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center text-3xl group-hover:bg-white/20 group-hover:text-white transition-colors">
+                            <i class="ph-fill ph-notebook"></i>
+                        </div>
+                        <span class="text-xs font-black text-slate-700 group-hover:text-white uppercase tracking-widest">Buku Penghubung</span>
+                    </a>
+                    <a href="{{ route('student.complaints.index') }}" class="p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center gap-4 group hover:bg-rose-600 transition-all">
+                        <div class="w-16 h-16 bg-rose-50 text-rose-600 rounded-3xl flex items-center justify-center text-3xl group-hover:bg-white/20 group-hover:text-white transition-colors">
+                            <i class="ph-fill ph-warning-circle"></i>
+                        </div>
+                        <span class="text-xs font-black text-slate-700 group-hover:text-white uppercase tracking-widest">Layanan Pengaduan</span>
+                    </a>
+                    <a href="{{ route('portal.show', Auth::guard('student')->id()) }}" class="p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center gap-4 group hover:bg-slate-800 transition-all">
+                        <div class="w-16 h-16 bg-slate-50 text-slate-800 rounded-3xl flex items-center justify-center text-3xl group-hover:bg-white/20 group-hover:text-white transition-colors">
+                            <i class="ph-fill ph-user-circle"></i>
+                        </div>
+                        <span class="text-xs font-black text-slate-700 group-hover:text-white uppercase tracking-widest">Profil Saya</span>
+                    </a>
                 </div>
-
-                {{-- Card Feedback Terakhir --}}
-                @php $lastFeedback = $recentActivities->whereNotNull('teacher_feedback')->first(); @endphp
-                <div class="bg-gradient-to-br from-indigo-600 to-blue-700 p-6 rounded-3xl text-white shadow-xl shadow-blue-500/20 relative overflow-hidden">
-                    <div class="absolute -right-4 -top-4 opacity-10"><i class="ph-fill ph-chat-circle-dots text-8xl"></i></div>
-                    <h4 class="font-bold text-blue-100 text-xs uppercase tracking-widest mb-3">Pesan Guru Terakhir</h4>
-                    @if($lastFeedback)
-                        <p class="font-medium text-sm leading-relaxed mb-4 italic line-clamp-3">
-                            "{{ $lastFeedback->teacher_feedback }}"
-                        </p>
-                        <p class="text-[10px] font-bold text-blue-200 uppercase">{{ \Carbon\Carbon::parse($lastFeedback->report_date)->translatedFormat('d M Y') }}</p>
-                    @else
-                        <p class="text-sm opacity-70 italic mb-4">Belum ada feedback terbaru dari bapak/ibu guru.</p>
-                    @endif
+                
+                <div class="mt-8 text-center">
+                    <form method="POST" action="{{ route('student.logout') }}">
+                        @csrf
+                        <button type="submit" class="text-xs font-bold text-rose-400 hover:text-rose-600 transition-colors uppercase tracking-widest">
+                            Keluar Aplikasi
+                        </button>
+                    </form>
                 </div>
             </div>
 
-            {{-- 7 Kebiasaan (Biru) --}}
-            <div class="lg:col-span-2 bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm">
-                <div class="flex items-center justify-between mb-8">
-                    <h3 class="text-xl font-black text-slate-800 flex items-center gap-2">
-                        <i class="ph-fill ph-star text-blue-500"></i> 
-                        Misi 7 Kebiasaan Baik
-                    </h3>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    @php
-                        $habits = [
-                            ['icon' => 'sun-horizon', 'color' => 'blue', 'label' => 'Bangun Pagi'],
-                            ['icon' => 'drop', 'color' => 'cyan', 'label' => 'Mandi Rapi'],
-                            ['icon' => 'sneaker-move', 'color' => 'indigo', 'label' => 'Olahraga'],
-                            ['icon' => 'book-open-text', 'color' => 'blue', 'label' => 'Belajar'],
-                            ['icon' => 'carrot', 'color' => 'cyan', 'label' => 'Makan Sehat'],
-                            ['icon' => 'users-three', 'color' => 'indigo', 'label' => 'Sosial'],
-                        ];
-                    @endphp
-                    @foreach($habits as $h)
-                        <div class="p-4 rounded-2xl bg-{{ $h['color'] }}-50 border border-{{ $h['color'] }}-100 text-center hover:bg-{{ $h['color'] }}-100 transition-colors group">
-                            <i class="ph-duotone ph-{{ $h['icon'] }} text-3xl text-{{ $h['color'] }}-600 mb-2 block group-hover:scale-110 transition-transform"></i>
-                            <h4 class="font-bold text-slate-700 text-xs">{{ $h['label'] }}</h4>
-                        </div>
-                    @endforeach
-                    <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 md:col-span-2 flex items-center gap-4 text-white">
-                        <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-3xl text-blue-400 shrink-0">
-                            <i class="ph-duotone ph-moon-stars"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-sm">Tidur Cukup</h4>
-                            <p class="text-[10px] text-slate-400">Istirahat tepat waktu agar bugar.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </main>
 
-        {{-- RIWAYAT TABLE --}}
-        <div class="mt-10">
-            <h3 class="text-lg font-bold text-slate-700 mb-6 flex items-center gap-2 px-2">
-                <i class="ph-bold ph-clock-counter-clockwise text-blue-600"></i> Riwayat & Feedback Guru
-            </h3>
+        <!-- 4. BOTTOM NAVIGATION (App-like Experience) -->
+        <nav class="bottom-nav fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-white/90 backdrop-blur-xl border border-white/50 ring-1 ring-slate-200/50 rounded-[2.5rem] p-2 flex items-center justify-between z-50 shadow-2xl">
+            <button @click="activeSection = 'overview'" 
+                    :class="activeSection === 'overview' ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20' : 'text-slate-400 hover:bg-slate-50'"
+                    class="flex-1 py-4 rounded-[2rem] flex flex-col items-center gap-1 transition-all duration-300 group">
+                <i class="ph-fill ph-house text-2xl group-hover:scale-110 transition-transform"></i>
+                <span class="text-[8px] font-black uppercase tracking-widest" x-show="activeSection === 'overview'" x-transition>Home</span>
+            </button>
             
-            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-slate-50 border-b border-slate-100">
-                            <tr>
-                                <th class="py-4 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tanggal</th>
-                                <th class="py-4 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Aktivitas</th>
-                                <th class="py-4 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pesan Dari Guru</th>
-                                <th class="py-4 px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            @forelse($recentActivities as $activity)
-                                <tr class="hover:bg-slate-50/50 transition-colors group">
-                                    <td class="py-4 px-6">
-                                        <span class="font-bold text-slate-700 block text-sm">
-                                            {{ \Carbon\Carbon::parse($activity->report_date)->translatedFormat('d F Y') }}
-                                        </span>
-                                        <span class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">DIKIRIM {{ $activity->created_at->format('H:i') }}</span>
-                                    </td>
-                                    <td class="py-4 px-6">
-                                        <div class="flex items-center gap-2">
-                                            <div class="flex -space-x-2">
-                                                @if($activity->habit_1) <div class="w-5 h-5 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center" title="Ibadah"><i class="ph-fill ph-sun-horizon text-[10px] text-blue-600"></i></div> @endif
-                                                @if($activity->habit_3) <div class="w-5 h-5 rounded-full bg-indigo-100 border-2 border-white flex items-center justify-center" title="Olahraga"><i class="ph-fill ph-sneaker-move text-[10px] text-indigo-600"></i></div> @endif
-                                                @if($activity->habit_4) <div class="w-5 h-5 rounded-full bg-cyan-100 border-2 border-white flex items-center justify-center" title="Belajar"><i class="ph-fill ph-book-open-text text-[10px] text-cyan-600"></i></div> @endif
-                                            </div>
-                                            <span class="text-xs text-slate-500 font-medium">Lengkap</span>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-6">
-                                        @if($activity->teacher_feedback)
-                                            <div class="flex items-start gap-3 bg-blue-50/50 p-3 rounded-xl border border-blue-100 group-hover:bg-white group-hover:border-blue-300 transition-all">
-                                                <i class="ph-fill ph-chat-circle-dots text-blue-500 text-lg shrink-0 mt-0.5"></i>
-                                                <p class="text-xs text-blue-700 italic leading-relaxed">
-                                                    "{{ $activity->teacher_feedback }}"
-                                                </p>
-                                            </div>
-                                        @else
-                                            <span class="text-[10px] font-bold text-slate-300 uppercase italic px-3">Belum ada feedback</span>
-                                        @endif
-                                    </td>
-                                    <td class="py-4 px-6 text-right">
-                                        <span class="inline-flex items-center gap-1 text-blue-600 font-bold text-[10px] bg-blue-50 px-3 py-1 rounded-full border border-blue-100 uppercase tracking-wide">
-                                            <i class="ph-fill ph-check-circle"></i> Berhasil
-                                        </span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="py-20 text-center">
-                                        <i class="ph-duotone ph-notebook text-4xl text-slate-200 mb-2"></i>
-                                        <p class="text-slate-400 text-sm">Belum ada riwayat jurnal.</p>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+            <a href="{{ route('students.learning.index') }}" class="flex-1 py-4 text-slate-400 hover:text-blue-600 flex flex-col items-center gap-1 transition-colors group">
+                <i class="ph-fill ph-books text-2xl group-hover:scale-110 transition-transform"></i>
+            </a>
+
+            <!-- Floating Main Action (Highlight) -->
+            <div class="relative -top-8 group">
+                <button @click="document.getElementById('habitSection').scrollIntoView({behavior: 'smooth'})" class="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white shadow-2xl shadow-blue-500/40 border-[6px] border-slate-50 active:scale-90 transition-all hover:-translate-y-1">
+                    <i class="ph-bold ph-plus text-2xl"></i>
+                </button>
             </div>
-        </div>
+
+            <a href="{{ route('student.exam.index') }}" class="flex-1 py-4 text-slate-400 hover:text-rose-600 flex flex-col items-center gap-1 transition-colors group">
+                <i class="ph-fill ph-desktop text-2xl group-hover:scale-110 transition-transform"></i>
+            </a>
+
+            <button @click="activeSection = 'menu'" 
+                    :class="activeSection === 'menu' ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20' : 'text-slate-400 hover:bg-slate-50'"
+                    class="flex-1 py-4 rounded-[2rem] flex flex-col items-center gap-1 transition-all duration-300 group">
+                <i class="ph-fill ph-squares-four text-2xl group-hover:scale-110 transition-transform"></i>
+                <span class="text-[8px] font-black uppercase tracking-widest" x-show="activeSection === 'menu'" x-transition>Menu</span>
+            </button>
+        </nav>
 
     </div>
 @endsection

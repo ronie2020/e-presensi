@@ -17,16 +17,21 @@ class LiaisonBookController extends Controller
     //  BAGIAN 1: MANAJEMEN BUKU PENGHUBUNG (CATATAN RESMI)
     // =========================================================================
 
+    /**
+     * Dashboard Guru: Daftar Catatan Resmi
+     */
     public function index(Request $request)
     {
         $query = LiaisonBook::with(['student.schoolClass', 'teacher'])->latest();
 
+        // Filter Pencarian
         if ($request->filled('search')) {
             $query->whereHas('student', function($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%');
             });
         }
 
+        // Filter Tipe Catatan
         if ($request->filled('type')) {
             $query->where('type', $request->type);
         }
@@ -37,6 +42,9 @@ class LiaisonBookController extends Controller
         return view('liaison.index', compact('messages', 'classes'));
     }
 
+    /**
+     * Dashboard Siswa: Daftar Catatan dari Guru
+     */
     public function indexStudent()
     {
         $studentId = Auth::guard('student')->id();
@@ -46,9 +54,17 @@ class LiaisonBookController extends Controller
                         ->latest()
                         ->paginate(10);
         
+        // LOGIKA BARU: Tandai semua catatan di halaman ini sebagai sudah dibaca
+        LiaisonBook::where('student_id', $studentId)
+                    ->where('is_read_by_parent', false)
+                    ->update(['is_read_by_parent' => true]);
+        
         return view('liaison.student_index', compact('messages'));
     }
 
+    /**
+     * Guru: Simpan Catatan Baru
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -58,32 +74,37 @@ class LiaisonBookController extends Controller
             'message'    => 'required|string',
         ]);
 
-        LiaisonBook::create([
-            'student_id' => $request->student_id,
-            'teacher_id' => Auth::id(),
-            'title'      => $request->title,
-            'type'       => $request->type,
-            'message'    => $request->message,
-            'is_read_by_parent' => false,
-        ]);
+        try {
+            LiaisonBook::create([
+                'student_id' => $request->student_id,
+                'teacher_id' => Auth::id(),
+                'title'      => $request->title,
+                'type'       => $request->type,
+                'message'    => $request->message,
+                'is_read_by_parent' => false,
+            ]);
 
-        return redirect()->route('liaison.index')->with('success', 'Catatan berhasil dikirim ke siswa.');
+            return redirect()->route('liaison.index')->with('success', 'Catatan resmi berhasil dikirim.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengirim catatan: ' . $e->getMessage());
+        }
     }
 
     public function destroy($id)
     {
         $liaison = LiaisonBook::findOrFail($id);
         
+        // Pastikan hanya pemilik atau admin yang bisa hapus
         if($liaison->teacher_id == Auth::id() || Auth::user()->role == 'admin') {
             $liaison->delete();
             return redirect()->route('liaison.index')->with('success', 'Catatan berhasil dihapus.');
         }
 
-        return redirect()->route('liaison.index')->with('error', 'Anda tidak memiliki akses.');
+        return redirect()->route('liaison.index')->with('error', 'Anda tidak memiliki hak akses.');
     }
 
     /**
-     * API Helper: Mengambil siswa berdasarkan kelas (Form Catatan)
+     * API: Ambil daftar siswa per kelas (Helper Form)
      */
     public function getStudentsByClass($classId)
     {
@@ -96,85 +117,59 @@ class LiaisonBookController extends Controller
                             ->get();
             return response()->json($students);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Gagal memuat data siswa.'], 500);
         }
     }
 
 
     // =========================================================================
-    //  BAGIAN 2: FITUR CHAT (PESAN ORANG TUA - SISI GURU)
+    //  BAGIAN 2: FITUR CHAT (SISI GURU)
     // =========================================================================
 
+    /**
+     * Guru: Ambil daftar kontak (Siswa) untuk di-chat
+     */
     public function getChatContacts(Request $request)
     {
-        $classId = $request->query('class_id');
         $search = $request->query('search'); 
-        
-        // 1. Deteksi Nama Kolom Kelas (Antisipasi beda nama kolom di DB)
         $classColumn = $this->detectClassColumn();
 
         $query = Student::query();
         
-        // Filter Kelas
-        if ($classId) {
-            $query->where($classColumn, $classId);
-        }
-
-        // Filter Pencarian Nama
         if ($search) {
             $query->where('name', 'like', '%' . $search . '%');
         }
 
-        // 2. Cek relasi untuk nama kelas (Optional relation loading)
-        $withRelations = [];
-        try {
-            // Kita cek dummy instance untuk melihat relasi apa yang tersedia di Model Student
-            $dummy = new Student();
-            if (method_exists($dummy, 'schoolClass')) {
-                $withRelations[] = 'schoolClass:id,name';
-            } elseif (method_exists($dummy, 'classroom')) { 
-                $withRelations[] = 'classroom:id,name';
-            }
-        } catch (\Exception $e) {
-            // Abaikan error jika pengecekan relasi gagal, lanjut load data siswa saja
-        }
-
-        /**
-         * 3. Build Query Utama
-         */
         $students = $query->select('id', 'name', $classColumn)
-            ->when(!empty($withRelations), function($q) use ($withRelations) {
-                return $q->with($withRelations);
-            })
-            // Menghitung jumlah pesan yang belum dibaca dari ortu (sender != teacher)
             ->withCount(['liaisonChats as unread_count' => function($q) {
                 $q->where('sender_type', '!=', 'teacher')->where('is_read', false);
             }])
-            // Mengambil cuplikan pesan terakhir
             ->addSelect(['last_message' => LiaisonChat::select('message')
                 ->whereColumn('student_id', 'students.id')
-                ->latest()
-                ->limit(1)
+                ->latest()->limit(1)
             ])
-            // Mengambil waktu pesan terakhir untuk sorting
             ->addSelect(['last_message_time' => LiaisonChat::select('created_at')
                 ->whereColumn('student_id', 'students.id')
-                ->latest()
-                ->limit(1)
+                ->latest()->limit(1)
             ])
-            ->orderByDesc('last_message_time') // Urutkan siswa yang chat paling baru di atas
+            ->orderByDesc('last_message_time')
             ->orderBy('name')
-            ->paginate(20);
+            ->get();
 
         return response()->json($students);
     }
 
+    /**
+     * Guru: Ambil riwayat chat dengan satu siswa
+     */
     public function getChatMessages($studentId)
     {
-        // Ambil semua chat history
-        $messages = LiaisonChat::where('student_id', $studentId)->oldest()->get();
+        $messages = LiaisonChat::where('student_id', $studentId)
+                        ->with('teacher:id,name')
+                        ->oldest()
+                        ->get();
 
-        // Tandai pesan dari Ortu sebagai 'sudah dibaca' (is_read = true)
+        // Tandai sebagai dibaca
         LiaisonChat::where('student_id', $studentId)
             ->where('sender_type', '!=', 'teacher')
             ->where('is_read', false)
@@ -183,6 +178,9 @@ class LiaisonBookController extends Controller
         return response()->json($messages);
     }
 
+    /**
+     * Guru: Kirim pesan chat
+     */
     public function sendChatMessage(Request $request)
     {
         $request->validate([
@@ -192,31 +190,29 @@ class LiaisonBookController extends Controller
 
         $chat = LiaisonChat::create([
             'student_id' => $request->student_id,
-            'teacher_id' => Auth::id(), // Pastikan Auth Teacher aktif
-            'message' => $request->message,
+            'teacher_id' => Auth::id(),
+            'message'    => $request->message,
             'sender_type' => 'teacher',
-            'is_read' => false,
+            'is_read'    => false,
         ]);
 
-        return response()->json($chat);
+        return response()->json($chat->load('teacher:id,name'));
     }
 
     // =========================================================================
-    //  BAGIAN 3: FITUR CHAT (PESAN ORANG TUA - SISI SISWA)
-    //  (Ditambahkan Baru)
+    //  BAGIAN 3: FITUR CHAT (SISI SISWA / ORANG TUA)
     // =========================================================================
 
     public function getStudentChatMessages()
     {
         $studentId = Auth::guard('student')->id();
         
-        // Ambil semua chat milik siswa ini
         $messages = LiaisonChat::where('student_id', $studentId)
-            ->with('teacher:id,name') // Ambil nama guru jika ada
+            ->with('teacher:id,name')
             ->oldest()
             ->get();
 
-        // Tandai pesan dari guru sebagai sudah dibaca oleh siswa/ortu
+        // Tandai pesan guru sebagai sudah dibaca oleh siswa
         LiaisonChat::where('student_id', $studentId)
             ->where('sender_type', 'teacher')
             ->where('is_read', false)
@@ -230,47 +226,31 @@ class LiaisonBookController extends Controller
         $request->validate(['message' => 'required|string']);
         $studentId = Auth::guard('student')->id();
 
-        // Simpan pesan
-        // teacher_id dikosongkan (null) karena pesan ditujukan ke sekolah/wali kelas umum
         $chat = LiaisonChat::create([
             'student_id' => $studentId,
             'teacher_id' => null, 
-            'message' => $request->message,
-            'sender_type' => 'parent', // Sesuai enum di database untuk Sisi Siswa/Ortu
-            'is_read' => false,
+            'message'    => $request->message,
+            'sender_type' => 'parent',
+            'is_read'    => false,
         ]);
 
         return response()->json($chat);
     }
 
     // =========================================================================
-    //  HELPER FUNCTIONS
+    //  HELPER
     // =========================================================================
 
-    /**
-     * Helper: Mendeteksi nama kolom Foreign Key kelas di tabel students.
-     * Menggunakan Schema::hasColumn agar 100% akurat sesuai struktur DB.
-     */
     private function detectClassColumn()
     {
-        // Daftar prioritas nama kolom yang mungkin dipakai di database Anda
-        $candidates = [
-            'school_class_id', // Standar Laravel
-            'class_id',        // Umum
-            'classroom_id',    // Variasi
-            'rombel_id',       // Istilah Dapodik/Indonesia
-            'grade_id',        // Variasi lain
-            'group_id',
-            'kelas_id'         // Tambahan untuk Bahasa Indonesia
-        ];
+        $candidates = ['school_class_id', 'class_id', 'classroom_id', 'rombel_id', 'kelas_id'];
 
-        // Cek langsung ke struktur tabel database
         foreach ($candidates as $col) {
             if (Schema::hasColumn('students', $col)) {
                 return $col;
             }
         }
         
-        return 'school_class_id'; // Default Fallback
+        return 'school_class_id';
     }
 }

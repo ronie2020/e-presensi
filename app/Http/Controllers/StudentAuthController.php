@@ -29,8 +29,6 @@ class StudentAuthController extends Controller
         ]);
 
         // 2. Cari Siswa
-        // CATATAN: Login ini 'Bypass Password' (hanya cek NISN). 
-        // Jika ingin pakai password, gunakan: Auth::guard('student')->attempt(['student_id' => ..., 'password' => ...])
         $student = Student::where('student_id', $request->student_id)
                     ->orWhere('nis', $request->student_id)
                     ->first();
@@ -43,26 +41,25 @@ class StudentAuthController extends Controller
         Auth::guard('student')->login($student);
         $request->session()->regenerate();
 
-        // === [LOGIKA BARU] CEK STATUS ALUMNI ===
+        // Cek Status Alumni
         if ($student->status === 'graduated') {
             return redirect()->route('alumni.dashboard')->with('success', 'Selamat datang kembali, Alumni!');
         }
-        // =======================================
 
-        // 4. Redirect sesuai Tujuan (LMS atau CBT)
+        // 4. Redirect Khusus (Jika login dari tombol spesifik di halaman depan)
         $intended = $request->input('intended_app');
 
-        // Jika tujuannya CBT, lempar ke halaman Ujian
         if ($intended === 'cbt') {
             return redirect()->route('student.exam.index')->with('success', 'Selamat datang di Ruang Ujian.');
         } 
         
-        // REKOMENDASI: Jika ingin siswa langsung melihat Jadwal Pelajaran
-        // Pastikan Anda sudah membuat route dengan nama 'student.schedule.index'
-        // return redirect()->route('student.schedule.index')->with('success', 'Selamat datang di Portal Siswa.');
+        if ($intended === 'lms') {
+            return redirect()->route('students.learning.index')->with('success', 'Selamat datang di Ruang Belajar.');
+        }
 
-        // Default ke LMS (Ruang Belajar) - Sesuai kode lama
-        return redirect()->route('students.learning.index')->with('success', 'Selamat datang di Ruang Belajar.');
+        // 5. DEFAULT REDIRECT: Ke Student Hub / Dashboard Utama
+        // Ini yang kita ubah agar masuk ke tampilan dashboard baru
+        return redirect()->route('student.habits.dashboard')->with('success', 'Selamat datang di Dashboard Siswa.');
     }
 
     /**
