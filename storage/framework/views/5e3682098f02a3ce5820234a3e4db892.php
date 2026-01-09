@@ -1,5 +1,14 @@
-<x-app-layout>
-    {{-- LOAD ASSETS --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
@@ -15,10 +24,10 @@
         @keyframes bounce { 0%, 100% { transform: translateY(-5%); } 50% { transform: translateY(0); } }
     </style>
 
-    {{-- TAMBAHAN: x-init="init()" --}}
+    
     <div class="font-jakarta p-4 md:p-8 space-y-8 min-h-screen bg-slate-50" x-data="liaisonHandler()" x-init="init()">
         
-        {{-- HERO SECTION --}}
+        
         <div class="animate-enter relative rounded-[3rem] bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 md:p-12 text-white shadow-2xl shadow-blue-900/30 overflow-hidden group border border-white/10">
             <div class="absolute top-0 right-0 -mt-20 -mr-20 w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[100px] group-hover:opacity-40 transition-opacity duration-1000"></div>
             
@@ -51,12 +60,12 @@
             </div>
         </div>
 
-        {{-- MAIN CONTENT --}}
+        
         <div class="animate-enter" style="animation-delay: 100ms">
             
-            {{-- MODE 1: CATATAN (NOTE) --}}
+            
             <div x-show="mode === 'note'" x-transition class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {{-- Form Input (Sama seperti sebelumnya) --}}
+                
                 <div class="lg:col-span-7">
                     <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden h-full">
                         <div class="p-8 md:p-10">
@@ -70,16 +79,16 @@
                                 </div>
                             </div>
 
-                            <form action="{{ route('liaison.store') }}" method="POST" class="space-y-8">
-                                @csrf
+                            <form action="<?php echo e(route('liaison.store')); ?>" method="POST" class="space-y-8">
+                                <?php echo csrf_field(); ?>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div class="space-y-3">
                                         <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Pilih Target Kelas</label>
                                         <select x-model="selectedClass" @change="fetchStudents()" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-50 font-bold text-slate-700 py-4 px-5 transition-all appearance-none">
                                             <option value="">-- Pilih Kelas --</option>
-                                            @foreach($classes as $class)
-                                                <option value="{{ $class->id }}">{{ $class->name }}</option>
-                                            @endforeach
+                                            <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $class): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($class->id); ?>"><?php echo e($class->name); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                     </div>
                                     <div class="space-y-3">
@@ -123,48 +132,49 @@
                 </div>
 
                 <div x-show="mode === 'note'" class="lg:col-span-5 h-full">
-                    {{-- Riwayat Catatan --}}
+                    
                     <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col h-[650px]">
                         <div class="p-8 border-b border-slate-50 flex items-center justify-between">
                             <h3 class="text-xl font-black text-slate-800 flex items-center gap-3">
                                 <i class="ph-bold ph-clock-counter-clockwise text-blue-600"></i> Riwayat
                             </h3>
-                            <span class="bg-blue-50 text-[10px] font-black px-4 py-1.5 rounded-full text-blue-600 uppercase tracking-widest">{{ $messages->total() }} Data</span>
+                            <span class="bg-blue-50 text-[10px] font-black px-4 py-1.5 rounded-full text-blue-600 uppercase tracking-widest"><?php echo e($messages->total()); ?> Data</span>
                         </div>
                         <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4 bg-slate-50/30">
-                            @forelse($messages as $msg)
+                            <?php $__empty_1 = true; $__currentLoopData = $messages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $msg): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <div class="p-6 bg-white rounded-[2rem] border border-slate-100 hover:border-blue-200 transition-all group shadow-sm">
                                     <div class="flex items-center justify-between mb-4">
                                         <div class="flex items-center gap-3">
                                             <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 font-black text-[10px] uppercase">
-                                                {{ substr($msg->student->name ?? 'S', 0, 1) }}
+                                                <?php echo e(substr($msg->student->name ?? 'S', 0, 1)); ?>
+
                                             </div>
                                             <div>
-                                                <p class="text-xs font-black text-slate-800">{{ $msg->student->name ?? 'Siswa' }}</p>
-                                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">{{ $msg->student->schoolClass->name ?? '-' }}</p>
+                                                <p class="text-xs font-black text-slate-800"><?php echo e($msg->student->name ?? 'Siswa'); ?></p>
+                                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter"><?php echo e($msg->student->schoolClass->name ?? '-'); ?></p>
                                             </div>
                                         </div>
-                                        <span class="text-[9px] font-bold text-slate-400">{{ $msg->created_at->diffForHumans() }}</span>
+                                        <span class="text-[9px] font-bold text-slate-400"><?php echo e($msg->created_at->diffForHumans()); ?></span>
                                     </div>
-                                    <h4 class="font-black text-slate-700 text-sm mb-2 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{{ $msg->title }}</h4>
-                                    <p class="text-[11px] text-slate-500 line-clamp-2 italic leading-relaxed">"{{ $msg->message }}"</p>
+                                    <h4 class="font-black text-slate-700 text-sm mb-2 group-hover:text-blue-600 transition-colors uppercase tracking-tight"><?php echo e($msg->title); ?></h4>
+                                    <p class="text-[11px] text-slate-500 line-clamp-2 italic leading-relaxed">"<?php echo e($msg->message); ?>"</p>
                                 </div>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <div class="text-center py-20 opacity-30">
                                     <i class="ph-duotone ph-notebook text-5xl mb-4"></i>
                                     <p class="text-xs font-black uppercase tracking-widest">Kosong</p>
                                 </div>
-                            @endforelse
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- MODE 2: CHAT INTERFACE --}}
+            
             <div x-show="mode === 'chat'" x-cloak x-transition>
                 <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-100 overflow-hidden h-[75vh] flex relative">
                     
-                    {{-- SIDEBAR CONTACTS --}}
+                    
                     <div class="w-full md:w-80 border-r border-slate-50 flex flex-col bg-slate-50/50" :class="activeContact ? 'hidden md:flex' : 'flex'">
                         <div class="p-8 border-b border-slate-50 bg-white">
                             <h3 class="text-sm font-black text-slate-800 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
@@ -189,7 +199,7 @@
                                             <h4 class="font-black text-slate-700 text-xs truncate uppercase tracking-tight" x-text="contact.name"></h4>
                                             <span class="text-[8px] font-black text-slate-300" x-text="formatTime(contact.last_message_time)"></span>
                                         </div>
-                                        {{-- TAMPILAN KELAS DIPERBAIKI --}}
+                                        
                                         <p class="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-1" x-text="getClassName(contact)"></p>
                                         
                                         <p class="text-[11px] text-slate-400 truncate font-medium" 
@@ -201,7 +211,7 @@
                         </div>
                     </div>
 
-                    {{-- CHAT BOX --}}
+                    
                     <div class="flex-1 flex flex-col bg-white relative" :class="activeContact ? 'flex' : 'hidden md:flex'">
                         <div x-show="!activeContact" class="flex-1 flex flex-col items-center justify-center text-center p-12 bg-slate-50/30">
                             <div class="w-24 h-24 bg-white rounded-[2.5rem] shadow-xl flex items-center justify-center mb-10 animate-bounce-slow border border-slate-50">
@@ -221,7 +231,7 @@
                                     <div>
                                         <h3 class="font-black text-slate-800 text-base uppercase tracking-tight" x-text="activeContact?.name"></h3>
                                         
-                                        {{-- TAMPILAN KELAS DI HEADER CHAT (DITAMBAHKAN) --}}
+                                        
                                         <div class="flex items-center gap-2 mt-0.5">
                                             <p class="text-[10px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md uppercase tracking-wide" 
                                                x-text="getClassName(activeContact)"></p>
@@ -304,13 +314,13 @@
                 fetchStudents() {
                     if (!this.selectedClass) { this.students = []; return; }
                     this.isLoading = true;
-                    fetch("{{ route('liaison.get_students', ':id') }}".replace(':id', this.selectedClass))
+                    fetch("<?php echo e(route('liaison.get_students', ':id')); ?>".replace(':id', this.selectedClass))
                     .then(res => res.json()).then(data => { this.students = data; this.isLoading = false; });
                 },
 
                 // Added silent param
                 fetchChatContacts(silent = false) {
-                    let url = "{{ route('liaison.chat.contacts') }}";
+                    let url = "<?php echo e(route('liaison.chat.contacts')); ?>";
                     if (this.chatSearch) url += "?search=" + this.chatSearch;
                     
                     fetch(url, { headers: { 'Accept': 'application/json' }})
@@ -328,7 +338,7 @@
 
                 // Added silent param
                 fetchChatMessages(studentId, silent = false) {
-                    fetch("{{ route('liaison.chat.messages', ':id') }}".replace(':id', studentId))
+                    fetch("<?php echo e(route('liaison.chat.messages', ':id')); ?>".replace(':id', studentId))
                     .then(res => res.json()).then(data => {
                         this.chatMessages = data;
                         if (!silent) this.scrollToBottom(); // Scroll hanya jika bukan silent update
@@ -345,9 +355,9 @@
                     this.chatMessages.push({ id: Date.now(), message: msgText, sender_type: 'teacher', created_at: new Date().toISOString() });
                     this.scrollToBottom();
 
-                    fetch("{{ route('liaison.chat.send') }}", {
+                    fetch("<?php echo e(route('liaison.chat.send')); ?>", {
                         method: "POST",
-                        headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                        headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "<?php echo e(csrf_token()); ?>" },
                         body: JSON.stringify({ student_id: currentContactId, message: msgText })
                     }).then(() => {
                         // Refresh segera setelah kirim untuk sinkronisasi
@@ -379,4 +389,13 @@
             }
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/liaison/index.blade.php ENDPATH**/ ?>

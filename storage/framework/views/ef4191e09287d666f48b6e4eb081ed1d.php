@@ -1,20 +1,18 @@
-@extends('layouts.public')
+<?php $__env->startSection('content'); ?>
+    <?php \Carbon\Carbon::setLocale('id'); ?>
 
-@section('content')
-    @php \Carbon\Carbon::setLocale('id'); @endphp
-
-    {{-- TAMBAHAN: x-init="init()" untuk menjalankan auto-refresh saat load --}}
+    
     <div x-data="studentLiaisonHandler()" x-init="init()" class="min-h-screen bg-slate-50 font-jakarta pt-24 pb-20">
         
         <div class="max-w-6xl mx-auto px-4 sm:px-6">
             
-            {{-- HEADER: Deep Indigo Gradient --}}
+            
             <div class="animate-enter relative rounded-[3rem] bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 p-8 md:p-12 mb-10 text-white shadow-2xl shadow-indigo-900/20 overflow-hidden border border-white/10">
                 <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-purple-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     <div>
-                        <a href="{{ route('portal.index') }}" class="inline-flex items-center gap-2 text-indigo-200 hover:text-white transition-colors mb-6 text-[10px] font-black uppercase tracking-widest">
+                        <a href="<?php echo e(route('portal.index')); ?>" class="inline-flex items-center gap-2 text-indigo-200 hover:text-white transition-colors mb-6 text-[10px] font-black uppercase tracking-widest">
                             <i class="ph-bold ph-arrow-left"></i> Kembali ke Dashboard
                         </a>
                         <h1 class="text-3xl md:text-5xl font-black tracking-tighter mb-3 leading-tight">Buku <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-indigo-200">Penghubung</span></h1>
@@ -23,7 +21,7 @@
                         </p>
                     </div>
 
-                    {{-- TAB SWITCHER --}}
+                    
                     <div class="bg-white/10 backdrop-blur-xl p-1.5 rounded-2xl flex border border-white/10 w-full md:w-auto shadow-inner">
                         <button @click="mode = 'note'" 
                             :class="mode === 'note' ? 'bg-white text-indigo-900 shadow-lg' : 'text-indigo-100 hover:bg-white/5'"
@@ -39,50 +37,51 @@
                 </div>
             </div>
 
-            {{-- CONTENT AREA --}}
+            
             <div class="relative">
                 
-                {{-- TAB 1: CATATAN GURU --}}
+                
                 <div x-show="mode === 'note'" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        @forelse($messages as $msg)
-                            @php
+                        <?php $__empty_1 = true; $__currentLoopData = $messages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $msg): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <?php
                                 $config = match($msg->type) {
                                     'warning' => ['icon' => 'ph-warning', 'accent' => 'bg-amber-500', 'bg' => 'bg-white', 'text' => 'text-amber-600'],
                                     'achievement' => ['icon' => 'ph-trophy', 'accent' => 'bg-emerald-500', 'bg' => 'bg-white', 'text' => 'text-emerald-600'],
                                     'call' => ['icon' => 'ph-phone-call', 'accent' => 'bg-rose-500', 'bg' => 'bg-rose-50/30', 'text' => 'text-rose-600'],
                                     default => ['icon' => 'ph-info', 'accent' => 'bg-blue-600', 'bg' => 'bg-white', 'text' => 'text-blue-600'],
                                 };
-                            @endphp
-                            <div class="group bg-white rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all border border-slate-100 overflow-hidden {{ $config['bg'] }} flex flex-col">
-                                <div class="h-2 w-full {{ $config['accent'] }}"></div>
+                            ?>
+                            <div class="group bg-white rounded-[2.5rem] shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all border border-slate-100 overflow-hidden <?php echo e($config['bg']); ?> flex flex-col">
+                                <div class="h-2 w-full <?php echo e($config['accent']); ?>"></div>
                                 <div class="p-8 flex-1">
                                     <div class="flex items-start justify-between mb-6">
                                         <div class="flex items-center gap-4">
-                                            <div class="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center {{ $config['text'] }} shadow-inner border border-slate-100">
-                                                <i class="ph-fill {{ $config['icon'] }} text-2xl"></i>
+                                            <div class="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center <?php echo e($config['text']); ?> shadow-inner border border-slate-100">
+                                                <i class="ph-fill <?php echo e($config['icon']); ?> text-2xl"></i>
                                             </div>
                                             <div>
-                                                <h3 class="font-black text-slate-800 text-lg leading-tight uppercase tracking-tight">{{ $msg->title }}</h3>
-                                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1 block">{{ $msg->created_at->format('d M Y | H:i') }}</span>
+                                                <h3 class="font-black text-slate-800 text-lg leading-tight uppercase tracking-tight"><?php echo e($msg->title); ?></h3>
+                                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1 block"><?php echo e($msg->created_at->format('d M Y | H:i')); ?></span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="bg-slate-50/50 p-6 rounded-[1.8rem] border border-slate-100">
-                                        <p class="text-sm text-slate-600 leading-relaxed italic font-medium">"{{ $msg->message }}"</p>
+                                        <p class="text-sm text-slate-600 leading-relaxed italic font-medium">"<?php echo e($msg->message); ?>"</p>
                                     </div>
                                 </div>
                                 <div class="px-8 py-5 bg-slate-50/30 border-t border-slate-50 flex items-center justify-between">
                                     <div class="flex items-center gap-2">
                                         <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-black shadow-lg shadow-blue-600/20">
-                                            {{ substr($msg->teacher->name ?? 'G', 0, 1) }}
+                                            <?php echo e(substr($msg->teacher->name ?? 'G', 0, 1)); ?>
+
                                         </div>
-                                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">{{ $msg->teacher->name ?? 'Guru' }}</span>
+                                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest"><?php echo e($msg->teacher->name ?? 'Guru'); ?></span>
                                     </div>
                                     <span class="text-[9px] font-black text-blue-400 uppercase tracking-widest">Terkirim Resmi</span>
                                 </div>
                             </div>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <div class="md:col-span-2 bg-white rounded-[3rem] p-20 text-center shadow-sm border border-slate-100">
                                 <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-200">
                                     <i class="ph-duotone ph-notebook text-5xl"></i>
@@ -90,13 +89,13 @@
                                 <h3 class="font-black text-slate-800 text-xl tracking-tight">Belum Ada Catatan</h3>
                                 <p class="text-sm text-slate-400 mt-2 max-w-sm mx-auto font-medium">Catatan prestasi atau informasi khusus dari guru akan muncul di bagian ini.</p>
                             </div>
-                        @endforelse
+                        <?php endif; ?>
                     </div>
 
-                    <div class="mt-10">{{ $messages->links() }}</div>
+                    <div class="mt-10"><?php echo e($messages->links()); ?></div>
                 </div>
 
-                {{-- TAB 2: CHAT INTERFACE --}}
+                
                 <div x-show="mode === 'chat'" x-cloak x-transition>
                     <div class="bg-white rounded-[3rem] shadow-2xl border border-slate-100 overflow-hidden flex flex-col h-[75vh]">
                         
@@ -203,7 +202,7 @@
                 fetchMessages(silent = false) {
                     if (!silent) this.loading = true;
 
-                    fetch("{{ route('student.liaison.chat.messages') }}")
+                    fetch("<?php echo e(route('student.liaison.chat.messages')); ?>")
                         .then(res => res.json()).then(data => {
                             this.messages = data;
                             
@@ -227,9 +226,9 @@
                     this.messages.push({ id: Date.now(), message: msgText, sender_type: 'parent', created_at: new Date().toISOString() });
                     this.scrollToBottom();
                     
-                    fetch("{{ route('student.liaison.chat.send') }}", {
+                    fetch("<?php echo e(route('student.liaison.chat.send')); ?>", {
                         method: "POST",
-                        headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                        headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "<?php echo e(csrf_token()); ?>" },
                         body: JSON.stringify({ message: msgText })
                     }).then(() => { 
                         this.sending = false;
@@ -248,4 +247,5 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.public', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/liaison/student_index.blade.php ENDPATH**/ ?>
