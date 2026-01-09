@@ -114,4 +114,4 @@
              <i class="ph-duotone ph-gear text-blue-400 text-xl group-hover:rotate-90 transition-transform duration-700"></i>
         </div>
     </div>
-</nav><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/layouts/navigation.blade.php ENDPATH**/ ?>
+</nav><?php /**PATH D:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/layouts/navigation.blade.php ENDPATH**/ ?>

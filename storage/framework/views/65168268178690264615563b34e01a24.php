@@ -29,4 +29,4 @@ foreach ($attributes->all() as $__key => $__value) {
 unset($__defined_vars); ?>
 
 <input <?php if($disabled): echo 'disabled'; endif; ?> <?php echo e($attributes->merge(['class' => 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm'])); ?>>
-<?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/components/text-input.blade.php ENDPATH**/ ?>
+<?php /**PATH D:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/components/text-input.blade.php ENDPATH**/ ?>

@@ -159,4 +159,4 @@
             </div>
         </div>
     </body>
-</html><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/layouts/guest.blade.php ENDPATH**/ ?>
+</html><?php /**PATH D:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/layouts/guest.blade.php ENDPATH**/ ?>

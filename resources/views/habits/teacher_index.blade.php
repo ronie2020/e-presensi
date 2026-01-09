@@ -207,6 +207,20 @@
                                             <span class="text-slate-300 text-xs font-bold italic tracking-tighter">MENUNGGU...</span>
                                         @endif
                                     </td>
+                                                                           
+                                    <td class="px-6 py-5 text-center">
+                                        @if($student->habit_data && $student->habit_data->habit_5) 
+                                            {{-- Asumsi habit_5 adalah Makan Sehat --}}
+                                            <span class="inline-flex w-8 h-8 items-center justify-center rounded-full bg-orange-100 text-orange-600 shadow-sm" title="Sudah Mengambil Makan">
+                                                <i class="ph-fill ph-check font-bold"></i>
+                                            </span>
+                                        @else
+                                            <span class="inline-flex w-8 h-8 items-center justify-center rounded-full bg-slate-50 text-slate-300 border border-slate-100" title="Belum Mengambil">
+                                                <i class="ph-bold ph-minus"></i>
+                                            </span>
+                                        @endif
+                                    </td>
+
                                     <td class="px-10 py-5 text-right">
                                         @if($student->habit_data)
                                             <button onclick="openDetail({{ $student->habit_data->id }})" 

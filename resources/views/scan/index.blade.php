@@ -39,18 +39,15 @@
     @endpush
 
     @php
+        // Ambil data dari Controller
         $safeSchedule = isset($scheduleConfig) ? $scheduleConfig : [];
         $scheduleJson = json_encode($safeSchedule);
         
-        // DATA DUMMY UNTUK TAMPILAN AWAL (Nanti diganti variable dari Controller)
-        // $totalStudents = $studentsCount ?? 0;
-        // $mealTaken = $todaysMealCount ?? 0;
-        
-        // Contoh data statis sementara agar UI terlihat
-        $totalTarget = 500; // Total Siswa
-        $currentTaken = 0;  // Akan dihitung via JS atau Backend
+        $totalTarget = $statsConfig['total_target'] ?? 0;
+        $currentTaken = $statsConfig['current_taken'] ?? 0;
     @endphp
 
+    {{-- WRAPPER UTAMA - Init Audio saat user klik area mana saja --}}
     <div class="py-4 md:py-8 font-sans text-slate-800" onclick="initAudio()"> 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
@@ -80,10 +77,8 @@
                 </div>
             </div>
 
-            {{-- PANEL REKAP GIZI (BARU: Hidden by default, Visible on 'Makan' mode) --}}
+            {{-- PANEL REKAP GIZI --}}
             <div id="makan-stats-panel" class="hidden grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate-enter">
-                
-                {{-- Card 1: Total Target --}}
                 <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4 relative overflow-hidden group">
                     <div class="w-14 h-14 rounded-2xl bg-slate-50 text-slate-500 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 transition-transform">
                         <i class="ph-duotone ph-users-three"></i>
@@ -94,7 +89,6 @@
                     </div>
                 </div>
 
-                {{-- Card 2: Sudah Ambil (Realtime Update) --}}
                 <div class="bg-orange-500 p-5 rounded-[2rem] border border-orange-400 shadow-lg shadow-orange-500/20 flex items-center gap-4 relative overflow-hidden text-white group">
                     <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-110 transition-transform"><i class="ph-fill ph-check-circle text-6xl"></i></div>
                     <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-3xl shrink-0 border border-white/20">
@@ -106,7 +100,6 @@
                     </div>
                 </div>
 
-                {{-- Card 3: Sisa Porsi (Realtime Update) --}}
                 <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4 relative overflow-hidden group">
                     <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 transition-transform">
                         <i class="ph-duotone ph-cookie"></i>
@@ -122,7 +115,7 @@
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 mb-6 md:mb-8">
                 @foreach([
                     ['id'=>'harian', 'label'=>'Absen Harian', 'sub'=>'Masuk & Pulang', 'icon'=>'calendar-check', 'color'=>'blue', 'type'=>'Harian'],
-                    ['id'=>'makan', 'label'=>'Makan Bergizi', 'sub'=>'Jam 09:00 - 10:00', 'icon'=>'bowl-food', 'color'=>'orange', 'type'=>'Makan'],
+                    ['id'=>'makan', 'label'=>'Makan Bergizi', 'sub'=>'Jam Makan Siang', 'icon'=>'bowl-food', 'color'=>'orange', 'type'=>'Makan'],
                     ['id'=>'dhuha', 'label'=>'Sholat Dhuha', 'sub'=>'Ibadah Pagi', 'icon'=>'sun-horizon', 'color'=>'emerald', 'type'=>'Dhuha'],
                     ['id'=>'dhuhur', 'label'=>'Sholat Dhuhur', 'sub'=>'Ibadah Siang', 'icon'=>'moon-stars', 'color'=>'amber', 'type'=>'Dhuhur'],
                     ['id'=>'ekskul', 'label'=>'Ekskul', 'sub'=>'Kegiatan Sore', 'icon'=>'basketball', 'color'=>'purple', 'type'=>'Ekstrakurikuler']
@@ -175,13 +168,15 @@
                             </div>
                         </div>
 
-                        <div class="relative bg-slate-900 rounded-[1rem] md:rounded-[1.5rem] overflow-hidden aspect-square border-[3px] md:border-[4px] border-slate-900 shadow-inner group">
+                        {{-- Perbaikan aspek rasio untuk HP agar tidak terpotong --}}
+                        <div class="relative bg-slate-900 rounded-[1rem] md:rounded-[1.5rem] overflow-hidden aspect-auto min-h-[300px] border-[3px] md:border-[4px] border-slate-900 shadow-inner group">
                             @if(isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false))
                             <div class="holiday-overlay text-center p-6">
                                 <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4"><i class="ph-duotone ph-prohibit text-3xl"></i></div>
                                 <h3 class="text-xl font-black text-slate-800 mb-2">Scanner Nonaktif</h3>
                             </div>
                             @endif
+                            {{-- QR Reader diisi JS --}}
                             <div id="qr-reader" class="w-full h-full object-cover"></div>
                             <div id="scanner-overlay-el" class="scanner-overlay z-20"><div class="scanner-line"></div></div>
                             <div class="absolute bottom-6 left-0 right-0 flex justify-center z-30 px-6">
@@ -219,7 +214,6 @@
                         <div class="flex-1 overflow-hidden relative">
                             <div class="absolute inset-0 overflow-auto custom-scrollbar">
                                 <table class="w-full text-left border-collapse">
-                                    {{-- TABLE HEADER RESPONSIVE --}}
                                     <thead class="bg-white sticky top-0 z-10 shadow-sm text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">
                                         <tr>
                                             <th class="px-3 py-3 md:px-6 md:py-4 rounded-tl-2xl">Siswa</th>
@@ -234,10 +228,10 @@
                                         @if(isset($recentScans))
                                             @foreach($recentScans as $scan)
                                                 <tr class="log-entry group hover:bg-slate-50/80 transition-colors" 
-                                                    data-harian="{{ $scan['data_harian'] ? 'true' : 'false' }}"
+                                                    data-harian="{{ ($scan['data_harian'] ?? false) ? 'true' : 'false' }}"
                                                     data-makan="{{ ($scan['data_makan'] ?? false) ? 'true' : 'false' }}"
-                                                    data-dhuha="{{ $scan['data_dhuha'] ? 'true' : 'false' }}"
-                                                    data-dhuhur="{{ $scan['data_dhuhur'] ? 'true' : 'false' }}"
+                                                    data-dhuha="{{ ($scan['data_dhuha'] ?? false) ? 'true' : 'false' }}"
+                                                    data-dhuhur="{{ ($scan['data_dhuhur'] ?? false) ? 'true' : 'false' }}"
                                                     data-ekskul="{{ ($scan['data_ekskul'] ?? false) ? 'true' : 'false' }}">
                                                     
                                                     <td class="px-3 py-3 md:px-6 md:py-4">
@@ -245,27 +239,26 @@
                                                         <div class="text-[9px] md:text-[10px] text-slate-400 font-mono mt-0.5">{{ $scan['student_id'] }}</div>
                                                     </td>
                                                     <td class="col-harian px-2 py-3 md:px-4 md:py-4 text-center">
-                                                        @if($scan['time_in']) <span class="font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs">{{ \Carbon\Carbon::parse($scan['time_in'])->format('H:i') }}</span>
+                                                        @if($scan['time_in'] ?? false) <span class="font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs">{{ \Carbon\Carbon::parse($scan['time_in'])->format('H:i') }}</span>
                                                         @else <span class="text-slate-300">-</span> @endif
                                                     </td>
                                                     <td class="col-harian px-2 py-3 md:px-4 md:py-4 text-center">
-                                                        @if($scan['time_out']) <span class="font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs">{{ \Carbon\Carbon::parse($scan['time_out'])->format('H:i') }}</span>
+                                                        @if($scan['time_out'] ?? false) <span class="font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs">{{ \Carbon\Carbon::parse($scan['time_out'])->format('H:i') }}</span>
                                                         @else <span class="text-slate-300">-</span> @endif
                                                     </td>
                                                     <td class="col-waktu hidden-col px-2 py-3 md:px-4 md:py-4 text-center">
-                                                        {{-- Condensed Time Cells --}}
                                                         @php $timeFormat = function($t) { return $t ? \Carbon\Carbon::parse($t)->format('H:i') : '-'; }; @endphp
                                                         <span class="time-makan font-mono font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs {{ ($scan['makan_time'] ?? false) ? '' : 'hidden' }}">{{ $timeFormat($scan['makan_time'] ?? false) }}</span>
-                                                        <span class="time-dhuha font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs {{ $scan['dhuha_time'] ? '' : 'hidden' }}">{{ $timeFormat($scan['dhuha_time']) }}</span>
-                                                        <span class="time-dhuhur font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs {{ $scan['dhuhur_time'] ? '' : 'hidden' }}">{{ $timeFormat($scan['dhuhur_time']) }}</span>
+                                                        <span class="time-dhuha font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs {{ ($scan['dhuha_time'] ?? false) ? '' : 'hidden' }}">{{ $timeFormat($scan['dhuha_time'] ?? false) }}</span>
+                                                        <span class="time-dhuhur font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs {{ ($scan['dhuhur_time'] ?? false) ? '' : 'hidden' }}">{{ $timeFormat($scan['dhuhur_time'] ?? false) }}</span>
                                                         <span class="time-ekskul font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs {{ ($scan['ekskul_time'] ?? false) ? '' : 'hidden' }}">{{ $timeFormat($scan['ekskul_time'] ?? false) }}</span>
                                                     </td>
                                                     <td class="col-kegiatan hidden-col px-2 py-3 md:px-4 md:py-4 text-center text-slate-600 font-medium text-[10px] md:text-xs line-clamp-1">
                                                         {{ $scan['ekskul_name'] ?? '-' }}
                                                     </td>
                                                     <td class="log-status px-3 py-3 md:px-6 md:py-4 text-right">
-                                                        <span class="badge-harian inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide {{ $scan['status'] == 'Masuk' ? 'bg-emerald-100 text-emerald-700' : ($scan['status'] == 'Terlambat' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500') }}">
-                                                            {{ $scan['status'] }}
+                                                        <span class="badge-harian inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide {{ ($scan['status'] ?? '') == 'Masuk' ? 'bg-emerald-100 text-emerald-700' : (($scan['status'] ?? '') == 'Terlambat' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500') }}">
+                                                            {{ $scan['status'] ?? '-' }}
                                                         </span>
                                                         <span class="badge-makan hidden inline-flex items-center gap-1 px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide bg-orange-100 text-orange-700"><i class="ph-fill ph-check"></i> Diambil</span>
                                                         <span class="badge-dhuha hidden inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide bg-emerald-100 text-emerald-700">Selesai</span>
@@ -295,34 +288,51 @@
     <script>
         const SCHEDULE_DATA = {!! $scheduleJson !!};
         
-        // --- VARIABLES COUNTER (DIUPDATE SECARA REALTIME VIA JS) ---
-        // Catatan: Idealnya data awal dilempar dari controller ke variabel ini
         let statsData = {
             total: {{ $totalTarget }},
             taken: {{ $currentTaken }}
         };
 
+        // AUDIO CONTEXT (Improvement: Check state before creating new one)
         let audioCtx;
-        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
+        function initAudio() { 
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+            if (audioCtx.state === 'suspended') audioCtx.resume(); 
+        }
+
         function escapeHtml(text) { if (!text) return text; return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
 
         document.addEventListener('DOMContentLoaded', (event) => {
             if(SCHEDULE_DATA.is_holiday) return;
-            const toMinutes = (timeStr) => { if(!timeStr) return 0; const [h, m] = timeStr.split(':').map(Number); return h * 60 + m; };
             
-            // KONFIGURASI JAM DI SINI
+            const toMinutes = (timeStr) => { 
+                if(!timeStr) return 0; 
+                const [h, m] = timeStr.split(':').map(Number); 
+                return h * 60 + m; 
+            };
+            
+            // --- 1. KONFIGURASI DINAMIS DARI DATABASE ---
             const MODE_TIMES = {
-                // Jam 09:00 (540 menit) s.d 10:00 (600 menit)
-                MAKAN_START: 540, 
-                MAKAN_END: 600,
-                
-                DHUHA_START: toMinutes(SCHEDULE_DATA.dhuha_start || '07:30'), DHUHA_END: toMinutes(SCHEDULE_DATA.dhuha_end || '09:00'),
-                DHUHUR_START: toMinutes(SCHEDULE_DATA.dhuhur_start || '11:45'), DHUHUR_END: toMinutes(SCHEDULE_DATA.dhuhur_end || '12:30')
+                MAKAN_START: toMinutes(SCHEDULE_DATA.makan_start || '09:00'), 
+                MAKAN_END: toMinutes(SCHEDULE_DATA.makan_end || '10:00'),
+                DHUHA_START: toMinutes(SCHEDULE_DATA.dhuha_start || '07:30'), 
+                DHUHA_END: toMinutes(SCHEDULE_DATA.dhuha_end || '09:00'),
+                DHUHUR_START: toMinutes(SCHEDULE_DATA.dhuhur_start || '11:45'), 
+                DHUHUR_END: toMinutes(SCHEDULE_DATA.dhuhur_end || '12:30')
             };
 
-            let currentScanMode = 'Harian'; let selectedExtra = ''; let manualOverride = false; let resultTimeout; let isProcessing = false;
-            const csrfToken = '{{ csrf_token() }}'; const scanProcessUrl = '{{ route('scan.process') }}'; 
+            let currentScanMode = 'Harian'; 
+            let selectedExtra = ''; 
+            let manualOverride = false; 
+            let isProcessing = false;
+            
+            // --- 2. DEBOUNCE SET (Mencegah Double Scan) ---
+            const processedSet = new Set(); 
 
+            const csrfToken = '{{ csrf_token() }}'; 
+            const scanProcessUrl = '{{ route('scan.process') }}'; 
+
+            // DOM Elements
             const logTableBody = document.getElementById('scan-log');
             const scanStatus = document.getElementById('scan-status');
             const scanResult = document.getElementById('scan-result');
@@ -332,23 +342,32 @@
             const extraSelect = document.getElementById('extra-activity-select');
             const btnResetAuto = document.getElementById('btn-reset-auto');
             const scannerOverlay = document.getElementById('scanner-overlay-el');
-
-            // REFERENSI PANEL STATS
+            
+            // Stats Panel Elements
             const makanStatsPanel = document.getElementById('makan-stats-panel');
-            const elStatTotal = document.getElementById('stat-total');
             const elStatTaken = document.getElementById('stat-taken');
             const elStatRemaining = document.getElementById('stat-remaining');
 
             function playBeep(type = 'success') {
-                try { initAudio(); const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.type = 'sine';
+                try { 
+                    initAudio(); 
+                    const osc = audioCtx.createOscillator(); 
+                    const gain = audioCtx.createGain(); 
+                    osc.connect(gain); 
+                    gain.connect(audioCtx.destination); 
+                    osc.type = 'sine';
+                    
                     let freq = 880; 
                     if(type === 'warning') freq = 440; 
                     else if(type === 'error') freq = 200;
-                    else if(type === 'makan') freq = 600; // Nada khusus makan
+                    else if(type === 'makan') freq = 600; 
 
-                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime); gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5); 
-                    osc.start(audioCtx.currentTime); osc.stop(audioCtx.currentTime + 0.5);
-                } catch (e) { console.log("Audio err"); }
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime); 
+                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
+                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5); 
+                    osc.start(audioCtx.currentTime); 
+                    osc.stop(audioCtx.currentTime + 0.5);
+                } catch (e) { console.log("Audio err", e); }
             }
 
             const visualConfig = { 
@@ -359,12 +378,15 @@
                 'Ekstrakurikuler': {color:'purple',label:'Ekstrakurikuler'} 
             };
             
+            // Clock Logic
             const clockElement = document.getElementById('clock');
             if(clockElement) { setInterval(() => { clockElement.textContent = new Date().toLocaleTimeString('id-ID', { hour12: false }); }, 1000); }
 
+            // Auto Mode Logic
             function autoSelectMode() {
                 if (manualOverride) return;
-                const now = new Date(); const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                const now = new Date(); 
+                const currentMinutes = now.getHours() * 60 + now.getMinutes();
                 let newMode = 'Harian';
                 
                 if (currentMinutes >= MODE_TIMES.MAKAN_START && currentMinutes < MODE_TIMES.MAKAN_END) newMode = 'Makan';
@@ -378,22 +400,32 @@
 
             function selectScanMode(type, isAuto = false) {
                 if (!isAuto) { manualOverride = true; btnResetAuto.classList.remove('hidden'); initAudio(); } else { btnResetAuto.classList.add('hidden'); }
-                currentScanMode = type; const config = visualConfig[type];
+                currentScanMode = type; 
+                const config = visualConfig[type];
                 
+                // Update UI Buttons
                 document.querySelectorAll('.scan-type-btn').forEach(btn => {
-                    const btnType = btn.getAttribute('data-type'); const activeBorder = btn.querySelector('.active-border'); const indicator = btn.querySelector('.indicator-dot');
-                    if (btnType === type) { activeBorder.classList.remove('opacity-0', 'scale-95'); indicator.className = `w-2.5 h-2.5 md:w-3 md:h-3 rounded-full indicator-dot bg-${config.color}-500 shadow-[0_0_8px_rgba(0,0,0,0.2)]`; } 
-                    else { activeBorder.classList.add('opacity-0', 'scale-95'); indicator.className = `w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border-2 border-slate-200 indicator-dot`; }
+                    const btnType = btn.getAttribute('data-type'); 
+                    const activeBorder = btn.querySelector('.active-border'); 
+                    const indicator = btn.querySelector('.indicator-dot');
+                    
+                    if (btnType === type) { 
+                        activeBorder.classList.remove('opacity-0', 'scale-95'); 
+                        indicator.className = `w-2.5 h-2.5 md:w-3 md:h-3 rounded-full indicator-dot bg-${config.color}-500 shadow-[0_0_8px_rgba(0,0,0,0.2)]`; 
+                    } else { 
+                        activeBorder.classList.add('opacity-0', 'scale-95'); 
+                        indicator.className = `w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border-2 border-slate-200 indicator-dot`; 
+                    }
                 });
                 
+                // Update Badge
                 modeBadgeText.innerText = config.label;
                 modeBadge.className = `px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-wider border flex items-center gap-1.5 md:gap-2 bg-${config.color}-50 text-${config.color}-600 border-${config.color}-100`;
                 modeBadge.querySelector('span').className = `w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-${config.color}-500 animate-pulse`;
 
-                // LOGIKA TAMPILAN PER-MODE
+                // Update Visible Panel
                 extraContainer.classList.add('hidden');
                 
-                // Toggle Panel Stats Makan
                 if (type === 'Makan') {
                     makanStatsPanel.classList.remove('hidden');
                     makanStatsPanel.classList.add('grid');
@@ -410,20 +442,31 @@
                     }
                 }
                 
-                updateTableLayout(type); filterLogs(type);
+                updateTableLayout(type); 
+                filterLogs(type);
             }
 
+            // Event Listeners
             document.querySelectorAll('.scan-type-btn').forEach(btn => { btn.addEventListener('click', () => selectScanMode(btn.getAttribute('data-type'))); });
             extraSelect.addEventListener('change', (e) => {
                 selectedExtra = e.target.value; 
                 if (selectedExtra) scanStatus.innerHTML = `<i class="ph-bold ph-check text-purple-500"></i> Siap: ${selectedExtra}`;
                 else scanStatus.innerHTML = `<i class="ph-bold ph-warning text-amber-500"></i> Pilih Kegiatan!`;
             });
-            autoSelectMode(); setInterval(autoSelectMode, 60000); 
+            
+            // Run Init
+            autoSelectMode(); 
+            setInterval(autoSelectMode, 60000); 
 
+            // Table Helpers
             function updateTableLayout(type) {
-                const harianCols = document.querySelectorAll('.col-harian'); const waktuCols = document.querySelectorAll('.col-waktu'); const kegiatanCols = document.querySelectorAll('.col-kegiatan');
-                harianCols.forEach(el => el.classList.add('hidden-col')); waktuCols.forEach(el => el.classList.add('hidden-col')); kegiatanCols.forEach(el => el.classList.add('hidden-col'));
+                const harianCols = document.querySelectorAll('.col-harian'); 
+                const waktuCols = document.querySelectorAll('.col-waktu'); 
+                const kegiatanCols = document.querySelectorAll('.col-kegiatan');
+                
+                harianCols.forEach(el => el.classList.add('hidden-col')); 
+                waktuCols.forEach(el => el.classList.add('hidden-col')); 
+                kegiatanCols.forEach(el => el.classList.add('hidden-col'));
                 
                 if (type === 'Harian') harianCols.forEach(el => el.classList.remove('hidden-col'));
                 else if (type === 'Ekstrakurikuler') { waktuCols.forEach(el => el.classList.remove('hidden-col')); kegiatanCols.forEach(el => el.classList.remove('hidden-col')); }
@@ -431,7 +474,8 @@
             }
 
             function filterLogs(type) {
-                const rows = logTableBody.querySelectorAll('.log-entry'); let visibleCount = 0;
+                const rows = logTableBody.querySelectorAll('.log-entry'); 
+                let visibleCount = 0;
                 rows.forEach(row => {
                     let shouldShow = false;
                     if (type === 'Harian') shouldShow = row.getAttribute('data-harian') === 'true';
@@ -440,8 +484,15 @@
                     else if (type === 'Dhuhur') shouldShow = row.getAttribute('data-dhuhur') === 'true';
                     else if (type === 'Ekstrakurikuler') shouldShow = row.getAttribute('data-ekskul') === 'true';
                     
-                    if (shouldShow) { row.classList.remove('hidden-row'); toggleCells(row, type.toLowerCase()); visibleCount++; } else row.classList.add('hidden-row');
+                    if (shouldShow) { 
+                        row.classList.remove('hidden-row'); 
+                        toggleCells(row, type.toLowerCase()); 
+                        visibleCount++; 
+                    } else {
+                        row.classList.add('hidden-row');
+                    }
                 });
+                
                 const noLogEntry = document.getElementById('no-log-entry');
                 if (visibleCount === 0) noLogEntry.classList.remove('hidden'); else noLogEntry.classList.add('hidden');
             }
@@ -449,24 +500,38 @@
             function toggleCells(row, activeType) {
                 row.querySelectorAll('.badge-harian, .badge-makan, .badge-dhuha, .badge-dhuhur, .badge-ekskul').forEach(el => el.classList.add('hidden'));
                 row.querySelectorAll('.col-waktu span').forEach(el => el.classList.add('hidden'));
-                let badgeClass = `.badge-${activeType}`; if(row.querySelector(badgeClass)) row.querySelector(badgeClass).classList.remove('hidden');
-                if (activeType !== 'harian') { let timeClass = `.time-${activeType}`; if(row.querySelector(timeClass)) row.querySelector(timeClass).classList.remove('hidden'); }
+                
+                let badgeClass = `.badge-${activeType}`; 
+                if(row.querySelector(badgeClass)) row.querySelector(badgeClass).classList.remove('hidden');
+                
+                if (activeType !== 'harian') { 
+                    let timeClass = `.time-${activeType}`; 
+                    if(row.querySelector(timeClass)) row.querySelector(timeClass).classList.remove('hidden'); 
+                }
             }
 
-            // FUNGSI UPDATE STATISTIK UI
-            function updateMakanStats() {
-                statsData.taken++; // Increment local counter
+            function updateMakanStats(serverTotal) {
+                // Update dari server (lebih akurat) atau increment lokal
+                if(serverTotal) statsData.taken = serverTotal;
+                else statsData.taken++; 
+                
                 elStatTaken.textContent = statsData.taken;
                 elStatRemaining.textContent = statsData.total - statsData.taken;
                 
-                // Animasi visual kecil
                 elStatTaken.parentElement.classList.add('scale-105');
                 setTimeout(() => elStatTaken.parentElement.classList.remove('scale-105'), 200);
             }
 
             function addNewRowToTable(scanData, scanType) {
-                const now = new Date(); const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                const name = scanData.student?.name || scanData.student_name || 'Siswa'; const id = scanData.student?.id || scanData.student_id || 'ID'; const status = scanData.status || 'Hadir';
+                const now = new Date(); 
+                const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                const name = scanData.student_name || 'Siswa'; 
+                const id = scanData.student_id || 'ID'; 
+                const status = scanData.status || 'Hadir';
+                
+                // Hapus baris 'no data' jika ada
+                document.getElementById('no-log-entry').classList.add('hidden');
+
                 const row = document.createElement('tr');
                 row.className = 'log-entry group hover:bg-slate-50/80 transition-colors new-row-entry';
                 
@@ -479,17 +544,13 @@
                 
                 let statusClass = 'bg-slate-100 text-slate-500';
                 if(status === 'Masuk' || status === 'Hadir') statusClass = 'bg-emerald-100 text-emerald-700';
-                else if(status.includes('Terlambat')) statusClass = 'bg-amber-100 text-amber-700';
+                else if(String(status).includes('Terlambat')) statusClass = 'bg-amber-100 text-amber-700';
 
-                // Kolom badge khusus
+                // Kolom badge
                 let statusBadgeHtml = '';
-                if(scanType === 'Makan') {
-                    statusBadgeHtml = `<span class="badge-makan inline-flex items-center gap-1 px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide bg-orange-100 text-orange-700"><i class="ph-fill ph-check"></i> Diambil</span>`;
-                } else if (scanType === 'Harian') {
-                    statusBadgeHtml = `<span class="badge-harian inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide ${statusClass}">${escapeHtml(status)}</span>`;
-                } else {
-                     statusBadgeHtml = `<span class="inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide bg-emerald-100 text-emerald-700">Selesai</span>`;
-                }
+                if(scanType === 'Makan') statusBadgeHtml = `<span class="badge-makan inline-flex items-center gap-1 px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide bg-orange-100 text-orange-700"><i class="ph-fill ph-check"></i> Diambil</span>`;
+                else if (scanType === 'Harian') statusBadgeHtml = `<span class="badge-harian inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide ${statusClass}">${escapeHtml(status)}</span>`;
+                else statusBadgeHtml = `<span class="inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide bg-emerald-100 text-emerald-700">Selesai</span>`;
 
                 row.innerHTML = `
                     <td class="px-3 py-3 md:px-6 md:py-4">
@@ -510,76 +571,123 @@
                         ${statusBadgeHtml}
                     </td>
                 `;
-                logTableBody.insertBefore(row, logTableBody.firstChild); filterLogs(currentScanMode);
+                logTableBody.insertBefore(row, logTableBody.firstChild); 
+                filterLogs(currentScanMode);
             }
 
-            // Scanner Setup
-            const html5QrCode = new Html5Qrcode("qr-reader");
-            const onScanSuccess = (decodedText, decodedResult) => {
-                if (isProcessing) return;
-                if (currentScanMode === 'Ekstrakurikuler' && !selectedExtra) {
-                    Swal.fire({ icon: 'warning', title: 'Pilih Kegiatan!', text: 'Silakan pilih jenis ekstrakurikuler.', timer: 2000, showConfirmButton: false }); return;
-                }
-                isProcessing = true; html5QrCode.pause(); scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-blue-600"></i> Memproses...`;
-                if (decodedText.length < 3 || decodedText.length > 50) { showScanResult('error', 'QR Invalid'); triggerScanEffect('error'); playBeep('error'); resumeScanner(); return; }
-                
-                // Tambahkan handler untuk Makan
-                let handler;
-                if (currentScanMode === 'Harian') handler = handleScanHarian;
-                else if (currentScanMode === 'Makan') handler = (id) => handleScanKegiatan(id, 'Makan', null);
-                else handler = (id) => handleScanKegiatan(id, currentScanMode, selectedExtra);
-                
-                handler(decodedText);
-            };
-
-            function triggerScanEffect(type) {
-                scannerOverlay.classList.remove('scan-success-effect', 'scan-error-effect', 'scan-warning-effect', 'scan-makan-effect'); 
-                
-                if (currentScanMode === 'Makan' && type === 'success') {
-                    scannerOverlay.classList.add('scan-makan-effect');
-                } else {
-                    scannerOverlay.classList.add(`scan-${type}-effect`);
-                }
-                
-                setTimeout(() => {
-                     scannerOverlay.classList.remove(`scan-${type}-effect`, 'scan-makan-effect');
-                }, 500);
-            }
-            async function handleScanHarian(studentId) { await processScan(studentId, 'Harian'); }
-            async function handleScanKegiatan(studentId, type, extraName) { await processScan(studentId, type, extraName); }
-
+            // QR HANDLER
             async function processScan(studentId, type, activity = null) {
                 try {
-                    const body = { student_id: studentId, type: type }; if(activity) body.activity = activity;
-                    const response = await fetch(scanProcessUrl, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(body) });
+                    const body = { student_id: studentId, type: type }; 
+                    if(activity) body.activity = activity;
+                    
+                    const response = await fetch(scanProcessUrl, { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, 
+                        body: JSON.stringify(body) 
+                    });
+                    
                     const result = await response.json();
+                    
                     if (response.ok) {
-                        const isLate = result.message.toUpperCase().includes('TERLAMBAT');
+                        const isLate = String(result.message).toUpperCase().includes('TERLAMBAT');
                         
-                        // Efek khusus makan
                         if (type === 'Makan') {
-                             triggerScanEffect('success'); playBeep('makan');
-                             updateMakanStats(); // UPDATE COUNTER DISINI
+                             triggerScanEffect('success'); 
+                             playBeep('makan');
+                             // Gunakan data stats dari server jika ada
+                             updateMakanStats(result.stats ? result.stats.taken : null); 
                         } else {
-                             triggerScanEffect(isLate ? 'warning' : 'success'); playBeep(isLate ? 'warning' : 'success'); 
+                             triggerScanEffect(isLate ? 'warning' : 'success'); 
+                             playBeep(isLate ? 'warning' : 'success'); 
                         }
                         
                         showScanResult(isLate ? 'warning' : 'success', result.message);
                         if(result.scan) addNewRowToTable(result.scan, type);
                     } else { 
-                        triggerScanEffect('error'); showScanResult(response.status === 409 ? 'warning' : 'error', result.message || 'Error Server'); playBeep('error'); 
+                        triggerScanEffect('error'); 
+                        showScanResult(response.status === 409 ? 'warning' : 'error', result.message || 'Error Server'); 
+                        playBeep('error'); 
                     }
-                } catch (error) { triggerScanEffect('error'); showScanResult('error', 'Gagal koneksi server.'); playBeep('error'); 
-                } finally { resumeScanner(); }
+                } catch (error) { 
+                    triggerScanEffect('error'); 
+                    showScanResult('error', 'Gagal koneksi server.'); 
+                    playBeep('error'); 
+                } finally { 
+                    resumeScanner(); 
+                }
             }
 
+            const onScanSuccess = (decodedText, decodedResult) => {
+                if (isProcessing) return;
+
+                // --- 2. DEBOUNCE CHECK ---
+                // Jika ID ini baru saja diproses dalam 5 detik terakhir, abaikan
+                if (processedSet.has(decodedText)) {
+                    console.log(`Scan diabaikan: ${decodedText} (Cooldown)`);
+                    return; 
+                }
+
+                if (currentScanMode === 'Ekstrakurikuler' && !selectedExtra) {
+                    Swal.fire({ icon: 'warning', title: 'Pilih Kegiatan!', text: 'Silakan pilih jenis ekstrakurikuler.', timer: 2000, showConfirmButton: false }); return;
+                }
+
+                isProcessing = true; 
+                html5QrCode.pause(); 
+                
+                // Tambahkan ke Set Cooldown
+                processedSet.add(decodedText);
+                setTimeout(() => processedSet.delete(decodedText), 5000); // Hapus setelah 5 detik
+
+                scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-blue-600"></i> Memproses...`;
+                
+                if (decodedText.length < 3 || decodedText.length > 50) { 
+                    showScanResult('error', 'QR Invalid'); 
+                    triggerScanEffect('error'); 
+                    playBeep('error'); 
+                    resumeScanner(); 
+                    return; 
+                }
+                
+                let handler;
+                if (currentScanMode === 'Harian') handler = () => processScan(decodedText, 'Harian');
+                else if (currentScanMode === 'Makan') handler = () => processScan(decodedText, 'Makan', null);
+                else handler = () => processScan(decodedText, currentScanMode, selectedExtra);
+                
+                handler();
+            };
+
+            // Setup HTML5 Qr Code
+            const html5QrCode = new Html5Qrcode("qr-reader");
             const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
-            Html5Qrcode.getCameras().then(cameras => {
-                if (cameras && cameras.length) {
-                    const rearCamera = cameras.find(c => c.label.toLowerCase().includes('back')) || cameras[0];
-                    html5QrCode.start(rearCamera.id, config, onScanSuccess).catch(() => html5QrCode.start(cameras[0].id, config, onScanSuccess));
-                } else { scanStatus.textContent = "Kamera error"; Swal.fire('Error', 'Kamera tidak ditemukan.', 'error'); }
-            }).catch(err => { scanStatus.textContent = "Izin kamera ditolak"; Swal.fire('Error', 'Izin kamera ditolak.', 'error'); });
+            
+            function startCamera() {
+                Html5Qrcode.getCameras().then(cameras => {
+                    if (cameras && cameras.length) {
+                        const rearCamera = cameras.find(c => c.label.toLowerCase().includes('back')) || cameras[0];
+                        html5QrCode.start(rearCamera.id, config, onScanSuccess)
+                            .catch(err => {
+                                console.error(err);
+                                // Fallback jika kamera belakang gagal
+                                html5QrCode.start(cameras[0].id, config, onScanSuccess);
+                            });
+                    } else { 
+                        scanStatus.textContent = "Kamera tidak ditemukan"; 
+                        Swal.fire('Error', 'Kamera tidak ditemukan.', 'error'); 
+                    }
+                }).catch(err => { 
+                    scanStatus.textContent = "Izin kamera ditolak"; 
+                    Swal.fire('Error', 'Izin kamera ditolak.', 'error'); 
+                });
+            }
+            startCamera();
+
+            function triggerScanEffect(type) {
+                scannerOverlay.classList.remove('scan-success-effect', 'scan-error-effect', 'scan-warning-effect', 'scan-makan-effect'); 
+                if (currentScanMode === 'Makan' && type === 'success') scannerOverlay.classList.add('scan-makan-effect');
+                else scannerOverlay.classList.add(`scan-${type}-effect`);
+                setTimeout(() => scannerOverlay.classList.remove(`scan-${type}-effect`, 'scan-makan-effect'), 500);
+            }
 
             function resumeScanner() {
                 setTimeout(() => { 
@@ -588,17 +696,21 @@
                     if (currentScanMode === 'Ekstrakurikuler') statusText = (selectedExtra || 'Pilih Kegiatan');
                     if (currentScanMode === 'Makan') statusText = 'Ambil Makan';
                     
-                    scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-slate-500"></i> Scan QR ${statusText}`; isProcessing = false; 
-                }, 2000); 
+                    scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-slate-500"></i> Scan QR ${statusText}`; 
+                    isProcessing = false; 
+                }, 1500); 
             }
 
+            let resultTimeout;
             function showScanResult(type, message) {
                 if (resultTimeout) clearTimeout(resultTimeout);
                 scanResult.className = 'mt-3 md:mt-4 p-3 md:p-4 rounded-xl font-bold text-xs md:text-sm text-center transition-all duration-500 shadow-sm transform scale-100 opacity-100 border';
                 const colors = { success: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' }, warning: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' }, error: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' } };
                 const c = colors[type] || colors.error;
-                scanResult.classList.add(c.bg, c.text, c.border); scanResult.innerHTML = `<span>${escapeHtml(message)}</span>`; scanResult.classList.remove('hidden');
-                resultTimeout = setTimeout(() => { scanResult.classList.add('opacity-0', 'scale-95'); setTimeout(() => scanResult.classList.add('hidden'), 300); }, 4000); 
+                scanResult.classList.add(c.bg, c.text, c.border); 
+                scanResult.innerHTML = `<span>${escapeHtml(message)}</span>`; 
+                scanResult.classList.remove('hidden');
+                resultTimeout = setTimeout(() => { scanResult.classList.add('opacity-0', 'scale-95'); setTimeout(() => scanResult.classList.add('hidden'), 300); }, 3000); 
             }
         });
     </script>
