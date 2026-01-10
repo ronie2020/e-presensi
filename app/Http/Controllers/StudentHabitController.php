@@ -21,7 +21,7 @@ class StudentHabitController extends Controller
         
         // 1. Cek Status Hari Ini
         $todayEntry = StudentHabit::where('student_id', $studentId)
-                        ->where('report_date', $today->format('Y-m-d'))
+                        ->whereDate('report_date', $today)
                         ->first();
 
         // 2. Hitung Laporan Bulan Ini
@@ -36,7 +36,7 @@ class StudentHabitController extends Controller
                             ->take(5)
                             ->get();
 
-        // 4. Hitung Statistik Poin (Logic disamakan dengan controller lama)
+        // 4. Hitung Poin (Contoh: Jumlah hari lapor x 100)
         $totalPoints = StudentHabit::where('student_id', $studentId)->count() * 100;
 
         return view('habits.student_dashboard', compact(
@@ -48,22 +48,19 @@ class StudentHabitController extends Controller
     }
 
     /**
-     * Halaman Form Jurnal (Index)
+     * Halaman Form Jurnal
      */
     public function index()
     {
         $studentId = Auth::guard('student')->id();
         $today = Carbon::now()->format('Y-m-d');
 
-        // Cek apakah sudah mengisi hari ini (untuk ditampilkan kembali di form)
         $todayEntry = StudentHabit::where('student_id', $studentId)
                         ->where('report_date', $today)
                         ->first();
 
-        // Ambil riwayat bulan ini
         $history = StudentHabit::where('student_id', $studentId)
                         ->whereMonth('report_date', Carbon::now()->month)
-                        ->whereYear('report_date', Carbon::now()->year)
                         ->orderBy('report_date', 'desc')
                         ->get();
 
@@ -71,104 +68,98 @@ class StudentHabitController extends Controller
     }
 
     /**
-     * Simpan atau Update Laporan (LOGIKA BARU)
+     * Simpan Laporan (LOGIKA PEMETAAN BARU)
      */
     public function store(Request $request)
     {
         $studentId = Auth::guard('student')->id();
         $today = Carbon::now()->format('Y-m-d');
 
-        // 1. Cek apakah data hari ini sudah ada?
+        // Cek data lama untuk validasi foto
         $existingEntry = StudentHabit::where('student_id', $studentId)
                             ->where('report_date', $today)
                             ->first();
 
-        // 2. Validasi Dinamis
-        // Jika belum pernah upload foto hari ini, maka WAJIB. Jika sudah ada, jadi OPTIONAL (nullable).
+        // Foto wajib jika belum pernah upload hari ini
         $photoRule = ($existingEntry && $existingEntry->photo_path) ? 'nullable' : 'required';
 
         $request->validate([
-            'habit_1_time' => 'nullable', // Boleh kosong jika belum bangun/belum diisi
             'habit_photo' => "$photoRule|image|mimes:jpeg,png,jpg|max:5120",
         ], [
-            'habit_photo.required' => 'Bukti foto kegiatan wajib diupload pertama kali ya!',
-            'habit_photo.image' => 'File harus berupa gambar.',
+            'habit_photo.required' => 'Bukti foto kolase kegiatan wajib diupload!',
             'habit_photo.max' => 'Ukuran foto maksimal 5MB.',
         ]);
 
         try {
             DB::beginTransaction();
 
-            // 3. Handle Upload Foto
+            // Handle Upload Foto
             $photoPath = $existingEntry ? $existingEntry->photo_path : null;
 
             if ($request->hasFile('habit_photo')) {
-                // Hapus foto lama jika ada (untuk menghemat storage)
+                // Hapus foto lama biar hemat storage
                 if ($existingEntry && $existingEntry->photo_path) {
                     if (Storage::disk('public')->exists($existingEntry->photo_path)) {
                         Storage::disk('public')->delete($existingEntry->photo_path);
                     }
                 }
-
-                // Upload foto baru
+                
                 $file = $request->file('habit_photo');
                 $filename = 'habit_' . $studentId . '_' . time() . '.' . $file->getClientOriginalExtension();
                 $photoPath = $file->storeAs('habits', $filename, 'public');
             }
 
-            // 4. Update Or Create (Kunci Perubahan)
-            // Ini memungkinkan data di-"cicil" (incremental update)
+            // SIMPAN DATA (MAPPING INPUT -> DB)
             StudentHabit::updateOrCreate(
                 [
                     'student_id' => $studentId,
                     'report_date' => $today
                 ],
                 [
-                    // Habit 1: Bangun & Ibadah
-                    'habit_1' => $request->has('check_1'),
+                    // 1. BANGUN TIDUR, MANDI DAN RAPI
+                    'habit_1' => $request->has('check_bangun'), // Input check_bangun -> habit_1
                     'habit_1_time' => $request->habit_1_time,
-                    'habit_1_note' => $request->habit_1_note,
+                    'habit_2' => $request->has('check_mandi'),  // Input check_mandi -> habit_2
 
-                    // Habit 2: Mandi/Rapi
-                    'habit_2' => $request->has('check_2'),
+                    // 2. SHALAT TEPAT WAKTU (Kolom Baru)
+                    'prayer_subuh' => $request->has('prayer_subuh'),
+                    'prayer_dhuha' => $request->has('prayer_dhuha'),   // Bisa dari Scanner atau Manual
+                    'prayer_dzuhur' => $request->has('prayer_dzuhur'), // Bisa dari Scanner atau Manual
+                    'prayer_ashar' => $request->has('prayer_ashar'),
+                    'prayer_maghrib' => $request->has('prayer_maghrib'),
+                    'prayer_isya' => $request->has('prayer_isya'),
 
-                    // Habit 3: Olahraga
-                    'habit_3' => $request->has('check_3'),
+                    // 3. OLAHRAGA
+                    'habit_3' => $request->has('check_olahraga'),
                     'habit_3_activity' => $request->habit_3_activity,
 
-                    // Habit 4: Belajar
-                    'habit_4' => $request->has('check_4'),
-                    'habit_4_subject' => $request->habit_4_subject,
-
-                    // Habit 5: Makan Sehat
-                    'habit_5' => $request->has('check_5'),
+                    // 4. MAKAN BERGIZI (Disimpan di habit_5 sesuai DB lama)
+                    'habit_5' => $request->has('check_makan'),
                     'habit_5_menu' => $request->habit_5_menu,
 
-                    // Habit 6: Bermasyarakat
-                    'habit_6' => $request->has('check_6'),
+                    // 5. GEMAR BELAJAR (Disimpan di habit_4 sesuai DB lama)
+                    'habit_4' => $request->has('check_belajar'),
+                    'habit_4_subject' => $request->habit_4_subject,
+
+                    // 6. BERMASYARAKAT
+                    'habit_6' => $request->has('check_sosial'),
                     'habit_6_activity' => $request->habit_6_activity,
 
-                    // Habit 7: Tidur Cukup
-                    'habit_7' => $request->has('check_7'),
+                    // 7. TIDUR CEPAT
+                    'habit_7' => $request->has('check_tidur'),
                     'habit_7_time' => $request->habit_7_time,
 
                     'photo_path' => $photoPath,
-                    // 'student_note' => $request->student_note, // Jika ada di form
                 ]
             );
 
             DB::commit();
 
-            // Pesan sukses berbeda tergantung update atau baru
-            $message = $existingEntry ? 'Data jurnal berhasil diperbarui!' : 'Hebat! Jurnal pertamamu hari ini berhasil disimpan.';
-
-            return redirect()->route('student.habits.dashboard')->with('success', $message);
+            return redirect()->route('student.habits.dashboard')
+                   ->with('success', 'Jurnal 7 Kebiasaan berhasil diperbarui!');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            // Hapus foto yang terlanjur ke-upload jika DB gagal (optional, good practice)
-            // ... logic delete ...
-            
             return back()->with('error', 'Gagal menyimpan data: ' . $e->getMessage())->withInput();
         }
     }

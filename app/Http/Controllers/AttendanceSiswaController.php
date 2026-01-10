@@ -293,22 +293,63 @@ class AttendanceSiswaController extends Controller
         }
     }
 
+    // --- LOGIKA KEAGAMAAN (POIN + CHECKLIST) ---
     private function handleKeagamaan($student, $type)
     {
         $today = Carbon::today();
-        if (AttendanceSiswa::where('student_id', $student->id)->where('attendance_date', $today)->where('type', 'Keagamaan')->where('activity', $type)->exists()) {
-            return response()->json(['message' => "Sudah absen {$type}."], 409);
+        
+        // 1. Cek Duplikasi Absen
+        $isExist = AttendanceSiswa::where('student_id', $student->id)
+            ->where('attendance_date', $today)
+            ->where('type', 'Keagamaan')
+            ->where('activity', $type)
+            ->exists();
+
+        if ($isExist) {
+            return response()->json(['message' => "Sudah absen {$type} hari ini."], 409);
         }
 
+        // 2. Simpan Absensi (Source of Truth)
         $att = AttendanceSiswa::create([
-            'student_id' => $student->id, 'attendance_date' => $today, 'type' => 'Keagamaan', 'activity' => $type, 'status' => 'Hadir', 'time_in' => now()->toTimeString(), 'notes' => 'Scan Otomatis'
+            'student_id' => $student->id,
+            'attendance_date' => $today,
+            'type' => 'Keagamaan',
+            'activity' => $type,
+            'status' => 'Hadir',
+            'time_in' => now()->toTimeString(),
+            'notes' => 'Scan Otomatis'
         ]);
 
-        try { if (class_exists(AddReligiousPointJob::class)) AddReligiousPointJob::dispatch($att); } catch (\Exception $e) {}
+        // 3. TAMBAH POIN KEBAIKAN (LOGIKA LAMA ANDA - AMAN)
+        try { 
+            if (class_exists(AddReligiousPointJob::class)) {
+                AddReligiousPointJob::dispatch($att); 
+            }
+        } catch (\Exception $e) {
+            Log::error("Gagal tambah poin religi: " . $e->getMessage());
+        }
+
+        // 4. UPDATE JURNAL 7 KEBIASAAN (LOGIKA BARU - WAJIB ADA)
+        // Agar di Dashboard Siswa & Guru tercentang otomatis
+        $habit = StudentHabit::firstOrCreate(
+            ['student_id' => $student->id, 'report_date' => $today->toDateString()]
+        );
+
+        if ($type == 'Dhuha') {
+            $habit->prayer_dhuha = true; // Centang Kolom Dhuha
+        } elseif ($type == 'Dhuhur') {
+            $habit->prayer_dzuhur = true; // Centang Kolom Dzuhur
+        }
+        $habit->save();
 
         return response()->json([
-            'message' => "{$type} Tercatat.",
-            'scan' => ['student_name' => $student->name, 'student_id' => $student->student_id, strtolower($type).'_time' => now()->format('H:i'), 'status' => 'Selesai']
+            'message' => "{$type} Tercatat. Poin Bertambah!",
+            'scan' => [
+                'student_name' => $student->name, 
+                'student_id' => $student->student_id, 
+                strtolower($type).'_time' => now()->format('H:i'), // dhuha_time atau dhuhur_time untuk JS
+                'status' => 'Selesai'
+            ]
         ]);
     }
 

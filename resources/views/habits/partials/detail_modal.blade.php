@@ -24,76 +24,142 @@
             <i class="ph-bold ph-image text-sm text-emerald-500"></i> Bukti Dokumentasi
         </label>
         <div class="rounded-3xl overflow-hidden border-4 border-slate-50 shadow-lg bg-slate-100">
-            {{-- Perbaikan: Menggunakan object-contain agar gambar tidak terpotong --}}
             <img src="{{ asset('storage/' . $habit->photo_path) }}" 
                 class="w-full max-h-[400px] object-contain mx-auto transition-transform hover:scale-[1.05] duration-500 cursor-zoom-in"
                 alt="Bukti Kebiasaan Siswa">
         </div>
-        <p class="text-center text-[10px] text-slate-400 italic">Klik gambar untuk melihat lebih jelas</p>
     </div>
     @endif
 
-    {{-- Grid 7 Kebiasaan --}}
+    {{-- Grid 7 Kebiasaan (LOGIKA URUTAN BARU) --}}
     <div class="space-y-4">
         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-            <i class="ph-bold ph-list-checks text-sm text-emerald-500"></i> Check-list 7 Kebiasaan
+            <i class="ph-bold ph-list-checks text-sm text-emerald-500"></i> Laporan 7 Kebiasaan
         </label>
+        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            @php
-                $habits = [
-                    ['val' => $habit->habit_1, 'label' => 'Shalat Subuh', 'icon' => 'ph-sun-horizon'],
-                    ['val' => $habit->habit_2, 'label' => 'Membaca Al-Quran', 'icon' => 'ph-book-open'],
-                    ['val' => $habit->habit_3, 'label' => 'Membantu Orang Tua', 'icon' => 'ph-heart-straight'],
-                    ['val' => $habit->habit_4, 'label' => 'Belajar Mandiri', 'icon' => 'ph-brain'],
-                    ['val' => $habit->habit_5, 'label' => 'Olahraga/Gerak Fisik', 'icon' => 'ph-barbell'],
-                    ['val' => $habit->habit_6, 'label' => 'Makan Bergizi', 'icon' => 'ph-bowl-food'],
-                ];
-            @endphp
-
-            @foreach($habits as $h)
-                <div class="flex items-center justify-between p-4 rounded-2xl border {{ $h['val'] ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-slate-100 opacity-60' }} transition-all">
+            
+            {{-- 1. BANGUN & MANDI --}}
+            <div class="flex flex-col p-4 rounded-2xl border {{ ($habit->habit_1 && $habit->habit_2) ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-slate-100 opacity-60' }}">
+                <div class="flex items-center justify-between mb-1">
                     <div class="flex items-center gap-3">
-                        <i class="ph-bold {{ $h['icon'] }} {{ $h['val'] ? 'text-emerald-600' : 'text-slate-400' }} text-lg"></i>
-                        <span class="text-sm font-bold text-slate-700">{{ $h['label'] }}</span>
+                        <i class="ph-bold ph-sun-horizon {{ $habit->habit_1 ? 'text-emerald-600' : 'text-slate-400' }} text-lg"></i>
+                        <span class="text-sm font-bold text-slate-700">1. Bangun & Mandi</span>
                     </div>
-                    <i class="ph-fill {{ $h['val'] ? 'ph-check-circle text-emerald-600' : 'ph-x-circle text-slate-300' }} text-xl"></i>
+                    <i class="ph-fill {{ ($habit->habit_1 && $habit->habit_2) ? 'ph-check-circle text-emerald-600' : 'ph-x-circle text-slate-300' }}"></i>
                 </div>
-            @endforeach
+                <p class="text-[10px] text-slate-500 ml-8 font-medium italic">
+                    Bangun jam {{ $habit->habit_1_time ?? '-' }}
+                </p>
+            </div>
 
-            {{-- Kebiasaan 7 (Tidur) --}}
+            {{-- 2. SHALAT (DETAIL CHECKLIST) --}}
+            <div class="flex flex-col p-4 rounded-2xl border bg-white border-slate-200 md:row-span-2">
+                <div class="flex items-center gap-3 mb-3">
+                    <i class="ph-bold ph-mosque text-emerald-600 text-lg"></i>
+                    <span class="text-sm font-bold text-slate-700">2. Shalat Tepat Waktu</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    @php
+                        $prayers = [
+                            ['Subuh', $habit->prayer_subuh],
+                            ['Dhuha', $habit->prayer_dhuha],
+                            ['Dzuhur', $habit->prayer_dzuhur],
+                            ['Ashar', $habit->prayer_ashar],
+                            ['Maghrib', $habit->prayer_maghrib],
+                            ['Isya', $habit->prayer_isya],
+                        ];
+                    @endphp
+                    @foreach($prayers as $p)
+                        <div class="flex items-center gap-2">
+                            <i class="ph-fill {{ $p[1] ? 'ph-check-circle text-emerald-500' : 'ph-circle text-slate-300' }} text-sm"></i>
+                            <span class="text-[10px] font-bold {{ $p[1] ? 'text-slate-700' : 'text-slate-400' }}">{{ $p[0] }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- 3. OLAHRAGA --}}
+            <div class="flex flex-col p-4 rounded-2xl border {{ $habit->habit_3 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-slate-100 opacity-60' }}">
+                <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center gap-3">
+                        <i class="ph-bold ph-sneaker-move {{ $habit->habit_3 ? 'text-emerald-600' : 'text-slate-400' }} text-lg"></i>
+                        <span class="text-sm font-bold text-slate-700">3. Berolahraga</span>
+                    </div>
+                    <i class="ph-fill {{ $habit->habit_3 ? 'ph-check-circle text-emerald-600' : 'ph-x-circle text-slate-300' }}"></i>
+                </div>
+                @if($habit->habit_3_activity)
+                <p class="text-[10px] text-slate-500 ml-8 font-medium italic">"{{ $habit->habit_3_activity }}"</p>
+                @endif
+            </div>
+
+            {{-- 4. MAKAN BERGIZI --}}
+            <div class="flex flex-col p-4 rounded-2xl border {{ $habit->habit_5 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-slate-100 opacity-60' }}">
+                <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center gap-3">
+                        <i class="ph-bold ph-carrot {{ $habit->habit_5 ? 'text-emerald-600' : 'text-slate-400' }} text-lg"></i>
+                        <span class="text-sm font-bold text-slate-700">4. Makan Bergizi</span>
+                    </div>
+                    <i class="ph-fill {{ $habit->habit_5 ? 'ph-check-circle text-emerald-600' : 'ph-x-circle text-slate-300' }}"></i>
+                </div>
+                @if($habit->habit_5_menu)
+                <p class="text-[10px] text-slate-500 ml-8 font-medium italic">Menu: {{ $habit->habit_5_menu }}</p>
+                @endif
+            </div>
+
+            {{-- 5. BELAJAR --}}
+            <div class="flex flex-col p-4 rounded-2xl border {{ $habit->habit_4 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-slate-100 opacity-60' }}">
+                <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center gap-3">
+                        <i class="ph-bold ph-book-open-text {{ $habit->habit_4 ? 'text-emerald-600' : 'text-slate-400' }} text-lg"></i>
+                        <span class="text-sm font-bold text-slate-700">5. Gemar Belajar</span>
+                    </div>
+                    <i class="ph-fill {{ $habit->habit_4 ? 'ph-check-circle text-emerald-600' : 'ph-x-circle text-slate-300' }}"></i>
+                </div>
+                @if($habit->habit_4_subject)
+                <p class="text-[10px] text-slate-500 ml-8 font-medium italic">Mapel: {{ $habit->habit_4_subject }}</p>
+                @endif
+            </div>
+
+            {{-- 6. SOSIAL --}}
+            <div class="flex flex-col p-4 rounded-2xl border {{ $habit->habit_6 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-slate-100 opacity-60' }}">
+                <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center gap-3">
+                        <i class="ph-bold ph-users-three {{ $habit->habit_6 ? 'text-emerald-600' : 'text-slate-400' }} text-lg"></i>
+                        <span class="text-sm font-bold text-slate-700">6. Bantu Orang Tua</span>
+                    </div>
+                    <i class="ph-fill {{ $habit->habit_6 ? 'ph-check-circle text-emerald-600' : 'ph-x-circle text-slate-300' }}"></i>
+                </div>
+                @if($habit->habit_6_activity)
+                <p class="text-[10px] text-slate-500 ml-8 font-medium italic">"{{ $habit->habit_6_activity }}"</p>
+                @endif
+            </div>
+
+            {{-- 7. TIDUR --}}
             <div class="md:col-span-2 flex items-center justify-between p-4 rounded-2xl border {{ $habit->habit_7 ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-100 opacity-60' }}">
                 <div class="flex items-center gap-3">
                     <i class="ph-bold ph-moon {{ $habit->habit_7 ? 'text-emerald-600' : 'text-slate-400' }} text-lg"></i>
                     <div>
-                        <span class="text-sm font-bold text-slate-700">Tidur Cukup (Maks Pukul 22.00)</span>
+                        <span class="text-sm font-bold text-slate-700">7. Tidur Cepat</span>
                         @if($habit->habit_7_time)
-                            <p class="text-[10px] font-bold text-emerald-600">Jam Tidur: {{ $habit->habit_7_time }}</p>
+                            <p class="text-[10px] font-bold text-emerald-600">Jam: {{ $habit->habit_7_time }}</p>
                         @endif
                     </div>
                 </div>
-                <i class="ph-fill {{ $habit->habit_7 ? 'ph-check-circle text-emerald-600' : 'ph-x-circle text-slate-300' }} text-xl"></i>
+                <i class="ph-fill {{ $habit->habit_7 ? 'ph-check-circle text-emerald-600' : 'ph-x-circle text-slate-300' }}"></i>
             </div>
         </div>
     </div>
 
-    {{-- Feedback Form --}}
+    {{-- Feedback Form (TETAP SAMA) --}}
     <div class="pt-4 border-t border-slate-100">
         <form action="{{ route('teacher.habits.feedback', $habit->id) }}" method="POST" class="bg-slate-900 p-6 rounded-[2rem] shadow-xl relative overflow-hidden">
             @csrf
-            {{-- Decorative Element --}}
-            <div class="absolute top-0 right-0 p-4 opacity-10">
-                <i class="ph-fill ph-chat-centered-text text-6xl text-white"></i>
-            </div>
-
+            <div class="absolute top-0 right-0 p-4 opacity-10"><i class="ph-fill ph-chat-centered-text text-6xl text-white"></i></div>
             <label class="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-3 block">Berikan Apresiasi / Catatan</label>
-            <textarea name="feedback" rows="3" 
-                class="w-full bg-slate-800 border-slate-700 rounded-2xl text-white text-sm focus:ring-emerald-500 focus:border-emerald-500 placeholder-slate-500" 
-                placeholder="Tulis pesan motivasi untuk siswa di sini...">{{ $habit->feedback }}</textarea>
-            
+            <textarea name="feedback" rows="3" class="w-full bg-slate-800 border-slate-700 rounded-2xl text-white text-sm focus:ring-emerald-500 focus:border-emerald-500 placeholder-slate-500" placeholder="Tulis pesan motivasi...">{{ $habit->teacher_feedback }}</textarea>
             <div class="flex justify-end mt-4">
-                <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black text-xs uppercase tracking-widest px-8 py-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
-                    Kirim Feedback
-                </button>
+                <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black text-xs uppercase tracking-widest px-8 py-3 rounded-xl transition-all shadow-lg">Kirim Feedback</button>
             </div>
         </form>
     </div>
