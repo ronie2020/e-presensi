@@ -17,7 +17,7 @@ use App\Models\Complaint;
 use App\Models\LiaisonBook;     
 use App\Models\StudentHabit;    
 
-// Model Opsional 
+// Model Opsional (Gunakan if class_exists untuk keamanan)
 use App\Models\LibraryLoan;      
 use App\Models\DisciplineRecord; 
 use App\Models\AcademicRecord;   
@@ -30,6 +30,7 @@ class StudentPortalController extends Controller
      */
     public function index()
     {
+        // Sesuaikan juga index jika ada di folder students/portal
         if (view()->exists('students.portal.index')) {
             return view('students.portal.index');
         }
@@ -64,80 +65,45 @@ class StudentPortalController extends Controller
      */
     public function show($id)
     {
+        // 1. Validasi Akses
         if (!Auth::guard('student')->check() || Auth::guard('student')->id() != $id) {
              return redirect()->route('portal.index')->with('error', 'Akses ditolak.');
         }
 
-        // Set Locale Indonesia
         Carbon::setLocale('id');
-
         $student = Student::with(['schoolClass', 'alumniProfile'])->findOrFail($id);
-
-        // --- [LOGIKA VIEW DIPINDAHKAN KE SINI] ---
         $isAlumni = $student->status === 'graduated';
 
-        // 1. DATA PENGHUBUNG
+        // 2. DATA PENGHUBUNG (LIAISON)
         $liaison_messages = collect([]);
         if (class_exists(LiaisonBook::class)) { 
             try {
                 $liaison_messages = LiaisonBook::with('teacher')
                     ->where('student_id', $student->id)
                     ->latest()
-                    ->paginate(5);
+                    ->take(10) // Ambil 10 pesan terakhir
+                    ->get();
             } catch (\Exception $e) {}
         }
 
-        // 2. DATA KEHADIRAN (ATTENDANCE)
+        // 3. DATA KEHADIRAN
         $hadir = 0; $sakit = 0; $izin = 0; $alpa = 0;
         $attendance_history = collect([]);
-
-        $attendanceModel = class_exists(AttendanceSiswa::class) ? AttendanceSiswa::class : (class_exists(\App\Models\Attendance::class) ? \App\Models\Attendance::class : null);
-
-        if ($attendanceModel) {
-            $attendanceQuery = $attendanceModel::where('student_id', $id);
-            
-            $hadir = (clone $attendanceQuery)->whereIn('status', ['Hadir', 'Masuk', 'Terlambat'])->count();
-            $sakit = (clone $attendanceQuery)->where('status', 'Sakit')->count();
-            $izin  = (clone $attendanceQuery)->where('status', 'Izin')->count();
-            $alpa  = (clone $attendanceQuery)->where('status', 'Alpa')->count();
-            
-            $dateCol = \Schema::hasColumn((new $attendanceModel)->getTable(), 'attendance_date') ? 'attendance_date' : 'created_at';
-            $attendance_history = (clone $attendanceQuery)->latest($dateCol)->take(5)->get();
+        
+        if (class_exists(AttendanceSiswa::class)) {
+            $attQuery = AttendanceSiswa::where('student_id', $id);
+            $hadir = (clone $attQuery)->whereIn('status', ['Hadir', 'Masuk', 'Terlambat'])->count();
+            $sakit = (clone $attQuery)->where('status', 'Sakit')->count();
+            $izin  = (clone $attQuery)->where('status', 'Izin')->count();
+            $alpa  = (clone $attQuery)->where('status', 'Alpa')->count();
+            $attendance_history = (clone $attQuery)->latest('attendance_date')->take(5)->get();
         }
         
-        $attendanceChart = [
-            'hadir' => $hadir, 'sakit' => $sakit, 'izin' => $izin, 'alpa' => $alpa
-        ];
-
-        // [BARU] Hitung Persentase Kehadiran
+        $attendanceChart = ['hadir' => $hadir, 'sakit' => $sakit, 'izin' => $izin, 'alpa' => $alpa];
         $total_hari = $hadir + $sakit + $izin + $alpa;
         $attendancePercentage = $total_hari > 0 ? round(($hadir / $total_hari) * 100) : 0;
 
-        // 3. DATA LMS (TUGAS & KUIS)
-        $lms_assignments_grouped = [];
-        $lms_grades = [];
-        
-        if ($student->school_class_id && class_exists(LmsAssignment::class)) {
-            $colClassId = \Schema::hasColumn('students', 'school_class_id') ? 'school_class_id' : 'class_id';
-            
-            $assignments = LmsAssignment::with('subject')
-                            ->where('class_id', $student->$colClassId)
-                            ->latest()
-                            ->get();
-            
-            $lms_assignments_grouped = $assignments->groupBy(function($item) {
-                return $item->subject->name ?? 'Umum';
-            });
-
-            if (class_exists(LmsSubmission::class)) {
-                $submissions = LmsSubmission::where('student_id', $id)->get();
-                foreach($submissions as $sub) {
-                    $lms_grades[$sub->assignment_id] = $sub->score;
-                }
-            }
-        }
-
-        // 4. DATA DISIPLIN & PRESTASI
+        // 4. DATA POIN KEBAIKAN & PELANGGARAN
         $violations = collect([]);
         $achievements = collect([]);
         $total_violation_points = 0;
@@ -145,14 +111,16 @@ class StudentPortalController extends Controller
 
         if (class_exists(DisciplineRecord::class)) {
             try {
-                $baseQuery = DisciplineRecord::with('disciplineType')->where('student_id', $id);
-
-                $violations = (clone $baseQuery)
-                    ->whereHas('disciplineType', function($q) { $q->where('type', 'violation'); })
+                // Ambil Pelanggaran
+                $violations = DisciplineRecord::with('disciplineType')
+                    ->where('student_id', $id)
+                    ->whereHas('disciplineType', fn($q) => $q->where('type', 'violation')) 
                     ->latest()->get();
-                    
-                $achievements = (clone $baseQuery)
-                    ->whereHas('disciplineType', function($q) { $q->where('type', 'merit'); })
+                
+                // Ambil Kebaikan / Prestasi
+                $achievements = DisciplineRecord::with('disciplineType')
+                    ->where('student_id', $id)
+                    ->whereHas('disciplineType', fn($q) => $q->where('type', 'merit')) 
                     ->latest()->get();
 
                 $total_violation_points = $violations->sum(fn($v) => $v->disciplineType->point_value ?? 0);
@@ -161,116 +129,109 @@ class StudentPortalController extends Controller
             } catch (QueryException $e) { }
         }
 
-        // 5. PERPUSTAKAAN
-        $library_visits = 0; 
-        $library_history = collect([]);
-        
-        if (class_exists(LibraryLoan::class)) {
-            try {
-                $library_history = LibraryLoan::with('book')
-                    ->where('student_id', $id)
-                    ->latest()
-                    ->take(10)
-                    ->get();
-                $library_visits = $library_history->count(); 
-            } catch (\Exception $e) {}
-        }
-
-        // 6. AKADEMIK (NILAI RAPOR)
-        $academic_record = null;
-        $chartData = ['labels' => [], 'scores' => []];
-
-        if (class_exists(AcademicRecord::class)) {
-            try {
-                $academic_record = AcademicRecord::with(['items.subject'])
-                    ->where('student_id', $id)
-                    ->latest()
-                    ->first();
-                
-                if ($academic_record) {
-                    foreach($academic_record->items as $item) {
-                        $chartData['labels'][] = $item->subject->name ?? 'Mapel';
-                        $chartData['scores'][] = $item->score;
-                    }
-                }
-            } catch (\Exception $e) {}
-        }
-
-        // 7. JURNAL KBM & KEAGAMAAN
-        $teaching_journals = [];
-        $sholat_dhuha = 0;
-        $sholat_dhuhur = 0;
-
-        if (class_exists(TeachingJournal::class) && $student->schoolClass) {
-            $teaching_journals = TeachingJournal::whereHas('schedule', function($q) use ($student) {
-                                    $q->where('class_id', $student->school_class_id ?? $student->class_id);
-                                 })->latest()->take(5)->get();
-        }
-
-        // 8. DATA PENGADUAN
-        $complaints = collect([]);
-        if (class_exists(Complaint::class)) {
-            try {
-                $complaints = Complaint::where('student_id', $student->id)->latest()->get();
-            } catch (\Exception $e) {}
-        }
-
-        // 9. CEK JURNAL 7 KEBIASAAN HARI INI
+        // 5. JURNAL 7 KEBIASAAN HARI INI
         $todayEntry = null;
         if (class_exists(StudentHabit::class)) {
             $todayEntry = StudentHabit::where('student_id', $id)
-                            ->whereDate('created_at', Carbon::today())
+                            ->whereDate('report_date', Carbon::today()) 
                             ->first();
         }
 
-        // --- [BARU] DEFINISI TABS MENU ---
-        $tabs = [
-            'ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan'],
-        ];
+        // 6. DATA LAINNYA (LMS, Perpus, Akademik, KBM)
+        $lms_assignments_grouped = []; $lms_grades = [];
+        if ($student->school_class_id && class_exists(LmsAssignment::class)) {
+             $assignments = LmsAssignment::with('subject')->where('class_id', $student->school_class_id)->latest()->get();
+             $lms_assignments_grouped = $assignments->groupBy(fn($i) => $i->subject->name ?? 'Umum');
+             
+             if (class_exists(LmsSubmission::class)) {
+                $submissions = LmsSubmission::where('student_id', $id)->get();
+                foreach($submissions as $sub) { $lms_grades[$sub->assignment_id] = $sub->score; }
+            }
+        }
+        
+        $library_visits = 0; $library_history = collect([]);
+        if (class_exists(LibraryLoan::class)) {
+             $library_history = LibraryLoan::with('book')->where('student_id', $id)->latest()->take(5)->get();
+             $library_visits = $library_history->count();
+        }
+
+        $academic_record = null; 
+        $chartData = ['labels' => [], 'scores' => []];
+        if (class_exists(AcademicRecord::class)) {
+             $academic_record = AcademicRecord::with(['items.subject'])->where('student_id', $id)->latest()->first();
+             if ($academic_record) {
+                foreach($academic_record->items as $item) {
+                    $chartData['labels'][] = $item->subject->name ?? 'Mapel';
+                    $chartData['scores'][] = $item->score;
+                }
+            }
+        }
+
+        $teaching_journals = [];
+        if (class_exists(TeachingJournal::class) && $student->schoolClass) {
+             $teaching_journals = TeachingJournal::whereHas('schedule', fn($q)=>$q->where('class_id',$student->school_class_id))->latest()->take(5)->get();
+        }
+
+        // 7. PENGADUAN
+        $complaints = collect([]);
+        if (class_exists(Complaint::class)) {
+            $complaints = Complaint::where('student_id', $student->id)->latest()->get();
+        }
+
+        // 8. DEFINISI TABS MENU
+        $tabs = ['ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan']];
 
         if ($isAlumni) {
             $tabs['prestasi'] = ['icon' => 'trophy', 'label' => 'Riwayat Prestasi'];
             $tabs['perpustakaan'] = ['icon' => 'books', 'label' => 'Riwayat Pustaka'];
         } else {
+            // Urutan Tab yang disarankan
             $tabs = array_merge($tabs, [
                 'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan'],
+                'poin_kebaikan' => ['icon' => 'scales', 'label' => 'Poin Kebaikan'], // Gabungan Disiplin & Merit
                 'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
-                'pengaduan' => ['icon' => 'megaphone', 'label' => 'Pengaduan'],
-                'jadwal' => ['icon' => 'calendar-blank', 'label' => 'Jadwal'], 
-                'lms' => ['icon' => 'clipboard-text', 'label' => 'Tugas & Kuis'],
-                'kbm' => ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'],
+                'pengaduan' => ['icon' => 'megaphone', 'label' => 'Lapor Masalah'],
+                'jadwal' => ['icon' => 'calendar-blank', 'label' => 'Jadwal & KBM'], // Digabung biar ringkas
                 'akademik' => ['icon' => 'exam', 'label' => 'Nilai Rapor'],
-                'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Kehadiran'],
-                'disiplin' => ['icon' => 'warning-circle', 'label' => 'Disiplin'],
-                'prestasi' => ['icon' => 'trophy', 'label' => 'Prestasi'],
-                'perpustakaan' => ['icon' => 'books', 'label' => 'Pustaka'],
+                'lms' => ['icon' => 'clipboard-text', 'label' => 'Tugas Online'],
+                'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Riwayat Absen'],
             ]);
         }
 
-        // 10. RETURN VIEW
-        $viewName = 'portal.show';
+        // Statistik Sholat (Opsional)
+        $sholat_dhuha = 0; $sholat_dhuhur = 0;
+        if (class_exists(AttendanceSiswa::class)) {
+            $sholat_dhuha = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuha')->count();
+            $sholat_dhuhur = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuhur')->count();
+        }
+
+        // --- PERBAIKAN LOKASI VIEW ---
+        // Jika file ada di resources/views/students/portal/show.blade.php
         if (view()->exists('students.portal.show')) {
-            $viewName = 'students.portal.show';
-        } elseif (view()->exists('student.show')) {
-            $viewName = 'student.show';
+            return view('students.portal.show', compact(
+                'student', 'isAlumni', 'tabs', 'attendancePercentage',
+                'liaison_messages', 'complaints', 'todayEntry',
+                'hadir', 'sakit', 'izin', 'alpa', 'attendance_history', 'attendanceChart',
+                'lms_assignments_grouped', 'lms_grades',
+                'violations', 'total_violation_points', 
+                'achievements', 'total_merit_points',
+                'library_visits', 'library_history',
+                'academic_record', 'chartData', 'teaching_journals',
+                'sholat_dhuha', 'sholat_dhuhur'
+            ));
         }
         
-        return view($viewName, compact(
-            'student', 
-            'isAlumni', // Dikirim dari controller
-            'tabs', // Dikirim dari controller
-            'attendancePercentage', // Dikirim dari controller
-            'liaison_messages', 
+        // Fallback (Jaga-jaga)
+        return view('portal.show', compact(
+            'student', 'isAlumni', 'tabs', 'attendancePercentage',
+            'liaison_messages', 'complaints', 'todayEntry',
             'hadir', 'sakit', 'izin', 'alpa', 'attendance_history', 'attendanceChart',
             'lms_assignments_grouped', 'lms_grades',
             'violations', 'total_violation_points', 
             'achievements', 'total_merit_points',
             'library_visits', 'library_history',
-            'academic_record', 'chartData',
-            'teaching_journals',
-            'sholat_dhuha', 'sholat_dhuhur',
-            'complaints', 
-            'todayEntry'
+            'academic_record', 'chartData', 'teaching_journals',
+            'sholat_dhuha', 'sholat_dhuhur'
         ));
     }
 
