@@ -1,5 +1,14 @@
-<x-student-learning-layout>
-    {{-- CUSTOM STYLES --}}
+<?php if (isset($component)) { $__componentOriginal5acda7f50fc1fb55f4bf1672ea512a11 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal5acda7f50fc1fb55f4bf1672ea512a11 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.student-learning-layout','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('student-learning-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -15,16 +24,13 @@
         }
     </style>
 
-    {{-- CDN SweetAlert2 --}}
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- 
-        TIMER LOGIC WRAPPER 
-        Mengambil durasi dari controller (dalam menit) dikonversi ke detik
-    --}}
-    <div x-data="examTimer({{ $assignment->duration_minutes * 60 }})" x-init="startTimer()" class="relative">
+    
+    <div x-data="examTimer(<?php echo e($assignment->duration_minutes * 60); ?>)" x-init="startTimer()" class="relative">
 
-        {{-- FLOATING TIMER BADGE (Fixed Position) --}}
+        
         <div class="fixed top-4 right-4 z-[100] transition-all duration-300 transform"
              :class="timeLeft < 300 ? 'scale-110' : 'scale-100'"> <!-- Membesar jika sisa 5 menit -->
             <div class="flex items-center gap-2 px-5 py-2.5 rounded-full shadow-2xl border-2 backdrop-blur-md transition-colors duration-500"
@@ -38,10 +44,10 @@
             </div>
         </div>
 
-        {{-- Padding bottom besar di mobile agar konten tidak tertutup tombol submit --}}
+        
         <div class="py-6 md:py-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto min-h-screen pb-40 md:pb-32">
             
-            {{-- QUIZ HEADER --}}
+            
             <div class="animate-enter bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-[2.5rem] shadow-2xl shadow-blue-900/20 border border-white/10 p-8 md:p-10 mb-8 relative overflow-hidden text-white group">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 
@@ -52,95 +58,95 @@
                         </span>
                     </div>
                     
-                    <h1 class="text-2xl md:text-4xl font-black text-white mb-3 tracking-tight leading-tight">{{ $assignment->title }}</h1>
-                    <p class="text-slate-400 leading-relaxed max-w-2xl text-sm md:text-base font-medium">{{ $assignment->description }}</p>
+                    <h1 class="text-2xl md:text-4xl font-black text-white mb-3 tracking-tight leading-tight"><?php echo e($assignment->title); ?></h1>
+                    <p class="text-slate-400 leading-relaxed max-w-2xl text-sm md:text-base font-medium"><?php echo e($assignment->description); ?></p>
                     
                     <div class="flex flex-wrap items-center gap-4 md:gap-6 mt-8 pt-6 border-t border-white/10">
                         <div class="flex items-center gap-2 text-sm font-bold text-slate-300 bg-white/5 px-4 py-2 rounded-xl border border-white/5">
                             <i class="ph-fill ph-clock text-yellow-400 text-lg"></i> 
-                            <span>{{ $assignment->duration_minutes }} Menit</span>
+                            <span><?php echo e($assignment->duration_minutes); ?> Menit</span>
                         </div>
                         <div class="flex items-center gap-2 text-sm font-bold text-slate-300 bg-white/5 px-4 py-2 rounded-xl border border-white/5">
                             <i class="ph-fill ph-list-numbers text-purple-400 text-lg"></i> 
-                            <span>{{ $assignment->questions->count() }} Soal</span>
+                            <span><?php echo e($assignment->questions->count()); ?> Soal</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <form action="{{ route('students.learning.assignment.quiz.submit', $assignment->id) }}" method="POST" id="quizForm">
-                @csrf
+            <form action="<?php echo e(route('students.learning.assignment.quiz.submit', $assignment->id)); ?>" method="POST" id="quizForm">
+                <?php echo csrf_field(); ?>
                 
                 <div class="space-y-6 md:space-y-8">
-                    @foreach($assignment->questions as $index => $q)
-                        <div class="animate-enter bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden relative hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 group" style="animation-delay: {{ ($index + 1) * 100 }}ms">
+                    <?php $__currentLoopData = $assignment->questions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $q): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <div class="animate-enter bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden relative hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500 group" style="animation-delay: <?php echo e(($index + 1) * 100); ?>ms">
                             
-                            {{-- Nomor Soal --}}
+                            
                             <div class="absolute top-0 left-0 bg-slate-100 text-slate-500 font-black text-xs px-4 py-2 rounded-br-2xl border-r border-b border-slate-200 z-10">
-                                NO. {{ $index + 1 }}
+                                NO. <?php echo e($index + 1); ?>
+
                             </div>
                             
                             <div class="p-6 md:p-8 pt-12 md:pt-8">
-                                {{-- Teks Soal --}}
+                                
                                 <div class="text-lg md:text-xl font-bold text-slate-800 mb-8 leading-relaxed pl-2 border-l-4 border-blue-500 rounded-sm">
-                                    {!! nl2br(e($q->question_text)) !!}
+                                    <?php echo nl2br(e($q->question_text)); ?>
+
                                 </div>
 
                                 <div class="space-y-3">
-                                    @if($q->question_type == 'multiple_choice')
-                                        @foreach(['A', 'B', 'C', 'D', 'E'] as $opt)
-                                            @if(isset($q->options[$opt]) && $q->options[$opt])
+                                    <?php if($q->question_type == 'multiple_choice'): ?>
+                                        <?php $__currentLoopData = ['A', 'B', 'C', 'D', 'E']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <?php if(isset($q->options[$opt]) && $q->options[$opt]): ?>
                                                 <label class="relative flex items-center gap-4 p-4 md:p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 group/opt select-none bg-slate-50/30 hover:bg-blue-50/30 border-slate-100 hover:border-blue-200 active:scale-[0.99]">
-                                                    {{-- 
-                                                        UPDATE: Menambahkan old() helper agar jawaban tidak hilang saat error validasi
-                                                    --}}
-                                                    <input type="radio" 
-                                                           name="answers[{{ $q->id }}]" 
-                                                           value="{{ $opt }}" 
-                                                           class="peer sr-only"
-                                                           {{ old("answers.{$q->id}") == $opt ? 'checked' : '' }}>
                                                     
-                                                    {{-- Indikator Huruf --}}
+                                                    <input type="radio" 
+                                                           name="answers[<?php echo e($q->id); ?>]" 
+                                                           value="<?php echo e($opt); ?>" 
+                                                           class="peer sr-only"
+                                                           <?php echo e(old("answers.{$q->id}") == $opt ? 'checked' : ''); ?>>
+                                                    
+                                                    
                                                     <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 transition-all border-2
                                                         bg-white border-slate-200 text-slate-500 
                                                         peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-checked:text-white
                                                         group-hover/opt:border-blue-300 group-hover/opt:text-blue-600">
-                                                        {{ $opt }}
+                                                        <?php echo e($opt); ?>
+
                                                     </div>
                                                     
-                                                    {{-- Teks Jawaban --}}
+                                                    
                                                     <span class="text-base font-medium text-slate-600 peer-checked:text-slate-900 peer-checked:font-bold transition-colors">
-                                                        {{ $q->options[$opt] }}
+                                                        <?php echo e($q->options[$opt]); ?>
+
                                                     </span>
                                                     
-                                                    {{-- Checkmark Icon --}}
+                                                    
                                                     <div class="absolute right-4 text-blue-600 opacity-0 peer-checked:opacity-100 transition-all transform scale-50 peer-checked:scale-100">
                                                         <i class="ph-fill ph-check-circle text-2xl"></i>
                                                     </div>
 
-                                                    {{-- Active Ring --}}
+                                                    
                                                     <div class="absolute inset-0 rounded-2xl ring-2 ring-blue-500 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></div>
                                                 </label>
-                                            @endif
-                                        @endforeach
-                                    @else
-                                        {{-- 
-                                            UPDATE: Menambahkan old() pada textarea
-                                        --}}
+                                            <?php endif; ?>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php else: ?>
+                                        
                                         <div class="relative">
-                                            <textarea name="answers[{{ $q->id }}]" rows="5" 
+                                            <textarea name="answers[<?php echo e($q->id); ?>]" rows="5" 
                                                 class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-slate-700 placeholder:text-slate-400 p-4 font-medium transition-all resize-none shadow-inner" 
-                                                placeholder="Ketik jawaban uraian Anda di sini...">{{ old("answers.{$q->id}") }}</textarea>
+                                                placeholder="Ketik jawaban uraian Anda di sini..."><?php echo e(old("answers.{$q->id}")); ?></textarea>
                                             <div class="absolute bottom-3 right-3 text-slate-300 pointer-events-none"><i class="ph-bold ph-pencil-simple text-xl"></i></div>
                                         </div>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
 
-                {{-- Floating Submit Button --}}
+                
                 <div class="fixed bottom-[80px] md:bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-lg border-t border-slate-200 flex justify-center z-[60] animate-enter" style="animation-delay: 800ms">
                     <div class="w-full max-w-4xl flex justify-end">
                         <button type="button" onclick="confirmSubmit()"
@@ -157,7 +163,7 @@
         </div>
     </div>
 
-    {{-- SCRIPTS --}}
+    
     <script>
         // ALPINE JS LOGIC UNTUK TIMER
         document.addEventListener('alpine:init', () => {
@@ -240,4 +246,13 @@
             });
         }
     </script>
-</x-student-learning-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal5acda7f50fc1fb55f4bf1672ea512a11)): ?>
+<?php $attributes = $__attributesOriginal5acda7f50fc1fb55f4bf1672ea512a11; ?>
+<?php unset($__attributesOriginal5acda7f50fc1fb55f4bf1672ea512a11); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal5acda7f50fc1fb55f4bf1672ea512a11)): ?>
+<?php $component = $__componentOriginal5acda7f50fc1fb55f4bf1672ea512a11; ?>
+<?php unset($__componentOriginal5acda7f50fc1fb55f4bf1672ea512a11); ?>
+<?php endif; ?><?php /**PATH C:\Users\ronie\Documents\aplikasi\E-Presensi Netila\resources\views/students/lms/quiz.blade.php ENDPATH**/ ?>

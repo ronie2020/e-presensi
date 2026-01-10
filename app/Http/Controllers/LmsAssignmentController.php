@@ -20,7 +20,6 @@ class LmsAssignmentController extends Controller
         $user = Auth::user();
 
         // 1. LOGIKA GROUPING (TAMPILKAN 1 KARTU PER GRUP TUGAS)
-        // Kita ambil ID pertama dari setiap grup yang memiliki Judul, Mapel, Deadline, dan Waktu Buat yang sama.
         $subQuery = LmsAssignment::selectRaw('MIN(id) as id')
             ->groupBy('title', 'subject_id', 'deadline', 'created_at');
 
@@ -28,18 +27,17 @@ class LmsAssignmentController extends Controller
             $subQuery->where('teacher_id', $user->id);
         }
 
-        // 2. Ambil Data Berdasarkan ID hasil grouping
+        // 2. Ambil Data
         $assignments = LmsAssignment::whereIn('id', $subQuery)
             ->with(['subject', 'schoolClass'])
             ->withCount('submissions')
             ->latest()
             ->paginate(10);
 
-        // 3. Tambahkan info tambahan ke setiap item untuk tampilan di View
+        // 3. Tambahkan info bulk
         foreach ($assignments as $assignment) {
-            // Cari "saudara" (tugas yang sama di kelas lain)
             $siblingsQuery = LmsAssignment::where('title', $assignment->title)
-                ->where('created_at', $assignment->created_at) // Kunci grouping
+                ->where('created_at', $assignment->created_at)
                 ->where('deadline', $assignment->deadline);
                 
             if ($user->role !== 'admin') {
@@ -48,14 +46,19 @@ class LmsAssignmentController extends Controller
 
             $siblingsCount = $siblingsQuery->count();
             
-            // Hitung total pengumpulan global (opsional, agar guru tau total dari semua kelas)
+            // Hitung total pengumpulan global
             $allIds = $siblingsQuery->pluck('id');
             $globalSubmissions = LmsSubmission::whereIn('assignment_id', $allIds)->count();
 
-            // Inject atribut custom ke model instance
-            $assignment->is_bulk = $siblingsCount > 1;     // Apakah ini tugas massal?
-            $assignment->total_classes = $siblingsCount;   // Berapa kelas?
+            $assignment->is_bulk = $siblingsCount > 1;
+            $assignment->total_classes = $siblingsCount;
             $assignment->global_submissions_count = $globalSubmissions;
+            
+            // Helper untuk view: tebak jenjang dari nama kelas (misal "9A" -> "9")
+            if ($assignment->is_bulk && $assignment->schoolClass) {
+                preg_match('/\d+/', $assignment->schoolClass->name, $matches);
+                $assignment->target_grade = $matches[0] ?? ''; 
+            }
         }
 
         $subjects = Subject::all();
@@ -73,7 +76,6 @@ class LmsAssignmentController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Tentukan Deskripsi sesuai tipe
         $description = null;
         if ($request->assignment_type == 'file_upload') {
             $description = $request->description_file;
@@ -85,7 +87,6 @@ class LmsAssignmentController extends Controller
 
         $request->merge(['description' => $description]);
 
-        // 2. Validasi
         $request->validate([
             'title' => 'required|string|max:255',
             'subject_id' => 'required|exists:' . Subject::class . ',id',
@@ -100,8 +101,6 @@ class LmsAssignmentController extends Controller
         ]);
 
         $teacherId = Auth::id();
-        
-        // [PENTING] Timestamp harus sama persis untuk semua kelas agar terdeteksi satu grup
         $now = now(); 
 
         try {
@@ -109,11 +108,11 @@ class LmsAssignmentController extends Controller
 
             DB::transaction(function () use ($request, $teacherId, $description, $deadline, $now) {
                 
-                // 3. Cari Kelas Target
                 $targetClassIds = [];
                 if ($request->target_type == 'class') {
                     $targetClassIds[] = $request->class_id;
                 } elseif ($request->target_type == 'grade') {
+                    // Ambil kelas berdasarkan nama depan (misal "7" -> "7A", "7B")
                     $classes = SchoolClass::where('name', 'like', $request->target_grade . '%')->get();
                     foreach ($classes as $c) {
                         $targetClassIds[] = $c->id;
@@ -124,7 +123,6 @@ class LmsAssignmentController extends Controller
                     throw new \Exception("Tidak ditemukan kelas untuk jenjang " . $request->target_grade);
                 }
 
-                // 4. Simpan Tugas ke Setiap Kelas
                 foreach ($targetClassIds as $classId) {
                     $assignment = LmsAssignment::create([
                         'teacher_id' => $teacherId,
@@ -137,11 +135,10 @@ class LmsAssignmentController extends Controller
                         'link_url' => $request->assignment_type == 'link' ? $request->link_url : null,
                         'duration_minutes' => $request->assignment_type == 'quiz' ? $request->duration_minutes : null,
                         'allow_late_submission' => $request->has('allow_late_submission'),
-                        'created_at' => $now, // Pakai waktu yang sama
+                        'created_at' => $now, 
                         'updated_at' => $now,
                     ]);
 
-                    // 5. Simpan Soal Kuis (Jika ada)
                     if ($request->assignment_type == 'quiz' && $request->has('questions')) {
                         foreach ($request->questions as $q) {
                             LmsQuizQuestion::create([
@@ -164,7 +161,6 @@ class LmsAssignmentController extends Controller
         }
     }
 
-    // --- METHOD EDIT (DIPERBARUI) ---
     public function edit($id)
     {
         $assignment = LmsAssignment::findOrFail($id);
@@ -173,10 +169,9 @@ class LmsAssignmentController extends Controller
             abort(403);
         }
 
-        // Cek apakah ini tugas massal?
         $siblingsCount = LmsAssignment::where('teacher_id', $assignment->teacher_id)
             ->where('title', $assignment->title)
-            ->where('created_at', $assignment->created_at) // Kunci grouping
+            ->where('created_at', $assignment->created_at)
             ->count();
 
         $isBulk = $siblingsCount > 1;
@@ -184,11 +179,9 @@ class LmsAssignmentController extends Controller
         $subjects = Subject::all();
         $classes = SchoolClass::orderBy('name', 'asc')->get();
 
-        // Pastikan Anda membuat view 'lms.assignments.edit' juga
         return view('lms.assignments.edit', compact('assignment', 'subjects', 'classes', 'isBulk'));
     }
 
-    // --- METHOD UPDATE (DIPERBARUI - BULK UPDATE) ---
     public function update(Request $request, $id)
     {
         $assignment = LmsAssignment::findOrFail($id);
@@ -197,12 +190,11 @@ class LmsAssignmentController extends Controller
             abort(403);
         }
 
-        // Validasi dasar (sesuaikan field yg bisa diedit)
         $request->validate([
             'title' => 'required|string|max:255',
             'subject_id' => 'required|exists:subjects,id',
             'deadline' => 'required',
-            'description' => 'required|string', // Pastikan input name di form edit konsisten (misal 'description' saja, bukan dipisah per tipe)
+            'description' => 'required|string',
             'link_url' => 'nullable|url',
         ]);
 
@@ -210,8 +202,6 @@ class LmsAssignmentController extends Controller
             $deadline = Carbon::parse($request->deadline)->format('Y-m-d H:i:s');
 
             DB::transaction(function () use ($request, $assignment, $deadline) {
-                // 1. Cari Saudara (Grup Tugas yang Sama)
-                // Kita cari berdasarkan data LAMA (sebelum diupdate)
                 $siblings = LmsAssignment::where('teacher_id', $assignment->teacher_id)
                     ->where('title', $assignment->title)
                     ->where('created_at', $assignment->created_at)
@@ -219,7 +209,6 @@ class LmsAssignmentController extends Controller
 
                 if ($siblings->isEmpty()) $siblings = collect([$assignment]);
 
-                // 2. Update Semua Saudara
                 foreach ($siblings as $target) {
                     $target->update([
                         'title' => $request->title,
@@ -230,10 +219,6 @@ class LmsAssignmentController extends Controller
                         'duration_minutes' => $request->duration_minutes,
                         'allow_late_submission' => $request->has('allow_late_submission'),
                     ]);
-                    
-                    // Catatan: Update soal kuis untuk bulk agak kompleks, 
-                    // untuk sekarang kita asumsikan edit hanya mengubah info dasar.
-                    // Jika ingin update soal massal, perlu logika hapus-tambah soal di semua siblings.
                 }
             });
 
@@ -244,7 +229,6 @@ class LmsAssignmentController extends Controller
         }
     }
 
-    // --- METHOD DESTROY (DIPERBARUI - BULK DELETE) ---
     public function destroy($id)
     {
         $user = Auth::user();
@@ -252,33 +236,58 @@ class LmsAssignmentController extends Controller
         
         if ($user->role !== 'admin' && $assignment->teacher_id !== $user->id) abort(403);
         
-        // Hapus Massal (Group)
         $siblings = LmsAssignment::where('teacher_id', $assignment->teacher_id)
             ->where('title', $assignment->title)
             ->where('created_at', $assignment->created_at)
             ->get();
 
         foreach ($siblings as $target) {
-            // Hapus submissions/soal terkait otomatis via cascade database 
-            // atau tambahkan logika hapus manual jika perlu
             $target->delete();
         }
 
         return redirect()->route('lms.assignments.index')->with('success', 'Tugas dihapus dari semua kelas.');
     }
 
+    // --- PERBAIKAN UTAMA ADA DI SINI ---
     public function submissions(LmsAssignment $assignment)
     {
         $user = Auth::user();
         if ($user->role !== 'admin' && $assignment->teacher_id !== $user->id) abort(403);
 
-        // Ambil data pengumpulan
-        $submissions = LmsSubmission::with('student')->where('assignment_id', $assignment->id)->get();
+        // 1. CARI SAUDARA (Assignment di kelas lain yang satu paket)
+        // Kita gunakan logika yang sama dengan index/store: 
+        // Same Teacher + Same Title + Same Created At = Bulk Assignment Group
+        $siblings = LmsAssignment::where('teacher_id', $assignment->teacher_id)
+            ->where('title', $assignment->title)
+            ->where('created_at', $assignment->created_at)
+            ->get();
+
+        // 2. Kumpulkan ID Assignment & ID Kelas
+        // Jika tidak ada siblings (tugas satuan), collection ini isinya cuma 1 ID (milik dia sendiri)
+        $assignmentIds = $siblings->pluck('id');
+        $classIds = $siblings->pluck('class_id');
+
+        // 3. Ambil Submission dari SEMUA assignment terkait
+        $submissions = LmsSubmission::with(['student.schoolClass']) 
+            ->whereIn('assignment_id', $assignmentIds)
+            ->get();
         
-        // Daftar semua siswa di kelas target untuk ditampilkan di tabel
-        $allStudents = Student::where('class_id', $assignment->class_id)
-                        ->orderBy('name')
+        // 4. Ambil Siswa dari SEMUA kelas terkait
+        $allStudents = Student::with('schoolClass')
+                        ->whereIn('class_id', $classIds)
+                        ->orderBy('class_id') // Agar urut per kelas (7A dulu, baru 7B, dst)
+                        ->orderBy('name')     // Lalu urut nama siswa
                         ->get();
+
+        // 5. Inject properti tambahan untuk View
+        // Ini penting agar View 'submissions.blade.php' bisa menampilkan badge "Semua Kelas 7"
+        $assignment->is_bulk = $siblings->count() > 1;
+        
+        if ($assignment->is_bulk && $assignment->schoolClass) {
+             // Tebak jenjang dari nama kelas pertama (misal "9A" -> "9")
+             preg_match('/\d+/', $assignment->schoolClass->name, $matches);
+             $assignment->target_grade = $matches[0] ?? ''; 
+        }
 
         return view('lms.assignments.submissions', compact('assignment', 'submissions', 'allStudents'));
     }
