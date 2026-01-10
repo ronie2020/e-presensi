@@ -69,6 +69,55 @@
                     </p>
                 </div>
 
+            
+                {{-- FILTER FORM & PRINT BUTTON --}}
+                <div class="w-full lg:w-auto shrink-0 flex flex-col gap-4">
+                    
+                    <form id="filterForm" action="{{ route('teacher.habits.index') }}" method="GET" class="bg-white/5 backdrop-blur-xl p-6 rounded-[2rem] border border-white/10 shadow-2xl flex flex-col gap-5 relative">
+                        <div id="formLoading" class="hidden absolute inset-0 bg-slate-900/40 backdrop-blur-[4px] z-10 rounded-[2rem] flex items-center justify-center">
+                            <i class="ph-bold ph-circle-notch animate-spin text-blue-400 text-3xl"></i>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-blue-200 uppercase tracking-widest ml-1 block">Periode</label>
+                                <div class="relative group">
+                                    <i class="ph-bold ph-calendar absolute left-4 top-1/2 -translate-y-1/2 text-blue-400"></i>
+                                    <input type="date" id="filterDate" name="date" value="{{ $date }}" 
+                                        class="block w-full pl-11 pr-4 py-3 bg-white/10 border-white/10 rounded-2xl text-xs font-bold text-white focus:ring-blue-500 focus:border-blue-500 transition-all uppercase" 
+                                        onchange="submitFilter()">
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-blue-200 uppercase tracking-widest ml-1 block">Kelas</label>
+                                <div class="relative group">
+                                    <i class="ph-bold ph-users-three absolute left-4 top-1/2 -translate-y-1/2 text-blue-400"></i>
+                                    <select id="filterClass" name="class_id" 
+                                        class="block w-full pl-11 pr-10 py-3 bg-white/10 border-white/10 rounded-2xl text-xs font-bold text-white focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none" 
+                                        onchange="submitFilter()">
+                                        <option value="" class="bg-slate-900 text-white">Pilih Kelas</option>
+                                        @foreach($classes as $class)
+                                            <option value="{{ $class->id }}" {{ $classId == $class->id ? 'selected' : '' }} class="bg-slate-900 text-white">{{ $class->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    {{-- TOMBOL CETAK (BARU) --}}
+                    @if($classId)
+                        <button onclick="printReport()" 
+                            class="group w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white rounded-[1.5rem] font-bold shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-3 transition-all active:scale-95 border border-white/10">
+                            <div class="bg-white/20 p-1.5 rounded-lg group-hover:rotate-12 transition-transform">
+                                <i class="ph-bold ph-printer text-lg"></i>
+                            </div>
+                            <span class="uppercase tracking-wider text-xs">Cetak Laporan Resmi</span>
+                        </button>
+                    @endif
+                </div>    
+
                 {{-- FILTER FORM --}}
                 <div class="w-full lg:w-auto shrink-0">
                     <form id="filterForm" action="{{ route('teacher.habits.index') }}" method="GET" class="bg-white/5 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col gap-6 relative">
@@ -340,5 +389,20 @@
             document.getElementById('detailModal').classList.add('hidden');
             document.body.style.overflow = 'auto';
         }
+
+         function printReport() {
+        const date = document.getElementById('filterDate').value;
+        const classId = document.getElementById('filterClass').value;
+        
+        if (!classId) {
+            alert('Silakan pilih kelas terlebih dahulu.');
+            return;
+        }
+
+        // Buka tab baru ke route print
+        // Pastikan Anda sudah membuat route 'teacher.habits.print'
+        const url = `{{ route('teacher.habits.print') }}?date=${date}&class_id=${classId}`;
+        window.open(url, '_blank');
+    }
     </script>
 </x-app-layout>

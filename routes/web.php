@@ -168,15 +168,12 @@ Route::middleware(['auth:student'])->group(function () {
     Route::post('/student/api/chat/send', [LiaisonBookController::class, 'sendStudentChatMessage'])->name('student.liaison.chat.send');
 
     // --- 4. JURNAL KEBIASAAN BAIK (7 HABITS) ---
-    // Update Struktur Route agar lebih rapi
     Route::prefix('student/kebiasaan')->name('student.habits.')->group(function() {
         
         // A. DASHBOARD UTAMA (Route Baru)
         Route::get('/dashboard', [StudentHabitController::class, 'dashboard'])->name('dashboard');
 
-        // B. FORM PENGISIAN JURNAL (Route Lama)
-        // Saya ubah URL-nya sedikit agar tidak bentrok, tapi name-nya tetap 'index' 
-        // agar kode lain tidak perlu diubah banyak.
+        // B. FORM PENGISIAN JURNAL        
         Route::get('/isi-jurnal', [StudentHabitController::class, 'index'])->name('index');
         Route::post('/simpan', [StudentHabitController::class, 'store'])->name('store');
     });
@@ -481,6 +478,7 @@ Route::middleware('auth')->group(function () {
 
     // MONITORING 7 KEBIASAAN (GURU)
     Route::get('/teacher/habits', [TeacherHabitController::class, 'index'])->name('teacher.habits.index');
+    Route::get('/teacher/habits/print', [TeacherHabitController::class, 'print'])->name('teacher.habits.print'); // <-- TAMBAHAN
     Route::get('/teacher/habits/detail/{id}', [TeacherHabitController::class, 'show'])->name('teacher.habits.show');
     Route::post('/teacher/habits/feedback/{id}', [TeacherHabitController::class, 'feedback'])->name('teacher.habits.feedback');
 

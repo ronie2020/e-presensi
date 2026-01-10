@@ -108,4 +108,34 @@ class TeacherHabitController extends Controller
         
         return 'school_class_id'; // Default Fallback jika semua gagal
     }
+public function print(Request $request)
+{
+    // 1. Ambil filter dari request, default ke hari ini jika kosong
+    $date = $request->date ?? now()->toDateString();
+    $classId = $request->class_id;
+
+    // 2. Validasi sederhana
+    if (!$classId) {
+        return redirect()->back()->with('error', 'Silakan pilih kelas terlebih dahulu.');
+    }
+
+    // 3. Ambil Data Kelas
+    $class = SchoolClass::findOrFail($classId);
+
+    // 4. Ambil Siswa & Data Kebiasaan (Habits)
+    $students = Student::where('class_id', $classId)
+        ->orderBy('name', 'asc')
+        ->get()
+        ->each(function($student) use ($date) {
+            // Attach habit data manual untuk tanggal tersebut
+            $student->habit_data = StudentHabit::where('student_id', $student->id)
+                ->whereDate('report_date', $date)
+                ->first();
+        });
+
+    // 5. Tampilkan View Cetak
+    // Pastikan file view 'teacher.habits.print' sudah dibuat sesuai kode sebelumnya
+    return view('habits.print', compact('students', 'date', 'class'));
+}
+    
 }
