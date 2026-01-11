@@ -12,6 +12,7 @@ class StudentHabit extends Model
     protected $fillable = [
         'student_id',
         'report_date',
+        'is_udzur_syar_i',
         
         // 1. Bangun & Mandi (Habit 1 & 2)
         'habit_1', 'habit_1_time', 'habit_1_note', // Bangun
@@ -72,6 +73,7 @@ class StudentHabit extends Model
         'prayer_ashar' => 'boolean',
         'prayer_maghrib' => 'boolean',
         'prayer_isya' => 'boolean',
+        'is_udzur_syar_i' => 'boolean',
     ];
 
     public function student()

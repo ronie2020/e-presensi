@@ -78,7 +78,6 @@
                     </p>
                 </div>
 
-            
                 
                 <div class="w-full lg:w-auto shrink-0 flex flex-col gap-4">
                     
@@ -126,42 +125,9 @@
                         </button>
                     <?php endif; ?>
                 </div>    
-
                 
-                <div class="w-full lg:w-auto shrink-0">
-                    <form id="filterForm" action="<?php echo e(route('teacher.habits.index')); ?>" method="GET" class="bg-white/5 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col gap-6 relative">
-                        <div id="formLoading" class="hidden absolute inset-0 bg-slate-900/40 backdrop-blur-[4px] z-10 rounded-[2.5rem] flex items-center justify-center">
-                            <i class="ph-bold ph-circle-notch animate-spin text-blue-400 text-3xl"></i>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-black text-blue-200 uppercase tracking-widest ml-1 block">Periode Laporan</label>
-                                <div class="relative group">
-                                    <i class="ph-bold ph-calendar absolute left-4 top-1/2 -translate-y-1/2 text-blue-400"></i>
-                                    <input type="date" name="date" value="<?php echo e($date); ?>" 
-                                        class="block w-full pl-11 pr-4 py-3 bg-white/10 border-white/10 rounded-2xl text-xs font-bold text-white focus:ring-blue-500 focus:border-blue-500 transition-all uppercase" 
-                                        onchange="submitFilter()">
-                                </div>
-                            </div>
-
-                            <div class="space-y-2">
-                                <label class="text-[10px] font-black text-blue-200 uppercase tracking-widest ml-1 block">Target Kelas</label>
-                                <div class="relative group">
-                                    <i class="ph-bold ph-users-three absolute left-4 top-1/2 -translate-y-1/2 text-blue-400"></i>
-                                    <select name="class_id" 
-                                        class="block w-full pl-11 pr-10 py-3 bg-white/10 border-white/10 rounded-2xl text-xs font-bold text-white focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none" 
-                                        onchange="submitFilter()">
-                                        <option value="" class="bg-slate-900 text-white">Pilih Kelas</option>
-                                        <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $class): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                            <option value="<?php echo e($class->id); ?>" <?php echo e($classId == $class->id ? 'selected' : ''); ?> class="bg-slate-900 text-white"><?php echo e($class->name); ?></option>
-                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+                
+                
             </div>
         </div>
 
@@ -275,7 +241,6 @@
                                     
                                     <td class="px-6 py-5 text-center">
                                         <?php if($student->habit_data && $student->habit_data->habit_5): ?> 
-                                            
                                             <span class="inline-flex w-8 h-8 items-center justify-center rounded-full bg-orange-100 text-orange-600 shadow-sm" title="Sudah Mengambil Makan">
                                                 <i class="ph-fill ph-check font-bold"></i>
                                             </span>
@@ -404,19 +369,17 @@
         }
 
          function printReport() {
-        const date = document.getElementById('filterDate').value;
-        const classId = document.getElementById('filterClass').value;
-        
-        if (!classId) {
-            alert('Silakan pilih kelas terlebih dahulu.');
-            return;
-        }
+            const date = document.getElementById('filterDate').value;
+            const classId = document.getElementById('filterClass').value;
+            
+            if (!classId) {
+                alert('Silakan pilih kelas terlebih dahulu.');
+                return;
+            }
 
-        // Buka tab baru ke route print
-        // Pastikan Anda sudah membuat route 'teacher.habits.print'
-        const url = `<?php echo e(route('teacher.habits.print')); ?>?date=${date}&class_id=${classId}`;
-        window.open(url, '_blank');
-    }
+            const url = `<?php echo e(route('teacher.habits.print')); ?>?date=${date}&class_id=${classId}`;
+            window.open(url, '_blank');
+        }
     </script>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>

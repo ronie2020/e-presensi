@@ -129,12 +129,20 @@ class StudentPortalController extends Controller
             } catch (QueryException $e) { }
         }
 
-        // 5. JURNAL 7 KEBIASAAN HARI INI
+        // 5. JURNAL 7 KEBIASAAN (Habits)
         $todayEntry = null;
+        $habits = collect([]); // Inisialisasi collection kosong agar tidak error jika model tidak ada
+        
         if (class_exists(StudentHabit::class)) {
+            // Ambil data hari ini (untuk form input)
             $todayEntry = StudentHabit::where('student_id', $id)
                             ->whereDate('report_date', Carbon::today()) 
                             ->first();
+
+            // [BARU] Ambil seluruh riwayat habits (untuk Tab Keagamaan & Statistik)
+            $habits = StudentHabit::where('student_id', $id)
+                        ->orderBy('report_date', 'desc')
+                        ->get();
         }
 
         // 6. DATA LAINNYA (LMS, Perpus, Akademik, KBM)
@@ -198,33 +206,19 @@ class StudentPortalController extends Controller
             ]);
         }
 
-        // Statistik Sholat (Opsional)
+        // Statistik Sholat (Optional - tetap dipertahankan jika view lain butuh)
         $sholat_dhuha = 0; $sholat_dhuhur = 0;
         if (class_exists(AttendanceSiswa::class)) {
             $sholat_dhuha = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuha')->count();
             $sholat_dhuhur = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuhur')->count();
         }
 
-        // --- PERBAIKAN LOKASI VIEW ---
-        // Jika file ada di resources/views/students/portal/show.blade.php
-        if (view()->exists('students.portal.show')) {
-            return view('students.portal.show', compact(
-                'student', 'isAlumni', 'tabs', 'attendancePercentage',
-                'liaison_messages', 'complaints', 'todayEntry',
-                'hadir', 'sakit', 'izin', 'alpa', 'attendance_history', 'attendanceChart',
-                'lms_assignments_grouped', 'lms_grades',
-                'violations', 'total_violation_points', 
-                'achievements', 'total_merit_points',
-                'library_visits', 'library_history',
-                'academic_record', 'chartData', 'teaching_journals',
-                'sholat_dhuha', 'sholat_dhuhur'
-            ));
-        }
-        
-        // Fallback (Jaga-jaga)
-        return view('portal.show', compact(
+        // --- DATA BINDING ---
+        // Menyatukan semua variabel untuk dikirim ke view
+        $data = compact(
             'student', 'isAlumni', 'tabs', 'attendancePercentage',
-            'liaison_messages', 'complaints', 'todayEntry',
+            'liaison_messages', 'complaints', 
+            'todayEntry', 'habits', // <--- 'habits' ditambahkan di sini
             'hadir', 'sakit', 'izin', 'alpa', 'attendance_history', 'attendanceChart',
             'lms_assignments_grouped', 'lms_grades',
             'violations', 'total_violation_points', 
@@ -232,7 +226,15 @@ class StudentPortalController extends Controller
             'library_visits', 'library_history',
             'academic_record', 'chartData', 'teaching_journals',
             'sholat_dhuha', 'sholat_dhuhur'
-        ));
+        );
+
+        // --- PERBAIKAN LOKASI VIEW ---
+        if (view()->exists('students.portal.show')) {
+            return view('students.portal.show', $data);
+        }
+        
+        // Fallback
+        return view('portal.show', $data);
     }
 
     /**

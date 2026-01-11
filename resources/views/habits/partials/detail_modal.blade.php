@@ -62,33 +62,49 @@
                 </p>
             </div>
 
-            {{-- 2. SHALAT (DETAIL CHECKLIST) & ODOA --}}
-            <div class="flex flex-col p-4 rounded-2xl border bg-white border-slate-200 md:row-span-2 shadow-sm">
-                
-                {{-- A. LIST SHALAT --}}
+            {{-- 2. IBADAH HARIAN (FIXED) --}}
+            <div class="flex flex-col p-4 rounded-2xl border bg-white border-slate-100 shadow-sm md:row-span-2">
                 <div class="mb-4">
-                    <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-100">
-                        <i class="ph-bold ph-mosque text-emerald-600 text-lg"></i>
-                        <span class="text-sm font-bold text-slate-700">2. Ibadah Harian</span>
+                    <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <i class="ph-bold ph-mosque text-emerald-600 text-lg"></i>
+                            <span class="text-sm font-bold text-slate-700">2. Ibadah Harian</span>
+                        </div>
+
+                        {{-- INDIKATOR UDZUR --}}
+                        @if($habit->is_udzur_syar_i)
+                            <span class="px-2 py-1 bg-pink-50 text-pink-600 rounded-lg text-[10px] font-black uppercase tracking-wider border border-pink-100 flex items-center gap-1">
+                                <i class="ph-fill ph-flower-lotus"></i> Sedang Udzur
+                            </span>
+                        @endif
                     </div>
-                    <div class="grid grid-cols-2 gap-y-3 gap-x-2">
-                        @php
-                            $prayers = [
-                                ['Subuh', $habit->prayer_subuh],
-                                ['Dhuha', $habit->prayer_dhuha],
-                                ['Dzuhur', $habit->prayer_dzuhur],
-                                ['Ashar', $habit->prayer_ashar],
-                                ['Maghrib', $habit->prayer_maghrib],
-                                ['Isya', $habit->prayer_isya],
-                            ];
-                        @endphp
-                        @foreach($prayers as $p)
-                            <div class="flex items-center gap-2">
-                                <i class="ph-fill {{ $p[1] ? 'ph-check-circle text-emerald-500' : 'ph-circle text-slate-200' }} text-lg"></i>
-                                <span class="text-xs font-bold {{ $p[1] ? 'text-slate-700' : 'text-slate-400' }}">{{ $p[0] }}</span>
-                            </div>
-                        @endforeach
-                    </div>
+
+                    {{-- KONDISI TAMPILAN JIKA Udzur --}}
+                    @if($habit->is_udzur_syar_i)
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 text-center">
+                            <p class="text-xs text-slate-500 font-medium">Siswa sedang berhalangan (Udzur Syar'i).</p>
+                        </div>
+                    @else
+                        <div class="grid grid-cols-2 gap-y-3 gap-x-2">
+                            {{-- [PERBAIKAN] Definisi Array Shalat yang Benar --}}
+                            @php
+                                $prayers = [
+                                    ['Subuh', $habit->prayer_subuh],
+                                    ['Dhuha', $habit->prayer_dhuha],
+                                    ['Dzuhur', $habit->prayer_dzuhur],
+                                    ['Ashar', $habit->prayer_ashar],
+                                    ['Maghrib', $habit->prayer_maghrib],
+                                    ['Isya', $habit->prayer_isya],
+                                ];
+                            @endphp
+                            @foreach($prayers as $p)
+                                <div class="flex items-center gap-2">
+                                    <i class="ph-fill {{ $p[1] ? 'ph-check-circle text-emerald-500' : 'ph-circle text-slate-200' }} text-lg"></i>
+                                    <span class="text-xs font-bold {{ $p[1] ? 'text-slate-700' : 'text-slate-400' }}">{{ $p[0] }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 {{-- B. AUDIO ODOA (TADARUS) --}}
@@ -99,7 +115,6 @@
                     
                     @if($habit->odoa_surah || $habit->odoa_ayat || $habit->odoa_audio_path)
                         <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 relative overflow-hidden group">
-                            
                              <div class="relative z-10">
                                 <div class="flex items-center gap-3 mb-2">
                                     <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
@@ -116,7 +131,6 @@
                                 {{-- PLAYER AUDIO --}}
                                 @if($habit->odoa_audio_path)
                                     <div class="mt-2">
-                                        {{-- Hapus type="audio/mpeg" agar browser mendeteksi format secara otomatis (support .webm) --}}
                                         <audio controls class="w-full h-8 rounded-lg">
                                             <source src="{{ asset('storage/'.$habit->odoa_audio_path) }}">
                                             Browser Anda tidak mendukung pemutar audio.
@@ -206,7 +220,6 @@
     </div>
 
     {{-- Feedback Form --}}
-    {{-- Pastikan route 'teacher.habits.feedback' sudah didefinisikan di web.php --}}
     <div class="pt-4 border-t border-slate-100">
         <form action="{{ route('teacher.habits.feedback', $habit->id) }}" method="POST" class="bg-slate-900 p-6 rounded-[2rem] shadow-xl relative overflow-hidden">
             @csrf

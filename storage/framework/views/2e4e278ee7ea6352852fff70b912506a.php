@@ -61,8 +61,9 @@
                                 
                                 <div class="flex items-center gap-4">
                                     <div class="relative flex items-center">
-                                        <input type="checkbox" name="check_bangun" class="w-6 h-6 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-blue-500 transition-all" 
-                                            <?php echo e(old('check_bangun', $todayEntry->habit_1 ?? false) ? 'checked' : ''); ?>>
+                                        
+                                        <input type="checkbox" name="habit_1" class="w-6 h-6 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-blue-500 transition-all" 
+                                            <?php echo e(old('habit_1', $todayEntry->habit_1 ?? false) ? 'checked' : ''); ?>>
                                         <span class="ml-3 font-bold text-slate-700">Ya, saya bangun pagi</span>
                                     </div>
                                     <input type="time" name="habit_1_time" value="<?php echo e(old('habit_1_time', $todayEntry->habit_1_time ?? '')); ?>" class="rounded-xl border-slate-200 text-sm font-bold text-slate-600 focus:border-blue-500 focus:ring-blue-500">
@@ -73,21 +74,38 @@
 
                     <!-- 2. IBADAH HARIAN (SHALAT + ODOA) -->
                     <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 group md:row-span-2"
-                         x-data="audioRecorder">
+                        x-data="{ isUdzur: <?php echo e(old('is_udzur_syar_i', $todayEntry->is_udzur_syar_i ?? false) ? 'true' : 'false'); ?> }">
                         
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl"><i class="ph-duotone ph-mosque"></i></div>
-                            <div>
-                                <h3 class="font-black text-slate-800 text-lg">2. Ibadah Harian</h3>
-                                <p class="text-xs text-slate-400 font-medium">Shalat & Tadarus Al-Qur'an</p>
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl"><i class="ph-duotone ph-mosque"></i></div>
+                                <div>
+                                    <h3 class="font-black text-slate-800 text-lg">2. Ibadah Harian</h3>
+                                    <p class="text-xs text-slate-400 font-medium">Shalat & Tadarus Al-Qur'an</p>
+                                </div>
                             </div>
+
+                            
+                            <label class="flex items-center gap-2 cursor-pointer bg-pink-50 px-3 py-2 rounded-xl border border-pink-100 hover:bg-pink-100 transition-colors">
+                                <input type="checkbox" name="is_udzur_syar_i" value="1" x-model="isUdzur" class="w-4 h-4 rounded text-pink-500 focus:ring-pink-500 border-pink-300">
+                                <span class="text-xs font-bold text-pink-600 select-none">Sedang halangan/Udzur syar'i</span>
+                            </label>
                         </div>
                         
                         
-                        <div class="space-y-3 mb-8">
+                        <div class="space-y-3 mb-8 transition-all duration-300" 
+                            :class="isUdzur ? 'opacity-50 grayscale pointer-events-none' : ''">
+                            
                             <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                                 <i class="ph-bold ph-hands-praying"></i> A. Shalat Wajib & Sunnah
                             </h4>
+
+                            
+                            <div x-show="isUdzur" class="mb-3 p-3 bg-pink-50 border border-pink-100 rounded-xl flex items-center gap-2 text-pink-600 text-xs font-bold animate-pulse" style="display: none;">
+                                <i class="ph-fill ph-flower-lotus"></i>
+                                Alhamdulillah, istirahat adalah ibadah bagi yang udzur.
+                            </div>
+
                             <?php 
                                 $prayers = [
                                     ['key' => 'prayer_subuh', 'label' => 'Subuh'],
@@ -115,6 +133,8 @@
                                         ? 'bg-blue-50 border-blue-200 cursor-not-allowed opacity-90' 
                                         : ($isChecked ? 'bg-emerald-50 border-emerald-200 cursor-pointer' : 'bg-white border-slate-100 cursor-pointer')); ?>">
                                     
+                                    
+                                    
                                     <div class="flex items-center gap-3">
                                         <span class="text-sm font-bold <?php echo e($isChecked ? ($isVerifiedSchool ? 'text-blue-700' : 'text-emerald-700') : 'text-slate-600'); ?>">
                                             <?php echo e($p['label']); ?>
@@ -134,6 +154,7 @@
 
                                     <div class="relative">
                                         <input type="checkbox" name="<?php echo e($p['key']); ?>" 
+                                            value="1"
                                             class="w-5 h-5 rounded focus:ring-emerald-500 
                                             <?php echo e($isVerifiedSchool ? 'text-blue-500 border-blue-300 bg-blue-100' : 'text-emerald-600'); ?>" 
                                             <?php echo e($isChecked ? 'checked' : ''); ?>
@@ -169,7 +190,7 @@
                             </div>
 
                             
-                            <div class="bg-slate-50 rounded-3xl border border-slate-200 p-5 text-center relative overflow-hidden">
+                            <div class="bg-slate-50 rounded-3xl border border-slate-200 p-5 text-center relative overflow-hidden" x-data="audioRecorder">
                                 
                                 <?php if($todayEntry && $todayEntry->odoa_audio_path): ?>
                                     <div class="mb-5 bg-white p-3 rounded-2xl border border-emerald-100 flex items-center gap-3 shadow-sm" x-show="!isRecording && !audioBlob">
@@ -226,8 +247,9 @@
                             <div>
                                 <h3 class="font-bold text-slate-800 text-lg mb-1">3. Mandi & Gosok Gigi</h3>
                                 <div class="flex items-center gap-2">
-                                    <input type="checkbox" name="check_mandi" class="w-6 h-6 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-blue-500 transition-all" 
-                                        <?php echo e(old('check_mandi', $todayEntry->habit_2 ?? false) ? 'checked' : ''); ?>>
+                                    
+                                    <input type="checkbox" name="habit_2" class="w-6 h-6 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-blue-500 transition-all" 
+                                        <?php echo e(old('habit_2', $todayEntry->habit_2 ?? false) ? 'checked' : ''); ?>>
                                     <span class="font-bold text-slate-700 text-sm">Sudah Mandi</span>
                                 </div>
                             </div>
@@ -241,8 +263,9 @@
                             <div>
                                 <h3 class="font-bold text-slate-800 text-lg mb-1">4. Olahraga</h3>
                                 <div class="flex items-center gap-2">
-                                    <input type="checkbox" name="check_olahraga" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" 
-                                        <?php echo e(old('check_olahraga', $todayEntry->habit_3 ?? false) ? 'checked' : ''); ?>>
+                                    
+                                    <input type="checkbox" name="habit_3" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" 
+                                        <?php echo e(old('habit_3', $todayEntry->habit_3 ?? false) ? 'checked' : ''); ?>>
                                     <span class="font-bold text-slate-600 text-sm">Melakukan aktivitas fisik</span>
                                 </div>
                             </div>
@@ -267,11 +290,12 @@
                                     <div class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-black uppercase tracking-wider mb-2">
                                         <i class="ph-fill ph-qr-code"></i> TERDATA OTOMATIS
                                     </div>
-                                    <input type="hidden" name="check_makan" value="1">
+                                    <input type="hidden" name="habit_5" value="1">
                                 <?php else: ?>
                                     <div class="flex items-center gap-2">
-                                        <input type="checkbox" name="check_makan" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" 
-                                            <?php echo e(old('check_makan', $todayEntry->habit_5 ?? false) ? 'checked' : ''); ?>>
+                                        
+                                        <input type="checkbox" name="habit_5" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" 
+                                            <?php echo e(old('habit_5', $todayEntry->habit_5 ?? false) ? 'checked' : ''); ?>>
                                         <span class="font-bold text-slate-600 text-sm">Makan sayur/buah</span>
                                     </div>
                                     <div class="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-lime-50 border border-lime-100 text-lime-700 text-[10px] font-black uppercase tracking-wider">
@@ -296,8 +320,9 @@
                             <div>
                                 <h3 class="font-bold text-slate-800 text-lg mb-1">6. Gemar Belajar</h3>
                                 <div class="flex items-center gap-2">
-                                    <input type="checkbox" name="check_belajar" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" 
-                                        <?php echo e(old('check_belajar', $todayEntry->habit_4 ?? false) ? 'checked' : ''); ?>>
+                                    
+                                    <input type="checkbox" name="habit_4" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" 
+                                        <?php echo e(old('habit_4', $todayEntry->habit_4 ?? false) ? 'checked' : ''); ?>>
                                     <span class="font-bold text-slate-600 text-sm">Belajar mandiri di rumah</span>
                                 </div>
                             </div>
@@ -312,8 +337,9 @@
                             <div>
                                 <h3 class="font-bold text-slate-800 text-lg mb-1">7. Membantu Orang Tua</h3>
                                 <div class="flex items-center gap-2">
-                                    <input type="checkbox" name="check_sosial" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" 
-                                        <?php echo e(old('check_sosial', $todayEntry->habit_6 ?? false) ? 'checked' : ''); ?>>
+                                    
+                                    <input type="checkbox" name="habit_6" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" 
+                                        <?php echo e(old('habit_6', $todayEntry->habit_6 ?? false) ? 'checked' : ''); ?>>
                                     <span class="font-bold text-slate-600 text-sm">Melakukan kebaikan</span>
                                 </div>
                             </div>
@@ -331,8 +357,9 @@
                                 
                                 <div class="flex items-center gap-4">
                                     <div class="relative flex items-center">
-                                        <input type="checkbox" name="check_tidur" class="w-6 h-6 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-blue-500 transition-all" 
-                                            <?php echo e(old('check_tidur', $todayEntry->habit_7 ?? false) ? 'checked' : ''); ?>>
+                                        
+                                        <input type="checkbox" name="habit_7" class="w-6 h-6 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-blue-500 transition-all" 
+                                            <?php echo e(old('habit_7', $todayEntry->habit_7 ?? false) ? 'checked' : ''); ?>>
                                         <span class="ml-3 font-bold text-slate-700">Ya, tidur tepat waktu</span>
                                     </div>
                                     <input type="time" name="habit_7_time" value="<?php echo e(old('habit_7_time', $todayEntry->habit_7_time ?? '')); ?>" class="rounded-xl border-slate-200 text-sm font-bold text-slate-600 focus:border-blue-500 focus:ring-blue-500">

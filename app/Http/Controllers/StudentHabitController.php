@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\StudentHabit;
-use App\Models\AttendanceSiswa; // Import Model Absensi Sekolah
+use App\Models\AttendanceSiswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -18,8 +18,6 @@ class StudentHabitController extends Controller
     public function dashboard()
     {
         $studentId = Auth::guard('student')->id();
-        
-        // [PERBAIKAN TIMEZONE] Gunakan Asia/Jakarta
         $today = Carbon::now('Asia/Jakarta')->toDateString();
         
         // 1. Cek Status Hari Ini
@@ -39,7 +37,7 @@ class StudentHabitController extends Controller
                             ->take(5)
                             ->get();
 
-        // 4. Hitung Poin (Contoh: Jumlah hari lapor x 100)
+        // 4. Hitung Poin (Total hari x 100)
         $totalPoints = StudentHabit::where('student_id', $studentId)->count() * 100;
 
         return view('habits.student_dashboard', compact(
@@ -56,17 +54,13 @@ class StudentHabitController extends Controller
     public function index()
     {
         $studentId = Auth::guard('student')->id();
-        
-        // [PERBAIKAN TIMEZONE] Gunakan Asia/Jakarta
         $today = Carbon::now('Asia/Jakarta')->toDateString();
 
-        // 1. Ambil Data Jurnal (Inputan Siswa Sebelumnya)
         $todayEntry = StudentHabit::where('student_id', $studentId)
                         ->whereDate('report_date', $today)
                         ->first();
 
-        // 2. [HYBRID SYSTEM] Cek Data Absensi Sekolah (Dhuha & Dhuhur)
-        // Mengecek apakah siswa sudah absen 'Hadir' untuk kegiatan Keagamaan hari ini
+        // [HYBRID SYSTEM] Cek Absensi Sekolah
         $schoolDhuha = AttendanceSiswa::where('student_id', $studentId)
                         ->whereDate('attendance_date', $today)
                         ->where('type', 'Keagamaan') 
@@ -81,7 +75,6 @@ class StudentHabitController extends Controller
                         ->where('status', 'Hadir')
                         ->exists();
 
-        // 3. [HYBRID SYSTEM] Cek Data Makan Bergizi (MBG)
         $schoolMbgMenu = null; 
         
         return view('habits.student_index', compact(
@@ -93,21 +86,18 @@ class StudentHabitController extends Controller
     }
 
     /**
-     * Simpan Jurnal (Mendukung Simpan Sebagian / Draf)
+     * Simpan Jurnal
      */
     public function store(Request $request)
     {
         $studentId = Auth::guard('student')->id();
-        
-        // [PERBAIKAN TIMEZONE] Pastikan saat menyimpan menggunakan tanggal Indonesia
         $today = Carbon::now('Asia/Jakarta')->toDateString();
         
-        // 1. Cek Data Lama
         $existingEntry = StudentHabit::where('student_id', $studentId)
                             ->where('report_date', $today)
                             ->first();
 
-        // --- A. LOGIKA HYBRID (SINKRONISASI BACKEND) ---
+        // --- A. LOGIKA HYBRID ---
         $schoolDhuha = AttendanceSiswa::where('student_id', $studentId)
                         ->whereDate('attendance_date', $today) 
                         ->where('type', 'Keagamaan')
@@ -122,38 +112,47 @@ class StudentHabitController extends Controller
                         ->where('status', 'Hadir')
                         ->exists();
 
-        // OVERRIDE VALUES:
-        $valSubuh   = $request->has('prayer_subuh');
-        $valDhuha   = $schoolDhuha ? true : $request->has('prayer_dhuha'); 
-        $valDzuhur  = $schoolDzuhur ? true : $request->has('prayer_dzuhur');
-        $valAshar   = $request->has('prayer_ashar');
-        $valMaghrib = $request->has('prayer_maghrib');
-        $valIsya    = $request->has('prayer_isya');
+        // [LOGIKA UDZUR SYAR'I]
+        // Jika sedang udzur, maka input shalat diabaikan (tetap false)
+        // Namun flag is_udzur_syar_i harus disimpan.
+        $isUdzur = $request->has('is_udzur_syar_i');
 
-        // Logika MBG (Makan)
-        $valMakan = $request->has('check_makan'); 
+        // PENGATURAN NILAI SHALAT
+        if ($isUdzur) {
+            // Jika Udzur, semua shalat otomatis false (tidak wajib)
+            $valSubuh = false;
+            $valDhuha = false;
+            $valDzuhur = false;
+            $valAshar = false;
+            $valMaghrib = false;
+            $valIsya = false;
+        } else {
+            // Jika TIDAK Udzur, ambil dari input atau data sekolah
+            $valSubuh   = $request->has('prayer_subuh');
+            $valDhuha   = $schoolDhuha ? true : $request->has('prayer_dhuha'); 
+            $valDzuhur  = $schoolDzuhur ? true : $request->has('prayer_dzuhur');
+            $valAshar   = $request->has('prayer_ashar');
+            $valMaghrib = $request->has('prayer_maghrib');
+            $valIsya    = $request->has('prayer_isya');
+        }
+
+        // [FIX VARIABLE NAMES] Menggunakan habit_5 sesuai database
+        $valMakan = $request->has('habit_5'); 
         $valMenuMakan = $request->habit_5_menu;
 
-        // VALIDASI
         $request->validate([
             'habit_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             'odoa_audio'  => 'nullable|file|mimes:audio/mpeg,mpga,mp3,wav,aac,webm|max:10240',
             'odoa_surah'  => 'nullable|string|max:100',
-            'odoa_ayat'   => 'nullable|string|max:50',
             'habit_1_time' => 'nullable',
             'habit_7_time' => 'nullable',
-        ], [
-            'habit_photo.image' => 'File bukti harus berupa gambar.',
-            'habit_photo.max' => 'Ukuran foto maksimal 5MB.',
-            'odoa_audio.max' => 'Ukuran rekaman maksimal 10MB.',
         ]);
 
         try {
             DB::beginTransaction();
 
-            // --- B. HANDLE FOTO KEGIATAN ---
+            // --- B. HANDLE FILES ---
             $photoPath = $existingEntry ? $existingEntry->photo_path : null;
-            
             if ($request->hasFile('habit_photo')) {
                 if ($photoPath && Storage::disk('public')->exists($photoPath)) {
                     Storage::disk('public')->delete($photoPath);
@@ -163,9 +162,7 @@ class StudentHabitController extends Controller
                 $photoPath = $file->storeAs('habits', $filename, 'public');
             }
 
-            // --- C. HANDLE AUDIO ODOA ---
             $audioPath = $existingEntry ? $existingEntry->odoa_audio_path : null;
-
             if ($request->hasFile('odoa_audio')) {
                 if ($audioPath && Storage::disk('public')->exists($audioPath)) {
                     Storage::disk('public')->delete($audioPath);
@@ -176,21 +173,25 @@ class StudentHabitController extends Controller
                 $audioPath = $audioFile->storeAs('habits/audio', $audioFilename, 'public');
             }
 
-            // --- D. SIMPAN KE DATABASE ---
+            // --- C. SIMPAN KE DATABASE (FIXED NAMES) ---
+            // Kita gunakan $request->has('habit_X') karena checkbox HTML tidak kirim value jika unchecked
             $habit = StudentHabit::updateOrCreate(
                 [
                     'student_id' => $studentId,
                     'report_date' => $today
                 ],
                 [
+                    // FLAG UDZUR
+                    'is_udzur_syar_i' => $isUdzur,
+
                     // 1. BANGUN PAGI
-                    'habit_1' => $request->has('check_bangun'),
+                    'habit_1' => $request->has('habit_1'), // Fixed from check_bangun
                     'habit_1_time' => $request->habit_1_time,
 
                     // 2. MANDI
-                    'habit_2' => $request->has('check_mandi'),
+                    'habit_2' => $request->has('habit_2'), // Fixed from check_mandi
 
-                    // 3. IBADAH (SHALAT)
+                    // 3. SHALAT
                     'prayer_subuh' => $valSubuh,
                     'prayer_dhuha' => $valDhuha,
                     'prayer_dzuhur' => $valDzuhur,
@@ -198,29 +199,29 @@ class StudentHabitController extends Controller
                     'prayer_maghrib' => $valMaghrib,
                     'prayer_isya' => $valIsya,
 
-                    // 4. ODOA (Ini sekarang akan tersimpan karena sudah ada di fillable)
+                    // 4. ODOA
                     'odoa_surah' => $request->odoa_surah,
                     'odoa_ayat' => $request->odoa_ayat,
                     'odoa_audio_path' => $audioPath,
 
                     // 5. OLAHRAGA
-                    'habit_3' => $request->has('check_olahraga'),
+                    'habit_3' => $request->has('habit_3'), // Fixed from check_olahraga
                     'habit_3_activity' => $request->habit_3_activity,
 
                     // 6. MAKAN BERGIZI
-                    'habit_5' => $valMakan,
+                    'habit_5' => $valMakan, // Fixed from check_makan
                     'habit_5_menu' => $valMenuMakan,
 
-                    // 7. GEMAR BELAJAR
-                    'habit_4' => $request->has('check_belajar'),
+                    // 7. BELAJAR
+                    'habit_4' => $request->has('habit_4'), // Fixed from check_belajar
                     'habit_4_subject' => $request->habit_4_subject,
 
-                    // 8. BERMASYARAKAT
-                    'habit_6' => $request->has('check_sosial'),
+                    // 8. SOSIAL
+                    'habit_6' => $request->has('habit_6'), // Fixed from check_sosial
                     'habit_6_activity' => $request->habit_6_activity,
 
-                    // 9. TIDUR CEPAT
-                    'habit_7' => $request->has('check_tidur'),
+                    // 9. TIDUR
+                    'habit_7' => $request->has('habit_7'), // Fixed from check_tidur
                     'habit_7_time' => $request->habit_7_time,
 
                     'photo_path' => $photoPath,
@@ -229,15 +230,20 @@ class StudentHabitController extends Controller
 
             DB::commit();
 
-            // --- E. CEK KELENGKAPAN (GAMIFICATION) ---
+            // --- D. LOGIKA GAMIFIKASI (FIXED FOR UDZUR) ---
             $hasPhoto = !empty($habit->photo_path);
             
-            $hasPrayer = $habit->prayer_subuh || $habit->prayer_dhuha || $habit->prayer_dzuhur || 
-                         $habit->prayer_ashar || $habit->prayer_maghrib || $habit->prayer_isya;
+            // Cek Shalat: Selesai jika (ada minimal 1 shalat) ATAU (sedang udzur)
+            $prayerCondition = ($habit->prayer_subuh || $habit->prayer_dhuha || $habit->prayer_dzuhur || 
+                                $habit->prayer_ashar || $habit->prayer_maghrib || $habit->prayer_isya);
+            
+            if ($habit->is_udzur_syar_i) {
+                $prayerCondition = true; // Bypass cek shalat jika udzur
+            }
 
             $isComplete = $habit->habit_1 && // Bangun
                           $habit->habit_2 && // Mandi
-                          $hasPrayer &&      // Shalat
+                          $prayerCondition && // Shalat/Udzur
                           $habit->habit_3 && // Olahraga
                           $habit->habit_5 && // Makan
                           $habit->habit_4 && // Belajar
@@ -248,10 +254,6 @@ class StudentHabitController extends Controller
             if ($isComplete) {
                 $message = 'Jurnal harian LENGKAP! Hebat, pertahankan kebiasaan baikmu.';
             } else {
-                $missing = [];
-                if (!$hasPhoto) $missing[] = 'Foto Bukti';
-                if (!$habit->habit_1) $missing[] = 'Bangun Pagi';
-                
                 $message = 'Tersimpan sebagai DRAF. Jangan lupa lengkapi data yang belum diisi ya.';
             }
 
