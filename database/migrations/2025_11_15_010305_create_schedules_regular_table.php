@@ -1,6 +1,5 @@
 <?php
 
-// INI BAGIAN YANG DIPERBAIKI (menggunakan backslash \)
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,19 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Tabel ini untuk menyimpan "Jadwal Hari Biasa" dan "Jadwal Hari Jum'at"
         Schema::create('schedules_regular', function (Blueprint $table) {
             $table->id();
             
-            // Kolom untuk membedakan 'Senin-Kamis' atau 'Jumat'
-            $table->string('day_type')->unique(); 
+            // --- PERBAIKAN DI SINI ---
+            // Ganti 'day_type' menjadi 'day_name' agar cocok dengan Controller
+            // Kolom ini akan diisi: Monday, Tuesday, Wednesday, dst.
+            $table->string('day_name')->unique(); 
             
-            $table->time('start_in'); // Masuk Mulai
-            $table->time('end_in');   // Masuk Akhir
-            $table->time('start_out'); // Pulang Mulai
-            $table->time('end_out');   // Pulang Akhir
+            $table->time('start_in'); 
+            $table->time('end_in');   
+            $table->time('start_out'); 
+            $table->time('end_out');   
             
-            //$table->timestamps();
+            // Opsional: Aktifkan timestamps jika perlu, tapi di kode Anda dikomentari
+            // $table->timestamps();
         });
     }
 

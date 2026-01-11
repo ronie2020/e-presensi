@@ -14,8 +14,6 @@ use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-
-// --- IMPORT JOB (TIDAK DIHAPUS) ---
 use App\Jobs\SendWaScanNotificationJob; 
 use App\Jobs\AddReligiousPointJob;
 
@@ -35,6 +33,8 @@ class AttendanceSiswaController extends Controller
         // 2. Jika tidak ada, Cek Jadwal Regular
         if (!$schedule) {
             $dayName = $today->locale('en')->dayName; // Monday, Tuesday, etc.
+            
+            // NOTE: Pastikan nama kolom di database Anda 'day_name' (sesuai saran perbaikan migrasi)
             $schedule = ScheduleRegular::where('day_name', $dayName)->first();
         }
 
@@ -53,7 +53,8 @@ class AttendanceSiswaController extends Controller
             'makan_start' => '11:00', 'makan_end' => '13:00', 
         ];
 
-        return view('attendance.index', compact('scheduleConfig'));
+        // --- PERBAIKAN: Arahkan ke folder 'scan' bukan 'attendance' ---
+        return view('scan.index', compact('scheduleConfig'));
     }
 
     /**
@@ -122,6 +123,8 @@ class AttendanceSiswaController extends Controller
             $scheduleLimit = $special->end_in; // Ambil kolom end_in sebagai batas terlambat
         } else {
             $dayName = $today->locale('en')->dayName;
+            
+            // NOTE: Pastikan ini juga 'day_name' agar konsisten
             $regular = ScheduleRegular::where('day_name', $dayName)->first();
             if ($regular) {
                 $scheduleLimit = $regular->end_in;
