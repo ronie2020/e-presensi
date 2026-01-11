@@ -194,6 +194,10 @@ class AdminAlumniController extends Controller
      */
     public function processImport(Request $request)
     {
+        // --- PERBAIKAN: Tambahkan batas waktu eksekusi agar tidak timeout ---
+        set_time_limit(300); // 300 detik = 5 menit
+        ini_set('max_execution_time', 300); 
+
         $request->validate([
             'file' => 'required|mimes:csv,txt|max:2048',
         ]);
@@ -241,7 +245,7 @@ class AdminAlumniController extends Controller
                         'status' => 'graduated',
                         'graduated_date' => $year . '-05-20',
                         'graduation_year' => $year,
-                        'password' => Hash::make($nisn), // Password Default = NISN
+                        'password' => Hash::make($nisn), // Password Default = NISN (Proses ini yang berat)
                         'email' => null, 
                         'class_id' => null, 
                     ]
