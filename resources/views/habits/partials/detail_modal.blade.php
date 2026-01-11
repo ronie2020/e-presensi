@@ -53,13 +53,15 @@
                 </p>
             </div>
 
-            {{-- 2. SHALAT (DETAIL CHECKLIST) --}}
+            {{-- 2. SHALAT (DETAIL CHECKLIST) & ODOA --}}
             <div class="flex flex-col p-4 rounded-2xl border bg-white border-slate-200 md:row-span-2">
-                <div class="flex items-center gap-3 mb-3">
+                
+                {{-- LIST SHALAT --}}
+                <div class="flex items-center gap-3 mb-3 border-b border-slate-100 pb-2">
                     <i class="ph-bold ph-mosque text-emerald-600 text-lg"></i>
-                    <span class="text-sm font-bold text-slate-700">2. Shalat Tepat Waktu</span>
+                    <span class="text-sm font-bold text-slate-700">2. Ibadah Harian</span>
                 </div>
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-2 gap-2 mb-4">
                     @php
                         $prayers = [
                             ['Subuh', $habit->prayer_subuh],
@@ -77,6 +79,24 @@
                         </div>
                     @endforeach
                 </div>
+
+                {{-- AUDIO ODOA --}}
+                @if($habit->odoa_audio_path || $habit->odoa_surah)
+                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                        <p class="text-[10px] font-black text-slate-400 uppercase mb-1">One Day One Ayat</p>
+                        <p class="text-xs font-bold text-slate-700 mb-2">
+                            {{ $habit->odoa_surah ?? '-' }} : Ayat {{ $habit->odoa_ayat ?? '-' }}
+                        </p>
+                        @if($habit->odoa_audio_path)
+                            <audio controls class="w-full h-6">
+                                <source src="{{ asset('storage/'.$habit->odoa_audio_path) }}" type="audio/mpeg">
+                                Browser tidak support audio.
+                            </audio>
+                        @else
+                            <p class="text-[9px] text-rose-400 italic">Tidak ada rekaman suara.</p>
+                        @endif
+                    </div>
+                @endif
             </div>
 
             {{-- 3. OLAHRAGA --}}
