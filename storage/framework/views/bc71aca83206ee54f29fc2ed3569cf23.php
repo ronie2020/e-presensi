@@ -346,5 +346,48 @@
         </div>
 
     </div>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Notifikasi Sukses
+            <?php if(session('success')): ?>
+                Swal.fire({
+                    icon: 'success', 
+                    title: 'Hebat!', 
+                    text: "<?php echo e(session('success')); ?>",
+                    toast: true, 
+                    position: 'top-end', 
+                    showConfirmButton: false, 
+                    timer: 5000,
+                    background: '#ffffff',
+                    customClass: { 
+                        popup: 'rounded-2xl shadow-xl border border-emerald-100',
+                        title: 'text-emerald-600 font-bold font-sans',
+                        htmlContainer: 'text-slate-600 text-sm font-medium font-sans'
+                    },
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            <?php endif; ?>
+
+            // Notifikasi Error
+            <?php if(session('error')): ?>
+                Swal.fire({
+                    icon: 'error', 
+                    title: 'Oops...', 
+                    text: "<?php echo e(session('error')); ?>",
+                    toast: true, 
+                    position: 'top-end', 
+                    showConfirmButton: false, 
+                    timer: 5000,
+                    customClass: { popup: 'rounded-2xl shadow-xl border border-rose-100 bg-white' }
+                });
+            <?php endif; ?>
+        });
+    </script>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.public', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ronie\Documents\aplikasi\E-Presensi Netila\resources\views/habits/student_dashboard.blade.php ENDPATH**/ ?>

@@ -172,20 +172,27 @@ class Student extends Authenticatable
 
     /**
      * Relasi ke Prestasi (Achievement)
-     * [TAMBAHAN UNTUK MENGATASI ERROR]
      */
     public function achievements(): HasMany
     {
-        // Pastikan Model Achievement ada di App\Models\Achievement
         return $this->hasMany(Achievement::class, 'student_id');
     }
 
      /**
      * Relasi ke Chat Liaison (Pesan Ortu)
-     * [FIX: Ditambahkan agar controller bisa memanggil 'liaisonChats']
      */
     public function liaisonChats(): HasMany
     {
         return $this->hasMany(LiaisonChat::class, 'student_id');
+    }
+
+    /**
+     * [PERBAIKAN PENTING]
+     * Relasi ke Jurnal Kebiasaan (Habits)
+     * Tanpa ini, dashboard guru tidak bisa menarik data habit siswa.
+     */
+    public function habits(): HasMany
+    {
+        return $this->hasMany(StudentHabit::class, 'student_id');
     }
 }

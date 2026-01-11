@@ -50,7 +50,7 @@
                         Sudahkah kamu melakukan kebiasaan baik hari ini? Terus tingkatkan poinmu menjadi <span class="font-bold text-white">Siswa Berkarakter!</span>
                     </p>
                     
-                    {{-- --- PERBAIKAN TOMBOL AKSI --- --}}
+                    {{-- TOMBOL AKSI --}}
                     <div class="mt-8 flex flex-wrap gap-4 justify-center md:justify-start">
                         @if(!$todayHabit)
                             {{-- KONDISI 1: Belum ada data sama sekali --}}
@@ -131,7 +131,7 @@
                 </div>
             </div>
 
-            {{-- RIGHT COLUMN: 7 HABITS GRID (UPDATED) --}}
+            {{-- RIGHT COLUMN: 7 HABITS GRID --}}
             <div class="lg:col-span-2 bg-white rounded-[2.5rem] p-6 md:p-8 border border-slate-100 shadow-sm relative">
                 <div class="flex items-center justify-between mb-8">
                     <div>
@@ -343,4 +343,47 @@
         </div>
 
     </div>
+
+    {{-- TAMBAHAN: SCRIPT SWEETALERT (Agar Notifikasi Muncul di Dashboard setelah redirect) --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Notifikasi Sukses
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success', 
+                    title: 'Hebat!', 
+                    text: "{{ session('success') }}",
+                    toast: true, 
+                    position: 'top-end', 
+                    showConfirmButton: false, 
+                    timer: 5000,
+                    background: '#ffffff',
+                    customClass: { 
+                        popup: 'rounded-2xl shadow-xl border border-emerald-100',
+                        title: 'text-emerald-600 font-bold font-sans',
+                        htmlContainer: 'text-slate-600 text-sm font-medium font-sans'
+                    },
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            @endif
+
+            // Notifikasi Error
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error', 
+                    title: 'Oops...', 
+                    text: "{{ session('error') }}",
+                    toast: true, 
+                    position: 'top-end', 
+                    showConfirmButton: false, 
+                    timer: 5000,
+                    customClass: { popup: 'rounded-2xl shadow-xl border border-rose-100 bg-white' }
+                });
+            @endif
+        });
+    </script>
 @endsection

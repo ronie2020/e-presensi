@@ -1,4 +1,4 @@
-<div class="space-y-8">
+<div class="space-y-8 font-jakarta">
     {{-- Header Modal --}}
     <div class="flex items-center gap-5 border-b border-slate-100 pb-6">
         <div class="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center overflow-hidden border-2 border-emerald-100 shadow-inner">
@@ -11,8 +11,13 @@
         <div>
             <h3 class="font-black text-2xl text-slate-800 tracking-tight">{{ $habit->student->name }}</h3>
             <div class="flex items-center gap-3 mt-1">
-                <span class="px-2.5 py-0.5 rounded-lg bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase">Kelas {{ $habit->student->schoolClass->name ?? '-' }}</span>
-                <span class="text-slate-400 text-xs font-medium"><i class="ph-bold ph-calendar-blank mr-1"></i>{{ $habit->report_date->translatedFormat('d F Y') }}</span>
+                <span class="px-2.5 py-0.5 rounded-lg bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase">
+                    Kelas {{ $habit->student->schoolClass->name ?? '-' }}
+                </span>
+                <span class="text-slate-400 text-xs font-medium">
+                    <i class="ph-bold ph-calendar-blank mr-1"></i>
+                    {{ \Carbon\Carbon::parse($habit->report_date)->translatedFormat('d F Y') }}
+                </span>
             </div>
         </div>
     </div>
@@ -23,15 +28,19 @@
         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
             <i class="ph-bold ph-image text-sm text-emerald-500"></i> Bukti Dokumentasi
         </label>
-        <div class="rounded-3xl overflow-hidden border-4 border-slate-50 shadow-lg bg-slate-100">
+        <div class="rounded-3xl overflow-hidden border-4 border-slate-50 shadow-lg bg-slate-100 relative group">
             <img src="{{ asset('storage/' . $habit->photo_path) }}" 
-                class="w-full max-h-[400px] object-contain mx-auto transition-transform hover:scale-[1.05] duration-500 cursor-zoom-in"
+                class="w-full max-h-[400px] object-contain mx-auto transition-transform hover:scale-[1.02] duration-500"
                 alt="Bukti Kebiasaan Siswa">
+                
+            <a href="{{ asset('storage/' . $habit->photo_path) }}" target="_blank" class="absolute bottom-4 right-4 bg-white/90 backdrop-blur text-slate-800 px-4 py-2 rounded-xl text-xs font-bold shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                <i class="ph-bold ph-arrows-out-simple"></i> Lihat Penuh
+            </a>
         </div>
     </div>
     @endif
 
-    {{-- Grid 7 Kebiasaan (LOGIKA URUTAN BARU) --}}
+    {{-- Grid 7 Kebiasaan --}}
     <div class="space-y-4">
         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
             <i class="ph-bold ph-list-checks text-sm text-emerald-500"></i> Laporan 7 Kebiasaan
@@ -49,54 +58,79 @@
                     <i class="ph-fill {{ ($habit->habit_1 && $habit->habit_2) ? 'ph-check-circle text-emerald-600' : 'ph-x-circle text-slate-300' }}"></i>
                 </div>
                 <p class="text-[10px] text-slate-500 ml-8 font-medium italic">
-                    Bangun jam {{ $habit->habit_1_time ?? '-' }}
+                    Bangun jam {{ $habit->habit_1_time ? \Carbon\Carbon::parse($habit->habit_1_time)->format('H:i') : '-' }}
                 </p>
             </div>
 
             {{-- 2. SHALAT (DETAIL CHECKLIST) & ODOA --}}
-            <div class="flex flex-col p-4 rounded-2xl border bg-white border-slate-200 md:row-span-2">
+            <div class="flex flex-col p-4 rounded-2xl border bg-white border-slate-200 md:row-span-2 shadow-sm">
                 
-                {{-- LIST SHALAT --}}
-                <div class="flex items-center gap-3 mb-3 border-b border-slate-100 pb-2">
-                    <i class="ph-bold ph-mosque text-emerald-600 text-lg"></i>
-                    <span class="text-sm font-bold text-slate-700">2. Ibadah Harian</span>
-                </div>
-                <div class="grid grid-cols-2 gap-2 mb-4">
-                    @php
-                        $prayers = [
-                            ['Subuh', $habit->prayer_subuh],
-                            ['Dhuha', $habit->prayer_dhuha],
-                            ['Dzuhur', $habit->prayer_dzuhur],
-                            ['Ashar', $habit->prayer_ashar],
-                            ['Maghrib', $habit->prayer_maghrib],
-                            ['Isya', $habit->prayer_isya],
-                        ];
-                    @endphp
-                    @foreach($prayers as $p)
-                        <div class="flex items-center gap-2">
-                            <i class="ph-fill {{ $p[1] ? 'ph-check-circle text-emerald-500' : 'ph-circle text-slate-300' }} text-sm"></i>
-                            <span class="text-[10px] font-bold {{ $p[1] ? 'text-slate-700' : 'text-slate-400' }}">{{ $p[0] }}</span>
-                        </div>
-                    @endforeach
+                {{-- A. LIST SHALAT --}}
+                <div class="mb-4">
+                    <div class="flex items-center gap-2 mb-3 pb-2 border-b border-slate-100">
+                        <i class="ph-bold ph-mosque text-emerald-600 text-lg"></i>
+                        <span class="text-sm font-bold text-slate-700">2. Ibadah Harian</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-y-3 gap-x-2">
+                        @php
+                            $prayers = [
+                                ['Subuh', $habit->prayer_subuh],
+                                ['Dhuha', $habit->prayer_dhuha],
+                                ['Dzuhur', $habit->prayer_dzuhur],
+                                ['Ashar', $habit->prayer_ashar],
+                                ['Maghrib', $habit->prayer_maghrib],
+                                ['Isya', $habit->prayer_isya],
+                            ];
+                        @endphp
+                        @foreach($prayers as $p)
+                            <div class="flex items-center gap-2">
+                                <i class="ph-fill {{ $p[1] ? 'ph-check-circle text-emerald-500' : 'ph-circle text-slate-200' }} text-lg"></i>
+                                <span class="text-xs font-bold {{ $p[1] ? 'text-slate-700' : 'text-slate-400' }}">{{ $p[0] }}</span>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
 
-                {{-- AUDIO ODOA --}}
-                @if($habit->odoa_audio_path || $habit->odoa_surah)
-                    <div class="bg-slate-50 rounded-xl p-3 border border-slate-100">
-                        <p class="text-[10px] font-black text-slate-400 uppercase mb-1">One Day One Ayat</p>
-                        <p class="text-xs font-bold text-slate-700 mb-2">
-                            {{ $habit->odoa_surah ?? '-' }} : Ayat {{ $habit->odoa_ayat ?? '-' }}
-                        </p>
-                        @if($habit->odoa_audio_path)
-                            <audio controls class="w-full h-6">
-                                <source src="{{ asset('storage/'.$habit->odoa_audio_path) }}" type="audio/mpeg">
-                                Browser tidak support audio.
-                            </audio>
-                        @else
-                            <p class="text-[9px] text-rose-400 italic">Tidak ada rekaman suara.</p>
-                        @endif
-                    </div>
-                @endif
+                {{-- B. AUDIO ODOA (TADARUS) --}}
+                <div class="mt-auto pt-3 border-t border-slate-100 border-dashed">
+                    <p class="text-[10px] font-black text-slate-400 uppercase mb-2 flex items-center gap-2">
+                        <i class="ph-bold ph-microphone-stage text-emerald-500"></i> Laporan Tadarus
+                    </p>
+                    
+                    @if($habit->odoa_surah || $habit->odoa_ayat || $habit->odoa_audio_path)
+                        <div class="bg-slate-50 rounded-xl p-3 border border-slate-100 relative overflow-hidden group">
+                            
+                             <div class="relative z-10">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                                        <i class="ph-fill ph-book-open-text"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-700">
+                                            {{ $habit->odoa_surah ? $habit->odoa_surah : 'Belum isi surat' }} 
+                                            <span class="text-slate-400 font-normal">: Ayat {{ $habit->odoa_ayat ?? '-' }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {{-- PLAYER AUDIO --}}
+                                @if($habit->odoa_audio_path)
+                                    <div class="mt-2">
+                                        {{-- Hapus type="audio/mpeg" agar browser mendeteksi format secara otomatis (support .webm) --}}
+                                        <audio controls class="w-full h-8 rounded-lg">
+                                            <source src="{{ asset('storage/'.$habit->odoa_audio_path) }}">
+                                            Browser Anda tidak mendukung pemutar audio.
+                                        </audio>
+                                    </div>
+                                @else
+                                    <p class="text-[10px] text-slate-400 italic pl-11">Tidak ada rekaman suara.</p>
+                                @endif
+                             </div>
+                        </div>
+                    @else
+                        <p class="text-xs text-slate-400 italic bg-slate-50 p-2 rounded-lg text-center">Siswa tidak mengisi laporan ODOA.</p>
+                    @endif
+                </div>
             </div>
 
             {{-- 3. OLAHRAGA --}}
@@ -162,7 +196,7 @@
                     <div>
                         <span class="text-sm font-bold text-slate-700">7. Tidur Cepat</span>
                         @if($habit->habit_7_time)
-                            <p class="text-[10px] font-bold text-emerald-600">Jam: {{ $habit->habit_7_time }}</p>
+                            <p class="text-[10px] font-bold text-emerald-600">Jam: {{ \Carbon\Carbon::parse($habit->habit_7_time)->format('H:i') }}</p>
                         @endif
                     </div>
                 </div>
@@ -171,7 +205,8 @@
         </div>
     </div>
 
-    {{-- Feedback Form (TETAP SAMA) --}}
+    {{-- Feedback Form --}}
+    {{-- Pastikan route 'teacher.habits.feedback' sudah didefinisikan di web.php --}}
     <div class="pt-4 border-t border-slate-100">
         <form action="{{ route('teacher.habits.feedback', $habit->id) }}" method="POST" class="bg-slate-900 p-6 rounded-[2rem] shadow-xl relative overflow-hidden">
             @csrf
@@ -179,7 +214,7 @@
             <label class="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-3 block">Berikan Apresiasi / Catatan</label>
             <textarea name="feedback" rows="3" class="w-full bg-slate-800 border-slate-700 rounded-2xl text-white text-sm focus:ring-emerald-500 focus:border-emerald-500 placeholder-slate-500" placeholder="Tulis pesan motivasi...">{{ $habit->teacher_feedback }}</textarea>
             <div class="flex justify-end mt-4">
-                <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black text-xs uppercase tracking-widest px-8 py-3 rounded-xl transition-all shadow-lg">Kirim Feedback</button>
+                <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black text-xs uppercase tracking-widest px-8 py-3 rounded-xl transition-all shadow-lg active:scale-95">Kirim Feedback</button>
             </div>
         </form>
     </div>

@@ -63,12 +63,10 @@
                                 
                                 <div class="flex items-center gap-4">
                                     <div class="relative flex items-center">
-                                        {{-- Gunakan OLD untuk menjaga state checked --}}
                                         <input type="checkbox" name="check_bangun" class="w-6 h-6 rounded-lg border-2 border-slate-300 text-blue-600 focus:ring-blue-500 transition-all" 
                                             {{ old('check_bangun', $todayEntry->habit_1 ?? false) ? 'checked' : '' }}>
                                         <span class="ml-3 font-bold text-slate-700">Ya, saya bangun pagi</span>
                                     </div>
-                                    {{-- Gunakan OLD untuk value waktu --}}
                                     <input type="time" name="habit_1_time" value="{{ old('habit_1_time', $todayEntry->habit_1_time ?? '') }}" class="rounded-xl border-slate-200 text-sm font-bold text-slate-600 focus:border-blue-500 focus:ring-blue-500">
                                 </div>
                             </div>
@@ -104,15 +102,50 @@
                             @endphp
 
                             @foreach($prayers as $p)
-                                <label class="flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer hover:bg-emerald-50 {{ (old($p['key'], $todayEntry->{$p['key']} ?? false)) ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-100' }}">
+                                @php
+                                    // LOGIKA HYBRID: Cek Verifikasi Sekolah
+                                    $isVerifiedSchool = false;
+                                    if($p['key'] == 'prayer_dhuha') $isVerifiedSchool = $schoolDhuha ?? false;
+                                    if($p['key'] == 'prayer_dzuhur') $isVerifiedSchool = $schoolDzuhur ?? false;
+
+                                    // Status Checkbox: Checked jika verified sekolah ATAU input manual ada
+                                    $isChecked = old($p['key'], $todayEntry->{$p['key']} ?? false) || $isVerifiedSchool;
+                                @endphp
+
+                                <label class="flex items-center justify-between p-3 rounded-2xl border transition-all 
+                                    {{ $isVerifiedSchool 
+                                        ? 'bg-blue-50 border-blue-200 cursor-not-allowed opacity-90' 
+                                        : ($isChecked ? 'bg-emerald-50 border-emerald-200 cursor-pointer' : 'bg-white border-slate-100 cursor-pointer') 
+                                    }}">
+                                    
                                     <div class="flex items-center gap-3">
-                                        <span class="text-sm font-bold {{ (old($p['key'], $todayEntry->{$p['key']} ?? false)) ? 'text-emerald-700' : 'text-slate-600' }}">{{ $p['label'] }}</span>
-                                        @if(isset($p['scan']))
-                                            <span class="text-[9px] px-2 py-0.5 rounded bg-slate-100 text-slate-500 font-bold border border-slate-200">SCAN/MANUAL</span>
+                                        <span class="text-sm font-bold {{ $isChecked ? ($isVerifiedSchool ? 'text-blue-700' : 'text-emerald-700') : 'text-slate-600' }}">
+                                            {{ $p['label'] }}
+                                        </span>
+                                        
+                                        @if($isVerifiedSchool)
+                                            <span class="text-[9px] px-2 py-0.5 rounded bg-blue-100 text-blue-600 font-bold border border-blue-200 flex items-center gap-1">
+                                                <i class="ph-fill ph-seal-check"></i> TERVERIFIKASI
+                                            </span>
+                                        @elseif(isset($p['scan']))
+                                            <span class="text-[9px] px-2 py-0.5 rounded bg-slate-100 text-slate-500 font-bold border border-slate-200">
+                                                MANUAL
+                                            </span>
                                         @endif
                                     </div>
-                                    <input type="checkbox" name="{{ $p['key'] }}" class="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500" 
-                                        {{ old($p['key'], $todayEntry->{$p['key']} ?? false) ? 'checked' : '' }}>
+
+                                    <div class="relative">
+                                        <input type="checkbox" name="{{ $p['key'] }}" 
+                                            class="w-5 h-5 rounded focus:ring-emerald-500 
+                                            {{ $isVerifiedSchool ? 'text-blue-500 border-blue-300 bg-blue-100' : 'text-emerald-600' }}" 
+                                            {{ $isChecked ? 'checked' : '' }}
+                                            {{ $isVerifiedSchool ? 'disabled' : '' }}>
+                                        
+                                        {{-- Hidden input agar data tetap "ada" di form submit walaupun disabled --}}
+                                        @if($isVerifiedSchool)
+                                            <input type="hidden" name="{{ $p['key'] }}" value="1">
+                                        @endif
+                                    </div>
                                 </label>
                             @endforeach
                         </div>
@@ -219,32 +252,42 @@
                     </div>
 
                     <!-- 5. MAKAN SEHAT (SCAN MBG) -->
-                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 relative hover:border-blue-300 transition-all">
+                    @php
+                        // Logika Makan Bergizi (MBG)
+                        $schoolMenu = $schoolMbgMenu ?? null; 
+                        $displayValue = $schoolMenu ? $schoolMenu : old('habit_5_menu', $todayEntry->habit_5_menu ?? '');
+                        $isLockedMBG = !empty($schoolMenu);
+                    @endphp
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border relative transition-all {{ $isLockedMBG ? 'border-lime-200 bg-lime-50/30' : 'border-slate-100 hover:border-blue-300' }}">
                         <div class="flex items-start gap-4 mb-3">
                             <div class="w-12 h-12 rounded-2xl bg-lime-50 text-lime-600 flex items-center justify-center text-2xl shrink-0"><i class="ph-duotone ph-carrot"></i></div>
                             <div>
                                 <h3 class="font-bold text-slate-800 text-lg mb-1">5. Makan Bergizi</h3>
-                                <div class="flex items-center gap-2">
-                                    <input type="checkbox" name="check_makan" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" 
-                                        {{ old('check_makan', $todayEntry->habit_5 ?? false) ? 'checked' : '' }}>
-                                    <span class="font-bold text-slate-600 text-sm">Makan sayur/buah</span>
-                                </div>
-                                <div class="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-lime-50 border border-lime-100 text-lime-700 text-[10px] font-black uppercase tracking-wider">
-                                    <i class="ph-bold ph-qr-code"></i> Scan MBG / Manual
-                                </div>
+                                
+                                @if($isLockedMBG)
+                                    <div class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-lime-100 text-lime-700 text-[10px] font-black uppercase tracking-wider mb-2">
+                                        <i class="ph-fill ph-qr-code"></i> TERDATA OTOMATIS
+                                    </div>
+                                    <input type="hidden" name="check_makan" value="1">
+                                @else
+                                    <div class="flex items-center gap-2">
+                                        <input type="checkbox" name="check_makan" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" 
+                                            {{ old('check_makan', $todayEntry->habit_5 ?? false) ? 'checked' : '' }}>
+                                        <span class="font-bold text-slate-600 text-sm">Makan sayur/buah</span>
+                                    </div>
+                                    <div class="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-lime-50 border border-lime-100 text-lime-700 text-[10px] font-black uppercase tracking-wider">
+                                        <i class="ph-bold ph-qr-code"></i> Scan MBG / Manual
+                                    </div>
+                                @endif
                             </div>
                         </div>
                         
-                        @php
-                            $valMenu = old('habit_5_menu', $todayEntry->habit_5_menu ?? '');
-                            $isMBG = $valMenu === 'Menu Sekolah (MBG)';
-                        @endphp
                         <input type="text" 
                                name="habit_5_menu" 
-                               value="{{ $valMenu }}" 
+                               value="{{ $displayValue }}" 
                                placeholder="Menu hari ini..." 
-                               class="w-full text-sm rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500 placeholder:text-slate-400 {{ $isMBG ? 'bg-lime-50 text-lime-700 font-bold' : '' }}"
-                               {{ $isMBG ? 'readonly' : '' }}>
+                               class="w-full text-sm rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500 placeholder:text-slate-400 {{ $isLockedMBG ? 'bg-lime-100 text-lime-800 font-bold cursor-not-allowed border-lime-200' : '' }}"
+                               {{ $isLockedMBG ? 'readonly' : '' }}>
                     </div>
 
                     <!-- 6. BELAJAR -->

@@ -24,6 +24,11 @@ class StudentHabit extends Model
         'prayer_ashar', 
         'prayer_maghrib', 
         'prayer_isya',
+
+        // [PERBAIKAN PENTING] Tambahkan Kolom ODOA agar bisa disimpan
+        'odoa_surah',
+        'odoa_ayat',
+        'odoa_audio_path',
         
         // 3. Olahraga (Habit 3)
         'habit_3', 'habit_3_activity',
