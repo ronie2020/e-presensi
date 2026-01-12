@@ -118,6 +118,7 @@ class Student extends Authenticatable
         'rfid_id', 
         'photo_path', 
         'status', 
+        'score', // <--- DITAMBAHKAN DI SINI
         'join_date', 
         'general_notes'
     ];
@@ -187,9 +188,7 @@ class Student extends Authenticatable
     }
 
     /**
-     * [PERBAIKAN PENTING]
      * Relasi ke Jurnal Kebiasaan (Habits)
-     * Tanpa ini, dashboard guru tidak bisa menarik data habit siswa.
      */
     public function habits(): HasMany
     {

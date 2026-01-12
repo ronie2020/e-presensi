@@ -17,16 +17,23 @@ class AttendanceSiswa extends Model
     
     /**
      * Kolom yang boleh diisi secara massal (Mass Assignment).
-     * activity WAJIB ada di sini agar filter Dhuha/Dhuhur berfungsi.
+     * Semua kolom yang di-create atau di-update dari Controller WAJIB ada di sini.
      */
     protected $fillable = [
         'student_id',
-        'attendance_date',
-        'type',
-        'activity', // <--- INI YANG TADINYA HILANG
-        'status',
+        'attendance_date', // Pastikan sesuai dengan controller (bukan 'date')
+        'type',            // Masuk, Pulang, Dhuha, dll
+        'activity',        // Kegiatan spesifik (misal: shalat dhuha)
+        'status',          // Hadir, Terlambat, dll
         'time_in',
-        'time_out', // <--- Tambahkan ini juga untuk jam pulang
+        'time_out',
+        
+        // --- PERBAIKAN: Tambahkan Kolom Lokasi ---
+        'lat_in',          
+        'long_in',         
+        'lat_out',         
+        'long_out',
+        
         'notes',
     ];
 
