@@ -113,13 +113,10 @@ class StudentHabitController extends Controller
                         ->exists();
 
         // [LOGIKA UDZUR SYAR'I]
-        // Jika sedang udzur, maka input shalat diabaikan (tetap false)
-        // Namun flag is_udzur_syar_i harus disimpan.
         $isUdzur = $request->has('is_udzur_syar_i');
 
         // PENGATURAN NILAI SHALAT
         if ($isUdzur) {
-            // Jika Udzur, semua shalat otomatis false (tidak wajib)
             $valSubuh = false;
             $valDhuha = false;
             $valDzuhur = false;
@@ -127,7 +124,6 @@ class StudentHabitController extends Controller
             $valMaghrib = false;
             $valIsya = false;
         } else {
-            // Jika TIDAK Udzur, ambil dari input atau data sekolah
             $valSubuh   = $request->has('prayer_subuh');
             $valDhuha   = $schoolDhuha ? true : $request->has('prayer_dhuha'); 
             $valDzuhur  = $schoolDzuhur ? true : $request->has('prayer_dzuhur');
@@ -136,13 +132,14 @@ class StudentHabitController extends Controller
             $valIsya    = $request->has('prayer_isya');
         }
 
-        // [FIX VARIABLE NAMES] Menggunakan habit_5 sesuai database
         $valMakan = $request->has('habit_5'); 
         $valMenuMakan = $request->habit_5_menu;
 
+        // [FIX VALIDASI UNTUK FIREFOX/OGG]
         $request->validate([
             'habit_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-            'odoa_audio'  => 'nullable|file|mimes:audio/mpeg,mpga,mp3,wav,aac,webm|max:10240',
+            // Tambahkan 'ogg' dan 'weba', hapus 'audio/mpeg' (karena mimes itu extension)
+            'odoa_audio'  => 'nullable|file|mimes:mp3,wav,aac,webm,ogg,m4a,weba|max:10240',
             'odoa_surah'  => 'nullable|string|max:100',
             'habit_1_time' => 'nullable',
             'habit_7_time' => 'nullable',
@@ -168,88 +165,76 @@ class StudentHabitController extends Controller
                     Storage::disk('public')->delete($audioPath);
                 }
                 $audioFile = $request->file('odoa_audio');
-                $ext = $audioFile->getClientOriginalExtension() ?: 'webm'; 
+                
+                // Gunakan extension asli dari browser jika ada, atau fallback ke ogg/webm
+                $ext = $audioFile->getClientOriginalExtension();
+                if(empty($ext) || $ext == 'bin') {
+                    // Deteksi manual sederhana jika extension hilang
+                    $mime = $audioFile->getMimeType();
+                    if(str_contains($mime, 'ogg')) $ext = 'ogg';
+                    elseif(str_contains($mime, 'wav')) $ext = 'wav';
+                    else $ext = 'webm';
+                }
+
                 $audioFilename = 'odoa_' . $studentId . '_' . time() . '.' . $ext;
                 $audioPath = $audioFile->storeAs('habits/audio', $audioFilename, 'public');
             }
 
-            // --- C. SIMPAN KE DATABASE (FIXED NAMES) ---
-            // Kita gunakan $request->has('habit_X') karena checkbox HTML tidak kirim value jika unchecked
+            // --- C. SIMPAN KE DATABASE ---
             $habit = StudentHabit::updateOrCreate(
                 [
                     'student_id' => $studentId,
                     'report_date' => $today
                 ],
                 [
-                    // FLAG UDZUR
                     'is_udzur_syar_i' => $isUdzur,
-
-                    // 1. BANGUN PAGI
-                    'habit_1' => $request->has('habit_1'), // Fixed from check_bangun
+                    'habit_1' => $request->has('habit_1'),
                     'habit_1_time' => $request->habit_1_time,
-
-                    // 2. MANDI
-                    'habit_2' => $request->has('habit_2'), // Fixed from check_mandi
-
-                    // 3. SHALAT
+                    'habit_2' => $request->has('habit_2'),
                     'prayer_subuh' => $valSubuh,
                     'prayer_dhuha' => $valDhuha,
                     'prayer_dzuhur' => $valDzuhur,
                     'prayer_ashar' => $valAshar,
                     'prayer_maghrib' => $valMaghrib,
                     'prayer_isya' => $valIsya,
-
-                    // 4. ODOA
                     'odoa_surah' => $request->odoa_surah,
                     'odoa_ayat' => $request->odoa_ayat,
                     'odoa_audio_path' => $audioPath,
-
-                    // 5. OLAHRAGA
-                    'habit_3' => $request->has('habit_3'), // Fixed from check_olahraga
+                    'habit_3' => $request->has('habit_3'),
                     'habit_3_activity' => $request->habit_3_activity,
-
-                    // 6. MAKAN BERGIZI
-                    'habit_5' => $valMakan, // Fixed from check_makan
+                    'habit_5' => $valMakan,
                     'habit_5_menu' => $valMenuMakan,
-
-                    // 7. BELAJAR
-                    'habit_4' => $request->has('habit_4'), // Fixed from check_belajar
+                    'habit_4' => $request->has('habit_4'),
                     'habit_4_subject' => $request->habit_4_subject,
-
-                    // 8. SOSIAL
-                    'habit_6' => $request->has('habit_6'), // Fixed from check_sosial
+                    'habit_6' => $request->has('habit_6'),
                     'habit_6_activity' => $request->habit_6_activity,
-
-                    // 9. TIDUR
-                    'habit_7' => $request->has('habit_7'), // Fixed from check_tidur
+                    'habit_7' => $request->has('habit_7'),
                     'habit_7_time' => $request->habit_7_time,
-
                     'photo_path' => $photoPath,
                 ]
             );
 
             DB::commit();
 
-            // --- D. LOGIKA GAMIFIKASI (FIXED FOR UDZUR) ---
+            // --- D. LOGIKA GAMIFIKASI ---
             $hasPhoto = !empty($habit->photo_path);
             
-            // Cek Shalat: Selesai jika (ada minimal 1 shalat) ATAU (sedang udzur)
             $prayerCondition = ($habit->prayer_subuh || $habit->prayer_dhuha || $habit->prayer_dzuhur || 
                                 $habit->prayer_ashar || $habit->prayer_maghrib || $habit->prayer_isya);
             
             if ($habit->is_udzur_syar_i) {
-                $prayerCondition = true; // Bypass cek shalat jika udzur
+                $prayerCondition = true;
             }
 
-            $isComplete = $habit->habit_1 && // Bangun
-                          $habit->habit_2 && // Mandi
-                          $prayerCondition && // Shalat/Udzur
-                          $habit->habit_3 && // Olahraga
-                          $habit->habit_5 && // Makan
-                          $habit->habit_4 && // Belajar
-                          $habit->habit_6 && // Sosial
-                          $habit->habit_7 && // Tidur
-                          $hasPhoto;         // Foto
+            $isComplete = $habit->habit_1 &&
+                          $habit->habit_2 &&
+                          $prayerCondition &&
+                          $habit->habit_3 &&
+                          $habit->habit_5 &&
+                          $habit->habit_4 &&
+                          $habit->habit_6 &&
+                          $habit->habit_7 &&
+                          $hasPhoto;
 
             if ($isComplete) {
                 $message = 'Jurnal harian LENGKAP! Hebat, pertahankan kebiasaan baikmu.';

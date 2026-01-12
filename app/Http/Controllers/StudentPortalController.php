@@ -17,7 +17,7 @@ use App\Models\Complaint;
 use App\Models\LiaisonBook;     
 use App\Models\StudentHabit;    
 
-// Model Opsional (Gunakan if class_exists untuk keamanan)
+// Model Opsional
 use App\Models\LibraryLoan;      
 use App\Models\DisciplineRecord; 
 use App\Models\AcademicRecord;   
@@ -30,7 +30,6 @@ class StudentPortalController extends Controller
      */
     public function index()
     {
-        // Sesuaikan juga index jika ada di folder students/portal
         if (view()->exists('students.portal.index')) {
             return view('students.portal.index');
         }
@@ -81,27 +80,40 @@ class StudentPortalController extends Controller
                 $liaison_messages = LiaisonBook::with('teacher')
                     ->where('student_id', $student->id)
                     ->latest()
-                    ->take(10) // Ambil 10 pesan terakhir
+                    ->take(10) 
                     ->get();
             } catch (\Exception $e) {}
         }
 
-        // 3. DATA KEHADIRAN
-        $hadir = 0; $sakit = 0; $izin = 0; $alpa = 0;
+        // 3. DATA KEHADIRAN (PERBAIKAN: Menambahkan Variabel Terlambat)
+        $hadir = 0; $terlambat = 0; $sakit = 0; $izin = 0; $alpa = 0; // Inisialisasi variabel
         $attendance_history = collect([]);
         
         if (class_exists(AttendanceSiswa::class)) {
             $attQuery = AttendanceSiswa::where('student_id', $id);
+            
+            // Total Hadir Fisik (Tepat Waktu + Terlambat)
             $hadir = (clone $attQuery)->whereIn('status', ['Hadir', 'Masuk', 'Terlambat'])->count();
+            
+            // [FIX] Hitung Terlambat secara spesifik agar tidak Error Undefined Variable
+            $terlambat = (clone $attQuery)->where('status', 'Terlambat')->count();
+            
             $sakit = (clone $attQuery)->where('status', 'Sakit')->count();
             $izin  = (clone $attQuery)->where('status', 'Izin')->count();
-            $alpa  = (clone $attQuery)->where('status', 'Alpa')->count();
-            $attendance_history = (clone $attQuery)->latest('attendance_date')->take(5)->get();
+            
+            // Handle typo status lama (Alfa vs Alpa)
+            $alpa  = (clone $attQuery)->whereIn('status', ['Alfa', 'Alpa'])->count(); 
+            
+            // Ambil history lebih banyak (10) untuk timeline
+            $attendance_history = (clone $attQuery)->latest('attendance_date')->take(10)->get();
         }
         
+        // Data Chart (Hadir digabung Terlambat agar chart ringkas)
         $attendanceChart = ['hadir' => $hadir, 'sakit' => $sakit, 'izin' => $izin, 'alpa' => $alpa];
-        $total_hari = $hadir + $sakit + $izin + $alpa;
-        $attendancePercentage = $total_hari > 0 ? round(($hadir / $total_hari) * 100) : 0;
+        
+        // Hitung Persentase Kehadiran
+        $total_hari_efektif = $hadir + $sakit + $izin + $alpa;
+        $attendancePercentage = $total_hari_efektif > 0 ? round(($hadir / $total_hari_efektif) * 100) : 0;
 
         // 4. DATA POIN KEBAIKAN & PELANGGARAN
         $violations = collect([]);
@@ -111,13 +123,11 @@ class StudentPortalController extends Controller
 
         if (class_exists(DisciplineRecord::class)) {
             try {
-                // Ambil Pelanggaran
                 $violations = DisciplineRecord::with('disciplineType')
                     ->where('student_id', $id)
                     ->whereHas('disciplineType', fn($q) => $q->where('type', 'violation')) 
                     ->latest()->get();
                 
-                // Ambil Kebaikan / Prestasi
                 $achievements = DisciplineRecord::with('disciplineType')
                     ->where('student_id', $id)
                     ->whereHas('disciplineType', fn($q) => $q->where('type', 'merit')) 
@@ -129,23 +139,19 @@ class StudentPortalController extends Controller
             } catch (QueryException $e) { }
         }
 
-        // 5. JURNAL 7 KEBIASAAN (Habits)
+        // 5. JURNAL 7 KEBIASAAN
         $todayEntry = null;
-        $habits = collect([]); // Inisialisasi collection kosong agar tidak error jika model tidak ada
-        
+        $habits = collect([]); 
         if (class_exists(StudentHabit::class)) {
-            // Ambil data hari ini (untuk form input)
             $todayEntry = StudentHabit::where('student_id', $id)
                             ->whereDate('report_date', Carbon::today()) 
                             ->first();
-
-            // [BARU] Ambil seluruh riwayat habits (untuk Tab Keagamaan & Statistik)
             $habits = StudentHabit::where('student_id', $id)
                         ->orderBy('report_date', 'desc')
                         ->get();
         }
 
-        // 6. DATA LAINNYA (LMS, Perpus, Akademik, KBM)
+        // 6. DATA LAINNYA
         $lms_assignments_grouped = []; $lms_grades = [];
         if ($student->school_class_id && class_exists(LmsAssignment::class)) {
              $assignments = LmsAssignment::with('subject')->where('class_id', $student->school_class_id)->latest()->get();
@@ -186,40 +192,39 @@ class StudentPortalController extends Controller
             $complaints = Complaint::where('student_id', $student->id)->latest()->get();
         }
 
-        // 8. DEFINISI TABS MENU
+        // 8. TABS MENU
         $tabs = ['ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan']];
 
         if ($isAlumni) {
             $tabs['prestasi'] = ['icon' => 'trophy', 'label' => 'Riwayat Prestasi'];
             $tabs['perpustakaan'] = ['icon' => 'books', 'label' => 'Riwayat Pustaka'];
         } else {
-            // Urutan Tab yang disarankan
             $tabs = array_merge($tabs, [
                 'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan'],
-                'poin_kebaikan' => ['icon' => 'scales', 'label' => 'Poin Kebaikan'], // Gabungan Disiplin & Merit
+                'poin_kebaikan' => ['icon' => 'scales', 'label' => 'Poin Kebaikan'], 
                 'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
                 'pengaduan' => ['icon' => 'megaphone', 'label' => 'Lapor Masalah'],
-                'jadwal' => ['icon' => 'calendar-blank', 'label' => 'Jadwal & KBM'], // Digabung biar ringkas
+                'jadwal' => ['icon' => 'calendar-blank', 'label' => 'Jadwal & KBM'],
                 'akademik' => ['icon' => 'exam', 'label' => 'Nilai Rapor'],
                 'lms' => ['icon' => 'clipboard-text', 'label' => 'Tugas Online'],
                 'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Riwayat Absen'],
             ]);
         }
 
-        // Statistik Sholat (Optional - tetap dipertahankan jika view lain butuh)
+        // Statistik Sholat
         $sholat_dhuha = 0; $sholat_dhuhur = 0;
         if (class_exists(AttendanceSiswa::class)) {
             $sholat_dhuha = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuha')->count();
             $sholat_dhuhur = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuhur')->count();
         }
 
-        // --- DATA BINDING ---
-        // Menyatukan semua variabel untuk dikirim ke view
+        // [FIX] Masukkan variabel $terlambat ke dalam compact agar tidak error di View
         $data = compact(
             'student', 'isAlumni', 'tabs', 'attendancePercentage',
             'liaison_messages', 'complaints', 
-            'todayEntry', 'habits', // <--- 'habits' ditambahkan di sini
-            'hadir', 'sakit', 'izin', 'alpa', 'attendance_history', 'attendanceChart',
+            'todayEntry', 'habits',
+            'hadir', 'terlambat', 'sakit', 'izin', 'alpa', // <--- Pastikan 'terlambat' ada disini
+            'attendance_history', 'attendanceChart',
             'lms_assignments_grouped', 'lms_grades',
             'violations', 'total_violation_points', 
             'achievements', 'total_merit_points',
@@ -228,18 +233,13 @@ class StudentPortalController extends Controller
             'sholat_dhuha', 'sholat_dhuhur'
         );
 
-        // --- PERBAIKAN LOKASI VIEW ---
         if (view()->exists('students.portal.show')) {
             return view('students.portal.show', $data);
         }
         
-        // Fallback
         return view('portal.show', $data);
     }
 
-    /**
-     * Cetak Kartu OSIS / Biodata
-     */
     public function printCard($id)
     {
         if (!Auth::guard('student')->check() || Auth::guard('student')->id() != $id) {

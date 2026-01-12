@@ -1,9 +1,9 @@
-{{-- 1. SECTION STATISTIK UTAMA --}}
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
     
-    {{-- Chart & Progress --}}
+    
     <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 lg:col-span-1 flex flex-col justify-center items-center relative overflow-hidden group">
-        {{-- Background Decoration --}}
+        
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
             <i class="ph-duotone ph-chart-pie-slice text-9xl text-blue-500"></i>
         </div>
@@ -12,83 +12,83 @@
             <canvas id="attendanceChart"></canvas>
             <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-4">
                 <span class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">KEHADIRAN</span>
-                <span class="text-4xl font-black text-slate-800">{{ $attendancePercentage }}<span class="text-lg text-slate-400">%</span></span>
+                <span class="text-4xl font-black text-slate-800"><?php echo e($attendancePercentage); ?><span class="text-lg text-slate-400">%</span></span>
             </div>
         </div>
 
-        {{-- Progress Bar Kelayakan --}}
+        
         <div class="w-full mt-6 space-y-2 relative z-10">
             <div class="flex justify-between text-xs font-bold text-slate-500">
                 <span>Target Sekolah</span>
                 <span>Min. 80%</span>
             </div>
             <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                <div class="h-full rounded-full transition-all duration-1000 {{ $attendancePercentage >= 90 ? 'bg-emerald-500' : ($attendancePercentage >= 80 ? 'bg-amber-500' : 'bg-rose-500') }}" 
-                     style="width: {{ $attendancePercentage }}%"></div>
+                <div class="h-full rounded-full transition-all duration-1000 <?php echo e($attendancePercentage >= 90 ? 'bg-emerald-500' : ($attendancePercentage >= 80 ? 'bg-amber-500' : 'bg-rose-500')); ?>" 
+                     style="width: <?php echo e($attendancePercentage); ?>%"></div>
             </div>
             <p class="text-[10px] text-center text-slate-400 mt-1 font-medium">
-                @if($attendancePercentage >= 90)
+                <?php if($attendancePercentage >= 90): ?>
                     <span class="text-emerald-600"><i class="ph-fill ph-check-circle"></i> Sangat Baik! Pertahankan.</span>
-                @elseif($attendancePercentage >= 80)
+                <?php elseif($attendancePercentage >= 80): ?>
                     <span class="text-amber-600"><i class="ph-fill ph-warning"></i> Hati-hati, jangan sering bolos.</span>
-                @else
+                <?php else: ?>
                     <span class="text-rose-600"><i class="ph-fill ph-warning-octagon"></i> Bahaya! Segera perbaiki kehadiran.</span>
-                @endif
+                <?php endif; ?>
             </p>
         </div>
     </div>
 
-    {{-- Grid Detail Statistik --}}
+    
     <div class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
         
-        {{-- Card Hadir (Tepat Waktu) --}}
+        
         <div class="bg-gradient-to-br from-emerald-50 to-white p-5 rounded-[2rem] border border-emerald-100 flex flex-col justify-center items-center text-center h-full hover:shadow-md transition-all group">
             <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-emerald-500 mb-3 group-hover:scale-110 transition-transform">
                 <i class="ph-duotone ph-check-circle text-2xl"></i>
             </div>
-            <div class="text-3xl font-black text-emerald-700 mb-0.5">{{ $hadir - $terlambat }}</div>
+            <div class="text-3xl font-black text-emerald-700 mb-0.5"><?php echo e($hadir - $terlambat); ?></div>
             <div class="text-[10px] font-bold text-emerald-600/70 uppercase tracking-wider">Tepat Waktu</div>
         </div>
 
-        {{-- Card Terlambat --}}
+        
         <div class="bg-gradient-to-br from-amber-50 to-white p-5 rounded-[2rem] border border-amber-100 flex flex-col justify-center items-center text-center h-full hover:shadow-md transition-all group">
             <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-amber-500 mb-3 group-hover:scale-110 transition-transform">
                 <i class="ph-duotone ph-clock-countdown text-2xl"></i>
             </div>
-            <div class="text-3xl font-black text-amber-700 mb-0.5">{{ $terlambat }}</div>
+            <div class="text-3xl font-black text-amber-700 mb-0.5"><?php echo e($terlambat); ?></div>
             <div class="text-[10px] font-bold text-amber-600/70 uppercase tracking-wider">Terlambat</div>
         </div>
 
-        {{-- Card Sakit --}}
+        
         <div class="bg-gradient-to-br from-blue-50 to-white p-5 rounded-[2rem] border border-blue-100 flex flex-col justify-center items-center text-center h-full hover:shadow-md transition-all group">
             <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-blue-500 mb-3 group-hover:scale-110 transition-transform">
                 <i class="ph-duotone ph-thermometer text-2xl"></i>
             </div>
-            <div class="text-3xl font-black text-blue-700 mb-0.5">{{ $sakit }}</div>
+            <div class="text-3xl font-black text-blue-700 mb-0.5"><?php echo e($sakit); ?></div>
             <div class="text-[10px] font-bold text-blue-600/70 uppercase tracking-wider">Sakit</div>
         </div>
 
-        {{-- Card Izin --}}
+        
         <div class="bg-gradient-to-br from-purple-50 to-white p-5 rounded-[2rem] border border-purple-100 flex flex-col justify-center items-center text-center h-full hover:shadow-md transition-all group">
             <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-purple-500 mb-3 group-hover:scale-110 transition-transform">
                 <i class="ph-duotone ph-envelope-open text-2xl"></i>
             </div>
-            <div class="text-3xl font-black text-purple-700 mb-0.5">{{ $izin }}</div>
+            <div class="text-3xl font-black text-purple-700 mb-0.5"><?php echo e($izin); ?></div>
             <div class="text-[10px] font-bold text-purple-600/70 uppercase tracking-wider">Izin</div>
         </div>
 
-        {{-- Card Alfa (Lebar di Mobile) --}}
+        
         <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-rose-50 to-white p-5 rounded-[2rem] border border-rose-100 flex flex-col justify-center items-center text-center h-full hover:shadow-md transition-all group">
             <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-rose-500 mb-3 group-hover:scale-110 transition-transform">
                 <i class="ph-duotone ph-x-circle text-2xl"></i>
             </div>
-            <div class="text-3xl font-black text-rose-700 mb-0.5">{{ $alpa }}</div>
+            <div class="text-3xl font-black text-rose-700 mb-0.5"><?php echo e($alpa); ?></div>
             <div class="text-[10px] font-bold text-rose-600/70 uppercase tracking-wider">Tanpa Ket.</div>
         </div>
     </div>
 </div>
 
-{{-- 2. RIWAYAT KEHADIRAN (TIMELINE STYLE) --}}
+
 <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
     <div class="p-6 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
         <h3 class="font-bold text-slate-800 flex items-center gap-2">
@@ -100,81 +100,85 @@
     </div>
 
     <div class="p-6">
-        @forelse($attendance_history as $index => $log)
-            <div class="relative pl-8 pb-8 last:pb-0 border-l-2 {{ $loop->last ? 'border-transparent' : 'border-slate-100' }} ml-2">
-                {{-- Timeline Dot --}}
+        <?php $__empty_1 = true; $__currentLoopData = $attendance_history; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $log): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <div class="relative pl-8 pb-8 last:pb-0 border-l-2 <?php echo e($loop->last ? 'border-transparent' : 'border-slate-100'); ?> ml-2">
+                
                 <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 border-white shadow-sm
-                    {{ ($log->status == 'Hadir') ? 'bg-emerald-500' : 
+                    <?php echo e(($log->status == 'Hadir') ? 'bg-emerald-500' : 
                        (($log->status == 'Terlambat') ? 'bg-amber-500' : 
                        (($log->status == 'Sakit') ? 'bg-blue-500' : 
-                       (($log->status == 'Izin') ? 'bg-purple-500' : 'bg-rose-500'))) }}">
+                       (($log->status == 'Izin') ? 'bg-purple-500' : 'bg-rose-500')))); ?>">
                 </div>
 
                 <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 hover:border-blue-200 transition-colors group">
                     <div class="flex justify-between items-start mb-2">
                         <div>
                             <p class="font-bold text-slate-800 text-sm">
-                                {{ \Carbon\Carbon::parse($log->attendance_date)->translatedFormat('l, d F Y') }}
+                                <?php echo e(\Carbon\Carbon::parse($log->attendance_date)->translatedFormat('l, d F Y')); ?>
+
                             </p>
                             <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
-                                {{ ($log->status == 'Hadir') ? 'bg-emerald-100 text-emerald-700' : 
+                                <?php echo e(($log->status == 'Hadir') ? 'bg-emerald-100 text-emerald-700' : 
                                    (($log->status == 'Terlambat') ? 'bg-amber-100 text-amber-700' : 
                                    (($log->status == 'Sakit') ? 'bg-blue-100 text-blue-700' : 
-                                   (($log->status == 'Izin') ? 'bg-purple-100 text-purple-700' : 'bg-rose-100 text-rose-700'))) }}">
-                                {{ $log->status }}
+                                   (($log->status == 'Izin') ? 'bg-purple-100 text-purple-700' : 'bg-rose-100 text-rose-700')))); ?>">
+                                <?php echo e($log->status); ?>
+
                             </span>
                         </div>
                         
-                        {{-- Icon Status Besar --}}
+                        
                         <i class="ph-duotone text-3xl opacity-20 group-hover:opacity-40 transition-opacity
-                            {{ ($log->status == 'Hadir') ? 'ph-check-circle text-emerald-600' : 
+                            <?php echo e(($log->status == 'Hadir') ? 'ph-check-circle text-emerald-600' : 
                                (($log->status == 'Terlambat') ? 'ph-clock-countdown text-amber-600' : 
                                (($log->status == 'Sakit') ? 'ph-thermometer text-blue-600' : 
-                               (($log->status == 'Izin') ? 'ph-envelope-open text-purple-600' : 'ph-x-circle text-rose-600'))) }}">
+                               (($log->status == 'Izin') ? 'ph-envelope-open text-purple-600' : 'ph-x-circle text-rose-600')))); ?>">
                         </i>
                     </div>
 
-                    {{-- Detail Waktu --}}
-                    @if($log->status == 'Hadir' || $log->status == 'Terlambat')
+                    
+                    <?php if($log->status == 'Hadir' || $log->status == 'Terlambat'): ?>
                     <div class="grid grid-cols-2 gap-2 mt-3">
                         <div class="bg-white p-2 rounded-xl border border-slate-100 text-center">
                             <span class="block text-[9px] text-slate-400 font-bold uppercase">Masuk</span>
-                            <span class="text-sm font-black {{ $log->status == 'Terlambat' ? 'text-amber-600' : 'text-slate-700' }}">
-                                {{ $log->time_in ? \Carbon\Carbon::parse($log->time_in)->format('H:i') : '--:--' }}
+                            <span class="text-sm font-black <?php echo e($log->status == 'Terlambat' ? 'text-amber-600' : 'text-slate-700'); ?>">
+                                <?php echo e($log->time_in ? \Carbon\Carbon::parse($log->time_in)->format('H:i') : '--:--'); ?>
+
                             </span>
                         </div>
                         <div class="bg-white p-2 rounded-xl border border-slate-100 text-center">
                             <span class="block text-[9px] text-slate-400 font-bold uppercase">Pulang</span>
                             <span class="text-sm font-black text-slate-700">
-                                {{ $log->time_out ? \Carbon\Carbon::parse($log->time_out)->format('H:i') : '--:--' }}
+                                <?php echo e($log->time_out ? \Carbon\Carbon::parse($log->time_out)->format('H:i') : '--:--'); ?>
+
                             </span>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
 
-                    {{-- Catatan --}}
-                    @if($log->notes)
+                    
+                    <?php if($log->notes): ?>
                         <div class="mt-3 text-xs text-slate-500 italic bg-white px-3 py-2 rounded-lg border border-slate-100 border-l-2 border-l-blue-400">
-                            "{{ Str::limit($log->notes, 60) }}"
+                            "<?php echo e(Str::limit($log->notes, 60)); ?>"
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
-        @empty
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <div class="flex flex-col items-center justify-center py-10 text-slate-400">
                 <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
                     <i class="ph-duotone ph-calendar-slash text-3xl"></i>
                 </div>
                 <p class="text-sm font-medium">Belum ada data kehadiran.</p>
             </div>
-        @endforelse
+        <?php endif; ?>
         
-        @if($attendance_history->count() >= 5)
+        <?php if($attendance_history->count() >= 5): ?>
             <div class="text-center pt-4 border-t border-slate-50 mt-2">
                 <button class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors flex items-center justify-center gap-1 mx-auto">
                     Lihat Selengkapnya <i class="ph-bold ph-caret-down"></i>
                 </button>
             </div>
-        @endif
+        <?php endif; ?>
     </div>
-</div>
+</div><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/students/portal/partials/tab-kehadiran.blade.php ENDPATH**/ ?>
