@@ -19,6 +19,7 @@ class ScheduleRegular extends Model
      */
     protected $fillable = [
         'day_type',
+        'day_name', // <--- PENAMBAHAN PENTING: Agar tidak error 1364
         'start_in',
         'end_in',
         'start_out',

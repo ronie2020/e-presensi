@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+// TAMBAHAN: Import Job Notifikasi Manual
+use App\Jobs\SendWaManualNotificationJob; 
 
 class ReportController extends Controller
 {
@@ -466,7 +469,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 7. SIMPAN MANUAL
+     * 7. SIMPAN MANUAL (DENGAN WA NOTIFIKASI)
      */
     public function storeManualEntry(Request $request)
     {
@@ -477,7 +480,7 @@ class ReportController extends Controller
             'attendance_type' => 'required'
         ]);
 
-        AttendanceSiswa::updateOrCreate(
+        $attendance = AttendanceSiswa::updateOrCreate(
             [
                 'student_id' => $request->student_id,
                 'attendance_date' => $request->date,
@@ -492,7 +495,15 @@ class ReportController extends Controller
             ]
         );
 
-        return back()->with('success', 'Data absensi berhasil disimpan.');
+        // --- TAMBAHAN: Kirim Notifikasi WA ke Orang Tua ---
+        try {
+            SendWaManualNotificationJob::dispatch($attendance);
+        } catch (\Exception $e) {
+            Log::error("Gagal dispatch WA Manual: " . $e->getMessage());
+        }
+        // --------------------------------------------------
+
+        return back()->with('success', 'Data absensi berhasil disimpan dan notifikasi diproses.');
     }
 
     /**

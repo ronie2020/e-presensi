@@ -153,7 +153,6 @@
                             <option value="">-- Pilih Ekstrakurikuler --</option>
                             <?php if(isset($extracurriculars)): ?>
                                 <?php $__currentLoopData = $extracurriculars; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ekskul): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    
                                     <option value="<?php echo e($ekskul->id); ?>"><?php echo e($ekskul->name); ?></option>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             <?php endif; ?>
@@ -186,7 +185,6 @@
                                 <h3 class="text-xl font-black text-slate-800 mb-2">Scanner Nonaktif</h3>
                             </div>
                             <?php endif; ?>
-                            
                             <div id="qr-reader" class="w-full h-full object-cover"></div>
                             <div id="scanner-overlay-el" class="scanner-overlay z-20"><div class="scanner-line"></div></div>
                             <div class="absolute bottom-6 left-0 right-0 flex justify-center z-30 px-6">
@@ -462,7 +460,7 @@
             // Event Listeners
             document.querySelectorAll('.scan-type-btn').forEach(btn => { btn.addEventListener('click', () => selectScanMode(btn.getAttribute('data-type'))); });
             
-            // PERBAIKAN: Handler untuk Select Ekskul
+            // Handler untuk Select Ekskul
             extraSelect.addEventListener('change', (e) => {
                 selectedExtra = e.target.value; 
                 const selectedText = e.target.options[e.target.selectedIndex].text; // Ambil text nama ekskul untuk display
@@ -601,14 +599,13 @@
             // QR HANDLER
             async function processScan(studentId, type, activity = null) {
                 try {
-                    // --- PERBAIKAN UTAMA: Sesuaikan nama field dengan Controller ---
                     const body = { 
-                        student_id: studentId, // Gunakan student_id agar sesuai controller
+                        student_id: studentId, 
                         type: type,
-                        lat: null, // Placeholder untuk lokasi (opsional)
+                        lat: null, 
                         long: null
                     }; 
-                    if(activity) body.extra_id = activity; // Gunakan 'extra_id' agar sesuai controller
+                    if(activity) body.extra_id = activity; 
                     
                     const response = await fetch(scanProcessUrl, { 
                         method: 'POST', 
@@ -632,7 +629,7 @@
                         }
                         
                         showScanResult(isLate ? 'warning' : 'success', result.message);
-                        if(result.scan) addNewRowToTable(result.scan, currentScanMode); // Gunakan currentScanMode untuk visual table
+                        if(result.scan) addNewRowToTable(result.scan, currentScanMode); 
                     } else { 
                         triggerScanEffect('error'); 
                         showScanResult(response.status === 409 ? 'warning' : 'error', result.message || 'Error Server'); 
@@ -650,7 +647,6 @@
             const onScanSuccess = (decodedText, decodedResult) => {
                 if (isProcessing) return;
 
-                // --- 2. DEBOUNCE CHECK ---
                 if (processedSet.has(decodedText)) {
                     console.log(`Scan diabaikan: ${decodedText} (Cooldown)`);
                     return; 
@@ -678,12 +674,27 @@
                 
                 let handler;
                 
-                // --- PERBAIKAN LOGIKA HARIAN ---
-                // Controller tidak menerima 'Harian', harus 'Masuk' atau 'Pulang'
+                // --- PERBAIKAN LOGIKA HARIAN UTAMA ---
+                // Menggunakan 'start_out' dari Jadwal Reguler untuk menentukan Masuk/Pulang
                 if (currentScanMode === 'Harian') {
-                    const hour = new Date().getHours();
-                    // Jika sebelum jam 12 siang = Masuk, setelahnya = Pulang
-                    const timeType = hour < 12 ? 'Masuk' : 'Pulang';
+                    const now = new Date();
+                    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                    
+                    // Ambil batas waktu pergantian Masuk -> Pulang dari Jadwal
+                    // Format di DB "HH:MM:SS" (misal: 14:00:00)
+                    let switchMinutes = 12 * 60; // Default fallback ke jam 12:00
+                    
+                    if (SCHEDULE_DATA && SCHEDULE_DATA.start_out) {
+                        const parts = SCHEDULE_DATA.start_out.split(':');
+                        const h = parseInt(parts[0]);
+                        const m = parseInt(parts[1]);
+                        switchMinutes = (h * 60) + m;
+                    }
+
+                    // Jika waktu sekarang < Jam Awal Pulang, maka dianggap MASUK
+                    // Jika waktu sekarang >= Jam Awal Pulang, maka dianggap PULANG
+                    const timeType = currentMinutes < switchMinutes ? 'Masuk' : 'Pulang';
+                    
                     handler = () => processScan(decodedText, timeType);
                 }
                 else if (currentScanMode === 'Makan') handler = () => processScan(decodedText, 'Makan', null);
@@ -703,7 +714,6 @@
                         html5QrCode.start(rearCamera.id, config, onScanSuccess)
                             .catch(err => {
                                 console.error(err);
-                                // Fallback jika kamera belakang gagal
                                 html5QrCode.start(cameras[0].id, config, onScanSuccess);
                             });
                     } else { 

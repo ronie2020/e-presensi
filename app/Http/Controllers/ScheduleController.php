@@ -42,6 +42,7 @@ class ScheduleController extends Controller
         $schedules = $query->get();
 
         // --- C. AMBIL DATA JAM BEL ---
+        // Pastikan tabel schedules_regular sudah memiliki kolom 'day_type'
         $regularSchedules = ScheduleRegular::all()->keyBy('day_type');
         $specialSchedules = ScheduleSpecial::orderBy('date', 'desc')->get();
 
@@ -66,19 +67,18 @@ class ScheduleController extends Controller
             'subject_id'      => 'required|exists:subjects,id',
             'teacher_id'      => 'required|exists:users,id',
             'day'             => 'required',
-            // PERBAIKAN: Gunakan integer dan gt (greater than) untuk angka jam pelajaran
+            // PERBAIKAN: Gunakan 'gte' agar mapel 1 JP (misal jam 1 s.d jam 1) bisa masuk
             'start_time'      => 'required|integer|min:1|max:15',
-            'end_time'        => 'required|integer|gt:start_time|max:15', 
+            'end_time'        => 'required|integer|gte:start_time|max:15', 
         ], [
-            'end_time.gt' => 'Jam selesai harus lebih besar dari jam mulai.', // Pesan error custom
+            'end_time.gte' => 'Jam selesai tidak boleh lebih kecil dari jam mulai.',
         ]);
 
         // Cek Tabrakan Jadwal (Bentrok Guru)
-        // Logika disesuaikan untuk angka (Range overlapping)
+        // Logika overlap: (StartA <= EndB) and (EndA >= StartB)
         $clash = Schedule::where('teacher_id', $request->teacher_id)
                 ->where('day', $request->day)
                 ->where(function($q) use ($request) {
-                    // Cek jika range waktu yang baru beririsan dengan yang sudah ada
                     $q->where(function($sub) use ($request) {
                         $sub->where('start_time', '<=', $request->end_time)
                             ->where('end_time', '>=', $request->start_time);
@@ -111,7 +111,7 @@ class ScheduleController extends Controller
 
     public function storeRegular(Request $request)
     {
-        // Validasi Jam Bel tetap menggunakan format Waktu (H:i) karena ini jam dinding asli
+        // Validasi Jam Bel
         $request->validate([
             'day_type.*' => 'required|string|in:Biasa,Jumat',
             'start_in.*' => 'required', 
@@ -120,10 +120,14 @@ class ScheduleController extends Controller
             'end_out.*'  => 'required|after:start_out.*',
         ]);
 
+        // Looping berdasarkan array day_type yang dikirim dari form
         foreach ($request->day_type as $index => $dayType) {
+            // NOTE: Kode di bawah ini butuh kolom 'day_type' di tabel 'schedules_regular'
             ScheduleRegular::updateOrCreate(
                 ['day_type' => $dayType], 
                 [ 
+                    // FIX: Isi day_name dengan day_type agar tidak error 1364 (Field 'day_name' doesn't have a default value)
+                    'day_name'  => $dayType, 
                     'start_in'  => $request->start_in[$index],
                     'end_in'    => $request->end_in[$index],
                     'start_out' => $request->start_out[$index],

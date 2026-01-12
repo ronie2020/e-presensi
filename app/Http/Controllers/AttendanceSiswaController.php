@@ -31,8 +31,12 @@ class AttendanceSiswaController extends Controller
         
         // 2. Jika tidak ada, Cek Jadwal Regular
         if (!$schedule) {
-            $dayName = $today->locale('en')->dayName;
-            $schedule = ScheduleRegular::where('day_name', $dayName)->first();
+            $dayEnglish = $today->locale('en')->dayName; 
+            $dayCategory = ($dayEnglish == 'Friday') ? 'Jumat' : 'Biasa';
+            
+            $schedule = ScheduleRegular::where('day_type', $dayCategory)
+                        ->orWhere('day_name', $dayCategory)
+                        ->first();
         }
 
         $scheduleConfig = [
@@ -48,7 +52,53 @@ class AttendanceSiswaController extends Controller
             'makan_start' => '11:00', 'makan_end' => '13:00', 
         ];
 
-        return view('scan.index', compact('scheduleConfig'));
+        // 3. STATISTIK MAKAN (Optional, sesuaikan)
+        $statsConfig = [
+            'total_target' => Student::where('status', 'active')->count(),
+            'current_taken' => AttendanceSiswa::whereDate('attendance_date', $today)
+                                ->where('type', 'Meal')
+                                ->count()
+        ];
+
+        // 4. AMBIL RIWAYAT SCAN HARI INI (Agar tabel tidak kosong)
+        $latestScans = AttendanceSiswa::with('student')
+            ->whereDate('attendance_date', $today)
+            ->orderBy('updated_at', 'desc')
+            ->take(10) // Ambil 10 terakhir
+            ->get();
+
+        // Mapping agar formatnya sesuai dengan JS di view
+        $recentScans = $latestScans->map(function($item) {
+            $tipe = $item->type;
+            $act = $item->activity;
+
+            return [
+                'student_name' => $item->student->name,
+                'student_id' => $item->student->student_id ?? $item->student->nisn,
+                'time_in' => $item->time_in,
+                'time_out' => $item->time_out,
+                'status' => $item->status,
+                
+                // Flags untuk JS filtering di tabel
+                'data_harian' => ($tipe == 'Harian' || $tipe == 'Masuk' || $tipe == 'Pulang'),
+                'data_makan' => ($tipe == 'Meal' || $tipe == 'Makan'),
+                'data_dhuha' => ($tipe == 'Keagamaan' && $act == 'Dhuha'),
+                'data_dhuhur' => ($tipe == 'Keagamaan' && $act == 'Dhuhur'),
+                'data_ekskul' => ($tipe == 'Extracurricular'),
+
+                // Waktu spesifik per kegiatan (sesuai kolom JS)
+                'makan_time' => ($tipe == 'Meal') ? $item->time_in : null,
+                'dhuha_time' => ($act == 'Dhuha') ? $item->time_in : null,
+                'dhuhur_time' => ($act == 'Dhuhur') ? $item->time_in : null,
+                'ekskul_time' => ($tipe == 'Extracurricular') ? $item->time_in : null,
+                'ekskul_name' => ($tipe == 'Extracurricular') ? $act : '-',
+            ];
+        });
+
+        // Ambil Data Ekskul untuk Dropdown
+        $extracurriculars = Extracurricular::all();
+
+        return view('scan.index', compact('scheduleConfig', 'statsConfig', 'recentScans', 'extracurriculars'));
     }
 
     /**
@@ -66,7 +116,6 @@ class AttendanceSiswaController extends Controller
 
         $today = Carbon::today();
         
-        // Cari siswa berdasarkan student_id ATAU nisn
         $student = Student::where('student_id', $request->student_id)
                     ->orWhere('nisn', $request->student_id)
                     ->first();
@@ -100,17 +149,14 @@ class AttendanceSiswaController extends Controller
      */
     private function processAttendance($student, $type, $request, $today)
     {
-        // PERBAIKAN: Menambahkan 'type' => 'Harian' pada kriteria pencarian (array pertama)
-        // Ini MENCEGAH sistem mengambil data 'Keagamaan' jika siswa sudah scan Dhuha sebelumnya
         $attendance = AttendanceSiswa::firstOrCreate(
             [
                 'student_id' => $student->id, 
                 'attendance_date' => $today->toDateString(),
-                'type' => 'Harian' // <--- PENAMBAHAN KRITIKAL DI SINI
+                'type' => 'Harian' 
             ],
             [
                 'status' => 'Alfa',
-                // 'type' => 'Harian', // Tidak perlu di sini jika sudah ada di atas
                 'time_in' => '00:00:00'
             ]
         );
@@ -118,20 +164,22 @@ class AttendanceSiswaController extends Controller
         $now = Carbon::now();
         $timeString = $now->format('H:i:s');
 
-        // Ambil Batas Waktu
         $scheduleLimit = '07:00:00'; 
         $special = ScheduleSpecial::where('date', $today->toDateString())->first();
         if ($special) {
             $scheduleLimit = $special->end_in; 
         } else {
-            $dayName = $today->locale('en')->dayName;
-            $regular = ScheduleRegular::where('day_name', $dayName)->first();
+            $dayEnglish = $today->locale('en')->dayName;
+            $dayCategory = ($dayEnglish == 'Friday') ? 'Jumat' : 'Biasa';
+            
+            $regular = ScheduleRegular::where('day_type', $dayCategory)
+                        ->orWhere('day_name', $dayCategory)
+                        ->first();
             if ($regular) {
                 $scheduleLimit = $regular->end_in;
             }
         }
 
-        // Logic MASUK
         if ($type == 'Masuk') {
             if ($attendance->time_in && $attendance->time_in != '00:00:00') {
                 return response()->json(['message' => 'Anda sudah absen masuk hari ini!'], 422);
@@ -164,7 +212,6 @@ class AttendanceSiswaController extends Controller
             ]);
         }
 
-        // Logic PULANG
         elseif ($type == 'Pulang') {
             if (!$attendance->time_in || $attendance->time_in == '00:00:00') {
                 return response()->json(['message' => 'Anda belum absen masuk!'], 422);
@@ -197,11 +244,10 @@ class AttendanceSiswaController extends Controller
     }
 
     /**
-     * LOGIKA RELIGI (DHUHA & DHUHUR) - DIPERBAIKI
+     * LOGIKA RELIGI (DHUHA & DHUHUR)
      */
     private function processReligious($student, $type, $today)
     {
-        // Cek duplikasi di ActivityLog (Logika lama tetap dipakai untuk validasi)
         $existingLog = ActivityLog::where('student_id', $student->id)
             ->where('activity_type', 'Religious')
             ->where('activity_name', 'Shalat ' . $type)
@@ -212,16 +258,12 @@ class AttendanceSiswaController extends Controller
             return response()->json(['message' => "Sudah absen shalat {$type} hari ini!"], 422);
         }
 
-        // =========================================================================
-        // [PERBAIKAN UTAMA] SIMPAN KE TABEL UTAMA (AttendanceSiswa)
-        // Agar muncul di ReportController (Laporan Harian/Religious)
-        // =========================================================================
-        AttendanceSiswa::firstOrCreate(
+        $attendance = AttendanceSiswa::firstOrCreate(
             [
                 'student_id' => $student->id,
                 'attendance_date' => $today->toDateString(),
-                'type' => 'Keagamaan', // Penting: Harus 'Keagamaan' agar terbaca di filter report
-                'activity' => $type    // 'Dhuha' atau 'Dhuhur'
+                'type' => 'Keagamaan',
+                'activity' => $type
             ],
             [
                 'status' => 'Hadir',
@@ -230,7 +272,6 @@ class AttendanceSiswaController extends Controller
             ]
         );
 
-        // Simpan ke ActivityLog (Untuk Poin & Gamification)
         ActivityLog::create([
             'student_id' => $student->id,
             'activity_type' => 'Religious',
@@ -241,12 +282,12 @@ class AttendanceSiswaController extends Controller
         ]);
 
         try {
-            AddReligiousPointJob::dispatch($student, 5, "Shalat {$type}");
+            AddReligiousPointJob::dispatch($attendance); 
         } catch (\Exception $e) {
+            Log::error("Gagal dispatch Job Poin Religi: " . $e->getMessage());
             $student->increment('score', 5);
         }
 
-        // Simpan ke StudentHabit (Untuk Rekap Bulanan Habit)
         $habit = StudentHabit::firstOrCreate(
             ['student_id' => $student->id, 'report_date' => $today->toDateString()]
         );
@@ -282,6 +323,20 @@ class AttendanceSiswaController extends Controller
             ], 422);
         }
 
+        // PERBAIKAN: Makan Juga Harus Masuk AttendanceSiswa agar muncul di Riwayat Scan
+        AttendanceSiswa::firstOrCreate(
+            [
+                'student_id' => $student->id,
+                'attendance_date' => $today->toDateString(),
+                'type' => 'Meal',
+            ],
+            [
+                'status' => 'Hadir',
+                'time_in' => Carbon::now()->format('H:i:s'),
+                'activity' => 'Makan Siang'
+            ]
+        );
+
         ActivityLog::create([
             'student_id' => $student->id,
             'activity_type' => 'Meal',
@@ -300,6 +355,11 @@ class AttendanceSiswaController extends Controller
         $habit->habit_5_menu = 'Menu Sekolah (MBG)'; 
         $habit->save();
 
+        // Hitung ulang statistik hari ini untuk dikirim balik
+        $currentTaken = AttendanceSiswa::whereDate('attendance_date', $today)
+                        ->where('type', 'Meal')
+                        ->count();
+
         return response()->json([
             'message' => "Scan Makan Berhasil. Selamat Makan!",
             'type' => 'success',
@@ -307,7 +367,8 @@ class AttendanceSiswaController extends Controller
                 'student_name' => $student->name,
                 'student_id' => $student->student_id,
                 'status' => 'Ambil Makan'
-            ]
+            ],
+            'stats' => ['taken' => $currentTaken]
         ]);
     }
 
@@ -328,6 +389,17 @@ class AttendanceSiswaController extends Controller
         $isMember = ExtracurricularMember::where('student_id', $student->id)
             ->where('extracurricular_id', $extraId)
             ->exists();
+
+        // PERBAIKAN: Gunakan AttendanceSiswa juga agar konsisten tampil di riwayat utama (Opsional, tapi direkomendasikan)
+        AttendanceSiswa::firstOrCreate([
+            'student_id' => $student->id,
+            'attendance_date' => $today->toDateString(),
+            'type' => 'Extracurricular',
+            'activity' => $extra->name
+        ], [
+            'status' => 'Hadir',
+            'time_in' => now()->format('H:i:s')
+        ]);
 
         $attendance = ExtracurricularAttendance::firstOrCreate([
             'extracurricular_id' => $extraId,
