@@ -1,12 +1,11 @@
 
 
 <?php
-    // Setup Data & Locale
     \Carbon\Carbon::setLocale('id');
     $schedules = $student->schoolClass->schedules ?? collect([]);
     $todayName = \Carbon\Carbon::now()->translatedFormat('l');
     
-    // Default tab aktif: Jika hari ini Minggu, default ke Senin. Jika tidak, ke hari ini.
+    // Default tab: Jika Minggu, ke Senin. Jika tidak, ke Hari Ini.
     $defaultDay = ($todayName == 'Minggu') ? 'Senin' : $todayName;
 ?>
 
@@ -28,7 +27,6 @@
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                     </span>
                 <?php endif; ?>
-                
                 <span class="relative z-10"><?php echo e($day); ?></span>
             </button>
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -47,7 +45,6 @@
                  x-transition:enter-end="opacity-100 translate-y-0"
                  style="display: none;">
                 
-                
                 <div class="flex items-center justify-between mb-10 relative z-10">
                     <div>
                         <h2 class="text-3xl font-black text-slate-800 tracking-tight"><?php echo e($day); ?></h2>
@@ -60,22 +57,37 @@
                     <?php endif; ?>
                 </div>
 
-                
-                <div class="relative z-10 space-y-8">
+                <div class="relative z-10 space-y-4">
                     <?php
                         $daySchedules = $schedules->where('day', $day)->sortBy('start_time');
                     ?>
 
                     <?php $__empty_1 = true; $__currentLoopData = $daySchedules; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sched): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                        <div class="flex group">
-                            
-                            <div class="flex flex-col items-center mr-6 md:mr-10">
-                                <div class="w-20 py-3 rounded-2xl bg-slate-100 text-slate-600 font-black text-xs text-center border border-slate-200 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-300 shadow-sm">
-                                    <?php echo e(\Carbon\Carbon::parse($sched->start_time)->format('H:i')); ?>
+                        <?php
+                            // Fix format jam 00:00 -> integer JP
+                            $startJP = str_contains($sched->start_time, ':') 
+                                        ? \Carbon\Carbon::parse($sched->start_time)->second 
+                                        : intval($sched->start_time);
+                                        
+                            $endJP = str_contains($sched->end_time, ':') 
+                                        ? \Carbon\Carbon::parse($sched->end_time)->second 
+                                        : intval($sched->end_time);
 
-                                    <div class="w-10 h-[2px] bg-slate-300 mx-auto my-1.5 opacity-30 group-hover:bg-white"></div>
-                                    <?php echo e(\Carbon\Carbon::parse($sched->end_time)->format('H:i')); ?>
+                            if($startJP == 0) $startJP = intval($sched->start_time);
+                            if($endJP == 0) $endJP = intval($sched->end_time);
+                        ?>
 
+                        
+                        <div class="flex group relative">
+                             
+                             <div class="flex flex-col items-center mr-6 md:mr-10">
+                                <div class="w-20 py-3 rounded-2xl bg-slate-100 text-slate-600 font-black text-xs text-center border border-slate-200 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-300 shadow-sm flex flex-col justify-center items-center gap-1">
+                                    <span class="text-[10px] uppercase font-bold opacity-60">Jam Ke</span>
+                                    <div class="text-xl leading-none"><?php echo e($startJP); ?></div>
+                                    <?php if($startJP != $endJP): ?>
+                                        <div class="w-8 h-[2px] bg-slate-300 mx-auto opacity-50 group-hover:bg-white"></div>
+                                        <div class="text-xl leading-none"><?php echo e($endJP); ?></div>
+                                    <?php endif; ?>
                                 </div>
                                 <?php if(!$loop->last): ?>
                                     <div class="w-1 h-full bg-slate-100 my-3 rounded-full group-hover:bg-blue-50 transition-colors"></div>
@@ -83,18 +95,15 @@
                             </div>
 
                             
-                            <div class="flex-1 pb-2">
+                            <div class="flex-1 pb-4">
                                 <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 group-hover:-translate-y-1 relative overflow-hidden">
                                     <div class="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16 group-hover:bg-blue-50 transition-colors"></div>
-                                    
                                     <div class="relative z-10">
                                         <h3 class="font-black text-xl text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">
                                             <?php echo e($sched->subject->name ?? 'Mata Pelajaran'); ?>
 
                                         </h3>
-                                        
                                         <div class="flex flex-wrap items-center gap-4 mt-4">
-                                            
                                             <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-100">
                                                 <div class="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-black">
                                                     <?php echo e(substr($sched->teacher->name ?? 'G', 0, 1)); ?>
@@ -102,8 +111,6 @@
                                                 </div>
                                                 <span class="text-xs font-bold text-slate-600"><?php echo e($sched->teacher->name ?? 'Guru Pengampu'); ?></span>
                                             </div>
-                                            
-                                            
                                             <div class="flex items-center gap-1.5 text-slate-400 text-xs font-bold">
                                                 <i class="ph-bold ph-door-open text-lg"></i>
                                                 R. Kelas <?php echo e($student->schoolClass->name ?? '-'); ?>
@@ -114,8 +121,44 @@
                                 </div>
                             </div>
                         </div>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+
                         
+                        <?php if($endJP == 3): ?>
+                            <div class="flex mb-4 opacity-80">
+                                <div class="w-20 mr-6 md:mr-10 flex justify-center">
+                                    <div class="w-1 h-full bg-slate-100 rounded-full"></div>
+                                </div>
+                                <div class="flex-1 bg-orange-50 rounded-2xl p-4 border border-orange-100 border-dashed flex items-center gap-4">
+                                    <div class="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-500 shadow-sm">
+                                        <i class="ph-duotone ph-coffee text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-orange-900 text-sm">Istirahat Pertama</h4>
+                                        <p class="text-xs text-orange-700">Waktunya menyegarkan pikiran sejenak.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        
+                        <?php if($endJP == 6): ?>
+                            <div class="flex mb-4 opacity-80">
+                                <div class="w-20 mr-6 md:mr-10 flex justify-center">
+                                    <div class="w-1 h-full bg-slate-100 rounded-full"></div>
+                                </div>
+                                <div class="flex-1 bg-blue-50 rounded-2xl p-4 border border-blue-100 border-dashed flex items-center gap-4">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-500 shadow-sm">
+                                        <i class="ph-duotone ph-mosque text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-blue-900 text-sm">Istirahat Kedua / ISOMA</h4>
+                                        <p class="text-xs text-blue-700">Istirahat, Sholat, dan Makan Siang.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <div class="text-center py-20">
                             <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300 border border-dashed border-slate-200">
                                 <i class="ph-duotone ph-coffee text-5xl"></i>
@@ -132,16 +175,15 @@
 
     
     <div class="bg-blue-600 rounded-[2rem] p-8 text-white relative overflow-hidden shadow-xl shadow-blue-600/20">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-            <div class="flex items-center gap-4 mb-4">
-                <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl text-white">
-                    <i class="ph-fill ph-info"></i>
-                </div>
-                <h4 class="font-black text-lg">Informasi Jadwal</h4>
+        <div class="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div class="flex items-center gap-4 mb-2">
+            <div class="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-xl text-white">
+                <i class="ph-fill ph-info"></i>
             </div>
-            <p class="text-sm font-medium leading-relaxed opacity-90">
-            Jadwal ini dapat berubah sewaktu-waktu sesuai kebijakan sekolah. Pastikan cek agenda kegiatan secara berkala.
-            </p>
+            <h4 class="font-black text-lg">Informasi Jadwal</h4>
+        </div>
+        <p class="text-sm font-medium leading-relaxed opacity-90 pl-14">
+            Jadwal istirahat menyesuaikan dengan bel sekolah.
+        </p>
     </div>
-
 </div><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/students/portal/partials/tab-jadwal.blade.php ENDPATH**/ ?>

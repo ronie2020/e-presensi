@@ -6,7 +6,6 @@ use App\Models\TeachingSession;
 use App\Models\Schedule;
 use App\Models\Student;
 use App\Models\ClassAttendance;
-// Gunakan Model yang Benar
 use App\Models\DisciplineRecord; 
 use App\Models\DisciplineType;
 use Illuminate\Http\Request;
@@ -17,16 +16,27 @@ use Carbon\Carbon;
 
 class TeachingController extends Controller
 {
+    /**
+     * MODIFIKASI: Hanya menampilkan jadwal HARI INI milik guru yang login.
+     */
     public function index()
     {
         $teacherId = Auth::id();
+        
+        // 1. Set Locale ke Indonesia agar cocok dengan data 'day' di database ('Senin', 'Selasa', dst)
+        Carbon::setLocale('id');
+        $todayName = Carbon::now()->translatedFormat('l'); // Output: "Senin", "Selasa", dst.
+
         $schedules = Schedule::with(['schoolClass', 'subject'])
                     ->where('teacher_id', $teacherId)
+                    ->where('day', $todayName) // <--- FILTER TAMBAHAN (Hanya Hari Ini)
+                    ->orderBy('start_time', 'asc')
                     ->get();
 
         return view('teaching.index', compact('schedules'));
     }
 
+    // --- MULAI KELAS ---
     public function start($schedule_id)
     {
         $existingSession = TeachingSession::where('schedule_id', $schedule_id)
@@ -48,6 +58,7 @@ class TeachingController extends Controller
         return redirect()->route('teaching.show', $session->id);
     }
 
+    // --- HALAMAN KELAS BERLANGSUNG ---
     public function show($id)
     {
         $session = TeachingSession::with(['schedule.schoolClass.students', 'schedule.subject', 'attendances.student'])
@@ -59,6 +70,7 @@ class TeachingController extends Controller
         return view('teaching.show', compact('session', 'presentCount', 'totalStudents'));
     }
 
+    // --- UPDATE JURNAL ---
     public function update(Request $request, $id)
     {
         $session = TeachingSession::findOrFail($id);
@@ -113,6 +125,7 @@ class TeachingController extends Controller
         return view('teaching.history', compact('histories', 'month'));
     }
 
+    // --- SCAN RFID ---
     public function scan(Request $request)
     {
         $request->validate([
@@ -157,7 +170,7 @@ class TeachingController extends Controller
         ]);
     }
 
-    // --- [PENTING] INI FUNGSI YANG SEBELUMNYA HILANG ---
+    // --- ABSEN MANUAL ---
     public function storeManual(Request $request)
     {
         $request->validate([
@@ -166,7 +179,6 @@ class TeachingController extends Controller
             'status'     => 'required|in:present,sick,permission,alpha',
         ]);
 
-        // Gunakan updateOrCreate agar data tidak ganda jika diklik berkali-kali
         $attendance = ClassAttendance::updateOrCreate(
             [
                 'teaching_session_id' => $request->session_id,
@@ -185,6 +197,7 @@ class TeachingController extends Controller
         ]);
     }
 
+    // --- TUTUP KELAS & DISIPLIN  ---
     public function close($id)
     {
         DB::beginTransaction();
@@ -200,7 +213,6 @@ class TeachingController extends Controller
             $presentIds = ClassAttendance::where('teaching_session_id', $id)
                           ->pluck('student_id')->toArray();
 
-            // Auto-Create Jenis Pelanggaran jika belum ada
             $alphaDiscipline = DisciplineType::firstOrCreate(
                 ['name' => 'Bolos Pelajaran (Alpha)'],
                 [
@@ -221,7 +233,6 @@ class TeachingController extends Controller
                         'scanned_at' => null
                     ]);
 
-                    // Catat ke Buku Disiplin
                     DisciplineRecord::create([
                         'student_id' => $student->id,
                         'discipline_type_id' => $alphaDiscipline->id,

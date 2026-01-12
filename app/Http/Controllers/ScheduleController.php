@@ -3,23 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-// --- 1. IMPORT MODEL YANG DIBUTUHKAN ---
 use App\Models\Schedule;        
 use App\Models\ScheduleRegular; 
 use App\Models\ScheduleSpecial; 
 use App\Models\SchoolClass;     
 use App\Models\Subject;         
 use App\Models\User;            
-use Carbon\Carbon;
+use Carbon\Carbon; // Pastikan ini ada
 
 class ScheduleController extends Controller
 {
-    /**
-     * Menampilkan halaman Manajemen Jadwal.
-     */
     public function index(Request $request)
     {
-        // --- A. AMBIL DATA MASTER (UNTUK DROPDOWN) ---
+        // --- LOGIKA ASLI: AMBIL DATA MASTER ---
         $classes = SchoolClass::orderBy('name', 'asc')->get(); 
         $subjects = Subject::orderBy('name', 'asc')->get();
         
@@ -31,18 +27,17 @@ class ScheduleController extends Controller
             $teachers = User::all();
         }
 
-        // --- B. AMBIL DATA JADWAL PELAJARAN ---
+        // --- LOGIKA ASLI: FILTER & QUERY ---
         $query = Schedule::with(['schoolClass', 'subject', 'teacher'])
                  ->orderByRaw("FIELD(day, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu')")
-                 ->orderBy('start_time'); // Urutkan berdasarkan jam ke-
+                 ->orderBy('start_time'); 
 
         if ($request->has('class_id') && $request->class_id != '') {
             $query->where('school_class_id', $request->class_id);
         }
         $schedules = $query->get();
 
-        // --- C. AMBIL DATA JAM BEL ---
-        // Pastikan tabel schedules_regular sudah memiliki kolom 'day_type'
+        // --- LOGIKA ASLI: DATA JAM BEL ---
         $regularSchedules = ScheduleRegular::all()->keyBy('day_type');
         $specialSchedules = ScheduleSpecial::orderBy('date', 'desc')->get();
 
@@ -56,84 +51,89 @@ class ScheduleController extends Controller
         ]);
     }
 
-    /**
-     * Menyimpan Jadwal Pelajaran Baru (DENGAN PERBAIKAN VALIDASI).
-     */
     public function store(Request $request)
     {
-        // Validasi Input
+        // 1. Validasi (Sesuai kode asli Anda)
         $request->validate([
-            'school_class_id' => 'required|exists:classes,id',
+            'school_class_id' => 'required|exists:classes,id', // Sesuai tabel asli 'classes'
             'subject_id'      => 'required|exists:subjects,id',
             'teacher_id'      => 'required|exists:users,id',
             'day'             => 'required',
-            // PERBAIKAN: Gunakan 'gte' agar mapel 1 JP (misal jam 1 s.d jam 1) bisa masuk
             'start_time'      => 'required|integer|min:1|max:15',
             'end_time'        => 'required|integer|gte:start_time|max:15', 
         ], [
             'end_time.gte' => 'Jam selesai tidak boleh lebih kecil dari jam mulai.',
         ]);
 
-        // Cek Tabrakan Jadwal (Bentrok Guru)
-        // Logika overlap: (StartA <= EndB) and (EndA >= StartB)
-        $clash = Schedule::where('teacher_id', $request->teacher_id)
+        // 2. Cek Bentrok GURU (Logika Asli Dipertahankan)
+        $teacherClash = Schedule::where('teacher_id', $request->teacher_id)
                 ->where('day', $request->day)
                 ->where(function($q) use ($request) {
-                    $q->where(function($sub) use ($request) {
-                        $sub->where('start_time', '<=', $request->end_time)
-                            ->where('end_time', '>=', $request->start_time);
-                    });
+                    $q->where('start_time', '<=', $request->end_time)
+                      ->where('end_time', '>=', $request->start_time);
                 })
                 ->exists();
 
-        if ($clash) {
-            return back()->with('error', 'Gagal! Guru tersebut sudah memiliki jadwal mengajar di jam pelajaran tersebut.');
+        if ($teacherClash) {
+            return back()->withInput()->withErrors(['teacher_id' => 'Gagal! Guru ini sudah memiliki jadwal mengajar di jam pelajaran tersebut.']);
         }
 
-        // Simpan Data
+        // 3. Cek Bentrok KELAS (TAMBAHAN BARU: Agar siswa tidak bentrok)
+        $classClash = Schedule::where('school_class_id', $request->school_class_id)
+                ->where('day', $request->day)
+                ->where(function($q) use ($request) {
+                    $q->where('start_time', '<=', $request->end_time)
+                      ->where('end_time', '>=', $request->start_time);
+                })
+                ->exists();
+
+        if ($classClash) {
+            return back()->withInput()->withErrors(['school_class_id' => 'Gagal! Kelas ini sudah ada mata pelajaran lain di jam pelajaran tersebut.']);
+        }
+
+        // 4. Simpan Data
         Schedule::create($request->all());
 
         return back()->with('success', 'Jadwal pelajaran berhasil ditambahkan.');
     }
 
-    /**
-     * Menghapus Jadwal Pelajaran.
-     */
     public function destroy($id)
     {
+        // Menggunakan findOrFail sesuai kode asli untuk memastikan data ada atau 404
         Schedule::findOrFail($id)->delete();
         return back()->with('success', 'Jadwal berhasil dihapus.');
     }
 
     // ==========================================
-    // FUNGSI UNTUK JAM BEL (REGULAR & SPECIAL)
+    // JAM REGULER & KHUSUS (LOGIKA ASLI DIKEMBALIKAN)
     // ==========================================
 
     public function storeRegular(Request $request)
     {
-        // Validasi Jam Bel
+        // Validasi Ketat (Sesuai kode asli Anda)
         $request->validate([
             'day_type.*' => 'required|string|in:Biasa,Jumat',
             'start_in.*' => 'required', 
-            'end_in.*'   => 'required|after:start_in.*',
+            'end_in.*'   => 'required|after:start_in.*', // Wajib ada & harus setelah start_in
             'start_out.*'=> 'required',
-            'end_out.*'  => 'required|after:start_out.*',
+            'end_out.*'  => 'required|after:start_out.*', // Wajib ada & harus setelah start_out
         ]);
 
-        // Looping berdasarkan array day_type yang dikirim dari form
-        foreach ($request->day_type as $index => $dayType) {
-            // NOTE: Kode di bawah ini butuh kolom 'day_type' di tabel 'schedules_regular'
-            ScheduleRegular::updateOrCreate(
-                ['day_type' => $dayType], 
-                [ 
-                    // FIX: Isi day_name dengan day_type agar tidak error 1364 (Field 'day_name' doesn't have a default value)
-                    'day_name'  => $dayType, 
-                    'start_in'  => $request->start_in[$index],
-                    'end_in'    => $request->end_in[$index],
-                    'start_out' => $request->start_out[$index],
-                    'end_out'   => $request->end_out[$index],
-                ]
-            );
+        if ($request->has('day_type')) {
+            foreach ($request->day_type as $index => $dayType) {
+                if (isset($request->start_in[$index])) {
+                    ScheduleRegular::updateOrCreate(
+                        ['day_type' => $dayType], 
+                        [ 
+                            'day_name'  => $dayType, 
+                            'start_in'  => $request->start_in[$index],
+                            'end_in'    => $request->end_in[$index],
+                            'start_out' => $request->start_out[$index],
+                            'end_out'   => $request->end_out[$index],
+                        ]
+                    );
+                }
+            }
         }
 
         return back()->with('success', 'Jam Sekolah Reguler berhasil diperbarui.');
@@ -141,26 +141,33 @@ class ScheduleController extends Controller
 
     public function storeSpecial(Request $request)
     {
+        // Normalisasi checkbox
+        $request->merge(['is_holiday' => $request->has('is_holiday') ? 1 : 0]);
+
+        // Validasi Ketat (Sesuai kode asli Anda, termasuk start_out dan end_out)
         $validatedData = $request->validate([
             'date'        => 'required|date|unique:schedules_special,date',
             'description' => 'nullable|string|max:255',
-            'is_holiday'  => 'nullable|boolean',
-            'start_in'    => 'nullable|required_if:is_holiday,null,0',
-            'end_in'      => 'nullable|required_if:is_holiday,null,0|after_or_equal:start_in',
-            'start_out'   => 'nullable|required_if:is_holiday,null,0',
-            'end_out'     => 'nullable|required_if:is_holiday,null,0|after_or_equal:start_out',
+            'is_holiday'  => 'boolean',
+            'start_in'    => 'nullable|required_if:is_holiday,0',
+            'end_in'      => 'nullable|required_if:is_holiday,0|after_or_equal:start_in',
+            'start_out'   => 'nullable|required_if:is_holiday,0',
+            'end_out'     => 'nullable|required_if:is_holiday,0|after_or_equal:start_out',
         ]);
-
-        $validatedData['is_holiday'] = $request->has('is_holiday');
 
         ScheduleSpecial::create($validatedData);
 
         return back()->with('success', 'Jadwal Khusus berhasil ditambahkan.');
     }
 
-    public function destroySpecial(ScheduleSpecial $schedule)
+    public function destroySpecial($id)
     {
-        $schedule->delete();
-        return back()->with('success', 'Jadwal Khusus berhasil dihapus.');
+        // Menggunakan find agar lebih fleksibel (menghindari error page jika data sudah terhapus)
+        $schedule = ScheduleSpecial::find($id);
+        if($schedule) {
+            $schedule->delete();
+            return back()->with('success', 'Jadwal Khusus berhasil dihapus.');
+        }
+        return back()->with('error', 'Data tidak ditemukan.');
     }
 }

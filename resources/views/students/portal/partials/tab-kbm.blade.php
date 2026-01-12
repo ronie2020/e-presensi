@@ -1,9 +1,47 @@
 <div class="grid grid-cols-1 gap-6">
     @if(isset($teaching_journals) && count($teaching_journals) > 0)
         @foreach($teaching_journals as $journal)
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+        
+        {{-- LOGIKA CEK ABSENSI SISWA --}}
+        @php
+            // Cek apakah siswa ini punya record absen di jurnal ini
+            $attendance = $journal->attendances->where('student_id', $student->id)->first();
+            $status = $attendance ? $attendance->status : null;
+
+            // Setup Tampilan Badge
+            $badgeColor = 'bg-slate-100 text-slate-500 border-slate-200';
+            $statusLabel = 'Belum Absen';
+
+            if ($status == 'present') {
+                $badgeColor = 'bg-emerald-50 text-emerald-600 border-emerald-100';
+                $statusLabel = 'Hadir';
+            } elseif ($status == 'sick') {
+                $badgeColor = 'bg-blue-50 text-blue-600 border-blue-100';
+                $statusLabel = 'Sakit';
+            } elseif ($status == 'permission') {
+                $badgeColor = 'bg-amber-50 text-amber-600 border-amber-100';
+                $statusLabel = 'Izin';
+            } elseif ($status == 'alpha') {
+                $badgeColor = 'bg-rose-50 text-rose-600 border-rose-100';
+                $statusLabel = 'Alpha';
+            } elseif ($journal->status == 'closed' && !$status) {
+                // Jika kelas sudah tutup tapi siswa tidak ada data, otomatis Alpha
+                $badgeColor = 'bg-rose-50 text-rose-600 border-rose-100';
+                $statusLabel = 'Alpha (Otomatis)';
+            }
+        @endphp
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow relative">
+            
+            {{-- BADGE STATUS ABSENSI --}}
+            <div class="absolute top-0 right-0 p-4 z-10">
+                 <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border {{ $badgeColor }}">
+                    {{ $statusLabel }}
+                </span>
+            </div>
+
             <div class="p-6">
-                <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
+                <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-4 pr-16">
                     <div>
                         <div class="flex items-center gap-2 mb-1">
                             <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wide border border-blue-100">
@@ -14,18 +52,40 @@
                                 {{ \Carbon\Carbon::parse($journal->started_at)->format('H:i') }}
                             </span>
                         </div>
-                        <h3 class="text-lg font-bold text-slate-800">{{ $journal->topic ?? 'Tanpa Topik' }}</h3>
-                        <p class="text-sm text-slate-500">Pengajar: {{ $journal->schedule?->teacher?->name ?? 'Guru' }}</p>
+                        <h3 class="text-lg font-bold text-slate-800 mt-2">{{ $journal->topic ?? 'Tanpa Topik' }}</h3>
+                        <p class="text-sm text-slate-500 font-medium">Pengajar: <span class="text-slate-700">{{ $journal->schedule?->teacher?->name ?? 'Guru' }}</span></p>
                     </div>
-                    <div class="text-right">
-                        <p class="text-2xl font-black text-slate-200">{{ \Carbon\Carbon::parse($journal->date)->format('d') }}</p>
-                        <p class="text-xs font-bold text-slate-400 uppercase">{{ \Carbon\Carbon::parse($journal->date)->translatedFormat('M Y') }}</p>
+                    
+                    {{-- TANGGAL --}}
+                    <div class="flex items-center gap-3 md:block md:text-right mt-2 md:mt-0">
+                        <div class="md:hidden w-10 h-10 bg-slate-50 rounded-lg flex items-center justify-center border border-slate-100">
+                             <i class="ph-duotone ph-calendar text-xl text-slate-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm md:text-2xl font-black text-slate-600 md:text-slate-200">{{ \Carbon\Carbon::parse($journal->date)->format('d') }}</p>
+                            <p class="text-xs font-bold text-slate-400 uppercase">{{ \Carbon\Carbon::parse($journal->date)->translatedFormat('M Y') }}</p>
+                        </div>
                     </div>
                 </div>
-                <div class="bg-slate-50 rounded-xl p-4 mb-4 border border-slate-100">
-                    <p class="text-xs font-bold text-slate-400 uppercase mb-2">Aktivitas / Tugas:</p>
-                    <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-line">{{ $journal->activities ?? '-' }}</p>
+
+                <div class="bg-slate-50 rounded-xl p-4 mb-2 border border-slate-100">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-1">
+                        <i class="ph-bold ph-notebook"></i> Aktivitas / Tugas
+                    </p>
+                    <p class="text-slate-700 text-sm leading-relaxed whitespace-pre-line">{{ $journal->activities ?? 'Tidak ada catatan aktivitas.' }}</p>
                 </div>
+
+                @if($journal->photo_proof)
+                    <div class="mt-4">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Dokumentasi Kelas</p>
+                        <div class="h-32 w-48 rounded-lg overflow-hidden border border-slate-200 relative group">
+                            <img src="{{ asset('storage/' . $journal->photo_proof) }}" class="w-full h-full object-cover transition-transform group-hover:scale-105">
+                            <a href="{{ asset('storage/' . $journal->photo_proof) }}" target="_blank" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <i class="ph-bold ph-eye text-white text-2xl"></i>
+                            </a>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
         @endforeach
@@ -35,6 +95,7 @@
                 <i class="ph-duotone ph-notebook text-4xl text-slate-300 group-hover:text-blue-400 transition-colors"></i>
             </div>
             <h3 class="font-bold text-slate-800 text-lg">Belum Ada Riwayat KBM</h3>
+            <p class="text-sm text-slate-400 mt-2">Jurnal kegiatan belajar mengajar akan muncul di sini.</p>
         </div>
     @endif
 </div>
