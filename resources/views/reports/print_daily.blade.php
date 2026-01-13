@@ -35,6 +35,10 @@
         table.data .center { text-align: center; }
         table.data .right { text-align: right; }
         
+        /* Helpers */
+        .text-danger { color: #d32f2f; font-weight: bold; }
+        .text-muted { color: #666; font-style: italic; }
+        
         /* Footer */
         .footer { margin-top: 40px; width: 100%; page-break-inside: avoid; }
         .signature-box { float: right; width: 250px; text-align: center; }
@@ -128,7 +132,7 @@
                     <td class="center">{{ $att->time_out ? \Carbon\Carbon::parse($att->time_out)->format('H:i') : '-' }}</td>
                     <td>
                         {{ $att->status }}
-                        @if($att->status == 'Terlambat') <small>(Poin)</small> @endif
+                        @if($att->status == 'Terlambat') <small class="text-danger">(- Poin)</small> @endif
                     </td>
                 </tr>
                 @endforeach
@@ -155,7 +159,13 @@
                     <td class="center">{{ $index + 1 }}</td>
                     <td>{{ $att->student->name }}</td>
                     <td class="center">{{ $att->student->schoolClass->name ?? '-' }}</td>
-                    <td class="center" style="font-weight: bold;">{{ $att->status }}</td>
+                    <td class="center" style="font-weight: bold;">
+                        {{ $att->status }}
+                        {{-- TAMBAHAN: Indikator Poin --}}
+                        @if(in_array($att->status, ['Alfa', 'Alpa']))
+                            <br><small class="text-danger">(-10 Poin)</small>
+                        @endif
+                    </td>
                     <td>{{ $att->notes ?? '-' }}</td>
                 </tr>
                 @endforeach
@@ -165,7 +175,7 @@
 
     {{-- Tabel 3: Belum Absen --}}
     @if($belumAbsenList->count() > 0)
-        <div class="section-title" style="color: #d32f2f;">C. Daftar Siswa Belum Absen</div>
+        <div class="section-title text-danger">C. Daftar Siswa Belum Absen</div>
         <table class="data">
             <thead>
                 <tr>
@@ -181,7 +191,7 @@
                     <td class="center">{{ $index + 1 }}</td>
                     <td>{{ $student->name }}</td>
                     <td class="center">{{ $student->schoolClass->name ?? '-' }}</td>
-                    <td class="center" style="color: #666; font-style: italic;">Belum ada keterangan</td>
+                    <td class="center text-muted">Belum ada keterangan</td>
                 </tr>
                 @endforeach
             </tbody>

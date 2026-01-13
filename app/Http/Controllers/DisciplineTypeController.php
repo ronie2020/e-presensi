@@ -28,14 +28,12 @@ class DisciplineTypeController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|in:Pelanggaran,Kebaikan',
             'point_value' => 'required|integer|min:1',
-            // Baris validasi 'description' dihapus karena kolom tidak ada di database hosting
         ]);
 
         DisciplineType::create([
             'name' => $request->name,
             'type' => $request->type,
             'point_value' => $request->point_value,
-            // Baris 'description' dihapus untuk mencegah error "Column not found: 1054"
         ]);
 
         return redirect()->back()->with('success', 'Jenis ' . $request->type . ' berhasil ditambahkan.');
@@ -48,6 +46,15 @@ class DisciplineTypeController extends Controller
     {
         $type = DisciplineType::findOrFail($id);
         
+        // [PERBAIKAN UTAMA] PROTEKSI SYSTEM DEFAULT
+        // Mencegah user menghapus kategori "Alfa" yang dibutuhkan oleh ReportController (Absensi)
+        $protectedKeywords = ['Alfa', 'Alpa', 'Alpha', 'Tidak Masuk', 'Tanpa Keterangan'];
+        foreach ($protectedKeywords as $keyword) {
+            if (stripos($type->name, $keyword) !== false) {
+                return redirect()->back()->with('error', 'GAGAL: Jenis pelanggaran Sistem (Absensi/Alfa) tidak boleh dihapus manual!');
+            }
+        }
+
         // PENTING: Cek apakah tipe ini sudah pernah dipakai di catatan siswa
         // Ini mencegah data poin siswa rusak/hilang referensinya
         if ($type->records()->count() > 0) {

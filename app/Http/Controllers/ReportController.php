@@ -18,7 +18,6 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-// TAMBAHAN: Import Job Notifikasi Manual
 use App\Jobs\SendWaManualNotificationJob; 
 
 class ReportController extends Controller
@@ -42,6 +41,70 @@ class ReportController extends Controller
     }
 
     /**
+     * Helper Sorting Siswa (Kelas -> Nama)
+     * Menggunakan SORT_NATURAL agar "9 A" urut sebelum "9 B" dengan benar
+     * Memastikan data tidak acak-acakan.
+     */
+    private function sortStudents($collection)
+    {
+        return $collection->sortBy(function ($item) {
+            // Cek apakah item adalah model Student langsung atau AttendanceSiswa (yang punya relasi student)
+            $student = $item instanceof Student ? $item : $item->student;
+            
+            // Urutkan berdasarkan Nama Kelas dulu, baru Nama Siswa
+            $className = $student->schoolClass->name ?? 'ZZZ';
+            return $className . ' ' . $student->name;
+        }, SORT_NATURAL | SORT_FLAG_CASE)->values();
+    }
+
+    /**
+     * LOGIKA OTOMATIS POIN PELANGGARAN
+     * Menambahkan poin jika status Alfa, dan mencegah duplikasi hari yang sama.
+     */
+    private function handleAutoPunishment($studentId, $date, $status, $typeContext = 'Harian')
+    {
+        // Hanya proses jika status adalah Alfa
+        if (!in_array($status, ['Alfa', 'Alpa', 'Alpha'])) {
+            return;
+        }
+
+        // Cari Jenis Pelanggaran yang cocok di database
+        $violationType = DisciplineType::where('type', 'Pelanggaran')
+            ->where(function($q) {
+                $q->where('name', 'LIKE', '%Alfa%')
+                  ->orWhere('name', 'LIKE', '%Alpa%')
+                  ->orWhere('name', 'LIKE', '%Tanpa Keterangan%')
+                  ->orWhere('name', 'LIKE', '%Tidak Masuk Sekolah%');
+            })->first();
+
+        // Jika tidak ketemu, buat default
+        if (!$violationType) {
+            $violationType = DisciplineType::create([
+                'name' => 'Tidak Masuk Sekolah (Alfa)',
+                'type' => 'Pelanggaran',
+                'point_value' => 10 // Poin default
+            ]);
+        }
+
+        // CEK DUPLIKASI: Jangan input poin jika hari itu sudah ada pelanggaran Alfa
+        $exists = DisciplineRecord::where('student_id', $studentId)
+            ->where('date', $date)
+            ->where('discipline_type_id', $violationType->id)
+            ->exists();
+
+        if (!$exists) {
+            DisciplineRecord::create([
+                'student_id' => $studentId,
+                'discipline_type_id' => $violationType->id,
+                'date' => $date,
+                'notes' => "Otomatis: Tidak hadir ($typeContext)",
+                'type' => 'violation', // Pastikan kolom ini ada di tabel discipline_records
+                'recorded_by_user_id' => auth()->id() ?? 1
+            ]);
+        }
+    }
+
+    /**
      * 1. REKAP ABSENSI HARIAN (Web View)
      */
     public function dailyReport(Request $request)
@@ -49,7 +112,7 @@ class ReportController extends Controller
         $dateStr = $request->input('date', Carbon::today()->toDateString());
         $selectedDate_db = Carbon::parse($dateStr); 
 
-        // [FIX] Ambil Data Absensi HANYA untuk siswa AKTIF (bukan alumni)
+        // Ambil data absensi (Filter Alumni)
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
             ->whereHas('student', function($q) {
                 $q->where('status', '!=', 'graduated');
@@ -68,18 +131,15 @@ class ReportController extends Controller
         $izinCount = $attendances->where('status', 'Izin')->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
-        // [FIX] Data Belum Absen: Hanya ambil siswa yang statusnya != graduated
+        // Data Belum Absen (Filter Alumni)
         $existingStudentIds = $attendances->pluck('student_id')->toArray();
         $belumAbsenListRaw = Student::with('schoolClass')
-            ->where('status', '!=', 'graduated') // Filter Alumni
+            ->where('status', '!=', 'graduated')
             ->whereNotIn('id', $existingStudentIds)
             ->get();
             
-        // SORTING: Kelas dulu, baru Nama
-        $belumAbsenList = $belumAbsenListRaw->sortBy([
-            fn ($q) => $q->schoolClass->name ?? 'ZZZ', 
-            fn ($q) => $q->name                        
-        ])->values();
+        // --- TERAPKAN SORTING PADA BELUM ABSEN ---
+        $belumAbsenList = $this->sortStudents($belumAbsenListRaw);
 
         // Mapping Data View
         $mappedHadir = $attendancesHadirRaw->map(function($item) {
@@ -96,17 +156,9 @@ class ReportController extends Controller
             return $item;
         });
 
-        // SORTING DATA HADIR (Kelas -> Nama)
-        $sortedHadir = $mappedHadir->sortBy([
-            fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
-            fn ($q) => $q->student->name
-        ])->values();
-
-        // SORTING DATA LAIN (Kelas -> Nama)
-        $sortedLain = $mappedLain->sortBy([
-            fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
-            fn ($q) => $q->student->name
-        ])->values();
+        // --- TERAPKAN SORTING PADA HADIR & LAIN ---
+        $sortedHadir = $this->sortStudents($mappedHadir);
+        $sortedLain = $this->sortStudents($mappedLain);
 
         // Pagination
         $attendancesHadir = $this->paginate($sortedHadir, 20);
@@ -136,7 +188,6 @@ class ReportController extends Controller
         $dateStr = $request->input('date', Carbon::today()->toDateString());
         $selectedDate_db = Carbon::parse($dateStr); 
 
-        // [FIX] Filter Alumni di Print
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
             ->whereHas('student', function($q) {
                 $q->where('status', '!=', 'graduated');
@@ -145,32 +196,18 @@ class ReportController extends Controller
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
             ->get();
 
-        // Grouping & SORTING (Kelas -> Nama)
-        $attendancesHadir = $attendances->whereIn('status', ['Hadir', 'Terlambat'])
-            ->sortBy([
-                fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
-                fn ($q) => $q->student->name
-            ])->values();
-
-        $attendancesLain = $attendances->whereIn('status', ['Sakit', 'Izin', 'Alfa'])
-            ->sortBy([
-                fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
-                fn ($q) => $q->student->name
-            ])->values();
+        // --- TERAPKAN SORTING UNTUK CETAK ---
+        $attendancesHadir = $this->sortStudents($attendances->whereIn('status', ['Hadir', 'Terlambat']));
+        $attendancesLain = $this->sortStudents($attendances->whereIn('status', ['Sakit', 'Izin', 'Alfa']));
         
-        // [FIX] Data Belum Absen (Filter Alumni)
         $existingStudentIds = $attendances->pluck('student_id')->toArray();
         $belumAbsenListRaw = Student::with('schoolClass')
-            ->where('status', '!=', 'graduated') // Filter Alumni
+            ->where('status', '!=', 'graduated')
             ->whereNotIn('id', $existingStudentIds)
             ->get();
 
-        $belumAbsenList = $belumAbsenListRaw->sortBy([
-            fn ($q) => $q->schoolClass->name ?? 'ZZZ',
-            fn ($q) => $q->name
-        ])->values();
+        $belumAbsenList = $this->sortStudents($belumAbsenListRaw);
 
-        // Hitung Statistik
         $stats = [
             'hadir' => $attendances->where('status', 'Hadir')->count(),
             'terlambat' => $attendances->where('status', 'Terlambat')->count(),
@@ -198,7 +235,6 @@ class ReportController extends Controller
         $selectedDate_db = Carbon::parse($dateStr);
         $selectedActivity = $request->input('activity', 'Dhuha'); 
 
-        // [FIX] Ambil Data (Filter Alumni)
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
             ->whereHas('student', function($q) {
                 $q->where('status', '!=', 'graduated');
@@ -211,23 +247,20 @@ class ReportController extends Controller
         $attendancesHadirRaw = $attendances->where('status', 'Hadir');
         $attendancesUzurRaw = $attendances->whereIn('status', ["Uzur Syar'i", "Alfa", "Izin", "Sakit"]);
 
-        // Hitung Statistik
+        // Statistik
         $hadirCount = $attendancesHadirRaw->count();
         $izinUzurCount = $attendances->whereIn('status', ["Uzur Syar'i", "Izin", "Sakit"])->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
-        // [FIX] Data Belum Absen (Filter Alumni)
+        // Data Belum Absen
         $existingIds = $attendances->pluck('student_id')->toArray();
         $belumAbsenListRaw = Student::with('schoolClass')
-            ->where('status', '!=', 'graduated') // Filter Alumni
+            ->where('status', '!=', 'graduated')
             ->whereNotIn('id', $existingIds)
             ->get();
             
-        $belumAbsenList = $belumAbsenListRaw->sortBy([
-            fn ($q) => $q->schoolClass->name ?? 'ZZZ',
-            fn ($q) => $q->name
-        ])->values();
-        
+        // --- TERAPKAN SORTING ---
+        $belumAbsenList = $this->sortStudents($belumAbsenListRaw);
         $belumAbsenCount = $belumAbsenList->count();
 
         // Mapping
@@ -243,16 +276,9 @@ class ReportController extends Controller
             return $item;
         });
 
-        // SORTING DATA (Kelas -> Nama)
-        $sortedHadir = $mappedHadir->sortBy([
-            fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
-            fn ($q) => $q->student->name
-        ])->values();
-
-        $sortedUzur = $mappedUzur->sortBy([
-            fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
-            fn ($q) => $q->student->name
-        ])->values();
+        // --- TERAPKAN SORTING ---
+        $sortedHadir = $this->sortStudents($mappedHadir);
+        $sortedUzur = $this->sortStudents($mappedUzur);
 
         // Pagination
         $attendancesHadir = $this->paginate($sortedHadir, 20);
@@ -283,7 +309,6 @@ class ReportController extends Controller
         $selectedDate_db = Carbon::parse($dateStr);
         $selectedActivity = $request->input('activity', 'Dhuha'); 
 
-        // [FIX] Ambil Data (Filter Alumni)
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
             ->whereHas('student', function($q) {
                 $q->where('status', '!=', 'graduated');
@@ -309,34 +334,23 @@ class ReportController extends Controller
             return $item;
         });
 
-        // SORTING (Kelas -> Nama)
-        $attendancesHadir = $attendancesHadirMap->sortBy([
-            fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
-            fn ($q) => $q->student->name
-        ])->values();
-
-        $attendancesUzur = $attendancesUzurMap->sortBy([
-            fn ($q) => $q->student->schoolClass->name ?? 'ZZZ',
-            fn ($q) => $q->student->name
-        ])->values();
+        // --- TERAPKAN SORTING ---
+        $attendancesHadir = $this->sortStudents($attendancesHadirMap);
+        $attendancesUzur = $this->sortStudents($attendancesUzurMap);
 
         // Statistik
         $hadirCount = $attendancesHadirRaw->count();
         $izinUzurCount = $attendances->whereIn('status', ["Uzur Syar'i", "Izin", "Sakit"])->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
-        // [FIX] Data Belum Absen (Filter Alumni)
+        // Data Belum Absen
         $existingIds = $attendances->pluck('student_id')->toArray();
         $belumAbsenListRaw = Student::with('schoolClass')
-            ->where('status', '!=', 'graduated') // Filter Alumni
+            ->where('status', '!=', 'graduated')
             ->whereNotIn('id', $existingIds)
             ->get();
 
-        $belumAbsenList = $belumAbsenListRaw->sortBy([
-            fn ($q) => $q->schoolClass->name ?? 'ZZZ',
-            fn ($q) => $q->name
-        ])->values();
-
+        $belumAbsenList = $this->sortStudents($belumAbsenListRaw);
         $belumAbsenCount = $belumAbsenList->count();
 
         return view('reports.print_religious', compact(
@@ -353,7 +367,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 5. MONITORING JURNAL MENGAJAR
+     * 5. MONITORING JURNAL MENGAJAR (Tidak berubah)
      */
     public function teachingJournal(Request $request)
     {
@@ -403,7 +417,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 6. PROSES BULK ALPHA (Tandai Masal)
+     * 6. BULK ALPHA (Dengan Auto Punishment)
      */
     public function bulkAlpha(Request $request)
     {
@@ -420,22 +434,14 @@ class ReportController extends Controller
 
         $presentIds = $query->pluck('student_id')->toArray();
         
-        // [FIX] Bulk Alpha: Jangan tandai alumni sebagai alfa
-        $absentStudents = Student::where('status', '!=', 'graduated') // Filter Alumni
+        // Filter alumni
+        $absentStudents = Student::where('status', '!=', 'graduated')
             ->whereNotIn('id', $presentIds)
             ->get();
 
         $insertData = [];
         $now = now();
         
-        $disciplineType = null;
-        if($type == 'Harian') {
-            $disciplineType = DisciplineType::firstOrCreate(
-                ['name' => 'Tidak Masuk Sekolah (Alfa)'],
-                ['point_value' => 10, 'type' => 'Pelanggaran']
-            );
-        }
-
         foreach ($absentStudents as $student) {
             $insertData[] = [
                 'student_id' => $student->id,
@@ -450,26 +456,19 @@ class ReportController extends Controller
                 'updated_at' => $now,
             ];
 
-            if($type == 'Harian' && $disciplineType) {
-                DisciplineRecord::create([
-                    'student_id' => $student->id,
-                    'discipline_type_id' => $disciplineType->id,
-                    'date' => $date,
-                    'notes' => 'Alfa Harian',
-                    'recorded_by_user_id' => auth()->id() ?? 1
-                ]);
-            }
+            // AUTO PUNISHMENT
+            $this->handleAutoPunishment($student->id, $date, 'Alfa', $type);
         }
 
         if (!empty($insertData)) {
             AttendanceSiswa::insert($insertData);
         }
 
-        return back()->with('success', count($insertData) . ' siswa berhasil ditandai Alfa.');
+        return back()->with('success', count($insertData) . ' siswa berhasil ditandai Alfa dan diberikan Poin Pelanggaran.');
     }
 
     /**
-     * 7. SIMPAN MANUAL (DENGAN WA NOTIFIKASI)
+     * 7. SIMPAN MANUAL (Dengan Notif WA & Auto Punishment)
      */
     public function storeManualEntry(Request $request)
     {
@@ -495,29 +494,36 @@ class ReportController extends Controller
             ]
         );
 
-        // --- TAMBAHAN: Kirim Notifikasi WA ke Orang Tua ---
+        // AUTO PUNISHMENT
+        $this->handleAutoPunishment($request->student_id, $request->date, $request->status, $request->attendance_type);
+
+        // KIRIM WA
         try {
             SendWaManualNotificationJob::dispatch($attendance);
         } catch (\Exception $e) {
             Log::error("Gagal dispatch WA Manual: " . $e->getMessage());
         }
-        // --------------------------------------------------
 
         return back()->with('success', 'Data absensi berhasil disimpan dan notifikasi diproses.');
     }
 
     /**
-     * 8. UPDATE DATA
+     * 8. UPDATE ATTENDANCE (Dengan Auto Punishment)
      */
     public function updateAttendance(Request $request, $id)
     {
         $att = AttendanceSiswa::findOrFail($id);
+        
         $att->update([
             'status' => $request->status,
             'time_in' => $request->time_in,
             'time_out' => $request->time_out,
             'notes' => $request->notes
         ]);
+
+        // AUTO PUNISHMENT
+        $this->handleAutoPunishment($att->student_id, $att->attendance_date, $request->status, $att->type);
+
         return back()->with('success', 'Data berhasil diperbarui.');
     }
 

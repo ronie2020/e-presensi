@@ -78,12 +78,24 @@
         </div>
 
         
-        <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-rose-50 to-white p-5 rounded-[2rem] border border-rose-100 flex flex-col justify-center items-center text-center h-full hover:shadow-md transition-all group">
+        <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-rose-50 to-white p-5 rounded-[2rem] border border-rose-100 flex flex-col justify-center items-center text-center h-full hover:shadow-md transition-all group relative overflow-hidden">
+            
+            <div class="absolute top-2 right-2 text-rose-200">
+                <i class="ph-fill ph-warning text-xl"></i>
+            </div>
+            
             <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-rose-500 mb-3 group-hover:scale-110 transition-transform">
                 <i class="ph-duotone ph-x-circle text-2xl"></i>
             </div>
             <div class="text-3xl font-black text-rose-700 mb-0.5"><?php echo e($alpa); ?></div>
             <div class="text-[10px] font-bold text-rose-600/70 uppercase tracking-wider">Tanpa Ket.</div>
+            
+            
+            <?php if($alpa > 0): ?>
+                <div class="mt-2 px-2 py-0.5 bg-rose-100 rounded text-[9px] font-bold text-rose-600">
+                    -<?php echo e($alpa * 10); ?> Poin
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -101,16 +113,20 @@
 
     <div class="p-6">
         <?php $__empty_1 = true; $__currentLoopData = $attendance_history; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $log): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-            <div class="relative pl-8 pb-8 last:pb-0 border-l-2 <?php echo e($loop->last ? 'border-transparent' : 'border-slate-100'); ?> ml-2">
+            
+            <div class="relative pl-8 pb-8 last:pb-0 group">
                 
-                <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 border-white shadow-sm
+                <div class="absolute left-0 top-2 bottom-0 w-0.5 bg-slate-100 group-last:bg-transparent ml-[5px]"></div>
+                
+                
+                <div class="absolute -left-[3px] top-2 w-5 h-5 rounded-full border-4 border-white shadow-sm z-10
                     <?php echo e(($log->status == 'Hadir') ? 'bg-emerald-500' : 
                        (($log->status == 'Terlambat') ? 'bg-amber-500' : 
                        (($log->status == 'Sakit') ? 'bg-blue-500' : 
                        (($log->status == 'Izin') ? 'bg-purple-500' : 'bg-rose-500')))); ?>">
                 </div>
 
-                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 hover:border-blue-200 transition-colors group">
+                <div class="bg-white rounded-2xl p-4 border border-slate-100 hover:border-blue-200 transition-all shadow-sm hover:shadow-md">
                     <div class="flex justify-between items-start mb-2">
                         <div>
                             <p class="font-bold text-slate-800 text-sm">
@@ -128,7 +144,7 @@
                         </div>
                         
                         
-                        <i class="ph-duotone text-3xl opacity-20 group-hover:opacity-40 transition-opacity
+                        <i class="ph-duotone text-3xl opacity-20 group-hover:opacity-100 transition-opacity
                             <?php echo e(($log->status == 'Hadir') ? 'ph-check-circle text-emerald-600' : 
                                (($log->status == 'Terlambat') ? 'ph-clock-countdown text-amber-600' : 
                                (($log->status == 'Sakit') ? 'ph-thermometer text-blue-600' : 
@@ -139,14 +155,14 @@
                     
                     <?php if($log->status == 'Hadir' || $log->status == 'Terlambat'): ?>
                     <div class="grid grid-cols-2 gap-2 mt-3">
-                        <div class="bg-white p-2 rounded-xl border border-slate-100 text-center">
+                        <div class="bg-slate-50 p-2 rounded-xl border border-slate-100 text-center">
                             <span class="block text-[9px] text-slate-400 font-bold uppercase">Masuk</span>
                             <span class="text-sm font-black <?php echo e($log->status == 'Terlambat' ? 'text-amber-600' : 'text-slate-700'); ?>">
                                 <?php echo e($log->time_in ? \Carbon\Carbon::parse($log->time_in)->format('H:i') : '--:--'); ?>
 
                             </span>
                         </div>
-                        <div class="bg-white p-2 rounded-xl border border-slate-100 text-center">
+                        <div class="bg-slate-50 p-2 rounded-xl border border-slate-100 text-center">
                             <span class="block text-[9px] text-slate-400 font-bold uppercase">Pulang</span>
                             <span class="text-sm font-black text-slate-700">
                                 <?php echo e($log->time_out ? \Carbon\Carbon::parse($log->time_out)->format('H:i') : '--:--'); ?>
@@ -158,7 +174,8 @@
 
                     
                     <?php if($log->notes): ?>
-                        <div class="mt-3 text-xs text-slate-500 italic bg-white px-3 py-2 rounded-lg border border-slate-100 border-l-2 border-l-blue-400">
+                        <div class="mt-3 text-xs text-slate-500 italic bg-slate-50/50 px-3 py-2 rounded-lg border border-slate-100 relative">
+                             <i class="ph-fill ph-quotes text-slate-300 absolute top-1 right-2"></i>
                             "<?php echo e(Str::limit($log->notes, 60)); ?>"
                         </div>
                     <?php endif; ?>
@@ -175,7 +192,7 @@
         
         <?php if($attendance_history->count() >= 5): ?>
             <div class="text-center pt-4 border-t border-slate-50 mt-2">
-                <button class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors flex items-center justify-center gap-1 mx-auto">
+                <button class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors flex items-center justify-center gap-1 mx-auto bg-blue-50 px-4 py-2 rounded-full">
                     Lihat Selengkapnya <i class="ph-bold ph-caret-down"></i>
                 </button>
             </div>

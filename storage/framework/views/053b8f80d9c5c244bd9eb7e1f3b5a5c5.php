@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Keagamaan - {{ $selectedActivity }} - {{ $selectedDate_db->format('d-m-Y') }}</title>
+    <title>Laporan Keagamaan - <?php echo e($selectedActivity); ?> - <?php echo e($selectedDate_db->format('d-m-Y')); ?></title>
     <style>
         @page { size: A4; margin: 2cm; }
         body { font-family: 'Times New Roman', serif; color: #000; line-height: 1.5; font-size: 11pt; }
@@ -67,7 +67,7 @@
     </button>
 
     <div class="header">
-        <h1>Laporan Kegiatan Keagamaan ({{ $selectedActivity }})</h1>
+        <h1>Laporan Kegiatan Keagamaan (<?php echo e($selectedActivity); ?>)</h1>
         <h2>SMP NEGERI 3 LAKBOK</h2>
         <p>Jl. Mekarjaya No.199 Sidaharja Kec. Lakbok, Ciamis, Jawa Barat</p>
     </div>
@@ -76,41 +76,41 @@
         <tr>
             <td class="meta-title">Hari / Tanggal</td>
             <td width="10">:</td>
-            <td>{{ $selectedDate_db->translatedFormat('l, d F Y') }}</td>
+            <td><?php echo e($selectedDate_db->translatedFormat('l, d F Y')); ?></td>
         </tr>
         <tr>
             <td class="meta-title">Jenis Kegiatan</td>
             <td>:</td>
-            <td>Shalat {{ $selectedActivity }}</td>
+            <td>Shalat <?php echo e($selectedActivity); ?></td>
         </tr>
         <tr>
             <td class="meta-title">Dicetak Oleh</td>
             <td>:</td>
-            <td>{{ auth()->user()->name ?? 'Administrator' }}</td>
+            <td><?php echo e(auth()->user()->name ?? 'Administrator'); ?></td>
         </tr>
     </table>
 
     <div class="summary-box">
         <div class="summary-item">
-            <span class="summary-val">{{ $hadirCount }}</span>
+            <span class="summary-val"><?php echo e($hadirCount); ?></span>
             <span class="summary-label">Hadir</span>
         </div>
         <div class="summary-item">
-            <span class="summary-val">{{ $izinUzurCount }}</span>
+            <span class="summary-val"><?php echo e($izinUzurCount); ?></span>
             <span class="summary-label">Uzur / Izin</span>
         </div>
         <div class="summary-item">
-            <span class="summary-val">{{ $alfaCount }}</span>
+            <span class="summary-val"><?php echo e($alfaCount); ?></span>
             <span class="summary-label">Alfa</span>
         </div>
         <div class="summary-item">
-            <span class="summary-val">{{ $belumAbsenCount }}</span>
+            <span class="summary-val"><?php echo e($belumAbsenCount); ?></span>
             <span class="summary-label">Belum Absen</span>
         </div>
     </div>
 
-    {{-- Tabel 1: Siswa Hadir --}}
-    @if($attendancesHadir->count() > 0)
+    
+    <?php if($attendancesHadir->count() > 0): ?>
         <div class="section-title">A. Daftar Siswa Hadir</div>
         <table class="data">
             <thead>
@@ -123,21 +123,21 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($attendancesHadir as $index => $att)
+                <?php $__currentLoopData = $attendancesHadir; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $att): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
-                    <td class="center">{{ $index + 1 }}</td>
-                    <td>{{ $att->student->name }}</td>
-                    <td class="center">{{ $att->student->schoolClass->name ?? '-' }}</td>
-                    <td class="center">{{ $att->created_at->format('H:i') }}</td>
-                    <td>{{ $att->notes_final ?? '-' }}</td>
+                    <td class="center"><?php echo e($index + 1); ?></td>
+                    <td><?php echo e($att->student->name); ?></td>
+                    <td class="center"><?php echo e($att->student->schoolClass->name ?? '-'); ?></td>
+                    <td class="center"><?php echo e($att->created_at->format('H:i')); ?></td>
+                    <td><?php echo e($att->notes_final ?? '-'); ?></td>
                 </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
         </table>
-    @endif
+    <?php endif; ?>
 
-    {{-- Tabel 2: Uzur / Izin / Alfa --}}
-    @if($attendancesUzur->count() > 0)
+    
+    <?php if($attendancesUzur->count() > 0): ?>
         <div class="section-title">B. Daftar Ketidakhadiran (Uzur / Izin / Alfa)</div>
         <table class="data">
             <thead>
@@ -150,27 +150,28 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($attendancesUzur as $index => $att)
+                <?php $__currentLoopData = $attendancesUzur; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $att): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
-                    <td class="center">{{ $index + 1 }}</td>
-                    <td>{{ $att->student->name }}</td>
-                    <td class="center">{{ $att->student->schoolClass->name ?? '-' }}</td>
+                    <td class="center"><?php echo e($index + 1); ?></td>
+                    <td><?php echo e($att->student->name); ?></td>
+                    <td class="center"><?php echo e($att->student->schoolClass->name ?? '-'); ?></td>
                     <td class="center" style="font-weight: bold;">
-                        {{ $att->status_final }}
-                        {{-- TAMBAHAN: Indikator Poin --}}
-                        @if(in_array($att->status_final, ['Alfa', 'Alpa']))
+                        <?php echo e($att->status_final); ?>
+
+                        
+                        <?php if(in_array($att->status_final, ['Alfa', 'Alpa'])): ?>
                             <br><small class="text-danger">(- Poin)</small>
-                        @endif
+                        <?php endif; ?>
                     </td>
-                    <td>{{ $att->notes_final ?? '-' }}</td>
+                    <td><?php echo e($att->notes_final ?? '-'); ?></td>
                 </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
         </table>
-    @endif
+    <?php endif; ?>
 
-    {{-- Tabel 3: Belum Absen --}}
-    @if($belumAbsenList->count() > 0)
+    
+    <?php if($belumAbsenList->count() > 0): ?>
         <div class="section-title text-danger">C. Daftar Siswa Belum Absen</div>
         <table class="data">
             <thead>
@@ -182,22 +183,22 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($belumAbsenList as $index => $student)
+                <?php $__currentLoopData = $belumAbsenList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
-                    <td class="center">{{ $index + 1 }}</td>
-                    <td>{{ $student->name }}</td>
-                    <td class="center">{{ $student->schoolClass->name ?? '-' }}</td>
+                    <td class="center"><?php echo e($index + 1); ?></td>
+                    <td><?php echo e($student->name); ?></td>
+                    <td class="center"><?php echo e($student->schoolClass->name ?? '-'); ?></td>
                     <td class="center text-muted">Belum ada keterangan</td>
                 </tr>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
         </table>
-    @endif
+    <?php endif; ?>
 
     <div class="footer">
         <div class="signature-box">
             <p>
-                Lakbok, {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}<br>
+                Lakbok, <?php echo e(\Carbon\Carbon::now()->isoFormat('D MMMM Y')); ?><br>
                 Mengetahui,<br>
                 Koordinator Keagamaan
             </p>
@@ -209,4 +210,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/reports/print_religious.blade.php ENDPATH**/ ?>

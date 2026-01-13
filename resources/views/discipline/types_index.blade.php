@@ -30,11 +30,21 @@
 
             {{-- Flash Messages --}}
             @if (session('success'))
-                <div x-data="{ show: true }" x-show="show" class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-[1.5rem] flex items-center justify-between shadow-sm">
+                <div x-data="{ show: true }" x-show="show" class="mb-4 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-[1.5rem] flex items-center justify-between shadow-sm animate-enter">
                     <span class="font-bold text-sm flex items-center gap-2">
                         <i class="ph-fill ph-check-circle text-lg"></i> {{ session('success') }}
                     </span>
                     <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-1"><i class="ph-bold ph-x"></i></button>
+                </div>
+            @endif
+
+            {{-- TAMBAHAN: Handle Error Session (Penting untuk proteksi Alfa) --}}
+            @if (session('error'))
+                <div x-data="{ show: true }" x-show="show" class="mb-4 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-[1.5rem] flex items-center justify-between shadow-sm animate-enter">
+                    <span class="font-bold text-sm flex items-center gap-2">
+                        <i class="ph-fill ph-warning-circle text-lg"></i> {{ session('error') }}
+                    </span>
+                    <button @click="show = false" class="text-rose-400 hover:text-rose-600 p-1"><i class="ph-bold ph-x"></i></button>
                 </div>
             @endif
             

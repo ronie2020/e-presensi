@@ -16,25 +16,31 @@ class DisciplineController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Ambil data untuk dropdown form
-        // --- PERBAIKAN URUTAN ---
-        // Ambil semua siswa beserta kelasnya, lalu urutkan koleksinya:
-        // Prioritas 1: Nama Kelas (7A, 7B, dst)
-        // Prioritas 2: Nama Siswa
+        // 1. Ambil data untuk dropdown form (Input Manual)
+        // PERBAIKAN: Filter siswa aktif & Urutkan berdasarkan Kelas lalu Nama
         $students = Student::with('schoolClass')
+            ->where('status', '!=', 'graduated') // Hanya siswa aktif
             ->get()
             ->sortBy(function ($student) {
-                // Kita gabungkan Nama Kelas dan Nama Siswa untuk menjadi kunci pengurutan
-                // Contoh hasil: "7A - Ahmad", "7A - Budi", "7B - Caca"
-                $className = $student->schoolClass->name ?? 'ZZZ'; // 'ZZZ' agar siswa tanpa kelas ada di paling bawah
-                return $className . $student->name;
-            });
+                // Kunci pengurutan: "Nama Kelas" + "Nama Siswa"
+                // Contoh: "7A Ahmad", "7A Budi", "7B Caca"
+                $className = $student->schoolClass->name ?? 'ZZZ'; // ZZZ agar yang tidak punya kelas ada di bawah
+                return $className . ' ' . $student->name;
+            }, SORT_NATURAL | SORT_FLAG_CASE); // Sort Natural agar "7A, 7B, 8A" urut benar
         
-        $violationTypes = DisciplineType::where('type', 'Pelanggaran')->orderBy('name', 'asc')->get();
+        // Sembunyikan 'Alfa' dari dropdown manual disiplin (harus via Absensi)
+        $violationTypes = DisciplineType::where('type', 'Pelanggaran')
+            ->where('name', 'NOT LIKE', '%Alfa%')
+            ->where('name', 'NOT LIKE', '%Alpa%')
+            ->where('name', 'NOT LIKE', '%Tidak Masuk%')
+            ->orderBy('name', 'asc')
+            ->get();
+
         $meritTypes = DisciplineType::where('type', 'Kebaikan')->orderBy('name', 'asc')->get();
 
         // 2. LOGIKA RINGKASAN POIN (Summary)
         $studentSummaries = Student::with(['schoolClass', 'disciplineRecords.disciplineType'])
+            ->where('status', '!=', 'graduated')
             ->get()
             ->map(function ($student) {
                 // Hitung Poin Pelanggaran
@@ -81,7 +87,6 @@ class DisciplineController extends Controller
 
         $historyRecords = $query->paginate(10)->withQueryString();
 
-        // 4. Kirim semua data ke view
         return view('discipline.index', [
             'students' => $students,
             'violationTypes' => $violationTypes,
