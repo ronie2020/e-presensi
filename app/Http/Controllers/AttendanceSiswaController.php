@@ -52,7 +52,7 @@ class AttendanceSiswaController extends Controller
             'makan_start' => '11:00', 'makan_end' => '13:00', 
         ];
 
-        // 3. STATISTIK MAKAN (Optional, sesuaikan)
+        // 3. STATISTIK MAKAN
         $statsConfig = [
             'total_target' => Student::where('status', 'active')->count(),
             'current_taken' => AttendanceSiswa::whereDate('attendance_date', $today)
@@ -60,11 +60,11 @@ class AttendanceSiswaController extends Controller
                                 ->count()
         ];
 
-        // 4. AMBIL RIWAYAT SCAN HARI INI (Agar tabel tidak kosong)
+        // 4. AMBIL RIWAYAT SCAN HARI INI
         $latestScans = AttendanceSiswa::with('student')
             ->whereDate('attendance_date', $today)
-            ->orderBy('updated_at', 'desc')
-            ->take(10) // Ambil 10 terakhir
+            ->orderBy('updated_at', 'desc') // Paling baru diatas
+            ->take(15) // Ambil lebih banyak sedikit
             ->get();
 
         // Mapping agar formatnya sesuai dengan JS di view
@@ -73,8 +73,8 @@ class AttendanceSiswaController extends Controller
             $act = $item->activity;
 
             return [
-                'student_name' => $item->student->name,
-                'student_id' => $item->student->student_id ?? $item->student->nisn,
+                'student_name' => $item->student->name ?? 'Siswa Dihapus',
+                'student_id' => $item->student->student_id ?? ($item->student->nisn ?? '-'),
                 'time_in' => $item->time_in,
                 'time_out' => $item->time_out,
                 'status' => $item->status,
@@ -206,6 +206,7 @@ class AttendanceSiswaController extends Controller
                 'message' => "Absen Masuk Berhasil ($status)",
                 'scan' => [
                     'student_name' => $student->name,
+                    'student_id' => $student->student_id ?? $student->nisn, // [FIX] ID Ditambahkan
                     'status' => $status,
                     'time' => $timeString
                 ]
@@ -236,6 +237,7 @@ class AttendanceSiswaController extends Controller
                 'message' => "Absen Pulang Berhasil. Hati-hati di jalan!",
                 'scan' => [
                     'student_name' => $student->name,
+                    'student_id' => $student->student_id ?? $student->nisn, // [FIX] ID Ditambahkan
                     'status' => 'Pulang',
                     'time' => $timeString
                 ]
@@ -300,7 +302,7 @@ class AttendanceSiswaController extends Controller
             'message' => "Shalat {$type} Tercatat. Poin +5!",
             'scan' => [
                 'student_name' => $student->name, 
-                'student_id' => $student->student_id, 
+                'student_id' => $student->student_id ?? $student->nisn, 
                 'status' => 'Selesai'
             ]
         ]);
@@ -323,7 +325,6 @@ class AttendanceSiswaController extends Controller
             ], 422);
         }
 
-        // PERBAIKAN: Makan Juga Harus Masuk AttendanceSiswa agar muncul di Riwayat Scan
         AttendanceSiswa::firstOrCreate(
             [
                 'student_id' => $student->id,
@@ -355,7 +356,6 @@ class AttendanceSiswaController extends Controller
         $habit->habit_5_menu = 'Menu Sekolah (MBG)'; 
         $habit->save();
 
-        // Hitung ulang statistik hari ini untuk dikirim balik
         $currentTaken = AttendanceSiswa::whereDate('attendance_date', $today)
                         ->where('type', 'Meal')
                         ->count();
@@ -365,7 +365,7 @@ class AttendanceSiswaController extends Controller
             'type' => 'success',
             'scan' => [
                 'student_name' => $student->name,
-                'student_id' => $student->student_id,
+                'student_id' => $student->student_id ?? $student->nisn,
                 'status' => 'Ambil Makan'
             ],
             'stats' => ['taken' => $currentTaken]
@@ -390,7 +390,7 @@ class AttendanceSiswaController extends Controller
             ->where('extracurricular_id', $extraId)
             ->exists();
 
-        // PERBAIKAN: Gunakan AttendanceSiswa juga agar konsisten tampil di riwayat utama (Opsional, tapi direkomendasikan)
+        // Create AttendanceSiswa agar muncul di Riwayat Scan
         AttendanceSiswa::firstOrCreate([
             'student_id' => $student->id,
             'attendance_date' => $today->toDateString(),
@@ -428,7 +428,9 @@ class AttendanceSiswaController extends Controller
             'message' => $msg,
             'scan' => [
                 'student_name' => $student->name,
-                'status' => 'Hadir Ekskul'
+                'student_id' => $student->student_id ?? $student->nisn, // [FIX] ID
+                'status' => 'Hadir Ekskul',
+                'extra_name' => $extra->name // [FIX] Nama Ekskul dikirim untuk JS
             ]
         ]);
     }

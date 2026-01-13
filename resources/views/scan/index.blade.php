@@ -325,13 +325,11 @@
             let manualOverride = false; 
             let isProcessing = false;
             
-            // --- 2. DEBOUNCE SET (Mencegah Double Scan) ---
             const processedSet = new Set(); 
 
             const csrfToken = '{{ csrf_token() }}'; 
             const scanProcessUrl = '{{ route('scan.process') }}'; 
 
-            // DOM Elements
             const logTableBody = document.getElementById('scan-log');
             const scanStatus = document.getElementById('scan-status');
             const scanResult = document.getElementById('scan-result');
@@ -342,7 +340,6 @@
             const btnResetAuto = document.getElementById('btn-reset-auto');
             const scannerOverlay = document.getElementById('scanner-overlay-el');
             
-            // Stats Panel Elements
             const makanStatsPanel = document.getElementById('makan-stats-panel');
             const elStatTaken = document.getElementById('stat-taken');
             const elStatRemaining = document.getElementById('stat-remaining');
@@ -377,11 +374,9 @@
                 'Ekstrakurikuler': {color:'purple',label:'Ekstrakurikuler'} 
             };
             
-            // Clock Logic
             const clockElement = document.getElementById('clock');
             if(clockElement) { setInterval(() => { clockElement.textContent = new Date().toLocaleTimeString('id-ID', { hour12: false }); }, 1000); }
 
-            // Auto Mode Logic
             function autoSelectMode() {
                 if (manualOverride) return;
                 const now = new Date(); 
@@ -402,7 +397,6 @@
                 currentScanMode = type; 
                 const config = visualConfig[type];
                 
-                // Update UI Buttons
                 document.querySelectorAll('.scan-type-btn').forEach(btn => {
                     const btnType = btn.getAttribute('data-type'); 
                     const activeBorder = btn.querySelector('.active-border'); 
@@ -417,12 +411,10 @@
                     }
                 });
                 
-                // Update Badge
                 modeBadgeText.innerText = config.label;
                 modeBadge.className = `px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-wider border flex items-center gap-1.5 md:gap-2 bg-${config.color}-50 text-${config.color}-600 border-${config.color}-100`;
                 modeBadge.querySelector('span').className = `w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-${config.color}-500 animate-pulse`;
 
-                // Update Visible Panel
                 extraContainer.classList.add('hidden');
                 
                 if (type === 'Makan') {
@@ -445,23 +437,19 @@
                 filterLogs(type);
             }
 
-            // Event Listeners
             document.querySelectorAll('.scan-type-btn').forEach(btn => { btn.addEventListener('click', () => selectScanMode(btn.getAttribute('data-type'))); });
             
-            // Handler untuk Select Ekskul
             extraSelect.addEventListener('change', (e) => {
                 selectedExtra = e.target.value; 
-                const selectedText = e.target.options[e.target.selectedIndex].text; // Ambil text nama ekskul untuk display
+                const selectedText = e.target.options[e.target.selectedIndex].text; 
                 
                 if (selectedExtra) scanStatus.innerHTML = `<i class="ph-bold ph-check text-purple-500"></i> Siap: ${selectedText}`;
                 else scanStatus.innerHTML = `<i class="ph-bold ph-warning text-amber-500"></i> Pilih Kegiatan!`;
             });
             
-            // Run Init
             autoSelectMode(); 
             setInterval(autoSelectMode, 60000); 
 
-            // Table Helpers
             function updateTableLayout(type) {
                 const harianCols = document.querySelectorAll('.col-harian'); 
                 const waktuCols = document.querySelectorAll('.col-waktu'); 
@@ -514,7 +502,6 @@
             }
 
             function updateMakanStats(serverTotal) {
-                // Update dari server (lebih akurat) atau increment lokal
                 if(serverTotal) statsData.taken = serverTotal;
                 else statsData.taken++; 
                 
@@ -529,16 +516,14 @@
                 const now = new Date(); 
                 const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
                 const name = scanData.student_name || 'Siswa'; 
-                const id = scanData.student_id || 'ID'; // Untuk tampilan di table, id tidak apa-apa
+                const id = scanData.student_id || 'ID'; 
                 const status = scanData.status || 'Hadir';
                 
-                // Hapus baris 'no data' jika ada
                 document.getElementById('no-log-entry').classList.add('hidden');
 
                 const row = document.createElement('tr');
                 row.className = 'log-entry group hover:bg-slate-50/80 transition-colors new-row-entry';
                 
-                // Set Attributes
                 row.setAttribute('data-harian', scanType === 'Harian'); 
                 row.setAttribute('data-makan', scanType === 'Makan');
                 row.setAttribute('data-dhuha', scanType === 'Dhuha'); 
@@ -549,15 +534,13 @@
                 if(status === 'Masuk' || status === 'Hadir') statusClass = 'bg-emerald-100 text-emerald-700';
                 else if(String(status).includes('Terlambat')) statusClass = 'bg-amber-100 text-amber-700';
 
-                // Kolom badge
                 let statusBadgeHtml = '';
                 if(scanType === 'Makan') statusBadgeHtml = `<span class="badge-makan inline-flex items-center gap-1 px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide bg-orange-100 text-orange-700"><i class="ph-fill ph-check"></i> Diambil</span>`;
                 else if (scanType === 'Harian') statusBadgeHtml = `<span class="badge-harian inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide ${statusClass}">${escapeHtml(status)}</span>`;
                 else statusBadgeHtml = `<span class="inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide bg-emerald-100 text-emerald-700">Selesai</span>`;
 
-                // Ambil text ekskul dari dropdown jika tipe ekskul
-                let extraName = '-';
-                if(scanType === 'Ekstrakurikuler' && extraSelect.selectedIndex >= 0) {
+                let extraName = scanData.extra_name || '-';
+                if(extraName === '-' && scanType === 'Ekstrakurikuler' && extraSelect.selectedIndex >= 0) {
                      extraName = extraSelect.options[extraSelect.selectedIndex].text;
                 }
 
@@ -584,7 +567,6 @@
                 filterLogs(currentScanMode);
             }
 
-            // QR HANDLER
             async function processScan(studentId, type, activity = null) {
                 try {
                     const body = { 
@@ -609,14 +591,30 @@
                         if (type === 'Makan') {
                              triggerScanEffect('success'); 
                              playBeep('makan');
-                             // Gunakan data stats dari server jika ada
                              updateMakanStats(result.stats ? result.stats.taken : null); 
                         } else {
                              triggerScanEffect(isLate ? 'warning' : 'success'); 
                              playBeep(isLate ? 'warning' : 'success'); 
                         }
                         
-                        showScanResult(isLate ? 'warning' : 'success', result.message);
+                        // [MODIFIKASI] Menampilkan Nama Siswa di Feedback
+                        let feedbackMessage = result.message;
+                        if(result.scan && result.scan.student_name) {
+                            feedbackMessage = `${result.scan.student_name} - ${result.message}`;
+                            
+                            // Tampilkan SweetAlert dengan Nama Siswa
+                            // [PERHATIAN] Ini adalah bagian yang akan diubah menjadi Toast
+                            Swal.fire({
+                                icon: isLate ? 'warning' : 'success',
+                                title: result.scan.student_name,
+                                text: result.message,
+                                timer: 2000,
+                                showConfirmButton: false,
+                                customClass: { popup: 'rounded-[2rem]' }
+                            });
+                        }
+
+                        showScanResult(isLate ? 'warning' : 'success', feedbackMessage);
                         if(result.scan) addNewRowToTable(result.scan, currentScanMode); 
                     } else { 
                         triggerScanEffect('error'); 
@@ -662,15 +660,11 @@
                 
                 let handler;
                 
-                // --- PERBAIKAN LOGIKA HARIAN UTAMA ---
-                // Menggunakan 'start_out' dari Jadwal Reguler untuk menentukan Masuk/Pulang
                 if (currentScanMode === 'Harian') {
                     const now = new Date();
                     const currentMinutes = now.getHours() * 60 + now.getMinutes();
                     
-                    // Ambil batas waktu pergantian Masuk -> Pulang dari Jadwal
-                    // Format di DB "HH:MM:SS" (misal: 14:00:00)
-                    let switchMinutes = 12 * 60; // Default fallback ke jam 12:00
+                    let switchMinutes = 12 * 60; 
                     
                     if (SCHEDULE_DATA && SCHEDULE_DATA.start_out) {
                         const parts = SCHEDULE_DATA.start_out.split(':');
@@ -679,8 +673,6 @@
                         switchMinutes = (h * 60) + m;
                     }
 
-                    // Jika waktu sekarang < Jam Awal Pulang, maka dianggap MASUK
-                    // Jika waktu sekarang >= Jam Awal Pulang, maka dianggap PULANG
                     const timeType = currentMinutes < switchMinutes ? 'Masuk' : 'Pulang';
                     
                     handler = () => processScan(decodedText, timeType);
@@ -691,7 +683,6 @@
                 handler();
             };
 
-            // Setup HTML5 Qr Code
             const html5QrCode = new Html5Qrcode("qr-reader");
             const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
             

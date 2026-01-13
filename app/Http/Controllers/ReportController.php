@@ -42,64 +42,70 @@ class ReportController extends Controller
 
     /**
      * Helper Sorting Siswa (Kelas -> Nama)
-     * Menggunakan SORT_NATURAL agar "9 A" urut sebelum "9 B" dengan benar
-     * Memastikan data tidak acak-acakan.
      */
     private function sortStudents($collection)
     {
         return $collection->sortBy(function ($item) {
-            // Cek apakah item adalah model Student langsung atau AttendanceSiswa (yang punya relasi student)
             $student = $item instanceof Student ? $item : $item->student;
-            
-            // Urutkan berdasarkan Nama Kelas dulu, baru Nama Siswa
             $className = $student->schoolClass->name ?? 'ZZZ';
             return $className . ' ' . $student->name;
         }, SORT_NATURAL | SORT_FLAG_CASE)->values();
     }
 
     /**
-     * LOGIKA OTOMATIS POIN PELANGGARAN
-     * Menambahkan poin jika status Alfa, dan mencegah duplikasi hari yang sama.
+     * ==========================================
+     * LOGIKA OTOMATIS POIN PELANGGARAN (ROBUST)
+     * ==========================================
      */
     private function handleAutoPunishment($studentId, $date, $status, $typeContext = 'Harian')
     {
-        // Hanya proses jika status adalah Alfa
+        // 1. Validasi Status
         if (!in_array($status, ['Alfa', 'Alpa', 'Alpha'])) {
             return;
         }
 
-        // Cari Jenis Pelanggaran yang cocok di database
+        // 2. Cari Tipe Pelanggaran yang Valid
         $violationType = DisciplineType::where('type', 'Pelanggaran')
             ->where(function($q) {
-                $q->where('name', 'LIKE', '%Alfa%')
-                  ->orWhere('name', 'LIKE', '%Alpa%')
-                  ->orWhere('name', 'LIKE', '%Tanpa Keterangan%')
-                  ->orWhere('name', 'LIKE', '%Tidak Masuk Sekolah%');
+                $q->where('name', 'Tidak Masuk Sekolah (Alfa)')
+                  ->orWhere('name', 'Alfa')
+                  ->orWhere('name', 'Alpa')
+                  ->orWhere('name', 'Tanpa Keterangan');
             })->first();
 
-        // Jika tidak ketemu, buat default
+        // Fallback: Cari yang mirip
+        if (!$violationType) {
+            $violationType = DisciplineType::where('type', 'Pelanggaran')
+                ->where('name', 'LIKE', '%Alfa%')
+                ->first();
+        }
+
+        // Auto-Create Tipe jika tidak ada
         if (!$violationType) {
             $violationType = DisciplineType::create([
                 'name' => 'Tidak Masuk Sekolah (Alfa)',
                 'type' => 'Pelanggaran',
-                'point_value' => 10 // Poin default
+                'point_value' => 10
             ]);
         }
 
-        // CEK DUPLIKASI: Jangan input poin jika hari itu sudah ada pelanggaran Alfa
+        // 3. Cek Duplikasi (Agar tidak double poin di hari yang sama)
         $exists = DisciplineRecord::where('student_id', $studentId)
             ->where('date', $date)
             ->where('discipline_type_id', $violationType->id)
             ->exists();
 
+        // 4. Eksekusi Simpan
         if (!$exists) {
+            // Pastikan ada User ID yang mencatat (Fallback ke User pertama jika Auth null)
+            $recorderId = auth()->id() ?? (User::first()->id ?? 1);
+
             DisciplineRecord::create([
                 'student_id' => $studentId,
                 'discipline_type_id' => $violationType->id,
                 'date' => $date,
                 'notes' => "Otomatis: Tidak hadir ($typeContext)",
-                'type' => 'violation', // Pastikan kolom ini ada di tabel discipline_records
-                'recorded_by_user_id' => auth()->id() ?? 1
+                'recorded_by_user_id' => $recorderId
             ]);
         }
     }
@@ -112,7 +118,6 @@ class ReportController extends Controller
         $dateStr = $request->input('date', Carbon::today()->toDateString());
         $selectedDate_db = Carbon::parse($dateStr); 
 
-        // Ambil data absensi (Filter Alumni)
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
             ->whereHas('student', function($q) {
                 $q->where('status', '!=', 'graduated');
@@ -124,24 +129,20 @@ class ReportController extends Controller
         $attendancesHadirRaw = $attendances->whereIn('status', ['Hadir', 'Terlambat']);
         $attendancesLainRaw = $attendances->whereIn('status', ['Sakit', 'Izin', 'Alfa']);
 
-        // Hitung Statistik
         $hadirCount = $attendances->where('status', 'Hadir')->count();
         $terlambatCount = $attendances->where('status', 'Terlambat')->count();
         $sakitCount = $attendances->where('status', 'Sakit')->count();
         $izinCount = $attendances->where('status', 'Izin')->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
-        // Data Belum Absen (Filter Alumni)
         $existingStudentIds = $attendances->pluck('student_id')->toArray();
         $belumAbsenListRaw = Student::with('schoolClass')
             ->where('status', '!=', 'graduated')
             ->whereNotIn('id', $existingStudentIds)
             ->get();
             
-        // --- TERAPKAN SORTING PADA BELUM ABSEN ---
         $belumAbsenList = $this->sortStudents($belumAbsenListRaw);
 
-        // Mapping Data View
         $mappedHadir = $attendancesHadirRaw->map(function($item) {
             $item->status_final = $item->status;
             $item->time_in_final = $item->time_in;
@@ -156,11 +157,9 @@ class ReportController extends Controller
             return $item;
         });
 
-        // --- TERAPKAN SORTING PADA HADIR & LAIN ---
         $sortedHadir = $this->sortStudents($mappedHadir);
         $sortedLain = $this->sortStudents($mappedLain);
 
-        // Pagination
         $attendancesHadir = $this->paginate($sortedHadir, 20);
         $attendancesLain = $this->paginate($sortedLain, 20);
         
@@ -196,7 +195,6 @@ class ReportController extends Controller
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
             ->get();
 
-        // --- TERAPKAN SORTING UNTUK CETAK ---
         $attendancesHadir = $this->sortStudents($attendances->whereIn('status', ['Hadir', 'Terlambat']));
         $attendancesLain = $this->sortStudents($attendances->whereIn('status', ['Sakit', 'Izin', 'Alfa']));
         
@@ -247,23 +245,19 @@ class ReportController extends Controller
         $attendancesHadirRaw = $attendances->where('status', 'Hadir');
         $attendancesUzurRaw = $attendances->whereIn('status', ["Uzur Syar'i", "Alfa", "Izin", "Sakit"]);
 
-        // Statistik
         $hadirCount = $attendancesHadirRaw->count();
         $izinUzurCount = $attendances->whereIn('status', ["Uzur Syar'i", "Izin", "Sakit"])->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
-        // Data Belum Absen
         $existingIds = $attendances->pluck('student_id')->toArray();
         $belumAbsenListRaw = Student::with('schoolClass')
             ->where('status', '!=', 'graduated')
             ->whereNotIn('id', $existingIds)
             ->get();
             
-        // --- TERAPKAN SORTING ---
         $belumAbsenList = $this->sortStudents($belumAbsenListRaw);
         $belumAbsenCount = $belumAbsenList->count();
 
-        // Mapping
         $mappedHadir = $attendancesHadirRaw->map(function($item) {
             $item->status_final = $item->status;
             $item->notes_final = $item->notes;
@@ -276,11 +270,9 @@ class ReportController extends Controller
             return $item;
         });
 
-        // --- TERAPKAN SORTING ---
         $sortedHadir = $this->sortStudents($mappedHadir);
         $sortedUzur = $this->sortStudents($mappedUzur);
 
-        // Pagination
         $attendancesHadir = $this->paginate($sortedHadir, 20);
         $attendancesUzur = $this->paginate($sortedUzur, 20);
 
@@ -321,7 +313,6 @@ class ReportController extends Controller
         $attendancesHadirRaw = $attendances->where('status', 'Hadir');
         $attendancesUzurRaw = $attendances->whereIn('status', ["Uzur Syar'i", "Alfa", "Izin", "Sakit"]);
 
-        // Mapping
         $attendancesHadirMap = $attendancesHadirRaw->map(function($item) {
             $item->status_final = $item->status;
             $item->notes_final = $item->notes;
@@ -334,16 +325,13 @@ class ReportController extends Controller
             return $item;
         });
 
-        // --- TERAPKAN SORTING ---
         $attendancesHadir = $this->sortStudents($attendancesHadirMap);
         $attendancesUzur = $this->sortStudents($attendancesUzurMap);
 
-        // Statistik
         $hadirCount = $attendancesHadirRaw->count();
         $izinUzurCount = $attendances->whereIn('status', ["Uzur Syar'i", "Izin", "Sakit"])->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
-        // Data Belum Absen
         $existingIds = $attendances->pluck('student_id')->toArray();
         $belumAbsenListRaw = Student::with('schoolClass')
             ->where('status', '!=', 'graduated')
@@ -367,7 +355,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 5. MONITORING JURNAL MENGAJAR (Tidak berubah)
+     * 5. MONITORING JURNAL MENGAJAR
      */
     public function teachingJournal(Request $request)
     {
@@ -417,7 +405,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 6. BULK ALPHA (Dengan Auto Punishment)
+     * 6. PROSES BULK ALPHA (FIXED: Dengan Sync Data Existing)
      */
     public function bulkAlpha(Request $request)
     {
@@ -425,50 +413,68 @@ class ReportController extends Controller
         $type = $request->input('type');
         $activity = $request->input('activity');
 
-        $query = AttendanceSiswa::whereDate('attendance_date', $date)
-                ->where('type', $type);
-        
-        if($type == 'Keagamaan' && $activity) {
-            $query->where('activity', $activity);
-        }
+        // Gunakan Transaksi untuk memastikan data konsisten
+        return DB::transaction(function () use ($date, $type, $activity) {
+            $query = AttendanceSiswa::whereDate('attendance_date', $date)
+                    ->where('type', $type);
+            
+            if($type == 'Keagamaan' && $activity) {
+                $query->where('activity', $activity);
+            }
 
-        $presentIds = $query->pluck('student_id')->toArray();
-        
-        // Filter alumni
-        $absentStudents = Student::where('status', '!=', 'graduated')
-            ->whereNotIn('id', $presentIds)
-            ->get();
+            // 1. PROSES SISWA BARU (Belum Absen)
+            $presentIds = $query->pluck('student_id')->toArray();
+            
+            $absentStudents = Student::where('status', '!=', 'graduated')
+                ->whereNotIn('id', $presentIds)
+                ->get();
 
-        $insertData = [];
-        $now = now();
-        
-        foreach ($absentStudents as $student) {
-            $insertData[] = [
-                'student_id' => $student->id,
-                'attendance_date' => $date,
-                'type' => $type,
-                'activity' => $activity,
-                'status' => 'Alfa',
-                'time_in' => null,
-                'time_out' => null,
-                'notes' => 'Otomatis oleh Sistem',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ];
+            $insertData = [];
+            $now = now();
+            
+            foreach ($absentStudents as $student) {
+                $insertData[] = [
+                    'student_id' => $student->id,
+                    'attendance_date' => $date,
+                    'type' => $type,
+                    'activity' => $activity,
+                    'status' => 'Alfa',
+                    'time_in' => null,
+                    'time_out' => null,
+                    'notes' => 'Otomatis oleh Sistem',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
 
-            // AUTO PUNISHMENT
-            $this->handleAutoPunishment($student->id, $date, 'Alfa', $type);
-        }
+                // Auto Punishment untuk data baru
+                $this->handleAutoPunishment($student->id, $date, 'Alfa', $type);
+            }
 
-        if (!empty($insertData)) {
-            AttendanceSiswa::insert($insertData);
-        }
+            if (!empty($insertData)) {
+                AttendanceSiswa::insert($insertData);
+            }
 
-        return back()->with('success', count($insertData) . ' siswa berhasil ditandai Alfa dan diberikan Poin Pelanggaran.');
+            // 2. [PENTING] PROSES SISWA LAMA (Sudah Alfa tapi mungkin belum dapat Poin)
+            // Ini menangani kasus dimana absensi sudah ada, tapi poin gagal terbuat sebelumnya.
+            $existingAlphas = AttendanceSiswa::whereDate('attendance_date', $date)
+                ->where('type', $type)
+                ->whereIn('status', ['Alfa', 'Alpa', 'Alpha']);
+            
+            if($type == 'Keagamaan' && $activity) {
+                $existingAlphas->where('activity', $activity);
+            }
+
+            foreach ($existingAlphas->get() as $existing) {
+                // Fungsi ini aman dipanggil berulang karena ada cek $exists didalamnya
+                $this->handleAutoPunishment($existing->student_id, $date, 'Alfa', $type);
+            }
+
+            return back()->with('success', count($insertData) . ' siswa baru ditandai Alfa (Data lama disinkronisasi).');
+        });
     }
 
     /**
-     * 7. SIMPAN MANUAL (Dengan Notif WA & Auto Punishment)
+     * 7. SIMPAN MANUAL (DENGAN AUTO PUNISHMENT + WA)
      */
     public function storeManualEntry(Request $request)
     {
@@ -494,10 +500,10 @@ class ReportController extends Controller
             ]
         );
 
-        // AUTO PUNISHMENT
+        // [FIX] Panggil Auto Punishment
         $this->handleAutoPunishment($request->student_id, $request->date, $request->status, $request->attendance_type);
 
-        // KIRIM WA
+        // Kirim Notifikasi WA
         try {
             SendWaManualNotificationJob::dispatch($attendance);
         } catch (\Exception $e) {
@@ -508,7 +514,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 8. UPDATE ATTENDANCE (Dengan Auto Punishment)
+     * 8. UPDATE DATA (DENGAN AUTO PUNISHMENT)
      */
     public function updateAttendance(Request $request, $id)
     {
@@ -521,7 +527,7 @@ class ReportController extends Controller
             'notes' => $request->notes
         ]);
 
-        // AUTO PUNISHMENT
+        // [FIX] Panggil Auto Punishment
         $this->handleAutoPunishment($att->student_id, $att->attendance_date, $request->status, $att->type);
 
         return back()->with('success', 'Data berhasil diperbarui.');
