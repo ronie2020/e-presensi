@@ -85,61 +85,140 @@ class StudentPortalController extends Controller
             } catch (\Exception $e) {}
         }
 
-        // 3. DATA KEHADIRAN (PERBAIKAN: Menambahkan Variabel Terlambat)
-        $hadir = 0; $terlambat = 0; $sakit = 0; $izin = 0; $alpa = 0; // Inisialisasi variabel
+        // 3. DATA KEHADIRAN
+        // [PERBAIKAN LOGIKA HITUNG STATISTIK]
+        $hadir = 0; $terlambat = 0; $sakit = 0; $izin = 0; $alpa = 0;
         $attendance_history = collect([]);
+        $rawAttendanceRecords = collect([]); // Penampung data untuk poin otomatis
         
         if (class_exists(AttendanceSiswa::class)) {
             $attQuery = AttendanceSiswa::where('student_id', $id);
             
-            // Total Hadir Fisik (Tepat Waktu + Terlambat)
-            $hadir = (clone $attQuery)->whereIn('status', ['Hadir', 'Masuk', 'Terlambat'])->count();
+            // Variasi penulisan status untuk query SQL yang lebih robust
+            $statusHadir = ['Hadir', 'Masuk', 'Terlambat', 'hadir', 'masuk', 'terlambat'];
+            $statusTelat = ['Terlambat', 'terlambat'];
+            $statusSakit = ['Sakit', 'sakit'];
+            $statusIzin  = ['Izin', 'izin'];
+            // [FIX] Menambahkan variasi huruf kecil untuk Alfa/Alpa
+            $statusAlpa  = ['Alfa', 'Alpa', 'Alpha', 'alfa', 'alpa', 'alpha', 'Tanpa Keterangan'];
+
+            // Hitung Statistik dengan array status yang diperluas
+            $hadir = (clone $attQuery)->whereIn('status', $statusHadir)->count();
+            $terlambat = (clone $attQuery)->whereIn('status', $statusTelat)->count();
+            $sakit = (clone $attQuery)->whereIn('status', $statusSakit)->count();
+            $izin  = (clone $attQuery)->whereIn('status', $statusIzin)->count();
+            $alpa  = (clone $attQuery)->whereIn('status', $statusAlpa)->count(); 
             
-            // [FIX] Hitung Terlambat secara spesifik agar tidak Error Undefined Variable
-            $terlambat = (clone $attQuery)->where('status', 'Terlambat')->count();
-            
-            $sakit = (clone $attQuery)->where('status', 'Sakit')->count();
-            $izin  = (clone $attQuery)->where('status', 'Izin')->count();
-            
-            // Handle typo status lama (Alfa vs Alpa)
-            $alpa  = (clone $attQuery)->whereIn('status', ['Alfa', 'Alpa'])->count(); 
-            
-            // Ambil history lebih banyak (10) untuk timeline
+            // History untuk tab kehadiran
             $attendance_history = (clone $attQuery)->latest('attendance_date')->take(10)->get();
+
+            // [PENTING] Ambil data tahun ini untuk diolah jadi Pelanggaran/Prestasi Otomatis
+            $currentYearStart = Carbon::now()->startOfYear(); 
+            $rawAttendanceRecords = (clone $attQuery)
+                                    ->whereDate('attendance_date', '>=', $currentYearStart)
+                                    ->orderBy('attendance_date', 'desc')
+                                    ->get();
         }
         
-        // Data Chart (Hadir digabung Terlambat agar chart ringkas)
         $attendanceChart = ['hadir' => $hadir, 'sakit' => $sakit, 'izin' => $izin, 'alpa' => $alpa];
-        
-        // Hitung Persentase Kehadiran
         $total_hari_efektif = $hadir + $sakit + $izin + $alpa;
         $attendancePercentage = $total_hari_efektif > 0 ? round(($hadir / $total_hari_efektif) * 100) : 0;
 
-        // 4. DATA POIN KEBAIKAN & PELANGGARAN
+        // ==========================================
+        // 4. DATA POIN KEBAIKAN & PELANGGARAN (FIXED)
+        // ==========================================
         $violations = collect([]);
         $achievements = collect([]);
-        $total_violation_points = 0;
-        $total_merit_points = 0;
-
+        
+        // A. Pelanggaran Manual (Dari Database)
+        $manualViolations = collect([]);
         if (class_exists(DisciplineRecord::class)) {
             try {
-                $violations = DisciplineRecord::with('disciplineType')
+                $manualViolations = DisciplineRecord::with('disciplineType')
                     ->where('student_id', $id)
-                    ->whereHas('disciplineType', fn($q) => $q->where('type', 'violation')) 
-                    ->latest()->get();
-                
-                $achievements = DisciplineRecord::with('disciplineType')
-                    ->where('student_id', $id)
-                    ->whereHas('disciplineType', fn($q) => $q->where('type', 'merit')) 
-                    ->latest()->get();
-
-                $total_violation_points = $violations->sum(fn($v) => $v->disciplineType->point_value ?? 0);
-                $total_merit_points = $achievements->sum(fn($a) => $a->disciplineType->point_value ?? 0);
-
+                    ->get() 
+                    ->filter(function($record) {
+                        $type = strtolower(optional($record->disciplineType)->type ?? $record->type ?? '');
+                        return in_array($type, ['violation', 'pelanggaran']);
+                    });
             } catch (QueryException $e) { }
         }
 
-        // 5. JURNAL 7 KEBIASAAN
+        // B. Pelanggaran Otomatis (ALPA dari Absensi)
+        // Kita format agar strukturnya MIRIP dengan DisciplineRecord (punya 'notes' dan 'disciplineType')
+        $alpaViolations = $rawAttendanceRecords
+            ->filter(function ($att) {
+                // Filter PHP ini sudah case-insensitive dan berhasil menangkap data
+                return in_array(strtolower($att->status), ['alfa', 'alpa', 'alpha']);
+            })
+            ->map(function ($att) {
+                // Return sebagai Object stdClass dengan struktur yang diharapkan View
+                return (object) [
+                    'date' => $att->attendance_date,
+                    'notes' => 'Ketidakhadiran Tanpa Keterangan (Alpa)', // View pakai ->notes
+                    'disciplineType' => (object) [ // Mock relasi disciplineType
+                        'name' => 'Absensi (Alpha)',
+                        'point_value' => 10, // Poin Alpa
+                        'type' => 'violation'
+                    ]
+                ];
+            });
+
+        // Gabungkan Manual & Otomatis
+        $violations = $manualViolations->concat($alpaViolations)->sortByDesc('date');
+
+        // C. Prestasi/Kebaikan Manual (Dari Database)
+        $manualAchievements = collect([]);
+        if (class_exists(DisciplineRecord::class)) {
+            try {
+                $manualAchievements = DisciplineRecord::with('disciplineType')
+                    ->where('student_id', $id)
+                    ->get()
+                    ->filter(function($record) {
+                        $type = strtolower(optional($record->disciplineType)->type ?? $record->type ?? '');
+                        return in_array($type, ['merit', 'prestasi', 'kebaikan']);
+                    });
+            } catch (QueryException $e) { }
+        }
+
+        // D. Poin Kebaikan Otomatis (SHALAT dari Absensi)
+        // Logika: Type='Keagamaan' DAN Activity mengandung kata 'Dhuha'/'Dhuhur'
+        $prayerAchievements = $rawAttendanceRecords
+            ->filter(function ($att) {
+                $isReligious = isset($att->type) && strtolower($att->type) === 'keagamaan';
+                $activity = strtolower($att->activity ?? '');
+                $isPrayer = str_contains($activity, 'dhuha') || str_contains($activity, 'dhuhur') || str_contains($activity, 'dzuhur');
+                return $isReligious && $isPrayer;
+            })
+            ->map(function ($att) {
+                $actName = ucfirst($att->activity ?? 'Ibadah');
+                return (object) [
+                    'date' => $att->attendance_date,
+                    'notes' => "Melaksanakan " . $actName . " Berjamaah", // View pakai ->notes
+                    'disciplineType' => (object) [ // Mock relasi
+                        'name' => 'Kegiatan Keagamaan',
+                        'point_value' => 5, // Poin Shalat
+                        'type' => 'merit'
+                    ]
+                ];
+            });
+
+        // Gabungkan Kebaikan
+        $achievements = $manualAchievements->concat($prayerAchievements)->sortByDesc('date');
+
+        // Hitung Total Poin (Akses properti point_value dari disciplineType, baik object asli maupun mock)
+        $total_violation_points = $violations->sum(function($v) {
+            return $v->disciplineType->point_value ?? 0;
+        });
+        
+        $total_merit_points = $achievements->sum(function($a) {
+            return $a->disciplineType->point_value ?? 0;
+        });
+
+        // Skor Akhir (Opsional jika dipakai di view)
+        $finalScore = 100 - $total_violation_points + $total_merit_points;
+
+        // 5. JURNAL 7 KEBIASAAN (LOGIKA LAMA DIPERTAHANKAN)
         $todayEntry = null;
         $habits = collect([]); 
         if (class_exists(StudentHabit::class)) {
@@ -151,7 +230,7 @@ class StudentPortalController extends Controller
                         ->get();
         }
 
-        // 6. DATA LAINNYA
+        // 6. DATA LAINNYA (LOGIKA LAMA DIPERTAHANKAN)
         $lms_assignments_grouped = []; $lms_grades = [];
         if ($student->school_class_id && class_exists(LmsAssignment::class)) {
              $assignments = LmsAssignment::with('subject')->where('class_id', $student->school_class_id)->latest()->get();
@@ -186,13 +265,13 @@ class StudentPortalController extends Controller
              $teaching_journals = TeachingJournal::whereHas('schedule', fn($q)=>$q->where('class_id',$student->school_class_id))->latest()->take(5)->get();
         }
 
-        // 7. PENGADUAN
+        // 7. PENGADUAN (LOGIKA LAMA DIPERTAHANKAN)
         $complaints = collect([]);
         if (class_exists(Complaint::class)) {
             $complaints = Complaint::where('student_id', $student->id)->latest()->get();
         }
 
-        // 8. TABS MENU
+        // 8. TABS MENU (LOGIKA LAMA DIPERTAHANKAN)
         $tabs = ['ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan']];
 
         if ($isAlumni) {
@@ -211,26 +290,27 @@ class StudentPortalController extends Controller
             ]);
         }
 
-        // Statistik Sholat
+        // Statistik Sholat (Counter Widget)
         $sholat_dhuha = 0; $sholat_dhuhur = 0;
         if (class_exists(AttendanceSiswa::class)) {
             $sholat_dhuha = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuha')->count();
             $sholat_dhuhur = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuhur')->count();
         }
 
-        // [FIX] Masukkan variabel $terlambat ke dalam compact agar tidak error di View
+        // Compact Data
         $data = compact(
             'student', 'isAlumni', 'tabs', 'attendancePercentage',
             'liaison_messages', 'complaints', 
             'todayEntry', 'habits',
-            'hadir', 'terlambat', 'sakit', 'izin', 'alpa', // <--- Pastikan 'terlambat' ada disini
+            'hadir', 'terlambat', 'sakit', 'izin', 'alpa', 
             'attendance_history', 'attendanceChart',
             'lms_assignments_grouped', 'lms_grades',
             'violations', 'total_violation_points', 
             'achievements', 'total_merit_points',
             'library_visits', 'library_history',
             'academic_record', 'chartData', 'teaching_journals',
-            'sholat_dhuha', 'sholat_dhuhur'
+            'sholat_dhuha', 'sholat_dhuhur',
+            'finalScore'
         );
 
         if (view()->exists('students.portal.show')) {
