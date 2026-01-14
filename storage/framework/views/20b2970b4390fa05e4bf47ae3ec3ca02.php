@@ -1,1 +1,0 @@
-<img <?php echo e($attributes); ?> src="<?php echo e(asset('images/logo.png')); ?>" alt="<?php echo e(config('app.name')); ?> Logo" /><?php /**PATH C:\Users\ronie\Documents\aplikasi\E-Presensi Netila\resources\views/components/application-logo.blade.php ENDPATH**/ ?>
