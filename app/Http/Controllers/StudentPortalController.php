@@ -21,7 +21,8 @@ use App\Models\StudentHabit;
 use App\Models\LibraryLoan;      
 use App\Models\DisciplineRecord; 
 use App\Models\AcademicRecord;   
-use App\Models\TeachingJournal; 
+use App\Models\TeachingJournal;
+use App\Models\Achievement; // [BARU] Import Model Achievement
 
 class StudentPortalController extends Controller
 {
@@ -85,7 +86,7 @@ class StudentPortalController extends Controller
             } catch (\Exception $e) {}
         }
 
-        // 3. DATA KEHADIRAN (LOGIKA LAMA DIPERTAHANKAN + DATA RAW TAHUNAN)
+        // 3. DATA KEHADIRAN
         $hadir = 0; $terlambat = 0; $sakit = 0; $izin = 0; $alpa = 0;
         $attendance_history = collect([]);
         $rawAttendanceRecords = collect([]); // Penampung data tahun ini untuk poin otomatis
@@ -123,12 +124,12 @@ class StudentPortalController extends Controller
         $attendancePercentage = $total_hari_efektif > 0 ? round(($hadir / $total_hari_efektif) * 100) : 0;
 
         // ==========================================
-        // 4. DATA POIN KEBAIKAN & PELANGGARAN (DIPERBAIKI STRUKTURNYA)
+        // 4. DATA POIN KEBAIKAN & PELANGGARAN (LENGKAP)
         // ==========================================
         $violations = collect([]);
         $achievements = collect([]);
         
-        // A. Pelanggaran Manual (Dari Database)
+        // --- A. PELANGGARAN (Manual + Otomatis Alpa) ---
         $manualViolations = collect([]);
         if (class_exists(DisciplineRecord::class)) {
             try {
@@ -141,13 +142,11 @@ class StudentPortalController extends Controller
                         return in_array($type, ['violation', 'pelanggaran']);
                     })
                     ->map(function($item) {
-                        // Standardisasi Object
                         return (object) [
                             'date' => $item->date,
                             'notes' => $item->notes ?? optional($item->disciplineType)->name ?? 'Pelanggaran',
                             'point' => optional($item->disciplineType)->point_value ?? $item->point ?? 0,
                             'type' => 'manual',
-                            // Pastikan recorder ada, jika null buat mock object
                             'recorder' => $item->recorder ?? (object)['name' => 'Admin/Guru'],
                             'disciplineType' => $item->disciplineType ?? (object)['name' => 'Pelanggaran', 'point_value' => 0]
                         ];
@@ -155,7 +154,6 @@ class StudentPortalController extends Controller
             } catch (QueryException $e) { }
         }
 
-        // B. Pelanggaran Otomatis (ALPA dari Absensi)
         $alpaViolations = $rawAttendanceRecords
             ->filter(function ($att) {
                 return in_array(strtolower($att->status), ['alfa', 'alpa', 'alpha']);
@@ -173,11 +171,13 @@ class StudentPortalController extends Controller
 
         $violations = $manualViolations->concat($alpaViolations)->sortByDesc('date');
 
-        // C. Prestasi/Kebaikan Manual (Dari Database)
-        $manualAchievements = collect([]);
+        // --- B. PRESTASI / KEBAIKAN (Manual + Shalat + Achievement Model) ---
+        
+        // 1. Prestasi Manual (DisciplineRecord)
+        $manualMerits = collect([]);
         if (class_exists(DisciplineRecord::class)) {
             try {
-                $manualAchievements = DisciplineRecord::with(['disciplineType', 'recorder'])
+                $manualMerits = DisciplineRecord::with(['disciplineType', 'recorder'])
                     ->where('student_id', $id)
                     ->get()
                     ->filter(function($record) {
@@ -189,7 +189,9 @@ class StudentPortalController extends Controller
                             'date' => $item->date,
                             'notes' => $item->notes ?? optional($item->disciplineType)->name ?? 'Prestasi',
                             'point' => optional($item->disciplineType)->point_value ?? $item->point ?? 0,
-                            'type' => 'manual',
+                            'type' => 'manual_merit',
+                            'level' => null, // Tidak ada level
+                            'photo' => null,
                             'recorder' => $item->recorder ?? (object)['name' => 'Admin/Guru'],
                             'disciplineType' => $item->disciplineType ?? (object)['name' => 'Prestasi', 'point_value' => 0]
                         ];
@@ -197,7 +199,7 @@ class StudentPortalController extends Controller
             } catch (QueryException $e) { }
         }
 
-        // D. Poin Kebaikan Otomatis (SHALAT dari Absensi)
+        // 2. Poin Shalat Otomatis
         $prayerAchievements = $rawAttendanceRecords
             ->filter(function ($att) {
                 $isReligious = isset($att->type) && strtolower($att->type) === 'keagamaan';
@@ -209,22 +211,48 @@ class StudentPortalController extends Controller
                 $actName = ucfirst($att->activity ?? 'Ibadah');
                 return (object) [
                     'date' => $att->attendance_date,
-                    'notes' => "Melaksanakan " . $actName . " Berjamaah",
+                    'notes' => "Melaksanakan Shalat " . $actName . " Berjamaah",
                     'point' => 5, // Poin Shalat
-                    'type' => 'auto',
+                    'type' => 'auto_prayer',
+                    'level' => null,
+                    'photo' => null,
                     'recorder' => (object) ['name' => 'Sistem Otomatis'],
                     'disciplineType' => (object) ['name' => 'Kegiatan Keagamaan', 'point_value' => 5]
                 ];
             });
 
-        $achievements = $manualAchievements->concat($prayerAchievements)->sortByDesc('date');
+        // 3. Data Prestasi Utama (Model Achievement)
+        $realAchievements = collect([]);
+        if (class_exists(Achievement::class)) {
+            try {
+                $realAchievements = Achievement::where('student_id', $id)->get()
+                    ->map(function($item) {
+                        return (object) [
+                            'date' => $item->date,
+                            'notes' => $item->description ?? $item->title,
+                            'point' => 0, // Poin 0 di list ini (karena poin real sudah masuk DisciplineRecord via Job)
+                            'type' => 'achievement_record',
+                            'title' => $item->title,
+                            'level' => $item->level,
+                            'photo' => $item->photo_path,
+                            'recorder' => (object) ['name' => 'Panitia/Sekolah'],
+                            'disciplineType' => (object) ['name' => 'Kejuaraan / Prestasi', 'point_value' => 0]
+                        ];
+                    });
+            } catch (\Exception $e) {}
+        }
 
-        // Hitung Total Poin
+        $achievements = $realAchievements->concat($manualMerits)->concat($prayerAchievements)->sortByDesc('date');
+
+        // Hitung Total Skor
+        // Total poin dihitung dari DisciplineRecord (manualMerits) + Shalat + Alpa
+        // AchievementRecord tidak dihitung poinnya disini karena asumsinya poinnya sudah di-entry ke DisciplineRecord saat input prestasi
         $total_violation_points = $violations->sum(fn($v) => $v->point ?? $v->disciplineType->point_value ?? 0);
-        $total_merit_points = $achievements->sum(fn($a) => $a->point ?? $a->disciplineType->point_value ?? 0);
+        $total_merit_points = $manualMerits->sum(fn($a) => $a->point ?? $a->disciplineType->point_value ?? 0) + $prayerAchievements->sum(fn($a) => $a->point ?? 0);
+        
         $finalScore = 100 - $total_violation_points + $total_merit_points;
 
-        // 5. JURNAL 7 KEBIASAAN (LOGIKA LAMA DIKEMBALIKAN)
+        // 5. JURNAL 7 KEBIASAAN
         $todayEntry = null;
         $habits = collect([]); 
         if (class_exists(StudentHabit::class)) {
@@ -236,7 +264,7 @@ class StudentPortalController extends Controller
                         ->get();
         }
 
-        // 6. DATA LENGKAP LAINNYA (LMS, PERPUSTAKAAN, AKADEMIK)
+        // 6. DATA LAINNYA (LMS, PERPUS, AKADEMIK)
         $lms_assignments_grouped = []; $lms_grades = [];
         if ($student->school_class_id && class_exists(LmsAssignment::class)) {
              $assignments = LmsAssignment::with('subject')->where('class_id', $student->school_class_id)->latest()->get();
@@ -277,7 +305,9 @@ class StudentPortalController extends Controller
             $complaints = Complaint::where('student_id', $student->id)->latest()->get();
         }
 
-        // 8. TABS MENU (LENGKAP)
+        // ==========================================
+        // 8. TABS MENU (PERBAIKAN KUNCI TAB)
+        // ==========================================
         $tabs = ['ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan']];
 
         if ($isAlumni) {
@@ -286,7 +316,11 @@ class StudentPortalController extends Controller
         } else {
             $tabs = array_merge($tabs, [
                 'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan'],
-                'poin_kebaikan' => ['icon' => 'scales', 'label' => 'Poin Kebaikan'], 
+                
+                // [FIX] Memisahkan Disiplin dan Prestasi agar masing-masing punya Tab sendiri
+                'disiplin' => ['icon' => 'warning-octagon', 'label' => 'Disiplin & Poin'], 
+                'prestasi' => ['icon' => 'medal', 'label' => 'Prestasi'], 
+                
                 'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
                 'pengaduan' => ['icon' => 'megaphone', 'label' => 'Lapor Masalah'],
                 'jadwal' => ['icon' => 'calendar-blank', 'label' => 'Jadwal & KBM'],
@@ -296,7 +330,6 @@ class StudentPortalController extends Controller
             ]);
         }
 
-        // Statistik Sholat (Counter Widget)
         $sholat_dhuha = 0; $sholat_dhuhur = 0;
         if (class_exists(AttendanceSiswa::class)) {
             $sholat_dhuha = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuha')->count();

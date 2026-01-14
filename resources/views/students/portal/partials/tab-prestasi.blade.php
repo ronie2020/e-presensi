@@ -33,41 +33,67 @@
                 <div class="relative border-l-2 border-slate-100 ml-3 space-y-8">
                     @foreach($achievements as $record)
                         <div class="relative pl-8 group">
-                            <!-- Dot Timeline (Green) -->
-                            <div class="absolute -left-[9px] top-0 w-5 h-5 bg-emerald-100 border-2 border-emerald-500 rounded-full group-hover:scale-125 transition-transform duration-300 shadow-sm"></div>
                             
-                            <!-- Content Header: Nama Kebaikan & Poin -->
+                            {{-- DOT INDICATOR --}}
+                            @if(isset($record->type) && $record->type === 'achievement_record')
+                                <!-- Dot Emas untuk Prestasi Besar -->
+                                <div class="absolute -left-[9px] top-0 w-5 h-5 bg-yellow-100 border-2 border-yellow-500 rounded-full group-hover:scale-125 transition-transform duration-300 shadow-sm z-10"></div>
+                            @else
+                                <!-- Dot Hijau untuk Poin Harian -->
+                                <div class="absolute -left-[9px] top-0 w-5 h-5 bg-emerald-100 border-2 border-emerald-500 rounded-full group-hover:scale-125 transition-transform duration-300 shadow-sm"></div>
+                            @endif
+                            
+                            {{-- HEADER CONTENT --}}
                             <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-1">
-                                <h4 class="font-bold text-slate-800 text-lg group-hover:text-emerald-600 transition-colors">
-                                    {{ $record->disciplineType->name ?? 'Jenis Prestasi Dihapus' }}
-                                </h4>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-lg group-hover:text-emerald-600 transition-colors">
+                                        {{-- Jika Prestasi Besar, tampilkan Judul. Jika Poin, tampilkan Discipline Type --}}
+                                        {{ isset($record->type) && $record->type === 'achievement_record' ? $record->title : ($record->disciplineType->name ?? 'Kebaikan') }}
+                                    </h4>
+                                    
+                                    {{-- Tampilkan Level untuk Prestasi Besar --}}
+                                    @if(isset($record->level) && $record->level)
+                                        <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-yellow-50 text-yellow-700 border border-yellow-200">
+                                            Tingkat: {{ $record->level }}
+                                        </span>
+                                    @endif
+                                </div>
                                 
-                                {{-- Badge Poin --}}
-                                <span class="text-xs font-bold px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-100 whitespace-nowrap shadow-sm">
-                                    +{{ $record->disciplineType->point_value ?? 0 }} Poin
-                                </span>
+                                {{-- Badge Poin (Hanya jika poin > 0) --}}
+                                @if(isset($record->disciplineType->point_value) && $record->disciplineType->point_value > 0)
+                                    <span class="text-xs font-bold px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-100 whitespace-nowrap shadow-sm">
+                                        +{{ $record->disciplineType->point_value }} Poin
+                                    </span>
+                                @endif
                             </div>
                             
-                            <!-- Tanggal Kejadian -->
+                            {{-- Tanggal --}}
                             <p class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-2">
                                 <i class="ph-fill ph-calendar-blank"></i>
                                 {{ \Carbon\Carbon::parse($record->date)->translatedFormat('l, d F Y') }}
                             </p>
                             
-                            <!-- Catatan Detail -->
+                            {{-- Notes / Description --}}
                             @if($record->notes)
                                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-sm text-slate-600 italic relative hover:bg-emerald-50/30 transition-colors">
                                     <i class="ph-fill ph-quotes text-emerald-200 text-2xl absolute top-2 right-2"></i>
                                     "{{ $record->notes }}"
                                 </div>
-                            @else
-                                <div class="text-xs text-slate-300 italic pl-1">Tidak ada catatan tambahan.</div>
                             @endif
 
-                             <!-- Guru Pencatat -->
-                             @if($record->recorder)
+                            {{-- Tombol Lihat Foto (Khusus Achievement Record) --}}
+                            @if(isset($record->type) && $record->type === 'achievement_record' && isset($record->photo))
+                                <div class="mt-3">
+                                    <a href="{{ asset('storage/' . $record->photo) }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-800 text-white text-xs font-bold rounded-lg hover:bg-slate-700 transition-colors">
+                                        <i class="ph-bold ph-image"></i> Lihat Foto Bukti
+                                    </a>
+                                </div>
+                            @endif
+
+                             {{-- Recorder --}}
+                             @if(isset($record->recorder))
                                 <div class="mt-3 flex items-center gap-1.5 text-[10px] text-slate-400 font-bold bg-slate-50 inline-block px-2 py-1 rounded-md">
-                                    <i class="ph-fill ph-user-circle text-slate-300"></i> Dicatat oleh: {{ $record->recorder->name ?? 'Guru' }}
+                                    <i class="ph-fill ph-user-circle text-slate-300"></i> Dicatat oleh: {{ $record->recorder->name ?? 'Sistem' }}
                                 </div>
                             @endif
                         </div>
