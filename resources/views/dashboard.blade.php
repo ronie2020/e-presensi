@@ -86,7 +86,6 @@
         </div>
 
         {{-- HERO SECTION --}}
-        <!-- PERBAIKAN 1: Padding dikurangi di mobile (p-6) agar konten lebih muat -->
         <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-r from-blue-900 via-slate-800 to-slate-900 p-6 md:p-10 mb-6 text-white shadow-2xl shadow-blue-900/20 overflow-hidden group border border-white/10 card-print">
             
             <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 no-print"></div>
@@ -102,7 +101,6 @@
                         </span>
                         System Online
                     </div>
-                    <!-- Judul responsif -->
                     <h1 class="text-2xl md:text-5xl font-extrabold text-white tracking-tight mb-3">
                         Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">{{ Auth::user()->name ?? 'Administrator' }}</span> 
                     </h1>
@@ -113,10 +111,8 @@
                 </div>
                 
                 {{-- FILTER CONTROLS --}}
-                <!-- PERBAIKAN 2: w-full di mobile, md:w-auto di desktop. Hapus min-w fix di mobile. -->
                 <div class="flex flex-col gap-3 w-full md:w-auto md:min-w-[320px] filter-group no-print">
                     <div class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-xl p-1 border border-white/10 mb-1 relative">
-                        <!-- Loading indicator -->
                         <div x-show="loadingTarget === 'date'" class="absolute inset-0 bg-slate-900/50 rounded-lg flex items-center justify-center z-10">
                             <i class="ph-bold ph-spinner animate-spin text-white"></i>
                         </div>
@@ -136,7 +132,6 @@
                         </button>
                     </div>
 
-                    <!-- Tombol Periode -->
                     <div class="bg-slate-900/50 backdrop-blur-md p-1.5 rounded-xl flex border border-white/10 shadow-lg overflow-x-auto">
                         <button @click="updateFilter('today')" :disabled="loading"
                             :class="period === 'today' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-blue-200 hover:text-white hover:bg-white/5'" 
@@ -204,14 +199,48 @@
             @php
                 $titleLower = strtolower($card['title']);
                 $rawIcon = $card['icon'] ?? ''; 
-                if (str_contains($titleLower, 'hadir') && !str_contains($titleLower, 'belum')) { $iconClass = 'ph-check-circle'; $colorKey = 'emerald'; } 
-                elseif (str_contains($titleLower, 'telat') || str_contains($titleLower, 'lambat')) { $iconClass = 'ph-clock'; $colorKey = 'amber'; } 
-                elseif (str_contains($titleLower, 'izin') || str_contains($titleLower, 'sakit')) { $iconClass = 'ph-envelope-open'; $colorKey = 'purple'; } 
-                elseif (str_contains($titleLower, 'alpha') || str_contains($titleLower, 'absen')) { $iconClass = 'ph-x-circle'; $colorKey = 'rose'; } 
-                elseif (str_contains($titleLower, 'belum')) { $iconClass = 'ph-minus-circle'; $colorKey = 'slate'; } 
-                elseif (str_contains($titleLower, 'pulang')) { $iconClass = 'ph-person-simple-run'; $colorKey = 'yellow'; } 
-                elseif (str_contains($titleLower, 'total') || str_contains($titleLower, 'siswa')) { $iconClass = 'ph-student'; $colorKey = 'blue'; } 
-                else { $iconClass = (!empty($rawIcon) && !str_starts_with($rawIcon, 'M') && $rawIcon !== 'ph-hash') ? $rawIcon : 'ph-chart-bar'; $colorKey = 'blue'; }
+                
+                // --- PERBAIKAN LOGIKA WARNA YANG LEBIH CERDAS ---
+                
+                // 1. Cek MERAH (Alpha, Alpa, Absen, Tidak Hadir) - Prioritas Tinggi
+                if (str_contains($titleLower, 'alpha') || str_contains($titleLower, 'alpa') || str_contains($titleLower, 'absen') || str_contains($titleLower, 'tidak hadir')) { 
+                    $iconClass = 'ph-x-circle'; 
+                    $colorKey = 'rose'; 
+                } 
+                // 2. Cek KUNING (Telat, Lambat)
+                elseif (str_contains($titleLower, 'telat') || str_contains($titleLower, 'lambat')) { 
+                    $iconClass = 'ph-clock'; 
+                    $colorKey = 'amber'; 
+                } 
+                // 3. Cek UNGU (Izin, Sakit)
+                elseif (str_contains($titleLower, 'izin') || str_contains($titleLower, 'sakit')) { 
+                    $iconClass = 'ph-envelope-open'; 
+                    $colorKey = 'purple'; 
+                } 
+                // 4. Cek HIJAU (Hadir) - Pastikan tidak ada kata "tidak" atau "belum"
+                elseif (str_contains($titleLower, 'hadir') && !str_contains($titleLower, 'belum') && !str_contains($titleLower, 'tidak')) { 
+                    $iconClass = 'ph-check-circle'; 
+                    $colorKey = 'emerald'; 
+                } 
+                // 5. Cek ABU (Belum)
+                elseif (str_contains($titleLower, 'belum')) { 
+                    $iconClass = 'ph-minus-circle'; 
+                    $colorKey = 'slate'; 
+                } 
+                // 6. Cek ORANGE/KUNING (Pulang)
+                elseif (str_contains($titleLower, 'pulang')) { 
+                    $iconClass = 'ph-person-simple-run'; 
+                    $colorKey = 'yellow'; 
+                } 
+                // 7. Cek BIRU (Total, Siswa, Default)
+                elseif (str_contains($titleLower, 'total') || str_contains($titleLower, 'siswa')) { 
+                    $iconClass = 'ph-student'; 
+                    $colorKey = 'blue'; 
+                } 
+                else { 
+                    $iconClass = (!empty($rawIcon) && !str_starts_with($rawIcon, 'M') && $rawIcon !== 'ph-hash') ? $rawIcon : 'ph-chart-bar'; 
+                    $colorKey = 'blue'; 
+                }
 
                 $theme = match($colorKey) {
                     'emerald' => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-600', 'hover_bg' => 'group-hover:bg-emerald-600', 'hover_border' => 'hover:border-emerald-200'],
@@ -249,9 +278,7 @@
         {{-- GRAFIK & KOMPOSISI --}}
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
             {{-- Grafik Batang --}}
-            <!-- PERBAIKAN 3: Padding responsif -->
             <div class="animate-enter xl:col-span-2 bg-white p-5 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 card-print" style="animation-delay: 600ms">
-                <!-- PERBAIKAN 4: Header flex-col di mobile agar legenda turun ke bawah -->
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <div>
                         <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -261,7 +288,6 @@
                             Statistik <span x-text="period === 'month' ? 'Bulanan' : 'Mingguan'"></span>
                         </p>
                     </div>
-                    <!-- PERBAIKAN 5: Flex-wrap agar legenda tidak terpotong di layar sempit -->
                     <div class="flex flex-wrap gap-2 no-print">
                         <div class="px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center gap-2 text-[10px] font-bold text-emerald-700 uppercase"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Hadir</div>
                         <div class="px-3 py-1 rounded-lg bg-amber-50 border border-amber-100 flex items-center gap-2 text-[10px] font-bold text-amber-700 uppercase"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Telat</div>
