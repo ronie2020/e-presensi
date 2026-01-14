@@ -1,12 +1,10 @@
-@extends('layouts.kiosk-layout')
-
-@section('content')
-@php
+<?php $__env->startSection('content'); ?>
+<?php
     $safeSchedule = isset($scheduleConfig) ? $scheduleConfig : [];
     $scheduleJson = json_encode($safeSchedule);
-@endphp
+?>
 
-{{-- PERBAIKAN 1: Ganti h-screen jadi min-h-screen & izinkan scroll (overflow-x-hidden) --}}
+
 <div class="min-h-screen w-full bg-slate-900 relative overflow-x-hidden font-sans selection:bg-cyan-500 selection:text-white">
     
     <!-- Background FX (Fixed agar tidak ikut scroll) -->
@@ -18,23 +16,42 @@
     </div>
 
     <!-- Tombol Kembali -->
-    <a href="{{ route('landing') }}" class="absolute top-6 left-6 md:top-8 md:left-8 z-50 flex items-center gap-3 px-4 py-2 md:px-5 md:py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full transition-all border border-slate-700 hover:border-slate-500 shadow-xl group backdrop-blur-md">
+    <a href="<?php echo e(route('landing')); ?>" class="absolute top-6 left-6 md:top-8 md:left-8 z-50 flex items-center gap-3 px-4 py-2 md:px-5 md:py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full transition-all border border-slate-700 hover:border-slate-500 shadow-xl group backdrop-blur-md">
         <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i>
         <span class="font-bold text-[10px] md:text-xs uppercase tracking-wider">Kembali</span>
     </a>
 
     <!-- CONTAINER UTAMA -->
-    {{-- PERBAIKAN 2: Flex-col untuk mobile, lg:flex-row untuk desktop besar. Tambah padding top agar header tidak nabrak --}}
+    
     <div class="flex flex-col lg:flex-row w-full min-h-screen p-4 md:p-8 gap-8 lg:gap-10 pt-24 md:pt-12 relative z-10">
         
         <!-- BAGIAN KIRI: SCANNER UTAMA -->
-        {{-- Hapus h-full agar tingginya menyesuaikan konten --}}
+        
         <div class="flex-1 flex flex-col items-center justify-start lg:justify-center w-full">
             
             <!-- Header -->
             <div class="text-center mb-8 lg:mb-10 w-full flex flex-col items-center shrink-0 animate-fade-in-down">
                 <div class="inline-flex items-center justify-center p-3 mb-4 md:mb-6 bg-slate-800/50 rounded-2xl border border-slate-700/50 shadow-2xl backdrop-blur-sm">
-                    <x-application-logo class="w-12 h-12 md:w-16 md:h-16 text-white fill-current drop-shadow-lg" />
+                    <?php if (isset($component)) { $__componentOriginal8892e718f3d0d7a916180885c6f012e7 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal8892e718f3d0d7a916180885c6f012e7 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.application-logo','data' => ['class' => 'w-12 h-12 md:w-16 md:h-16 text-white fill-current drop-shadow-lg']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('application-logo'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['class' => 'w-12 h-12 md:w-16 md:h-16 text-white fill-current drop-shadow-lg']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal8892e718f3d0d7a916180885c6f012e7)): ?>
+<?php $attributes = $__attributesOriginal8892e718f3d0d7a916180885c6f012e7; ?>
+<?php unset($__attributesOriginal8892e718f3d0d7a916180885c6f012e7); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal8892e718f3d0d7a916180885c6f012e7)): ?>
+<?php $component = $__componentOriginal8892e718f3d0d7a916180885c6f012e7; ?>
+<?php unset($__componentOriginal8892e718f3d0d7a916180885c6f012e7); ?>
+<?php endif; ?>
                 </div>
                 
                 <h1 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-white tracking-tight uppercase leading-tight drop-shadow-sm text-center">
@@ -94,7 +111,7 @@
         </div>
 
         <!-- BAGIAN KANAN: LIST KEHADIRAN (LOG) -->
-        {{-- PERBAIKAN 3: Fixed height pada Log agar bisa discroll secara internal. Sticky di desktop --}}
+        
         <div class="w-full lg:w-[420px] h-[500px] lg:h-[calc(100vh-4rem)] flex flex-col bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 shadow-2xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden relative z-20 shrink-0 lg:sticky lg:top-8">
             
             <div class="p-6 md:p-8 bg-slate-900/50 border-b border-slate-700/50 flex justify-between items-center">
@@ -128,7 +145,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const SCHEDULE_DATA = {!! $scheduleJson !!};
+        const SCHEDULE_DATA = <?php echo $scheduleJson; ?>;
         let currentScanMode = 'Masuk';
         let manualOverride = false;
         
@@ -144,8 +161,8 @@
         const logList = document.getElementById('scan-log-list');
         const emptyLogMsg = document.getElementById('empty-log');
 
-        const csrfToken = '{{ csrf_token() }}';
-        const processUrl = '{{ route("scan.process") }}'; 
+        const csrfToken = '<?php echo e(csrf_token()); ?>';
+        const processUrl = '<?php echo e(route("scan.process")); ?>'; 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let isProcessing = false;
 
@@ -418,4 +435,5 @@
     
     .text-shadow-glow { text-shadow: 0 0 15px rgba(56,189,248,0.5); }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.kiosk-layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ronie\Documents\aplikasi\E-Presensi Netila\resources\views/kiosk/index.blade.php ENDPATH**/ ?>
