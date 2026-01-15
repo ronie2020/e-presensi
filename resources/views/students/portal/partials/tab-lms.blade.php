@@ -22,31 +22,24 @@
             @foreach($lms_assignments_grouped as $subjectName => $assignments)
                 {{-- 
                     THEME LOGIC: SINKRONISASI DENGAN INDEX.BLADE.PHP
-                    Menentukan warna dan ikon berdasarkan nama mata pelajaran.
                 --}}
                 @php
                     $sName = strtolower($subjectName);
                     
-                    // Default Theme (Blue) & Icon
+                    // Default Theme
                     $theme = ['bg' => 'bg-blue-50', 'text' => 'text-blue-700', 'border' => 'border-blue-200', 'light' => 'bg-blue-100', 'ring' => 'ring-blue-100', 'icon' => 'ph-book-bookmark'];
 
-                    if (str_contains($sName, 'informatika') || str_contains($sName, 'tik') || str_contains($sName, 'komputer') || str_contains($sName, 'coding')) {
-                        // Cyan (TIK)
+                    if (str_contains($sName, 'informatika') || str_contains($sName, 'tik') || str_contains($sName, 'komputer')) {
                         $theme = ['bg' => 'bg-cyan-50', 'text' => 'text-cyan-700', 'border' => 'border-cyan-200', 'light' => 'bg-cyan-100', 'ring' => 'ring-cyan-100', 'icon' => 'ph-desktop'];
                     } elseif (str_contains($sName, 'seni') || str_contains($sName, 'budaya') || str_contains($sName, 'musik')) {
-                        // Purple (Seni)
                         $theme = ['bg' => 'bg-purple-50', 'text' => 'text-purple-700', 'border' => 'border-purple-200', 'light' => 'bg-purple-100', 'ring' => 'ring-purple-100', 'icon' => 'ph-palette'];
-                    } elseif (str_contains($sName, 'matematika') || str_contains($sName, 'kalkulus') || str_contains($sName, 'aljabar') || str_contains($sName, 'pjok') || str_contains($sName, 'olahraga')) {
-                        // Orange (Matematika & Olahraga)
-                        $theme = ['bg' => 'bg-orange-50', 'text' => 'text-orange-700', 'border' => 'border-orange-200', 'light' => 'bg-orange-100', 'ring' => 'ring-orange-100', 'icon' => str_contains($sName, 'pjok') ? 'ph-soccer-ball' : 'ph-calculator'];
-                    } elseif (str_contains($sName, 'ipa') || str_contains($sName, 'fisika') || str_contains($sName, 'kimia') || str_contains($sName, 'biologi') || str_contains($sName, 'agama') || str_contains($sName, 'pai')) {
-                        // Emerald (Sains & Agama)
-                        $theme = ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'border' => 'border-emerald-200', 'light' => 'bg-emerald-100', 'ring' => 'ring-emerald-100', 'icon' => str_contains($sName, 'agama') ? 'ph-hands-praying' : 'ph-flask'];
+                    } elseif (str_contains($sName, 'matematika') || str_contains($sName, 'kalkulus') || str_contains($sName, 'olahraga')) {
+                        $theme = ['bg' => 'bg-orange-50', 'text' => 'text-orange-700', 'border' => 'border-orange-200', 'light' => 'bg-orange-100', 'ring' => 'ring-orange-100', 'icon' => 'ph-calculator'];
+                    } elseif (str_contains($sName, 'ipa') || str_contains($sName, 'fisika') || str_contains($sName, 'agama')) {
+                        $theme = ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'border' => 'border-emerald-200', 'light' => 'bg-emerald-100', 'ring' => 'ring-emerald-100', 'icon' => 'ph-flask'];
                     } elseif (str_contains($sName, 'bahasa') || str_contains($sName, 'inggris') || str_contains($sName, 'indonesia')) {
-                        // Rose (Bahasa)
                         $theme = ['bg' => 'bg-rose-50', 'text' => 'text-rose-700', 'border' => 'border-rose-200', 'light' => 'bg-rose-100', 'ring' => 'ring-rose-100', 'icon' => 'ph-translate'];
-                    } elseif (str_contains($sName, 'ips') || str_contains($sName, 'sejarah') || str_contains($sName, 'geografi') || str_contains($sName, 'pkn')) {
-                        // Blue (Sosial)
+                    } elseif (str_contains($sName, 'ips') || str_contains($sName, 'sejarah') || str_contains($sName, 'pkn')) {
                         $theme = ['bg' => 'bg-blue-50', 'text' => 'text-blue-700', 'border' => 'border-blue-200', 'light' => 'bg-blue-100', 'ring' => 'ring-blue-100', 'icon' => 'ph-globe-hemisphere-west'];
                     }
                 @endphp
@@ -71,7 +64,6 @@
                                 $isGraded = $score !== null;
                                 $isQuiz = $task->assignment_type == 'quiz';
                                 
-                                // Config Visual Jenis Tugas
                                 $typeConfig = $isQuiz 
                                     ? ['icon' => 'ph-brain', 'label' => 'Kuis Online', 'color' => 'text-purple-600', 'bg' => 'bg-purple-50', 'border' => 'border-purple-200']
                                     : ['icon' => 'ph-clipboard-text', 'label' => 'Tugas Rumah', 'color' => 'text-blue-600', 'bg' => 'bg-blue-50', 'border' => 'border-blue-200'];
@@ -87,7 +79,6 @@
 
                                     {{-- Card Header --}}
                                     <div class="flex justify-between items-start mb-4 relative z-10">
-                                        {{-- Ikon Mapel Dinamis --}}
                                         <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm border {{ $theme['border'] }} {{ $theme['bg'] }} {{ $theme['text'] }}">
                                             <i class="ph-duotone {{ $theme['icon'] }}"></i>
                                         </div>
@@ -122,7 +113,6 @@
                                             <span class="text-slate-300">•</span>
                                             <span class="text-xs text-slate-500 flex items-center gap-1">
                                                 <i class="ph-fill ph-calendar-blank"></i> 
-                                                {{-- FIX: Menggunakan translatedFormat (Indonesia) --}}
                                                 {{ \Carbon\Carbon::parse($task->deadline)->translatedFormat('d M, H:i') }}
                                             </span>
                                         </div>
@@ -135,8 +125,8 @@
                                                 <i class="ph-bold ph-check-circle"></i> Selesai
                                             </button>
                                         @else
-                                            {{-- FIX: Menambahkan hash fragment #tugas --}}
-                                            <a href="{{ $isQuiz ? route('students.learning.assignment.quiz', $task->id) : route('students.learning.subject.show', $task->lms_subject_id) . '#tugas' }}" 
+                                            {{-- FIX: Mengganti lms_subject_id menjadi subject_id --}}
+                                            <a href="{{ $isQuiz ? route('students.learning.assignment.quiz', $task->id) : route('students.learning.subject.show', $task->subject_id) . '#tugas' }}" 
                                                class="w-full py-3 rounded-xl {{ $isQuiz ? 'bg-purple-600 hover:bg-purple-700 shadow-purple-200' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200' }} text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg hover:-translate-y-0.5 transition-all">
                                                 <span>Kerjakan</span>
                                                 <i class="ph-bold ph-arrow-right"></i>
@@ -165,27 +155,22 @@
     <div x-show="lmsTab === 'materials'" x-cloak x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
         @if(isset($lms_materials_grouped) && count($lms_materials_grouped) > 0)
             @foreach($lms_materials_grouped as $subjectName => $materials)
-                {{-- 
-                    THEME LOGIC: Copy Paste logic yang sama dengan section assignments
-                    agar konsisten antara tab Tugas dan Materi.
-                --}}
                 @php
+                    // THEME LOGIC yang sama dengan Assignments
                     $sName = strtolower($subjectName);
-                    
-                    // Default Theme (Blue) & Icon
                     $theme = ['bg' => 'bg-blue-50', 'text' => 'text-blue-700', 'border' => 'border-blue-200', 'light' => 'bg-blue-100', 'ring' => 'ring-blue-100', 'icon' => 'ph-book-bookmark'];
 
-                    if (str_contains($sName, 'informatika') || str_contains($sName, 'tik') || str_contains($sName, 'komputer') || str_contains($sName, 'coding')) {
+                    if (str_contains($sName, 'informatika') || str_contains($sName, 'tik') || str_contains($sName, 'komputer')) {
                         $theme = ['bg' => 'bg-cyan-50', 'text' => 'text-cyan-700', 'border' => 'border-cyan-200', 'light' => 'bg-cyan-100', 'ring' => 'ring-cyan-100', 'icon' => 'ph-desktop'];
                     } elseif (str_contains($sName, 'seni') || str_contains($sName, 'budaya') || str_contains($sName, 'musik')) {
                         $theme = ['bg' => 'bg-purple-50', 'text' => 'text-purple-700', 'border' => 'border-purple-200', 'light' => 'bg-purple-100', 'ring' => 'ring-purple-100', 'icon' => 'ph-palette'];
-                    } elseif (str_contains($sName, 'matematika') || str_contains($sName, 'kalkulus') || str_contains($sName, 'aljabar') || str_contains($sName, 'pjok') || str_contains($sName, 'olahraga')) {
-                        $theme = ['bg' => 'bg-orange-50', 'text' => 'text-orange-700', 'border' => 'border-orange-200', 'light' => 'bg-orange-100', 'ring' => 'ring-orange-100', 'icon' => str_contains($sName, 'pjok') ? 'ph-soccer-ball' : 'ph-calculator'];
-                    } elseif (str_contains($sName, 'ipa') || str_contains($sName, 'fisika') || str_contains($sName, 'kimia') || str_contains($sName, 'biologi') || str_contains($sName, 'agama') || str_contains($sName, 'pai')) {
-                        $theme = ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'border' => 'border-emerald-200', 'light' => 'bg-emerald-100', 'ring' => 'ring-emerald-100', 'icon' => str_contains($sName, 'agama') ? 'ph-hands-praying' : 'ph-flask'];
+                    } elseif (str_contains($sName, 'matematika') || str_contains($sName, 'kalkulus') || str_contains($sName, 'aljabar')) {
+                        $theme = ['bg' => 'bg-orange-50', 'text' => 'text-orange-700', 'border' => 'border-orange-200', 'light' => 'bg-orange-100', 'ring' => 'ring-orange-100', 'icon' => 'ph-calculator'];
+                    } elseif (str_contains($sName, 'ipa') || str_contains($sName, 'fisika') || str_contains($sName, 'agama')) {
+                        $theme = ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'border' => 'border-emerald-200', 'light' => 'bg-emerald-100', 'ring' => 'ring-emerald-100', 'icon' => 'ph-flask'];
                     } elseif (str_contains($sName, 'bahasa') || str_contains($sName, 'inggris') || str_contains($sName, 'indonesia')) {
                         $theme = ['bg' => 'bg-rose-50', 'text' => 'text-rose-700', 'border' => 'border-rose-200', 'light' => 'bg-rose-100', 'ring' => 'ring-rose-100', 'icon' => 'ph-translate'];
-                    } elseif (str_contains($sName, 'ips') || str_contains($sName, 'sejarah') || str_contains($sName, 'geografi') || str_contains($sName, 'pkn')) {
+                    } elseif (str_contains($sName, 'ips') || str_contains($sName, 'sejarah') || str_contains($sName, 'pkn')) {
                         $theme = ['bg' => 'bg-blue-50', 'text' => 'text-blue-700', 'border' => 'border-blue-200', 'light' => 'bg-blue-100', 'ring' => 'ring-blue-100', 'icon' => 'ph-globe-hemisphere-west'];
                     }
                 @endphp
@@ -227,7 +212,8 @@
                                                 <i class="ph-bold ph-download-simple"></i> Unduh
                                             </a>
                                         @endif
-                                        <a href="{{ route('students.learning.subject.show', $material->lms_subject_id) }}" class="flex-1 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-xs flex items-center justify-center gap-2 transition-colors">
+                                        {{-- FIX: Mengganti lms_subject_id menjadi subject_id --}}
+                                        <a href="{{ route('students.learning.subject.show', $material->subject_id) }}" class="flex-1 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-xs flex items-center justify-center gap-2 transition-colors">
                                             <i class="ph-bold ph-eye"></i> Lihat
                                         </a>
                                     </div>
