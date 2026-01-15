@@ -17,19 +17,20 @@ use Carbon\Carbon;
 class TeachingController extends Controller
 {
     /**
-     * MODIFIKASI: Hanya menampilkan jadwal HARI INI milik guru yang login.
+     * DASHBOARD JADWAL
+     * Optimasi: Menggunakan Eager Loading 'todaySession'
      */
     public function index()
     {
         $teacherId = Auth::id();
         
-        // 1. Set Locale ke Indonesia agar cocok dengan data 'day' di database ('Senin', 'Selasa', dst)
         Carbon::setLocale('id');
-        $todayName = Carbon::now()->translatedFormat('l'); // Output: "Senin", "Selasa", dst.
+        $todayName = Carbon::now()->translatedFormat('l'); 
 
-        $schedules = Schedule::with(['schoolClass', 'subject'])
+        // Load 'todaySession' agar tidak query database di dalam loop Blade
+        $schedules = Schedule::with(['schoolClass', 'subject', 'todaySession'])
                     ->where('teacher_id', $teacherId)
-                    ->where('day', $todayName) // <--- FILTER TAMBAHAN (Hanya Hari Ini)
+                    ->where('day', $todayName)
                     ->orderBy('start_time', 'asc')
                     ->get();
 
@@ -61,13 +62,28 @@ class TeachingController extends Controller
     // --- HALAMAN KELAS BERLANGSUNG ---
     public function show($id)
     {
-        $session = TeachingSession::with(['schedule.schoolClass.students', 'schedule.subject', 'attendances.student'])
+        // Load semua relasi yang dibutuhkan
+        $session = TeachingSession::with(['schedule.schoolClass.students', 'schedule.subject', 'attendances'])
                     ->findOrFail($id);
         
-        $presentCount = $session->attendances->whereIn('status', ['present', 'late'])->count();
-        $totalStudents = $session->schedule->schoolClass->students->count();
+        // 1. Ambil Data Siswa & Urutkan
+        $allStudents = $session->schedule->schoolClass->students->sortBy('name');
+        
+        // 2. Ambil Absensi & Key By ID agar mudah diakses di Blade
+        $attendances = $session->attendances->keyBy('student_id');
+        
+        // 3. Cek Status Kelas
+        $isOpen = $session->status == 'open';
 
-        return view('teaching.show', compact('session', 'presentCount', 'totalStudents'));
+        // 4. LOGIKA STATISTIK (DIPINDAHKAN DARI BLADE KE SINI)
+        $stats = [
+            'present'    => $attendances->where('status', 'present')->count(),
+            'sick'       => $attendances->where('status', 'sick')->count(),
+            'permission' => $attendances->where('status', 'permission')->count(),
+            'alpha'      => $attendances->where('status', 'alpha')->count(),
+        ];
+
+        return view('teaching.show', compact('session', 'allStudents', 'attendances', 'isOpen', 'stats'));
     }
 
     // --- UPDATE JURNAL ---
@@ -76,7 +92,7 @@ class TeachingController extends Controller
         $session = TeachingSession::findOrFail($id);
         
         $request->validate([
-            'topic' => 'nullable|string|max:255',
+            'topic' => 'required|string|max:255', // Ubah ke required agar jurnal tidak kosong
             'activities' => 'nullable|string',
             'photo_proof' => 'nullable|image|max:5120', 
             'video_link' => 'nullable|url',
@@ -85,7 +101,7 @@ class TeachingController extends Controller
         $data = [
             'topic' => $request->topic,
             'activities' => $request->activities,
-            'reference_link' => $request->reference_link,
+            'reference_link' => $request->reference_link ?? null,
             'video_link' => $request->video_link,
         ];
 
@@ -109,7 +125,7 @@ class TeachingController extends Controller
 
         $histories = TeachingSession::with(['schedule.schoolClass', 'schedule.subject'])
                     ->withCount([
-                        'attendances as hadir' => function($q){ $q->whereIn('status', ['present', 'late', 'masuk']); },
+                        'attendances as hadir' => function($q){ $q->whereIn('status', ['present', 'late']); },
                         'attendances as alpha' => function($q){ $q->where('status', 'alpha'); },
                         'attendances as sakit' => function($q){ $q->where('status', 'sick'); },
                         'attendances as izin' => function($q){ $q->where('status', 'permission'); },
@@ -133,6 +149,7 @@ class TeachingController extends Controller
             'session_id' => 'required'
         ]);
 
+        // Cari siswa berdasarkan RFID atau NIS
         $student = Student::where('student_id', $request->rfid) 
                    ->orWhere('nis', $request->rfid) 
                    ->first();
@@ -176,24 +193,36 @@ class TeachingController extends Controller
         $request->validate([
             'session_id' => 'required|exists:teaching_sessions,id',
             'student_id' => 'required|exists:students,id',
-            'status'     => 'required|in:present,sick,permission,alpha',
+            'status'     => 'nullable|in:present,sick,permission,alpha', // Nullable jika ingin reset
         ]);
 
-        $attendance = ClassAttendance::updateOrCreate(
-            [
-                'teaching_session_id' => $request->session_id,
-                'student_id' => $request->student_id
-            ],
-            [
-                'status' => $request->status,
-                'scanned_at' => now(), 
-            ]
-        );
+        if(is_null($request->status)) {
+             // Jika status dikirim null (Reset), hapus data absensi
+             ClassAttendance::where('teaching_session_id', $request->session_id)
+                            ->where('student_id', $request->student_id)
+                            ->delete();
+             $data = null;
+             $status = null;
+        } else {
+            $attendance = ClassAttendance::updateOrCreate(
+                [
+                    'teaching_session_id' => $request->session_id,
+                    'student_id' => $request->student_id
+                ],
+                [
+                    'status' => $request->status,
+                    'scanned_at' => now(), 
+                ]
+            );
+            $data = $attendance;
+            $status = $request->status;
+        }
 
         return response()->json([
             'status' => 'success',
             'message' => 'Status siswa berhasil diperbarui.',
-            'data' => $attendance
+            'data' => $data,
+            'new_status' => $status
         ]);
     }
 
@@ -205,7 +234,8 @@ class TeachingController extends Controller
             $session = TeachingSession::with('schedule.schoolClass')->findOrFail($id);
             
             if ($session->status == 'closed') {
-                return redirect()->route('dashboard')->with('info', 'Kelas sudah ditutup sebelumnya.');
+                // UPDATE: Redirect ke halaman Index (Jadwal), bukan Dashboard
+                return redirect()->route('teaching.index')->with('info', 'Kelas sudah ditutup sebelumnya.');
             }
 
             $classId = $session->schedule->school_class_id;
@@ -251,7 +281,8 @@ class TeachingController extends Controller
             ]);
 
             DB::commit();
-            return redirect()->route('dashboard')->with('success', "Kelas ditutup. $alphaCount siswa ditandai Alpha & mendapat poin.");
+            // UPDATE: Redirect ke halaman Index (Jadwal), bukan Dashboard
+            return redirect()->route('teaching.index')->with('success', "Kelas ditutup. $alphaCount siswa ditandai Alpha & mendapat poin.");
 
         } catch (\Exception $e) {
             DB::rollBack();

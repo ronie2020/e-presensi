@@ -71,6 +71,9 @@ class StudentPortalController extends Controller
         Carbon::setLocale('id');
         $student = Student::with(['schoolClass', 'alumniProfile'])->findOrFail($id);
         $isAlumni = $student->status === 'graduated';
+        
+        // FIX: Deteksi Class ID yang benar (antisipasi nama kolom berbeda)
+        $classId = $student->class_id ?? $student->school_class_id ?? optional($student->schoolClass)->id;
 
         // 2. DATA PENGHUBUNG (LIAISON)
         $liaison_messages = collect([]);
@@ -255,8 +258,9 @@ class StudentPortalController extends Controller
 
         // 6. DATA LAINNYA
         $lms_assignments_grouped = []; $lms_grades = [];
-        if ($student->school_class_id && class_exists(LmsAssignment::class)) {
-             $assignments = LmsAssignment::with('subject')->where('class_id', $student->school_class_id)->latest()->get();
+        // [FIX] Gunakan $classId yang sudah divalidasi di atas
+        if ($classId && class_exists(LmsAssignment::class)) {
+             $assignments = LmsAssignment::with('subject')->where('class_id', $classId)->latest()->get();
              $lms_assignments_grouped = $assignments->groupBy(fn($i) => $i->subject->name ?? 'Umum');
              
              if (class_exists(LmsSubmission::class)) {
@@ -283,25 +287,26 @@ class StudentPortalController extends Controller
             }
         }
 
-        // [PERBAIKAN] Menggunakan TeachingSession untuk Jurnal KBM
+        // 7. JURNAL KBM / TEACHING JOURNAL (FIXED)
         $teaching_journals = [];
-        if (class_exists(TeachingSession::class) && $student->schoolClass) {
-             // Mengambil sesi mengajar yang jadwalnya sesuai dengan kelas siswa
+        // [FIX] Gunakan $classId untuk query, bukan $student->school_class_id yang mungkin null
+        if (class_exists(TeachingSession::class) && $classId) {
              $teaching_journals = TeachingSession::with(['schedule.subject', 'schedule.teacher', 'attendances'])
-                ->whereHas('schedule', fn($q) => $q->where('school_class_id', $student->school_class_id))
+                ->whereHas('schedule', fn($q) => $q->where('school_class_id', $classId))
                 ->latest('date')
-                ->take(10) // Ambil 10 terakhir
+                ->latest('started_at') // Tambah sorting waktu agar yang terbaru muncul di atas
+                ->take(10)
                 ->get();
         }
 
-        // 7. PENGADUAN
+        // 8. PENGADUAN
         $complaints = collect([]);
         if (class_exists(Complaint::class)) {
             $complaints = Complaint::where('student_id', $student->id)->latest()->get();
         }
 
          // ==========================================
-        // 8. TABS MENU (DIPERBAIKI: DIPISAH & LENGKAP)
+        // 9. TABS MENU
         // ==========================================
         $tabs = ['ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan']];
 
@@ -316,7 +321,7 @@ class StudentPortalController extends Controller
                 'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
                 'pengaduan' => ['icon' => 'megaphone', 'label' => 'Lapor Masalah'],   
                 'jadwal' => ['icon' => 'calendar-blank', 'label' => 'Jadwal Pelajaran'],
-                'kbm' => ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'],
+                'kbm' => ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'], // Pastikan key 'kbm' sesuai dengan nama file tab-kbm.blade.php
                 'akademik' => ['icon' => 'exam', 'label' => 'Nilai Rapor'],
                 'lms' => ['icon' => 'clipboard-text', 'label' => 'Tugas Online'],
                 'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Riwayat Absen'],
