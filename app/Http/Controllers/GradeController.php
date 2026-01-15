@@ -268,7 +268,7 @@ class GradeController extends Controller
     }
 
     /**
-     * Download Template Excel PER MAPEL (Versi Otomatis Generate)
+     * Download Template Excel PER MAPEL
      */
     public function downloadTemplate()
     {
@@ -276,7 +276,7 @@ class GradeController extends Controller
     }
 
     /**
-     * Download Template Excel PER SISWA (Versi Otomatis Generate)
+     * Download Template Excel PER SISWA
      */
     public function downloadStudentTemplate()
     {
@@ -392,6 +392,7 @@ class GradeController extends Controller
 
     /**
      * Halaman Detail/Preview Rapor Siswa
+     * UPDATE: Penambahan logika Navigasi Siswa (Prev/Next)
      */
     public function reportCard($student_id)
     {
@@ -418,12 +419,44 @@ class GradeController extends Controller
             return $subject;
         });
 
+        // ------------------------------------------------------------------
+        // LOGIKA NAVIGASI PREV/NEXT (Update Baru)
+        // ------------------------------------------------------------------
+        
+        // 1. Ambil daftar ID siswa sekelas, urut abjad
+        // Pastikan 'name' asc agar urutannya sama dengan di daftar
+        $classmates = Student::where('class_id', $student->class_id)
+                        ->orderBy('name', 'asc')
+                        ->pluck('id')
+                        ->toArray();
+
+        // 2. Cari posisi siswa saat ini di array
+        $currentPos = array_search($student->id, $classmates);
+
+        // 3. Tentukan ID Next dan Prev
+        $prevStudentId = null;
+        $nextStudentId = null;
+
+        if ($currentPos !== false) {
+            // Jika bukan siswa pertama, ambil ID sebelumnya
+            if ($currentPos > 0) {
+                $prevStudentId = $classmates[$currentPos - 1];
+            }
+            
+            // Jika bukan siswa terakhir, ambil ID selanjutnya
+            if ($currentPos < count($classmates) - 1) {
+                $nextStudentId = $classmates[$currentPos + 1];
+            }
+        }
+
         return view('grades.report', [
             'student' => $student,
             'record' => $record,
             'subjects' => $subjects,
             'year' => $academic_year,
-            'semester' => $semester
+            'semester' => $semester,
+            'prevStudentId' => $prevStudentId, // Variable baru untuk tombol Prev
+            'nextStudentId' => $nextStudentId  // Variable baru untuk tombol Next
         ]);
     }
 }
