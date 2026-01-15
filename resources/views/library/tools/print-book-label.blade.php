@@ -3,21 +3,25 @@
 <head>
     <title>Cetak Label Buku</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    {{-- FONT PENTING: Mengubah text menjadi Barcode --}}
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    
+    {{-- FONT BARCODE & TEXT --}}
     <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39+Text&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: #e2e8f0; 
+            background: #cbd5e1; 
             -webkit-print-color-adjust: exact; 
+            print-color-adjust: exact;
         }
 
-        /* FONT BARCODE */
+        /* FONT BARCODE (Diperbesar sedikit spacingnya agar mudah discan) */
         .font-barcode {
             font-family: 'Libre Barcode 39 Text', cursive;
-            font-size: 42px; /* Ukuran barcode */
+            font-size: 38px; 
             line-height: 1;
+            white-space: nowrap;
         }
 
         /* LAYOUT KERTAS A4 */
@@ -29,37 +33,47 @@
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3 Kolom Stiker */
+            grid-template-columns: repeat(3, 1fr); /* 3 Kolom */
             grid-auto-rows: min-content;
-            gap: 4mm; /* Jarak antar stiker */
+            gap: 5mm; 
             align-content: start;
         }
 
-        /* DESAIN SATU STIKER */
+        /* STICKER CONTAINER */
         .sticker {
-            border: 1px dashed #cbd5e1; /* Garis potong */
-            height: 38mm; /* Tinggi standar label sticker */
+            height: 35mm; /* Tinggi ideal label buku */
             display: flex;
             overflow: hidden;
             position: relative;
             background: white;
+            page-break-inside: avoid;
         }
 
+        /* OPSI GARIS POTONG (Dinyalakan via Alpine) */
+        .sticker.show-border {
+            border: 1px dashed #94a3b8;
+        }
+        .sticker.no-border {
+            border: 1px solid transparent; /* Tetap ada border transparan agar layout tidak geser */
+        }
+
+        /* LABEL PUNGGUNG (SPINE) */
         .spine-label {
-            width: 35%;
-            background: #f1f5f9;
-            border-right: 1px dashed #94a3b8;
+            width: 32%;
+            background: #fff;
+            border-right: 1px solid #000; /* Garis lipat tegas */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 4px;
+            padding: 2px;
         }
 
+        /* LABEL COVER (BARCODE) */
         .cover-label {
-            width: 65%;
-            padding: 6px 10px;
+            width: 68%;
+            padding: 4px 8px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -67,75 +81,104 @@
         }
 
         @media print {
-            body { background: none; margin: 0; }
+            body { background: white; margin: 0; padding: 0; }
             .page { 
-                width: 100%; 
-                margin: 0; 
-                box-shadow: none; 
-                padding: 5mm; 
+                width: 100%; margin: 0; box-shadow: none; padding: 5mm; 
                 page-break-after: always;
             }
             .no-print { display: none !important; }
+            
+            /* Sembunyikan scrollbar saat print */
+            ::-webkit-scrollbar { display: none; }
         }
     </style>
 </head>
-<body>
+<body x-data="{ showBorder: true }">
 
-    <!-- Tombol Navigasi (Hilang saat print) -->
-    <div class="no-print fixed top-0 left-0 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 p-4 flex justify-between items-center z-50">
-        <div>
-            <h1 class="font-bold text-slate-800">Preview Cetak Label Buku</h1>
-            <p class="text-xs text-slate-500">Total: {{ $books->count() }} Label</p>
+    <!-- TOOLBAR NAVIGASI (NO PRINT) -->
+    <div class="no-print fixed top-0 left-0 w-full bg-slate-900 text-white p-3 shadow-lg z-50 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-4">
+            <div class="bg-white/10 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+            </div>
+            <div>
+                <h1 class="font-bold text-sm md:text-base">Preview Label Buku</h1>
+                <p class="text-xs text-slate-400">Total: {{ $books->count() }} Label</p>
+            </div>
         </div>
-        <div class="flex gap-3">
-            <button onclick="window.print()" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-xl font-bold shadow-lg transition flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M216,40H40A16,16,0,0,0,24,56V160a16,16,0,0,0,16,16H56v48a16,16,0,0,0,16,16H184a16,16,0,0,0,16-16V176h32a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM184,224H72V152H184Zm32-64H200V144a8,8,0,0,0-8-8H64a8,8,0,0,0-8,8v16H40V56H216Zm-32-80a12,12,0,1,1,12,12A12,12,0,0,1,184,80Z"></path></svg>
-                Cetak
+
+        {{-- Kontrol Garis Potong --}}
+        <div class="flex items-center gap-3 bg-white/5 px-4 py-2 rounded-xl border border-white/10">
+            <label class="text-xs font-bold text-slate-300 uppercase tracking-wider cursor-pointer select-none flex items-center gap-2">
+                <input type="checkbox" x-model="showBorder" class="w-4 h-4 rounded text-blue-500 bg-slate-700 border-slate-600 focus:ring-offset-slate-900">
+                Tampilkan Garis Potong
+            </label>
+        </div>
+
+        <div class="flex gap-2">
+            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-xl font-bold shadow-lg transition flex items-center gap-2 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" /></svg>
+                Cetak Label
             </button>
-            <button onclick="window.close()" class="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl font-bold hover:bg-slate-200 transition">
+            <button onclick="window.close()" class="bg-slate-700 text-slate-300 px-4 py-2 rounded-xl font-bold hover:bg-slate-600 transition text-sm">
                 Tutup
             </button>
         </div>
     </div>
 
     <!-- AREA KERTAS -->
-    <div class="page mt-20">
+    <div class="page mt-24">
         @foreach($books as $book)
-        <div class="sticker">
-            {{-- BAGIAN KIRI: LABEL PUNGGUNG (Untuk Rak) --}}
+        {{-- Warna Border Kategori (Opsional: Bisa diwarnai berdasarkan klasifikasi DDC) --}}
+        @php
+            $ddc = substr($book->category->code ?? '000', 0, 3);
+            $colorClass = 'border-black'; 
+            // Logika warna bisa ditambahkan disini jika perlu (misal 800 sastra = kuning, dsb)
+        @endphp
+
+        <div class="sticker" :class="showBorder ? 'show-border' : 'no-border'">
+            
+            {{-- 1. BAGIAN KIRI: LABEL PUNGGUNG (SPINE) --}}
             <div class="spine-label">
-                <span class="text-[8px] font-bold text-slate-500 uppercase tracking-tighter mb-0.5">PERPUS</span>
+                {{-- Nama Perpustakaan Kecil --}}
+                <div class="text-[6px] font-black uppercase tracking-tighter mb-1 rotate-0 text-slate-400">
+                    PERPUS
+                </div>
                 
-                {{-- Klasifikasi DDC (Contoh: 813) --}}
+                {{-- Klasifikasi DDC (Besar) --}}
                 <h3 class="text-lg font-black text-slate-900 leading-none">
-                    {{ substr($book->category->code ?? '000', 0, 3) }}
+                    {{ $ddc }}
                 </h3>
                 
-                {{-- 3 Huruf Pengarang (Contoh: ROW) --}}
-                <h3 class="text-xs font-bold text-slate-700 leading-none mt-1 uppercase">
+                {{-- Pengarang (3 Huruf) --}}
+                <h3 class="text-xs font-bold text-slate-900 leading-none mt-1 uppercase font-mono">
                     {{ substr($book->author ?? 'XXX', 0, 3) }}
                 </h3>
                 
-                {{-- Huruf Awal Judul (Contoh: h) --}}
-                <h3 class="text-xs font-bold text-slate-500 leading-none mt-1 lowercase">
+                {{-- Judul (1 Huruf) --}}
+                <h3 class="text-xs font-bold text-slate-900 leading-none mt-0.5 lowercase font-mono">
                     {{ substr($book->title ?? 'x', 0, 1) }}
                 </h3>
             </div>
 
-            {{-- BAGIAN KANAN: BARCODE & JUDUL --}}
+            {{-- 2. BAGIAN KANAN: BARCODE & JUDUL --}}
             <div class="cover-label">
-                <p class="text-[9px] font-bold text-slate-600 truncate w-full mb-1 text-center">
-                    {{ \Illuminate\Support\Str::limit($book->title, 20) }}
+                {{-- Judul Buku (Truncated) --}}
+                <p class="text-[9px] font-bold text-slate-700 text-center leading-tight mb-1 w-full line-clamp-2 h-6 flex items-center justify-center">
+                    {{ $book->title }}
                 </p>
                 
-                {{-- BARCODE GENERATOR (Font Based) --}}
+                {{-- BARCODE --}}
                 <div class="flex-1 flex items-center justify-center w-full overflow-hidden">
-                    <span class="font-barcode text-slate-900 text-4xl">
-                        {{-- Tambahkan * di awal & akhir agar discan valid Code39 --}}
+                    <span class="font-barcode text-black">
                         *{{ $book->book_code }}*
                     </span>
                 </div>
-                <p class="text-[8px] font-mono text-slate-400 mt-1">{{ $book->book_code }}</p>
+                
+                {{-- Kode Teks di Bawah Barcode --}}
+                <p class="text-[9px] font-mono font-bold text-slate-500 tracking-wider mt-0.5">
+                    {{ $book->book_code }}
+                </p>
             </div>
         </div>
         @endforeach

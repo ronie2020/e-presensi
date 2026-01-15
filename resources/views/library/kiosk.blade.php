@@ -110,7 +110,6 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // ... (Logic Jam, Scan, Fetch sama, hanya update template HTML untuk Result & Log) ...
         const clockEl = document.getElementById('kiosk-clock');
         const dateEl = document.getElementById('kiosk-date');
         const scanInput = document.getElementById('scan-input');
@@ -126,7 +125,7 @@
 
         const initialData = @json($recentVisits ?? []);
 
-        // Audio Logic (Same as before)
+        // Audio Logic
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playBeep(type) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -151,7 +150,6 @@
             const time = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
             const initial = name.charAt(0).toUpperCase();
             
-            // STYLE UPDATE: Log Card
             const cardClass = status 
                 ? "bg-slate-800/50 border-slate-700" 
                 : "bg-rose-900/20 border-rose-500/20";
@@ -210,6 +208,10 @@
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
                     body: JSON.stringify({ scan_data: code })
                 });
+                
+                // Cek status HTTP sebelum parse JSON
+                if (!res.ok) throw new Error('HTTP Status ' + res.status);
+                
                 const data = await res.json();
                 
                 if(data.success) {
@@ -229,7 +231,7 @@
                     addToLog(data.student_name, true, 'Kunjungan');
                 } else {
                     playBeep('error');
-                    // ERROR STATE UI
+                    // ERROR STATE UI (Scan Gagal / Siswa Tidak Ditemukan)
                     statusBox.className = "w-full max-w-3xl aspect-[16/7] bg-rose-600 rounded-[2.5rem] flex flex-col items-center justify-center shadow-[0_0_80px_rgba(225,29,72,0.5)] transform scale-[1.02] transition-all duration-300 z-50 relative overflow-hidden";
                     stateResult.innerHTML = `
                          <div class="bg-white/20 p-4 rounded-full mb-4 backdrop-blur-md border border-white/20">
@@ -240,9 +242,15 @@
                     addToLog('Scan Gagal', false, data.message);
                 }
             } catch (err) {
+                // SYSTEM / NETWORK ERROR HANDLING
+                console.error(err);
                 playBeep('error');
-                statusBox.className = "w-full max-w-3xl aspect-[16/7] bg-slate-800 rounded-[2.5rem] border-4 border-rose-500 flex flex-col items-center justify-center";
-                stateResult.innerHTML = `<p class="text-rose-400 font-bold text-2xl uppercase">Koneksi Terputus</p>`;
+                statusBox.className = "w-full max-w-3xl aspect-[16/7] bg-slate-800 rounded-[2.5rem] border-4 border-rose-500 flex flex-col items-center justify-center shadow-[0_0_50px_rgba(225,29,72,0.3)]";
+                stateResult.innerHTML = `
+                    <i class="ph-duotone ph-wifi-slash text-6xl text-rose-500 mb-4 animate-pulse"></i>
+                    <p class="text-rose-400 font-bold text-2xl uppercase tracking-widest">Koneksi Terputus</p>
+                    <p class="text-rose-500/50 text-sm font-mono mt-1">Gagal menghubungi server</p>
+                `;
             }
 
             setTimeout(() => {

@@ -7,7 +7,7 @@ use App\Models\Student;
 use App\Models\Book;
 use App\Models\Loan; 
 use Barryvdh\DomPDF\Facade\Pdf;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
+// HAPUS: use SimpleSoftwareIO\QrCode\Facades\QrCode; (Penyebab Error)
 
 class LibraryToolController extends Controller
 {
@@ -62,10 +62,11 @@ class LibraryToolController extends Controller
             });
         }
 
-        // Generate QR Code (Format SVG agar tajam saat diprint)
-        $qrcode = QrCode::size(100)->generate($student->student_id);
+        // HAPUS: Bagian generate QR Code lokal yang menyebabkan error
+        // $qrcode = QrCode::size(100)->generate($student->student_id);
 
-        return view('library.tools.print-card', compact('student', 'qrcode'));
+        // Kirim data siswa saja, QR Code ditangani oleh View (Blade) via API
+        return view('library.tools.print-card', compact('student'));
     }
 
     /**

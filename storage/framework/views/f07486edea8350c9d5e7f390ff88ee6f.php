@@ -1,11 +1,20 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION --}}
+            
             <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 mb-10 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -13,7 +22,7 @@
                 <div class="relative z-10 flex items-center justify-between">
                     <div>
                         <div class="flex items-center gap-3 mb-2">
-                            <a href="{{ route('library.dashboard') }}" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-blue-100 transition flex items-center gap-2">
+                            <a href="<?php echo e(route('library.dashboard')); ?>" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-blue-100 transition flex items-center gap-2">
                                 <i class="ph-bold ph-arrow-left"></i> Dashboard
                             </a>
                             <span class="text-blue-300 text-xs font-bold uppercase tracking-wider">Modul Transaksi</span>
@@ -38,7 +47,7 @@
                 <!-- PANEL PEMINJAMAN (KIRI) -->
                 <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 h-full flex flex-col relative overflow-hidden group hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
                     
-                    {{-- Header --}}
+                    
                     <div class="p-8 pb-0">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-[1.2rem] flex items-center justify-center text-2xl shadow-sm border border-blue-100">
@@ -139,7 +148,7 @@
         </div>
     </div>
 
-    {{-- MODAL SCANNER --}}
+    
     <div id="scannerModal" class="fixed inset-0 z-[60] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-md transition-opacity" onclick="stopScanner()"></div>
         <div class="flex min-h-screen items-center justify-center p-4">
@@ -148,7 +157,7 @@
                     <h3 class="text-xl font-black text-slate-800 text-center mb-6">Pindai Kode</h3>
                     <div class="relative bg-black rounded-3xl overflow-hidden aspect-square border-4 border-slate-100 shadow-inner">
                         <div id="reader" class="w-full h-full"></div>
-                        {{-- Overlay Frame Scanner --}}
+                        
                         <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
                             <div class="w-64 h-64 border-2 border-white/30 rounded-2xl relative">
                                 <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl-xl -mt-1 -ml-1"></div>
@@ -164,7 +173,7 @@
         </div>
     </div>
 
-    {{-- Script JavaScript --}}
+    
     <script>
         let html5QrcodeScanner = null;
         let activeInputId = null;
@@ -214,9 +223,9 @@
                 // Tampilkan loading visual sederhana
                 wrapper.classList.add('opacity-50');
 
-                const res = await fetch('{{ route("library.circulation.searchStudent") }}', {
+                const res = await fetch('<?php echo e(route("library.circulation.searchStudent")); ?>', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ q: query })
                 });
                 
@@ -286,9 +295,9 @@
             try {
                 wrapper.classList.add('opacity-50');
 
-                const res = await fetch('{{ route("library.circulation.searchBook") }}', {
+                const res = await fetch('<?php echo e(route("library.circulation.searchBook")); ?>', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ q: query })
                 });
 
@@ -330,9 +339,9 @@
             if(!currentMember || !currentBook) return;
              
              try {
-                const res = await fetch('{{ route("library.circulation.store") }}', {
+                const res = await fetch('<?php echo e(route("library.circulation.store")); ?>', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ student_id: currentMember.id, book_id: currentBook.id })
                 });
                 
@@ -372,9 +381,9 @@
             infoBox.innerHTML = '<div class="text-center py-8"><div class="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div></div>';
 
             try {
-                const res = await fetch('{{ route("library.circulation.return") }}?check_only=1', {
+                const res = await fetch('<?php echo e(route("library.circulation.return")); ?>?check_only=1', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ book_code: query })
                 });
                 
@@ -420,9 +429,9 @@
         // --- 5. LOGIC KONFIRMASI PENGEMBALIAN ---
         async function confirmReturn(bookCode) {
             try {
-                const res = await fetch('{{ route("library.circulation.return") }}', {
+                const res = await fetch('<?php echo e(route("library.circulation.return")); ?>', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ book_code: bookCode })
                 });
                 
@@ -448,4 +457,13 @@
             }
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/library/circulation.blade.php ENDPATH**/ ?>

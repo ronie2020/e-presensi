@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kartu Pustaka - {{ $student->name }}</title>
+    <title>Kartu Pustaka - <?php echo e($student->name); ?></title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Poppins -->
@@ -229,13 +229,13 @@
 
             <!-- Logo Kiri Atas -->
             <div class="logo-left-group">
-                 <img src="{{ asset('images/tut_wuri.png') }}" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/b/b3/Logo_Tut_Wuri_Handayani.svg'" class="h-6 w-auto drop-shadow-sm filter brightness-110">
-                 <img src="{{ asset('images/ciamis.png') }}" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Coat_of_arms_of_Ciamis_Regency.svg/1200px-Coat_of_arms_of_Ciamis_Regency.svg.png'" class="h-6 w-auto drop-shadow-sm">
+                 <img src="<?php echo e(asset('images/tut_wuri.png')); ?>" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/b/b3/Logo_Tut_Wuri_Handayani.svg'" class="h-6 w-auto drop-shadow-sm filter brightness-110">
+                 <img src="<?php echo e(asset('images/ciamis.png')); ?>" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Coat_of_arms_of_Ciamis_Regency.svg/1200px-Coat_of_arms_of_Ciamis_Regency.svg.png'" class="h-6 w-auto drop-shadow-sm">
             </div>
 
             <!-- Logo Sekolah Tengah -->
             <div class="school-logo-center">
-                <img src="{{ asset('images/logo.png') }}" onerror="this.src='https://via.placeholder.com/100?text=LOGO'" class="h-9 w-9 object-contain">
+                <img src="<?php echo e(asset('images/logo.png')); ?>" onerror="this.src='https://via.placeholder.com/100?text=LOGO'" class="h-9 w-9 object-contain">
             </div>
 
             <!-- Judul Kartu -->
@@ -247,12 +247,12 @@
             <!-- Foto Siswa -->
             <div class="w-full flex justify-center mb-1">
                 <div class="student-photo-frame">
-                    @if($student->photo_path)
-                        <img src="{{ asset('storage/' . $student->photo_path) }}" class="w-full h-full object-cover">
-                    @else
-                        {{-- FIX: Gunakan urlencode agar nama dengan spasi tidak error --}}
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($student->name) }}&background=2563eb&color=fff&size=200" class="w-full h-full object-cover">
-                    @endif
+                    <?php if($student->photo_path): ?>
+                        <img src="<?php echo e(asset('storage/' . $student->photo_path)); ?>" class="w-full h-full object-cover">
+                    <?php else: ?>
+                        
+                        <img src="https://ui-avatars.com/api/?name=<?php echo e(urlencode($student->name)); ?>&background=2563eb&color=fff&size=200" class="w-full h-full object-cover">
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -263,7 +263,8 @@
                 <div class="text-center w-full mb-1">
                     <div class="inline-block border-b-2 border-slate-900 pb-0.5">
                         <h3 class="text-[10px] font-black text-slate-900 uppercase leading-none">
-                            {{ \Illuminate\Support\Str::limit($student->name, 22) }}
+                            <?php echo e(\Illuminate\Support\Str::limit($student->name, 22)); ?>
+
                         </h3>
                     </div>
                     <p class="text-[8px] font-bold text-slate-600 uppercase tracking-widest mt-0.5">ANGGOTA PERPUS</p>
@@ -275,21 +276,22 @@
                         <tr>
                             <td class="data-label">ID</td>
                             <td class="data-separator">:</td>
-                            <td class="font-bold font-mono">{{ $student->student_id }}</td>
+                            <td class="font-bold font-mono"><?php echo e($student->student_id); ?></td>
                         </tr>
                         <tr>
                             <td class="data-label">TTL</td>
                             <td class="data-separator">:</td>
                             <td class="font-bold leading-tight">
-                                {{-- FIX: Cek jika DOB ada, untuk menghindari error parsing --}}
-                                {{ $student->pob }}, {{ $student->dob ? \Carbon\Carbon::parse($student->dob)->translatedFormat('d M Y') : '-' }}
+                                
+                                <?php echo e($student->pob); ?>, <?php echo e($student->dob ? \Carbon\Carbon::parse($student->dob)->translatedFormat('d M Y') : '-'); ?>
+
                             </td>
                         </tr>
                         <tr>
                             <td class="data-label">Kelas</td>
                             <td class="data-separator">:</td>
-                            {{-- FIX UTAMA: Gunakan optional() agar tidak error jika schoolClass null --}}
-                            <td class="font-bold">{{ optional($student->schoolClass)->name ?? '-' }}</td>
+                            
+                            <td class="font-bold"><?php echo e(optional($student->schoolClass)->name ?? '-'); ?></td>
                         </tr>
                     </table>
                 </div>
@@ -323,8 +325,8 @@
             <div class="z-10 flex flex-col items-center w-full px-6 flex-1 justify-center mt-6">
                 <!-- QR Code Box -->
                 <div class="bg-white p-1 rounded-lg border border-slate-200 mb-5 shadow-sm">
-                    {{-- FIX: Gunakan urlencode pada data QR agar aman --}}
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ urlencode($student->student_id) }}" class="w-32 h-32">
+                    
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?php echo e(urlencode($student->student_id)); ?>" class="w-32 h-32">
                 </div>
 
                 <!-- Tata Tertib Perpus -->
@@ -346,4 +348,4 @@
         </div>
     </div>
 </body>
-</html>
+</html><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/library/tools/print-card.blade.php ENDPATH**/ ?>
