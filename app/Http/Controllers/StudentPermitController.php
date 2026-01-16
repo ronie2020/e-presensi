@@ -7,9 +7,13 @@ use App\Models\Student;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
 
 class StudentPermitController extends Controller
 {
+    /**
+     * Halaman Utama (Dashboard Monitoring)
+     */
     public function index()
     {
         $activePermits = StudentPermit::with(['student.schoolClass']) 
@@ -27,11 +31,95 @@ class StudentPermitController extends Controller
         return view('permit.index', compact('activePermits', 'todayHistory'));
     }
 
+    /**
+     * Helper: Filter Query (Agar tidak menulis ulang logika yang sama)
+     */
+    private function getFilteredQuery(Request $request)
+    {
+        $query = StudentPermit::with(['student.schoolClass'])
+            ->latest('time_out');
+
+        // 1. Filter Pencarian
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('student', function (Builder $q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('student_id', 'like', "%{$search}%")
+                  ->orWhere('nisn', 'like', "%{$search}%");
+            });
+        }
+
+        // 2. Filter Tanggal
+        if ($request->filled('date')) {
+            $query->whereDate('time_out', $request->date);
+        }
+
+        // 3. Filter Status
+        if ($request->filled('status')) {
+            if ($request->status == 'active') {
+                $query->where('status', 'OUT');
+            } elseif ($request->status == 'returned') {
+                $query->where('status', 'RETURNED');
+            } elseif ($request->status == 'overdue') {
+                $query->where('status', 'OUT')
+                      ->where('time_out', '<=', Carbon::now()->subMinutes(15));
+            }
+        }
+
+        return $query;
+    }
+
+    /**
+     * Halaman Riwayat Lengkap & Laporan
+     */
+    public function history(Request $request)
+    {
+        $query = $this->getFilteredQuery($request);
+        $permits = $query->paginate(10)->withQueryString();
+
+        return view('permit.history', compact('permits'));
+    }
+
+    /**
+     * [BARU] Fitur Print Laporan (PDF View)
+     */
+    public function print(Request $request)
+    {
+        // Ambil semua data sesuai filter (tanpa pagination)
+        $permits = $this->getFilteredQuery($request)->get();
+        
+        // Judul Laporan dinamis
+        $title = 'Laporan Izin Siswa';
+        if($request->filled('date')) {
+            $title .= ' - Tanggal ' . Carbon::parse($request->date)->translatedFormat('d F Y');
+        }
+
+        return view('permit.print', compact('permits', 'title'));
+    }
+
+    /**
+     * [BARU] Fitur Export Excel
+     */
+    public function export(Request $request)
+    {
+        $permits = $this->getFilteredQuery($request)->get();
+        $filename = 'Laporan_Izin_' . date('Y-m-d_H-i') . '.xls';
+
+        // Header agar browser mendownload sebagai Excel
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+
+        return view('permit.excel', compact('permits'));
+    }
+
+    /**
+     * Handle Scan QR / Input Manual (Cek Data Siswa)
+     */
     public function scan(Request $request)
     {
         $request->validate(['identifier' => 'required']);
 
-        $student = Student::where('student_id', $request->identifier)
+        $student = Student::with('schoolClass')->where('student_id', $request->identifier)
             ->orWhere('nisn', $request->identifier)
             ->orWhere('rfid_id', $request->identifier)
             ->first();
@@ -47,11 +135,8 @@ class StudentPermitController extends Controller
             ->where('status', 'OUT')
             ->first();
 
-        // LOGIKA CHECK-IN (KEMBALI)
         if ($existingPermit) {
             $checkInTime = Carbon::now();
-            
-            // [UPDATE] Pakai (int) agar angka bulat, tidak ada desimal panjang
             $duration = (int) $existingPermit->time_out->diffInMinutes($checkInTime);
 
             $existingPermit->update([
@@ -71,7 +156,6 @@ class StudentPermitController extends Controller
             ]);
         }
 
-        // LOGIKA PRE-CHECK-OUT (MAU KELUAR)
         return response()->json([
             'status' => 'success',
             'mode' => 'PRE_CHECK_OUT',
@@ -80,6 +164,9 @@ class StudentPermitController extends Controller
         ]);
     }
 
+    /**
+     * Simpan Data Izin Baru (Check-Out)
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -92,7 +179,7 @@ class StudentPermitController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Siswa sudah tercatat di luar!'], 422);
         }
 
-        StudentPermit::create([
+        $permit = StudentPermit::create([
             'student_id' => $request->student_id,
             'pic_teacher_id' => Auth::id(),
             'reason_category' => $request->reason_category,
@@ -101,9 +188,15 @@ class StudentPermitController extends Controller
             'status' => 'OUT'
         ]);
 
+        $permit->load('student');
+
         return response()->json([
             'status' => 'success',
-            'message' => 'Izin berhasil dicatat.'
+            'message' => 'Izin berhasil dicatat.',
+            'data' => [
+                'student' => $permit->student,
+                'reason' => $permit->reason_category
+            ]
         ]);
     }
 }

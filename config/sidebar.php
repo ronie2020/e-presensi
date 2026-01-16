@@ -24,10 +24,16 @@ return [
                 'icon' => 'ph-scan'
             ],
             [
-                'name' => 'Izin Keluar Siswa',
+                'name' => 'Izin Keluar Siswa', 
                 'route' => 'permit.index',
-                'active_check' => 'permit.*',
+                'active_check' => 'permit.index', 
                 'icon' => 'ph-door-open' 
+            ],
+            [
+                'name' => 'Riwayat Izin', 
+                'route' => 'permit.history',
+                'active_check' => 'permit.history',
+                'icon' => 'ph-scroll' 
             ],
             [
                 'name' => 'Rekap Harian',

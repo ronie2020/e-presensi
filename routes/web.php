@@ -310,12 +310,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/scan', [AttendanceSiswaController::class, 'showScanner'])->name('scan.show');
     Route::post('/scan', [AttendanceSiswaController::class, 'processScan'])->name('scan.process');
     
+    
     // --- SISTEM IZIN KELUAR (GURU PIKET) ---
     Route::prefix('permit')->name('permit.')->group(function() {
         Route::get('/', [StudentPermitController::class, 'index'])->name('index');
+        Route::get('/history', [StudentPermitController::class, 'history'])->name('history');
+        
+        // [BARU] Route Cetak & Export
+        Route::get('/print', [StudentPermitController::class, 'print'])->name('print');
+        Route::get('/export', [StudentPermitController::class, 'export'])->name('export');
+        
         Route::post('/scan', [StudentPermitController::class, 'scan'])->name('scan');
         Route::post('/store', [StudentPermitController::class, 'store'])->name('store');    
     });
+
 
     Route::resource('discipline', DisciplineController::class)->only(['index', 'store', 'destroy']);
     Route::resource('discipline-types', DisciplineTypeController::class);
