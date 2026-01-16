@@ -24,6 +24,12 @@ return [
                 'icon' => 'ph-scan'
             ],
             [
+                'name' => 'Izin Keluar Siswa',
+                'route' => 'permit.index',
+                'active_check' => 'permit.*',
+                'icon' => 'ph-door-open' 
+            ],
+            [
                 'name' => 'Rekap Harian',
                 'route' => 'reports.daily',
                 'icon' => 'ph-chart-bar'
@@ -155,7 +161,6 @@ return [
                 'active_check' => 'complaints.*',
                 'icon' => 'ph-mailbox', 
             ],
-            // [BARU] MENU JURNAL KEBIASAAN
             [
                 'name' => 'Monitoring Kebiasaan',
                 'route' => 'teacher.habits.index',

@@ -34,6 +34,7 @@ use App\Http\Controllers\TeachingController;
 use App\Http\Controllers\GraduationController; 
 use App\Http\Controllers\PpdbController;
 use App\Http\Controllers\AlumniController;
+use App\Http\Controllers\StudentPermitController; 
 
 // LMS (Learning Management System)
 use App\Http\Controllers\LmsMaterialController;
@@ -50,7 +51,7 @@ use App\Http\Controllers\StudentPortalController;
 use App\Http\Controllers\StudentAuthController;
 use App\Http\Controllers\StudentExamController;
 use App\Http\Controllers\StudentScheduleController;
-use App\Http\Controllers\StudentHabitController; // [BARU]
+use App\Http\Controllers\StudentHabitController; 
 
 // Perpustakaan
 use App\Http\Controllers\BookController;
@@ -72,8 +73,7 @@ use App\Http\Controllers\AdminAlumniController;
 // Buku Penghubung, Pengaduan & Kebiasaan Guru
 use App\Http\Controllers\LiaisonBookController;
 use App\Http\Controllers\ComplaintController;
-use App\Http\Controllers\TeacherHabitController; // [BARU]
-
+use App\Http\Controllers\TeacherHabitController; 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -115,6 +115,7 @@ Route::post('/kiosk/process', [KioskController::class, 'processKioskScan'])->nam
 // Portal Informasi Siswa (Publik/Orang Tua)
 Route::get('/portal', [StudentPortalController::class, 'index'])->name('portal.index');
 Route::post('/portal/search', [StudentPortalController::class, 'search'])->name('portal.search');
+
 // [PERHATIAN] Route wildcard ini menangkap semua URL /portal/{sesuatu}
 Route::get('/portal/{student_id}', [StudentPortalController::class, 'show'])->name('portal.show');
 Route::get('/portal/student/{id}/card', [StudentPortalController::class, 'printCard'])->name('portal.card');
@@ -127,7 +128,6 @@ Route::get('/kelulusan/cetak/{id}', [GraduationController::class, 'printSkl'])->
 // Library Kiosk
 Route::get('/library/kiosk', [LibraryKioskController::class, 'index'])->name('library.kiosk.index');
 Route::post('/library/kiosk/process', [LibraryKioskController::class, 'process'])->name('library.kiosk.process');
-
 
 // =========================================================================
 //  2. SISTEM SISWA (LOGIN & AREA SISWA)
@@ -170,7 +170,7 @@ Route::middleware(['auth:student'])->group(function () {
     // --- 4. JURNAL KEBIASAAN BAIK (7 HABITS) ---
     Route::prefix('student/kebiasaan')->name('student.habits.')->group(function() {
         
-        // A. DASHBOARD UTAMA (Route Baru)
+        // A. DASHBOARD UTAMA JURNAL
         Route::get('/dashboard', [StudentHabitController::class, 'dashboard'])->name('dashboard');
 
         // B. FORM PENGISIAN JURNAL        
@@ -309,6 +309,14 @@ Route::middleware('auth')->group(function () {
     // Kedisiplinan & Penilaian
     Route::get('/scan', [AttendanceSiswaController::class, 'showScanner'])->name('scan.show');
     Route::post('/scan', [AttendanceSiswaController::class, 'processScan'])->name('scan.process');
+    
+    // --- SISTEM IZIN KELUAR (GURU PIKET) ---
+    Route::prefix('permit')->name('permit.')->group(function() {
+        Route::get('/', [StudentPermitController::class, 'index'])->name('index');
+        Route::post('/scan', [StudentPermitController::class, 'scan'])->name('scan');
+        Route::post('/store', [StudentPermitController::class, 'store'])->name('store');    
+    });
+
     Route::resource('discipline', DisciplineController::class)->only(['index', 'store', 'destroy']);
     Route::resource('discipline-types', DisciplineTypeController::class);
     
@@ -319,6 +327,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/grades/template', [GradeController::class, 'downloadTemplate'])->name('grades.template');
     Route::get('/grades/template-student', [GradeController::class, 'downloadStudentTemplate'])->name('grades.template_student');
+    
     Route::post('/grades/import', [GradeController::class, 'importGrades'])->name('grades.import');
     Route::post('/grades/import-student', [GradeController::class, 'importStudentGrades'])->name('grades.import_student');
     Route::get('/grades/students/{class_id}', [GradeController::class, 'getStudentsByClass'])->name('grades.get_students');
@@ -381,9 +390,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [ExtracurricularController::class, 'store'])->name('store');
         Route::put('/{id}', [ExtracurricularController::class, 'update'])->name('update');
         Route::delete('/{id}', [ExtracurricularController::class, 'destroy'])->name('destroy');
+       
         Route::get('/members', [ExtracurricularController::class, 'members'])->name('members');
         Route::post('/members', [ExtracurricularController::class, 'storeMember'])->name('members.store');
         Route::delete('/members/{id}', [ExtracurricularController::class, 'destroyMember'])->name('members.destroy');
+        
         Route::get('/reports', [ExtracurricularController::class, 'reports'])->name('reports');
         Route::get('/reports/export', [ExtracurricularController::class, 'exportReports'])->name('reports.export');
     });
@@ -407,15 +418,18 @@ Route::middleware('auth')->group(function () {
 
     // Laporan
     Route::get('/reports/teaching-journal', [ReportController::class, 'teachingJournal'])->name('reports.teaching_journal');
+    
     Route::get('/reports/daily/print', [ReportController::class, 'printDaily'])->name('reports.printDaily');
     Route::get('/reports/daily', [ReportController::class, 'dailyReport'])->name('reports.daily');
     Route::post('/reports/manual-entry', [ReportController::class, 'storeManualEntry'])->name('reports.storeManual');
     Route::post('/reports/process-alpha', [ReportController::class, 'processAlpha'])->name('reports.processAlpha');
     Route::delete('/reports/daily', [ReportController::class, 'destroyDaily'])->name('reports.destroyDaily');
     Route::get('/reports/export-daily', [ReportController::class, 'exportDaily'])->name('reports.exportDaily');
+   
     Route::get('/reports/attendance/{attendance}/edit', [ReportController::class, 'editAttendance'])->name('reports.edit');
     Route::put('/reports/attendance/{attendance}', [ReportController::class, 'updateAttendance'])->name('reports.update');
     Route::delete('/reports/attendance/{attendance}', [ReportController::class, 'deleteAttendance'])->name('reports.delete');
+    
     Route::get('/reports/religious/print', [ReportController::class, 'printReligious'])->name('reports.printReligious');
     Route::get('/reports/religious', [ReportController::class, 'religiousReport'])->name('reports.religious');
     Route::delete('/reports/religious', [ReportController::class, 'destroyReligious'])->name('reports.destroyReligious');
@@ -434,12 +448,12 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{id}', [AdminPpdbController::class, 'destroy'])->name('destroy');
         Route::get('/{id}/print', [AdminPpdbController::class, 'print'])->name('print');
         Route::get('/selection', [AdminPpdbController::class, 'index'])->name('selection'); 
+       
         Route::get('/reports', [AdminPpdbController::class, 'reports'])->name('reports');
         Route::get('/reports/export-excel', [AdminPpdbController::class, 'exportExcel'])->name('export.excel');
         Route::get('/reports/print-recap', [AdminPpdbController::class, 'printRecap'])->name('print.recap');
         Route::get('/reports/print-mass-letters', [AdminPpdbController::class, 'printMassLetters'])->name('print.mass_letters');
     });
-
 
     // Persuratan
     Route::prefix('letters')->name('letters.')->group(function () {
@@ -450,7 +464,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('sppd/{id}/print', [SppdController::class, 'print'])->name('sppd.print');
     Route::resource('sppd', SppdController::class);
-
 
     // =========================================================================
     //  MANAJEMEN BUKU PENGHUBUNG & PENGADUAN (GURU/ADMIN)
