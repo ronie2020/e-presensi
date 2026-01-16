@@ -172,6 +172,79 @@
         </div>
 
         
+        <?php
+            $studentsOut = \App\Models\StudentPermit::with('student.schoolClass')
+                            ->where('status', 'OUT')
+                            ->orderBy('time_out', 'desc')
+                            ->get();
+            $countOut = $studentsOut->count();
+        ?>
+
+        <!-- Widget ini sekarang akan SELALU TAMPIL -->
+        <div class="animate-enter mb-8 no-print" style="animation-delay: 50ms">
+            <?php if($countOut > 0): ?>
+                
+                <div class="bg-orange-50 rounded-[2rem] border border-orange-100 p-6 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <i class="ph-duotone ph-door-open text-8xl text-orange-500"></i>
+                    </div>
+                    
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="relative flex h-3 w-3">
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
+                                </span>
+                                <h3 class="text-lg font-bold text-orange-800">Peringatan: Siswa Sedang Di Luar</h3>
+                            </div>
+                            <p class="text-sm text-orange-600/80">Terdapat <span class="font-bold"><?php echo e($countOut); ?> siswa</span> yang belum kembali ke kelas saat ini.</p>
+                        </div>
+                        
+                        <a href="<?php echo e(route('permit.index')); ?>" class="px-5 py-2.5 bg-white text-orange-600 text-sm font-bold rounded-xl shadow-sm border border-orange-100 hover:bg-orange-100 transition-colors flex items-center gap-2">
+                            <i class="ph-bold ph-eye"></i> Lihat Detail Monitoring
+                        </a>
+                    </div>
+
+                    <div class="mt-6 flex gap-3 overflow-x-auto pb-2 custom-scrollbar">
+                        <?php $__currentLoopData = $studentsOut; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $permit): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
+                                $duration = \Carbon\Carbon::parse($permit->time_out)->diffInMinutes(now());
+                                $isOverdue = $duration > 15;
+                            ?>
+                            <div class="flex-shrink-0 w-64 bg-white p-3 rounded-xl border <?php echo e($isOverdue ? 'border-rose-200 bg-rose-50/50' : 'border-orange-100'); ?> shadow-sm flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full <?php echo e($isOverdue ? 'bg-rose-100 text-rose-600' : 'bg-orange-100 text-orange-600'); ?> flex items-center justify-center font-bold text-sm">
+                                    <?php echo e(substr($permit->student->name, 0, 1)); ?>
+
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-bold text-slate-700 truncate"><?php echo e($permit->student->name); ?></p>
+                                    <p class="text-[10px] text-slate-500 truncate"><?php echo e($permit->reason_category); ?> • <span class="<?php echo e($isOverdue ? 'text-rose-600 font-bold animate-pulse' : 'text-slate-500'); ?>"><?php echo e($duration); ?> m</span></p>
+                                </div>
+                            </div>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </div>
+                </div>
+            <?php else: ?>
+                
+                <div class="bg-emerald-50 rounded-[2rem] border border-emerald-100 p-6 relative overflow-hidden flex items-center justify-between">
+                    <div class="flex items-center gap-4 relative z-10">
+                        <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 text-2xl shadow-sm">
+                            <i class="ph-fill ph-shield-check"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-emerald-800">Status Monitoring: Aman</h3>
+                            <p class="text-sm text-emerald-600/80">Semua siswa berada di dalam kelas. Tidak ada izin keluar aktif.</p>
+                        </div>
+                    </div>
+                    <a href="<?php echo e(route('permit.index')); ?>" class="px-5 py-2.5 bg-white text-emerald-600 text-sm font-bold rounded-xl shadow-sm border border-emerald-100 hover:bg-emerald-100 transition-colors hidden md:flex items-center gap-2">
+                        <i class="ph-bold ph-list-magnifying-glass"></i> Cek Log
+                    </a>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 no-print animate-enter quick-actions" style="animation-delay: 100ms">
             <a href="<?php echo e(route('students.index')); ?>" @click.prevent="navigate('<?php echo e(route('students.index')); ?>')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
