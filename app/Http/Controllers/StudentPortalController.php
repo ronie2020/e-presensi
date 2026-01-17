@@ -13,7 +13,7 @@ use App\Models\SchoolClass;
 use App\Models\AttendanceSiswa; 
 use App\Models\LmsAssignment;
 use App\Models\LmsSubmission;
-use App\Models\LmsMaterial; // <--- TAMBAHAN BARU (Supaya materi tampil)
+use App\Models\LmsMaterial; 
 use App\Models\Complaint;       
 use App\Models\LiaisonBook;     
 use App\Models\StudentHabit; 
@@ -22,6 +22,8 @@ use App\Models\DisciplineRecord;
 use App\Models\AcademicRecord;  
 use App\Models\TeachingSession;
 use App\Models\Achievement; 
+// Import Model BK (PENTING: Jangan lupa import ini agar query di bawah jalan)
+use App\Models\BkSession;
 
 class StudentPortalController extends Controller
 {
@@ -73,10 +75,9 @@ class StudentPortalController extends Controller
         $student = Student::with(['schoolClass', 'alumniProfile'])->findOrFail($id);
         $isAlumni = $student->status === 'graduated';
         
-        // FIX: Deteksi Class ID yang benar (Support berbagai penamaan kolom)
         $classId = $student->class_id ?? $student->school_class_id ?? optional($student->schoolClass)->id;
 
-        // 2. DATA PENGHUBUNG (LIAISON) - [LOGIKA LAMA TETAP ADA]
+        // 2. DATA PENGHUBUNG (LIAISON)
         $liaison_messages = collect([]);
         if (class_exists(LiaisonBook::class)) { 
             try {
@@ -88,7 +89,7 @@ class StudentPortalController extends Controller
             } catch (\Exception $e) {}
         }
 
-        // 3. DATA KEHADIRAN & ABSENSI - [LOGIKA LAMA TETAP ADA]
+        // 3. DATA KEHADIRAN & ABSENSI
         $hadir = 0; $terlambat = 0; $sakit = 0; $izin = 0; $alpa = 0;
         $attendance_history = collect([]);
         $rawAttendanceRecords = collect([]); 
@@ -121,9 +122,7 @@ class StudentPortalController extends Controller
         $total_hari_efektif = $hadir + $sakit + $izin + $alpa;
         $attendancePercentage = $total_hari_efektif > 0 ? round(($hadir / $total_hari_efektif) * 100) : 0;
 
-        // ==========================================
-        // 4. LOGIKA DISIPLIN & PRESTASI - [LOGIKA LAMA TETAP ADA]
-        // ==========================================
+        // 4. LOGIKA DISIPLIN & PRESTASI
         $violations = collect([]);
         $achievements = collect([]); 
         
@@ -246,7 +245,7 @@ class StudentPortalController extends Controller
         
         $finalScore = 100 - $total_violation_points + $total_merit_points;
 
-        // 5. JURNAL 7 KEBIASAAN - [LOGIKA LAMA TETAP ADA]
+        // 5. JURNAL 7 KEBIASAAN
         $todayEntry = null; $habits = collect([]); 
         if (class_exists(StudentHabit::class)) {
             $todayEntry = StudentHabit::where('student_id', $id)
@@ -257,14 +256,12 @@ class StudentPortalController extends Controller
                         ->get();
         }
 
-        // 6. DATA LMS (TUGAS & MATERI) - [UPDATE DISINI]
-        // ==========================================
+        // 6. DATA LMS (TUGAS & MATERI)
         $lms_assignments_grouped = []; 
-        $lms_materials_grouped = []; // <--- Variabel baru untuk materi
+        $lms_materials_grouped = []; 
         $lms_grades = [];
         
         if ($classId) {
-            // A. Ambil Tugas (Assignments) - [LOGIKA LAMA]
             if (class_exists(LmsAssignment::class)) {
                 $assignments = LmsAssignment::with('subject')
                                 ->where('class_id', $classId)
@@ -272,32 +269,29 @@ class StudentPortalController extends Controller
                                 ->get();
                 $lms_assignments_grouped = $assignments->groupBy(fn($i) => $i->subject->name ?? 'Umum');
                 
-                // Ambil Nilai/Submission
                 if (class_exists(LmsSubmission::class)) {
                     $submissions = LmsSubmission::where('student_id', $id)->get();
                     foreach($submissions as $sub) { $lms_grades[$sub->assignment_id] = $sub->score; }
                 }
             }
 
-            // B. Ambil Materi (Materials) - [BAGIAN BARU DITAMBAHKAN]
             if (class_exists(LmsMaterial::class)) {
                 $materials = LmsMaterial::with('subject')
                                 ->where('class_id', $classId)
                                 ->latest()
                                 ->get();
-                // Grouping berdasarkan mapel agar rapi di view
                 $lms_materials_grouped = $materials->groupBy(fn($i) => $i->subject->name ?? 'Umum');
             }
         }
         
-        // 7. PERPUSTAKAAN - [LOGIKA LAMA TETAP ADA]
+        // 7. PERPUSTAKAAN
         $library_visits = 0; $library_history = collect([]);
         if (class_exists(LibraryLoan::class)) {
              $library_history = LibraryLoan::with('book')->where('student_id', $id)->latest()->take(5)->get();
              $library_visits = $library_history->count();
         }
 
-        // 8. DATA AKADEMIK - [LOGIKA LAMA TETAP ADA]
+        // 8. DATA AKADEMIK
         $academic_record = null; 
         $chartData = ['labels' => [], 'scores' => []];
         if (class_exists(AcademicRecord::class)) {
@@ -310,10 +304,9 @@ class StudentPortalController extends Controller
             }
         }
 
-        // 9. JURNAL KBM / TEACHING JOURNAL - [LOGIKA LAMA TETAP ADA]
+        // 9. JURNAL KBM
         $teaching_journals = [];
         if (class_exists(TeachingSession::class) && $classId) {
-             // Menggunakan $classId yang sudah divalidasi
              $teaching_journals = TeachingSession::with(['schedule.subject', 'schedule.teacher', 'attendances'])
                 ->whereHas('schedule', fn($q) => $q->where('school_class_id', $classId))
                 ->latest('date')
@@ -322,14 +315,25 @@ class StudentPortalController extends Controller
                 ->get();
         }
 
-        // 10. PENGADUAN - [LOGIKA LAMA TETAP ADA]
+        // 10. PENGADUAN
         $complaints = collect([]);
         if (class_exists(Complaint::class)) {
             $complaints = Complaint::where('student_id', $student->id)->latest()->get();
         }
 
+        // ==========================================
+        // 11. DATA BK / COUNSELING (BARU!)
+        // ==========================================
+        $bkSessions = collect([]);
+        if (class_exists(BkSession::class)) {
+            $bkSessions = BkSession::where('student_id', $student->id)
+                ->with(['category', 'teacher'])
+                ->latest()
+                ->get();
+        }
+
          // ==========================================
-        // 11. TABS MENU
+        // 12. TABS MENU (DINAMIS)
         // ==========================================
         $tabs = ['ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan']];
 
@@ -338,16 +342,20 @@ class StudentPortalController extends Controller
             $tabs['perpustakaan'] = ['icon' => 'books', 'label' => 'Riwayat Pustaka'];
         } else {
             $tabs = array_merge($tabs, [
-                'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan'],       
-                'disiplin' => ['icon' => 'warning-octagon', 'label' => 'Disiplin & Poin'], 
-                'prestasi' => ['icon' => 'medal', 'label' => 'Prestasi'],                 
+                'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan'],
+                
+                // [BARU] MENU E-COUNSELING DITAMBAHKAN DISINI
+                'bk' => ['icon' => 'heart-beat', 'label' => 'Konseling BK'],
+                
                 'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
                 'pengaduan' => ['icon' => 'megaphone', 'label' => 'Lapor Masalah'],   
                 'jadwal' => ['icon' => 'calendar-blank', 'label' => 'Jadwal Pelajaran'],
+                'lms' => ['icon' => 'clipboard-text', 'label' => 'Tugas Online'],
                 'kbm' => ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'],
                 'akademik' => ['icon' => 'exam', 'label' => 'Nilai Rapor'],
-                'lms' => ['icon' => 'clipboard-text', 'label' => 'Tugas Online'], // Tab LMS
                 'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Riwayat Absen'],
+                'disiplin' => ['icon' => 'warning-octagon', 'label' => 'Disiplin & Poin'], 
+                'prestasi' => ['icon' => 'medal', 'label' => 'Prestasi'],                 
             ]);
         }
 
@@ -366,13 +374,14 @@ class StudentPortalController extends Controller
             'hadir', 'terlambat', 'sakit', 'izin', 'alpa', 
             'attendance_history', 'attendanceChart',
             'lms_assignments_grouped', 'lms_grades', 
-            'lms_materials_grouped', // <--- Pastikan variabel ini dikirim ke View
+            'lms_materials_grouped', 
             'violations', 'total_violation_points', 
             'achievements', 'total_merit_points',
             'library_visits', 'library_history',
             'academic_record', 'chartData', 'teaching_journals',
             'sholat_dhuha', 'sholat_dhuhur',
-            'finalScore'
+            'finalScore',
+            'bkSessions' // <--- Tambahkan variabel ini agar dikirim ke view
         );
 
         if (view()->exists('students.portal.show')) {

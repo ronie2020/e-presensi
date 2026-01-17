@@ -74,6 +74,11 @@ use App\Http\Controllers\AdminAlumniController;
 use App\Http\Controllers\LiaisonBookController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\TeacherHabitController; 
+
+// CONTROLLER BIMBINGAN KONSELING (BK)
+use App\Http\Controllers\BkStudentController; 
+use App\Http\Controllers\BkTeacherController; 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -176,6 +181,14 @@ Route::middleware(['auth:student'])->group(function () {
         // B. FORM PENGISIAN JURNAL        
         Route::get('/isi-jurnal', [StudentHabitController::class, 'index'])->name('index');
         Route::post('/simpan', [StudentHabitController::class, 'store'])->name('store');
+    });
+
+    // --- 5. [BARU] LAYANAN E-COUNSELING (BK) UNTUK SISWA ---
+    Route::prefix('student/bk')->name('student.bk.')->group(function() {
+        Route::get('/', [BkStudentController::class, 'index'])->name('index'); // Riwayat
+        Route::get('/konsultasi', [BkStudentController::class, 'create'])->name('create'); // Form Curhat
+        Route::post('/', [BkStudentController::class, 'store'])->name('store'); // Kirim
+        Route::get('/{id}', [BkStudentController::class, 'show'])->name('show'); // Detail Tiket
     });
 });
 
@@ -495,6 +508,21 @@ Route::middleware('auth')->group(function () {
         Route::get('/api/chat/contacts', [LiaisonBookController::class, 'getChatContacts'])->name('liaison.chat.contacts');
         Route::get('/api/chat/messages/{studentId}', [LiaisonBookController::class, 'getChatMessages'])->name('liaison.chat.messages');
         Route::post('/api/chat/send', [LiaisonBookController::class, 'sendChatMessage'])->name('liaison.chat.send');
+    });
+
+    // =========================================================================
+    //  [BARU] MODUL BIMBINGAN KONSELING (GURU BK)
+    // =========================================================================
+    Route::prefix('admin/bk')->name('admin.bk.')->group(function () {
+        // Dashboard Antrian Konseling
+        Route::get('/', [BkTeacherController::class, 'index'])->name('index');
+        
+        // Detail & Approval
+        Route::get('/{id}', [BkTeacherController::class, 'show'])->name('show');
+        Route::put('/{id}/status', [BkTeacherController::class, 'updateStatus'])->name('update_status');
+        
+        // Input Hasil Konseling (Jurnal Rahasia)
+        Route::post('/{id}/record', [BkTeacherController::class, 'storeRecord'])->name('store_record');
     });
 
     // MONITORING 7 KEBIASAAN (GURU)

@@ -173,6 +173,13 @@ return [
                 'active_check' => 'teacher.habits.*',
                 'icon' => 'ph-check-square-offset', 
             ],
+            // [BARU] Menu E-Counseling
+            [
+                'name' => 'E-Counseling (BK)',
+                'route' => 'admin.bk.index',
+                'active_check' => 'admin.bk.*',
+                'icon' => 'ph-chat-centered-text', 
+            ],
         ],
         'Persuratan & Dinas' => [
             [
