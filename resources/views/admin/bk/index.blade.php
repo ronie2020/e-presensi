@@ -1,116 +1,249 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('E-Counseling (Bimbingan Konseling)') }}
-        </h2>
-    </x-slot>
+    {{-- 
+        LAYOUT MODERN (BLUE THEME)
+        - Menyesuaikan style halaman Kelulusan
+        - Warna dominan: Blue-900 (Hero), Blue-600 (Primary)
+    --}}
+    <div class="py-8 sm:py-10 font-sans text-slate-800">
+        
+        {{-- HERO SECTION --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+            <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-950 via-blue-900 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
+                
+                {{-- Background Decorations (Sesuai Referensi) --}}
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+                <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/30 transition-all duration-700"></div>
+                <div class="absolute bottom-0 right-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+                    <div class="space-y-2">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-widest backdrop-blur-sm">
+                            <i class="ph-fill ph-hand-heart"></i> Student Care Center
+                        </div>
+                        <h1 class="text-3xl sm:text-4xl font-black tracking-tight leading-tight">
+                            E-Counseling & <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-emerald-200">Bimbingan</span>
+                        </h1>
+                        <p class="text-blue-200/80 text-sm sm:text-base max-w-xl font-medium">
+                            Kelola antrian konseling, jadwalkan pertemuan, dan pantau perkembangan siswa secara real-time.
+                        </p>
+                    </div>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
-            <!-- Statistik Ringkas -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5 border-l-4 border-amber-500">
-                    <div class="text-slate-500 text-xs font-bold uppercase">Menunggu Respon</div>
-                    <div class="text-2xl font-bold text-slate-800">{{ \App\Models\BkSession::where('status', 'pending')->count() }}</div>
-                </div>
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5 border-l-4 border-blue-500">
-                    <div class="text-slate-500 text-xs font-bold uppercase">Terjadwal</div>
-                    <div class="text-2xl font-bold text-slate-800">{{ \App\Models\BkSession::where('status', 'approved')->count() }}</div>
-                </div>
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5 border-l-4 border-green-500">
-                    <div class="text-slate-500 text-xs font-bold uppercase">Selesai Bulan Ini</div>
-                    <div class="text-2xl font-bold text-slate-800">{{ \App\Models\BkSession::where('status', 'finished')->whereMonth('created_at', now()->month)->count() }}</div>
-                </div>
-            </div>
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-lg font-bold text-slate-700">Daftar Pengajuan Konseling</h3>
-                        <div class="flex gap-2">
-                            <a href="{{ route('admin.bk.index', ['status' => 'pending']) }}" class="px-3 py-1 text-xs rounded-full border {{ request('status') == 'pending' ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-white text-slate-500 border-slate-200' }}">Pending</a>
-                            <a href="{{ route('admin.bk.index', ['status' => 'approved']) }}" class="px-3 py-1 text-xs rounded-full border {{ request('status') == 'approved' ? 'bg-blue-100 text-blue-800 border-blue-300' : 'bg-white text-slate-500 border-slate-200' }}">Terjadwal</a>
-                            <a href="{{ route('admin.bk.index', ['status' => 'all']) }}" class="px-3 py-1 text-xs rounded-full border {{ request('status') == 'all' || !request('status') ? 'bg-slate-100 text-slate-800 border-slate-300' : 'bg-white text-slate-500 border-slate-200' }}">Semua</a>
+                    {{-- Quick Action (Optional) --}}
+                    <div class="hidden md:block">
+                        <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex items-center gap-4">
+                            <div class="p-3 bg-blue-500 rounded-xl text-white shadow-lg shadow-blue-500/30">
+                                <i class="ph-duotone ph-calendar-check text-2xl"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs text-blue-200 font-bold uppercase">Hari Ini</div>
+                                <div class="text-lg font-bold text-white">{{ now()->translatedFormat('l, d F Y') }}</div>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Siswa</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Topik & Pesan</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metode</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($sessions as $session)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center font-bold text-slate-500">
-                                                {{ substr($session->student->name, 0, 1) }}
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">{{ $session->student->name }}</div>
-                                                {{-- PERBAIKAN: Gunakan schoolClass --}}
-                                                <div class="text-xs text-gray-500">{{ $session->student->schoolClass->name ?? 'Kelas -' }}</div>
-                                            </div>
+        {{-- STATISTIK CARDS (Grid Style) --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <!-- Pending -->
+                <a href="{{ route('admin.bk.index', ['status' => 'pending']) }}" class="bg-white p-5 rounded-2xl shadow-sm border border-amber-100 hover:border-amber-300 hover:shadow-md transition group">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="p-2 bg-amber-50 rounded-lg text-amber-600 group-hover:bg-amber-100 transition">
+                            <i class="ph-bold ph-hourglass text-xl"></i>
+                        </div>
+                        <span class="bg-amber-100 text-amber-700 py-1 px-2 rounded text-[10px] font-bold uppercase">Pending</span>
+                    </div>
+                    <div class="text-3xl font-black text-slate-800">{{ \App\Models\BkSession::where('status', 'pending')->count() }}</div>
+                    <div class="text-xs font-bold text-slate-400 mt-1">Menunggu Respon</div>
+                </a>
+
+                <!-- Approved -->
+                <a href="{{ route('admin.bk.index', ['status' => 'approved']) }}" class="bg-white p-5 rounded-2xl shadow-sm border border-blue-100 hover:border-blue-300 hover:shadow-md transition group">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="p-2 bg-blue-50 rounded-lg text-blue-600 group-hover:bg-blue-100 transition">
+                            <i class="ph-bold ph-calendar-check text-xl"></i>
+                        </div>
+                        <span class="bg-blue-100 text-blue-700 py-1 px-2 rounded text-[10px] font-bold uppercase">Terjadwal</span>
+                    </div>
+                    <div class="text-3xl font-black text-slate-800">{{ \App\Models\BkSession::where('status', 'approved')->count() }}</div>
+                    <div class="text-xs font-bold text-slate-400 mt-1">Akan Datang</div>
+                </a>
+
+                <!-- Finished -->
+                <a href="{{ route('admin.bk.index', ['status' => 'finished']) }}" class="bg-white p-5 rounded-2xl shadow-sm border border-emerald-100 hover:border-emerald-300 hover:shadow-md transition group">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600 group-hover:bg-emerald-100 transition">
+                            <i class="ph-bold ph-check-circle text-xl"></i>
+                        </div>
+                        <span class="bg-emerald-100 text-emerald-700 py-1 px-2 rounded text-[10px] font-bold uppercase">Selesai</span>
+                    </div>
+                    <div class="text-3xl font-black text-slate-800">{{ \App\Models\BkSession::where('status', 'finished')->whereMonth('created_at', now()->month)->count() }}</div>
+                    <div class="text-xs font-bold text-slate-400 mt-1">Bulan Ini</div>
+                </a>
+
+                <!-- Rejected -->
+                <a href="{{ route('admin.bk.index', ['status' => 'rejected']) }}" class="bg-white p-5 rounded-2xl shadow-sm border border-rose-100 hover:border-rose-300 hover:shadow-md transition group">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="p-2 bg-rose-50 rounded-lg text-rose-600 group-hover:bg-rose-100 transition">
+                            <i class="ph-bold ph-x-circle text-xl"></i>
+                        </div>
+                        <span class="bg-rose-100 text-rose-700 py-1 px-2 rounded text-[10px] font-bold uppercase">Ditolak</span>
+                    </div>
+                    <div class="text-3xl font-black text-slate-800">{{ \App\Models\BkSession::where('status', 'rejected')->whereMonth('created_at', now()->month)->count() }}</div>
+                    <div class="text-xs font-bold text-slate-400 mt-1">Bulan Ini</div>
+                </a>
+            </div>
+        </div>
+
+        {{-- FILTER & SEARCH BAR --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                
+                {{-- Filter Status (Tab Style) --}}
+                <div class="w-full sm:w-auto p-1 bg-slate-100 rounded-xl flex gap-1">
+                    @foreach(['pending' => 'Pending', 'approved' => 'Terjadwal', 'all' => 'Semua'] as $key => $label)
+                        <a href="{{ route('admin.bk.index', ['status' => $key]) }}" 
+                           class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold text-center transition-all
+                           {{ (request('status') == $key || ($key == 'all' && !request('status'))) 
+                                ? 'bg-white text-blue-600 shadow-sm' 
+                                : 'text-slate-500 hover:text-slate-700' }}">
+                           {{ $label }}
+                        </a>
+                    @endforeach
+                </div>
+
+                {{-- Search --}}
+                <form method="GET" class="w-full sm:w-auto relative">
+                    @if(request('status')) 
+                        <input type="hidden" name="status" value="{{ request('status') }}"> 
+                    @endif
+                    <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Siswa / Topik..." 
+                           class="w-full sm:w-64 pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-slate-50 text-sm font-bold focus:ring-blue-500 focus:border-blue-500 transition-all">
+                </form>
+            </div>
+        </div>
+
+        {{-- MAIN CONTENT: TABEL DAFTAR --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
+                
+                {{-- Table Header --}}
+                <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div class="flex items-center gap-2">
+                        <i class="ph-duotone ph-list-dashes text-blue-500 text-lg"></i>
+                        <span class="text-sm font-bold text-slate-700">Daftar Antrian & Riwayat</span>
+                    </div>
+                </div>
+
+                {{-- Table Body --}}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 text-xs uppercase font-bold text-slate-400 tracking-wider">
+                            <tr>
+                                <th class="px-6 py-4 rounded-tl-2xl">Siswa</th>
+                                <th class="px-6 py-4">Topik & Pesan</th>
+                                <th class="px-6 py-4">Metode</th>
+                                <th class="px-6 py-4">Status & Jadwal</th>
+                                <th class="px-6 py-4 rounded-tr-2xl text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm">
+                            @forelse($sessions as $session)
+                            <tr class="hover:bg-blue-50/30 transition-colors group">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <!-- Avatar -->
+                                        <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs shrink-0 overflow-hidden border-2 border-white shadow-sm">
+                                            @if($session->student && $session->student->photo_path)
+                                                <img src="{{ asset('storage/' . $session->student->photo_path) }}" class="w-full h-full object-cover">
+                                            @else
+                                                {{ substr($session->student->name ?? '?', 0, 1) }}
+                                            @endif
                                         </div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800 mb-1">
-                                            {{ $session->category->name }}
-                                        </span>
-                                        <p class="text-sm text-gray-500 truncate w-48" title="{{ $session->initial_message }}">
-                                            {{ $session->initial_message }}
-                                        </p>
-                                        <div class="text-xs text-gray-400 mt-1">{{ $session->created_at->diffForHumans() }}</div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        @if($session->method == 'online')
-                                            <span class="flex items-center gap-1"><i class="ph-fill ph-globe"></i> Online</span>
-                                        @else
-                                            <span class="flex items-center gap-1"><i class="ph-fill ph-users"></i> Tatap Muka</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @php
-                                            $colors = [
-                                                'pending' => 'bg-amber-100 text-amber-800',
-                                                'approved' => 'bg-blue-100 text-blue-800',
-                                                'ongoing' => 'bg-purple-100 text-purple-800',
-                                                'finished' => 'bg-green-100 text-green-800',
-                                                'rejected' => 'bg-red-100 text-red-800',
-                                            ];
-                                        @endphp
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $colors[$session->status] }}">
-                                            {{ ucfirst($session->status) }}
-                                        </span>
-                                        @if($session->scheduled_at && $session->status == 'approved')
-                                            <div class="text-xs text-blue-600 font-bold mt-1">{{ $session->scheduled_at->format('d M H:i') }}</div>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <a href="{{ route('admin.bk.show', $session->id) }}" class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded-md">Proses</a>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="5" class="px-6 py-12 text-center text-gray-500">
-                                        Belum ada data pengajuan.
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="mt-4">
-                        {{ $sessions->links() }}
-                    </div>
+                                        <div>
+                                            <div class="font-bold text-slate-800 group-hover:text-blue-600 transition">{{ $session->student->name ?? 'Data Terhapus' }}</div>
+                                            <div class="text-xs text-slate-400 font-medium">{{ $session->student->schoolClass->name ?? '-' }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold uppercase mb-1">
+                                        {{ $session->category->name ?? 'Umum' }}
+                                    </span>
+                                    <p class="text-sm text-slate-600 truncate w-48 italic" title="{{ $session->initial_message }}">
+                                        "{{ $session->initial_message }}"
+                                    </p>
+                                    <div class="text-[10px] text-slate-400 mt-1 flex items-center gap-1 font-medium">
+                                        <i class="ph-bold ph-clock"></i> {{ $session->created_at->diffForHumans() }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                    @if($session->method == 'online')
+                                        <div class="flex items-center gap-2">
+                                            <div class="p-1.5 rounded-full bg-purple-100 text-purple-600">
+                                                <i class="ph-bold ph-globe"></i>
+                                            </div>
+                                            <span class="font-bold text-xs text-slate-600">Online</span>
+                                        </div>
+                                    @else
+                                        <div class="flex items-center gap-2">
+                                            <div class="p-1.5 rounded-full bg-teal-100 text-teal-600">
+                                                <i class="ph-bold ph-users"></i>
+                                            </div>
+                                            <span class="font-bold text-xs text-slate-600">Tatap Muka</span>
+                                        </div>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @php
+                                        // Ubah 'approved' menjadi biru (blue)
+                                        $colors = [
+                                            'pending' => 'bg-amber-100 text-amber-700 border-amber-200',
+                                            'approved' => 'bg-blue-100 text-blue-700 border-blue-200', 
+                                            'ongoing' => 'bg-purple-100 text-purple-700 border-purple-200',
+                                            'finished' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                                            'rejected' => 'bg-rose-100 text-rose-700 border-rose-200',
+                                        ];
+                                        $statusClass = $colors[$session->status] ?? 'bg-slate-100 text-slate-700';
+                                    @endphp
+                                    <span class="px-2.5 py-1 inline-flex text-[10px] font-black uppercase tracking-wide rounded-lg border {{ $statusClass }}">
+                                        {{ ucfirst($session->status == 'approved' ? 'Terjadwal' : $session->status) }}
+                                    </span>
+                                    
+                                    @if($session->scheduled_at && $session->status == 'approved')
+                                        <div class="text-xs text-blue-600 font-bold mt-1.5 flex items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-md w-fit">
+                                            <i class="ph-bold ph-calendar-check"></i> {{ $session->scheduled_at->format('d M, H:i') }}
+                                        </div>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <a href="{{ route('admin.bk.show', $session->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:bg-blue-600 hover:text-white hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300" title="Proses">
+                                        <i class="ph-bold ph-caret-right text-lg"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center text-slate-400">
+                                    <div class="flex flex-col items-center justify-center gap-3">
+                                        <div class="p-4 bg-slate-50 rounded-full">
+                                            <i class="ph-duotone ph-clipboard-text text-3xl text-slate-300"></i>
+                                        </div>
+                                        <span class="font-medium">Belum ada data pengajuan konseling.</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                
+                {{-- Pagination --}}
+                <div class="px-6 py-4 border-t border-slate-100 bg-slate-50">
+                    {{ $sessions->links() }}
                 </div>
             </div>
         </div>

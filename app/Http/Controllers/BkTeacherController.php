@@ -12,17 +12,20 @@ use Illuminate\Support\Facades\Auth;
 
 class BkTeacherController extends Controller
 {
-    // Dashboard Antrian Konseling
+    /**
+     * Menampilkan daftar antrian konseling.
+     */
     public function index(Request $request)
     {
-        // PERBAIKAN: Ubah 'student.class' menjadi 'student.schoolClass'
-        $query = BkSession::with(['student.schoolClass', 'category']);
+        // PERBAIKAN: Hanya load 'student' dan 'category'. 
+        // Menghapus 'student.schoolClass' untuk mencegah error "Relation Not Found" jika nama relasinya berbeda.
+        $query = BkSession::with(['student', 'category']);
 
-        // Filter Status
+        // Filter Status (Logika Tetap)
         if ($request->has('status') && $request->status != 'all') {
             $query->where('status', $request->status);
         } else {
-            // Default tampilkan yang aktif (pending, approved, ongoing) di atas
+            // Default sorting: Pending paling atas
             $query->orderByRaw("FIELD(status, 'pending', 'approved', 'ongoing', 'finished', 'rejected')");
         }
 
@@ -31,15 +34,20 @@ class BkTeacherController extends Controller
         return view('admin.bk.index', compact('sessions'));
     }
 
-    // Detail & Approval Halaman
+    /**
+     * Menampilkan detail sesi dan form approval/jurnal.
+     */
     public function show($id)
     {
-        // PERBAIKAN: Ubah 'student.class' menjadi 'student.schoolClass'
-        $session = BkSession::with(['student.schoolClass', 'category', 'record'])->findOrFail($id);
+        // PERBAIKAN: Sama seperti index, hapus nested relation yang berisiko
+        $session = BkSession::with(['student', 'category', 'record'])->findOrFail($id);
+        
         return view('admin.bk.show', compact('session'));
     }
 
-    // PROSES 1: Update Status (Terima/Tolak/Jadwalkan)
+    /**
+     * Mengupdate status pengajuan (Setujui/Tolak/Selesai).
+     */
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
@@ -54,24 +62,30 @@ class BkTeacherController extends Controller
             'status' => $request->status,
             'scheduled_at' => ($request->status == 'approved') ? $request->scheduled_at : $session->scheduled_at,
             'response_message' => $request->response_message,
-            'teacher_id' => Auth::id(), // Set guru yang menangani
+            'teacher_id' => Auth::id(),
         ]);
 
-        // --- KIRIM WA NOTIFIKASI KE SISWA ---
-        if ($request->status == 'approved' && $session->student->parent_wa_number) {
+        // --- LOGIKA NOTIFIKASI WA ---
+        if ($request->status == 'approved' && $session->student && $session->student->parent_wa_number) {
             $date = Carbon::parse($request->scheduled_at)->translatedFormat('l, d F Y H:i');
             $guru = Auth::user()->name;
             
-            $message = "Halo *{$session->student->name}*,\n\nPengajuan konseling kamu telah *DISETUJUI*.\n\n👨‍🏫 Guru: {$guru}\n📅 Jadwal: {$date} WIB\n📍 Metode: {$session->method}\n💬 Pesan: _{$request->response_message}_\n\nSilakan datang tepat waktu ya. Terima kasih.";
+            $message = "Halo *{$session->student->name}*,\n\nPengajuan konseling kamu telah *DISETUJUI*.\n\n👨‍🏫 Guru: {$guru}\n📅 Jadwal: {$date} WIB\n💬 Metode: {$session->method}\n📝 Pesan: _{$request->response_message}_\n\nSilakan datang tepat waktu ya. Terima kasih.";
             
-            // Dispatch Job WA (Pastikan queue worker jalan)
-            SendGeneralWaJob::dispatch($session->student->parent_wa_number, $message);
+            try {
+                SendGeneralWaJob::dispatch($session->student->parent_wa_number, $message);
+            } catch (\Exception $e) {
+                // Silent fail jika WA error agar tidak mengganggu proses simpan
+                \Log::error("Gagal kirim WA: " . $e->getMessage());
+            }
         }
 
-        return back()->with('success', 'Status konseling diperbarui.');
+        return back()->with('success', 'Status konseling berhasil diperbarui.');
     }
 
-    // PROSES 2: Simpan Hasil Konseling (Jurnal)
+    /**
+     * Menyimpan hasil konseling.
+     */
     public function storeRecord(Request $request, $id)
     {
         $request->validate([
@@ -92,7 +106,6 @@ class BkTeacherController extends Controller
             ]
         );
 
-        // Otomatis set status jadi finished jika hasil disimpan
         $session->update(['status' => 'finished']);
 
         return redirect()->route('admin.bk.index')->with('success', 'Jurnal konseling berhasil disimpan.');
