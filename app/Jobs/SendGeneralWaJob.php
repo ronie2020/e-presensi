@@ -9,6 +9,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Throwable;
+use Exception;
 
 class SendGeneralWaJob implements ShouldQueue
 {
@@ -16,6 +18,10 @@ class SendGeneralWaJob implements ShouldQueue
 
     protected $phoneNumber;
     protected $message;
+
+    // Retry broadcast lebih penting karena sering kena rate limit
+    public $tries = 3;
+    public $backoff = 20; // Jeda lebih lama untuk broadcast
 
     public function __construct($phoneNumber, $message)
     {
@@ -30,40 +36,46 @@ class SendGeneralWaJob implements ShouldQueue
         // 1. Anti-Banned: Jeda lebih lama untuk Broadcast (5-10 detik)
         sleep(rand(5, 10));
 
-        // 2. Variasi Pesan (Anti-Spam Filter)
-        // Menambahkan ID unik kecil di akhir pesan agar setiap pesan dianggap "berbeda" oleh sistem WA
+        // 2. Validasi Nomor HP
+        $nomorWA = preg_replace('/[^0-9]/', '', $this->phoneNumber);
+        if (substr($nomorWA, 0, 2) == '08') $nomorWA = '62' . substr($nomorWA, 1);
+        
+        if (strlen($nomorWA) < 10) {
+            Log::warning("Broadcast Skip: Nomor tidak valid {$this->phoneNumber}");
+            return;
+        }
+
+        // 3. Variasi Pesan (Anti-Spam Filter) & Ref ID
         $uniqueId = substr(md5(uniqid()), 0, 4);
         $finalMessage = $this->message . "\n\n_Ref: #{$uniqueId}_";
 
-        // 3. Konfigurasi Multi Device
+        // 4. Konfigurasi Multi Device
         $apiUrl  = 'https://app.wapanels.com/api/create-message';
         $authKey = config('app.wapanels_authkey');
         $appKeys = config('app.wapanels_appkeys');
 
         if (empty($appKeys) || empty($authKey)) {
-            Log::error('GAGAL Broadcast: Config kosong.');
-            return;
+            throw new Exception("Config WA Kosong");
         }
 
-        // Load Balancer: Pilih device acak
         $selectedAppKey = $appKeys[array_rand($appKeys)];
 
-        // 4. Kirim Pesan
-        try {
-            $response = Http::asForm()->post($apiUrl, [
-                'appkey'  => $selectedAppKey,
-                'authkey' => $authKey,
-                'to'      => $this->phoneNumber,
-                'message' => $finalMessage,
-                'sandbox' => 'false'
-            ]);
+        // 5. Kirim Pesan dengan Timeout
+        $response = Http::timeout(20)->asForm()->post($apiUrl, [
+            'appkey'  => $selectedAppKey,
+            'authkey' => $authKey,
+            'to'      => $nomorWA,
+            'message' => $finalMessage,
+            'sandbox' => 'false'
+        ]);
 
-            if ($response->failed()) {
-                Log::error("Gagal Broadcast WA: " . $response->body());
-            }
-
-        } catch (\Exception $e) {
-            Log::error('Exception Broadcast WA: ' . $e->getMessage());
+        if ($response->failed()) {
+            throw new Exception("Gagal Broadcast WA: " . $response->body());
         }
+    }
+
+    public function failed(Throwable $exception): void
+    {
+        Log::error("BROADCAST GAGAL FINAL [To: {$this->phoneNumber}]: " . $exception->getMessage());
     }
 }
