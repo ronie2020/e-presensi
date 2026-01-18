@@ -9,7 +9,7 @@ use App\Models\ScheduleSpecial;
 use App\Models\SchoolClass;     
 use App\Models\Subject;         
 use App\Models\User;            
-use Carbon\Carbon; // Pastikan ini ada
+use Carbon\Carbon; 
 
 class ScheduleController extends Controller
 {
@@ -38,7 +38,9 @@ class ScheduleController extends Controller
         $schedules = $query->get();
 
         // --- LOGIKA ASLI: DATA JAM BEL ---
-        $regularSchedules = ScheduleRegular::all()->keyBy('day_type');
+        // [FIX] Menggunakan 'day_name' sebagai key agar tidak error column not found
+        $regularSchedules = ScheduleRegular::all()->keyBy('day_name');
+        
         $specialSchedules = ScheduleSpecial::orderBy('date', 'desc')->get();
 
         return view('admin.schedules.index', [
@@ -53,9 +55,9 @@ class ScheduleController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Validasi (Sesuai kode asli Anda)
+        // 1. Validasi (Sesuai kode asli)
         $request->validate([
-            'school_class_id' => 'required|exists:classes,id', // Sesuai tabel asli 'classes'
+            'school_class_id' => 'required|exists:classes,id', 
             'subject_id'      => 'required|exists:subjects,id',
             'teacher_id'      => 'required|exists:users,id',
             'day'             => 'required',
@@ -79,6 +81,7 @@ class ScheduleController extends Controller
         }
 
         // 3. Cek Bentrok KELAS (TAMBAHAN BARU: Agar siswa tidak bentrok)
+        // Logika ini PENTING dan TETAP ADA
         $classClash = Schedule::where('school_class_id', $request->school_class_id)
                 ->where('day', $request->day)
                 ->where(function($q) use ($request) {
@@ -99,33 +102,34 @@ class ScheduleController extends Controller
 
     public function destroy($id)
     {
-        // Menggunakan findOrFail sesuai kode asli untuk memastikan data ada atau 404
         Schedule::findOrFail($id)->delete();
         return back()->with('success', 'Jadwal berhasil dihapus.');
     }
 
     // ==========================================
-    // JAM REGULER & KHUSUS (LOGIKA ASLI DIKEMBALIKAN)
+    // JAM REGULER & KHUSUS
     // ==========================================
 
     public function storeRegular(Request $request)
     {
-        // Validasi Ketat (Sesuai kode asli Anda)
+        // Validasi input form (day_type adalah nama field HTML, jadi tetap dibiarkan day_type)
         $request->validate([
             'day_type.*' => 'required|string|in:Biasa,Jumat',
             'start_in.*' => 'required', 
-            'end_in.*'   => 'required|after:start_in.*', // Wajib ada & harus setelah start_in
+            'end_in.*'   => 'required|after:start_in.*', 
             'start_out.*'=> 'required',
-            'end_out.*'  => 'required|after:start_out.*', // Wajib ada & harus setelah start_out
+            'end_out.*'  => 'required|after:start_out.*', 
         ]);
 
         if ($request->has('day_type')) {
             foreach ($request->day_type as $index => $dayType) {
                 if (isset($request->start_in[$index])) {
+                    // [FIX] Update berdasarkan 'day_name', bukan 'day_type'
+                    // Database Anda tidak punya kolom 'day_type' lagi.
                     ScheduleRegular::updateOrCreate(
-                        ['day_type' => $dayType], 
+                        ['day_name' => $dayType], 
                         [ 
-                            'day_name'  => $dayType, 
+                            // 'day_type' => $dayType, // HAPUS INI (Penyebab Error)
                             'start_in'  => $request->start_in[$index],
                             'end_in'    => $request->end_in[$index],
                             'start_out' => $request->start_out[$index],
@@ -141,10 +145,8 @@ class ScheduleController extends Controller
 
     public function storeSpecial(Request $request)
     {
-        // Normalisasi checkbox
         $request->merge(['is_holiday' => $request->has('is_holiday') ? 1 : 0]);
 
-        // Validasi Ketat (Sesuai kode asli Anda, termasuk start_out dan end_out)
         $validatedData = $request->validate([
             'date'        => 'required|date|unique:schedules_special,date',
             'description' => 'nullable|string|max:255',
@@ -162,7 +164,6 @@ class ScheduleController extends Controller
 
     public function destroySpecial($id)
     {
-        // Menggunakan find agar lebih fleksibel (menghindari error page jika data sudah terhapus)
         $schedule = ScheduleSpecial::find($id);
         if($schedule) {
             $schedule->delete();

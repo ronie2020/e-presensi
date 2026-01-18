@@ -320,15 +320,16 @@
                                     <div>
                                         <label class="block text-[10px] uppercase font-bold text-slate-400 mb-2 text-center">Masuk</label>
                                         <div class="flex gap-1.5">
-                                            <input type="time" name="start_in[]" value="{{ isset($regularSchedules['Biasa']->start_in) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->start_in)->format('H:i') : '' }}" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm">
-                                            <input type="time" name="end_in[]" value="{{ isset($regularSchedules['Biasa']->end_in) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->end_in)->format('H:i') : '' }}" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm">
+                                            {{-- PERBAIKAN: Gunakan optional() dan get() agar tidak error jika data kosong --}}
+                                            <input type="time" name="start_in[]" value="{{ optional($regularSchedules->get('Biasa'))->start_in ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->start_in)->format('H:i') : '' }}" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm">
+                                            <input type="time" name="end_in[]" value="{{ optional($regularSchedules->get('Biasa'))->end_in ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->end_in)->format('H:i') : '' }}" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm">
                                         </div>
                                     </div>
                                     <div>
                                         <label class="block text-[10px] uppercase font-bold text-slate-400 mb-2 text-center">Pulang</label>
                                         <div class="flex gap-1.5">
-                                            <input type="time" name="start_out[]" value="{{ isset($regularSchedules['Biasa']->start_out) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->start_out)->format('H:i') : '' }}" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm">
-                                            <input type="time" name="end_out[]" value="{{ isset($regularSchedules['Biasa']->end_out) ? \Carbon\Carbon::parse($regularSchedules['Biasa']->end_out)->format('H:i') : '' }}" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm">
+                                            <input type="time" name="start_out[]" value="{{ optional($regularSchedules->get('Biasa'))->start_out ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->start_out)->format('H:i') : '' }}" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm">
+                                            <input type="time" name="end_out[]" value="{{ optional($regularSchedules->get('Biasa'))->end_out ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->end_out)->format('H:i') : '' }}" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm">
                                         </div>
                                     </div>
                                 </div>
@@ -346,15 +347,16 @@
                                     <div>
                                         <label class="block text-[10px] uppercase font-bold text-purple-400 mb-2 text-center">Masuk</label>
                                         <div class="flex gap-1.5">
-                                            <input type="time" name="start_in[]" value="{{ isset($regularSchedules['Jumat']->start_in) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->start_in)->format('H:i') : '' }}" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
-                                            <input type="time" name="end_in[]" value="{{ isset($regularSchedules['Jumat']->end_in) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->end_in)->format('H:i') : '' }}" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
+                                            {{-- PERBAIKAN: Gunakan optional() dan get() --}}
+                                            <input type="time" name="start_in[]" value="{{ optional($regularSchedules->get('Jumat'))->start_in ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->start_in)->format('H:i') : '' }}" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
+                                            <input type="time" name="end_in[]" value="{{ optional($regularSchedules->get('Jumat'))->end_in ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->end_in)->format('H:i') : '' }}" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
                                         </div>
                                     </div>
                                     <div>
                                         <label class="block text-[10px] uppercase font-bold text-purple-400 mb-2 text-center">Pulang</label>
                                         <div class="flex gap-1.5">
-                                            <input type="time" name="start_out[]" value="{{ isset($regularSchedules['Jumat']->start_out) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->start_out)->format('H:i') : '' }}" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
-                                            <input type="time" name="end_out[]" value="{{ isset($regularSchedules['Jumat']->end_out) ? \Carbon\Carbon::parse($regularSchedules['Jumat']->end_out)->format('H:i') : '' }}" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
+                                            <input type="time" name="start_out[]" value="{{ optional($regularSchedules->get('Jumat'))->start_out ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->start_out)->format('H:i') : '' }}" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
+                                            <input type="time" name="end_out[]" value="{{ optional($regularSchedules->get('Jumat'))->end_out ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->end_out)->format('H:i') : '' }}" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
                                         </div>
                                     </div>
                                 </div>

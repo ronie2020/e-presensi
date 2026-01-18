@@ -18,8 +18,8 @@ class ScheduleRegular extends Model
      * Kolom yang boleh diisi secara massal.
      */
     protected $fillable = [
-        'day_type',
-        'day_name', // <--- PENAMBAHAN PENTING: Agar tidak error 1364
+        // 'day_type', // <--- Dihapus karena kolomnya sudah tidak ada di DB lokal
+        'day_name',    // Kolom pengganti (berisi 'Biasa' atau 'Jumat')
         'start_in',
         'end_in',
         'start_out',

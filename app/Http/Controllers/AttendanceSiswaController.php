@@ -34,9 +34,8 @@ class AttendanceSiswaController extends Controller
             $dayEnglish = $today->locale('en')->dayName; 
             $dayCategory = ($dayEnglish == 'Friday') ? 'Jumat' : 'Biasa';
             
-            $schedule = ScheduleRegular::where('day_type', $dayCategory)
-                        ->orWhere('day_name', $dayCategory)
-                        ->first();
+            // [FIX] Hapus pencarian 'day_type', hanya cari 'day_name'
+            $schedule = ScheduleRegular::where('day_name', $dayCategory)->first();
         }
 
         $scheduleConfig = [
@@ -63,8 +62,8 @@ class AttendanceSiswaController extends Controller
         // 4. AMBIL RIWAYAT SCAN HARI INI
         $latestScans = AttendanceSiswa::with('student')
             ->whereDate('attendance_date', $today)
-            ->orderBy('updated_at', 'desc') // Paling baru diatas
-            ->take(15) // Ambil lebih banyak sedikit
+            ->orderBy('updated_at', 'desc') 
+            ->take(15) 
             ->get();
 
         // Mapping agar formatnya sesuai dengan JS di view
@@ -79,14 +78,12 @@ class AttendanceSiswaController extends Controller
                 'time_out' => $item->time_out,
                 'status' => $item->status,
                 
-                // Flags untuk JS filtering di tabel
                 'data_harian' => ($tipe == 'Harian' || $tipe == 'Masuk' || $tipe == 'Pulang'),
                 'data_makan' => ($tipe == 'Meal' || $tipe == 'Makan'),
                 'data_dhuha' => ($tipe == 'Keagamaan' && $act == 'Dhuha'),
                 'data_dhuhur' => ($tipe == 'Keagamaan' && $act == 'Dhuhur'),
                 'data_ekskul' => ($tipe == 'Extracurricular'),
 
-                // Waktu spesifik per kegiatan (sesuai kolom JS)
                 'makan_time' => ($tipe == 'Meal') ? $item->time_in : null,
                 'dhuha_time' => ($act == 'Dhuha') ? $item->time_in : null,
                 'dhuhur_time' => ($act == 'Dhuhur') ? $item->time_in : null,
@@ -95,7 +92,6 @@ class AttendanceSiswaController extends Controller
             ];
         });
 
-        // Ambil Data Ekskul untuk Dropdown
         $extracurriculars = Extracurricular::all();
 
         return view('scan.index', compact('scheduleConfig', 'statsConfig', 'recentScans', 'extracurriculars'));
@@ -172,9 +168,9 @@ class AttendanceSiswaController extends Controller
             $dayEnglish = $today->locale('en')->dayName;
             $dayCategory = ($dayEnglish == 'Friday') ? 'Jumat' : 'Biasa';
             
-            $regular = ScheduleRegular::where('day_type', $dayCategory)
-                        ->orWhere('day_name', $dayCategory)
-                        ->first();
+            // [FIX] Hapus pencarian 'day_type'
+            $regular = ScheduleRegular::where('day_name', $dayCategory)->first();
+            
             if ($regular) {
                 $scheduleLimit = $regular->end_in;
             }
@@ -206,7 +202,7 @@ class AttendanceSiswaController extends Controller
                 'message' => "Absen Masuk Berhasil ($status)",
                 'scan' => [
                     'student_name' => $student->name,
-                    'student_id' => $student->student_id ?? $student->nisn, // [FIX] ID Ditambahkan
+                    'student_id' => $student->student_id ?? $student->nisn, 
                     'status' => $status,
                     'time' => $timeString
                 ]
@@ -237,7 +233,7 @@ class AttendanceSiswaController extends Controller
                 'message' => "Absen Pulang Berhasil. Hati-hati di jalan!",
                 'scan' => [
                     'student_name' => $student->name,
-                    'student_id' => $student->student_id ?? $student->nisn, // [FIX] ID Ditambahkan
+                    'student_id' => $student->student_id ?? $student->nisn,
                     'status' => 'Pulang',
                     'time' => $timeString
                 ]

@@ -1,0 +1,1 @@
+<img <?php echo e($attributes); ?> src="<?php echo e(asset('images/logo.png')); ?>" alt="<?php echo e(config('app.name')); ?> Logo" /><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views\components\application-logo.blade.php ENDPATH**/ ?>
