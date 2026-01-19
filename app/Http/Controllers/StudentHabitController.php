@@ -141,6 +141,7 @@ class StudentHabitController extends Controller
             // Tambahkan 'ogg' dan 'weba', hapus 'audio/mpeg' (karena mimes itu extension)
             'odoa_audio'  => 'nullable|file|mimes:mp3,wav,aac,webm,ogg,m4a,weba|max:10240',
             'odoa_surah'  => 'nullable|string|max:100',
+            'odoa_ayat'   => 'nullable|string|max:100', // [TAMBAHAN] Validasi ayat agar aman
             'habit_1_time' => 'nullable',
             'habit_7_time' => 'nullable',
         ]);
@@ -181,6 +182,7 @@ class StudentHabitController extends Controller
             }
 
             // --- C. SIMPAN KE DATABASE ---
+            // AMAN: Urutan array di sini tidak harus sama dengan urutan kolom di MySQL
             $habit = StudentHabit::updateOrCreate(
                 [
                     'student_id' => $studentId,
@@ -196,7 +198,7 @@ class StudentHabitController extends Controller
                     'prayer_dzuhur' => $valDzuhur,
                     'prayer_ashar' => $valAshar,
                     'prayer_maghrib' => $valMaghrib,
-                    'prayer_isya' => $valIsya,
+                    'prayer_isya' => $valIsya, // PASTIKAN KOLOM INI ADA DI DB
                     'odoa_surah' => $request->odoa_surah,
                     'odoa_ayat' => $request->odoa_ayat,
                     'odoa_audio_path' => $audioPath,

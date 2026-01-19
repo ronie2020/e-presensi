@@ -13,18 +13,18 @@ return new class extends Migration
     {
         Schema::table('student_habits', function (Blueprint $table) {
             // Menambahkan kolom untuk fitur ODOA (One Day One Ayat)
-            // Kita gunakan ->nullable() karena tidak semua siswa mungkin mengisi ini setiap hari
+            // Saya menghapus '->after(...)' agar tidak error jika kolom referensi tidak ada
             
             if (!Schema::hasColumn('student_habits', 'odoa_surah')) {
-                $table->string('odoa_surah')->nullable()->after('prayer_isya');
+                $table->string('odoa_surah')->nullable();
             }
             
             if (!Schema::hasColumn('student_habits', 'odoa_ayat')) {
-                $table->string('odoa_ayat')->nullable()->after('odoa_surah');
+                $table->string('odoa_ayat')->nullable();
             }
             
             if (!Schema::hasColumn('student_habits', 'odoa_audio_path')) {
-                $table->string('odoa_audio_path')->nullable()->after('odoa_ayat');
+                $table->string('odoa_audio_path')->nullable();
             }
         });
     }
