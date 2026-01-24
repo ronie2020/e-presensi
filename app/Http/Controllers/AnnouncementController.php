@@ -46,7 +46,7 @@ class AnnouncementController extends Controller
 
     /**
      * Fungsi khusus untuk menu 'Agenda Kegiatan'
-     * Menggunakan tampilan yang sama dengan index karena data agenda sudah ada disana.
+     * 
      */
     public function agendas()
     {

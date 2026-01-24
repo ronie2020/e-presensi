@@ -28,7 +28,7 @@ class AlumniController extends Controller
         // Cek apakah class Achievement ada di App\Models
         if (class_exists(\App\Models\Achievement::class)) {
             $achievements = \App\Models\Achievement::where('student_id', $student->id)
-                                ->with('disciplineType') // Pastikan relasi ini ada di model Achievement
+                                ->with('disciplineType') 
                                 ->latest('date')
                                 ->get();
                                 

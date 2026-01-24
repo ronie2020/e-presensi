@@ -22,7 +22,6 @@ use App\Models\DisciplineRecord;
 use App\Models\AcademicRecord;  
 use App\Models\TeachingSession;
 use App\Models\Achievement; 
-// Import Model BK (PENTING: Jangan lupa import ini agar query di bawah jalan)
 use App\Models\BkSession;
 
 class StudentPortalController extends Controller
@@ -150,10 +149,29 @@ class StudentPortalController extends Controller
             } catch (QueryException $e) { }
         }
 
+        // [MODIFIKASI] Ambil daftar tanggal di mana Guru sudah input "Alfa/Bolos" secara manual
+        // Agar tidak double counting dengan sistem otomatis
+        $manualAlpaDates = $manualViolations->filter(function($record) {
+            $text = strtolower(($record->notes ?? '') . ' ' . optional($record->disciplineType)->name);
+            return str_contains($text, 'alfa') || 
+                   str_contains($text, 'alpa') || 
+                   str_contains($text, 'bolos') || 
+                   str_contains($text, 'tidak masuk');
+        })->map(function($record) {
+            return Carbon::parse($record->date)->toDateString();
+        })->toArray();
+
         // B. Pelanggaran Otomatis (ALPA)
         $alpaViolations = $rawAttendanceRecords
-            ->filter(function ($att) {
-                return in_array(strtolower($att->status), ['alfa', 'alpa', 'alpha']);
+            ->filter(function ($att) use ($manualAlpaDates) {
+                // Syarat 1: Status memang Alfa
+                $isAlfa = in_array(strtolower($att->status), ['alfa', 'alpa', 'alpha']);
+                
+                // Syarat 2: Tanggal ini BELUM diinput manual oleh guru (cegah duplikat)
+                $dateString = Carbon::parse($att->attendance_date)->toDateString();
+                $notDuplicate = !in_array($dateString, $manualAlpaDates);
+
+                return $isAlfa && $notDuplicate;
             })
             ->map(function ($att) {
                 return (object) [
@@ -166,6 +184,7 @@ class StudentPortalController extends Controller
                 ];
             });
 
+        // Gabungkan Manual + Otomatis (yang sudah difilter)
         $violations = $manualViolations->concat($alpaViolations)->sortByDesc('date');
 
         // C. Prestasi/Kebaikan Manual

@@ -15,7 +15,7 @@ class ScheduleController extends Controller
 {
     public function index(Request $request)
     {
-        // --- LOGIKA ASLI: AMBIL DATA MASTER ---
+        //  AMBIL DATA MASTER ---
         $classes = SchoolClass::orderBy('name', 'asc')->get(); 
         $subjects = Subject::orderBy('name', 'asc')->get();
         
@@ -27,7 +27,7 @@ class ScheduleController extends Controller
             $teachers = User::all();
         }
 
-        // --- LOGIKA ASLI: FILTER & QUERY ---
+        // FILTER & QUERY ---
         $query = Schedule::with(['schoolClass', 'subject', 'teacher'])
                  ->orderByRaw("FIELD(day, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu')")
                  ->orderBy('start_time'); 
@@ -37,8 +37,7 @@ class ScheduleController extends Controller
         }
         $schedules = $query->get();
 
-        // --- LOGIKA ASLI: DATA JAM BEL ---
-        // [FIX] Menggunakan 'day_name' sebagai key agar tidak error column not found
+        // DATA JAM BEL ---    
         $regularSchedules = ScheduleRegular::all()->keyBy('day_name');
         
         $specialSchedules = ScheduleSpecial::orderBy('date', 'desc')->get();
@@ -55,7 +54,7 @@ class ScheduleController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Validasi (Sesuai kode asli)
+        // 1. Validasi 
         $request->validate([
             'school_class_id' => 'required|exists:classes,id', 
             'subject_id'      => 'required|exists:subjects,id',
@@ -67,7 +66,7 @@ class ScheduleController extends Controller
             'end_time.gte' => 'Jam selesai tidak boleh lebih kecil dari jam mulai.',
         ]);
 
-        // 2. Cek Bentrok GURU (Logika Asli Dipertahankan)
+        // 2. Cek Bentrok GURU 
         $teacherClash = Schedule::where('teacher_id', $request->teacher_id)
                 ->where('day', $request->day)
                 ->where(function($q) use ($request) {
@@ -80,8 +79,7 @@ class ScheduleController extends Controller
             return back()->withInput()->withErrors(['teacher_id' => 'Gagal! Guru ini sudah memiliki jadwal mengajar di jam pelajaran tersebut.']);
         }
 
-        // 3. Cek Bentrok KELAS (TAMBAHAN BARU: Agar siswa tidak bentrok)
-        // Logika ini PENTING dan TETAP ADA
+        // 3. Cek Bentrok KELAS         
         $classClash = Schedule::where('school_class_id', $request->school_class_id)
                 ->where('day', $request->day)
                 ->where(function($q) use ($request) {
@@ -112,7 +110,7 @@ class ScheduleController extends Controller
 
     public function storeRegular(Request $request)
     {
-        // Validasi input form (day_type adalah nama field HTML, jadi tetap dibiarkan day_type)
+        // Validasi input form 
         $request->validate([
             'day_type.*' => 'required|string|in:Biasa,Jumat',
             'start_in.*' => 'required', 
@@ -123,13 +121,10 @@ class ScheduleController extends Controller
 
         if ($request->has('day_type')) {
             foreach ($request->day_type as $index => $dayType) {
-                if (isset($request->start_in[$index])) {
-                    // [FIX] Update berdasarkan 'day_name', bukan 'day_type'
-                    // Database Anda tidak punya kolom 'day_type' lagi.
+                if (isset($request->start_in[$index])) {   
                     ScheduleRegular::updateOrCreate(
                         ['day_name' => $dayType], 
-                        [ 
-                            // 'day_type' => $dayType, // HAPUS INI (Penyebab Error)
+                        [                             
                             'start_in'  => $request->start_in[$index],
                             'end_in'    => $request->end_in[$index],
                             'start_out' => $request->start_out[$index],

@@ -56,9 +56,8 @@ class AdminAlumniController extends Controller
            
             'kuliah' => AlumniProfile::whereIn('activity_status', ['SMA', 'SMK', 'MA', 'Pesantren'])->count(),
             
-            'bekerja' => AlumniProfile::whereIn('activity_status', ['Bekerja', 'Wirausaha'])->count(),
-            
-            // Menghitung yang mencari kerja atau memutuskan tidak lanjut
+            'bekerja' => AlumniProfile::whereIn('activity_status', ['Bekerja', 'Wirausaha'])->count(),            
+          
             'mencari' => AlumniProfile::whereIn('activity_status', ['Mencari Kerja', 'Tidak Lanjut'])->count(),
         ];
 
@@ -69,7 +68,7 @@ class AdminAlumniController extends Controller
     }
 
     /**
-     * Halaman Rekap Testimoni Alumni (FITUR BARU)
+     * Halaman Rekap Testimoni Alumni 
      */
     public function testimonials()
     {
@@ -194,7 +193,7 @@ class AdminAlumniController extends Controller
      */
     public function processImport(Request $request)
     {
-        // --- PERBAIKAN: Tambahkan batas waktu eksekusi agar tidak timeout ---
+        // --- batas waktu eksekusi agar tidak timeout ---
         set_time_limit(300); // 300 detik = 5 menit
         ini_set('max_execution_time', 300); 
 

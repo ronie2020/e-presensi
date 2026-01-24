@@ -108,8 +108,7 @@ class AchievementController extends Controller
         // Atur ukuran kertas (A4 Landscape agar muat tabel lebar)
         $pdf->setPaper('a4', 'landscape');
 
-        // Stream: Membuka di browser (tab baru)
-        // Jika ingin langsung download, ganti 'stream' dengan 'download'
+        // Stream: Membuka di browser (tab baru)        
         return $pdf->stream('Laporan_Prestasi_' . date('Y-m-d') . '.pdf');
     }
 }
