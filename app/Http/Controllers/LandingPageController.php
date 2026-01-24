@@ -19,6 +19,7 @@ use App\Models\LmsMaterial;
 use App\Models\LmsAssignment;
 use App\Models\AlumniProfile; 
 use App\Models\StudentHabit; 
+use App\Models\Book; // Pastikan Model Book di-import
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -187,11 +188,26 @@ class LandingPageController extends Controller
             ->take(6) 
             ->get();
 
+        // --- 8. KATALOG E-BOOK (TAMBAHAN FITUR BARU) ---
+        $latestBooks = collect([]);
+        if (class_exists(Book::class)) {
+            try {
+                // Ambil 4 buku terbaru yang memiliki file ebook
+                $latestBooks = Book::whereNotNull('ebook_path')
+                                ->latest()
+                                ->take(4)
+                                ->get();
+            } catch (\Exception $e) {
+                // Biarkan array kosong jika error agar halaman tidak crash
+            }
+        }
+
         return view('welcome', compact(
             'stats', 'barChartData', 'libraryStats', 'libraryChartData', 
             'announcements', 'achievements', 'activities', 'teachers',
             'guestbooks', 'allGuestbooks', 'extracurriculars', 'agendas', 'schoolStats',
-            'alumniStats', 'alumniTestimonials', 'habitLabels', 'habitData', 'habitStats'
+            'alumniStats', 'alumniTestimonials', 'habitLabels', 'habitData', 'habitStats',
+            'latestBooks' // <--- Masukkan variabel ini agar view bisa mengaksesnya
         ));
     }
 

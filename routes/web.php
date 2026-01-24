@@ -134,6 +134,10 @@ Route::get('/kelulusan/cetak/{id}', [GraduationController::class, 'printSkl'])->
 Route::get('/library/kiosk', [LibraryKioskController::class, 'index'])->name('library.kiosk.index');
 Route::post('/library/kiosk/process', [LibraryKioskController::class, 'process'])->name('library.kiosk.process');
 
+// KATALOG PERPUSTAKAAN & BACA E-BOOK (AKSES SISWA)
+Route::get('/katalog', [BookController::class, 'catalogue'])->name('library.catalogue');
+Route::get('/katalog/baca/{book}', [BookController::class, 'read'])->name('library.books.read');
+
 // =========================================================================
 //  2. SISTEM SISWA (LOGIN & AREA SISWA)
 // =========================================================================

@@ -17,7 +17,8 @@ use App\Models\LmsMaterial;
 use App\Models\Complaint;       
 use App\Models\LiaisonBook;     
 use App\Models\StudentHabit; 
-use App\Models\LibraryLoan;      
+use App\Models\LibraryLoan;
+use App\Models\Book; // Pastikan Model Book di-import
 use App\Models\DisciplineRecord; 
 use App\Models\AcademicRecord;  
 use App\Models\TeachingSession;
@@ -26,9 +27,6 @@ use App\Models\BkSession;
 
 class StudentPortalController extends Controller
 {
-    /**
-     * Halaman Dashboard Portal (PUBLIC LANDING)
-     */
     public function index()
     {
         if (view()->exists('students.portal.index')) {
@@ -37,9 +35,6 @@ class StudentPortalController extends Controller
         return view('portal.index');
     }
 
-    /**
-     * Proses Pencarian Siswa berdasarkan NISN
-     */
     public function search(Request $request)
     {
         $request->validate([
@@ -60,9 +55,6 @@ class StudentPortalController extends Controller
                          ->with('success', 'Berhasil masuk ke Portal Informasi.');
     }
 
-    /**
-     * Halaman Utama Dashboard Siswa (SHOW)
-     */
     public function show($id)
     {
         // 1. Validasi Akses
@@ -149,28 +141,19 @@ class StudentPortalController extends Controller
             } catch (QueryException $e) { }
         }
 
-        // [MODIFIKASI] Ambil daftar tanggal di mana Guru sudah input "Alfa/Bolos" secara manual
-        // Agar tidak double counting dengan sistem otomatis
+        // B. Pelanggaran Otomatis (ALPA)
         $manualAlpaDates = $manualViolations->filter(function($record) {
             $text = strtolower(($record->notes ?? '') . ' ' . optional($record->disciplineType)->name);
-            return str_contains($text, 'alfa') || 
-                   str_contains($text, 'alpa') || 
-                   str_contains($text, 'bolos') || 
-                   str_contains($text, 'tidak masuk');
+            return str_contains($text, 'alfa') || str_contains($text, 'alpa') || str_contains($text, 'bolos') || str_contains($text, 'tidak masuk');
         })->map(function($record) {
             return Carbon::parse($record->date)->toDateString();
         })->toArray();
 
-        // B. Pelanggaran Otomatis (ALPA)
         $alpaViolations = $rawAttendanceRecords
             ->filter(function ($att) use ($manualAlpaDates) {
-                // Syarat 1: Status memang Alfa
                 $isAlfa = in_array(strtolower($att->status), ['alfa', 'alpa', 'alpha']);
-                
-                // Syarat 2: Tanggal ini BELUM diinput manual oleh guru (cegah duplikat)
                 $dateString = Carbon::parse($att->attendance_date)->toDateString();
                 $notDuplicate = !in_array($dateString, $manualAlpaDates);
-
                 return $isAlfa && $notDuplicate;
             })
             ->map(function ($att) {
@@ -184,10 +167,9 @@ class StudentPortalController extends Controller
                 ];
             });
 
-        // Gabungkan Manual + Otomatis (yang sudah difilter)
         $violations = $manualViolations->concat($alpaViolations)->sortByDesc('date');
 
-        // C. Prestasi/Kebaikan Manual
+        // C. Prestasi
         $manualMerits = collect([]);
         if (class_exists(DisciplineRecord::class)) {
             try {
@@ -213,7 +195,6 @@ class StudentPortalController extends Controller
             } catch (QueryException $e) { }
         }
 
-        // D. Poin Shalat Otomatis
         $prayerAchievements = $rawAttendanceRecords
             ->filter(function ($att) {
                 $isReligious = isset($att->type) && strtolower($att->type) === 'keagamaan';
@@ -235,7 +216,6 @@ class StudentPortalController extends Controller
                 ];
             });
 
-        // E. Real Achievements
         $realAchievements = collect([]);
         if (class_exists(Achievement::class)) {
             try {
@@ -258,10 +238,8 @@ class StudentPortalController extends Controller
 
         $achievements = $realAchievements->concat($manualMerits)->concat($prayerAchievements)->sortByDesc('date');
 
-        // Hitung Total Skor
         $total_violation_points = $violations->sum(fn($v) => $v->point ?? $v->disciplineType->point_value ?? 0);
         $total_merit_points = $manualMerits->sum(fn($a) => $a->point ?? $a->disciplineType->point_value ?? 0) + $prayerAchievements->sum(fn($a) => $a->point ?? 0);
-        
         $finalScore = 100 - $total_violation_points + $total_merit_points;
 
         // 5. JURNAL 7 KEBIASAAN
@@ -275,7 +253,7 @@ class StudentPortalController extends Controller
                         ->get();
         }
 
-        // 6. DATA LMS (TUGAS & MATERI)
+        // 6. DATA LMS
         $lms_assignments_grouped = []; 
         $lms_materials_grouped = []; 
         $lms_grades = [];
@@ -293,7 +271,6 @@ class StudentPortalController extends Controller
                     foreach($submissions as $sub) { $lms_grades[$sub->assignment_id] = $sub->score; }
                 }
             }
-
             if (class_exists(LmsMaterial::class)) {
                 $materials = LmsMaterial::with('subject')
                                 ->where('class_id', $classId)
@@ -303,11 +280,20 @@ class StudentPortalController extends Controller
             }
         }
         
-        // 7. PERPUSTAKAAN
+        // 7. PERPUSTAKAAN (MODIFIKASI: DENGAN E-BOOKS)
         $library_visits = 0; $library_history = collect([]);
+        $ebooks = collect([]); // Init E-Books
+
         if (class_exists(LibraryLoan::class)) {
              $library_history = LibraryLoan::with('book')->where('student_id', $id)->latest()->take(5)->get();
              $library_visits = $library_history->count();
+        }
+
+        // [BARU] Ambil Data E-Book jika model ada
+        if (class_exists(Book::class)) {
+            $ebooks = Book::whereNotNull('ebook_path')
+                        ->latest()
+                        ->get();
         }
 
         // 8. DATA AKADEMIK
@@ -334,15 +320,11 @@ class StudentPortalController extends Controller
                 ->get();
         }
 
-        // 10. PENGADUAN
+        // 10. PENGADUAN & BK
         $complaints = collect([]);
         if (class_exists(Complaint::class)) {
             $complaints = Complaint::where('student_id', $student->id)->latest()->get();
         }
-
-        // ==========================================
-        // 11. DATA BK / COUNSELING (BARU!)
-        // ==========================================
         $bkSessions = collect([]);
         if (class_exists(BkSession::class)) {
             $bkSessions = BkSession::where('student_id', $student->id)
@@ -351,8 +333,8 @@ class StudentPortalController extends Controller
                 ->get();
         }
 
-         // ==========================================
-        // 12. TABS MENU (DINAMIS)
+        // ==========================================
+        // 11. TABS MENU (PASTIKAN BAGIAN INI LENGKAP)
         // ==========================================
         $tabs = ['ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan']];
 
@@ -362,10 +344,7 @@ class StudentPortalController extends Controller
         } else {
             $tabs = array_merge($tabs, [
                 'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan'],
-                
-                // [BARU] MENU E-COUNSELING DITAMBAHKAN DISINI
                 'bk' => ['icon' => 'heart-beat', 'label' => 'Konseling BK'],
-                
                 'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
                 'pengaduan' => ['icon' => 'megaphone', 'label' => 'Lapor Masalah'],   
                 'jadwal' => ['icon' => 'calendar-blank', 'label' => 'Jadwal Pelajaran'],
@@ -374,7 +353,11 @@ class StudentPortalController extends Controller
                 'akademik' => ['icon' => 'exam', 'label' => 'Nilai Rapor'],
                 'kehadiran' => ['icon' => 'calendar-check', 'label' => 'Riwayat Absen'],
                 'disiplin' => ['icon' => 'warning-octagon', 'label' => 'Disiplin & Poin'], 
-                'prestasi' => ['icon' => 'medal', 'label' => 'Prestasi'],                 
+                'prestasi' => ['icon' => 'medal', 'label' => 'Prestasi'],   
+                'keagamaan' => ['icon' => 'mosque', 'label' => 'Keagamaan'],
+                
+                // [PENTING] INI YANG MENAMPILKAN TAB PERPUSTAKAAN
+                'perpustakaan' => ['icon' => 'books', 'label' => 'E-Library'], 
             ]);
         }
 
@@ -385,7 +368,7 @@ class StudentPortalController extends Controller
             $sholat_dhuhur = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuhur')->count();
         }
 
-        // Compact Data
+        // 12. COMPACT DATA (TERMASUK EBOOKS)
         $data = compact(
             'student', 'isAlumni', 'tabs', 'attendancePercentage',
             'liaison_messages', 'complaints', 
@@ -396,11 +379,11 @@ class StudentPortalController extends Controller
             'lms_materials_grouped', 
             'violations', 'total_violation_points', 
             'achievements', 'total_merit_points',
-            'library_visits', 'library_history',
+            'library_visits', 'library_history', 'ebooks', // <-- Kirim ebooks ke view
             'academic_record', 'chartData', 'teaching_journals',
             'sholat_dhuha', 'sholat_dhuhur',
             'finalScore',
-            'bkSessions' // <--- Tambahkan variabel ini agar dikirim ke view
+            'bkSessions'
         );
 
         if (view()->exists('students.portal.show')) {

@@ -20,7 +20,7 @@
                             Koleksi Buku
                         </h1>
                         <p class="text-blue-100/80 text-sm md:text-base font-medium leading-relaxed max-w-lg">
-                            Kelola inventaris buku perpustakaan, pantau ketersediaan stok, dan tambahkan koleksi literasi terbaru.
+                            Kelola inventaris buku perpustakaan, pantau ketersediaan stok, dan baca koleksi E-Book digital.
                         </p>
                     </div>
                     
@@ -96,6 +96,15 @@
                             {{-- Overlay Gradient --}}
                             <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
 
+                            {{-- BADGE E-BOOK (DITAMBAHKAN) --}}
+                            @if($book->ebook_path)
+                                <div class="absolute top-4 left-4 z-10">
+                                    <span class="px-2 py-1 bg-rose-500/90 backdrop-blur-md text-[10px] font-bold text-white rounded-lg shadow-sm border border-white/20 flex items-center gap-1">
+                                        <i class="ph-bold ph-file-pdf"></i> E-Book
+                                    </span>
+                                </div>
+                            @endif
+
                             {{-- Badge Kategori --}}
                             <div class="absolute top-4 right-4">
                                 <span class="px-3 py-1.5 bg-white/90 backdrop-blur-md text-[10px] font-black uppercase tracking-wider rounded-xl text-blue-900 shadow-sm border border-white/20">
@@ -124,9 +133,19 @@
                             </div>
 
                             <div class="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
-                                <div class="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                                    <span class="text-[10px] font-mono font-bold text-slate-500">{{ $book->book_code }}</span>
-                                </div>
+                                {{-- TOMBOL BACA / KODE BUKU (DIMODIFIKASI) --}}
+                                @if($book->ebook_path)
+                                    <a href="{{ route('library.books.read', $book->id) }}" 
+                                       class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105 transition-all flex items-center gap-2 group/btn">
+                                        <i class="ph-bold ph-read-cv-logo text-lg group-hover/btn:animate-pulse"></i>
+                                        <span>Baca</span>
+                                    </a>
+                                @else
+                                    <div class="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                                        <span class="text-[10px] font-mono font-bold text-slate-500">{{ $book->book_code }}</span>
+                                    </div>
+                                @endif
+
                                 <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0 duration-300">
                                     <a href="{{ route('library.books.edit', $book->id) }}" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors" title="Edit">
                                         <i class="ph-bold ph-pencil-simple"></i>
@@ -196,7 +215,7 @@
                         <div class="relative group mb-6">
                             <input type="file" name="file" required class="block w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 border border-dashed border-slate-300 rounded-2xl py-3 px-4 hover:border-emerald-400 transition-all cursor-pointer bg-white">
                             
-                            {{-- ERROR MESSAGE INLINE (PERBAIKAN) --}}
+                            {{-- ERROR MESSAGE INLINE --}}
                             @error('file')
                                 <div class="mt-2 p-3 bg-rose-50 border border-rose-100 rounded-xl flex items-center gap-2 text-rose-600 text-xs font-bold animate-pulse">
                                     <i class="ph-bold ph-warning-circle text-lg"></i>

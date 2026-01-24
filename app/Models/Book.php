@@ -21,6 +21,7 @@ class Book extends Model
         'shelf_location', // Lokasi Rak
         'description',
         'cover_path',     // Foto Cover
+        'ebook_path',     // <--- WAJIB DITAMBAHKAN DI SINI
     ];
 
     /**
