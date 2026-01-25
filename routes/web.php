@@ -60,6 +60,7 @@ use App\Http\Controllers\LibraryCirculationController;
 use App\Http\Controllers\LibraryKioskController;
 use App\Http\Controllers\LibraryToolController;
 
+
 // Persuratan & Dinas
 use App\Http\Controllers\LetterIncomingController;
 use App\Http\Controllers\SptController;
@@ -361,18 +362,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/grades/list', [GradeController::class, 'listStudents'])->name('grades.list');
     Route::get('/report-card/{student_id}', [GradeController::class, 'reportCard'])->name('grades.report');
 
-    // Perpustakaan
+     // Perpustakaan
     Route::prefix('library')->name('library.')->group(function () {
         Route::get('/dashboard', [LibraryDashboardController::class, 'index'])->name('dashboard');
         Route::post('/books/import', [BookController::class, 'import'])->name('books.import');
         Route::post('/books/categories/store-ajax', [BookController::class, 'storeCategoryAjax'])->name('books.categories.ajax');
+                
+        Route::post('/dashboard/check-student', [LibraryDashboardController::class, 'checkStudent'])
+                ->name('dashboard.checkStudent');
+
         Route::resource('books', BookController::class);   
         Route::get('/circulation', [LibraryCirculationController::class, 'index'])->name('circulation.index');
         Route::post('/circulation/search-student', [LibraryCirculationController::class, 'searchStudent'])->name('circulation.searchStudent');
-        Route::post('/circulation/search-book', [LibraryCirculationController::class, 'searchBook'])->name('circulation.searchBook');
-        Route::post('/circulation/borrow', [LibraryCirculationController::class, 'store'])->name('circulation.store');
-        Route::post('/circulation/return', [LibraryCirculationController::class, 'returnBook'])->name('circulation.return');
-     
+        
         // ALAT BANTU & CETAK
         Route::controller(LibraryToolController::class)->prefix('tools')->name('tools.')->group(function () {
             Route::get('/', 'index')->name('index');             

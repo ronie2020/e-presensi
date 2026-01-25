@@ -2,48 +2,17 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- CUSTOM STYLES UNTUK ANIMASI & EFEK VISUAL --}}
+    {{-- CUSTOM STYLES --}}
     <style>
-        /* 1. Animasi Masuk (Staggered Fade In Up) */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-enter {
-            opacity: 0;
-            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        /* Delay bertingkat */
+        /* Animasi standar tetap dipertahankan */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-enter { opacity: 0; animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .delay-100 { animation-delay: 0.1s; }
         .delay-200 { animation-delay: 0.2s; }
         .delay-300 { animation-delay: 0.3s; }
-        .delay-400 { animation-delay: 0.4s; }
-
-        /* 2. Animasi Background Hero (Floating Blobs) */
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(-10px, -15px); }
-        }
-        @keyframes float-reverse {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(10px, 15px); }
-        }
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .animate-float-reverse { animation: float-reverse 7s ease-in-out infinite; }
-
-        /* 3. Animasi Berkedip (Twinkle) untuk Partikel */
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.3; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.2); box-shadow: 0 0 10px rgba(255,255,255,0.8); }
-        }
-        .animate-twinkle { animation: twinkle 3s ease-in-out infinite; }
-        .delay-slow { animation-delay: 1.5s; }
-
-        /* 4. Animasi Teks Mengkilap (Shimmering Gradient) */
-        @keyframes shimmer {
-            0% { background-position: -200% center; }
-            100% { background-position: 200% center; }
-        }
+        
+        /* Shimmer Effect */
+        @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
         .text-shimmer {
             background: linear-gradient(to right, #ffffff 0%, #bfdbfe 20%, #ffffff 40%, #ffffff 100%);
             background-size: 200% auto;
@@ -53,16 +22,10 @@
             -webkit-text-fill-color: transparent;
             animation: shimmer 3s linear infinite;
         }
-
-        /* 5. Animasi Icon Goyang (Wiggle) saat Hover */
-        @keyframes wiggle {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-10deg); }
-            75% { transform: rotate(10deg); }
-        }
-        .group:hover .animate-wiggle {
-            animation: wiggle 0.5s ease-in-out;
-        }
+        
+        /* Floating Animation */
+        @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-10px, -15px); } }
+        .animate-float { animation: float 6s ease-in-out infinite; }
     </style>
 
     <div class="py-6 sm:py-8 font-sans text-slate-800">
@@ -71,28 +34,16 @@
         <div class="animate-enter max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10">
             <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
                 
-                {{-- Background Decorations & Particles --}}
+                {{-- Background Decorations --}}
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                
-                {{-- Blobs yang bergerak --}}
                 <div class="absolute -top-24 -right-24 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-blue-500/30 transition-all duration-700 animate-float"></div>
-                <div class="absolute bottom-0 right-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none animate-float-reverse"></div>
                 
-                {{-- Partikel "Bintang/Data" --}}
-                <div class="absolute top-10 left-20 w-1.5 h-1.5 bg-blue-300 rounded-full animate-twinkle"></div>
-                <div class="absolute top-1/2 right-1/3 w-1 h-1 bg-white rounded-full animate-twinkle delay-200"></div>
-                <div class="absolute bottom-20 left-1/3 w-2 h-2 bg-indigo-300 rounded-full animate-twinkle delay-slow blur-[1px]"></div>
-                <div class="absolute top-20 right-20 w-1.5 h-1.5 bg-blue-100 rounded-full animate-twinkle delay-300"></div>
-
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                    
-                    {{-- Text Content --}}
                     <div class="max-w-2xl">
-                        {{-- Badge dengan efek Pulse halus --}}
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm shadow-[0_0_15px_rgba(59,130,246,0.3)] animate-pulse">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm animate-pulse">
                             <i class="ph-fill ph-books"></i> Sistem Perpustakaan Digital
                         </div>
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-white leading-tight drop-shadow-lg">
+                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-white drop-shadow-lg">
                             Dashboard Pustaka
                         </h1>
                         <p class="text-blue-100/80 text-sm md:text-base font-medium leading-relaxed max-w-lg">
@@ -100,31 +51,22 @@
                         </p>
                     </div>
                     
-                    {{-- Stats Cards (FIXED RESPONSIVE) --}}
                     <div class="w-full md:w-auto mt-4 md:mt-0">
                         <div class="grid grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                            {{-- Card 1: Koleksi Buku --}}
-                            <div class="bg-white/10 backdrop-blur-md px-5 py-5 rounded-2xl border border-white/20 text-center md:text-left hover:bg-white/15 transition-all hover:scale-105 duration-300 group/card shadow-lg">
-                                <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center md:justify-start gap-2 mb-1 text-blue-300">
-                                    <i class="ph-duotone ph-book-bookmark text-2xl md:text-xl lg:text-2xl group-hover/card:text-white transition-colors"></i>
+                            <div class="bg-white/10 backdrop-blur-md px-5 py-5 rounded-2xl border border-white/20 hover:bg-white/15 transition-all hover:scale-105 duration-300">
+                                <div class="flex flex-col items-start gap-1 text-blue-300">
                                     <span class="text-[10px] font-bold uppercase tracking-wider">Koleksi Buku</span>
+                                    <span class="text-3xl font-black text-shimmer count-up" data-target="{{ $totalBooks }}">0</span>
                                 </div>
-                                {{-- Angka dengan efek Shimmer --}}
-                                <span class="block text-3xl font-black tracking-tight count-up text-shimmer mt-1" data-target="{{ $totalBooks }}">0</span>
                             </div>
-
-                            {{-- Card 2: Pengunjung Hari Ini --}}
-                            <div class="bg-orange-500/20 backdrop-blur-md px-5 py-5 rounded-2xl border border-orange-400/30 text-center md:text-left hover:bg-orange-500/30 transition-all hover:scale-105 duration-300 group/card shadow-lg">
-                                <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center md:justify-start gap-2 mb-1 text-orange-300">
-                                    <i class="ph-duotone ph-users-three text-2xl md:text-xl lg:text-2xl group-hover/card:text-white transition-colors"></i>
-                                    <span class="text-[10px] font-bold uppercase tracking-wider">Pengunjung</span>
+                            <div class="bg-orange-500/20 backdrop-blur-md px-5 py-5 rounded-2xl border border-orange-400/30 hover:bg-orange-500/30 transition-all hover:scale-105 duration-300">
+                                <div class="flex flex-col items-start gap-1 text-orange-300">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider">Pengunjung Hari Ini</span>
+                                    <span class="text-3xl font-black text-shimmer count-up" data-target="{{ $todayVisits }}">0</span>
                                 </div>
-                                {{-- Angka dengan efek Shimmer --}}
-                                <span class="block text-3xl font-black tracking-tight count-up text-shimmer mt-1" data-target="{{ $todayVisits }}">0</span>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -135,226 +77,143 @@
                 <!-- KOLOM UTAMA (KIRI - 2/3) -->
                 <div class="lg:col-span-2 space-y-8">
 
-                    <!-- 1. Menu Akses Cepat -->
-                    <div class="animate-enter delay-100 bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group/panel">
-                        {{-- Aksen Header dengan animasi gradient flow --}}
-                        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 bg-[length:200%_100%] animate-[shimmer_3s_linear_infinite]"></div>
-                        
+                    <!-- Menu Akses Cepat -->
+                    <div class="animate-enter delay-100 bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
                         <h2 class="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
-                            <i class="ph-fill ph-lightning text-yellow-500 text-xl drop-shadow-md"></i> Akses Cepat
+                            <i class="ph-fill ph-lightning text-yellow-500 text-xl"></i> Akses Cepat
                         </h2>
                         
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {{-- Button 1 --}}
-                            <a href="{{ route('library.circulation.index') }}" class="group flex flex-col items-center justify-center p-5 bg-blue-50/50 hover:bg-blue-600 border border-blue-100 hover:border-blue-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/30 hover:-translate-y-2 transform">
-                                <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-3 text-blue-600 group-hover:text-blue-600 group-hover:bg-white transition-colors">
-                                    <i class="ph-duotone ph-arrows-left-right text-3xl animate-wiggle"></i>
-                                </div>
-                                <span class="font-bold text-slate-600 text-sm group-hover:text-white transition-colors text-center">Sirkulasi</span>
+                            <a href="{{ route('library.circulation.index') }}" class="group flex flex-col items-center justify-center p-4 bg-blue-50/50 hover:bg-blue-600 border border-blue-100 hover:border-blue-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                                <i class="ph-duotone ph-arrows-left-right text-3xl text-blue-600 group-hover:text-white mb-2 transition-colors"></i>
+                                <span class="font-bold text-slate-600 text-xs group-hover:text-white transition-colors">Sirkulasi</span>
                             </a>
                             
-                            {{-- Button 2 --}}
-                            <button onclick="searchMemberPopup()" class="group flex flex-col items-center justify-center p-5 bg-purple-50/50 hover:bg-purple-600 border border-purple-100 hover:border-purple-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 hover:-translate-y-2 transform">
-                                <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-3 text-purple-600 group-hover:text-purple-600 group-hover:bg-white transition-colors">
-                                    <i class="ph-duotone ph-user-focus text-3xl animate-wiggle"></i>
-                                </div>
-                                <span class="font-bold text-slate-600 text-sm group-hover:text-white transition-colors text-center">Cari Siswa</span>
+                            <button onclick="searchMemberPopup()" class="group flex flex-col items-center justify-center p-4 bg-purple-50/50 hover:bg-purple-600 border border-purple-100 hover:border-purple-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                                <i class="ph-duotone ph-user-focus text-3xl text-purple-600 group-hover:text-white mb-2 transition-colors"></i>
+                                <span class="font-bold text-slate-600 text-xs group-hover:text-white transition-colors">Cari Siswa</span>
                             </button>
                             
-                            {{-- Button 3 --}}
-                            <a href="{{ route('library.books.create') }}" class="group flex flex-col items-center justify-center p-5 bg-emerald-50/50 hover:bg-emerald-600 border border-emerald-100 hover:border-emerald-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-2 transform">
-                                <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-3 text-emerald-600 group-hover:text-emerald-600 group-hover:bg-white transition-colors">
-                                    <i class="ph-duotone ph-plus-circle text-3xl animate-wiggle"></i>
-                                </div>
-                                <span class="font-bold text-slate-600 text-sm group-hover:text-white transition-colors text-center">Input Buku</span>
+                            <a href="{{ route('library.books.create') }}" class="group flex flex-col items-center justify-center p-4 bg-emerald-50/50 hover:bg-emerald-600 border border-emerald-100 hover:border-emerald-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                                <i class="ph-duotone ph-plus-circle text-3xl text-emerald-600 group-hover:text-white mb-2 transition-colors"></i>
+                                <span class="font-bold text-slate-600 text-xs group-hover:text-white transition-colors">Input Buku</span>
                             </a>
                             
-                            {{-- Button 4 --}}
-                            <a href="{{ route('library.kiosk.index') }}" target="_blank" class="group flex flex-col items-center justify-center p-5 bg-orange-50/50 hover:bg-orange-600 border border-orange-100 hover:border-orange-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-2 transform">
-                                <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-sm mb-3 text-orange-600 group-hover:text-orange-600 group-hover:bg-white transition-colors">
-                                    <i class="ph-duotone ph-desktop text-3xl animate-wiggle"></i>
-                                </div>
-                                <span class="font-bold text-slate-600 text-sm group-hover:text-white transition-colors text-center">Mode Kiosk</span>
+                            <a href="{{ route('library.kiosk.index') }}" target="_blank" class="group flex flex-col items-center justify-center p-4 bg-orange-50/50 hover:bg-orange-600 border border-orange-100 hover:border-orange-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                                <i class="ph-duotone ph-desktop text-3xl text-orange-600 group-hover:text-white mb-2 transition-colors"></i>
+                                <span class="font-bold text-slate-600 text-xs group-hover:text-white transition-colors">Mode Kiosk</span>
                             </a>
-                        </div>
-                    </div>
+                        </div>   
+                    </div>     
 
-            {{-- SECTION: ANALITIK E-BOOK (DIGITAL) --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-enter delay-100">
-                
-                {{-- Card Statistik Total Baca Digital --}}
-                <div class="bg-gradient-to-br from-indigo-600 to-violet-600 rounded-[2rem] p-6 text-white shadow-xl shadow-indigo-600/20 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700"></div>
-                    <div class="relative z-10">
-                        <div class="flex items-center gap-3 mb-4 text-indigo-100">
-                            <div class="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
-                                <i class="ph-fill ph-read-cv-logo text-xl"></i>
-                            </div>
-                            <span class="text-xs font-bold uppercase tracking-wider">Literasi Digital (Bulan Ini)</span>
-                        </div>
-                        <div class="flex items-end gap-2">
-                            <h2 class="text-5xl font-black">{{ $ebookReadsThisMonth ?? 0 }}</h2>
-                            <span class="text-lg font-medium opacity-80 mb-1">x Baca</span>
-                        </div>
-                        <p class="text-xs text-indigo-200 mt-4 leading-relaxed max-w-[90%]">
-                            Total aktivitas siswa mengakses dan membaca E-Book melalui portal digital bulan ini.
-                        </p>
-                    </div>
-                </div>
-
-                {{-- Card Top 5 E-Book --}}
-                <div class="lg:col-span-2 bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 relative overflow-hidden">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                            <i class="ph-fill ph-crown text-amber-500 text-xl"></i>
-                            E-Book Terpopuler
-                        </h3>
-                        <span class="text-[10px] font-bold bg-slate-50 text-slate-500 px-2 py-1 rounded-lg uppercase tracking-wider">Digital</span>
-                    </div>
-
-                    @if(isset($popularEbooks) && count($popularEbooks) > 0)
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            @foreach($popularEbooks as $index => $book)
-                                <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group">
-                                    <div class="w-6 h-6 flex items-center justify-center font-black text-sm {{ $index == 0 ? 'text-amber-500 bg-amber-50 rounded' : 'text-slate-400 bg-slate-100 rounded' }}">
-                                        {{ $index + 1 }}
-                                    </div>
-                                    <div class="w-8 h-12 bg-slate-200 rounded overflow-hidden shadow-sm flex-shrink-0">
-                                        @if($book->cover_path)
-                                            <img src="{{ asset('storage/' . $book->cover_path) }}" class="w-full h-full object-cover">
-                                        @else
-                                            <div class="w-full h-full flex items-center justify-center text-slate-400"><i class="ph-bold ph-book"></i></div>
-                                        @endif
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <h4 class="font-bold text-slate-800 text-xs truncate group-hover:text-blue-600 transition-colors">{{ $book->title }}</h4>
-                                        <div class="flex items-center gap-2 mt-1">
-                                            <span class="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[10px] font-bold">
-                                                {{ $book->ebook_reads_count }} Baca
-                                            </span>
-                                        </div>
-                                    </div>
+                    <!-- E-Book Stats -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-enter delay-100">
+                        <div class="bg-gradient-to-br from-indigo-600 to-violet-600 rounded-[2rem] p-6 text-white shadow-xl shadow-indigo-600/20 relative overflow-hidden">
+                            <div class="relative z-10">
+                                <div class="flex items-center gap-2 mb-2 opacity-80">
+                                    <i class="ph-fill ph-read-cv-logo"></i>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider">Literasi Digital</span>
                                 </div>
-                            @endforeach
+                                <h2 class="text-4xl font-black mb-1">{{ $ebookReadsThisMonth ?? 0 }}</h2>
+                                <p class="text-xs text-indigo-200">Total baca E-Book bulan ini</p>
+                            </div>
                         </div>
-                    @else
-                        <div class="flex flex-col items-center justify-center h-32 text-slate-400 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
-                            <i class="ph-duotone ph-books text-3xl mb-2 opacity-50"></i>
-                            <p class="text-xs font-bold">Belum ada data baca digital bulan ini.</p>
+
+                        <div class="lg:col-span-2 bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6">
+                            <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+                                <i class="ph-fill ph-crown text-amber-500"></i> Top E-Book
+                            </h3>
+                            @if(isset($popularEbooks) && count($popularEbooks) > 0)
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    @foreach($popularEbooks as $index => $book)
+                                        <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-default">
+                                            <div class="w-5 h-5 flex items-center justify-center text-xs font-black bg-slate-100 rounded text-slate-500">{{ $index + 1 }}</div>
+                                            <div class="flex-1 min-w-0">
+                                                <h4 class="font-bold text-slate-700 text-xs truncate">{{ $book->title }}</h4>
+                                                <span class="text-[10px] text-slate-400">{{ $book->ebook_reads_count }}x Baca</span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <p class="text-xs text-slate-400 text-center py-4">Belum ada data bacaan digital.</p>
+                            @endif
                         </div>
-                    @endif
-                </div>
-            </div>
+                    </div>            
                     
                     <!-- 2. Grafik Statistik -->
-                    <div class="animate-enter delay-200 bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 hover:shadow-2xl hover:shadow-blue-900/5 transition-all duration-500">
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+                    <div class="animate-enter delay-200 bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+                        <div class="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
                             <div>
                                 <h2 class="text-lg font-black text-slate-800 flex items-center gap-2">
-                                    <i class="ph-fill ph-chart-bar text-blue-900"></i> Statistik Bulanan
+                                    <i class="ph-fill ph-chart-bar text-blue-900"></i> Tren Aktivitas
                                 </h2>
-                                <p class="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wide">Analisa Peminjaman & Kunjungan</p>
+                                <p class="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wide">7 Hari Terakhir</p>
                             </div>
-                            <!-- Toggle Chart -->
-                            <div class="flex bg-slate-100 p-1.5 rounded-xl border border-slate-200 w-full sm:w-auto">
-                                <button onclick="toggleChart('loans')" id="btn-loans" class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-black bg-white shadow-sm text-blue-900 transition-all hover:scale-105 active:scale-95 text-center">Peminjaman</button>
-                                <button onclick="toggleChart('visits')" id="btn-visits" class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all hover:scale-105 active:scale-95 text-center">Kunjungan</button>
+                            <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                                <button onclick="toggleChart('loans')" id="btn-loans" class="px-4 py-2 rounded-lg text-xs font-black bg-white shadow-sm text-blue-900 transition-all">Peminjaman</button>
+                                <button onclick="toggleChart('visits')" id="btn-visits" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all">Kunjungan</button>
                             </div>
                         </div>
                         <div class="h-64 sm:h-72 w-full relative">
-                             <canvas id="mainChart"></canvas>
+                            <canvas id="mainChart"></canvas>
                         </div>
-                    </div>
-                </div>
+                    </div>            
 
-                <!-- SIDEBAR KANAN (1/3) -->
+                </div> 
+
+                <!-- SIDEBAR KANAN -->
                 <div class="lg:col-span-1 space-y-8">
                      
-                     <!-- 3. Status Sirkulasi -->
-                     <div class="animate-enter delay-300 bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="font-black text-slate-800 text-lg">Status Sirkulasi</h3>
-                            <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center animate-pulse">
-                                {{-- FIX: Menggunakan ph-duotone untuk konsistensi --}}
-                                <i class="ph-duotone ph-arrows-left-right"></i>
+                     <!-- Status Sirkulasi -->
+                     <div class="animate-enter delay-300 bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+                        <h3 class="font-black text-slate-800 text-lg mb-4">Status Sirkulasi</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="p-4 bg-indigo-50 rounded-2xl text-center border border-indigo-100">
+                                <i class="ph-duotone ph-book-open-text text-2xl text-indigo-600 mb-1 block"></i>
+                                <p class="text-2xl font-black text-slate-800 count-up" data-target="{{ $borrowedBooks }}">0</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Dipinjam</p>
                             </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div class="p-4 sm:p-5 bg-indigo-50 rounded-3xl text-center border border-indigo-100 hover:bg-indigo-100 transition-colors group cursor-default">
-                                <div class="w-10 h-10 mx-auto bg-white text-indigo-600 rounded-full flex items-center justify-center shadow-sm mb-2 group-hover:scale-110 transition-transform">
-                                    {{-- FIX: Mengganti ph-hand-holding (invalid) dengan ph-book-open-text (valid) --}}
-                                    <i class="ph-duotone ph-book-open-text text-lg"></i>
-                                </div>
-                                <p class="text-2xl sm:text-3xl font-black text-slate-800 count-up" data-target="{{ $borrowedBooks }}">0</p>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Dipinjam</p>
-                            </div>
-                            <div class="p-4 sm:p-5 bg-rose-50 rounded-3xl text-center border border-rose-100 hover:bg-rose-100 transition-colors group cursor-default">
-                                <div class="w-10 h-10 mx-auto bg-white text-rose-600 rounded-full flex items-center justify-center shadow-sm mb-2 group-hover:scale-110 transition-transform">
-                                    {{-- FIX: ph-warning-circle valid, tapi ubah ke duotone agar konsisten --}}
-                                    <i class="ph-duotone ph-warning-circle text-lg"></i>
-                                </div>
-                                <p class="text-2xl sm:text-3xl font-black text-slate-800 count-up" data-target="{{ $overdueBooks }}">0</p>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Terlambat</p>
-                            </div>
-                        </div>
-
-                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                            <div class="flex justify-between items-center text-xs mb-2">
-                                <span class="font-bold text-slate-500">Anggota Meminjam</span>
-                                <span class="font-black text-blue-900 bg-blue-100 px-2 py-0.5 rounded">{{ $membersBorrowingCount }} Siswa</span>
-                            </div>
-                            <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                                <div class="bg-blue-600 h-2.5 rounded-full animate-pulse" style="width: {{ $activeMembers > 0 ? ($membersBorrowingCount / $activeMembers) * 100 : 0 }}%"></div>
+                            <div class="p-4 bg-rose-50 rounded-2xl text-center border border-rose-100">
+                                <i class="ph-duotone ph-warning-circle text-2xl text-rose-600 mb-1 block"></i>
+                                <p class="text-2xl font-black text-slate-800 count-up" data-target="{{ $overdueBooks }}">0</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Terlambat</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 4. Log Aktivitas -->
-                    <div class="animate-enter delay-400 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col h-[500px]">
-                        <div class="p-6 border-b border-slate-50 flex items-center justify-between bg-white z-10">
+                    <!-- Log Aktivitas -->
+                    <div class="animate-enter delay-400 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col h-[500px]">
+                        <div class="p-6 border-b border-slate-50">
                             <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
                                 <i class="ph-fill ph-clock-counter-clockwise text-blue-900"></i> Log Aktivitas
                             </h3>
                         </div>
-                        
-                        <div class="p-0 overflow-y-auto flex-1 custom-scrollbar">
+                        <div class="overflow-y-auto flex-1 p-0 custom-scrollbar">
                             <div class="divide-y divide-slate-50">
                                 @forelse($recentActivities as $activity)
-                                    <div class="p-5 hover:bg-blue-50/50 transition-colors flex gap-4 items-start group cursor-pointer">
-                                        <div class="shrink-0 mt-1 transition-transform group-hover:scale-110 duration-200">
+                                    <div class="p-4 hover:bg-slate-50 transition-colors flex gap-3 items-start">
+                                        <div class="shrink-0 mt-1">
                                             @if($activity->type == 'visit')
-                                                <div class="w-10 h-10 rounded-2xl bg-orange-50 text-orange-500 border border-orange-100 flex items-center justify-center text-lg shadow-sm">
-                                                    {{-- FIX: Menggunakan duotone --}}
+                                                <div class="w-8 h-8 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-sm">
                                                     <i class="ph-duotone ph-door-open"></i>
                                                 </div>
                                             @else
-                                                <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-lg shadow-sm border {{ $activity->status == 'returned' ? 'bg-emerald-50 text-emerald-500 border-emerald-100' : 'bg-blue-50 text-blue-500 border-blue-100' }}">
-                                                    {{-- FIX: Menggunakan duotone --}}
+                                                <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm {{ $activity->status == 'returned' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600' }}">
                                                     <i class="{{ $activity->status == 'returned' ? 'ph-duotone ph-arrow-u-down-left' : 'ph-duotone ph-arrow-u-right-up' }}"></i>
                                                 </div>
                                             @endif
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-bold text-slate-800 truncate group-hover:text-blue-700 transition-colors">{{ $activity->student->name }}</p>
-                                            
-                                            @if($activity->type == 'visit')
-                                                <p class="text-xs text-slate-500 font-medium flex items-center gap-1 mt-0.5">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span> Absensi Masuk
-                                                </p>
-                                            @else
-                                                <p class="text-xs text-slate-500 font-medium truncate mt-0.5">{{ $activity->book->title }}</p>
-                                            @endif
-                                            
-                                            <p class="text-[10px] font-bold text-slate-400 mt-2 bg-slate-100 px-2 py-0.5 rounded-md inline-block group-hover:bg-white group-hover:shadow-sm transition-all">
-                                                {{ $activity->sort_time->diffForHumans(null, true) }} yang lalu
-                                            </p>
+                                            <p class="text-xs font-bold text-slate-800 truncate">{{ $activity->student->name }}</p>
+                                            <p class="text-[10px] text-slate-500 truncate">{{ $activity->type == 'visit' ? 'Absensi Masuk' : $activity->book->title }}</p>
+                                            <p class="text-[9px] font-bold text-slate-400 mt-1">{{ $activity->updated_at->diffForHumans() }}</p>
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="text-center py-12 text-slate-400">
-                                        <i class="ph-duotone ph-coffee text-4xl mb-2 animate-bounce"></i>
-                                        <p class="text-xs font-bold">Belum ada aktivitas hari ini.</p>
+                                    <div class="text-center py-10 text-slate-400">
+                                        <i class="ph-duotone ph-coffee text-3xl mb-2"></i>
+                                        <p class="text-xs">Belum ada aktivitas.</p>
                                     </div>
                                 @endforelse
                             </div>
@@ -363,25 +222,76 @@
 
                 </div>
             </div>
+        </div> 
+
+        {{-- BAGIAN BAWAH: ANALITIK KELAS & KIOSK CHECKER --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8 animate-enter delay-300">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {{-- Grafik Peminjaman per Kelas (Pie/Bar Chart) --}}
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="ph-fill ph-chart-pie-slice text-purple-500"></i> Distribusi Kelas
+                    </h3>
+                    <div class="h-64 w-full">
+                        <canvas id="classChart"></canvas>
+                    </div>
+                </div>
+
+                {{-- Buku Fisik Terpopuler (ADDED) --}}
+                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="ph-fill ph-trophy text-yellow-500"></i> Buku Fisik Terpopuler
+                    </h3>
+                    <div class="space-y-3">
+                        @forelse($popularBooks as $index => $book)
+                            <div class="flex items-center gap-4 p-2 hover:bg-slate-50 rounded-xl transition-colors">
+                                <span class="font-black text-slate-300 text-lg w-6 text-center">{{ $index + 1 }}</span>
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-sm font-bold text-slate-800 truncate" title="{{ $book->title }}">{{ $book->title }}</h4>
+                                    <p class="text-xs text-slate-500">{{ $book->borrowings_count }}x Dipinjam</p>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="flex flex-col items-center justify-center h-40 text-slate-400">
+                                <i class="ph-duotone ph-books text-3xl mb-2 opacity-50"></i>
+                                <p class="text-xs font-bold">Belum ada data peminjaman.</p>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+            </div>
+
+            {{-- SEARCH SISWA KIOSK (FITUR CEK STATUS) --}}
+            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8 text-center flex flex-col justify-center">
+                <i class="ph-duotone ph-barcode text-5xl text-blue-200 mb-4 block mx-auto"></i>
+                <h3 class="text-xl font-black text-slate-800 mb-2">Cek Status Siswa</h3>
+                <p class="text-slate-500 mb-6 text-sm max-w-xs mx-auto">Scan kartu atau masukkan NISN untuk cek peminjaman aktif.</p>
+                
+                <div class="w-full relative group max-w-xl mx-auto">
+                    <input type="text" id="studentSearchInput" placeholder="Scan Barcode / NISN..." 
+                        class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-100 focus:border-blue-500 font-mono font-bold text-slate-800 transition-all text-center">
+                    <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors"></i>
+                    <div id="loadingIndicator" class="absolute right-4 top-1/2 -translate-y-1/2 hidden">
+                        <i class="ph-bold ph-spinner animate-spin text-blue-500"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    {{-- Script untuk Chart, SweetAlert & Animasi --}}
+    {{-- Script JavaScript --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             
-            // --- 1. COUNT UP ANIMATION LOGIC ---
+            // 1. COUNT UP ANIMATION
             const counters = document.querySelectorAll('.count-up');
-            
-            const animateCounter = (counter) => {
+            counters.forEach(counter => {
                 const target = +counter.getAttribute('data-target');
-                const duration = 2000; 
-                const frameRate = 16;
-                const totalFrames = duration / frameRate;
-                const increment = target / totalFrames;
-                
                 let current = 0;
-
+                const increment = target / 50;
                 const updateCount = () => {
                     current += increment;
                     if (current < target) {
@@ -392,48 +302,30 @@
                     }
                 };
                 updateCount();
-            };
-            counters.forEach(counter => animateCounter(counter));
+            });
 
+            // 2. MAIN CHART LOGIC (Time Series)
+            // Mengambil data dari variabel PHP yang sudah diperbaiki di Controller
+            const loanLabels = @json($loanChartLabels ?? []);
+            const loanData = @json($loanChartData ?? []);
+            const visitLabels = @json($visitChartLabels ?? []);
+            const visitData = @json($visitChartData ?? []);
 
-            // --- 2. CHART JS LOGIC ---
-            const loanLabels = @json($chartLabels);
-            const loanData = @json($chartData);
-            const visitLabels = @json($visitChartLabels);
-            const visitData = @json($visitChartData);
-
-            const canvasElement = document.getElementById('mainChart');
-            const ctx = canvasElement.getContext('2d');
+            const ctx = document.getElementById('mainChart').getContext('2d');
             let mainChart;
 
             function renderChart(type) {
-                // FIX: Menghindari error "Canvas is already in use"
-                const existingChart = Chart.getChart(canvasElement);
-                if (existingChart) {
-                    existingChart.destroy();
-                }
-                
-                // Fallback variabel lokal
-                if (mainChart) {
-                    mainChart.destroy();
-                    mainChart = null;
-                }
+                if (mainChart) mainChart.destroy();
                 
                 const isVisit = type === 'visits';
                 const labels = isVisit ? visitLabels : loanLabels;
                 const data = isVisit ? visitData : loanData;
                 const label = isVisit ? 'Jumlah Kunjungan' : 'Jumlah Peminjaman';
+                const color = isVisit ? '#f97316' : '#1e3a8a';
+                const bgGradient = ctx.createLinearGradient(0, 0, 0, 300);
                 
-                const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                if (isVisit) {
-                    gradient.addColorStop(0, 'rgba(249, 115, 22, 0.5)'); 
-                    gradient.addColorStop(1, 'rgba(249, 115, 22, 0.0)');
-                } else {
-                    gradient.addColorStop(0, 'rgba(30, 64, 175, 0.5)'); 
-                    gradient.addColorStop(1, 'rgba(30, 64, 175, 0.0)');
-                }
-
-                const borderColor = isVisit ? '#f97316' : '#1e3a8a';
+                bgGradient.addColorStop(0, isVisit ? 'rgba(249, 115, 22, 0.2)' : 'rgba(30, 64, 175, 0.2)');
+                bgGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
                 mainChart = new Chart(ctx, {
                     type: 'line', 
@@ -442,126 +334,181 @@
                         datasets: [{
                             label: label,
                             data: data,
-                            backgroundColor: gradient,
-                            borderColor: borderColor,
+                            backgroundColor: bgGradient,
+                            borderColor: color,
                             borderWidth: 3,
-                            pointBackgroundColor: '#ffffff',
-                            pointBorderColor: borderColor,
-                            pointBorderWidth: 2,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: color,
                             pointRadius: 4,
-                            pointHoverRadius: 6,
                             fill: true,
-                            tension: 0.4 
+                            tension: 0.4
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        animation: {
-                            duration: 2000,
-                            easing: 'easeOutQuart'
-                        },
                         plugins: { legend: { display: false } },
                         scales: {
-                            y: { 
-                                beginAtZero: true, 
-                                grid: { borderDash: [2, 4], color: '#f1f5f9' }, 
-                                ticks: { font: { size: 10, weight: 'bold', family: 'sans-serif' }, color: '#94a3b8' }
-                            },
-                            x: { 
-                                grid: { display: false },
-                                ticks: { font: { size: 10, weight: 'bold', family: 'sans-serif' }, color: '#64748b' }
-                            }
+                            y: { beginAtZero: true, grid: { borderDash: [2, 4] } },
+                            x: { grid: { display: false } }
                         }
                     }
                 });
             }
 
-            renderChart('loans');
+            renderChart('loans'); // Render awal
 
             window.toggleChart = function(type) {
                 const btnLoans = document.getElementById('btn-loans');
                 const btnVisits = document.getElementById('btn-visits');
                 
+                // Reset styles
+                const activeClass = "px-4 py-2 rounded-lg text-xs font-black bg-white shadow-sm text-blue-900 transition-all";
+                const inactiveClass = "px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all";
+
                 if(type === 'loans') {
-                    btnLoans.className = "flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-black bg-white shadow-sm text-blue-900 transition-all hover:scale-105 active:scale-95 text-center";
-                    btnVisits.className = "flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all hover:scale-105 active:scale-95 text-center";
-                    renderChart('loans');
+                    btnLoans.className = activeClass;
+                    btnVisits.className = inactiveClass;
                 } else {
-                    btnVisits.className = "flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-black bg-white shadow-sm text-slate-800 transition-all hover:scale-105 active:scale-95 text-center";
-                    btnLoans.className = "flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-800 transition-all hover:scale-105 active:scale-95 text-center";
-                    renderChart('visits');
+                    btnLoans.className = inactiveClass;
+                    btnVisits.className = activeClass;
                 }
+                renderChart(type);
             };
-        });
 
-        // --- 3. SEARCH POPUP LOGIC ---
-        async function searchMemberPopup() {
-            const { value: query } = await Swal.fire({
-                title: 'Cari Data Siswa',
-                input: 'text',
-                inputPlaceholder: 'Ketik Nama atau NISN...',
-                confirmButtonColor: '#1e3a8a', 
-                confirmButtonText: 'Cari',
-                showCancelButton: true,
-                cancelButtonText: 'Batal',
-                background: '#fff',
-                customClass: {
-                    popup: 'rounded-[2rem]',
-                    confirmButton: 'rounded-xl px-6 py-2.5 font-bold',
-                    cancelButton: 'rounded-xl px-6 py-2.5 font-bold',
-                    input: 'rounded-xl border-slate-200 bg-slate-50 focus:ring-blue-900 focus:border-blue-900'
-                }
-            });
+            // 3. CLASS CHART LOGIC (Bar Chart for Classes)
+            const classLabels = @json($classChartLabels ?? []);
+            const classData = @json($classChartData ?? []);
+            
+            if(document.getElementById('classChart')) {
+                const ctxClass = document.getElementById('classChart').getContext('2d');
+                new Chart(ctxClass, {
+                    type: 'bar',
+                    data: {
+                        labels: classLabels,
+                        datasets: [{
+                            label: 'Peminjaman',
+                            data: classData,
+                            backgroundColor: '#8b5cf6',
+                            borderRadius: 6,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { display: false } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
 
-            if (query) {
+            // 4. KIOSK SEARCH LOGIC (FIXED)
+            const searchInput = document.getElementById('studentSearchInput');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            let timeout = null;
+
+            // Logic Fetch Data
+            async function performSearch(query) {
+                if(!query || query.length < 3) return;
+                
+                loadingIndicator.classList.remove('hidden');
+                
                 try {
-                    Swal.showLoading();
-                    const res = await fetch('{{ route("library.circulation.searchStudent") }}', {
+                    // MENGGUNAKAN ROUTE BARU: library.dashboard.checkStudent
+                    // Pastikan Anda mendaftarkan route ini di web.php:
+                    // Route::post('/library/dashboard/check-student', [LibraryDashboardController::class, 'checkStudent'])->name('library.dashboard.checkStudent');
+                    
+                    const res = await fetch('{{ route("library.dashboard.checkStudent") }}', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        headers: { 
+                            'Content-Type': 'application/json', 
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}' 
+                        },
                         body: JSON.stringify({ q: query })
                     });
+                    
                     const data = await res.json();
+                    
+                    loadingIndicator.classList.add('hidden');
 
                     if(data.success) {
-                        const student = data.student;
+                        const s = data.student;
                         Swal.fire({
+                            title: s.name,
+                            text: `${s.student_id} - ${s.school_class ? s.school_class.name : ''}`,
+                            icon: data.has_overdue ? 'warning' : 'success',
                             html: `
-                                <div class="text-center">
-                                    <div class="w-24 h-24 bg-gradient-to-br from-blue-900 to-blue-700 text-white rounded-[2rem] flex items-center justify-center text-4xl font-black mx-auto mb-6 shadow-xl shadow-blue-900/30">
-                                        ${student.name.charAt(0)}
+                                <div class="mt-2 p-3 bg-slate-50 rounded-lg text-left text-sm">
+                                    <div class="flex justify-between mb-1">
+                                        <span>Status:</span>
+                                        <span class="font-bold ${data.has_overdue ? 'text-red-500' : 'text-green-500'}">
+                                            ${data.has_overdue ? 'Terblokir (Denda)' : 'Aktif'}
+                                        </span>
                                     </div>
-                                    <h3 class="text-2xl font-black text-slate-800 mb-1">${student.name}</h3>
-                                    <p class="text-slate-400 font-mono text-sm font-bold mb-6 bg-slate-50 inline-block px-3 py-1 rounded-lg border border-slate-100">${student.student_id}</p>
-                                    
-                                    <div class="grid grid-cols-2 gap-4 text-left">
-                                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Kelas</p>
-                                            <p class="font-bold text-slate-700 text-lg">${student.school_class ? student.school_class.name : '-'}</p>
-                                        </div>
-                                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">Status</p>
-                                            ${data.has_overdue ? '<span class="text-rose-600 font-black text-lg flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Terblokir</span>' : '<span class="text-emerald-600 font-black text-lg flex items-center gap-1"><i class="ph-fill ph-check-circle"></i> Aktif</span>'}
-                                        </div>
-                                    </div>
-                                    <div class="mt-4 bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                                        <div class="flex justify-between items-center">
-                                            <p class="text-xs font-bold text-blue-400 uppercase">Buku Dipinjam</p>
-                                            <p class="font-black text-blue-900 text-xl">${data.active_loans} Buku</p>
-                                        </div>
+                                    <div class="flex justify-between">
+                                        <span>Buku Dipinjam:</span>
+                                        <span class="font-bold">${data.active_loans} Buku</span>
                                     </div>
                                 </div>
                             `,
-                            showConfirmButton: false,
-                            showCloseButton: true,
-                            customClass: { popup: 'rounded-[2.5rem] p-0 overflow-hidden' }
+                            confirmButtonColor: '#1e3a8a',
+                            timer: 5000 // Auto close
                         });
+                        searchInput.value = ''; // Reset input
                     } else {
-                        Swal.fire({ icon: 'error', title: 'Tidak Ditemukan', text: 'Data siswa tidak ada dalam database.', customClass: { popup: 'rounded-[2rem]' } });
+                        // Feedback visual error
+                        searchInput.classList.add('ring-2', 'ring-red-200', 'border-red-500');
+                        setTimeout(() => searchInput.classList.remove('ring-2', 'ring-red-200', 'border-red-500'), 1000);
                     }
                 } catch (err) {
-                    Swal.fire('Error', 'Terjadi kesalahan sistem.', 'error');
+                    console.error(err);
+                    loadingIndicator.classList.add('hidden');
+                }
+            }
+
+            if(searchInput) {
+                // Event Listener: Input (Typing with Debounce)
+                searchInput.addEventListener('input', function (e) {
+                    clearTimeout(timeout);
+                    const query = e.target.value;
+                    
+                    if(query.length < 3) return;
+                    
+                    timeout = setTimeout(() => {
+                        performSearch(query);
+                    }, 800); // Delay 800ms
+                });
+
+                // Event Listener: Enter Key (Instant Search for Barcode Scanner)
+                searchInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); // Mencegah form submit default jika ada
+                        clearTimeout(timeout); // Cancel pending debounce
+                        performSearch(e.target.value);
+                    }
+                });
+            }
+        });
+
+        // Global function untuk Popup Search (Header)
+        window.searchMemberPopup = async function() {
+            const { value: query } = await Swal.fire({
+                title: 'Cari Siswa',
+                input: 'text',
+                inputPlaceholder: 'Nama atau NISN...',
+                confirmButtonColor: '#1e3a8a',
+                showCancelButton: true
+            });
+
+            if (query) {
+                const searchInput = document.getElementById('studentSearchInput');
+                if(searchInput) {
+                    searchInput.value = query;
+                    // Trigger input event manually
+                    searchInput.dispatchEvent(new Event('input'));
                 }
             }
         }
