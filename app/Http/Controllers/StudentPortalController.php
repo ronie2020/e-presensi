@@ -17,13 +17,14 @@ use App\Models\LmsMaterial;
 use App\Models\Complaint;       
 use App\Models\LiaisonBook;     
 use App\Models\StudentHabit; 
-use App\Models\LibraryLoan;
-use App\Models\Book; // Pastikan Model Book di-import
+use App\Models\LibraryLoan;      
 use App\Models\DisciplineRecord; 
 use App\Models\AcademicRecord;  
 use App\Models\TeachingSession;
 use App\Models\Achievement; 
 use App\Models\BkSession;
+use App\Models\Book; 
+use App\Models\EbookRead; 
 
 class StudentPortalController extends Controller
 {
@@ -144,7 +145,10 @@ class StudentPortalController extends Controller
         // B. Pelanggaran Otomatis (ALPA)
         $manualAlpaDates = $manualViolations->filter(function($record) {
             $text = strtolower(($record->notes ?? '') . ' ' . optional($record->disciplineType)->name);
-            return str_contains($text, 'alfa') || str_contains($text, 'alpa') || str_contains($text, 'bolos') || str_contains($text, 'tidak masuk');
+            return str_contains($text, 'alfa') || 
+                   str_contains($text, 'alpa') || 
+                   str_contains($text, 'bolos') || 
+                   str_contains($text, 'tidak masuk');
         })->map(function($record) {
             return Carbon::parse($record->date)->toDateString();
         })->toArray();
@@ -280,20 +284,32 @@ class StudentPortalController extends Controller
             }
         }
         
-        // 7. PERPUSTAKAAN (MODIFIKASI: DENGAN E-BOOKS)
+        // 7. PERPUSTAKAAN (MODIFIKASI: DENGAN E-BOOKS & RIWAYAT BACA)
         $library_visits = 0; $library_history = collect([]);
-        $ebooks = collect([]); // Init E-Books
+        $ebooks = collect([]); 
+        $ebookHistory = collect([]); // [BARU] Riwayat Baca E-Book
 
+        // A. Riwayat Fisik
         if (class_exists(LibraryLoan::class)) {
              $library_history = LibraryLoan::with('book')->where('student_id', $id)->latest()->take(5)->get();
              $library_visits = $library_history->count();
         }
 
-        // [BARU] Ambil Data E-Book jika model ada
+        // B. Data E-Book & Riwayat Baca
         if (class_exists(Book::class)) {
             $ebooks = Book::whereNotNull('ebook_path')
                         ->latest()
                         ->get();
+            
+            // [BARU] Ambil Riwayat Baca Siswa Ini
+            if(class_exists(EbookRead::class)) {
+                $ebookHistory = EbookRead::where('student_id', $id)
+                                ->with('book')
+                                ->latest()
+                                ->get()
+                                ->unique('book_id') // Agar tidak duplikat (misal baca buku A 3x, tampil 1 aja)
+                                ->take(5); // Ambil 5 terakhir
+            }
         }
 
         // 8. DATA AKADEMIK
@@ -333,9 +349,7 @@ class StudentPortalController extends Controller
                 ->get();
         }
 
-        // ==========================================
-        // 11. TABS MENU (PASTIKAN BAGIAN INI LENGKAP)
-        // ==========================================
+        // 11. TABS MENU
         $tabs = ['ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan']];
 
         if ($isAlumni) {
@@ -356,7 +370,6 @@ class StudentPortalController extends Controller
                 'prestasi' => ['icon' => 'medal', 'label' => 'Prestasi'],   
                 'keagamaan' => ['icon' => 'mosque', 'label' => 'Keagamaan'],
                 
-                // [PENTING] INI YANG MENAMPILKAN TAB PERPUSTAKAAN
                 'perpustakaan' => ['icon' => 'books', 'label' => 'E-Library'], 
             ]);
         }
@@ -368,7 +381,7 @@ class StudentPortalController extends Controller
             $sholat_dhuhur = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuhur')->count();
         }
 
-        // 12. COMPACT DATA (TERMASUK EBOOKS)
+        // 12. COMPACT DATA
         $data = compact(
             'student', 'isAlumni', 'tabs', 'attendancePercentage',
             'liaison_messages', 'complaints', 
@@ -379,7 +392,8 @@ class StudentPortalController extends Controller
             'lms_materials_grouped', 
             'violations', 'total_violation_points', 
             'achievements', 'total_merit_points',
-            'library_visits', 'library_history', 'ebooks', // <-- Kirim ebooks ke view
+            'library_visits', 'library_history', 
+            'ebooks', 'ebookHistory', // <-- [TAMBAHAN] Kirim ebookHistory
             'academic_record', 'chartData', 'teaching_journals',
             'sholat_dhuha', 'sholat_dhuhur',
             'finalScore',
