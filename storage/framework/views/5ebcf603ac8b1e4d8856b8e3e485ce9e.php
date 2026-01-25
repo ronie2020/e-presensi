@@ -11,7 +11,7 @@
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         
         
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">                
             <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
                 
                 
@@ -22,6 +22,12 @@
                     
                     
                     <div class="max-w-2xl">
+                        <div class="flex items-center gap-3 mb-2">
+                            <a href="<?php echo e(route('library.dashboard')); ?>" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-blue-100 transition flex items-center gap-2">
+                                <i class="ph-bold ph-arrow-left"></i> Dashboard
+                            </a>
+                            <span class="text-blue-300 text-xs font-bold uppercase tracking-wider">Koleksi</span>
+                        </div>                      
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm">
                             <i class="ph-fill ph-books"></i> Katalog Perpustakaan
                         </div>
