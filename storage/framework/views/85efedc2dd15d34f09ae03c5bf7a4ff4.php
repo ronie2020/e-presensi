@@ -187,6 +187,74 @@
                             </a>
                         </div>
                     </div>
+
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-enter delay-100">
+                
+                
+                <div class="bg-gradient-to-br from-indigo-600 to-violet-600 rounded-[2rem] p-6 text-white shadow-xl shadow-indigo-600/20 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 group-hover:scale-110 transition-transform duration-700"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-4 text-indigo-100">
+                            <div class="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+                                <i class="ph-fill ph-read-cv-logo text-xl"></i>
+                            </div>
+                            <span class="text-xs font-bold uppercase tracking-wider">Literasi Digital (Bulan Ini)</span>
+                        </div>
+                        <div class="flex items-end gap-2">
+                            <h2 class="text-5xl font-black"><?php echo e($ebookReadsThisMonth ?? 0); ?></h2>
+                            <span class="text-lg font-medium opacity-80 mb-1">x Baca</span>
+                        </div>
+                        <p class="text-xs text-indigo-200 mt-4 leading-relaxed max-w-[90%]">
+                            Total aktivitas siswa mengakses dan membaca E-Book melalui portal digital bulan ini.
+                        </p>
+                    </div>
+                </div>
+
+                
+                <div class="lg:col-span-2 bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6 relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <i class="ph-fill ph-crown text-amber-500 text-xl"></i>
+                            E-Book Terpopuler
+                        </h3>
+                        <span class="text-[10px] font-bold bg-slate-50 text-slate-500 px-2 py-1 rounded-lg uppercase tracking-wider">Digital</span>
+                    </div>
+
+                    <?php if(isset($popularEbooks) && count($popularEbooks) > 0): ?>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <?php $__currentLoopData = $popularEbooks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 group">
+                                    <div class="w-6 h-6 flex items-center justify-center font-black text-sm <?php echo e($index == 0 ? 'text-amber-500 bg-amber-50 rounded' : 'text-slate-400 bg-slate-100 rounded'); ?>">
+                                        <?php echo e($index + 1); ?>
+
+                                    </div>
+                                    <div class="w-8 h-12 bg-slate-200 rounded overflow-hidden shadow-sm flex-shrink-0">
+                                        <?php if($book->cover_path): ?>
+                                            <img src="<?php echo e(asset('storage/' . $book->cover_path)); ?>" class="w-full h-full object-cover">
+                                        <?php else: ?>
+                                            <div class="w-full h-full flex items-center justify-center text-slate-400"><i class="ph-bold ph-book"></i></div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="font-bold text-slate-800 text-xs truncate group-hover:text-blue-600 transition-colors"><?php echo e($book->title); ?></h4>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[10px] font-bold">
+                                                <?php echo e($book->ebook_reads_count); ?> Baca
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="flex flex-col items-center justify-center h-32 text-slate-400 bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                            <i class="ph-duotone ph-books text-3xl mb-2 opacity-50"></i>
+                            <p class="text-xs font-bold">Belum ada data baca digital bulan ini.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
                     
                     <!-- 2. Grafik Statistik -->
                     <div class="animate-enter delay-200 bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 hover:shadow-2xl hover:shadow-blue-900/5 transition-all duration-500">

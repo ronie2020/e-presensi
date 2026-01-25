@@ -6,7 +6,8 @@ use App\Models\Book;
 use App\Models\Borrowing;
 use App\Models\Student;
 use App\Models\SchoolClass;
-use App\Models\LibraryVisit; // Pastikan Model ini di-import
+use App\Models\LibraryVisit; 
+use App\Models\EbookRead; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -23,64 +24,39 @@ class LibraryDashboardController extends Controller
                                     ->distinct('student_id')
                                     ->count('student_id');
 
-        // ---------------------------------------------------------
-        // [BARU] STATISTIK KUNJUNGAN (ABSENSI KIOSK)
-        // ---------------------------------------------------------
-        
-        // A. Pengunjung Hari Ini
-        $todayVisits = LibraryVisit::whereDate('date', Carbon::today())->count();
+        // 2. STATISTIK KUNJUNGAN FISIK (KIOSK)
+        $todayVisits = 0;
+        $visitChartLabels = [];
+        $visitChartData = [];
 
-        // B. Grafik Kunjungan (7 Hari Terakhir)
-        $visitStats = LibraryVisit::select(DB::raw('DATE(date) as visit_date'), DB::raw('count(*) as total'))
-                        ->where('date', '>=', Carbon::now()->subDays(6))
-                        ->groupBy('visit_date')
-                        ->orderBy('visit_date', 'asc')
-                        ->get();
-        
-        $visitChartLabels = $visitStats->map(function($item) {
-            return Carbon::parse($item->visit_date)->isoFormat('dddd, D MMM');
-        });
-        $visitChartData = $visitStats->pluck('total');
+        try {
+            if (class_exists(LibraryVisit::class)) {
+                // A. Pengunjung Hari Ini
+                $todayVisits = LibraryVisit::whereDate('date', Carbon::today())->count();
 
-        // ---------------------------------------------------------
+                // B. Grafik Kunjungan (7 Hari Terakhir)
+                $visitStats = LibraryVisit::select(DB::raw('DATE(date) as visit_date'), DB::raw('count(*) as total'))
+                                ->where('date', '>=', Carbon::now()->subDays(6))
+                                ->groupBy('visit_date')
+                                ->orderBy('visit_date', 'asc')
+                                ->get();
+                
+                $visitChartLabels = $visitStats->map(fn($item) => Carbon::parse($item->visit_date)->format('d M'));
+                $visitChartData = $visitStats->pluck('total');
+            }
+        } catch (\Exception $e) {}
 
-        // 2. Statistik Sidebar Kanan (Status Sirkulasi)
+        // 3. STATISTIK SIRKULASI (PEMINJAMAN FISIK)
         $borrowedBooks = Borrowing::where('status', 'borrowed')->count();
-        $overdueBooks = Borrowing::where('status', 'borrowed')
+        $overdueBooks  = Borrowing::where('status', 'borrowed')
                             ->where('due_date', '<', Carbon::now())
                             ->count();
 
-        // 3. Aktivitas Terkini (GABUNGAN Peminjaman + Absensi Kiosk)
-        // Mengambil 5 peminjaman terakhir
-        $latestBorrowings = Borrowing::with(['student', 'book'])
-                            ->orderBy('updated_at', 'desc')
-                            ->limit(5)
-                            ->get()
-                            ->map(function ($item) {
-                                $item->type = 'circulation'; // Penanda tipe
-                                $item->sort_time = $item->updated_at;
-                                return $item;
-                            });
+        $recentActivities = Borrowing::with(['student', 'book'])
+                            ->latest('updated_at') // Bisa created_at atau updated_at
+                            ->take(7)
+                            ->get();
 
-        // Mengambil 5 kunjungan terakhir
-        $latestVisits = LibraryVisit::with('student')
-                            ->orderBy('date', 'desc')
-                            ->orderBy('time', 'desc')
-                            ->limit(5)
-                            ->get()
-                            ->map(function ($item) {
-                                $item->type = 'visit'; // Penanda tipe
-                                // Gabungkan date & time untuk sorting
-                                $item->sort_time = Carbon::parse($item->date . ' ' . $item->time);
-                                return $item;
-                            });
-
-        // Gabung collection, sort ulang berdasarkan waktu, dan ambil 6 teratas
-        $recentActivities = $latestBorrowings->merge($latestVisits)
-                            ->sortByDesc('sort_time')
-                            ->take(7);
-
-        // 4. Daftar Terlambat & Buku Populer (Tetap sama)
         $overdueList = Borrowing::with(['student', 'book'])
                             ->where('status', 'borrowed')
                             ->where('due_date', '<', Carbon::now())
@@ -88,12 +64,13 @@ class LibraryDashboardController extends Controller
                             ->limit(5)
                             ->get();
 
+        // Buku Populer (FISIK)
         $popularBooks = Book::withCount('borrowings')
                             ->orderBy('borrowings_count', 'desc')
                             ->limit(5)
                             ->get();
 
-        // 5. Grafik Peminjaman (Tetap sama)
+        // Grafik Peminjaman per Kelas
         $chartQuery = DB::table('borrowings')
             ->join('students', 'borrowings.student_id', '=', 'students.id')
             ->join('classes', 'students.class_id', '=', 'classes.id')
@@ -105,12 +82,40 @@ class LibraryDashboardController extends Controller
         $chartLabels = $chartQuery->pluck('name');
         $chartData = $chartQuery->pluck('total');
 
+        // ---------------------------------------------------------
+        // 4. [BARU] STATISTIK LITERASI DIGITAL (E-BOOK)
+        // ---------------------------------------------------------
+        $ebookReadsThisMonth = 0;
+        $popularEbooks = collect([]);
+
+        try {
+            if (class_exists(EbookRead::class)) {
+                // A. Total Bacaan E-Book Bulan Ini
+                $ebookReadsThisMonth = EbookRead::whereMonth('created_at', Carbon::now()->month)
+                                        ->whereYear('created_at', Carbon::now()->year)
+                                        ->count();
+                
+                // B. 5 E-Book Terpopuler Bulan Ini
+                $popularEbooks = Book::withCount(['ebookReads' => function($query) {
+                                        $query->whereMonth('created_at', Carbon::now()->month)
+                                              ->whereYear('created_at', Carbon::now()->year);
+                                    }])
+                                    ->having('ebook_reads_count', '>', 0)
+                                    ->orderByDesc('ebook_reads_count')
+                                    ->take(5)
+                                    ->get();
+            }
+        } catch (\Exception $e) {}
+
         return view('library.dashboard', compact(
             'totalBooks', 'activeMembers', 'membersBorrowingCount',
-            'todayVisits', 'visitChartLabels', 'visitChartData', // Variabel Baru
+            'todayVisits', 'visitChartLabels', 'visitChartData',
             'borrowedBooks', 'overdueBooks', 
             'recentActivities', 'overdueList', 
-            'popularBooks', 'chartLabels', 'chartData'
+            'popularBooks', 'chartLabels', 'chartData',
+            
+            // Variabel Baru E-Book
+            'ebookReadsThisMonth', 'popularEbooks'
         ));
     }
 }

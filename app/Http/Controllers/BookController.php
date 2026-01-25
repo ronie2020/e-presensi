@@ -9,6 +9,8 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\BooksImport;
+use App\Models\EbookRead; 
+use Illuminate\Support\Facades\Auth;
 
 class BookController extends Controller
 {
@@ -43,19 +45,16 @@ class BookController extends Controller
         return view('books.create', compact('categories', 'autoCode'));
     }
 
-    public function store(Request $request)
-    {
-        // UPDATE VALIDASI SIZE DI SINI
+    public function store(Request $request)    {
+ 
         $request->validate([
             'book_code' => 'required|unique:books,book_code|max:50',
             'title' => 'required|string|max:255',
             'category_id' => 'nullable|exists:book_categories,id',
             'author' => 'nullable|string|max:255',
             'stock' => 'required|integer|min:0',
-            'year' => 'nullable|integer|min:1900|max:' . (date('Y') + 1),
-            // Cover dinaikkan ke 5MB (5120 KB)
-            'cover' => 'nullable|image|max:5120', 
-            // E-Book dinaikkan ke 50MB (51200 KB)
+            'year' => 'nullable|integer|min:1900|max:' . (date('Y') + 1),       
+            'cover' => 'nullable|image|max:5120',        
             'ebook_file' => 'nullable|mimes:pdf|max:51200', 
         ]);
 
@@ -84,14 +83,11 @@ class BookController extends Controller
 
     public function update(Request $request, Book $book)
     {
-        // UPDATE VALIDASI SIZE DI SINI JUGA
         $request->validate([
             'book_code' => ['required', 'max:50', Rule::unique('books')->ignore($book->id)],
             'title' => 'required|string|max:255',
             'stock' => 'required|integer|min:0',
-            // Cover dinaikkan ke 5MB
             'cover' => 'nullable|image|max:5120',
-            // E-Book dinaikkan ke 50MB
             'ebook_file' => 'nullable|mimes:pdf|max:51200',
         ]);
 
@@ -128,16 +124,7 @@ class BookController extends Controller
         
         $book->delete();
         return redirect()->route('library.books.index')->with('success', 'Buku berhasil dihapus.');
-    }
-
-    public function read(Book $book)
-    {
-        if (!$book->ebook_path || !Storage::disk('public')->exists($book->ebook_path)) {
-            return back()->with('error', 'File E-Book tidak tersedia atau rusak.');
-        }
-
-        return view('books.read', compact('book'));
-    }
+    }   
 
     public function storeCategoryAjax(Request $request)
     {
@@ -186,5 +173,28 @@ class BookController extends Controller
         $categories = BookCategory::orderBy('name')->get();
 
         return view('books.catalogue', compact('books', 'categories'));
+    }
+
+   /**
+     * [UPDATE] Halaman Baca E-Book & Tracking Statistik
+     */
+    public function read(Book $book)
+    {
+        if (!$book->ebook_path || !Storage::disk('public')->exists($book->ebook_path)) {
+            return back()->with('error', 'File E-Book tidak tersedia atau rusak.');
+        }
+
+        // --- LOGIKA TRACKING ANALITIK ---
+        // Mencatat bahwa buku ini sedang dibaca
+        try {
+            EbookRead::create([
+                'book_id' => $book->id,
+                'student_id' => Auth::guard('student')->id() ?? null, // Null jika tamu/admin
+            ]);
+        } catch (\Exception $e) {
+            // Silent fail: Jangan hentikan proses baca hanya karena gagal catat log
+        }
+
+        return view('books.read', compact('book'));
     }
 }
