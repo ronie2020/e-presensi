@@ -39,125 +39,34 @@
     @endpush
 
     @php
-        // Ambil data dari Controller
+        // [LOGIKA LAMA - TETAP DIPERTAHANKAN]
+        // Pengecekan Null Safety agar tidak error jika variabel tidak dikirim controller
         $safeSchedule = isset($scheduleConfig) ? $scheduleConfig : [];
         $scheduleJson = json_encode($safeSchedule);
         
-        $totalTarget = $statsConfig['total_target'] ?? 0;
-        $currentTaken = $statsConfig['current_taken'] ?? 0;
+        // Pastikan $statsConfig terdefinisi sebagai array sebelum diakses
+        $statsData = isset($statsConfig) ? $statsConfig : [];
+        $totalTarget = $statsData['total_target'] ?? 0;
+        $currentTaken = $statsData['current_taken'] ?? 0;
     @endphp
 
     {{-- WRAPPER UTAMA - Init Audio saat user klik area mana saja --}}
     <div class="py-4 md:py-8 font-sans text-slate-800" onclick="initAudio()"> 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO BANNER --}}
-            <div class="relative rounded-[1.5rem] md:rounded-[2rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-5 md:p-8 mb-6 md:mb-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
-                    <div class="text-center md:text-left">
-                        <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2 flex items-center justify-center md:justify-start gap-2">
-                            Scan QR Aktifitas <span class="animate-pulse"></span>
-                        </h2>
-                        <div class="flex flex-wrap justify-center md:justify-start gap-2 items-center text-blue-300 text-xs md:text-sm font-medium">
-                            @if(isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false))
-                                <span class="inline-flex items-center px-3 py-1 rounded-full bg-rose-500/20 text-rose-200 border border-rose-500/30">Libur: {{ $scheduleConfig['description'] }}</span>
-                            @else
-                                <span class="opacity-90">Sistem pencatatan kehadiran, ibadah & gizi siswa.</span>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="bg-slate-900/40 backdrop-blur-md border border-white/10 px-4 py-3 md:px-6 md:py-4 rounded-2xl flex items-center gap-3 shadow-lg">
-                        <div class="p-2 md:p-3 bg-blue-600 rounded-xl text-white shadow-lg"><i class="ph-bold ph-clock text-lg md:text-2xl"></i></div>
-                        <div>
-                            <p class="text-[9px] md:text-[10px] font-bold text-blue-300 uppercase tracking-widest">Waktu Server</p>
-                            <div id="clock" class="text-2xl md:text-3xl font-black text-white font-mono tracking-widest leading-none mt-1">00:00:00</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- PANEL REKAP GIZI --}}
-            <div id="makan-stats-panel" class="hidden grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate-enter">
-                <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4 relative overflow-hidden group">
-                    <div class="w-14 h-14 rounded-2xl bg-slate-50 text-slate-500 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 transition-transform">
-                        <i class="ph-duotone ph-users-three"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Sasaran</p>
-                        <h3 class="text-3xl font-black text-slate-800 tracking-tight" id="stat-total">{{ $totalTarget }}</h3>
-                    </div>
-                </div>
-
-                <div class="bg-orange-500 p-5 rounded-[2rem] border border-orange-400 shadow-lg shadow-orange-500/20 flex items-center gap-4 relative overflow-hidden text-white group">
-                    <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-110 transition-transform"><i class="ph-fill ph-check-circle text-6xl"></i></div>
-                    <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-3xl shrink-0 border border-white/20">
-                        <i class="ph-fill ph-hand-grabbing"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-black text-orange-100 uppercase tracking-widest mb-1">Sudah Mengambil</p>
-                        <h3 class="text-3xl font-black text-white tracking-tight" id="stat-taken">{{ $currentTaken }}</h3>
-                    </div>
-                </div>
-
-                <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4 relative overflow-hidden group">
-                    <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 transition-transform">
-                        <i class="ph-duotone ph-cookie"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Sisa Belum Ambil</p>
-                        <h3 class="text-3xl font-black text-slate-800 tracking-tight" id="stat-remaining">{{ $totalTarget - $currentTaken }}</h3>
-                    </div>
-                </div>
-            </div>
-
-            {{-- MODE SELECTION GRID --}}
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 mb-6 md:mb-8">
-                @foreach([
-                    ['id'=>'harian', 'label'=>'Absen Harian', 'sub'=>'Masuk & Pulang', 'icon'=>'calendar-check', 'color'=>'blue', 'type'=>'Harian'],
-                    ['id'=>'makan', 'label'=>'Makan Bergizi', 'sub'=>'Jam Makan Siang', 'icon'=>'bowl-food', 'color'=>'orange', 'type'=>'Makan'],
-                    ['id'=>'dhuha', 'label'=>'Sholat Dhuha', 'sub'=>'Ibadah Pagi', 'icon'=>'sun-horizon', 'color'=>'emerald', 'type'=>'Dhuha'],
-                    ['id'=>'dhuhur', 'label'=>'Sholat Dhuhur', 'sub'=>'Ibadah Siang', 'icon'=>'moon-stars', 'color'=>'amber', 'type'=>'Dhuhur'],
-                    ['id'=>'ekskul', 'label'=>'Ekskul', 'sub'=>'Kegiatan Sore', 'icon'=>'basketball', 'color'=>'purple', 'type'=>'Ekstrakurikuler']
-                ] as $mode)
-                <button id="btn-{{ $mode['id'] }}" data-type="{{ $mode['type'] }}" class="scan-type-btn group relative bg-white p-3 md:p-4 rounded-2xl md:rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition-all text-left overflow-hidden ring-2 ring-transparent">
-                    <div class="flex items-center justify-between mb-2 md:mb-3">
-                        <div class="p-2 md:p-3 rounded-xl md:rounded-2xl bg-{{ $mode['color'] }}-50 text-{{ $mode['color'] }}-600 group-hover:bg-{{ $mode['color'] }}-600 group-hover:text-white transition-colors">
-                            <i class="ph-bold ph-{{ $mode['icon'] }} text-xl md:text-2xl"></i>
-                        </div>
-                        <div class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border-2 border-slate-200 indicator-dot transition-all"></div>
-                    </div>
-                    <h3 class="font-bold text-slate-700 text-xs md:text-sm group-hover:text-{{ $mode['color'] }}-700 transition-colors">{{ $mode['label'] }}</h3>
-                    <p class="text-[9px] md:text-[10px] text-slate-400 mt-0.5 font-medium truncate">{{ $mode['sub'] }}</p>
-                    <div class="absolute inset-0 border-2 border-{{ $mode['color'] }}-500 rounded-2xl md:rounded-[2rem] opacity-0 scale-95 transition-all active-border"></div>
-                </button>
-                @endforeach
-            </div>
-
-            {{-- DROPDOWN EKSKUL --}}
-            <div id="extra-selector-container" class="hidden mb-8 animate-fade-in-down">
-                <div class="bg-white p-4 rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col md:flex-row items-center gap-4">
-                    <div class="p-2 bg-purple-100 text-purple-600 rounded-xl"><i class="ph-fill ph-trophy text-2xl"></i></div>
-                    <div class="flex-1 w-full">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Pilih Jenis Kegiatan</label>
-                        <select id="extra-activity-select" class="w-full rounded-xl border-slate-300 focus:border-purple-500 font-bold text-slate-700 h-10 md:h-12 text-sm">
-                            <option value="">-- Pilih Ekstrakurikuler --</option>
-                            @if(isset($extracurriculars))
-                                @foreach($extracurriculars as $ekskul)
-                                    <option value="{{ $ekskul->id }}">{{ $ekskul->name }}</option>
-                                @endforeach
-                            @endif
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            {{-- MAIN CONTENT GRID --}}
+            {{-- 
+                LAYOUT GRID SYSTEM YANG DIUBAH
+                Strategi Layout:
+                - Mobile: Kamera (Order 1) -> Banner Judul (Order 2) -> Tombol (Order 3) -> Log (Order 4)
+                - Desktop: Banner Judul (Row 1) -> Tombol (Row 2) -> Kamera (Row 3 Kiri) -> Log (Row 3 Kanan)
+            --}}
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8">
                 
-                {{-- LEFT: CAMERA CARD --}}
-                <div class="lg:col-span-5 flex flex-col order-1 lg:order-1">
-                    <div class="bg-white rounded-[1.5rem] md:rounded-[2rem] p-3 md:p-4 shadow-xl shadow-slate-200/60 border border-slate-100 h-fit">
+                {{-- BAGIAN 1: KAMERA CARD --}}
+                {{-- Mobile: Order 1 (PALING ATAS - Sesuai Request) --}}
+                {{-- Desktop: Order 3 (Kiri Bawah) & Col-Span-5 --}}
+                <div class="lg:col-span-5 flex flex-col order-1 lg:order-3">
+                    <div class="bg-white rounded-[1.5rem] md:rounded-[2rem] p-3 md:p-4 shadow-xl shadow-slate-200/60 border border-slate-100 h-fit sticky top-4 z-30">
                         <div class="flex justify-between items-center mb-3 md:mb-4 px-2">
                             <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm md:text-base">
                                 <i class="ph-fill ph-camera text-blue-600 text-lg md:text-xl"></i> Kamera
@@ -193,8 +102,121 @@
                     </div>
                 </div>
 
-                {{-- RIGHT: LOG CARD --}}
-                <div class="lg:col-span-7 flex flex-col order-2 lg:order-2">
+                {{-- BAGIAN 2: HERO BANNER (JUDUL & JAM) --}}
+                {{-- Mobile: Order 2 (Di bawah Kamera) --}}
+                {{-- Desktop: Order 1 (Paling Atas Full Width) --}}
+                <div class="lg:col-span-12 order-2 lg:order-1">
+                    <div class="relative rounded-[1.5rem] md:rounded-[2rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-5 md:p-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
+                        <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+                        <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
+                            <div class="text-center md:text-left">
+                                <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2 flex items-center justify-center md:justify-start gap-2">
+                                    Scan QR Aktifitas <span class="animate-pulse"></span>
+                                </h2>
+                                <div class="flex flex-wrap justify-center md:justify-start gap-2 items-center text-blue-300 text-xs md:text-sm font-medium">
+                                    @if(isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false))
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-rose-500/20 text-rose-200 border border-rose-500/30">Libur: {{ $scheduleConfig['description'] }}</span>
+                                    @else
+                                        <span class="opacity-90">Sistem pencatatan kehadiran, ibadah & gizi siswa.</span>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="bg-slate-900/40 backdrop-blur-md border border-white/10 px-4 py-3 md:px-6 md:py-4 rounded-2xl flex items-center gap-3 shadow-lg">
+                                <div class="p-2 md:p-3 bg-blue-600 rounded-xl text-white shadow-lg"><i class="ph-bold ph-clock text-lg md:text-2xl"></i></div>
+                                <div>
+                                    <p class="text-[9px] md:text-[10px] font-bold text-blue-300 uppercase tracking-widest">Waktu Perangkat</p>
+                                    <div id="clock" class="text-2xl md:text-3xl font-black text-white font-mono tracking-widest leading-none mt-1">00:00:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- BAGIAN 3: KONTROL & STATISTIK --}}
+                {{-- Mobile: Order 3 (Di bawah Judul) --}}
+                {{-- Desktop: Order 2 (Di bawah Judul Full Width) --}}
+                <div class="lg:col-span-12 order-3 lg:order-2 flex flex-col gap-6">
+                    
+                    {{-- PANEL REKAP GIZI --}}
+                    <div id="makan-stats-panel" class="hidden grid-cols-1 md:grid-cols-3 gap-4 animate-enter">
+                        <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4 relative overflow-hidden group">
+                            <div class="w-14 h-14 rounded-2xl bg-slate-50 text-slate-500 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 transition-transform">
+                                <i class="ph-duotone ph-users-three"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Sasaran</p>
+                                <h3 class="text-3xl font-black text-slate-800 tracking-tight" id="stat-total">{{ $totalTarget }}</h3>
+                            </div>
+                        </div>
+
+                        <div class="bg-orange-500 p-5 rounded-[2rem] border border-orange-400 shadow-lg shadow-orange-500/20 flex items-center gap-4 relative overflow-hidden text-white group">
+                            <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-110 transition-transform"><i class="ph-fill ph-check-circle text-6xl"></i></div>
+                            <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-3xl shrink-0 border border-white/20">
+                                <i class="ph-fill ph-hand-grabbing"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black text-orange-100 uppercase tracking-widest mb-1">Sudah Mengambil</p>
+                                <h3 class="text-3xl font-black text-white tracking-tight" id="stat-taken">{{ $currentTaken }}</h3>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4 relative overflow-hidden group">
+                            <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 transition-transform">
+                                <i class="ph-duotone ph-cookie"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Sisa Belum Ambil</p>
+                                <h3 class="text-3xl font-black text-slate-800 tracking-tight" id="stat-remaining">{{ $totalTarget - $currentTaken }}</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- MODE SELECTION GRID --}}
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+                        @foreach([
+                            ['id'=>'harian', 'label'=>'Absen Harian', 'sub'=>'Masuk & Pulang', 'icon'=>'calendar-check', 'color'=>'blue', 'type'=>'Harian'],
+                            ['id'=>'makan', 'label'=>'Makan Bergizi', 'sub'=>'Jam Makan Siang', 'icon'=>'bowl-food', 'color'=>'orange', 'type'=>'Makan'],
+                            ['id'=>'dhuha', 'label'=>'Sholat Dhuha', 'sub'=>'Ibadah Pagi', 'icon'=>'sun-horizon', 'color'=>'emerald', 'type'=>'Dhuha'],
+                            ['id'=>'dhuhur', 'label'=>'Sholat Dhuhur', 'sub'=>'Ibadah Siang', 'icon'=>'moon-stars', 'color'=>'amber', 'type'=>'Dhuhur'],
+                            ['id'=>'ekskul', 'label'=>'Ekskul', 'sub'=>'Kegiatan Sore', 'icon'=>'basketball', 'color'=>'purple', 'type'=>'Ekstrakurikuler']
+                        ] as $mode)
+                        <button id="btn-{{ $mode['id'] }}" data-type="{{ $mode['type'] }}" class="scan-type-btn group relative bg-white p-3 md:p-4 rounded-2xl md:rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition-all text-left overflow-hidden ring-2 ring-transparent">
+                            <div class="flex items-center justify-between mb-2 md:mb-3">
+                                <div class="p-2 md:p-3 rounded-xl md:rounded-2xl bg-{{ $mode['color'] }}-50 text-{{ $mode['color'] }}-600 group-hover:bg-{{ $mode['color'] }}-600 group-hover:text-white transition-colors">
+                                    <i class="ph-bold ph-{{ $mode['icon'] }} text-xl md:text-2xl"></i>
+                                </div>
+                                <div class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border-2 border-slate-200 indicator-dot transition-all"></div>
+                            </div>
+                            <h3 class="font-bold text-slate-700 text-xs md:text-sm group-hover:text-{{ $mode['color'] }}-700 transition-colors">{{ $mode['label'] }}</h3>
+                            <p class="text-[9px] md:text-[10px] text-slate-400 mt-0.5 font-medium truncate">{{ $mode['sub'] }}</p>
+                            <div class="absolute inset-0 border-2 border-{{ $mode['color'] }}-500 rounded-2xl md:rounded-[2rem] opacity-0 scale-95 transition-all active-border"></div>
+                        </button>
+                        @endforeach
+                    </div>
+
+                    {{-- DROPDOWN EKSKUL --}}
+                    <div id="extra-selector-container" class="hidden animate-fade-in-down">
+                        <div class="bg-white p-4 rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col md:flex-row items-center gap-4">
+                            <div class="p-2 bg-purple-100 text-purple-600 rounded-xl"><i class="ph-fill ph-trophy text-2xl"></i></div>
+                            <div class="flex-1 w-full">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Pilih Jenis Kegiatan</label>
+                                <select id="extra-activity-select" class="w-full rounded-xl border-slate-300 focus:border-purple-500 font-bold text-slate-700 h-10 md:h-12 text-sm">
+                                    <option value="">-- Pilih Ekstrakurikuler --</option>
+                                    @if(isset($extracurriculars))
+                                        @foreach($extracurriculars as $ekskul)
+                                            <option value="{{ $ekskul->id }}">{{ $ekskul->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- BAGIAN 4: LOG CARD --}}
+                {{-- Mobile: Order 4 (Paling Bawah) --}}
+                {{-- Desktop: Order 4 (Kanan Bawah) --}}
+                <div class="lg:col-span-7 flex flex-col order-4 lg:order-4">
                     <div class="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-xl shadow-slate-200/60 border border-slate-100 flex flex-col h-full min-h-[400px] md:min-h-[500px] relative overflow-hidden">
                         
                         <div class="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -283,6 +305,7 @@
     </div>
 
     {{-- 3. JAVASCRIPT LOGIC --}}
+    {{-- [LOGIKA LAMA - TETAP DIPERTAHANKAN 100%] --}}
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
         const SCHEDULE_DATA = {!! $scheduleJson !!};
@@ -502,7 +525,8 @@
             }
 
             function updateMakanStats(serverTotal) {
-                if(serverTotal) statsData.taken = serverTotal;
+                // [FIX] Cek tipe data number, karena 0 dianggap false di JS
+                if(typeof serverTotal === 'number') statsData.taken = serverTotal;
                 else statsData.taken++; 
                 
                 elStatTaken.textContent = statsData.taken;
@@ -586,7 +610,7 @@
                     const result = await response.json();
                     
                     if (response.ok) {
-                        const isLate = String(result.message).toUpperCase().includes('TERLAMBAT');
+                        const isLate = String(result.message || '').toUpperCase().includes('TERLAMBAT');
                         
                         if (type === 'Makan') {
                              triggerScanEffect('success'); 
@@ -597,13 +621,10 @@
                              playBeep(isLate ? 'warning' : 'success'); 
                         }
                         
-                        // [MODIFIKASI] Menampilkan Nama Siswa di Feedback
                         let feedbackMessage = result.message;
                         if(result.scan && result.scan.student_name) {
                             feedbackMessage = `${result.scan.student_name} - ${result.message}`;
                             
-                            // Tampilkan SweetAlert dengan Nama Siswa
-                            // [PERHATIAN] Ini adalah bagian yang akan diubah menjadi Toast
                             Swal.fire({
                                 icon: isLate ? 'warning' : 'success',
                                 title: result.scan.student_name,

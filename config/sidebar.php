@@ -153,6 +153,12 @@ return [
                 'route' => 'extracurriculars.members',
                 'icon' => 'ph-users-three'
             ],
+            [
+                'name' => 'Laporan Absensi',
+                'route' => 'extracurriculars.reports',
+                'active_check' => 'extracurriculars.reports*',
+                'icon' => 'ph-file-text'
+            ],
         ],
         'Pusat Layanan Siswa' => [
             [
@@ -173,7 +179,6 @@ return [
                 'active_check' => 'teacher.habits.*',
                 'icon' => 'ph-check-square-offset', 
             ],
-            // [BARU] Menu E-Counseling
             [
                 'name' => 'E-Counseling (BK)',
                 'route' => 'admin.bk.index',
