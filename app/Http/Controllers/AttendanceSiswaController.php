@@ -29,11 +29,12 @@ class AttendanceSiswaController extends Controller
         // 1. Cek Jadwal Khusus
         $schedule = ScheduleSpecial::where('date', $today->toDateString())->first();
         
-        // 2. Cek Jadwal Regular
+        // 2. Jika tidak ada, Cek Jadwal Regular
         if (!$schedule) {
             $dayEnglish = $today->locale('en')->dayName; 
             $dayCategory = ($dayEnglish == 'Friday') ? 'Jumat' : 'Biasa';
-     
+            
+            // [FIX] Hapus pencarian 'day_type', hanya cari 'day_name'
             $schedule = ScheduleRegular::where('day_name', $dayCategory)->first();
         }
 
@@ -383,19 +384,19 @@ class AttendanceSiswaController extends Controller
         $isMember = ExtracurricularMember::where('student_id', $student->id)
             ->where('extracurricular_id', $extraId)
             ->exists();
-
-        // Create AttendanceSiswa agar muncul di Riwayat Scan
-        AttendanceSiswa::firstOrCreate([
+       
+        AttendanceSiswa::updateOrCreate([
             'student_id' => $student->id,
             'attendance_date' => $today->toDateString(),
             'type' => 'Extracurricular',
             'activity' => $extra->name
         ], [
             'status' => 'Hadir',
-            'time_in' => now()->format('H:i:s')
+            'time_in' => now()->format('H:i:s'),
+            'updated_at' => now() 
         ]);
         
-        $attendance = ExtracurricularAttendance::firstOrCreate([
+        $attendance = ExtracurricularAttendance::updateOrCreate([
             'extracurricular_id' => $extraId,
             'student_id' => $student->id,
             'date' => $today->toDateString()
@@ -422,9 +423,10 @@ class AttendanceSiswaController extends Controller
             'message' => $msg,
             'scan' => [
                 'student_name' => $student->name,
-                'student_id' => $student->student_id ?? $student->nisn, 
+                'student_id' => $student->student_id ?? $student->nisn,
                 'status' => 'Hadir Ekskul',
-                'extra_name' => $extra->name 
+                'extra_name' => $extra->name,
+                'time' => now()->format('H:i') 
             ]
         ]);
     }

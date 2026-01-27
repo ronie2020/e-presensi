@@ -2,17 +2,32 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ExtracurricularAttendance extends Model
 {
-    protected $guarded = [];
+    use HasFactory;
+
+    protected $table = 'extracurricular_attendances';
+
+    /**
+     * Kita gunakan $fillable agar lebih eksplisit.
+     * Pastikan 'time_in' ada di sini.
+     */
+    protected $fillable = [
+        'extracurricular_id',
+        'student_id',
+        'date',
+        'status',
+        'time_in', // <--- INI KUNCINYA
+    ];
 
     public function student()
     {
-        // PERBAIKAN: 
-        // Parameter ke-3 diubah dari 'student_id' menjadi 'id'.
-        // Ini memberitahu Laravel: "Cocokkan kolom student_id di tabel ini dengan kolom ID di tabel students"
+        // Jika kolom primary key di tabel students adalah 'id',
+        // maka default belongsTo(Student::class) sudah cukup.
+        // Tapi jika Anda ingin eksplisit seperti file sebelumnya, boleh juga:
         return $this->belongsTo(Student::class, 'student_id', 'id');
     }
 
