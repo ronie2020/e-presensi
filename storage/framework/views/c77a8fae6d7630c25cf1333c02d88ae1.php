@@ -532,7 +532,6 @@
             }
 
             function updateMakanStats(serverTotal) {
-                // [FIX] Cek tipe data number, karena 0 dianggap false di JS
                 if(typeof serverTotal === 'number') statsData.taken = serverTotal;
                 else statsData.taken++; 
                 

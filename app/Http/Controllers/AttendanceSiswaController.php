@@ -29,12 +29,11 @@ class AttendanceSiswaController extends Controller
         // 1. Cek Jadwal Khusus
         $schedule = ScheduleSpecial::where('date', $today->toDateString())->first();
         
-        // 2. Jika tidak ada, Cek Jadwal Regular
+        // 2. Cek Jadwal Regular
         if (!$schedule) {
             $dayEnglish = $today->locale('en')->dayName; 
             $dayCategory = ($dayEnglish == 'Friday') ? 'Jumat' : 'Biasa';
-            
-            // [FIX] Hapus pencarian 'day_type', hanya cari 'day_name'
+     
             $schedule = ScheduleRegular::where('day_name', $dayCategory)->first();
         }
 
@@ -166,9 +165,8 @@ class AttendanceSiswaController extends Controller
             $scheduleLimit = $special->end_in; 
         } else {
             $dayEnglish = $today->locale('en')->dayName;
-            $dayCategory = ($dayEnglish == 'Friday') ? 'Jumat' : 'Biasa';
-            
-            // [FIX] Hapus pencarian 'day_type'
+            $dayCategory = ($dayEnglish == 'Friday') ? 'Jumat' : 'Biasa';            
+           
             $regular = ScheduleRegular::where('day_name', $dayCategory)->first();
             
             if ($regular) {
@@ -396,14 +394,14 @@ class AttendanceSiswaController extends Controller
             'status' => 'Hadir',
             'time_in' => now()->format('H:i:s')
         ]);
-
+        
         $attendance = ExtracurricularAttendance::firstOrCreate([
             'extracurricular_id' => $extraId,
             'student_id' => $student->id,
             'date' => $today->toDateString()
         ], [
             'status' => 'Hadir',
-            'check_in_time' => now()
+            'time_in' => now() 
         ]);
 
         if ($attendance->wasRecentlyCreated) {
@@ -424,9 +422,9 @@ class AttendanceSiswaController extends Controller
             'message' => $msg,
             'scan' => [
                 'student_name' => $student->name,
-                'student_id' => $student->student_id ?? $student->nisn, // [FIX] ID
+                'student_id' => $student->student_id ?? $student->nisn, 
                 'status' => 'Hadir Ekskul',
-                'extra_name' => $extra->name // [FIX] Nama Ekskul dikirim untuk JS
+                'extra_name' => $extra->name 
             ]
         ]);
     }
