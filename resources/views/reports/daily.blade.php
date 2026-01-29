@@ -2,16 +2,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- CUSTOM STYLES (Sama seperti Dashboard) --}}
+    {{-- CUSTOM STYLES --}}
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        
-        /* Animasi Wiggle untuk ikon saat hover */
         @keyframes wiggle { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
         .group:hover .animate-wiggle { animation: wiggle 0.5s ease-in-out; }
-
-        /* Utility Printing */
         @media print {
             .no-print { display: none !important; }
             body { background-color: white; }
@@ -22,19 +18,14 @@
     <div class="py-6 md:py-8 font-sans text-slate-800 pb-32" x-data="{ 
         activeTab: '{{ request('activeTab', 'hadir') }}',
         reportType: '{{ request('report_type', 'daily') }}',
-        loading: false, // State untuk loading overlay
-        
-        // Fungsi untuk submit filter dengan animasi loading
+        loading: false, 
         submitFilter() {
             this.loading = true;
-            // Beri sedikit jeda agar user melihat efek klik
-            setTimeout(() => {
-                this.$el.closest('form').submit();
-            }, 200);
+            setTimeout(() => { this.$el.closest('form').submit(); }, 200);
         }
     }">
     
-        {{-- LOADING OVERLAY (Modern) --}}
+        {{-- LOADING OVERLAY --}}
         <div x-show="loading" 
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
@@ -58,19 +49,16 @@
             
             {{-- HERO SECTION --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 no-print">
-                {{-- Kiri: Judul & Tanggal Aktif --}}
                 <div class="animate-enter bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 rounded-[2rem] p-6 lg:p-8 text-white shadow-xl shadow-blue-900/30 relative overflow-hidden flex flex-col justify-between min-h-[180px] lg:min-h-[200px] border border-white/10 group">
                     <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/30 transition-all duration-700"></div>
                     <div class="absolute -left-10 bottom-0 w-32 h-32 bg-blue-400/10 rounded-full blur-xl group-hover:bg-blue-400/20 transition-all duration-700"></div>
                     <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                    
                     <div class="relative z-10">
                         <h1 class="text-xl lg:text-2xl font-extrabold mb-1 tracking-tight text-white flex items-center gap-2">
                             Rekap Absensi
                         </h1>
                         <p class="text-blue-300 text-sm font-medium tracking-wide">Kehadiran siswa harian.</p>
                     </div>
-
                     <div class="relative z-10 mt-6">
                         <div class="inline-flex items-center gap-2 bg-slate-900/40 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl text-sm font-bold shadow-sm">
                             <i class="ph-bold ph-calendar-blank text-blue-300"></i>
@@ -79,10 +67,8 @@
                     </div>
                 </div>
 
-                {{-- Kanan: Filter & Tools --}}
                 <div class="animate-enter lg:col-span-2 bg-white rounded-[2rem] p-6 lg:p-8 border border-slate-100 shadow-sm relative overflow-hidden" style="animation-delay: 100ms">
                     <div class="absolute inset-0 opacity-40 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:20px_20px]"></div>
-                    
                     <div class="relative z-10">
                          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                             <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -99,7 +85,6 @@
                         <form action="{{ route('reports.daily') }}" method="GET" class="flex flex-col md:flex-row gap-3 w-full" @submit.prevent="submitFilter">
                             <input type="hidden" name="report_type" x-model="reportType">
                             <input type="hidden" name="activeTab" x-model="activeTab">
-
                             <div class="flex-1 w-full">
                                 <div x-show="reportType === 'daily'">
                                     <input type="date" name="date" value="{{ request('date', $selectedDate_db->format('Y-m-d')) }}" 
@@ -114,14 +99,11 @@
                                            class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900 shadow-sm">
                                 </div>
                             </div>
-
                             <div class="flex gap-2 w-full md:w-auto">
                                 <button type="submit" class="flex-1 md:flex-none bg-blue-900 hover:bg-slate-900 text-white px-5 rounded-xl h-11 font-bold text-sm shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95">
                                     <i class="ph-bold ph-magnifying-glass"></i> <span class="md:hidden">Tampilkan</span>
                                 </button>
-                                
                                 <div class="w-px h-11 bg-slate-200 hidden md:block"></div>
-
                                 <a href="{{ route('reports.printDaily', request()->all()) }}" target="_blank" class="flex-1 md:flex-none bg-white border border-slate-200 text-slate-600 hover:text-blue-900 hover:border-blue-900 px-5 rounded-xl h-11 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-95">
                                     <i class="ph-bold ph-printer text-lg"></i> <span class="md:hidden">Cetak</span>
                                 </a>
@@ -137,7 +119,6 @@
                     <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-1"><i class="ph-bold ph-x"></i></button>
                 </div>
             @endif
-            
             @if (session('error'))
                 <div x-data="{ show: true }" x-show="show" x-transition class="animate-enter mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl font-bold text-sm flex justify-between items-center shadow-sm no-print">
                     <div class="flex items-center gap-2"><i class="ph-fill ph-warning-circle text-lg"></i> <span>{{ session('error') }}</span></div>
@@ -159,7 +140,6 @@
                     </div>
                     <div class="w-14 h-14 lg:w-16 lg:h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-check-circle"></i></div>
                 </div>
-
                 <div class="animate-enter bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all" style="animation-delay: 300ms">
                      <div class="min-w-0">
                          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Izin / Alfa</p>
@@ -167,7 +147,6 @@
                     </div>
                     <div class="w-14 h-14 lg:w-16 lg:h-16 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-warning-circle"></i></div>
                 </div>
-
                 <div class="animate-enter bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all" style="animation-delay: 400ms">
                      <div class="min-w-0">
                          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Belum Absen</p>
@@ -180,7 +159,7 @@
             {{-- LIST DATA UTAMA --}}
             <div class="animate-enter bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden min-h-[500px]" style="animation-delay: 500ms">
                 
-                {{-- Tabs Header (DIBUAT WRAP DI MOBILE) --}}
+                {{-- Tabs Header --}}
                 <div class="flex flex-wrap md:flex-nowrap border-b border-slate-100 bg-slate-50/50 p-2 gap-2 sticky top-0 z-20 no-print">
                     <button @click="activeTab = 'hadir'" :class="activeTab === 'hadir' ? 'bg-white text-blue-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60'" class="flex-1 md:flex-none py-2.5 px-4 md:px-6 rounded-xl text-xs md:text-sm font-bold whitespace-nowrap transition-all">Hadir / Terlambat</button>
                     <button @click="activeTab = 'belum'" :class="activeTab === 'belum' ? 'bg-white text-blue-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60'" class="flex-1 md:flex-none py-2.5 px-4 md:px-6 rounded-xl text-xs md:text-sm font-bold whitespace-nowrap transition-all">
@@ -196,32 +175,29 @@
                         <div class="grid grid-cols-1 gap-0">
                             @forelse ($attendancesHadir as $att)
                                 <div class="relative p-4 md:p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors group flex items-center justify-between">
-                                    {{-- Status Bar Indicator --}}
-                                    <div class="absolute left-0 top-0 bottom-0 w-1 {{ $att->status_final == 'Terlambat' ? 'bg-amber-500' : 'bg-emerald-500' }} hidden group-hover:block"></div>
-                                    
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 {{ $att->status == 'Terlambat' ? 'bg-amber-500' : 'bg-emerald-500' }} hidden group-hover:block"></div>
                                     <div class="flex items-center gap-3 md:gap-4 overflow-hidden w-full">
-                                        <div class="w-12 h-12 rounded-2xl {{ $att->status_final == 'Terlambat' ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600' }} flex items-center justify-center font-bold text-xs shrink-0">
+                                        <div class="w-12 h-12 rounded-2xl {{ $att->status == 'Terlambat' ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600' }} flex items-center justify-center font-bold text-xs shrink-0">
                                              {{ $loop->iteration }}
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <h4 class="font-bold text-slate-800 truncate group-hover:text-blue-600 transition-colors">{{ $att->student->name }}</h4>
                                             <div class="flex flex-wrap items-center gap-2 md:gap-3 mt-1 text-xs">
                                                 <span class="font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded">{{ $att->student->schoolClass->name ?? '-' }}</span>
-                                                
                                                 <span class="flex items-center gap-1 font-bold text-slate-600">
-                                                    <i class="ph-bold ph-arrow-right-circle text-emerald-500"></i> {{ $att->time_in_final ? \Carbon\Carbon::parse($att->time_in_final)->format('H:i') : '-' }}
+                                                    <i class="ph-bold ph-arrow-right-circle text-emerald-500"></i> {{ $att->time_in ? \Carbon\Carbon::parse($att->time_in)->format('H:i') : '-' }}
                                                 </span>
                                                 <span class="flex items-center gap-1 font-bold text-slate-600">
-                                                    <i class="ph-bold ph-arrow-left-circle text-blue-500"></i> {{ $att->time_out_final ? \Carbon\Carbon::parse($att->time_out_final)->format('H:i') : '-' }}
+                                                    <i class="ph-bold ph-arrow-left-circle text-blue-500"></i> {{ $att->time_out ? \Carbon\Carbon::parse($att->time_out)->format('H:i') : '-' }}
                                                 </span>
-                                                @if($att->status_final == 'Terlambat')
+                                                @if($att->status == 'Terlambat')
                                                     <span class="text-amber-600 font-bold uppercase tracking-wider text-[10px] bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">Terlambat</span>
                                                 @endif
                                             </div>
                                         </div>
                                     </div>
-
-                                    <button onclick="openEditModal({{ $att->id }}, '{{ $att->student->name }}', '{{ $att->status_final }}', `{{ $att->notes_final }}`, '{{ $att->time_in_final }}', '{{ $att->time_out_final }}')" 
+                                    {{-- PERBAIKAN: Menggunakan atribut murni DB ($att->status, $att->notes, dll) --}}
+                                    <button onclick="openEditModal({{ $att->id }}, '{{ addslashes($att->student->name) }}', '{{ $att->status }}', `{{ addslashes($att->notes ?? '') }}`, '{{ $att->time_in }}', '{{ $att->time_out }}')" 
                                         class="p-2 ml-2 md:ml-4 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all no-print shrink-0 active:scale-95">
                                         <i class="ph-bold ph-pencil-simple text-xl"></i>
                                     </button>
@@ -250,7 +226,6 @@
                                     @csrf
                                     <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
                                     <input type="hidden" name="type" value="Harian">
-                                    {{-- JS CONFIRMATION --}}
                                     <button type="button" onclick="confirmBulkAlpha('{{ $belumAbsenList->count() }}')" 
                                         class="w-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-5 py-3 rounded-xl shadow-lg shadow-rose-200 transition-all flex items-center justify-center gap-2 active:scale-95">
                                         <i class="ph-bold ph-check-circle"></i> Proses Alfa
@@ -270,7 +245,7 @@
                                             <p class="text-xs text-slate-500">{{ $student->schoolClass->name ?? '-' }}</p>
                                         </div>
                                     </div>
-                                    <button onclick="openManualModalDaily({{ $student->id }}, '{{ $student->name }}')" 
+                                    <button onclick="openManualModalDaily({{ $student->id }}, '{{ addslashes($student->name) }}')" 
                                         class="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 hover:text-blue-600 hover:border-blue-100 transition-all shadow-sm no-print shrink-0 active:scale-95">
                                         Input <span class="hidden md:inline">Manual</span>
                                     </button>
@@ -286,22 +261,23 @@
                          <div class="grid grid-cols-1 gap-0">
                             @forelse ($attendancesLain as $att)
                                 <div class="relative p-4 md:p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors group flex items-center justify-between">
-                                    <div class="absolute left-0 top-0 bottom-0 w-1 {{ $att->status_final == 'Alfa' ? 'bg-rose-500' : 'bg-blue-500' }} hidden group-hover:block"></div>
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 {{ $att->status == 'Alfa' ? 'bg-rose-500' : 'bg-blue-500' }} hidden group-hover:block"></div>
                                     <div class="flex items-center gap-4 overflow-hidden">
-                                        <div class="w-10 h-10 rounded-xl {{ $att->status_final == 'Alfa' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600' }} flex items-center justify-center font-bold text-xs shrink-0">
-                                             {{ substr($att->status_final, 0, 1) }}
+                                        <div class="w-10 h-10 rounded-xl {{ $att->status == 'Alfa' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600' }} flex items-center justify-center font-bold text-xs shrink-0">
+                                             {{ substr($att->status, 0, 1) }}
                                         </div>
                                         <div class="min-w-0">
                                             <h4 class="font-bold text-slate-800 truncate">{{ $att->student->name }}</h4>
                                             <div class="flex items-center gap-2 mt-1">
-                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $att->status_final == 'Alfa' ? 'bg-rose-50 text-rose-700' : 'bg-blue-50 text-blue-700' }} uppercase">{{ $att->status_final }}</span>
-                                                @if($att->notes_final)
-                                                    <span class="text-xs text-slate-400 italic max-w-[100px] md:max-w-none truncate">"{{ $att->notes_final }}"</span>
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $att->status == 'Alfa' ? 'bg-rose-50 text-rose-700' : 'bg-blue-50 text-blue-700' }} uppercase">{{ $att->status }}</span>
+                                                @if($att->notes)
+                                                    <span class="text-xs text-slate-400 italic max-w-[100px] md:max-w-none truncate">"{{ $att->notes }}"</span>
                                                 @endif
                                             </div>
                                         </div>
                                     </div>
-                                    <button onclick="openEditModal({{ $att->id }}, '{{ $att->student->name }}', '{{ $att->status_final }}', `{{ $att->notes_final }}`, '', '')" 
+                                    {{-- PERBAIKAN: Menggunakan atribut murni DB --}}
+                                    <button onclick="openEditModal({{ $att->id }}, '{{ addslashes($att->student->name) }}', '{{ $att->status }}', `{{ addslashes($att->notes ?? '') }}`, '', '')" 
                                         class="p-2 ml-2 md:ml-4 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all no-print shrink-0 active:scale-95">
                                         <i class="ph-bold ph-pencil-simple text-xl"></i>
                                     </button>
@@ -317,7 +293,7 @@
     </div>
     
     {{-- MODAL & JS --}}
-    {{-- Modal Manual Input (UPDATED) --}}
+    {{-- Modal Manual Input --}}
     <div id="manualModalDaily" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity no-print">
         <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-enter">
              <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
@@ -335,7 +311,6 @@
                     <p id="daily-manual-name-display" class="text-lg font-black text-blue-900 truncate px-4"></p>
                 </div>
 
-                {{-- Alert Merah untuk Manual Input --}}
                 <div x-data="{ status: 'Hadir' }">
                     <label class="text-xs font-bold text-slate-400 uppercase mb-2 block ml-1">Status</label>
                     <select name="status" id="daily-manual-status" x-model="status" onchange="toggleTimeInput()" class="w-full border-slate-200 bg-slate-50 rounded-xl focus:ring-blue-900 font-bold text-slate-700 h-12">
@@ -354,12 +329,15 @@
                     </div>
                 </div>
 
-                <div id="time-input-container" class="grid grid-cols-2 gap-4">
-                    <div>
+                <div class="grid grid-cols-2 gap-4">
+                    {{-- Wrapper Waktu --}}
+                    <div id="manual-time-wrapper">
                         <label class="text-xs font-bold text-slate-400 uppercase mb-2 block ml-1">Masuk</label>
                         <input type="time" name="time_in" id="daily-manual-time-in" class="w-full border-slate-200 bg-slate-50 rounded-xl font-bold text-slate-700 h-12">
                     </div>
-                     <div>
+                    
+                    {{-- Wrapper Catatan --}}
+                     <div id="manual-notes-wrapper" class="col-span-1">
                         <label class="text-xs font-bold text-slate-400 uppercase mb-2 block ml-1">Catatan</label>
                         <input type="text" name="notes" placeholder="Opsional" class="w-full border-slate-200 bg-slate-50 rounded-xl h-12">
                     </div>
@@ -370,7 +348,7 @@
         </div>
     </div>
 
-    {{-- Modal Edit (UPDATED) --}}
+    {{-- Modal Edit --}}
     <div id="editAttendanceModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity no-print">
         <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-enter">
              <div class="bg-slate-800 px-6 py-4 flex justify-between items-center">
@@ -449,12 +427,23 @@
         
         function toggleTimeInput() {
             const status = document.getElementById('daily-manual-status').value;
-            const timeContainer = document.getElementById('time-input-container');
+            const timeWrapper = document.getElementById('manual-time-wrapper');
+            const notesWrapper = document.getElementById('manual-notes-wrapper');
             
+            // Jika Hadir atau Terlambat, Tampilkan Waktu
             if (status === 'Hadir' || status === 'Terlambat') {
-                timeContainer.classList.remove('hidden', 'opacity-50', 'pointer-events-none');
+                timeWrapper.classList.remove('hidden');
+                
+                // Kembalikan Catatan ke ukuran normal (1 kolom)
+                notesWrapper.classList.remove('col-span-2');
+                notesWrapper.classList.add('col-span-1');
             } else {
-                timeContainer.classList.add('hidden', 'opacity-50', 'pointer-events-none');
+                // Sembunyikan Waktu
+                timeWrapper.classList.add('hidden');
+                
+                // Catatan jadi Full Width (2 kolom)
+                notesWrapper.classList.remove('col-span-1');
+                notesWrapper.classList.add('col-span-2');
             }
         }
 
@@ -483,11 +472,13 @@
             statusSelect.value = 'Hadir';
             statusSelect.dispatchEvent(new Event('change')); // Trigger Alpine
             
-            toggleTimeInput(); 
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             document.getElementById('daily-manual-time-in').value = `${hours}:${minutes}`;
+            
+            toggleTimeInput(); 
+            
             document.getElementById('manualModalDaily').classList.remove('hidden'); 
         }
         function closeManualModalDaily() { 
@@ -500,12 +491,16 @@
         function openEditModal(id, name, status, notes, timeIn, timeOut) {
             form.action = '{{ route('reports.update', ['attendance' => '__ID__']) }}'.replace('__ID__', id);
             document.getElementById('modal-student-name').textContent = name;
-            document.getElementById('modal-status').value = status;
+            
+            // Set value dan trigger event manual agar logika checkEditStatus berjalan
+            const statusSelect = document.getElementById('modal-status');
+            statusSelect.value = status;
+            
             document.getElementById('modal-notes').value = notes;
             document.getElementById('modal-time_in').value = timeIn ? timeIn.substring(0,5) : '';
             document.getElementById('modal-time_out').value = timeOut ? timeOut.substring(0,5) : '';
             
-            checkEditStatus(status); // Cek status awal untuk menampilkan alert jika perlu
+            checkEditStatus(status); 
             
             modal.classList.remove('hidden');
         }
