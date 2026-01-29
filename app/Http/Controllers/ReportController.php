@@ -24,6 +24,7 @@ class ReportController extends Controller
 {
     /**
      * Helper untuk menentukan rentang tanggal berdasarkan input request.
+     * PERBAIKAN: Menambahkan default value jika input kosong agar tidak fallback ke daily.
      */
     private function getDateRange(Request $request)
     {
@@ -32,22 +33,41 @@ class ReportController extends Controller
         $end = null;
         $label = "";
 
-        if ($reportType === 'weekly' && $request->filled('week')) {
-            // Format: 2024-W01
-            $parts = explode('-W', $request->week);
-            $year = $parts[0];
-            $week = $parts[1];
-            $dt = Carbon::now()->setISODate($year, $week);
-            $start = $dt->startOfWeek()->toDateString();
-            $end = $dt->endOfWeek()->toDateString();
-            $label = "Minggu ke-" . $week . " Tahun " . $year;
-        } elseif ($reportType === 'monthly' && $request->filled('month')) {
-            // Format: 2024-01
-            $dt = Carbon::parse($request->month . '-01');
+        // Logika Mingguan
+        if ($reportType === 'weekly') {
+            // Jika user tidak pilih minggu, default ke minggu ini
+            $weekStr = $request->input('week', Carbon::now()->format('Y-\WW'));
+            
+            // Format input HTML type="week" adalah 2024-W01
+            $parts = explode('-W', $weekStr);
+            // Validasi format
+            if(count($parts) === 2) {
+                $year = $parts[0];
+                $week = $parts[1];
+                $dt = Carbon::now()->setISODate($year, $week);
+                $start = $dt->startOfWeek()->toDateString();
+                $end = $dt->endOfWeek()->toDateString();
+                $label = "Minggu ke-" . $week . " Tahun " . $year . " (" . $dt->startOfWeek()->format('d M') . " - " . $dt->endOfWeek()->format('d M Y') . ")";
+            } else {
+                // Fallback jika format salah
+                $start = Carbon::now()->startOfWeek()->toDateString();
+                $end = Carbon::now()->endOfWeek()->toDateString();
+                $label = "Minggu Ini";
+            }
+        } 
+        // Logika Bulanan
+        elseif ($reportType === 'monthly') {
+            // Jika user tidak pilih bulan, default ke bulan ini
+            $monthStr = $request->input('month', Carbon::now()->format('Y-m'));
+            
+            $dt = Carbon::parse($monthStr . '-01');
             $start = $dt->startOfMonth()->toDateString();
             $end = $dt->endOfMonth()->toDateString();
             $label = "Bulan " . $dt->translatedFormat('F Y');
-        } else {
+        } 
+        // Logika Harian (Default)
+        else {
+            $reportType = 'daily'; // Paksa set daily jika bukan weekly/monthly
             $dateStr = $request->input('date', Carbon::today()->toDateString());
             $dt = Carbon::parse($dateStr);
             $start = $dt->toDateString();
@@ -86,16 +106,13 @@ class ReportController extends Controller
         return $collection->sortBy(function ($item) {
             $student = $item instanceof Student ? $item : $item->student;
             $className = $student->schoolClass->name ?? 'ZZZ';
-            return $className . ' ' . $student->name;
+            // Sort by Date (desc) then Class then Name agar data history urut tanggal
+            $date = $item->attendance_date ?? '0000-00-00';
+            return $date . $className . ' ' . $student->name;
         }, SORT_NATURAL | SORT_FLAG_CASE)->values();
     }
 
-    /**
-     * ==========================================
-     * LOGIKA OTOMATIS POIN PELANGGARAN (ROBUST)
-     * ==========================================   
-     */
-     private function handleAutoPunishment($studentId, $date, $status, $typeContext = 'Harian', $preloadedViolationType = null)
+    private function handleAutoPunishment($studentId, $date, $status, $typeContext = 'Harian', $preloadedViolationType = null)
     {
         if (!in_array($status, ['Alfa', 'Alpa', 'Alpha'])) return;
 
@@ -129,9 +146,7 @@ class ReportController extends Controller
         }
     }
 
-    /**
-     * 1. REKAP ABSENSI HARIAN (Web View)
-     */
+    // --- REKAP ABSENSI HARIAN ---
      public function dailyReport(Request $request)
     {
         $range = $this->getDateRange($request);
@@ -141,16 +156,22 @@ class ReportController extends Controller
             ->whereHas('student', function($q) { $q->where('status', '!=', 'graduated'); })
             ->whereBetween('attendance_date', [$range['start'], $range['end']])
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
+            ->orderBy('attendance_date', 'desc') // Urutkan tanggal terbaru
             ->get();
 
-        // Count logic (Unique student per status)
         $hadirCount = $attendances->where('status', 'Hadir')->count();
         $terlambatCount = $attendances->where('status', 'Terlambat')->count();
         $sakitCount = $attendances->where('status', 'Sakit')->count();
         $izinCount = $attendances->where('status', 'Izin')->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
+        // Untuk "Belum Absen", kita hanya cek jika ini mode HARIAN.
+        // Jika mingguan/bulanan, "Belum Absen" kurang relevan ditampilkan sebagai list kecuali siswa yang tidak hadir sama sekali dalam periode tersebut.
+        // Di sini kita tetap load logicnya tapi filter berdasarkan hari ini jika range-nya daily.
+        
         $existingStudentIds = $attendances->pluck('student_id')->unique()->toArray();
+        
+        // Jika range lebih dari 1 hari, logika "Belum Absen" akan menampilkan siswa yang BELUM PERNAH absen sekalipun dalam range itu.
         $belumAbsenListRaw = Student::with('schoolClass')
             ->where('status', '!=', 'graduated')
             ->whereNotIn('id', $existingStudentIds)
@@ -170,9 +191,6 @@ class ReportController extends Controller
         ));
     }
 
-    /**
-     * 2. CETAK LAPORAN HARIAN (Print View)
-     */
     public function printDaily(Request $request)
     {
         $range = $this->getDateRange($request);
@@ -182,6 +200,8 @@ class ReportController extends Controller
             ->whereHas('student', function($q) { $q->where('status', '!=', 'graduated'); })
             ->whereBetween('attendance_date', [$range['start'], $range['end']])
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
+            ->orderBy('attendance_date', 'asc')
+            ->orderBy('student_id', 'asc')
             ->get();
 
         $attendancesHadir = $this->sortStudents($attendances->whereIn('status', ['Hadir', 'Terlambat']));
@@ -202,9 +222,7 @@ class ReportController extends Controller
         return view('reports.print_daily', compact('selectedDate_db', 'attendancesHadir', 'attendancesLain', 'belumAbsenList', 'stats', 'range'));
     }
     
-    /**
-     * 3. REKAP KEAGAMAAN (Web View)
-     */
+    // --- REKAP KEAGAMAAN ---
     public function religiousReport(Request $request)
     {
         $range = $this->getDateRange($request);
@@ -216,6 +234,7 @@ class ReportController extends Controller
             ->whereBetween('attendance_date', [$range['start'], $range['end']])
             ->where('type', 'Keagamaan')
             ->where('activity', $selectedActivity)
+            ->orderBy('attendance_date', 'desc')
             ->get();
 
         $hadirCount = $attendances->where('status', 'Hadir')->count();
@@ -235,9 +254,6 @@ class ReportController extends Controller
         ));
     }
 
-    /**
-     * 4. CETAK LAPORAN KEAGAMAAN (Print View)
-     */
      public function printReligious(Request $request)
     {
         $range = $this->getDateRange($request);
@@ -249,6 +265,7 @@ class ReportController extends Controller
             ->whereBetween('attendance_date', [$range['start'], $range['end']])
             ->where('type', 'Keagamaan')
             ->where('activity', $selectedActivity)
+            ->orderBy('attendance_date', 'asc')
             ->get();
 
         $attendancesHadir = $this->sortStudents($attendances->where('status', 'Hadir'));
@@ -268,9 +285,7 @@ class ReportController extends Controller
         ));
     }
 
-    /**
-     * 5. MONITORING JURNAL MENGAJAR
-     */
+    // --- FITUR LAIN (TIDAK BERUBAH) ---
     public function teachingJournal(Request $request)
     {
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
@@ -318,9 +333,6 @@ class ReportController extends Controller
         ));
     }
 
-    /**
-     * 6. PROSES BULK ALPHA 
-     */
     public function bulkAlpha(Request $request)
     {
         $date = $request->input('date');
@@ -343,7 +355,6 @@ class ReportController extends Controller
                 $query->where('activity', $activity);
             }
 
-            // 1. PROSES SISWA BARU (Belum Absen)
             $presentIds = $query->pluck('student_id')->toArray();
             
             $absentStudents = Student::where('status', '!=', 'graduated')
@@ -390,9 +401,6 @@ class ReportController extends Controller
         });
     }
 
-    /**
-     * 7. SIMPAN MANUAL (DENGAN AUTO PUNISHMENT + WA)
-     */
     public function storeManualEntry(Request $request)
     {
         $request->validate([
@@ -427,7 +435,6 @@ class ReportController extends Controller
     
         $this->handleAutoPunishment($request->student_id, $request->date, $request->status, $request->attendance_type);
 
-        // Kirim Notifikasi WA
         try {
             SendWaManualNotificationJob::dispatch($attendance);
         } catch (\Exception $e) {
@@ -437,9 +444,6 @@ class ReportController extends Controller
         return back()->with('success', 'Data absensi berhasil disimpan dan notifikasi diproses.');
     }
 
-    /**
-     * 8. UPDATE DATA (DENGAN AUTO PUNISHMENT)
-     */
     public function updateAttendance(Request $request, $id)
     {
         $att = AttendanceSiswa::findOrFail($id);        
@@ -465,9 +469,6 @@ class ReportController extends Controller
         return back()->with('success', 'Data berhasil diperbarui.');
     }
 
-    /**
-     * 9. HAPUS DATA KEAGAMAAN
-     */
     public function destroyReligious(Request $request)
     {
         $date = $request->date;

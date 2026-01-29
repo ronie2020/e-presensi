@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Keagamaan - {{ $selectedActivity }} - {{ $selectedDate_db->format('d-m-Y') }}</title>
+    <title>Laporan Keagamaan - {{ $range['label'] }}</title>
     <style>
         @page { size: A4; margin: 2cm; }
         body { font-family: 'Times New Roman', serif; color: #000; line-height: 1.5; font-size: 11pt; }
@@ -74,9 +74,9 @@
 
     <table class="meta-table">
         <tr>
-            <td class="meta-title">Hari / Tanggal</td>
+            <td class="meta-title">Periode</td>
             <td width="10">:</td>
-            <td>{{ $selectedDate_db->translatedFormat('l, d F Y') }}</td>
+            <td>{{ $range['label'] }}</td>
         </tr>
         <tr>
             <td class="meta-title">Jenis Kegiatan</td>
@@ -116,6 +116,7 @@
             <thead>
                 <tr>
                     <th width="5%">No</th>
+                    @if($range['type'] != 'daily') <th width="15%">Tanggal</th> @endif
                     <th width="35%">Nama Siswa</th>
                     <th width="20%">Kelas</th>
                     <th width="20%">Waktu Absen</th>
@@ -126,10 +127,14 @@
                 @foreach($attendancesHadir as $index => $att)
                 <tr>
                     <td class="center">{{ $index + 1 }}</td>
+                    @if($range['type'] != 'daily') 
+                        <td class="center">{{ \Carbon\Carbon::parse($att->attendance_date)->format('d/m/Y') }}</td> 
+                    @endif
                     <td>{{ $att->student->name }}</td>
                     <td class="center">{{ $att->student->schoolClass->name ?? '-' }}</td>
                     <td class="center">{{ $att->created_at->format('H:i') }}</td>
-                    <td>{{ $att->notes_final ?? '-' }}</td>
+                    {{-- PERBAIKAN: Menggunakan $att->notes --}}
+                    <td>{{ $att->notes ?? '-' }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -143,6 +148,7 @@
             <thead>
                 <tr>
                     <th width="5%">No</th>
+                    @if($range['type'] != 'daily') <th width="15%">Tanggal</th> @endif
                     <th width="35%">Nama Siswa</th>
                     <th width="20%">Kelas</th>
                     <th width="15%">Status</th>
@@ -153,16 +159,20 @@
                 @foreach($attendancesUzur as $index => $att)
                 <tr>
                     <td class="center">{{ $index + 1 }}</td>
+                    @if($range['type'] != 'daily') 
+                        <td class="center">{{ \Carbon\Carbon::parse($att->attendance_date)->format('d/m/Y') }}</td> 
+                    @endif
                     <td>{{ $att->student->name }}</td>
                     <td class="center">{{ $att->student->schoolClass->name ?? '-' }}</td>
+                    {{-- PERBAIKAN: Menggunakan $att->status --}}
                     <td class="center" style="font-weight: bold;">
-                        {{ $att->status_final }}
-                        {{-- TAMBAHAN: Indikator Poin --}}
-                        @if(in_array($att->status_final, ['Alfa', 'Alpa']))
+                        {{ $att->status }}
+                        @if(in_array($att->status, ['Alfa', 'Alpa']))
                             <br><small class="text-danger">(- Poin)</small>
                         @endif
                     </td>
-                    <td>{{ $att->notes_final ?? '-' }}</td>
+                    {{-- PERBAIKAN: Menggunakan $att->notes --}}
+                    <td>{{ $att->notes ?? '-' }}</td>
                 </tr>
                 @endforeach
             </tbody>

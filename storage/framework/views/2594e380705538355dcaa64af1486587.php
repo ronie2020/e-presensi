@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Absensi Harian - <?php echo e($selectedDate_db->format('d-m-Y')); ?></title>
+    <title>Laporan Absensi Harian - <?php echo e($range['label']); ?></title>
     <style>
         @page { size: A4; margin: 2cm; }
         body { font-family: 'Times New Roman', serif; color: #000; line-height: 1.5; font-size: 11pt; }
@@ -67,16 +67,16 @@
     </button>
 
     <div class="header">
-        <h1>Laporan Absensi Harian Siswa</h1>
+        <h1>Laporan Absensi Siswa</h1>
         <h2>SMP NEGERI 3 LAKBOK</h2>
         <p>Jl. Mekarjaya No.199 Sidaharja Kec. Lakbok, Ciamis, Jawa Barat</p>
     </div>
 
     <table class="meta-table">
         <tr>
-            <td class="meta-title">Hari / Tanggal</td>
+            <td class="meta-title">Periode</td>
             <td width="10">:</td>
-            <td><?php echo e($selectedDate_db->translatedFormat('l, d F Y')); ?></td>
+            <td><?php echo e($range['label']); ?></td>
         </tr>
         <tr>
             <td class="meta-title">Dicetak Oleh</td>
@@ -115,6 +115,10 @@
             <thead>
                 <tr>
                     <th width="5%">No</th>
+                    
+                    <?php if($range['type'] != 'daily'): ?> 
+                        <th width="15%">Tanggal</th> 
+                    <?php endif; ?>
                     <th width="25%">Nama Siswa</th>
                     <th width="15%">Kelas</th>
                     <th width="15%">Jam Masuk</th>
@@ -126,6 +130,10 @@
                 <?php $__currentLoopData = $attendancesHadir; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $att): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
                     <td class="center"><?php echo e($index + 1); ?></td>
+                    
+                    <?php if($range['type'] != 'daily'): ?> 
+                        <td class="center"><?php echo e(\Carbon\Carbon::parse($att->attendance_date)->format('d/m/Y')); ?></td> 
+                    <?php endif; ?>
                     <td><?php echo e($att->student->name); ?></td>
                     <td class="center"><?php echo e($att->student->schoolClass->name ?? '-'); ?></td>
                     <td class="center"><?php echo e($att->time_in ? \Carbon\Carbon::parse($att->time_in)->format('H:i') : '-'); ?></td>
@@ -148,6 +156,10 @@
             <thead>
                 <tr>
                     <th width="5%">No</th>
+                    
+                    <?php if($range['type'] != 'daily'): ?> 
+                        <th width="15%">Tanggal</th> 
+                    <?php endif; ?>
                     <th width="30%">Nama Siswa</th>
                     <th width="15%">Kelas</th>
                     <th width="15%">Status</th>
@@ -158,6 +170,10 @@
                 <?php $__currentLoopData = $attendancesLain; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $att): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <tr>
                     <td class="center"><?php echo e($index + 1); ?></td>
+                    
+                    <?php if($range['type'] != 'daily'): ?> 
+                        <td class="center"><?php echo e(\Carbon\Carbon::parse($att->attendance_date)->format('d/m/Y')); ?></td> 
+                    <?php endif; ?>
                     <td><?php echo e($att->student->name); ?></td>
                     <td class="center"><?php echo e($att->student->schoolClass->name ?? '-'); ?></td>
                     <td class="center" style="font-weight: bold;">

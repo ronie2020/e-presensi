@@ -15,10 +15,8 @@
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        
         @keyframes wiggle { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
         .group:hover .animate-wiggle { animation: wiggle 0.5s ease-in-out; }
-
         @media print {
             .no-print { display: none !important; }
             body { background-color: white; }
@@ -66,13 +64,8 @@
             
             
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 no-print">
-                
-                
                 <div class="animate-enter bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 rounded-[2rem] p-6 lg:p-8 text-white shadow-xl shadow-blue-900/30 relative overflow-hidden flex flex-col justify-between min-h-[180px] lg:min-h-[200px] border border-white/10 group">
                     <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-all duration-700"></div>
-                    <div class="absolute -left-10 bottom-0 w-32 h-32 bg-blue-400/10 rounded-full blur-2xl group-hover:bg-blue-400/20 transition-all duration-700"></div>
-                    
                     <div class="relative z-10">
                         <h1 class="text-xl lg:text-2xl font-extrabold mb-1 tracking-tight text-white flex items-center gap-2">
                             Rekap Keagamaan
@@ -83,21 +76,17 @@
                     <div class="relative z-10 mt-6 bg-slate-900/50 p-1.5 rounded-2xl flex border border-white/10 backdrop-blur-sm">
                         <button @click="navigate('<?php echo e(route('reports.religious', array_merge(request()->all(), ['activity' => 'Dhuha']))); ?>')" 
                            class="flex-1 text-center py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 <?php echo e($selectedActivity == 'Dhuha' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-blue-300 hover:bg-white/5 hover:text-white'); ?>">
-                            <i class="ph-bold ph-sun text-lg <?php echo e($selectedActivity == 'Dhuha' ? 'text-yellow-300' : ''); ?>"></i> 
-                            Dhuha
+                            <i class="ph-bold ph-sun text-lg <?php echo e($selectedActivity == 'Dhuha' ? 'text-yellow-300' : ''); ?>"></i> Dhuha
                         </button>
                         <button @click="navigate('<?php echo e(route('reports.religious', array_merge(request()->all(), ['activity' => 'Dhuhur']))); ?>')" 
                            class="flex-1 text-center py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 <?php echo e($selectedActivity == 'Dhuhur' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-blue-300 hover:bg-white/5 hover:text-white'); ?>">
-                            <i class="ph-fill ph-moon-stars text-lg <?php echo e($selectedActivity == 'Dhuhur' ? 'text-white' : ''); ?>"></i> 
-                            Dhuhur
+                            <i class="ph-fill ph-moon-stars text-lg <?php echo e($selectedActivity == 'Dhuhur' ? 'text-white' : ''); ?>"></i> Dhuhur
                         </button>
                     </div>
                 </div>
 
-                
                 <div class="animate-enter lg:col-span-2 bg-white rounded-[2rem] p-6 lg:p-8 border border-slate-100 shadow-sm relative overflow-hidden" style="animation-delay: 100ms">
                     <div class="absolute inset-0 opacity-40 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:20px_20px]"></div>
-                    
                     <div class="relative z-10">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                             <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -122,11 +111,11 @@
                                            class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900 shadow-sm">
                                 </div>
                                 <div x-show="reportType === 'weekly'" style="display: none;">
-                                    <input type="week" name="week" value="<?php echo e(request('week')); ?>" 
+                                    <input type="week" name="week" value="<?php echo e(request('week', date('Y-\WW'))); ?>" 
                                            class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900 shadow-sm">
                                 </div>
                                 <div x-show="reportType === 'monthly'" style="display: none;">
-                                    <input type="month" name="month" value="<?php echo e(request('month')); ?>" 
+                                    <input type="month" name="month" value="<?php echo e(request('month', date('Y-m'))); ?>" 
                                            class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900 shadow-sm">
                                 </div>
                             </div>
@@ -151,9 +140,12 @@
                     <div class="min-w-0">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Sudah Absen</p>
                         <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate"><?php echo e($hadirCount); ?></h3>
+                        
+                        <p class="text-[10px] text-slate-400 mt-1 font-medium"><?php echo e($range['label']); ?></p>
                     </div>
                     <div class="w-14 h-14 lg:w-16 lg:h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-check-circle"></i></div>
                 </div>
+
                 <div class="animate-enter bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all" style="animation-delay: 300ms">
                     <div class="min-w-0">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Izin / Uzur</p>
@@ -161,6 +153,7 @@
                     </div>
                     <div class="w-14 h-14 lg:w-16 lg:h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-info"></i></div>
                 </div>
+
                 <div class="animate-enter bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all" style="animation-delay: 400ms">
                     <div class="min-w-0">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Belum Absen</p>
@@ -201,22 +194,32 @@
                             <?php $__empty_1 = true; $__currentLoopData = $attendancesHadir; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $attendance): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <div class="relative p-4 md:p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors group flex items-center justify-between">
                                     <div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 hidden group-hover:block"></div>
-                                    <div class="flex items-center gap-3 md:gap-4 overflow-hidden">
+                                    <div class="flex items-center gap-3 md:gap-4 overflow-hidden w-full">
                                         <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0">
                                             <?php echo e($loop->iteration); ?>
 
                                         </div>
-                                        <div class="min-w-0">
-                                            <h4 class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate"><?php echo e($attendance->student->name); ?></h4>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex justify-between items-center pr-2">
+                                                <h4 class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate"><?php echo e($attendance->student->name); ?></h4>
+                                                
+                                                <?php if(isset($range) && $range['type'] != 'daily'): ?>
+                                                    <span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-md border border-slate-200">
+                                                        <?php echo e(\Carbon\Carbon::parse($attendance->attendance_date)->format('d M')); ?>
+
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
                                             <div class="flex items-center gap-2 mt-1">
                                                 <span class="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded"><?php echo e($attendance->student->schoolClass->name); ?></span>
                                                 <span class="text-xs font-bold text-emerald-600 flex items-center gap-1"><i class="ph-bold ph-clock"></i> <?php echo e($attendance->created_at->format('H:i')); ?></span>
+                                                
+                                                <span class="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded uppercase border border-emerald-100"><?php echo e($attendance->status); ?></span>
                                             </div>
                                         </div>
                                     </div>
                                     
-                                    
-                                    <button onclick="openEditModalReligious(<?php echo e($attendance->id); ?>, '<?php echo e(addslashes($attendance->student->name)); ?>', '<?php echo e(addslashes($attendance->status)); ?>', '<?php echo e(addslashes($attendance->notes ?? '')); ?>', '<?php echo e($attendance->activity); ?>')" 
+                                    <button onclick="openEditModalReligious(<?php echo e($attendance->id); ?>, '<?php echo e(addslashes($attendance->student->name)); ?>', '<?php echo e($attendance->status); ?>', `<?php echo e(addslashes($attendance->notes ?? '')); ?>`, '<?php echo e($attendance->activity); ?>')" 
                                         class="p-2 ml-2 md:ml-4 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all no-print shrink-0 active:scale-95">
                                         <i class="ph-bold ph-pencil-simple text-xl"></i>
                                     </button>
@@ -286,14 +289,24 @@
                             <?php $__empty_1 = true; $__currentLoopData = $attendancesUzur; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $attendance): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <div class="relative p-4 md:p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors group flex items-center justify-between">
                                     <div class="absolute left-0 top-0 bottom-0 w-1 <?php echo e($attendance->status == 'Alfa' ? 'bg-rose-500' : 'bg-blue-500'); ?> hidden group-hover:block"></div>
-                                    <div class="flex items-center gap-4 overflow-hidden">
+                                    <div class="flex items-center gap-4 overflow-hidden w-full">
                                         <div class="w-10 h-10 rounded-xl <?php echo e($attendance->status == 'Alfa' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600'); ?> flex items-center justify-center font-bold text-xs shrink-0">
                                             <?php echo e(substr($attendance->status, 0, 1)); ?>
 
                                         </div>
-                                        <div class="min-w-0">
-                                            <h4 class="font-bold text-slate-800 truncate"><?php echo e($attendance->student->name); ?></h4>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex justify-between items-center pr-2">
+                                                <h4 class="font-bold text-slate-800 truncate"><?php echo e($attendance->student->name); ?></h4>
+                                                
+                                                <?php if(isset($range) && $range['type'] != 'daily'): ?>
+                                                    <span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-md border border-slate-200">
+                                                        <?php echo e(\Carbon\Carbon::parse($attendance->attendance_date)->format('d M')); ?>
+
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
                                             <div class="flex items-center gap-2 mt-1">
+                                                
                                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold <?php echo e($attendance->status == 'Alfa' ? 'bg-rose-50 text-rose-700' : 'bg-blue-50 text-blue-700'); ?> uppercase"><?php echo e($attendance->status); ?></span>
                                                 <?php if($attendance->notes): ?>
                                                     <span class="text-xs text-slate-400 italic max-w-[100px] md:max-w-none truncate">"<?php echo e($attendance->notes); ?>"</span>
@@ -301,8 +314,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    <button onclick="openEditModalReligious(<?php echo e($attendance->id); ?>, '<?php echo e(addslashes($attendance->student->name)); ?>', '<?php echo e(addslashes($attendance->status)); ?>', '<?php echo e(addslashes($attendance->notes ?? '')); ?>', '<?php echo e($attendance->activity); ?>')" 
+                                    <button onclick="openEditModalReligious(<?php echo e($attendance->id); ?>, '<?php echo e(addslashes($attendance->student->name)); ?>', '<?php echo e($attendance->status); ?>', `<?php echo e(addslashes($attendance->notes ?? '')); ?>`, '<?php echo e($attendance->activity); ?>')" 
                                         class="p-2 ml-2 md:ml-4 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all no-print shrink-0 active:scale-95">
                                         <i class="ph-bold ph-pencil-simple text-xl"></i>
                                     </button>
@@ -347,8 +359,8 @@
                     <label class="text-xs font-bold text-slate-400 uppercase mb-2 block ml-1">Status Kehadiran</label>
                     <select name="status" x-model="status" class="w-full border-slate-200 bg-slate-50 rounded-xl focus:ring-blue-900 font-bold text-slate-700 h-12">
                         <option value="Hadir">Hadir</option>
-                        <option value="Sakit">Sakit</option> 
-                        <option value="Izin">Izin</option>   
+                        <option value="Sakit">Sakit</option>
+                        <option value="Izin">Izin</option>
                         <option value="Uzur Syar'i">Uzur Syar'i</option>
                         <option value="Alfa">Alfa</option> 
                     </select>
@@ -378,7 +390,6 @@
                 <h3 class="font-bold text-white flex items-center gap-2"><i class="ph-bold ph-pencil-simple"></i> Edit Data</h3>
                 <button onclick="closeEditModalReligious()" class="text-white/70 hover:text-white transition"><i class="ph-bold ph-x text-xl"></i></button>
             </div>
-            
             <form id="editReligiousForm" method="POST" class="p-6 space-y-4" onsubmit="this.querySelector('button[type=submit]').disabled=true; this.querySelector('button[type=submit]').innerText='Menyimpan...';">
                 <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
                 <div class="text-center mb-4">
@@ -391,8 +402,8 @@
                     <label class="text-xs font-bold text-slate-400 uppercase mb-2 block ml-1">Status</label>
                     <select name="status" id="modal-religious-status" onchange="checkEditReligiousStatus(this.value)" class="w-full border-slate-200 bg-slate-50 rounded-xl font-bold text-slate-700 h-12">
                         <option value="Hadir">Hadir</option>
-                        <option value="Sakit">Sakit</option> 
-                        <option value="Izin">Izin</option>   
+                        <option value="Sakit">Sakit</option>
+                        <option value="Izin">Izin</option>
                         <option value="Uzur Syar'i">Uzur Syar'i</option>
                         <option value="Alfa">Alfa</option>
                     </select>
@@ -477,7 +488,6 @@
         }
 
         function openEditModalReligious(id, name, status, notes, activity) {
-            // Reset tombol submit jika sebelumnya disabled
             const submitBtn = religiousForm.querySelector('button[type=submit]');
             submitBtn.disabled = false;
             submitBtn.innerText = 'Update';
