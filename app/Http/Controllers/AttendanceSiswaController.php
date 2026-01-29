@@ -269,10 +269,10 @@ class AttendanceSiswaController extends Controller
             ]
         );
 
+        // PERBAIKAN: Menghapus 'type' => 'Religious' yang menyebabkan error SQL
         ActivityLog::create([
             'student_id' => $student->id,
             'activity_type' => 'Religious',
-            'type' => 'Religious',
             'activity_name' => 'Shalat ' . $type,
             'description' => "Siswa melakukan shalat {$type} di sekolah",
             'point_earned' => 5
@@ -333,10 +333,10 @@ class AttendanceSiswaController extends Controller
             ]
         );
 
+        // PERBAIKAN: Menghapus 'type' => 'Meal'
         ActivityLog::create([
             'student_id' => $student->id,
             'activity_type' => 'Meal',
-            'type' => 'Meal',
             'activity_name' => 'Makan Bergizi Gratis',
             'description' => "Siswa mengambil jatah makan siang",
             'point_earned' => 2
@@ -406,10 +406,10 @@ class AttendanceSiswaController extends Controller
         ]);
 
         if ($attendance->wasRecentlyCreated) {
+            // PERBAIKAN: Menghapus 'type' => 'Extracurricular'
             ActivityLog::create([
                 'student_id' => $student->id,
                 'activity_type' => 'Extracurricular',
-                'type' => 'Extracurricular',
                 'activity_name' => $extra->name,
                 'description' => "Hadir kegiatan ekstrakurikuler",
                 'point_earned' => 5

@@ -59,6 +59,9 @@
             </div>
 
             <div class="flex-1 text-center md:text-left">
+                 <a href="<?php echo e(route('student.habits.dashboard')); ?>" class="inline-flex items-center gap-2 text-blue-300 hover:text-white transition-colors mb-4 text-[10px] font-bold uppercase tracking-[0.2em]">
+                    <i class="ph-bold ph-arrow-left"></i> Pantau Dashboard Siswa
+                </a>
                 <h2 class="text-2xl font-black mb-2">Pantauan Karakter Hari Ini</h2>
                 <p class="text-blue-200 text-sm leading-relaxed mb-4">
                     Lihat perkembangan kebiasaan baik siswa secara real-time. Data ini disinkronkan langsung dari dashboard siswa.
@@ -90,9 +93,9 @@
                     </div>
                 <?php else: ?>
                     <div class="pt-4 border-t border-white/10">
-                         <span class="inline-flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                        <span class="inline-flex items-center gap-2 text-emerald-400 font-bold text-sm">
                             <i class="ph-fill ph-seal-check text-xl"></i> Luar Biasa! Semua misi hari ini sudah tercatat.
-                        </span>
+                        </span>                        
                     </div>
                 <?php endif; ?>
             </div>

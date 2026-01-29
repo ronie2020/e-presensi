@@ -17,7 +17,10 @@
                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
                         <a href="{{ route('student.habits.dashboard') }}" class="inline-flex items-center gap-2 text-blue-300 hover:text-white transition-colors mb-4 text-[10px] font-bold uppercase tracking-[0.2em]">
-                            <i class="ph-bold ph-arrow-left"></i> Kembali ke Dashboard
+                            <i class="ph-bold ph-arrow-left"></i> Dashboard
+                        </a>
+                        <a href="{{ route('portal.show', Auth::guard('student')->id()) }}" class="inline-flex items-center gap-2 text-blue-300 hover:text-white transition-colors mb-4 text-[10px] font-bold uppercase tracking-[0.2em]">
+                            <i class="ph-bold ph-arrow-left"></i> Kembali ke halaman profil
                         </a>
                         <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-2">Jurnal Misi Harian</h1>
                         <p class="text-blue-100/70 text-sm max-w-xl leading-relaxed">
