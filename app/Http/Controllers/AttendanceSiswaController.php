@@ -141,7 +141,7 @@ class AttendanceSiswaController extends Controller
     }
 
     /**
-     * LOGIKA ABSENSI KBM (HARIAN)
+     * LOGIKA ABSENSI KBM (HARIAN) - TIDAK ADA PERUBAHAN (AMAN)
      */
     private function processAttendance($student, $type, $request, $today)
     {
@@ -241,12 +241,12 @@ class AttendanceSiswaController extends Controller
     }
 
     /**
-     * LOGIKA RELIGI (DHUHA & DHUHUR)
+     * LOGIKA RELIGI (DHUHA & DHUHUR) - DIPERBAIKI (activity_type -> type)
      */
     private function processReligious($student, $type, $today)
     {
         $existingLog = ActivityLog::where('student_id', $student->id)
-            ->where('activity_type', 'Religious')
+            ->where('type', 'Religious') // FIX: activity_type -> type (untuk pengecekan juga)
             ->where('activity_name', 'Shalat ' . $type)
             ->whereDate('created_at', $today)
             ->first();
@@ -269,10 +269,10 @@ class AttendanceSiswaController extends Controller
             ]
         );
 
-        // PERBAIKAN: Menghapus 'type' => 'Religious' yang menyebabkan error SQL
+        // FIX: Menggunakan kolom 'type' agar sesuai database
         ActivityLog::create([
             'student_id' => $student->id,
-            'activity_type' => 'Religious',
+            'type' => 'Religious', // SEBELUMNYA: activity_type
             'activity_name' => 'Shalat ' . $type,
             'description' => "Siswa melakukan shalat {$type} di sekolah",
             'point_earned' => 5
@@ -304,12 +304,12 @@ class AttendanceSiswaController extends Controller
     }
 
     /**
-     * LOGIKA MAKAN
+     * LOGIKA MAKAN - DIPERBAIKI (activity_type -> type)
      */
     private function processMeal($student, $today)
     {
         $existingLog = ActivityLog::where('student_id', $student->id)
-            ->where('activity_type', 'Meal')
+            ->where('type', 'Meal') // FIX: activity_type -> type
             ->whereDate('created_at', $today)
             ->first();
 
@@ -333,10 +333,10 @@ class AttendanceSiswaController extends Controller
             ]
         );
 
-        // PERBAIKAN: Menghapus 'type' => 'Meal'
+        // FIX: Menggunakan kolom 'type'
         ActivityLog::create([
             'student_id' => $student->id,
-            'activity_type' => 'Meal',
+            'type' => 'Meal', // SEBELUMNYA: activity_type
             'activity_name' => 'Makan Bergizi Gratis',
             'description' => "Siswa mengambil jatah makan siang",
             'point_earned' => 2
@@ -368,7 +368,7 @@ class AttendanceSiswaController extends Controller
     }
 
     /**
-     * LOGIKA EKSKUL
+     * LOGIKA EKSKUL - DIPERBAIKI (activity_type -> type)
      */
     private function processExtra($student, $extraId, $today)
     {
@@ -406,10 +406,10 @@ class AttendanceSiswaController extends Controller
         ]);
 
         if ($attendance->wasRecentlyCreated) {
-            // PERBAIKAN: Menghapus 'type' => 'Extracurricular'
+            // FIX: Menggunakan kolom 'type'
             ActivityLog::create([
                 'student_id' => $student->id,
-                'activity_type' => 'Extracurricular',
+                'type' => 'Extracurricular', // SEBELUMNYA: activity_type
                 'activity_name' => $extra->name,
                 'description' => "Hadir kegiatan ekstrakurikuler",
                 'point_earned' => 5
