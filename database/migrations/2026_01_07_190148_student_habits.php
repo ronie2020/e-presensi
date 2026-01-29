@@ -20,54 +20,58 @@ return new class extends Migration
             // Tanggal Laporan (Unique: 1 siswa 1 hari 1 laporan)
             $table->date('report_date');
             
-            // --- 7 KEBIASAAN (DISESUAIKAN DENGAN URUTAN BARU) ---
+            // Status Udzur Syar'i (Haid/Sakit)
+            $table->boolean('is_udzur_syar_i')->default(false);
+            
+            // --- 7 KEBIASAAN ---
             
             // 1. Bangun Pagi, Mandi & Rapi
-            // (Menggabungkan Habit 1 & 2 secara konsep, tapi kolom tetap dipisah agar fleksibel)
-            $table->boolean('habit_1')->default(false); // Status Bangun
-            $table->string('habit_1_time', 10)->nullable(); // Jam Bangun (04:30)
-            $table->string('habit_1_note')->nullable(); // Catatan tambahan
-            
-            $table->boolean('habit_2')->default(false); // Status Mandi & Rapi
+            $table->boolean('habit_1')->default(false); 
+            $table->string('habit_1_time', 10)->nullable(); 
+            $table->string('habit_1_note')->nullable(); 
+            $table->boolean('habit_2')->default(false); 
 
-            // 2. Shalat Tepat Waktu (Poin Baru - Pengganti konsep Habit 2 lama di UI)
+            // 2. Shalat Tepat Waktu
             $table->boolean('prayer_subuh')->default(false);
-            $table->boolean('prayer_dhuha')->default(false);  // Bisa diisi via Scanner
-            $table->boolean('prayer_dzuhur')->default(false); // Bisa diisi via Scanner
+            $table->boolean('prayer_dhuha')->default(false);
+            $table->boolean('prayer_dzuhur')->default(false);
             $table->boolean('prayer_ashar')->default(false);
             $table->boolean('prayer_maghrib')->default(false);
             $table->boolean('prayer_isya')->default(false);
 
-            // 3. Olahraga (Habit 3)
+            // Fitur ODOA (One Day One Ayat)
+            $table->string('odoa_surah')->nullable();
+            $table->string('odoa_ayat')->nullable();
+            $table->string('odoa_audio_path')->nullable(); 
+
+            // 3. Olahraga
             $table->boolean('habit_3')->default(false);
-            $table->string('habit_3_activity')->nullable(); // Jenis Olahraga (Jogging/Senam)
+            $table->string('habit_3_activity')->nullable(); 
 
-            // 4. Makan Bergizi (Sebelumnya Habit 5, sekarang urutan ke-4 secara logika)
-            // Nama kolom tetap habit_5 agar tidak merusak logika controller lama
+            // 4. Makan Bergizi (Habit 5)
             $table->boolean('habit_5')->default(false);
-            $table->text('habit_5_menu')->nullable(); // Menu Makanan
-            $table->timestamp('mbg_taken_at')->nullable(); // Waktu ambil makan (Integrasi Scanner)
+            $table->text('habit_5_menu')->nullable(); 
+            $table->timestamp('mbg_taken_at')->nullable(); 
 
-            // 5. Gemar Belajar (Sebelumnya Habit 4, sekarang urutan ke-5 secara logika)
-            // Nama kolom tetap habit_4
+            // 5. Gemar Belajar (Habit 4)
             $table->boolean('habit_4')->default(false);
-            $table->string('habit_4_subject')->nullable(); // Mapel/Topik
+            $table->string('habit_4_subject')->nullable(); 
 
-            // 6. Bermasyarakat (Membantu Orang Tua)
+            // 6. Bermasyarakat (Bantu Orang Tua)
             $table->boolean('habit_6')->default(false);
-            $table->text('habit_6_activity')->nullable(); // Kegiatan
+            $table->text('habit_6_activity')->nullable(); 
 
             // 7. Tidur Cukup
             $table->boolean('habit_7')->default(false);
-            $table->string('habit_7_time', 10)->nullable(); // Jam Tidur (21:00)
+            $table->string('habit_7_time', 10)->nullable(); 
 
             // --- BUKTI & VALIDASI ---
-            $table->string('photo_path')->nullable(); // Foto Kolase
-            $table->text('student_note')->nullable(); // Catatan harian siswa (Diary singkat)
+            $table->string('photo_path')->nullable(); 
+            $table->text('student_note')->nullable(); 
             
-            $table->foreignId('teacher_id')->nullable()->constrained('users')->onDelete('set null'); // Guru yang memvalidasi
-            $table->text('teacher_feedback')->nullable(); // Komentar Guru
-            $table->timestamp('validated_at')->nullable(); // Waktu validasi
+            $table->foreignId('teacher_id')->nullable()->constrained('users')->onDelete('set null'); 
+            $table->text('teacher_feedback')->nullable(); 
+            $table->timestamp('validated_at')->nullable(); 
 
             $table->timestamps();
 

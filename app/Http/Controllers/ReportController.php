@@ -56,37 +56,44 @@ class ReportController extends Controller
      * ==========================================
      * LOGIKA OTOMATIS POIN PELANGGARAN (ROBUST)
      * ==========================================
+     * OPTIMISASI: Menambahkan parameter $preloadedViolationType
+     * agar tidak perlu query tipe pelanggaran berulang-ulang di dalam loop.
      */
-    private function handleAutoPunishment($studentId, $date, $status, $typeContext = 'Harian')
+    private function handleAutoPunishment($studentId, $date, $status, $typeContext = 'Harian', $preloadedViolationType = null)
     {
         // 1. Validasi Status
         if (!in_array($status, ['Alfa', 'Alpa', 'Alpha'])) {
             return;
         }
 
-        // 2. Cari Tipe Pelanggaran yang Valid
-        $violationType = DisciplineType::where('type', 'Pelanggaran')
-            ->where(function($q) {
-                $q->where('name', 'Tidak Masuk Sekolah (Alfa)')
-                  ->orWhere('name', 'Alfa')
-                  ->orWhere('name', 'Alpa')
-                  ->orWhere('name', 'Tanpa Keterangan');
-            })->first();
+        // 2. Gunakan Preloaded Type jika ada, jika tidak cari di DB
+        $violationType = $preloadedViolationType;
 
-        // Fallback: Cari yang mirip
         if (!$violationType) {
+            // Cari Tipe Pelanggaran yang Valid
             $violationType = DisciplineType::where('type', 'Pelanggaran')
-                ->where('name', 'LIKE', '%Alfa%')
-                ->first();
-        }
+                ->where(function($q) {
+                    $q->where('name', 'Tidak Masuk Sekolah (Alfa)')
+                      ->orWhere('name', 'Alfa')
+                      ->orWhere('name', 'Alpa')
+                      ->orWhere('name', 'Tanpa Keterangan');
+                })->first();
 
-        // Auto-Create Tipe jika tidak ada
-        if (!$violationType) {
-            $violationType = DisciplineType::create([
-                'name' => 'Tidak Masuk Sekolah (Alfa)',
-                'type' => 'Pelanggaran',
-                'point_value' => 10
-            ]);
+            // Fallback: Cari yang mirip
+            if (!$violationType) {
+                $violationType = DisciplineType::where('type', 'Pelanggaran')
+                    ->where('name', 'LIKE', '%Alfa%')
+                    ->first();
+            }
+
+            // Auto-Create Tipe jika tidak ada
+            if (!$violationType) {
+                $violationType = DisciplineType::create([
+                    'name' => 'Tidak Masuk Sekolah (Alfa)',
+                    'type' => 'Pelanggaran',
+                    'point_value' => 10
+                ]);
+            }
         }
 
         // 3. Cek Duplikasi (Agar tidak double poin di hari yang sama)
@@ -405,7 +412,7 @@ class ReportController extends Controller
     }
 
     /**
-     * 6. PROSES BULK ALPHA (FIXED: Dengan Sync Data Existing)
+     * 6. PROSES BULK ALPHA (FIXED: Dengan Sync Data Existing + OPTIMIZED)
      */
     public function bulkAlpha(Request $request)
     {
@@ -413,8 +420,18 @@ class ReportController extends Controller
         $type = $request->input('type');
         $activity = $request->input('activity');
 
+        // OPTIMISASI: Cari/Create Tipe Pelanggaran SEKALI saja di luar loop
+        // Ini mencegah ribuan query jika murid banyak
+        $violationType = DisciplineType::firstOrCreate(
+            ['name' => 'Tidak Masuk Sekolah (Alfa)'],
+            [
+                'type' => 'Pelanggaran', 
+                'point_value' => 10
+            ]
+        );
+
         // Gunakan Transaksi untuk memastikan data konsisten
-        return DB::transaction(function () use ($date, $type, $activity) {
+        return DB::transaction(function () use ($date, $type, $activity, $violationType) {
             $query = AttendanceSiswa::whereDate('attendance_date', $date)
                     ->where('type', $type);
             
@@ -439,7 +456,7 @@ class ReportController extends Controller
                     'type' => $type,
                     'activity' => $activity,
                     'status' => 'Alfa',
-                    'time_in' => null,
+                    'time_in' => '00:00:00', // FIXED: Default untuk DB NOT NULL
                     'time_out' => null,
                     'notes' => 'Otomatis oleh Sistem',
                     'created_at' => $now,
@@ -447,7 +464,8 @@ class ReportController extends Controller
                 ];
 
                 // Auto Punishment untuk data baru
-                $this->handleAutoPunishment($student->id, $date, 'Alfa', $type);
+                // Kita passing $violationType agar tidak perlu query ulang
+                $this->handleAutoPunishment($student->id, $date, 'Alfa', $type, $violationType);
             }
 
             if (!empty($insertData)) {
@@ -466,7 +484,7 @@ class ReportController extends Controller
 
             foreach ($existingAlphas->get() as $existing) {
                 // Fungsi ini aman dipanggil berulang karena ada cek $exists didalamnya
-                $this->handleAutoPunishment($existing->student_id, $date, 'Alfa', $type);
+                $this->handleAutoPunishment($existing->student_id, $date, 'Alfa', $type, $violationType);
             }
 
             return back()->with('success', count($insertData) . ' siswa baru ditandai Alfa (Data lama disinkronisasi).');
@@ -485,6 +503,17 @@ class ReportController extends Controller
             'attendance_type' => 'required'
         ]);
 
+        // LOGIKA FIX: Handle kolom time_in yang NOT NULL di database
+        // Jika Hadir/Terlambat -> gunakan input atau waktu sekarang.
+        // Jika Uzur/Sakit/Alfa -> gunakan '00:00:00' sebagai default pengganti NULL.
+        $defaultTime = '00:00:00'; 
+        
+        $inputTime = $request->time_in ? $request->time_in : now()->format('H:i:s');
+        
+        $timeIn = in_array($request->status, ['Hadir', 'Terlambat']) 
+                  ? $inputTime 
+                  : $defaultTime;
+
         $attendance = AttendanceSiswa::updateOrCreate(
             [
                 'student_id' => $request->student_id,
@@ -494,7 +523,7 @@ class ReportController extends Controller
             ],
             [
                 'status' => $request->status,
-                'time_in' => $request->time_in,
+                'time_in' => $timeIn,
                 'time_out' => $request->time_out,
                 'notes' => $request->notes,
             ]
@@ -520,9 +549,20 @@ class ReportController extends Controller
     {
         $att = AttendanceSiswa::findOrFail($id);
         
+        // LOGIKA FIX: Sama seperti storeManualEntry, handle NOT NULL constraint
+        $defaultTime = '00:00:00';
+        
+        // Ambil waktu yang ada di DB atau waktu sekarang jika kosong
+        $existingOrNow = $att->time_in ?? now()->format('H:i:s');
+        $inputTime = $request->time_in ? $request->time_in : $existingOrNow;
+
+        $timeIn = in_array($request->status, ['Hadir', 'Terlambat']) 
+                  ? $inputTime 
+                  : $defaultTime;
+
         $att->update([
             'status' => $request->status,
-            'time_in' => $request->time_in,
+            'time_in' => $timeIn,
             'time_out' => $request->time_out,
             'notes' => $request->notes
         ]);

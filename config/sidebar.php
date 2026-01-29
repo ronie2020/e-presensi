@@ -46,6 +46,16 @@ return [
                 'icon' => 'ph-star'
             ],
         ],
+        'Spesial Ramadhan' => [
+           
+            [
+                'name' => 'Rekap Mutabaah',
+                'route' => 'admin.ramadan.reports',
+                'active_check' => 'admin.ramadan.reports',
+                'icon' => 'ph-book-open'
+            ],
+        ],
+
        'Penerimaan Siswa (PPDB)' => [
             [
                 'name' => 'Data Pendaftar',

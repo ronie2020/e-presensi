@@ -194,4 +194,12 @@ class Student extends Authenticatable
     {
         return $this->hasMany(StudentHabit::class, 'student_id');
     }
+
+     /**
+     * Jurnal Ramadhan.
+     */
+    public function ramadanLogs(): HasMany
+    {
+        return $this->hasMany(RamadanLog::class, 'student_id');
+    }
 }

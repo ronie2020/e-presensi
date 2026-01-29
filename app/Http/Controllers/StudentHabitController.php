@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\StudentHabit;
+use App\Models\RamadanLog;
 use App\Models\AttendanceSiswa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -89,7 +90,7 @@ class StudentHabitController extends Controller
      * Simpan Jurnal
      */
     public function store(Request $request)
-    {
+    {        
         $studentId = Auth::guard('student')->id();
         $today = Carbon::now('Asia/Jakarta')->toDateString();
         
@@ -112,17 +113,10 @@ class StudentHabitController extends Controller
                         ->where('status', 'Hadir')
                         ->exists();
 
-        // [LOGIKA UDZUR SYAR'I]
         $isUdzur = $request->has('is_udzur_syar_i');
 
-        // PENGATURAN NILAI SHALAT
         if ($isUdzur) {
-            $valSubuh = false;
-            $valDhuha = false;
-            $valDzuhur = false;
-            $valAshar = false;
-            $valMaghrib = false;
-            $valIsya = false;
+            $valSubuh = $valDhuha = $valDzuhur = $valAshar = $valMaghrib = $valIsya = false;
         } else {
             $valSubuh   = $request->has('prayer_subuh');
             $valDhuha   = $schoolDhuha ? true : $request->has('prayer_dhuha'); 
@@ -134,14 +128,12 @@ class StudentHabitController extends Controller
 
         $valMakan = $request->has('habit_5'); 
         $valMenuMakan = $request->habit_5_menu;
-
-        // [FIX VALIDASI UNTUK FIREFOX/OGG]
+     
         $request->validate([
-            'habit_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-            // Tambahkan 'ogg' dan 'weba', hapus 'audio/mpeg' (karena mimes itu extension)
+            'habit_photo' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',    
             'odoa_audio'  => 'nullable|file|mimes:mp3,wav,aac,webm,ogg,m4a,weba|max:10240',
             'odoa_surah'  => 'nullable|string|max:100',
-            'odoa_ayat'   => 'nullable|string|max:100', // [TAMBAHAN] Validasi ayat agar aman
+            'odoa_ayat'   => 'nullable|string|max:100', 
             'habit_1_time' => 'nullable',
             'habit_7_time' => 'nullable',
         ]);
@@ -149,6 +141,7 @@ class StudentHabitController extends Controller
         try {
             DB::beginTransaction();
 
+            
             // --- B. HANDLE FILES ---
             $photoPath = $existingEntry ? $existingEntry->photo_path : null;
             if ($request->hasFile('habit_photo')) {
@@ -181,8 +174,7 @@ class StudentHabitController extends Controller
                 $audioPath = $audioFile->storeAs('habits/audio', $audioFilename, 'public');
             }
 
-            // --- C. SIMPAN KE DATABASE ---
-            // AMAN: Urutan array di sini tidak harus sama dengan urutan kolom di MySQL
+            // --- C. SIMPAN KE DATABASE ---            
             $habit = StudentHabit::updateOrCreate(
                 [
                     'student_id' => $studentId,
@@ -198,7 +190,7 @@ class StudentHabitController extends Controller
                     'prayer_dzuhur' => $valDzuhur,
                     'prayer_ashar' => $valAshar,
                     'prayer_maghrib' => $valMaghrib,
-                    'prayer_isya' => $valIsya, // PASTIKAN KOLOM INI ADA DI DB
+                    'prayer_isya' => $valIsya, 
                     'odoa_surah' => $request->odoa_surah,
                     'odoa_ayat' => $request->odoa_ayat,
                     'odoa_audio_path' => $audioPath,
@@ -213,6 +205,25 @@ class StudentHabitController extends Controller
                     'habit_7' => $request->has('habit_7'),
                     'habit_7_time' => $request->habit_7_time,
                     'photo_path' => $photoPath,
+                ]
+            );
+
+            // 2. SINKRONISASI KE RAMADAN (Jika sedang bulan Ramadan)
+            $ramadanLog = RamadanLog::where('student_id', $studentId)->whereDate('date', $today)->first();
+            RamadanLog::updateOrCreate(
+                ['student_id' => $studentId, 'date' => $today],
+                [                    
+                    'is_fasting' => $isUdzur ? false : ($ramadanLog->is_fasting ?? true),
+                    'prayers' => [
+                        'subuh'   => $valSubuh,
+                        'dzuhur'  => $valDzuhur,
+                        'ashar'   => $valAshar,
+                        'maghrib' => $valMaghrib,
+                        'isya'    => $valIsya,
+                    ],                    
+                    'sunnah_deeds' => array_merge($ramadanLog->sunnah_deeds ?? [], [
+                        'dhuha' => $valDhuha
+                    ])
                 ]
             );
 

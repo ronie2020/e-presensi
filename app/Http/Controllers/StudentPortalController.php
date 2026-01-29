@@ -9,6 +9,7 @@ use Illuminate\Database\QueryException;
 
 // --- IMPORT MODELS ---
 use App\Models\Student;
+use App\Models\RamadanLog;
 use App\Models\SchoolClass;
 use App\Models\AttendanceSiswa; 
 use App\Models\LmsAssignment;
@@ -69,7 +70,25 @@ class StudentPortalController extends Controller
         
         $classId = $student->class_id ?? $student->school_class_id ?? optional($student->schoolClass)->id;
 
-        // 2. DATA PENGHUBUNG (LIAISON)
+         // --- 1. DATA RAMADHAN (LOG HARI INI) ---
+        $today = Carbon::now('Asia/Jakarta')->toDateString();
+        $todayRamadanLog = RamadanLog::where('student_id', $student->id)
+                            ->whereDate('date', $today)
+                            ->first();
+
+        // --- 2. DATA LEADERBOARD RAMADHAN ---
+        $topRamadanStudents = Student::withCount(['ramadanLogs as points_raw'])
+            ->with('schoolClass')
+            ->get()
+            ->map(function($s) {
+                $s->ramadan_points = ($s->points_raw ?? 0) * 100;
+                return $s;
+            })
+            ->sortByDesc('ramadan_points')
+            ->take(10)
+            ->values();
+
+        // 3. DATA PENGHUBUNG (LIAISON)
         $liaison_messages = collect([]);
         if (class_exists(LiaisonBook::class)) { 
             try {
@@ -81,7 +100,7 @@ class StudentPortalController extends Controller
             } catch (\Exception $e) {}
         }
 
-        // 3. DATA KEHADIRAN & ABSENSI
+        // 4. DATA KEHADIRAN & ABSENSI
         $hadir = 0; $terlambat = 0; $sakit = 0; $izin = 0; $alpa = 0;
         $attendance_history = collect([]);
         $rawAttendanceRecords = collect([]); 
@@ -358,6 +377,8 @@ class StudentPortalController extends Controller
         } else {
             $tabs = array_merge($tabs, [
                 'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan'],
+                'ramadan_jurnal' => ['icon' => 'moon-stars', 'label' => 'Jurnal Ramadhan'], // <-- TAB BARU
+                'ramadan_rank'   => ['icon' => 'trophy', 'label' => 'Peringkat Kebaikan'], // <-- TAB BARU
                 'bk' => ['icon' => 'heart-beat', 'label' => 'Konseling BK'],
                 'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
                 'pengaduan' => ['icon' => 'megaphone', 'label' => 'Lapor Masalah'],   
@@ -397,7 +418,8 @@ class StudentPortalController extends Controller
             'academic_record', 'chartData', 'teaching_journals',
             'sholat_dhuha', 'sholat_dhuhur',
             'finalScore',
-            'bkSessions'
+            'bkSessions',
+            'today', 'todayRamadanLog', 'topRamadanStudents'
         );
 
         if (view()->exists('students.portal.show')) {
