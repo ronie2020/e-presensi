@@ -285,6 +285,113 @@ class ReportController extends Controller
         ));
     }
 
+    // --- FITUR BARU: REKAP PER KELAS (MATRIX VIEW) ---
+
+    /**
+     * Helper private untuk mengambil data laporan kelas
+     * Digunakan oleh classReport (Web) dan printClassReport (Cetak)
+     */
+    private function getClassReportData(Request $request)
+    {
+        $monthStr = $request->input('month', Carbon::now()->format('Y-m'));
+        $classId = $request->input('class_id');
+        
+        $startDate = Carbon::parse($monthStr . '-01')->startOfMonth();
+        $endDate = Carbon::parse($monthStr . '-01')->endOfMonth();
+        
+        // 1. Generate Array Tanggal (Header Tabel)
+        $dates = [];
+        $period = \Carbon\CarbonPeriod::create($startDate, $endDate);
+        foreach ($period as $date) {
+            $dates[] = $date;
+        }
+
+        // 2. Ambil List Kelas untuk Dropdown
+        $classes = SchoolClass::orderBy('name')->get();
+
+        // 3. Ambil Data Siswa & Absensi (Jika Kelas Dipilih)
+        $students = collect([]);
+        $selectedClass = null;
+
+        if ($classId) {
+            $selectedClass = SchoolClass::find($classId);
+
+            // Ambil semua siswa di kelas tersebut (Gunakan whereHas untuk keamanan relasi)
+            $students = Student::whereHas('schoolClass', function($q) use ($classId) {
+                $q->where('id', $classId);
+            })
+            ->where('status', '!=', 'graduated') // Filter siswa aktif
+            ->orderBy('name')
+            ->get();
+
+            // Ambil semua data absensi dalam rentang tanggal & kelas
+            $attendances = AttendanceSiswa::whereIn('student_id', $students->pluck('id'))
+                ->whereBetween('attendance_date', [$startDate->toDateString(), $endDate->toDateString()])
+                ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
+                ->get()
+                ->groupBy('student_id');
+
+            // Mapping Absensi ke Siswa
+            foreach ($students as $student) {
+                $attendanceMap = [];
+                $summary = ['H' => 0, 'S' => 0, 'I' => 0, 'A' => 0];
+                $studentAttendances = $attendances->get($student->id, collect());
+
+                foreach ($dates as $date) {
+                    $dateStr = $date->format('Y-m-d');
+                    $record = $studentAttendances->where('attendance_date', $dateStr)->first();
+                    
+                    $code = '-'; 
+                    $color = 'text-slate-300';
+                    
+                    if ($record) {
+                        switch ($record->status) {
+                            case 'Hadir':
+                                $code = 'H'; $color = 'text-black font-bold'; $summary['H']++; break;
+                            case 'Terlambat':
+                                $code = 'T'; $color = 'text-black font-bold'; $summary['H']++; break; // Terlambat dihitung Hadir
+                            case 'Sakit':
+                                $code = 'S'; $color = 'text-black font-bold'; $summary['S']++; break;
+                            case 'Izin':
+                                $code = 'I'; $color = 'text-black font-bold'; $summary['I']++; break;
+                            case 'Alfa':
+                            case 'Alpa':
+                            case 'Alpha':
+                                $code = 'A'; $color = 'text-black font-bold'; $summary['A']++; break;
+                        }
+                    }
+
+                    if ($code === '-' && ($date->isSaturday() || $date->isSunday())) {
+                         $code = ''; 
+                         $color = 'bg-gray-200';
+                    }
+
+                    $attendanceMap[$dateStr] = ['code' => $code, 'class' => $color];
+                }
+
+                $student->attendance_map = $attendanceMap;
+                $student->summary = $summary;
+            }
+        }
+
+        return compact('classes', 'classId', 'students', 'dates', 'monthStr', 'startDate', 'selectedClass');
+    }
+
+    public function classReport(Request $request)
+    {
+        $data = $this->getClassReportData($request);
+        return view('reports.class_report', $data);
+    }
+
+    public function printClassReport(Request $request)
+    {
+        $data = $this->getClassReportData($request);
+        // Pastikan kelas dipilih sebelum cetak
+        if(!$data['classId']) return redirect()->back()->with('error', 'Pilih kelas terlebih dahulu');
+        
+        return view('reports.print_class_report', $data);
+    }
+
     // --- FITUR LAIN (TIDAK BERUBAH) ---
     public function teachingJournal(Request $request)
     {

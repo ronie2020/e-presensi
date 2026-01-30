@@ -45,6 +45,11 @@ return [
                 'route' => 'reports.religious',
                 'icon' => 'ph-star'
             ],
+            [
+                'name' => 'Rekap Kelas',
+                'route' => 'reports.classReport',
+                'icon' => 'ph-chalkboard-teacher'
+            ],
         ],
         'Spesial Ramadhan' => [
            

@@ -424,6 +424,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/reports/manual-entry', [ReportController::class, 'storeManualEntry'])->name('reports.storeManual');
     Route::post('/reports/process-alpha', [ReportController::class, 'processAlpha'])->name('reports.processAlpha');
     Route::delete('/reports/daily', [ReportController::class, 'destroyDaily'])->name('reports.destroyDaily');
+    Route::get('/reports/class-recap', [ReportController::class, 'classReport'])->name('reports.classReport');
+    Route::get('/reports/class-recap/print', [ReportController::class, 'printClassReport'])->name('reports.printClassReport');
     Route::get('/reports/export-daily', [ReportController::class, 'exportDaily'])->name('reports.exportDaily');
     Route::get('/reports/attendance/{attendance}/edit', [ReportController::class, 'editAttendance'])->name('reports.edit');
     Route::put('/reports/attendance/{attendance}', [ReportController::class, 'updateAttendance'])->name('reports.update');

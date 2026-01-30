@@ -406,10 +406,9 @@ class AttendanceSiswaController extends Controller
         ]);
 
         if ($attendance->wasRecentlyCreated) {
-            // FIX: Menggunakan kolom 'type'
             ActivityLog::create([
                 'student_id' => $student->id,
-                'type' => 'Extracurricular', // SEBELUMNYA: activity_type
+                'type' => 'Extracurricular', 
                 'activity_name' => $extra->name,
                 'description' => "Hadir kegiatan ekstrakurikuler",
                 'point_earned' => 5
