@@ -1,136 +1,163 @@
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
     
-    {{-- KOLOM KIRI: Statistik Ringkas --}}
+    {{-- KOLOM KIRI: SCORE CARD --}}
     <div class="lg:col-span-1 space-y-6">
         
-        {{-- Card Skor Perilaku (Skor Akhir) --}}
-        <div class="bg-slate-50 p-6 rounded-[2rem] border border-slate-200 text-center relative overflow-hidden">
-            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none"></div>
-            <p class="text-xs text-slate-400 font-bold mb-2 uppercase tracking-widest">SKOR PERILAKU ANDA</p>
+        {{-- 1. Main Score Card --}}
+        @php 
+            $score = $finalScore ?? 100;
+            // Tentukan warna berdasarkan skor
+            if($score >= 90) {
+                $theme = 'emerald';
+                $label = 'Sangat Baik';
+                $icon = 'ph-shield-check';
+                $msg = 'Pertahankan sikap disiplinmu!';
+            } elseif($score >= 75) {
+                $theme = 'blue';
+                $label = 'Baik';
+                $icon = 'ph-shield';
+                $msg = 'Tingkatkan lagi kedisiplinan.';
+            } elseif($score >= 60) {
+                $theme = 'amber';
+                $label = 'Cukup';
+                $icon = 'ph-shield-warning';
+                $msg = 'Hati-hati, poinmu mulai rendah.';
+            } else {
+                $theme = 'rose';
+                $label = 'Kurang';
+                $icon = 'ph-warning-octagon';
+                $msg = 'Segera perbaiki sikap & perilaku!';
+            }
+        @endphp
+
+        <div class="bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden text-center">
+            {{-- Background Radial --}}
+            <div class="absolute inset-0 bg-gradient-to-b from-{{ $theme }}-50/50 to-transparent pointer-events-none"></div>
             
-            @php 
-                $score = $finalScore ?? 100; 
-                $scoreColor = $score >= 100 ? 'text-emerald-600' : ($score >= 80 ? 'text-blue-600' : 'text-rose-600');
-            @endphp
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-6 relative z-10">Skor Perilaku</h3>
             
-            <p class="text-6xl font-black {{ $scoreColor }} tracking-tighter">
-                {{ $score }}
+            {{-- Circular Score Indicator --}}
+            <div class="relative w-48 h-48 mx-auto mb-6 flex items-center justify-center">
+                {{-- Outer Ring --}}
+                <div class="absolute inset-0 rounded-full border-[12px] border-slate-50"></div>
+                {{-- Colored Ring (Static for visual simplcity, ideally dynamic with JS) --}}
+                <svg class="absolute inset-0 w-full h-full -rotate-90 transform">
+                    <circle cx="96" cy="96" r="84" stroke="currentColor" stroke-width="12" fill="transparent" 
+                        class="text-{{ $theme }}-500 transition-all duration-1000 ease-out" 
+                        stroke-dasharray="527" 
+                        stroke-dashoffset="{{ 527 - (527 * $score / 100) }}"
+                        stroke-linecap="round">
+                    </circle>
+                </svg>
+                
+                <div class="flex flex-col items-center relative z-10">
+                    <span class="text-6xl font-black text-slate-800 tracking-tighter">{{ $score }}</span>
+                    <span class="text-xs font-bold text-{{ $theme }}-600 bg-{{ $theme }}-100 px-2 py-0.5 rounded-md mt-1 border border-{{ $theme }}-200">
+                        {{ $label }}
+                    </span>
+                </div>
+            </div>
+
+            <p class="text-sm font-medium text-slate-500 relative z-10 px-4">
+                <i class="ph-fill {{ $icon }} text-{{ $theme }}-500 mr-1"></i> {{ $msg }}
             </p>
-            
-            <div class="mt-4 flex justify-center gap-2">
-                @if($score >= 100)
-                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full uppercase">Sangat Baik</span>
-                @elseif($score >= 80)
-                    <span class="px-3 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold rounded-full uppercase">Cukup Baik</span>
-                @else
-                    <span class="px-3 py-1 bg-rose-100 text-rose-700 text-[10px] font-bold rounded-full uppercase animate-pulse">Perlu Perhatian</span>
-                @endif
-            </div>
         </div>
 
-        {{-- Card Statistik Pelanggaran (Merah) --}}
-        <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-rose-100">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                    <i class="ph-fill ph-warning-octagon text-rose-500 text-xl"></i> Poin Minus
-                </h3>
-                <span class="bg-rose-50 text-rose-600 text-[10px] font-black px-2 py-1 rounded-lg">INDISIPLINER</span>
+        {{-- 2. Breakdown Points --}}
+        <div class="grid grid-cols-2 gap-3">
+            {{-- Pelanggaran --}}
+            <div class="bg-rose-50 p-4 rounded-3xl border border-rose-100 text-center group hover:bg-rose-100 transition-colors">
+                <div class="w-8 h-8 mx-auto bg-white rounded-full flex items-center justify-center text-rose-500 shadow-sm mb-2 group-hover:scale-110 transition-transform">
+                    <i class="ph-bold ph-minus"></i>
+                </div>
+                <p class="text-2xl font-black text-rose-700">{{ $total_violation_points ?? 0 }}</p>
+                <p class="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Minus</p>
             </div>
-            <div class="bg-rose-50 rounded-2xl p-4 border border-rose-100 text-center relative overflow-hidden group">
-                <div class="absolute top-0 right-0 w-16 h-16 bg-rose-200/50 rounded-full blur-2xl -mr-8 -mt-8"></div>
-                <p class="text-4xl font-black text-rose-600 relative z-10">{{ $total_violation_points ?? 0 }}</p>
-                <p class="text-[10px] text-rose-400 mt-1 font-bold uppercase tracking-wider relative z-10">Total Pengurangan</p>
+
+            {{-- Kebaikan --}}
+            <div class="bg-emerald-50 p-4 rounded-3xl border border-emerald-100 text-center group hover:bg-emerald-100 transition-colors">
+                <div class="w-8 h-8 mx-auto bg-white rounded-full flex items-center justify-center text-emerald-500 shadow-sm mb-2 group-hover:scale-110 transition-transform">
+                    <i class="ph-bold ph-plus"></i>
+                </div>
+                <p class="text-2xl font-black text-emerald-700">{{ $total_merit_points ?? 0 }}</p>
+                <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Plus</p>
             </div>
         </div>
-
-        {{-- Card Statistik Kebaikan (Hijau - Ringkasan) --}}
-        <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-emerald-100">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-                    <i class="ph-fill ph-medal text-emerald-500 text-xl"></i> Poin Plus
-                </h3>
-                <span class="bg-emerald-50 text-emerald-600 text-[10px] font-black px-2 py-1 rounded-lg">PRESTASI</span>
-            </div>
-            <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100 text-center relative overflow-hidden group mb-3">
-                <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-200/50 rounded-full blur-2xl -mr-8 -mt-8"></div>
-                <p class="text-4xl font-black text-emerald-600 relative z-10">+{{ $total_merit_points ?? 0 }}</p>
-                <p class="text-[10px] text-emerald-500 mt-1 font-bold uppercase tracking-wider relative z-10">Total Penambahan</p>
-            </div>
-            
-            {{-- PERBAIKAN: Tombol Link ke Tab Prestasi (Key yang benar: 'prestasi') --}}
-            <button @click="activeTab = 'prestasi'" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2">
-                <i class="ph-bold ph-list-magnifying-glass"></i> Lihat Detail Prestasi
-            </button>
-        </div>
-
     </div>
 
-    {{-- KOLOM KANAN: Riwayat Detail (HANYA PELANGGARAN) --}}
+    {{-- KOLOM KANAN: RIWAYAT PELANGGARAN --}}
     <div class="lg:col-span-2">
-        
-        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 p-6 md:p-8 h-full">
-            <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
-                <h4 class="font-black text-slate-800 flex items-center gap-3 text-xl">
-                    <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
-                        <i class="ph-duotone ph-clock-counter-clockwise text-2xl"></i>
-                    </div>
-                    Riwayat Pelanggaran
+        <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-6 md:p-8 h-full">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-50">
+                <h4 class="font-black text-slate-800 flex items-center gap-3 text-lg">
+                    <span class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
+                        <i class="ph-duotone ph-warning-octagon text-xl"></i>
+                    </span>
+                    Catatan Indisipliner
                 </h4>
-                <span class="text-xs font-bold text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-200">
-                    Tercatat: {{ isset($violations) ? count($violations) : 0 }}
-                </span>
+                <div class="bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                    <span class="text-xs font-bold text-slate-500">
+                        {{ isset($violations) ? count($violations) : 0 }} Kasus
+                    </span>
+                </div>
             </div>
 
             @if(isset($violations) && count($violations) > 0)
-                <div class="relative border-l-2 border-slate-100 ml-3 space-y-8 pb-4">
+                <div class="space-y-4">
                     @foreach($violations as $record)
-                        <div class="relative pl-8 group">
-                            <div class="absolute -left-[9px] top-0 w-5 h-5 bg-white border-4 border-rose-500 rounded-full group-hover:scale-110 transition-transform duration-300 shadow-sm"></div>
+                        <div class="group relative bg-white border border-slate-100 rounded-2xl p-5 hover:shadow-md hover:border-rose-100 transition-all duration-300">
+                            {{-- Side Accent --}}
+                            <div class="absolute left-0 top-4 bottom-4 w-1 bg-rose-500 rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             
-                            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-1.5">
-                                <h4 class="font-bold text-slate-800 text-base sm:text-lg group-hover:text-rose-600 transition-colors">
-                                    {{ $record->disciplineType->name ?? 'Pelanggaran Umum' }}
-                                </h4>
-                                <span class="inline-flex items-center gap-1 text-[10px] font-black px-2 py-1 bg-rose-50 text-rose-600 rounded-lg border border-rose-100 whitespace-nowrap w-fit">
-                                    <i class="ph-bold ph-minus"></i> {{ $record->disciplineType->point_value ?? ($record->point ?? 0) }} Poin
-                                </span>
-                            </div>
-                            
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-1.5">
-                                <i class="ph-fill ph-calendar-blank"></i>
-                                {{ \Carbon\Carbon::parse($record->date)->translatedFormat('l, d F Y') }}
-                            </p>
-                            
-                            <div class="bg-rose-50/50 p-4 rounded-2xl border border-rose-100 text-sm text-slate-600 relative group-hover:bg-rose-50 transition-colors">
-                                @if(isset($record->notes) && $record->notes)
-                                    <div class="flex gap-3">
-                                        <i class="ph-fill ph-warning-circle text-rose-300 text-xl shrink-0 mt-0.5"></i>
-                                        <span class="italic">"{{ $record->notes }}"</span>
+                            <div class="flex flex-col sm:flex-row justify-between gap-4">
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="bg-rose-50 text-rose-700 text-[10px] font-black px-2 py-0.5 rounded border border-rose-100 uppercase">
+                                            -{{ $record->disciplineType->point_value ?? ($record->point ?? 0) }} Poin
+                                        </span>
+                                        <span class="text-xs text-slate-400 font-medium flex items-center gap-1">
+                                            <i class="ph-bold ph-calendar-blank"></i>
+                                            {{ \Carbon\Carbon::parse($record->date)->translatedFormat('d F Y') }}
+                                        </span>
                                     </div>
-                                @else
-                                    <span class="text-slate-400 italic text-xs">Tidak ada catatan tambahan.</span>
+                                    
+                                    <h4 class="font-bold text-slate-800 text-base group-hover:text-rose-600 transition-colors">
+                                        {{ $record->disciplineType->name ?? 'Pelanggaran Tata Tertib' }}
+                                    </h4>
+                                    
+                                    @if(isset($record->notes) && $record->notes)
+                                        <p class="text-sm text-slate-500 mt-2 bg-slate-50 p-3 rounded-xl border border-slate-100 italic leading-relaxed">
+                                            "{{ $record->notes }}"
+                                        </p>
+                                    @endif
+                                </div>
+
+                                {{-- Recorder Info --}}
+                                @if(isset($record->recorder))
+                                    <div class="sm:text-right flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-0 mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-0 border-slate-50">
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Pelapor</p>
+                                        <div class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
+                                            <i class="ph-fill ph-user-circle text-slate-400"></i>
+                                            <span class="text-xs font-bold text-slate-600">{{ $record->recorder->name ?? 'Guru Piket' }}</span>
+                                        </div>
+                                    </div>
                                 @endif
                             </div>
-
-                             @if(isset($record->recorder))
-                                <div class="mt-2 flex items-center gap-1.5 text-[10px] text-slate-400 font-medium ml-1">
-                                    <i class="ph-fill ph-user-circle text-slate-300"></i> 
-                                    Dicatat oleh: <span class="text-slate-500 font-bold">{{ $record->recorder->name ?? 'Sistem' }}</span>
-                                </div>
-                            @endif
                         </div>
                     @endforeach
                 </div>
             @else
-                <div class="flex flex-col items-center justify-center py-16 text-center">
-                    <div class="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center mb-4 animate-bounce">
-                        <i class="ph-duotone ph-shield-check text-5xl text-emerald-400"></i>
+                {{-- Zero Violation State --}}
+                <div class="flex flex-col items-center justify-center py-16 text-center h-full">
+                    <div class="w-32 h-32 bg-gradient-to-b from-emerald-50 to-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-emerald-50 animate-bounce-subtle">
+                        <i class="ph-duotone ph-shield-check text-6xl text-emerald-400"></i>
                     </div>
-                    <h3 class="font-bold text-slate-800 text-lg">Bersih & Disiplin!</h3>
-                    <p class="text-slate-500 text-sm mt-2 max-w-xs">Tidak ada catatan pelanggaran sejauh ini. Pertahankan sikap baikmu!</p>
+                    <h3 class="text-2xl font-black text-slate-800 mb-2">Bersih & Teladan!</h3>
+                    <p class="text-slate-500 text-sm max-w-sm leading-relaxed">
+                        Tidak ada catatan pelanggaran hingga saat ini. Kamu adalah contoh siswa yang luar biasa. Pertahankan!
+                    </p>
                 </div>
             @endif
         </div>
-
     </div>
 </div>

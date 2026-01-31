@@ -1,197 +1,227 @@
-{{-- 1. SECTION STATISTIK UTAMA --}}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
     
-    {{-- Chart & Progress --}}
-    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 lg:col-span-1 flex flex-col justify-center items-center relative overflow-hidden group">
-        {{-- Background Decoration --}}
-        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-            <i class="ph-duotone ph-chart-pie-slice text-9xl text-blue-500"></i>
-        </div>
+    {{-- KOLOM KIRI: STATUS UTAMA (Sticky) --}}
+    <div class="lg:col-span-1">
+        <div class="bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 sticky top-24 relative overflow-hidden group text-center">
+            
+            {{-- Background Decor --}}
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500"></div>
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-blue-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
-        <div class="h-48 w-full relative mt-2 z-10">
-            <canvas id="attendanceChart"></canvas>
-            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pt-4">
-                <span class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">KEHADIRAN</span>
-                <span class="text-4xl font-black text-slate-800">{{ $attendancePercentage }}<span class="text-lg text-slate-400">%</span></span>
-            </div>
-        </div>
+            <h3 class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Persentase Kehadiran</h3>
 
-        {{-- Progress Bar Kelayakan --}}
-        <div class="w-full mt-6 space-y-2 relative z-10">
-            <div class="flex justify-between text-xs font-bold text-slate-500">
-                <span>Target Sekolah</span>
-                <span>Min. 80%</span>
+            {{-- Circular Indicator Wrapper --}}
+            <div class="relative w-56 h-56 mx-auto mb-6">
+                {{-- Kita pertahankan Canvas untuk Chart.js agar logika JS yang ada tidak rusak --}}
+                {{-- Namun kita bungkus agar rapi --}}
+                <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                    <div class="text-center">
+                        <span class="text-5xl font-black text-slate-800 tracking-tighter block">{{ $attendancePercentage }}<span class="text-2xl text-slate-400">%</span></span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1 block">Semester Ini</span>
+                    </div>
+                </div>
+                {{-- Canvas Chart (Pastikan script JS chart di layout induk tetap jalan) --}}
+                <canvas id="attendanceChart" class="relative z-0 opacity-90"></canvas>
             </div>
-            <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                <div class="h-full rounded-full transition-all duration-1000 {{ $attendancePercentage >= 90 ? 'bg-emerald-500' : ($attendancePercentage >= 80 ? 'bg-amber-500' : 'bg-rose-500') }}" 
-                     style="width: {{ $attendancePercentage }}%"></div>
+
+            {{-- Progress Bar Kelayakan --}}
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 relative z-10">
+                <div class="flex justify-between items-end mb-2">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">Target Sekolah</span>
+                    <span class="text-xs font-black text-slate-700">Min. 80%</span>
+                </div>
+                
+                <div class="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden mb-2">
+                    <div class="h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_currentColor] 
+                        {{ $attendancePercentage >= 90 ? 'bg-emerald-500 text-emerald-500' : ($attendancePercentage >= 80 ? 'bg-amber-500 text-amber-500' : 'bg-rose-500 text-rose-500') }}" 
+                        style="width: {{ $attendancePercentage }}%">
+                    </div>
+                </div>
+
+                <p class="text-[10px] font-medium leading-relaxed">
+                    @if($attendancePercentage >= 90)
+                        <span class="text-emerald-600 flex items-center justify-center gap-1"><i class="ph-fill ph-check-circle"></i> Luar biasa! Pertahankan kehadiranmu.</span>
+                    @elseif($attendancePercentage >= 80)
+                        <span class="text-amber-600 flex items-center justify-center gap-1"><i class="ph-fill ph-warning"></i> Hati-hati, jangan bolos lagi ya.</span>
+                    @else
+                        <span class="text-rose-600 flex items-center justify-center gap-1"><i class="ph-fill ph-warning-octagon"></i> Bahaya! Segera temui Guru BK/Wali Kelas.</span>
+                    @endif
+                </p>
             </div>
-            <p class="text-[10px] text-center text-slate-400 mt-1 font-medium">
-                @if($attendancePercentage >= 90)
-                    <span class="text-emerald-600"><i class="ph-fill ph-check-circle"></i> Sangat Baik! Pertahankan.</span>
-                @elseif($attendancePercentage >= 80)
-                    <span class="text-amber-600"><i class="ph-fill ph-warning"></i> Hati-hati, jangan sering bolos.</span>
-                @else
-                    <span class="text-rose-600"><i class="ph-fill ph-warning-octagon"></i> Bahaya! Segera perbaiki kehadiran.</span>
-                @endif
-            </p>
         </div>
     </div>
 
-    {{-- Grid Detail Statistik --}}
-    <div class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
+    {{-- KOLOM KANAN: STATISTIK DETAIL & TIMELINE --}}
+    <div class="lg:col-span-2 space-y-6">
         
-        {{-- Card Hadir (Tepat Waktu) --}}
-        <div class="bg-gradient-to-br from-emerald-50 to-white p-5 rounded-[2rem] border border-emerald-100 flex flex-col justify-center items-center text-center h-full hover:shadow-md transition-all group">
-            <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-emerald-500 mb-3 group-hover:scale-110 transition-transform">
-                <i class="ph-duotone ph-check-circle text-2xl"></i>
+        {{-- 1. GRID STATISTIK DETAIL --}}
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            
+            {{-- Hadir --}}
+            <div class="bg-white p-4 rounded-[2rem] border border-emerald-100 shadow-sm flex flex-col items-center text-center group hover:bg-emerald-50/50 transition-colors relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform"><i class="ph-fill ph-check-circle text-4xl text-emerald-500"></i></div>
+                <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2 shadow-sm">
+                    <i class="ph-bold ph-user-check text-xl"></i>
+                </div>
+                <span class="text-2xl font-black text-slate-800">{{ $hadir - $terlambat }}</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tepat Waktu</span>
             </div>
-            <div class="text-3xl font-black text-emerald-700 mb-0.5">{{ $hadir - $terlambat }}</div>
-            <div class="text-[10px] font-bold text-emerald-600/70 uppercase tracking-wider">Tepat Waktu</div>
+
+            {{-- Terlambat --}}
+            <div class="bg-white p-4 rounded-[2rem] border border-amber-100 shadow-sm flex flex-col items-center text-center group hover:bg-amber-50/50 transition-colors relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform"><i class="ph-fill ph-clock-countdown text-4xl text-amber-500"></i></div>
+                <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-2 shadow-sm">
+                    <i class="ph-bold ph-clock-afternoon text-xl"></i>
+                </div>
+                <span class="text-2xl font-black text-slate-800">{{ $terlambat }}</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Terlambat</span>
+            </div>
+
+            {{-- Sakit --}}
+            <div class="bg-white p-4 rounded-[2rem] border border-blue-100 shadow-sm flex flex-col items-center text-center group hover:bg-blue-50/50 transition-colors relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform"><i class="ph-fill ph-thermometer text-4xl text-blue-500"></i></div>
+                <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center mb-2 shadow-sm">
+                    <i class="ph-bold ph-bandaids text-xl"></i>
+                </div>
+                <span class="text-2xl font-black text-slate-800">{{ $sakit }}</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sakit</span>
+            </div>
+
+            {{-- Izin --}}
+            <div class="bg-white p-4 rounded-[2rem] border border-purple-100 shadow-sm flex flex-col items-center text-center group hover:bg-purple-50/50 transition-colors relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform"><i class="ph-fill ph-envelope-open text-4xl text-purple-500"></i></div>
+                <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-2 shadow-sm">
+                    <i class="ph-bold ph-paper-plane-tilt text-xl"></i>
+                </div>
+                <span class="text-2xl font-black text-slate-800">{{ $izin }}</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Izin</span>
+            </div>
+
+            {{-- Alpa (Lebar di Mobile) --}}
+            <div class="col-span-2 md:col-span-2 bg-white p-4 rounded-[2rem] border border-rose-100 shadow-sm flex flex-row items-center justify-between px-6 group hover:bg-rose-50/50 transition-colors relative overflow-hidden">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center shadow-sm shrink-0">
+                        <i class="ph-bold ph-x-circle text-2xl"></i>
+                    </div>
+                    <div class="text-left">
+                        <span class="text-3xl font-black text-rose-600 block leading-none">{{ $alpa }}</span>
+                        <span class="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Tanpa Keterangan</span>
+                    </div>
+                </div>
+                
+                @if($alpa > 0)
+                    <div class="text-right">
+                        <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-100 text-rose-700 text-[10px] font-black uppercase rounded-lg border border-rose-200">
+                            <i class="ph-bold ph-warning"></i> -{{ $alpa * 10 }} Poin
+                        </span>
+                    </div>
+                @else
+                    <div class="text-right hidden sm:block">
+                        <span class="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-100 text-emerald-700 text-[10px] font-black uppercase rounded-lg border border-emerald-200">
+                            <i class="ph-bold ph-thumbs-up"></i> Disiplin
+                        </span>
+                    </div>
+                @endif
+            </div>
         </div>
 
-        {{-- Card Terlambat --}}
-        <div class="bg-gradient-to-br from-amber-50 to-white p-5 rounded-[2rem] border border-amber-100 flex flex-col justify-center items-center text-center h-full hover:shadow-md transition-all group">
-            <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-amber-500 mb-3 group-hover:scale-110 transition-transform">
-                <i class="ph-duotone ph-clock-countdown text-2xl"></i>
+        {{-- 2. TIMELINE RIWAYAT --}}
+        <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-6 md:p-8">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-50">
+                <h4 class="font-black text-slate-800 flex items-center gap-2 text-lg">
+                    <i class="ph-duotone ph-clock-counter-clockwise text-blue-600 text-xl"></i> 
+                    Log Kehadiran
+                </h4>
+                <span class="text-[10px] font-bold bg-slate-50 border border-slate-200 px-3 py-1 rounded-full text-slate-500">
+                    Terakhir
+                </span>
             </div>
-            <div class="text-3xl font-black text-amber-700 mb-0.5">{{ $terlambat }}</div>
-            <div class="text-[10px] font-bold text-amber-600/70 uppercase tracking-wider">Terlambat</div>
-        </div>
 
-        {{-- Card Sakit --}}
-        <div class="bg-gradient-to-br from-blue-50 to-white p-5 rounded-[2rem] border border-blue-100 flex flex-col justify-center items-center text-center h-full hover:shadow-md transition-all group">
-            <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-blue-500 mb-3 group-hover:scale-110 transition-transform">
-                <i class="ph-duotone ph-thermometer text-2xl"></i>
-            </div>
-            <div class="text-3xl font-black text-blue-700 mb-0.5">{{ $sakit }}</div>
-            <div class="text-[10px] font-bold text-blue-600/70 uppercase tracking-wider">Sakit</div>
-        </div>
+            <div class="relative pl-4 space-y-6">
+                {{-- Garis Timeline Vertical --}}
+                <div class="absolute left-4 top-2 bottom-4 w-0.5 bg-slate-100 -ml-[0.5px]"></div>
 
-        {{-- Card Izin --}}
-        <div class="bg-gradient-to-br from-purple-50 to-white p-5 rounded-[2rem] border border-purple-100 flex flex-col justify-center items-center text-center h-full hover:shadow-md transition-all group">
-            <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-purple-500 mb-3 group-hover:scale-110 transition-transform">
-                <i class="ph-duotone ph-envelope-open text-2xl"></i>
-            </div>
-            <div class="text-3xl font-black text-purple-700 mb-0.5">{{ $izin }}</div>
-            <div class="text-[10px] font-bold text-purple-600/70 uppercase tracking-wider">Izin</div>
-        </div>
+                @forelse($attendance_history as $index => $log)
+                    <div class="relative pl-8 group">
+                        {{-- Dot Timeline --}}
+                        <div class="absolute left-[11px] top-1.5 w-3 h-3 rounded-full border-2 border-white shadow-sm z-10
+                            {{ ($log->status == 'Hadir') ? 'bg-emerald-500 ring-4 ring-emerald-50' : 
+                               (($log->status == 'Terlambat') ? 'bg-amber-500 ring-4 ring-amber-50' : 
+                               (($log->status == 'Sakit') ? 'bg-blue-500 ring-4 ring-blue-50' : 
+                               (($log->status == 'Izin') ? 'bg-purple-500 ring-4 ring-purple-50' : 'bg-rose-500 ring-4 ring-rose-50'))) }}">
+                        </div>
 
-        {{-- Card Alfa (Lebar di Mobile) --}}
-        <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-rose-50 to-white p-5 rounded-[2rem] border border-rose-100 flex flex-col justify-center items-center text-center h-full hover:shadow-md transition-all group relative overflow-hidden">
-            {{-- Tambahan: Visualisasi Warning Poin --}}
-            <div class="absolute top-2 right-2 text-rose-200">
-                <i class="ph-fill ph-warning text-xl"></i>
+                        <div class="bg-white rounded-2xl p-4 border border-slate-100 hover:shadow-md hover:border-slate-200 transition-all duration-300">
+                            
+                            {{-- Header Card --}}
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <p class="font-bold text-slate-800 text-sm">
+                                        {{ \Carbon\Carbon::parse($log->attendance_date)->translatedFormat('l, d F Y') }}
+                                    </p>
+                                    {{-- Badge Status --}}
+                                    <span class="inline-block mt-1 px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wide border
+                                        {{ ($log->status == 'Hadir') ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+                                           (($log->status == 'Terlambat') ? 'bg-amber-50 text-amber-600 border-amber-100' : 
+                                           (($log->status == 'Sakit') ? 'bg-blue-50 text-blue-600 border-blue-100' : 
+                                           (($log->status == 'Izin') ? 'bg-purple-50 text-purple-600 border-purple-100' : 'bg-rose-50 text-rose-600 border-rose-100'))) }}">
+                                        {{ $log->status }}
+                                    </span>
+                                </div>
+                                
+                                {{-- Icon Besar Pudar --}}
+                                <i class="ph-duotone text-3xl opacity-20
+                                    {{ ($log->status == 'Hadir') ? 'ph-check-circle text-emerald-600' : 
+                                       (($log->status == 'Terlambat') ? 'ph-clock-countdown text-amber-600' : 
+                                       (($log->status == 'Sakit') ? 'ph-thermometer text-blue-600' : 
+                                       (($log->status == 'Izin') ? 'ph-envelope-open text-purple-600' : 'ph-x-circle text-rose-600'))) }}">
+                                </i>
+                            </div>
+
+                            {{-- Detail Waktu (Hanya untuk Hadir/Terlambat) --}}
+                            @if($log->status == 'Hadir' || $log->status == 'Terlambat')
+                                <div class="flex items-center gap-2 bg-slate-50 rounded-xl p-2 border border-slate-100">
+                                    <div class="flex-1 text-center border-r border-slate-200 pr-2">
+                                        <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Datang</span>
+                                        <span class="text-sm font-black {{ $log->status == 'Terlambat' ? 'text-amber-600' : 'text-slate-700' }}">
+                                            {{ $log->time_in ? \Carbon\Carbon::parse($log->time_in)->format('H:i') : '--:--' }}
+                                        </span>
+                                    </div>
+                                    <div class="flex-1 text-center pl-2">
+                                        <span class="block text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Pulang</span>
+                                        <span class="text-sm font-black text-slate-700">
+                                            {{ $log->time_out ? \Carbon\Carbon::parse($log->time_out)->format('H:i') : '--:--' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            @endif
+
+                            {{-- Catatan Khusus --}}
+                            @if($log->notes)
+                                <div class="mt-3 flex items-start gap-2">
+                                    <i class="ph-fill ph-info text-slate-300 mt-0.5"></i>
+                                    <p class="text-xs text-slate-500 italic leading-snug">"{{ Str::limit($log->notes, 80) }}"</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div class="py-12 text-center">
+                        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="ph-duotone ph-calendar-slash text-3xl text-slate-300"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-400">Belum ada riwayat kehadiran.</p>
+                    </div>
+                @endforelse
             </div>
             
-            <div class="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center text-rose-500 mb-3 group-hover:scale-110 transition-transform">
-                <i class="ph-duotone ph-x-circle text-2xl"></i>
-            </div>
-            <div class="text-3xl font-black text-rose-700 mb-0.5">{{ $alpa }}</div>
-            <div class="text-[10px] font-bold text-rose-600/70 uppercase tracking-wider">Tanpa Ket.</div>
-            
-            {{-- Indikator Pengurangan Poin --}}
-            @if($alpa > 0)
-                <div class="mt-2 px-2 py-0.5 bg-rose-100 rounded text-[9px] font-bold text-rose-600">
-                    -{{ $alpa * 10 }} Poin
+            @if($attendance_history->count() >= 5)
+                <div class="mt-6 text-center">
+                    <button class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-slate-50 text-slate-600 text-xs font-bold hover:bg-slate-100 transition-colors border border-slate-200">
+                        Lihat Lebih Banyak <i class="ph-bold ph-caret-down"></i>
+                    </button>
                 </div>
             @endif
         </div>
-    </div>
-</div>
-
-{{-- 2. RIWAYAT KEHADIRAN (TIMELINE STYLE) --}}
-<div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
-    <div class="p-6 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
-        <h3 class="font-bold text-slate-800 flex items-center gap-2">
-            <i class="ph-fill ph-clock-counter-clockwise text-blue-600 text-lg"></i> Riwayat Terakhir
-        </h3>
-        <span class="text-[10px] font-bold bg-white border border-slate-200 px-3 py-1 rounded-full text-slate-500">
-            5 Hari Terakhir
-        </span>
-    </div>
-
-    <div class="p-6">
-        @forelse($attendance_history as $index => $log)
-            {{-- Timeline Container --}}
-            <div class="relative pl-8 pb-8 last:pb-0 group">
-                {{-- Timeline Line --}}
-                <div class="absolute left-0 top-2 bottom-0 w-0.5 bg-slate-100 group-last:bg-transparent ml-[5px]"></div>
-                
-                {{-- Timeline Dot --}}
-                <div class="absolute -left-[3px] top-2 w-5 h-5 rounded-full border-4 border-white shadow-sm z-10
-                    {{ ($log->status == 'Hadir') ? 'bg-emerald-500' : 
-                       (($log->status == 'Terlambat') ? 'bg-amber-500' : 
-                       (($log->status == 'Sakit') ? 'bg-blue-500' : 
-                       (($log->status == 'Izin') ? 'bg-purple-500' : 'bg-rose-500'))) }}">
-                </div>
-
-                <div class="bg-white rounded-2xl p-4 border border-slate-100 hover:border-blue-200 transition-all shadow-sm hover:shadow-md">
-                    <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <p class="font-bold text-slate-800 text-sm">
-                                {{ \Carbon\Carbon::parse($log->attendance_date)->translatedFormat('l, d F Y') }}
-                            </p>
-                            <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider
-                                {{ ($log->status == 'Hadir') ? 'bg-emerald-100 text-emerald-700' : 
-                                   (($log->status == 'Terlambat') ? 'bg-amber-100 text-amber-700' : 
-                                   (($log->status == 'Sakit') ? 'bg-blue-100 text-blue-700' : 
-                                   (($log->status == 'Izin') ? 'bg-purple-100 text-purple-700' : 'bg-rose-100 text-rose-700'))) }}">
-                                {{ $log->status }}
-                            </span>
-                        </div>
-                        
-                        {{-- Icon Status Besar --}}
-                        <i class="ph-duotone text-3xl opacity-20 group-hover:opacity-100 transition-opacity
-                            {{ ($log->status == 'Hadir') ? 'ph-check-circle text-emerald-600' : 
-                               (($log->status == 'Terlambat') ? 'ph-clock-countdown text-amber-600' : 
-                               (($log->status == 'Sakit') ? 'ph-thermometer text-blue-600' : 
-                               (($log->status == 'Izin') ? 'ph-envelope-open text-purple-600' : 'ph-x-circle text-rose-600'))) }}">
-                        </i>
-                    </div>
-
-                    {{-- Detail Waktu --}}
-                    @if($log->status == 'Hadir' || $log->status == 'Terlambat')
-                    <div class="grid grid-cols-2 gap-2 mt-3">
-                        <div class="bg-slate-50 p-2 rounded-xl border border-slate-100 text-center">
-                            <span class="block text-[9px] text-slate-400 font-bold uppercase">Masuk</span>
-                            <span class="text-sm font-black {{ $log->status == 'Terlambat' ? 'text-amber-600' : 'text-slate-700' }}">
-                                {{ $log->time_in ? \Carbon\Carbon::parse($log->time_in)->format('H:i') : '--:--' }}
-                            </span>
-                        </div>
-                        <div class="bg-slate-50 p-2 rounded-xl border border-slate-100 text-center">
-                            <span class="block text-[9px] text-slate-400 font-bold uppercase">Pulang</span>
-                            <span class="text-sm font-black text-slate-700">
-                                {{ $log->time_out ? \Carbon\Carbon::parse($log->time_out)->format('H:i') : '--:--' }}
-                            </span>
-                        </div>
-                    </div>
-                    @endif
-
-                    {{-- Catatan --}}
-                    @if($log->notes)
-                        <div class="mt-3 text-xs text-slate-500 italic bg-slate-50/50 px-3 py-2 rounded-lg border border-slate-100 relative">
-                             <i class="ph-fill ph-quotes text-slate-300 absolute top-1 right-2"></i>
-                            "{{ Str::limit($log->notes, 60) }}"
-                        </div>
-                    @endif
-                </div>
-            </div>
-        @empty
-            <div class="flex flex-col items-center justify-center py-10 text-slate-400">
-                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3">
-                    <i class="ph-duotone ph-calendar-slash text-3xl"></i>
-                </div>
-                <p class="text-sm font-medium">Belum ada data kehadiran.</p>
-            </div>
-        @endforelse
-        
-        @if($attendance_history->count() >= 5)
-            <div class="text-center pt-4 border-t border-slate-50 mt-2">
-                <button class="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors flex items-center justify-center gap-1 mx-auto bg-blue-50 px-4 py-2 rounded-full">
-                    Lihat Selengkapnya <i class="ph-bold ph-caret-down"></i>
-                </button>
-            </div>
-        @endif
     </div>
 </div>

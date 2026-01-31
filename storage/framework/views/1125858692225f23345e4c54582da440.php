@@ -1,117 +1,170 @@
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
+    
     
     <div class="lg:col-span-1">
-        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-emerald-100 sticky top-24">
-            <h3 class="text-lg font-bold text-slate-800 mb-1 flex items-center gap-2">
-                <i class="ph-fill ph-medal text-emerald-500"></i> Catatan Prestasi
-            </h3>
+        <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-emerald-100 sticky top-24">
             
-            <div class="bg-emerald-50 rounded-[1.5rem] p-6 border border-emerald-100 text-center mt-6 relative overflow-hidden group">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-200/50 rounded-full blur-2xl -mr-10 -mt-10 group-hover:bg-emerald-300/50 transition-all"></div>
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-700 p-6 text-white shadow-lg shadow-emerald-500/20">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <i class="ph-fill ph-trophy text-8xl"></i>
+                </div>
                 
-                
-                <p class="text-6xl font-black text-emerald-600 relative z-10 tracking-tight">+<?php echo e($total_merit_points ?? 0); ?></p>
-                <p class="text-xs text-emerald-600 mt-2 font-bold uppercase tracking-widest relative z-10 opacity-80">Total Poin Kebaikan</p>
+                <div class="relative z-10">
+                    <p class="text-xs font-bold uppercase tracking-widest text-emerald-100 mb-1">Total Poin Kebaikan</p>
+                    <h2 class="text-5xl font-black tracking-tight">+<?php echo e($total_merit_points ?? 0); ?></h2>
+                    <div class="mt-4 flex items-center gap-2 text-xs font-medium bg-white/20 w-fit px-3 py-1.5 rounded-lg backdrop-blur-sm">
+                        <i class="ph-bold ph-trend-up"></i> Terus Meningkat
+                    </div>
+                </div>
             </div>
+
             
-            <div class="mt-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                <p class="text-xs text-slate-500 italic text-center leading-relaxed">
-                    "Terus tingkatkan kebaikanmu untuk menjadi inspirasi bagi teman-teman!"
+            <div class="mt-6 bg-slate-50 p-6 rounded-3xl border border-slate-100 relative">
+                <i class="ph-fill ph-quotes text-slate-200 text-4xl absolute top-4 left-4"></i>
+                <p class="text-sm text-slate-600 italic text-center relative z-10 leading-relaxed pt-2">
+                    "Prestasi bukanlah kebetulan, melainkan hasil dari kerja keras, ketekunan, dan doa yang konsisten."
                 </p>
+                <div class="mt-4 flex justify-center gap-1">
+                    <div class="w-1 h-1 rounded-full bg-slate-300"></div>
+                    <div class="w-8 h-1 rounded-full bg-emerald-400"></div>
+                    <div class="w-1 h-1 rounded-full bg-slate-300"></div>
+                </div>
             </div>
         </div>
     </div>
 
     
-    <div class="lg:col-span-2">
-        <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-6 md:p-8">
-            <h4 class="font-black text-emerald-800 mb-6 flex items-center gap-2 text-lg pb-4 border-b border-emerald-50">
-                <i class="ph-duotone ph-star text-2xl"></i> Riwayat Pencapaian
-            </h4>
+    <div class="lg:col-span-2 space-y-6">
+        
+        
+        <div class="flex items-center justify-between bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+            <div>
+                <h3 class="text-xl font-black text-slate-800 flex items-center gap-2">
+                    <i class="ph-fill ph-star text-yellow-400"></i> Jejak Prestasi
+                </h3>
+                <p class="text-slate-400 text-sm mt-1">Riwayat pencapaian dan perilaku positifmu.</p>
+            </div>
+            <div class="hidden sm:block">
+                <span class="px-4 py-2 bg-slate-50 rounded-xl text-xs font-bold text-slate-500 border border-slate-200">
+                    Total: <?php echo e(isset($achievements) ? count($achievements) : 0); ?> Catatan
+                </span>
+            </div>
+        </div>
 
-            <?php if(isset($achievements) && count($achievements) > 0): ?>
-                <div class="relative border-l-2 border-slate-100 ml-3 space-y-8">
-                    <?php $__currentLoopData = $achievements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $record): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div class="relative pl-8 group">
-                            
-                            
-                            <?php if(isset($record->type) && $record->type === 'achievement_record'): ?>
-                                <!-- Dot Emas untuk Prestasi Besar -->
-                                <div class="absolute -left-[9px] top-0 w-5 h-5 bg-yellow-100 border-2 border-yellow-500 rounded-full group-hover:scale-125 transition-transform duration-300 shadow-sm z-10"></div>
-                            <?php else: ?>
-                                <!-- Dot Hijau untuk Poin Harian -->
-                                <div class="absolute -left-[9px] top-0 w-5 h-5 bg-emerald-100 border-2 border-emerald-500 rounded-full group-hover:scale-125 transition-transform duration-300 shadow-sm"></div>
-                            <?php endif; ?>
-                            
-                            
-                            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-1">
-                                <div>
-                                    <h4 class="font-bold text-slate-800 text-lg group-hover:text-emerald-600 transition-colors">
-                                        
-                                        <?php echo e(isset($record->type) && $record->type === 'achievement_record' ? $record->title : ($record->disciplineType->name ?? 'Kebaikan')); ?>
+        
+        <?php if(isset($achievements) && count($achievements) > 0): ?>
+            <div class="space-y-4">
+                <?php $__currentLoopData = $achievements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $record): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
+                        // Cek Tipe: Apakah Prestasi Besar (Lomba) atau Poin Harian
+                        $isMajorAchievement = isset($record->type) && $record->type === 'achievement_record';
+                    ?>
 
-                                    </h4>
+                    <?php if($isMajorAchievement): ?>
+                        
+                        <div class="relative group">
+                            <div class="absolute inset-0 bg-gradient-to-r from-yellow-100 to-amber-50 rounded-3xl transform translate-y-2 translate-x-2 transition-transform group-hover:translate-x-3 group-hover:translate-y-3"></div>
+                            <div class="relative bg-white p-6 rounded-3xl border border-amber-100 shadow-sm flex flex-col sm:flex-row gap-5 overflow-hidden">
+                                
+                                <div class="shrink-0">
+                                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-400 to-amber-600 flex items-center justify-center text-white shadow-lg shadow-amber-200">
+                                        <i class="ph-duotone ph-trophy text-3xl"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex flex-wrap items-start justify-between gap-2">
+                                        <div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-wider border border-amber-200">
+                                                    <?php echo e($record->level ?? 'PENGHARGAAN'); ?>
+
+                                                </span>
+                                                <span class="text-xs text-slate-400 font-medium">
+                                                    <?php echo e(\Carbon\Carbon::parse($record->date)->translatedFormat('d F Y')); ?>
+
+                                                </span>
+                                            </div>
+                                            <h4 class="text-lg font-black text-slate-800 leading-snug group-hover:text-amber-600 transition-colors">
+                                                <?php echo e($record->title); ?>
+
+                                            </h4>
+                                        </div>
+                                    </div>
                                     
-                                    
-                                    <?php if(isset($record->level) && $record->level): ?>
-                                        <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-yellow-50 text-yellow-700 border border-yellow-200">
-                                            Tingkat: <?php echo e($record->level); ?>
+                                    <?php if($record->notes): ?>
+                                        <p class="text-sm text-slate-600 mt-2 line-clamp-2"><?php echo e($record->notes); ?></p>
+                                    <?php endif; ?>
 
-                                        </span>
+                                    
+                                    <div class="mt-4 flex items-center gap-3">
+                                        <?php if(isset($record->photo) && $record->photo): ?>
+                                            <a href="<?php echo e(asset('storage/' . $record->photo)); ?>" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-xs font-bold rounded-xl hover:bg-slate-700 transition-all shadow-md">
+                                                <i class="ph-bold ph-image"></i> Lihat Bukti
+                                            </a>
+                                        <?php endif; ?>
+                                        <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 bg-slate-50 px-3 py-2 rounded-xl">
+                                            <i class="ph-bold ph-user"></i> <?php echo e($record->recorder->name ?? 'Admin Sekolah'); ?>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        
+                        <div class="flex gap-4 group">
+                            
+                            <div class="flex flex-col items-center">
+                                <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                    <i class="ph-bold ph-plus"></i>
+                                </div>
+                                <div class="w-0.5 h-full bg-slate-100 my-2 group-last:hidden"></div>
+                            </div>
+
+                            <div class="flex-1 pb-6">
+                                <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm group-hover:border-emerald-200 transition-colors relative">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h5 class="font-bold text-slate-800 text-sm">
+                                                <?php echo e($record->disciplineType->name ?? 'Kebaikan Harian'); ?>
+
+                                            </h5>
+                                            <p class="text-xs text-slate-400 mt-0.5">
+                                                <?php echo e(\Carbon\Carbon::parse($record->date)->translatedFormat('l, d F Y')); ?>
+
+                                            </p>
+                                        </div>
+                                        <?php if(isset($record->disciplineType->point_value) && $record->disciplineType->point_value > 0): ?>
+                                            <span class="text-emerald-600 font-black text-sm bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100">
+                                                +<?php echo e($record->disciplineType->point_value); ?>
+
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <?php if($record->notes): ?>
+                                        <div class="mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded-lg italic">
+                                            "<?php echo e($record->notes); ?>"
+                                        </div>
                                     <?php endif; ?>
                                 </div>
-                                
-                                
-                                <?php if(isset($record->disciplineType->point_value) && $record->disciplineType->point_value > 0): ?>
-                                    <span class="text-xs font-bold px-3 py-1 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-100 whitespace-nowrap shadow-sm">
-                                        +<?php echo e($record->disciplineType->point_value); ?> Poin
-                                    </span>
-                                <?php endif; ?>
                             </div>
-                            
-                            
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-2">
-                                <i class="ph-fill ph-calendar-blank"></i>
-                                <?php echo e(\Carbon\Carbon::parse($record->date)->translatedFormat('l, d F Y')); ?>
-
-                            </p>
-                            
-                            
-                            <?php if($record->notes): ?>
-                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-sm text-slate-600 italic relative hover:bg-emerald-50/30 transition-colors">
-                                    <i class="ph-fill ph-quotes text-emerald-200 text-2xl absolute top-2 right-2"></i>
-                                    "<?php echo e($record->notes); ?>"
-                                </div>
-                            <?php endif; ?>
-
-                            
-                            <?php if(isset($record->type) && $record->type === 'achievement_record' && isset($record->photo)): ?>
-                                <div class="mt-3">
-                                    <a href="<?php echo e(asset('storage/' . $record->photo)); ?>" target="_blank" class="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-800 text-white text-xs font-bold rounded-lg hover:bg-slate-700 transition-colors">
-                                        <i class="ph-bold ph-image"></i> Lihat Foto Bukti
-                                    </a>
-                                </div>
-                            <?php endif; ?>
-
-                             
-                             <?php if(isset($record->recorder)): ?>
-                                <div class="mt-3 flex items-center gap-1.5 text-[10px] text-slate-400 font-bold bg-slate-50 inline-block px-2 py-1 rounded-md">
-                                    <i class="ph-fill ph-user-circle text-slate-300"></i> Dicatat oleh: <?php echo e($record->recorder->name ?? 'Sistem'); ?>
-
-                                </div>
-                            <?php endif; ?>
                         </div>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <?php endif; ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </div>
+        <?php else: ?>
+            
+            <div class="bg-white rounded-[2.5rem] p-12 text-center border-2 border-dashed border-slate-200">
+                <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-subtle">
+                    <i class="ph-duotone ph-medal text-5xl text-slate-300"></i>
                 </div>
-            <?php else: ?>
-                <div class="flex flex-col items-center justify-center py-16 text-center bg-emerald-50/20 rounded-[2rem] border border-dashed border-emerald-100">
-                    <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mb-4 animate-bounce">
-                        <i class="ph-duotone ph-trophy text-4xl text-emerald-300"></i>
-                    </div>
-                    <h3 class="font-bold text-slate-800 text-lg">Belum Ada Prestasi</h3>
-                    <p class="text-slate-500 text-sm mt-2 max-w-xs">Ayo tunjukkan bakatmu dan kumpulkan poin kebaikan!</p>
-                </div>
-            <?php endif; ?>
-        </div>
+                <h3 class="text-xl font-black text-slate-800">Belum Ada Catatan</h3>
+                <p class="text-slate-500 text-sm mt-2 max-w-sm mx-auto">
+                    Setiap langkah kecil menuju kebaikan adalah prestasi. Ayo mulai kumpulkan poin kebaikanmu!
+                </p>
+            </div>
+        <?php endif; ?>
     </div>
 </div><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/students/portal/partials/tab-prestasi.blade.php ENDPATH**/ ?>

@@ -21,7 +21,7 @@
                     <span class="text-xl font-black text-slate-800">{{ isset($ebookHistory) ? $ebookHistory->count() : 0 }}</span>
                 </div>
 
-                {{-- Total Aktivitas Fisik --}}
+                {{-- Total Aktivitas Fisik (DIPERBAIKI: Menggunakan $library_visits agar akurat) --}}
                 <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 transition-all hover:bg-white hover:shadow-md group">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -32,7 +32,6 @@
                             <p class="text-[10px] text-slate-400">Buku Fisik</p>
                         </div>
                     </div>
-                    {{-- Catatan: Angka ini mungkin terlimit 5 oleh controller (logic take(5)) --}}
                     <span class="text-xl font-black text-slate-800">{{ $library_visits ?? 0 }}</span>
                 </div>
 
@@ -102,7 +101,9 @@
                                         <i class="ph-bold ph-play"></i> Lanjut
                                     </a>
                                 @else
-                                    <span class="px-3 py-1 bg-white/90 text-slate-600 rounded-full text-[10px] font-bold">Mode Preview</span>
+                                    <span class="px-3 py-1 bg-white/90 text-slate-600 rounded-full text-[10px] font-bold shadow-md cursor-default">
+                                        Preview
+                                    </span>
                                 @endif
                             </div>
                         </div>

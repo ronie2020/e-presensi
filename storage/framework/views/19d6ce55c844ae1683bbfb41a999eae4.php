@@ -32,7 +32,6 @@
                             <p class="text-[10px] text-slate-400">Buku Fisik</p>
                         </div>
                     </div>
-                    
                     <span class="text-xl font-black text-slate-800"><?php echo e($library_visits ?? 0); ?></span>
                 </div>
 
@@ -102,7 +101,9 @@
                                         <i class="ph-bold ph-play"></i> Lanjut
                                     </a>
                                 <?php else: ?>
-                                    <span class="px-3 py-1 bg-white/90 text-slate-600 rounded-full text-[10px] font-bold">Mode Preview</span>
+                                    <span class="px-3 py-1 bg-white/90 text-slate-600 rounded-full text-[10px] font-bold shadow-md cursor-default">
+                                        Preview
+                                    </span>
                                 <?php endif; ?>
                             </div>
                         </div>
