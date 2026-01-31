@@ -1,4 +1,4 @@
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-500 font-sans">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-500 font-sans" x-data="{ showHistory: false }">
     
     {{-- LOGIKA HITUNG STATISTIK DARI DATA YANG TAMPIL --}}
     @php
@@ -12,7 +12,11 @@
 
         if(isset($teaching_journals)) {
             foreach($teaching_journals as $journal) {
-                $attendance = $journal->attendances->where('student_id', $student->id)->first();
+                // Gunakan pencarian strict jika tipe ID berbeda (string vs int)
+                $attendance = $journal->attendances->first(function ($att) use ($student) {
+                    return (string)$att->student_id === (string)$student->id;
+                });
+                
                 $status = $attendance ? $attendance->status : null;
                 
                 // Logika Auto-Alpha jika closed
@@ -24,6 +28,12 @@
                 elseif($status == 'alpha') $stats['alpha']++;
             }
         }
+        
+        // Menghitung persentase untuk tinggi diagram (dengan number_format agar CSS valid)
+        $total = $stats['total'] > 0 ? $stats['total'] : 1;
+        $pctPresent = number_format(($stats['present'] / $total) * 100, 1);
+        $pctSickPermit = number_format((($stats['sick'] + $stats['permission']) / $total) * 100, 1);
+        $pctAlpha = number_format(($stats['alpha'] / $total) * 100, 1);
     @endphp
 
     {{-- KOLOM KIRI: STATISTIK RINGKAS (Sticky) --}}
@@ -39,27 +49,33 @@
                 <p class="text-slate-400 text-xs mb-6 font-medium">Ringkasan kehadiran di kelas ({{ $stats['total'] }} Sesi Terakhir).</p>
 
                 {{-- Chart Bar Sederhana --}}
-                <div class="flex items-end gap-2 h-24 mb-6 px-2">
+                <div class="flex items-end gap-3 h-32 mb-6 px-4 pb-2 border-b border-slate-50">
                     {{-- Hadir --}}
-                    <div class="flex-1 flex flex-col items-center gap-1 group/bar">
-                        <div class="w-full bg-emerald-100 rounded-t-lg relative h-full overflow-hidden">
-                            <div style="height: {{ $stats['total'] > 0 ? ($stats['present']/$stats['total'])*100 : 0 }}%" class="absolute bottom-0 w-full bg-emerald-500 transition-all duration-1000 group-hover/bar:bg-emerald-400"></div>
+                    <div class="flex-1 flex flex-col items-center gap-2 group/bar h-full justify-end">
+                        <div class="w-full bg-emerald-50 rounded-t-lg relative h-full flex items-end overflow-hidden">
+                            <div style="height: {{ $pctPresent }}%" class="w-full bg-emerald-500 transition-all duration-1000 group-hover/bar:bg-emerald-400 relative">
+                                <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-emerald-600 opacity-0 group-hover/bar:opacity-100 transition-opacity">{{ $pctPresent }}%</span>
+                            </div>
                         </div>
-                        <span class="text-[10px] font-bold text-slate-500">Hadir</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Hadir</span>
                     </div>
                     {{-- Izin/Sakit --}}
-                    <div class="flex-1 flex flex-col items-center gap-1 group/bar">
-                        <div class="w-full bg-blue-100 rounded-t-lg relative h-full overflow-hidden">
-                            <div style="height: {{ $stats['total'] > 0 ? (($stats['sick']+$stats['permission'])/$stats['total'])*100 : 0 }}%" class="absolute bottom-0 w-full bg-blue-500 transition-all duration-1000 group-hover/bar:bg-blue-400"></div>
+                    <div class="flex-1 flex flex-col items-center gap-2 group/bar h-full justify-end">
+                        <div class="w-full bg-blue-50 rounded-t-lg relative h-full flex items-end overflow-hidden">
+                            <div style="height: {{ $pctSickPermit }}%" class="w-full bg-blue-500 transition-all duration-1000 group-hover/bar:bg-blue-400 relative">
+                                <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-blue-600 opacity-0 group-hover/bar:opacity-100 transition-opacity">{{ $pctSickPermit }}%</span>
+                            </div>
                         </div>
-                        <span class="text-[10px] font-bold text-slate-500">Izin</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Izin</span>
                     </div>
                     {{-- Alpha --}}
-                    <div class="flex-1 flex flex-col items-center gap-1 group/bar">
-                        <div class="w-full bg-rose-100 rounded-t-lg relative h-full overflow-hidden">
-                            <div style="height: {{ $stats['total'] > 0 ? ($stats['alpha']/$stats['total'])*100 : 0 }}%" class="absolute bottom-0 w-full bg-rose-500 transition-all duration-1000 group-hover/bar:bg-rose-400"></div>
+                    <div class="flex-1 flex flex-col items-center gap-2 group/bar h-full justify-end">
+                        <div class="w-full bg-rose-50 rounded-t-lg relative h-full flex items-end overflow-hidden">
+                            <div style="height: {{ $pctAlpha }}%" class="w-full bg-rose-500 transition-all duration-1000 group-hover/bar:bg-rose-400 relative">
+                                <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-rose-600 opacity-0 group-hover/bar:opacity-100 transition-opacity">{{ $pctAlpha }}%</span>
+                            </div>
                         </div>
-                        <span class="text-[10px] font-bold text-slate-500">Alpha</span>
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Alpha</span>
                     </div>
                 </div>
 
@@ -88,10 +104,11 @@
                     @endif
                 </div>
 
+                {{-- TOMBOL RIWAYAT LENGKAP --}}
                 <div class="mt-6 pt-4 border-t border-slate-50 text-center">
-                    <p class="text-[10px] text-slate-400 italic">
-                        "Kehadiran di kelas adalah langkah awal menuju pemahaman materi yang sempurna."
-                    </p>
+                    <button @click="showHistory = true" class="w-full py-3 bg-slate-800 text-white rounded-xl text-xs font-bold hover:bg-slate-700 transition-all flex items-center justify-center gap-2 shadow-lg">
+                        <i class="ph-bold ph-list-dashes"></i> Lihat Riwayat Lengkap
+                    </button>
                 </div>
             </div>
         </div>
@@ -116,10 +133,13 @@
                     {{-- Garis Timeline --}}
                     <div class="absolute left-4 top-4 bottom-4 w-0.5 bg-slate-100 -ml-[0.5px]"></div>
 
-                    @foreach($teaching_journals as $journal)
+                    {{-- Loop data jurnal (bisa dibatasi di view agar tidak terlalu panjang, misal 5-10 terakhir) --}}
+                    @foreach($teaching_journals->take(10) as $journal)
                         {{-- LOGIKA STATUS ABSEN --}}
                         @php
-                            $attendance = $journal->attendances->where('student_id', $student->id)->first();
+                            $attendance = $journal->attendances->first(function ($att) use ($student) {
+                                return (string)$att->student_id === (string)$student->id;
+                            });
                             $status = $attendance ? $attendance->status : null;
                             
                             $statusConfig = [
@@ -130,29 +150,24 @@
                                 'default' => ['color' => 'slate', 'label' => 'Belum Absen', 'icon' => 'ph-question'],
                             ];
 
-                            // Cek Alpha Otomatis
                             if ($journal->status == 'closed' && !$status) $status = 'alpha';
-                            
                             $config = $statusConfig[$status] ?? $statusConfig['default'];
                         @endphp
 
                         <div class="relative pl-10 group">
-                            {{-- Dot Timeline (Icon Mapel) --}}
+                            {{-- Dot Timeline --}}
                             <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-white border-2 border-slate-100 shadow-sm flex items-center justify-center z-10 group-hover:scale-110 transition-transform">
                                 <i class="ph-bold ph-book-bookmark text-slate-400"></i>
                             </div>
 
                             {{-- Card Jurnal --}}
                             <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 relative overflow-hidden">
-                                
-                                {{-- Status Badge (Pojok Kanan Atas) --}}
                                 <div class="absolute top-0 right-0">
                                     <div class="bg-{{ $config['color'] }}-50 text-{{ $config['color'] }}-600 px-4 py-1.5 rounded-bl-2xl text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 border-b border-l border-{{ $config['color'] }}-100">
                                         <i class="ph-bold {{ $config['icon'] }}"></i> {{ $config['label'] }}
                                     </div>
                                 </div>
 
-                                {{-- Header Mapel & Guru --}}
                                 <div class="mb-4 pr-20">
                                     <div class="flex flex-wrap items-center gap-2 mb-1.5">
                                         <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wide border border-blue-100">
@@ -176,7 +191,6 @@
                                     </p>
                                 </div>
 
-                                {{-- Konten Aktivitas --}}
                                 <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 relative mb-4">
                                     <i class="ph-fill ph-quotes text-slate-200 text-2xl absolute top-2 right-2"></i>
                                     <p class="text-xs text-slate-600 leading-relaxed relative z-10 whitespace-pre-line">
@@ -184,22 +198,14 @@
                                     </p>
                                 </div>
 
-                                {{-- Dokumentasi Foto --}}
                                 @if($journal->photo_proof)
                                     <div x-data="{ open: false }">
                                         <button @click="open = true" class="flex items-center gap-2 text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-2 rounded-xl hover:bg-slate-50 hover:text-blue-600 transition-colors w-full sm:w-auto shadow-sm">
                                             <i class="ph-bold ph-image text-blue-500"></i> Lihat Dokumentasi Kelas
                                         </button>
-
-                                        {{-- Lightbox Sederhana --}}
-                                        <div x-show="open" 
-                                             x-transition.opacity
-                                             class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
-                                             style="display: none;">
+                                        <div x-show="open" x-transition.opacity class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" style="display: none;">
                                             <div @click.away="open = false" class="relative max-w-3xl w-full">
-                                                <button @click="open = false" class="absolute -top-10 right-0 text-white hover:text-rose-400">
-                                                    <i class="ph-bold ph-x text-2xl"></i>
-                                                </button>
+                                                <button @click="open = false" class="absolute -top-10 right-0 text-white hover:text-rose-400"><i class="ph-bold ph-x text-2xl"></i></button>
                                                 <img src="{{ asset('storage/' . $journal->photo_proof) }}" class="w-full h-auto rounded-xl shadow-2xl border-2 border-white/20">
                                             </div>
                                         </div>
@@ -211,7 +217,6 @@
                 </div>
             </div>
         @else
-            {{-- Empty State --}}
             <div class="bg-white rounded-[3rem] border-2 border-dashed border-slate-200 p-16 text-center group hover:border-blue-200 transition-colors h-full flex flex-col items-center justify-center">
                 <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-50 transition-colors">
                     <i class="ph-duotone ph-notebook text-5xl text-slate-300 group-hover:text-blue-400 transition-colors"></i>
@@ -222,5 +227,88 @@
                 </p>
             </div>
         @endif
+    </div>
+
+    {{-- MODAL RIWAYAT LENGKAP --}}
+    <div x-show="showHistory" 
+         x-transition.opacity
+         class="fixed inset-0 z-[60] flex items-center justify-center px-4"
+         style="display: none;">
+        
+        {{-- Backdrop --}}
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="showHistory = false"></div>
+
+        {{-- Modal Content --}}
+        <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+            {{-- Header --}}
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="text-xl font-black text-slate-800 flex items-center gap-2">
+                    <i class="ph-duotone ph-list-checks text-blue-600"></i> Rekapitulasi Kehadiran KBM
+                </h3>
+                <button @click="showHistory = false" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-rose-100 hover:text-rose-600 flex items-center justify-center transition-colors">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+
+            {{-- Table Body --}}
+            <div class="overflow-y-auto p-0">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase sticky top-0 z-10">
+                        <tr>
+                            <th class="px-6 py-4">Tanggal</th>
+                            <th class="px-6 py-4">Mata Pelajaran</th>
+                            <th class="px-6 py-4">Guru</th>
+                            <th class="px-6 py-4 text-center">Status Kehadiran</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @if(isset($teaching_journals))
+                            @foreach($teaching_journals as $journal)
+                                @php
+                                    $attendance = $journal->attendances->first(function ($att) use ($student) {
+                                        return (string)$att->student_id === (string)$student->id;
+                                    });
+                                    $status = $attendance ? $attendance->status : null;
+                                    if ($journal->status == 'closed' && !$status) $status = 'alpha';
+                                    
+                                    $badge = match($status) {
+                                        'present' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                                        'sick' => 'bg-blue-100 text-blue-700 border-blue-200',
+                                        'permission' => 'bg-amber-100 text-amber-700 border-amber-200',
+                                        'alpha' => 'bg-rose-100 text-rose-700 border-rose-200',
+                                        default => 'bg-slate-100 text-slate-500 border-slate-200'
+                                    };
+                                    $label = match($status) {
+                                        'present' => 'Hadir', 'sick' => 'Sakit', 'permission' => 'Izin', 'alpha' => 'Alpha', default => 'Belum Ada'
+                                    };
+                                @endphp
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="px-6 py-4 font-bold text-slate-700">
+                                        {{ \Carbon\Carbon::parse($journal->date)->translatedFormat('d F Y') }}
+                                        <span class="block text-[10px] text-slate-400 font-normal">
+                                            {{ \Carbon\Carbon::parse($journal->started_at)->format('H:i') }} WIB
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 font-bold text-blue-600">
+                                        {{ $journal->schedule?->subject?->name ?? '-' }}
+                                        <span class="block text-[10px] text-slate-500 font-normal truncate max-w-[200px]">
+                                            Topik: {{ $journal->topic ?? '-' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-600">
+                                        {{ $journal->schedule?->teacher?->name ?? '-' }}
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border {{ $badge }}">
+                                            {{ $label }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>

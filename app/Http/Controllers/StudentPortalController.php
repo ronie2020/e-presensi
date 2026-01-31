@@ -59,7 +59,7 @@ class StudentPortalController extends Controller
 
     public function show($id)
     {
-        // 1. Validasi Akses
+        // 1. VALIDASI AKSES
         if (!Auth::guard('student')->check() || Auth::guard('student')->id() != $id) {
              return redirect()->route('portal.index')->with('error', 'Akses ditolak.');
         }
@@ -70,7 +70,7 @@ class StudentPortalController extends Controller
         
         $classId = $student->class_id ?? $student->school_class_id ?? optional($student->schoolClass)->id;
 
-         // --- 1. DATA RAMADHAN ---
+         // --- 2. DATA RAMADHAN (LOGIKA BARU) ---
         $today = Carbon::now('Asia/Jakarta')->toDateString();
         
         // A. Log Hari Ini (Untuk Form Input)
@@ -78,27 +78,58 @@ class StudentPortalController extends Controller
                             ->whereDate('date', $today)
                             ->first();
 
-        // B. [PERBAIKAN UTAMA] Log Terakhir yang Sudah Dinilai (Untuk Feedback)
-        // Kita cari log milik siswa ini yang kolom teacher_verified_at TIDAK NULL (sudah dinilai)
-        // Diurutkan dari tanggal paling baru
+        // B. Log Terakhir yang Sudah Dinilai (Untuk Feedback)
         $lastVerifiedLog = RamadanLog::where('student_id', $student->id)
                             ->whereNotNull('teacher_verified_at')
                             ->orderBy('date', 'desc')
                             ->first();
 
-        // --- 2. DATA LEADERBOARD RAMADHAN ---
-        $topRamadanStudents = Student::withCount(['ramadanLogs as points_raw'])
-            ->with('schoolClass')
+        // C. LEADERBOARD (LOGIKA POIN DETAIL BERBASIS AMAL)
+        // Kita gunakan logika yang lebih detail, bukan hanya 100 poin per hari
+        $topRamadanStudents = Student::with(['ramadanLogs', 'schoolClass'])
             ->get()
             ->map(function($s) {
-                $s->ramadan_points = ($s->points_raw ?? 0) * 100;
+                // Hitung total poin dari seluruh log siswa
+                $totalPoints = $s->ramadanLogs->sum(function($log) {
+                    $dailyScore = 0;
+                    
+                    // 1. Poin Puasa (50 Poin)
+                    if ($log->is_fasting) $dailyScore += 50;
+                    
+                    // 2. Poin Shalat Wajib (10 Poin per waktu -> Max 50)
+                    $prayers = is_string($log->prayers) ? json_decode($log->prayers, true) : ($log->prayers ?? []);
+                    if(is_array($prayers)) {
+                        $dailyScore += count(array_filter($prayers)) * 10;
+                    }
+
+                    // 3. Poin Sunnah (Tarawih, Witir, dll -> 10 Poin per item)
+                    $sunnahs = is_string($log->sunnah_deeds) ? json_decode($log->sunnah_deeds, true) : ($log->sunnah_deeds ?? []);
+                    if(is_array($sunnahs)) {
+                        $dailyScore += count(array_filter($sunnahs)) * 10;
+                    }
+
+                    // 4. Poin Tilawah (20 Poin)
+                    if (!empty($log->tadarus_surah)) $dailyScore += 20;
+                    
+                    // 5. Poin Laporan Jumat (30 Poin)
+                    if (!empty($log->friday_khotib)) $dailyScore += 30;
+
+                    // 6. Bonus Nilai Guru (Opsional)
+                    if ($log->teacher_score) {
+                        $dailyScore += round($log->teacher_score / 5); 
+                    }
+
+                    return $dailyScore;
+                });
+
+                $s->ramadan_points = $totalPoints;
                 return $s;
             })
             ->sortByDesc('ramadan_points')
             ->take(10)
             ->values();
 
-        // 3. DATA PENGHUBUNG (LIAISON)
+        // --- 3. DATA PENGHUBUNG (LIAISON) ---
         $liaison_messages = collect([]);
         if (class_exists(LiaisonBook::class)) { 
             try {
@@ -110,7 +141,7 @@ class StudentPortalController extends Controller
             } catch (\Exception $e) {}
         }
 
-        // 4. DATA KEHADIRAN & ABSENSI
+        // --- 4. DATA KEHADIRAN & ABSENSI (LOGIKA LAMA - DIPERTAHANKAN) ---
         $hadir = 0; $terlambat = 0; $sakit = 0; $izin = 0; $alpa = 0;
         $attendance_history = collect([]);
         $rawAttendanceRecords = collect([]); 
@@ -143,7 +174,7 @@ class StudentPortalController extends Controller
         $total_hari_efektif = $hadir + $sakit + $izin + $alpa;
         $attendancePercentage = $total_hari_efektif > 0 ? round(($hadir / $total_hari_efektif) * 100) : 0;
 
-        // 4. LOGIKA DISIPLIN & PRESTASI
+        // --- 5. LOGIKA DISIPLIN & PRESTASI (LOGIKA LAMA - DIPERTAHANKAN) ---
         $violations = collect([]);
         $achievements = collect([]); 
         
@@ -275,7 +306,7 @@ class StudentPortalController extends Controller
         $total_merit_points = $manualMerits->sum(fn($a) => $a->point ?? $a->disciplineType->point_value ?? 0) + $prayerAchievements->sum(fn($a) => $a->point ?? 0);
         $finalScore = 100 - $total_violation_points + $total_merit_points;
 
-        // 5. JURNAL 7 KEBIASAAN
+        // --- 6. JURNAL 7 KEBIASAAN ---
         $todayEntry = null; $habits = collect([]); 
         if (class_exists(StudentHabit::class)) {
             $todayEntry = StudentHabit::where('student_id', $id)
@@ -286,7 +317,7 @@ class StudentPortalController extends Controller
                         ->get();
         }
 
-        // 6. DATA LMS
+        // --- 7. DATA LMS ---
         $lms_assignments_grouped = []; 
         $lms_materials_grouped = []; 
         $lms_grades = [];
@@ -313,24 +344,18 @@ class StudentPortalController extends Controller
             }
         }
         
-        // 7. PERPUSTAKAAN (MODIFIKASI: DENGAN E-BOOKS & RIWAYAT BACA)
+        // --- 8. PERPUSTAKAAN ---
         $library_visits = 0; $library_history = collect([]);
         $ebooks = collect([]); 
         $ebookHistory = collect([]); 
 
-        // A. Riwayat Fisik
         if (class_exists(LibraryLoan::class)) {
              $library_history = LibraryLoan::with('book')->where('student_id', $id)->latest()->take(5)->get();
              $library_visits = $library_history->count();
         }
 
-        // B. Data E-Book & Riwayat Baca
         if (class_exists(Book::class)) {
-            $ebooks = Book::whereNotNull('ebook_path')
-                        ->latest()
-                        ->get();
-            
-            // Ambil Riwayat Baca Siswa Ini
+            $ebooks = Book::whereNotNull('ebook_path')->latest()->get();
             if(class_exists(EbookRead::class)) {
                 $ebookHistory = EbookRead::where('student_id', $id)
                                 ->with('book')
@@ -341,7 +366,7 @@ class StudentPortalController extends Controller
             }
         }
 
-        // 8. DATA AKADEMIK
+        // --- 9. DATA AKADEMIK ---
         $academic_record = null; 
         $chartData = ['labels' => [], 'scores' => []];
         if (class_exists(AcademicRecord::class)) {
@@ -354,18 +379,17 @@ class StudentPortalController extends Controller
             }
         }
 
-        // 9. JURNAL KBM
+        // --- 10. JURNAL KBM (ALL DATA - NO LIMIT) ---
         $teaching_journals = [];
         if (class_exists(TeachingSession::class) && $classId) {
              $teaching_journals = TeachingSession::with(['schedule.subject', 'schedule.teacher', 'attendances'])
                 ->whereHas('schedule', fn($q) => $q->where('school_class_id', $classId))
                 ->latest('date')
                 ->latest('started_at')
-                ->take(10)
                 ->get();
         }
 
-        // 10. PENGADUAN & BK
+        // --- 11. PENGADUAN & BK ---
         $complaints = collect([]);
         if (class_exists(Complaint::class)) {
             $complaints = Complaint::where('student_id', $student->id)->latest()->get();
@@ -378,7 +402,7 @@ class StudentPortalController extends Controller
                 ->get();
         }
 
-        // 11. TABS MENU
+        // --- 12. TABS CONFIGURATION ---
         $tabs = ['ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan']];
 
         if ($isAlumni) {
@@ -387,8 +411,8 @@ class StudentPortalController extends Controller
         } else {
             $tabs = array_merge($tabs, [
                 'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan'],
-                'ramadan_jurnal' => ['icon' => 'moon-stars', 'label' => 'Jurnal Ramadhan'], // TAB BARU
-                'ramadan_rank'   => ['icon' => 'trophy', 'label' => 'Peringkat Kebaikan'], // TAB BARU
+                'ramadan_jurnal' => ['icon' => 'moon-stars', 'label' => 'Jurnal Ramadhan'], 
+                'ramadan_rank'   => ['icon' => 'trophy', 'label' => 'Peringkat Kebaikan'], 
                 'bk' => ['icon' => 'heart-beat', 'label' => 'Konseling BK'],
                 'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
                 'pengaduan' => ['icon' => 'megaphone', 'label' => 'Lapor Masalah'],   
@@ -400,19 +424,18 @@ class StudentPortalController extends Controller
                 'disiplin' => ['icon' => 'warning-octagon', 'label' => 'Disiplin & Poin'], 
                 'prestasi' => ['icon' => 'medal', 'label' => 'Prestasi'],   
                 'keagamaan' => ['icon' => 'mosque', 'label' => 'Keagamaan'],
-                
                 'perpustakaan' => ['icon' => 'books', 'label' => 'E-Library'], 
             ]);
         }
 
-        // Statistik Sholat
+        // Statistik Sholat (Opsional, untuk debug/extra)
         $sholat_dhuha = 0; $sholat_dhuhur = 0;
         if (class_exists(AttendanceSiswa::class)) {
             $sholat_dhuha = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuha')->count();
             $sholat_dhuhur = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuhur')->count();
         }
 
-        // 12. COMPACT DATA (Updated)
+        // --- 13. COMPACT DATA ---
         $data = compact(
             'student', 'isAlumni', 'tabs', 'attendancePercentage',
             'liaison_messages', 'complaints', 
@@ -431,7 +454,7 @@ class StudentPortalController extends Controller
             'bkSessions',
             'today', 
             'todayRamadanLog', 
-            'lastVerifiedLog', // <--- Pastikan ini masuk ke compact
+            'lastVerifiedLog',
             'topRamadanStudents'
         );
 
