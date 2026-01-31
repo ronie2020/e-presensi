@@ -1,5 +1,5 @@
 <x-app-layout>
-    {{-- CUSTOM STYLES --}}
+    {{-- CUSTOM STYLES (ASLI - TIDAK DIHAPUS) --}}
     <style>
         @keyframes bounce-slow { 0%, 100% { transform: translateY(-5%); } 50% { transform: translateY(0); } }
         .animate-podium { animation: bounce-slow 3s ease-in-out infinite; }
@@ -8,7 +8,7 @@
 
     <div class="p-6 md:p-10 space-y-8 min-h-screen bg-slate-50 font-sans text-slate-800">
         
-        {{-- HEADER --}}
+        {{-- HEADER (ASLI - TIDAK DIHAPUS) --}}
         <div class="relative rounded-[3rem] bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-600 p-8 md:p-12 text-white shadow-2xl overflow-hidden border border-white/10">
             <div class="absolute -top-10 -right-10 opacity-10 rotate-12">
                 <i class="ph-fill ph-trophy text-[200px]"></i>
@@ -38,12 +38,13 @@
             </div>
         </div>
 
-        {{-- TOP 3 PODIUM --}}
-        @if($topStudents->count() >= 3)
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end max-w-5xl mx-auto py-10">
+        {{-- TOP 3 PODIUM (LOGIKA DIPERBAIKI: Tetap tampil walau < 3 siswa) --}}
+        @if($topStudents->isNotEmpty())
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end max-w-5xl mx-auto py-10 min-h-[350px]">
             
-            {{-- PERINGKAT 2 --}}
-            <div class="order-2 md:order-1 flex flex-col items-center">
+            {{-- PERINGKAT 2 (Kiri) --}}
+            <div class="order-2 md:order-1 flex flex-col items-center {{ !isset($topStudents[1]) ? 'invisible md:visible opacity-0' : '' }}">
+                @if(isset($topStudents[1]))
                 <div class="relative mb-4">
                     <div class="w-20 h-20 rounded-full border-4 border-slate-300 overflow-hidden shadow-lg bg-white">
                         <img src="https://ui-avatars.com/api/?name={{ urlencode($topStudents[1]->name) }}&background=cbd5e1&color=64748b" alt="Runner up" class="w-full h-full object-cover">
@@ -55,10 +56,12 @@
                     <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">{{ $topStudents[1]->schoolClass->name ?? 'Kelas' }}</p>
                     <div class="text-emerald-600 font-black text-xl">{{ number_format($topStudents[1]->points, 0, ',', '.') }} pts</div>
                 </div>
+                @endif
             </div>
 
-            {{-- PERINGKAT 1 (GOLD) --}}
+            {{-- PERINGKAT 1 (Tengah - Selalu ada jika count > 0) --}}
             <div class="order-1 md:order-2 flex flex-col items-center scale-110 md:-translate-y-4">
+                @if(isset($topStudents[0]))
                 <div class="relative mb-6">
                     <div class="absolute -top-8 left-1/2 -translate-x-1/2 animate-podium">
                         <i class="ph-fill ph-crown text-amber-400 text-5xl drop-shadow-lg"></i>
@@ -75,10 +78,12 @@
                         {{ number_format($topStudents[0]->points, 0, ',', '.') }} pts
                     </div>
                 </div>
+                @endif
             </div>
 
-            {{-- PERINGKAT 3 --}}
-            <div class="order-3 flex flex-col items-center">
+            {{-- PERINGKAT 3 (Kanan) --}}
+            <div class="order-3 flex flex-col items-center {{ !isset($topStudents[2]) ? 'invisible md:visible opacity-0' : '' }}">
+                @if(isset($topStudents[2]))
                 <div class="relative mb-4">
                     <div class="w-20 h-20 rounded-full border-4 border-amber-600/30 overflow-hidden shadow-lg bg-white">
                         <img src="https://ui-avatars.com/api/?name={{ urlencode($topStudents[2]->name) }}&background=d97706&color=ffffff" alt="3rd place" class="w-full h-full object-cover">
@@ -90,11 +95,21 @@
                     <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">{{ $topStudents[2]->schoolClass->name ?? 'Kelas' }}</p>
                     <div class="text-emerald-600 font-black text-xl">{{ number_format($topStudents[2]->points, 0, ',', '.') }} pts</div>
                 </div>
+                @endif
             </div>
         </div>
+        @else
+            {{-- EMPTY STATE JIKA TIDAK ADA SISWA SAMA SEKALI --}}
+            <div class="text-center py-24">
+                <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="ph-duotone ph-users text-4xl text-slate-400"></i>
+                </div>
+                <h3 class="font-bold text-slate-600">Belum ada data peringkat</h3>
+                <p class="text-slate-400 text-sm">Data akan muncul setelah siswa mengisi jurnal.</p>
+            </div>
         @endif
 
-        {{-- LIST RANK 4+ --}}
+        {{-- LIST RANK 4+ (ASLI - TIDAK DIHAPUS) --}}
         <div class="max-w-4xl mx-auto bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
             <div class="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                 <h3 class="font-black text-slate-800 uppercase tracking-wider text-xs flex items-center gap-2">
@@ -135,7 +150,7 @@
             </div>
         </div>
 
-        {{-- INFO SECTION --}}
+        {{-- INFO SECTION (ASLI - TIDAK DIHAPUS) --}}
         <div class="max-w-4xl mx-auto flex flex-col md:flex-row gap-6">
             <div class="flex-1 bg-blue-50 p-6 rounded-3xl border border-blue-100 flex items-start gap-4">
                 <div class="p-3 bg-white rounded-2xl text-blue-600 shadow-sm"><i class="ph-fill ph-lightning text-xl"></i></div>

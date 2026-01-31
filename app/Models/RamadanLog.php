@@ -9,25 +9,38 @@ class RamadanLog extends Model
 {
     use HasFactory;
 
+    protected $table = 'ramadan_logs';
+
     protected $fillable = [
         'student_id',
         'date',
         'is_fasting',
-        'prayers',
-        'sunnah_deeds',
+        'prayers',       // Disimpan sebagai array/json
+        'sunnah_deeds',  // Disimpan sebagai array/json
         'tadarus_surah',
         'tadarus_ayah',
         'murojaah_surah',
+        
+        // [TAMBAHAN PENTING] Kolom Khusus Jumat
+        'friday_khotib',
+        'friday_summary',
+
+        // [TAMBAHAN PENTING] Kolom Penilaian Guru (Wajib ada agar feedback tersimpan)
+        'teacher_id',
+        'teacher_score',
+        'teacher_note',
+        'teacher_verified_at',
     ];
 
     /**
      * Casting kolom JSON ke array secara otomatis.
      */
     protected $casts = [
+        'is_fasting' => 'boolean',
         'prayers' => 'array',
         'sunnah_deeds' => 'array',
         'date' => 'date',
-        'is_fasting' => 'boolean',
+        'teacher_verified_at' => 'datetime',
     ];
 
     /**
@@ -35,6 +48,15 @@ class RamadanLog extends Model
      */
     public function student()
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Student::class, 'student_id');
+    }
+
+    /**
+     * Relasi ke Guru (Penilai)
+     */
+    public function teacher()
+    {
+        // Sesuaikan 'User' jika model guru Anda berbeda (misal 'Teacher')
+        return $this->belongsTo(User::class, 'teacher_id'); 
     }
 }

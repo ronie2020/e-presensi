@@ -1,245 +1,259 @@
-@php
-    // --- 1. PRE-PROCESSING DATA ---
-    $habits = $habits ?? collect([]);
-    $totalEntries = $habits->count();
-    
-    $udzurCount = $habits->filter(function($h) {
-        return ($h->is_udzur_syar_i ?? false) || (strtolower($h->notes ?? '') == 'haid');
-    })->count();
+<div class="space-y-8 animate-in fade-in duration-500 font-sans">
 
-    // Total hari WAJIB shalat
-    $obligatedEntries = $totalEntries - $udzurCount;
-    $divider = $obligatedEntries > 0 ? $obligatedEntries : 1; 
-
-    // --- A. LOGIKA BADGES / LENCANA ---
-    $badges = [
-        [
-            'id' => 'dhuha_starter',
-            'label' => 'Pejuang Dhuha',
-            'icon' => 'ph-sun-horizon', 
-            'bg_class' => 'from-amber-400 to-amber-600 shadow-amber-500/30',
-            'condition' => $habits->where('prayer_dhuha', 1)->count() >= 10,
-            'desc' => 'Melakukan Shalat Dhuha 10x'
-        ],
-        [
-            'id' => 'odoa_lover',
-            'label' => 'Cinta Qur\'an',
-            'icon' => 'ph-book-open', 
-            'bg_class' => 'from-emerald-400 to-emerald-600 shadow-emerald-500/30',
-            'condition' => $habits->whereNotNull('odoa_audio_path')->count() >= 5,
-            'desc' => 'Merekam ODOA 5x'
-        ],
-        [
-            'id' => 'early_bird',
-            'label' => 'Bangun Fajar',
-            'icon' => 'ph-alarm', 
-            'bg_class' => 'from-rose-400 to-rose-600 shadow-rose-500/30',
-            'condition' => $habits->where('habit_1', 1)->count() >= 7,
-            'desc' => 'Bangun pagi 7 hari'
-        ],
-        [
-            'id' => 'discipline_master',
-            'label' => 'Istiqomah',
-            'icon' => 'ph-medal', 
-            'bg_class' => 'from-blue-400 to-blue-600 shadow-blue-500/30',
-            'condition' => $totalEntries >= 30,
-            'desc' => 'Mengisi jurnal 30 hari'
-        ],
-    ];
-
-    $nextBadge = collect($badges)->reject(fn($b) => $b['condition'])->first();
-
-    // --- B. DATA GRAFIK MINGGUAN (PERBAIKAN TIMEZONE) ---
-    $chartData = [];
-    $days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-    
-    // Gunakan Timezone Jakarta agar sinkron dengan Controller
-    $todayJakarta = \Carbon\Carbon::now('Asia/Jakarta')->startOfDay();
-
-    for ($i = 6; $i >= 0; $i--) {
-        $date = $todayJakarta->copy()->subDays($i);
-        $dayName = $days[$date->dayOfWeek];
+    {{-- 
+        ==================================================
+        SECTION 0: LOGIKA UTAMA & PRE-PROCESSING DATA
+        ==================================================
+    --}}
+    @php
+        $habits = $habits ?? collect([]);
+        $totalEntries = $habits->count();
         
-        // Pencarian data yang lebih robust (Tahan format date)
-        $entry = $habits->first(function($h) use ($date) {
-            return \Carbon\Carbon::parse($h->report_date)->isSameDay($date);
-        });
-        
-        $isUdzur = $entry ? (($entry->is_udzur_syar_i ?? false) || (strtolower($entry->notes ?? '') == 'haid')) : false;
+        // 1. HITUNG UDZUR SYAR'I
+        // Filter hari dimana siswa mencentang udzur atau menulis catatan 'haid'
+        $udzurCount = $habits->filter(function($h) {
+            return ($h->is_udzur_syar_i ?? false) || (strtolower($h->notes ?? '') == 'haid');
+        })->count();
 
-        $score = 0;
-        if($entry && !$isUdzur) {
-            if($entry->prayer_subuh) $score++;
-            if($entry->prayer_dhuha) $score++;
-            if($entry->prayer_dzuhur) $score++;
-            if($entry->prayer_ashar) $score++;
-            if($entry->prayer_maghrib) $score++;
-            if($entry->prayer_isya) $score++;
-        } elseif ($isUdzur) {
-            $score = 6; // Poin penuh visual untuk Udzur
-        }
-        
-        $chartData[] = [
-            'day' => $dayName,
-            'date' => $date->format('d/m'),
-            'score' => $score,
-            'height' => ($score / 6) * 100, // Persentase tinggi (0 - 100%)
-            'is_today' => $i === 0,
-            'is_udzur' => $isUdzur,
-            'has_entry' => !is_null($entry) // Flag penanda ada data atau tidak
+        // 2. TENTUKAN PEMBAGI (DIVIDER)
+        // Total hari wajib = Total Entry dikurangi Hari Udzur
+        $obligatedEntries = $totalEntries - $udzurCount;
+        $divider = $obligatedEntries > 0 ? $obligatedEntries : 1; 
+
+        // 3. CONFIG ICON SHALAT
+        $prayerConfig = [
+            ['key' => 'prayer_subuh',   'label' => 'Subuh',   'icon' => 'ph-cloud-sun',      'color' => 'blue'],
+            ['key' => 'prayer_dhuha',   'label' => 'Dhuha',   'icon' => 'ph-sun',            'color' => 'teal'],
+            ['key' => 'prayer_dzuhur',  'label' => 'Dzuhur',  'icon' => 'ph-sun-dim',        'color' => 'orange'],
+            ['key' => 'prayer_ashar',   'label' => 'Ashar',   'icon' => 'ph-cloud-fog',      'color' => 'amber'],
+            ['key' => 'prayer_maghrib', 'label' => 'Maghrib', 'icon' => 'ph-moon-stars',     'color' => 'indigo'],
+            ['key' => 'prayer_isya',    'label' => 'Isya',    'icon' => 'ph-moon',           'color' => 'slate'],
         ];
-    }
-    
-    // Konfigurasi Visual Shalat
-    $prayerConfig = [
-        ['key' => 'prayer_subuh',   'label' => 'Subuh',   'icon' => 'ph-cloud-sun',      'color' => 'blue'],
-        ['key' => 'prayer_dhuha',   'label' => 'Dhuha',   'icon' => 'ph-sun',            'color' => 'teal'],
-        ['key' => 'prayer_dzuhur',  'label' => 'Dzuhur',  'icon' => 'ph-sun-dim',        'color' => 'orange'],
-        ['key' => 'prayer_ashar',   'label' => 'Ashar',   'icon' => 'ph-cloud-fog',      'color' => 'amber'],
-        ['key' => 'prayer_maghrib', 'label' => 'Maghrib', 'icon' => 'ph-moon-stars',     'color' => 'indigo'],
-        ['key' => 'prayer_isya',    'label' => 'Isya',    'icon' => 'ph-moon',           'color' => 'slate'],
-    ];
-@endphp
+    @endphp
 
-<div class="space-y-8 animate-enter">
-
-    {{-- SECTION 1: BADGES & WEEKLY CHART --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    {{-- 
+        ==================================================
+        SECTION 1: DASHBOARD MODE RAMADHAN (JIKA AKTIF)
+        ==================================================
+    --}}
+    @if(isset($topRamadanStudents) && $topRamadanStudents->isNotEmpty())
         
-        {{-- KOLOM KIRI: Koleksi Lencana --}}
-        <div class="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden group">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+        {{-- Header & Statistik Poin Pribadi --}}
+        <div class="bg-gradient-to-br from-emerald-900 via-teal-800 to-emerald-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-6 opacity-10">
+                <i class="ph-fill ph-mosque text-[150px]"></i>
+            </div>
             
-            <div class="flex items-center justify-between mb-6 relative z-10">
-                <div>
-                    <h3 class="font-black text-xl tracking-tight">Pencapaianmu</h3>
-                    <p class="text-indigo-200 text-xs mt-1">Kumpulkan semua lencana!</p>
-                </div>
-                <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/20">
-                    <i class="ph-fill ph-trophy text-yellow-400 text-xl"></i>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-4 gap-2 mb-4 relative z-10">
-                @foreach($badges as $badge)
-                    <div class="flex flex-col items-center gap-1 group/badge cursor-help relative">
-                        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl transition-all duration-300
-                            {{ $badge['condition'] 
-                                ? 'bg-gradient-to-br ' . $badge['bg_class'] . ' shadow-lg text-white scale-100' 
-                                : 'bg-white/5 text-white/20 grayscale scale-90 border border-white/5' 
-                            }}">
-                            <i class="ph-duotone {{ $badge['icon'] }}"></i>
-                        </div>
-                        
-                        <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-max max-w-[120px] bg-black/80 backdrop-blur text-white text-[10px] p-2 rounded-lg opacity-0 group-hover/badge:opacity-100 transition-opacity pointer-events-none text-center z-20 shadow-xl border border-white/10">
-                            <p class="font-bold">{{ $badge['label'] }}</p>
-                            <p class="text-white/70">{{ $badge['desc'] }}</p>
-                        </div>
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="text-center md:text-left">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 backdrop-blur-sm mb-2">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-100">Edisi Ramadhan</span>
                     </div>
-                @endforeach
-            </div>
-
-            @if($nextBadge)
-                <div class="bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/10 flex items-center gap-3 relative z-10">
-                    <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                        <i class="ph-bold ph-lock-key text-white/70"></i>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-indigo-200 uppercase tracking-wider font-bold">Target Selanjutnya</p>
-                        <p class="text-xs font-bold text-white">{{ $nextBadge['label'] }} <span class="font-normal text-indigo-200">({{ $nextBadge['desc'] }})</span></p>
-                    </div>
-                </div>
-            @else
-                 <div class="bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/10 text-center relative z-10">
-                    <p class="text-xs font-bold text-emerald-300 flex items-center justify-center gap-2">
-                        <i class="ph-fill ph-crown"></i> Semua Lencana Terbuka!
+                    <h2 class="text-3xl font-black mb-1">Papan Keagamaan</h2>
+                    <p class="text-emerald-100/80 text-sm max-w-md">
+                        Pantau terus ibadah harianmu, kumpulkan poin kebaikan, dan raih predikat siswa paling istiqomah.
                     </p>
+                    
+                    {{-- TOMBOL AKSES JURNAL --}}
+                    <div class="mt-6 flex flex-wrap justify-center md:justify-start gap-3">
+                        <a href="{{ route('student.ramadan.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-amber-400 text-amber-900 font-black rounded-xl hover:bg-amber-300 transition shadow-lg shadow-amber-900/20 group">
+                            <i class="ph-bold ph-pencil-simple"></i> Isi Jurnal Ramadhan
+                        </a>
+                        @if(isset($todayRamadanLog) && $todayRamadanLog)
+                            <div class="inline-flex items-center gap-2 px-4 py-3 bg-emerald-800/50 text-emerald-100 font-bold rounded-xl border border-emerald-700">
+                                <i class="ph-fill ph-check-circle text-emerald-400"></i> Sudah Mengisi
+                            </div>
+                        @endif
+                    </div>
                 </div>
-            @endif
+
+                {{-- Score Card Pribadi --}}
+                @php
+                    $myRank = $topRamadanStudents->search(function($s) {
+                        return $s->id == Auth::guard('student')->id();
+                    });
+                    $myScore = $topRamadanStudents->where('id', Auth::guard('student')->id())->first()->ramadan_points ?? 0;
+                @endphp
+                <div class="bg-white/10 backdrop-blur-md border border-white/10 p-5 rounded-2xl min-w-[160px] text-center">
+                    <p class="text-xs font-bold text-emerald-200 uppercase tracking-wider mb-1">Poin Saya</p>
+                    <div class="text-4xl font-black text-white mb-1">{{ number_format($myScore) }}</div>
+                    @if($myRank !== false)
+                        <div class="inline-block px-2 py-0.5 rounded bg-emerald-500 text-white text-[10px] font-bold">
+                            Peringkat #{{ $myRank + 1 }}
+                        </div>
+                    @else
+                        <div class="text-[10px] text-white/60">Belum masuk Top 10</div>
+                    @endif
+                </div>
+            </div>
         </div>
 
-        {{-- KOLOM KANAN: Grafik Mingguan --}}
+        {{-- Mini Leaderboard (Top 3 Only) --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            @foreach($topRamadanStudents->take(3) as $index => $winner)
+            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 relative overflow-hidden">
+                <div class="absolute right-0 top-0 opacity-5 -mr-4 -mt-4">
+                    <i class="ph-fill ph-crown text-6xl text-slate-800"></i>
+                </div>
+                <div class="w-12 h-12 rounded-full border-2 {{ $index == 0 ? 'border-amber-400 p-0.5' : 'border-slate-200' }} shrink-0">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode($winner->name) }}&background=random" class="w-full h-full rounded-full object-cover">
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-black w-5 h-5 rounded-full flex items-center justify-center {{ $index == 0 ? 'bg-amber-400 text-white' : 'bg-slate-100 text-slate-500' }}">
+                            {{ $index + 1 }}
+                        </span>
+                        <p class="text-sm font-bold text-slate-800 truncate max-w-[120px]">{{ strtok($winner->name, ' ') }}</p>
+                    </div>
+                    <p class="text-xs text-emerald-600 font-bold mt-0.5">{{ number_format($winner->ramadan_points) }} Poin</p>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+    @else
+        {{-- HEADER STANDAR (DILUAR RAMADHAN) --}}
+        <div class="flex items-center justify-between bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+            <div>
+                <h2 class="text-2xl font-black text-slate-800">Jurnal Kebiasaan Baik</h2>
+                <p class="text-slate-400 text-sm">Bangun karakter positif dengan 7 kebiasaan harian.</p>
+            </div>
+            <a href="{{ route('student.habits.create') }}" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition shadow-lg shadow-blue-200">
+                <i class="ph-bold ph-plus-circle"></i> Isi Jurnal
+            </a>
+        </div>
+    @endif
+
+    {{-- 
+        ==================================================
+        SECTION 2: GRAFIK MINGGUAN & BADGES
+        ==================================================
+    --}}
+    
+    @php
+        $chartData = [];
+        $days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+        $todayJakarta = \Carbon\Carbon::now('Asia/Jakarta')->startOfDay();
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = $todayJakarta->copy()->subDays($i);
+            $dayName = $days[$date->dayOfWeek];
+            
+            $entry = $habits->first(function($h) use ($date) {
+                return \Carbon\Carbon::parse($h->report_date)->isSameDay($date);
+            });
+            
+            // Cek Udzur per hari
+            $isUdzur = $entry ? (($entry->is_udzur_syar_i ?? false) || (strtolower($entry->notes ?? '') == 'haid')) : false;
+
+            $score = 0;
+            if($entry && !$isUdzur) {
+                if($entry->prayer_subuh) $score++;
+                if($entry->prayer_dhuha) $score++;
+                if($entry->prayer_dzuhur) $score++;
+                if($entry->prayer_ashar) $score++;
+                if($entry->prayer_maghrib) $score++;
+                if($entry->prayer_isya) $score++;
+            } elseif ($isUdzur) {
+                $score = 6; // Poin penuh visual untuk Udzur
+            }
+            
+            $chartData[] = [
+                'day' => $dayName,
+                'score' => $score,
+                'height' => ($score / 6) * 100,
+                'is_today' => $i === 0,
+                'is_udzur' => $isUdzur,
+                'has_entry' => !is_null($entry)
+            ];
+        }
+    @endphp
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {{-- GRAFIK KONSISTENSI --}}
         <div class="lg:col-span-2 bg-white rounded-[2rem] border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h3 class="font-bold text-slate-700 text-lg">Konsistensi Ibadah</h3>
+                    <h3 class="font-bold text-slate-700 text-lg flex items-center gap-2">
+                        <i class="ph-duotone ph-chart-bar text-blue-600"></i> Konsistensi Shalat
+                    </h3>
                     <p class="text-xs text-slate-400">7 Hari Terakhir</p>
                 </div>
-                
-                <div class="flex gap-2">
-                    <div class="px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-xs font-bold border border-pink-100 flex items-center gap-1">
-                        <div class="w-2 h-2 rounded-full bg-pink-500"></div> Udzur
-                    </div>
-                    <div class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-100">
-                        Target: 6 Waktu
-                    </div>
+                {{-- Legend Udzur --}}
+                @if(collect($chartData)->where('is_udzur', true)->count() > 0)
+                <div class="flex items-center gap-2 px-3 py-1 bg-pink-50 text-pink-600 rounded-full text-[10px] font-bold border border-pink-100">
+                    <span class="w-2 h-2 rounded-full bg-pink-500"></span> Masa Udzur
                 </div>
+                @endif
             </div>
 
-            {{-- Grafik Batang dengan Background Track --}}
-            <div class="flex items-end justify-between gap-2 h-32 md:h-40 w-full px-2">
+            <div class="flex items-end justify-between gap-3 h-40 w-full px-2">
                 @foreach($chartData as $data)
                     <div class="flex flex-col items-center gap-2 flex-1 group relative h-full justify-end">
-                        
-                        {{-- Tooltip --}}
-                        <div class="absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-[10px] py-1 px-2 rounded z-10 whitespace-nowrap">
-                            @if($data['is_udzur'])
-                                Sedang Udzur
-                            @elseif($data['has_entry'])
-                                {{ $data['score'] }} Waktu Shalat
-                            @else
-                                Belum Mengisi
-                            @endif
-                        </div>
-
-                        {{-- Track Batang (Background Abu-abu) --}}
-                        <div class="w-full max-w-[40px] bg-slate-50 rounded-t-xl relative overflow-hidden h-full flex items-end transition-all hover:bg-slate-100 border border-slate-100 border-b-0">
-                            
+                        <div class="w-full max-w-[40px] bg-slate-50 rounded-t-xl relative overflow-hidden h-full flex items-end transition-all hover:bg-slate-100">
                             @php
-                                $barColor = 'bg-slate-200'; // Default kosong
-                                
+                                $barColor = 'bg-slate-200';
                                 if ($data['has_entry']) {
-                                    if ($data['is_udzur']) {
-                                        $barColor = 'bg-pink-400'; 
-                                    } elseif ($data['is_today']) {
-                                        $barColor = 'bg-blue-500';
-                                    } else {
-                                        $barColor = match(true) {
-                                            $data['score'] >= 5 => 'bg-emerald-400',
-                                            $data['score'] >= 3 => 'bg-amber-400',
-                                            default => 'bg-rose-300'
-                                        };
-                                    }
+                                    $barColor = $data['is_udzur'] ? 'bg-pink-400' : 
+                                        ($data['score'] >= 5 ? 'bg-emerald-400' : 
+                                        ($data['score'] >= 3 ? 'bg-amber-400' : 'bg-rose-300'));
                                 }
                             @endphp
-
-                            <div style="height: {{ $data['height'] }}%" 
-                                 class="w-full rounded-t-xl transition-all duration-1000 ease-out relative group-hover:opacity-90 {{ $barColor }}">
-                                 
-                                 @if($data['is_udzur'])
-                                    <div class="absolute bottom-2 left-0 right-0 text-center text-white/80 text-xs animate-pulse">
-                                        <i class="ph-bold ph-flower-lotus"></i>
-                                    </div>
-                                 @endif
-                            </div>
+                            <div style="height: {{ $data['height'] }}%" class="w-full rounded-t-xl transition-all duration-1000 ease-out {{ $barColor }}"></div>
                         </div>
-                        <div class="text-center h-6">
-                            <p class="text-[10px] font-bold {{ $data['is_today'] ? 'text-blue-600' : 'text-slate-500' }}">{{ $data['day'] }}</p>
-                        </div>
+                        <p class="text-[10px] font-bold {{ $data['is_today'] ? 'text-blue-600' : 'text-slate-500' }}">{{ $data['day'] }}</p>
                     </div>
                 @endforeach
+            </div>
+        </div>
+
+        {{-- BADGES / PENCAPAIAN --}}
+        <div class="bg-gradient-to-b from-slate-900 to-slate-800 rounded-[2rem] p-6 text-white shadow-xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10">
+                <i class="ph-fill ph-medal text-8xl"></i>
+            </div>
+            <h3 class="font-black text-xl mb-4 relative z-10">Lencana</h3>
+            
+            @php
+                $badges = [
+                    ['icon' => 'ph-sun-horizon', 'bg' => 'bg-amber-500', 'active' => $habits->where('prayer_dhuha', 1)->count() >= 10, 'label' => 'Ahli Dhuha'],
+                    ['icon' => 'ph-book-open', 'bg' => 'bg-emerald-500', 'active' => $habits->whereNotNull('odoa_audio_path')->count() >= 5, 'label' => 'Qari'],
+                    ['icon' => 'ph-fire', 'bg' => 'bg-rose-500', 'active' => $habits->count() >= 30, 'label' => 'Istiqomah'],
+                ];
+            @endphp
+
+            <div class="grid grid-cols-3 gap-3 relative z-10">
+                @foreach($badges as $badge)
+                    <div class="flex flex-col items-center gap-2 p-3 rounded-xl {{ $badge['active'] ? 'bg-white/10 border border-white/20' : 'bg-white/5 border border-white/5 opacity-50 grayscale' }}">
+                        <div class="w-10 h-10 rounded-full {{ $badge['active'] ? $badge['bg'] : 'bg-slate-700' }} flex items-center justify-center text-white shadow-lg">
+                            <i class="ph-fill {{ $badge['icon'] }} text-lg"></i>
+                        </div>
+                        <p class="text-[9px] font-bold text-center">{{ $badge['label'] }}</p>
+                    </div>
+                @endforeach
+            </div>
+            
+            <div class="mt-6 pt-4 border-t border-white/10 text-center relative z-10">
+                <p class="text-[10px] text-slate-400">Konsisten adalah kunci keberhasilan.</p>
             </div>
         </div>
     </div>
 
-    {{-- SECTION 2: STATISTIK CIRCULAR --}}
+    {{-- 
+        ==================================================
+        SECTION 3: REKAPITULASI TOTAL & UDZUR (DIKEMBALIKAN)
+        ==================================================
+    --}}
     <div>
         <div class="flex items-center justify-between mb-4">
             <h3 class="font-bold text-slate-700 text-lg flex items-center gap-2">
                 <i class="ph-duotone ph-chart-pie-slice text-blue-600"></i> Rekapitulasi Total
             </h3>
+            
+            {{-- Indikator Udzur --}}
             @if($udzurCount > 0)
-                <span class="text-xs font-bold text-pink-500 bg-pink-50 px-2 py-1 rounded-lg border border-pink-100">
+                <span class="text-xs font-bold text-pink-500 bg-pink-50 px-3 py-1.5 rounded-xl border border-pink-100 flex items-center gap-1.5 animate-pulse">
                     <i class="ph-fill ph-info"></i> {{ $udzurCount }} Hari Udzur (Dikecualikan)
                 </span>
             @endif
@@ -250,34 +264,38 @@
                 @foreach($prayerConfig as $prayer)
                     @php
                         $count = $habits->where($prayer['key'], 1)->count();
+                        // Gunakan $divider yang sudah dikurangi udzur
                         $percentage = $divider > 0 ? round(($count / $divider) * 100) : 0;
-                        
-                        $colorClass = match($prayer['color']) {
+                        if($percentage > 100) $percentage = 100; // Cap at 100%
+
+                        $strokeColor = match($prayer['color']) {
+                            'blue' => 'text-blue-500', 'teal' => 'text-teal-500', 'orange' => 'text-orange-500',
+                            'amber' => 'text-amber-500', 'indigo' => 'text-indigo-500', 'slate' => 'text-slate-500',
+                            default => 'text-gray-500'
+                        };
+                        $iconColor = match($prayer['color']) {
                             'blue' => 'text-blue-600', 'teal' => 'text-teal-600', 'orange' => 'text-orange-600',
                             'amber' => 'text-amber-600', 'indigo' => 'text-indigo-600', 'slate' => 'text-slate-600',
                             default => 'text-gray-600'
                         };
-                        $strokeColor = match($prayer['color']) {
-                            'blue' => 'stroke-blue-500', 'teal' => 'stroke-teal-500', 'orange' => 'stroke-orange-500',
-                            'amber' => 'stroke-amber-500', 'indigo' => 'stroke-indigo-500', 'slate' => 'stroke-slate-500',
-                            default => 'stroke-gray-500'
-                        };
                     @endphp
 
-                    <div class="bg-white p-4 rounded-[1.5rem] border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center gap-2 hover:shadow-md transition-all group">
+                    <div class="bg-white p-4 rounded-[1.5rem] border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center gap-2 hover:shadow-md transition-all group relative overflow-hidden">
                         <div class="relative w-16 h-16 group-hover:scale-105 transition-transform">
                             <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
                                 <path class="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
-                                <path class="{{ $strokeColor }} transition-all duration-1000 ease-out" stroke-dasharray="{{ $percentage }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke-width="3" stroke-linecap="round" />
+                                <path class="{{ $strokeColor }} transition-all duration-1000 ease-out" stroke-dasharray="{{ $percentage }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
                             </svg>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <i class="ph-fill {{ $prayer['icon'] }} {{ $colorClass }} text-xl"></i>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-[10px] font-black text-slate-800">{{ $percentage }}%</span>
                             </div>
                         </div>
                         <div>
-                            <h4 class="text-xs font-bold text-slate-700">{{ $prayer['label'] }}</h4>
-                            <p class="text-[10px] text-slate-400 font-medium">
-                                {{ $count }}x / {{ $divider }} Wajib
+                            <h4 class="text-xs font-bold text-slate-700 flex items-center justify-center gap-1">
+                                <i class="ph-fill {{ $prayer['icon'] }} {{ $iconColor }}"></i> {{ $prayer['label'] }}
+                            </h4>
+                            <p class="text-[10px] text-slate-400 font-medium mt-1">
+                                {{ $count }} / {{ $divider }} Hari
                             </p>
                         </div>
                     </div>
@@ -286,13 +304,17 @@
         @else
             <div class="bg-slate-50 rounded-2xl p-8 text-center border-2 border-dashed border-slate-200">
                 <i class="ph-duotone ph-notebook text-4xl text-slate-300 mb-2"></i>
-                <p class="text-slate-500 text-sm font-bold">Belum ada data jurnal keagamaan.</p>
-                <p class="text-slate-400 text-xs">Isi jurnal harianmu untuk melihat statistik.</p>
+                <p class="text-slate-500 text-sm font-bold">Belum ada data statistik.</p>
+                <p class="text-slate-400 text-xs">Mulai isi jurnal untuk melihat perkembanganmu.</p>
             </div>
         @endif
     </div>
 
-    {{-- SECTION 3: RIWAYAT ODOA --}}
+    {{-- 
+        ==================================================
+        SECTION 4: RIWAYAT ODOA
+        ==================================================
+    --}}
     <div>
         <div class="flex items-center justify-between mb-4">
             <h3 class="font-bold text-slate-700 text-lg flex items-center gap-2">
@@ -329,7 +351,6 @@
                                 </h4>
                             </div>
                             <div class="md:w-1/3">
-                                {{-- Gunakan asset storage dengan path yang benar --}}
                                 <audio controls class="w-full h-8 rounded-lg shadow-sm border border-slate-100 bg-slate-50/50">
                                     <source src="{{ asset('storage/'.$habit->odoa_audio_path) }}" type="audio/mpeg">
                                     Browser tidak mendukung audio.

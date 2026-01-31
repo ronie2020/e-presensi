@@ -508,8 +508,8 @@ Route::middleware('auth')->group(function () {
   // RAMADHAN ADMIN (Rekap Guru)
     Route::prefix('admin/ramadan')->name('admin.ramadan.')->group(function() {
         Route::get('/reports', [RamadanLogController::class, 'adminReport'])->name('reports');
+        Route::post('/verify/{id}', [RamadanLogController::class, 'verifyFriday'])->name('verify');
     });
-
 });
 
 require __DIR__.'/auth.php';

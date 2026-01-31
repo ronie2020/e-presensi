@@ -1,94 +1,251 @@
-<div class="space-y-6 animate-in fade-in duration-500">
-    <div class="bg-gradient-to-r from-emerald-800 to-teal-600 rounded-[2rem] p-8 text-white shadow-xl relative overflow-hidden">
-        <div class="absolute top-0 right-0 p-4 opacity-10">
-            <i class="ph-fill ph-moon text-[100px]"></i>
-        </div>
-        <div class="relative z-10">
-            <h2 class="text-2xl font-black mb-2">Jurnal Ibadah Ramadhan</h2>
-            <p class="text-emerald-50/80 text-sm italic">"Fastabiqul Khairat - Berlomba-lombalah dalam kebaikan."</p>
+<div x-data="{
+        showDetail: false,
+    }" class="space-y-8 animate-in fade-in duration-500">
+    
+    {{-- 1. LOGIKA HITUNG PROGRESS --}}
+    @php
+        // Total Poin Ideal Harian Dasar:
+        // 1 (Puasa) + 5 (Wajib) + 5 (Sunnah) + 1 (Tilawah) = 12 Poin
+        $totalTarget = 12; 
+        $currentScore = 0;
+        
+        // Cek Hari Jumat
+        $isFriday = \Carbon\Carbon::parse($today)->isFriday();
+        
+        // Jika Jumat, Target nambah 1 (Laporan Jumat)
+        if ($isFriday) {
+            $totalTarget = 13;
+        }
+
+        if($todayRamadanLog) {
+            // 1. Puasa
+            if($todayRamadanLog->is_fasting) $currentScore++;
+            
+            // 2. Shalat Wajib (Loop 5 waktu)
+            foreach(['subuh', 'dzuhur', 'ashar', 'maghrib', 'isya'] as $p) {
+                if($todayRamadanLog->prayers[$p] ?? false) $currentScore++;
+            }
+
+            // 3. Sunnah (Loop 5 item)
+            foreach(['tarawih', 'witir', 'dhuha', 'rawatib', 'sedekah'] as $s) {
+                if($todayRamadanLog->sunnah_deeds[$s] ?? false) $currentScore++;
+            }
+
+            // 4. Tilawah
+            if($todayRamadanLog->tadarus_surah) $currentScore++;
+
+            // 5. KHUSUS JUMAT: Cek apakah Khotib sudah diisi
+            if ($isFriday && !empty($todayRamadanLog->friday_khotib)) {
+                $currentScore++;
+            }
+        }
+
+        // Hindari pembagian dengan nol
+        $progressPercent = $totalTarget > 0 ? ($currentScore / $totalTarget) * 100 : 0;
+        
+        // Warna progress bar
+        $progressColor = 'text-emerald-400';
+        if($progressPercent < 30) $progressColor = 'text-rose-400';
+        elseif($progressPercent < 70) $progressColor = 'text-amber-400';
+    @endphp
+
+    {{-- 2. HEADER SUMMARY & CIRCULAR PROGRESS --}}
+    <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden">
+        {{-- Background Effects --}}
+        <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-600/20 rounded-full blur-[80px] -mr-32 -mt-32"></div>
+        <div class="absolute bottom-0 left-0 w-40 h-40 bg-teal-600/20 rounded-full blur-[60px] -ml-20 -mb-20"></div>
+        <div class="absolute top-4 right-4 opacity-10"><i class="ph-fill ph-moon-stars text-8xl"></i></div>
+
+        <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
+            {{-- Circular Progress --}}
+            <div class="relative w-32 h-32 shrink-0 group">
+                <svg class="w-full h-full transform -rotate-90">
+                    <circle cx="64" cy="64" r="56" stroke="currentColor" stroke-width="12" fill="transparent" class="text-slate-800"></circle>
+                    <circle cx="64" cy="64" r="56" stroke="currentColor" stroke-width="12" fill="transparent" 
+                            class="{{ $progressColor }} transition-all duration-1000 ease-out shadow-[0_0_15px_currentColor]"
+                            stroke-dasharray="351.8"
+                            stroke-dashoffset="{{ 351.8 - (351.8 * $progressPercent / 100) }}"></circle>
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span class="text-2xl font-black text-white tracking-tight">{{ round($progressPercent) }}%</span>
+                    <span class="text-[9px] uppercase text-slate-400 font-bold tracking-widest">Tuntas</span>
+                </div>
+            </div>
+
+            <div class="flex-1 text-center md:text-left">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-black mb-1">Jurnal Ibadah Ramadhan</h2>
+                        <p class="text-emerald-100/70 text-sm leading-relaxed max-w-lg">
+                            "Barangsiapa berpuasa Ramadhan atas dasar iman dan mengharap pahala dari Allah, maka dosanya yang telah lalu akan diampuni."
+                        </p>
+                    </div>
+                </div>
+                
+                {{-- Status Badges --}}
+                <div class="flex flex-wrap justify-center md:justify-start gap-2 mt-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold border {{ $todayRamadanLog && $todayRamadanLog->is_fasting ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200' : 'bg-slate-700 border-slate-600 text-slate-300' }}">
+                        {{ $todayRamadanLog && $todayRamadanLog->is_fasting ? 'Berpuasa Hari Ini' : 'Belum Puasa' }}
+                    </span>
+                    @if($isFriday)
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 border border-amber-500/50 text-amber-200 flex items-center gap-1 animate-pulse">
+                            <i class="ph-fill ph-star"></i> Jumat Berkah: Jangan Lupa Laporan Jumat!
+                        </span>
+                    @endif
+                </div>
+
+                {{-- TOMBOL AKSI CEPAT --}}
+                <div class="pt-6 mt-2 border-t border-white/10 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
+                    @if(!$todayRamadanLog)
+                        <div class="flex items-center gap-2 text-amber-400 animate-pulse">
+                            <i class="ph-fill ph-warning-circle"></i>
+                            <span class="text-xs font-bold">Jurnal Kosong</span>
+                        </div>
+                        <a href="{{ route('student.ramadan.index') }}" class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-400 hover:to-teal-400 font-black rounded-xl transition-all shadow-lg shadow-emerald-900/50 ring-2 ring-emerald-500/50 hover:ring-white/50">
+                            <span>Isi Jurnal Sekarang</span>
+                            <i class="ph-bold ph-pencil-simple group-hover:rotate-12 transition-transform"></i>
+                        </a>
+                    @else
+                         <a href="{{ route('student.ramadan.index') }}" class="group relative inline-flex items-center gap-2 px-6 py-2 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white font-bold text-xs rounded-xl transition-all border border-slate-700">
+                            <span>Update / Edit Data</span>
+                            <i class="ph-bold ph-pencil-simple"></i>
+                        </a>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 
-    <form action="{{ route('student.ramadan.save') }}" method="POST" class="grid grid-cols-1 md:grid-cols-12 gap-6">
-        @csrf
-        <input type="hidden" name="date" value="{{ $today }}">
+    {{-- 3. THE GRID (STATUS IBADAH) --}}
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        @php
+            // Helper untuk status icon & warna
+            $getStatus = function($condition) {
+                return $condition 
+                    ? ['bg' => 'bg-emerald-50', 'border' => 'border-emerald-200', 'icon_color' => 'text-emerald-500', 'text' => 'text-slate-800', 'status' => 'Tercatat', 'check' => true]
+                    : ['bg' => 'bg-slate-50', 'border' => 'border-slate-100', 'icon_color' => 'text-slate-300', 'text' => 'text-slate-400', 'status' => 'Belum', 'check' => false];
+            };
 
-        {{-- Checklist Utama --}}
-        <div class="md:col-span-8 space-y-6">
-            {{-- PUASA --}}
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
-                        <i class="ph-bold ph-check-circle text-2xl"></i>
+            $gridItems = [];
+
+            // [LOGIKA BARU] JIKA HARI JUMAT, TAMPILKAN KARTU KHUSUS DI URUTAN PERTAMA
+            if ($isFriday) {
+                $fridayFilled = !empty($todayRamadanLog->friday_khotib);
+                $gridItems[] = [
+                    'label' => 'Laporan Jumat',
+                    'icon' => 'mosque',
+                    'bg' => $fridayFilled ? 'bg-emerald-50' : 'bg-amber-50', // Kuning jika belum diisi agar eye-catching
+                    'border' => $fridayFilled ? 'border-emerald-200' : 'border-amber-200',
+                    'icon_color' => $fridayFilled ? 'text-emerald-500' : 'text-amber-500',
+                    'text' => 'text-slate-800',
+                    'status' => $fridayFilled ? 'Sudah Diisi' : 'Wajib Diisi!',
+                    'check' => $fridayFilled
+                ];
+            }
+
+            // 1. PUASA
+            $gridItems[] = array_merge(['label' => 'Puasa Hari Ini', 'icon' => 'bowl-food'], $getStatus($todayRamadanLog->is_fasting ?? false));
+            
+            // 2. SHALAT 5 WAKTU
+            $gridItems[] = [
+                'label' => 'Shalat Wajib', 
+                'icon' => 'clock-afternoon',
+                'bg' => ($todayRamadanLog && count(array_filter($todayRamadanLog->prayers)) == 5) ? 'bg-blue-50' : 'bg-slate-50',
+                'border' => ($todayRamadanLog && count(array_filter($todayRamadanLog->prayers)) == 5) ? 'border-blue-200' : 'border-slate-100',
+                'icon_color' => ($todayRamadanLog && count(array_filter($todayRamadanLog->prayers)) >= 1) ? 'text-blue-500' : 'text-slate-300',
+                'text' => 'text-slate-800',
+                'status' => ($todayRamadanLog ? count(array_filter($todayRamadanLog->prayers)) : 0) . '/5 Waktu',
+                'check' => ($todayRamadanLog && count(array_filter($todayRamadanLog->prayers)) == 5)
+            ];
+
+            // 3. TARAWIH
+            $gridItems[] = array_merge(['label' => 'Shalat Tarawih', 'icon' => 'moon-stars'], $getStatus($todayRamadanLog->sunnah_deeds['tarawih'] ?? false));
+
+            // 4. TILAWAH
+            $gridItems[] = [
+                'label' => 'Tilawah Quran', 
+                'icon' => 'book-open-text',
+                'bg' => ($todayRamadanLog->tadarus_surah ?? false) ? 'bg-amber-50' : 'bg-slate-50',
+                'border' => ($todayRamadanLog->tadarus_surah ?? false) ? 'border-amber-200' : 'border-slate-100',
+                'icon_color' => ($todayRamadanLog->tadarus_surah ?? false) ? 'text-amber-500' : 'text-slate-300',
+                'text' => 'text-slate-800',
+                'status' => $todayRamadanLog->tadarus_surah ?? 'Belum ada',
+                'check' => ($todayRamadanLog->tadarus_surah ?? false)
+            ];
+
+            // 5. SUNNAH LAINNYA (Summary)
+            $gridItems[] = [
+                'label' => 'Sunnah Lainnya', 
+                'icon' => 'sparkle',
+                'bg' => 'bg-purple-50',
+                'border' => 'border-purple-100',
+                'icon_color' => 'text-purple-500',
+                'text' => 'text-slate-800',
+                'status' => ($todayRamadanLog ? 
+                    ( ($todayRamadanLog->sunnah_deeds['sedekah']??0) + ($todayRamadanLog->sunnah_deeds['dhuha']??0) + ($todayRamadanLog->sunnah_deeds['witir']??0) + ($todayRamadanLog->sunnah_deeds['rawatib']??0) ) 
+                    : 0) . ' Amalan',
+                'check' => false
+            ];
+        @endphp
+
+        @foreach($gridItems as $item)
+            <div class="p-5 rounded-2xl border {{ $item['bg'] }} {{ $item['border'] }} flex flex-col items-center text-center justify-center relative group transition-all hover:shadow-md h-full">
+                @if($item['check'])
+                    <div class="absolute top-2 right-2 bg-white rounded-full p-0.5 shadow-sm text-emerald-500">
+                        <i class="ph-fill ph-check-circle text-lg"></i>
                     </div>
+                @endif
+
+                <i class="ph-duotone ph-{{ $item['icon'] }} text-3xl mb-3 {{ $item['icon_color'] }}"></i>
+                <h4 class="font-bold text-xs {{ $item['text'] }} mb-1 uppercase tracking-wider">{{ $item['label'] }}</h4>
+                <p class="text-xs font-bold {{ $item['check'] ? 'text-slate-600' : 'text-slate-400' }}">
+                    {{ Str::limit($item['status'], 15) }}
+                </p>
+            </div>
+        @endforeach
+    </div>
+
+    {{-- 4. FEEDBACK GURU (Dipastikan Muncul jika ada data) --}}
+    @if(isset($lastVerifiedLog) && $lastVerifiedLog && $lastVerifiedLog->teacher_verified_at)
+    <div class="bg-gradient-to-br from-white to-emerald-50 p-6 rounded-[2rem] border border-emerald-100 shadow-sm relative overflow-hidden">
+        {{-- Background Decorator --}}
+        <div class="absolute top-0 right-0 p-4 opacity-5"><i class="ph-fill ph-quotes text-8xl text-emerald-800"></i></div>
+        
+        <div class="flex flex-col sm:flex-row items-start gap-4 relative z-10">
+            <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
+                <i class="ph-fill ph-chalkboard-teacher text-2xl"></i>
+            </div>
+            <div class="flex-1 w-full">
+                <div class="flex justify-between items-start mb-2">
                     <div>
-                        <h3 class="font-bold text-slate-800">Ibadah Puasa</h3>
-                        <p class="text-xs text-slate-400">Centang jika kamu berpuasa hari ini</p>
+                        <h3 class="font-bold text-emerald-900 text-sm">Feedback Guru Pembimbing</h3>
+                        <p class="text-[10px] text-emerald-600 font-bold uppercase">
+                            Menilai Jurnal Tanggal: <span class="text-slate-600">{{ \Carbon\Carbon::parse($lastVerifiedLog->date)->isoFormat('dd MMMM') }}</span>
+                        </p>
+                    </div>
+                    <div class="flex flex-col items-end">
+                        <div class="bg-emerald-600 text-white px-3 py-1 rounded-lg text-lg font-black shadow-lg shadow-emerald-200">
+                            {{ $lastVerifiedLog->teacher_score }}
+                        </div>
+                        <div class="text-[9px] text-slate-400 font-bold uppercase mt-1">Nilai Guru</div>
                     </div>
                 </div>
-                <input type="checkbox" name="is_fasting" class="w-6 h-6 rounded-lg text-emerald-600 focus:ring-emerald-500 border-slate-300" {{ ($todayRamadanLog->is_fasting ?? true) ? 'checked' : '' }}>
-            </div>
-
-            {{-- SHALAT WAJIB --}}
-            <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-                <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
-                    <i class="ph-fill ph-clock text-emerald-500"></i> Shalat Wajib 5 Waktu
-                </h3>
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                    @foreach(['subuh', 'dzuhur', 'ashar', 'maghrib', 'isya'] as $p)
-                    @php $checked = $todayRamadanLog->prayers[$p] ?? false; @endphp
-                    <label class="cursor-pointer group">
-                        <input type="checkbox" name="prayer_{{ $p }}" class="hidden peer" {{ $checked ? 'checked' : '' }}>
-                        <div class="p-3 rounded-2xl border-2 border-slate-50 bg-slate-50 text-slate-400 transition-all peer-checked:bg-emerald-50 peer-checked:border-emerald-200 peer-checked:text-emerald-700 flex flex-col items-center gap-2">
-                            <span class="text-[10px] font-bold uppercase tracking-widest">{{ $p }}</span>
-                            <i class="ph-bold ph-check-circle text-xl"></i>
-                        </div>
-                    </label>
-                    @endforeach
-                </div>
-            </div>
-
-            {{-- TILAWAH --}}
-            <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-                <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
-                    <i class="ph-fill ph-book-open text-blue-500"></i> Tadarus & Murojaah
-                </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Surah Terakhir</label>
-                        <div class="flex gap-2">
-                            <input type="text" name="tadarus_surah" value="{{ $todayRamadanLog->tadarus_surah ?? '' }}" class="flex-1 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-emerald-500" placeholder="Nama Surah">
-                            <input type="number" name="tadarus_ayah" value="{{ $todayRamadanLog->tadarus_ayah ?? '' }}" class="w-20 bg-slate-50 border-none rounded-xl text-sm font-bold text-center focus:ring-emerald-500" placeholder="Ayat">
-                        </div>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Target Murojaah</label>
-                        <input type="text" name="murojaah_surah" value="{{ $todayRamadanLog->murojaah_surah ?? '' }}" class="w-full bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-emerald-500" placeholder="Contoh: An-Naba">
-                    </div>
+                
+                <div class="bg-white/60 p-4 rounded-xl border border-emerald-100/50 backdrop-blur-sm mt-2">
+                    <p class="text-sm text-slate-700 italic leading-relaxed">
+                        "{{ $lastVerifiedLog->teacher_note ?? 'Terus tingkatkan ibadahnya ya!' }}"
+                    </p>
                 </div>
             </div>
         </div>
-
-        {{-- Amalan Sunnah & Simpan --}}
-        <div class="md:col-span-4 space-y-6">
-            <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm h-full flex flex-col">
-                <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2">
-                    <i class="ph-fill ph-star text-amber-500"></i> Amalan Sunnah
-                </h3>
-                <div class="space-y-3 flex-1">
-                    @foreach(['tarawih', 'witir', 'dhuha', 'rawatib', 'sedekah'] as $s)
-                    @php $checked = $todayRamadanLog->sunnah_deeds[$s] ?? false; @endphp
-                    <label class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-50 cursor-pointer hover:border-emerald-200 transition-all group">
-                        <span class="text-xs font-bold text-slate-600 capitalize group-hover:text-emerald-700">{{ $s }}</span>
-                        <input type="checkbox" name="sunnah_{{ $s }}" class="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300" {{ $checked ? 'checked' : '' }}>
-                    </label>
-                    @endforeach
-                </div>
-
-                <button type="submit" class="w-full mt-8 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-emerald-100 transition-all flex items-center justify-center gap-2">
-                    <i class="ph-bold ph-floppy-disk"></i> Simpan Jurnal
-                </button>
+    </div>
+    @else
+        {{-- Empty State Feedback --}}
+        <div class="text-center py-8 border border-dashed border-slate-200 rounded-[2rem] bg-slate-50/50">
+            <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-2 text-slate-400">
+                <i class="ph-bold ph-chat-slash"></i>
             </div>
+            <p class="text-xs text-slate-400 italic font-medium">Belum ada nilai atau catatan baru dari guru untuk jurnal terakhirmu.</p>
         </div>
-    </form>
+    @endif
 </div>

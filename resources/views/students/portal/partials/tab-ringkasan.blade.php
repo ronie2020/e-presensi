@@ -1,27 +1,37 @@
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in duration-500">
+    
+    {{-- LOGIKA ALUMNI --}}
     @if($isAlumni)
-        <div class="md:col-span-3 bg-amber-50 border border-amber-200 rounded-[2rem] p-6 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden shadow-sm">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -mr-16 -mt-16"></div>
-            <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-4xl shrink-0 z-10 shadow-inner border-2 border-white">
+        <div class="md:col-span-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-[2.5rem] p-8 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden shadow-sm">
+            {{-- Background Decor --}}
+            <div class="absolute top-0 right-0 w-48 h-48 bg-amber-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -mr-16 -mt-16"></div>
+            
+            <div class="w-24 h-24 bg-white text-amber-600 rounded-full flex items-center justify-center text-5xl shrink-0 z-10 shadow-lg border-4 border-amber-100">
                 <i class="ph-duotone ph-graduation-cap"></i>
             </div>
+            
             <div class="flex-1 text-center md:text-left z-10 w-full">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <h3 class="text-xl font-black text-amber-900 mb-1">Status Alumni</h3>
-                        <p class="text-amber-800/80 text-sm">
-                            Siswa ini dinyatakan <strong>LULUS</strong> pada tahun {{ $student->graduation_year ?? \Carbon\Carbon::parse($student->graduated_date)->year }}.
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-widest mb-2">
+                            Alumni Sekolah
+                        </div>
+                        <h3 class="text-2xl font-black text-slate-800 mb-1">Selamat Mengabdi di Masyarakat!</h3>
+                        <p class="text-slate-600 text-sm max-w-xl">
+                            Siswa ini dinyatakan <strong>LULUS</strong> pada tahun {{ $student->graduation_year ?? \Carbon\Carbon::parse($student->graduated_date)->year }}. Tetap jaga nama baik almamater.
                         </p>
                     </div>
                     <div class="flex flex-wrap justify-center gap-3">
                         @if($student->alumniProfile)
-                            <div class="inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-amber-200 shadow-sm">
-                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Saat ini:</span>
-                                <span class="font-bold text-amber-600">{{ $student->alumniProfile->activity_status }}</span>
+                            <div class="flex flex-col items-end">
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Status Saat Ini</span>
+                                <span class="font-black text-amber-600 text-lg">{{ $student->alumniProfile->activity_status }}</span>
                             </div>
                         @else
-                            <a href="{{ route('alumni.tracer') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold shadow-xl shadow-amber-600/30 transition-all animate-bounce hover:animate-none">
+                            {{-- Cek rute alumni.tracer sebelum render --}}
+                            <a href="{{ Route::has('alumni.tracer') ? route('alumni.tracer') : '#' }}" class="group inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold shadow-xl shadow-amber-600/30 transition-all">
                                 <i class="ph-bold ph-clipboard-text"></i> Isi Tracer Study
+                                <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                             </a>
                         @endif
                     </div>
@@ -29,12 +39,21 @@
             </div>
         </div>
     @else
-        {{-- Card Persentase Kehadiran --}}
-        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full">
-            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i class="ph-fill ph-chart-pie-slice text-9xl text-blue-500"></i></div>
+        
+        {{-- 1. CARD KEHADIRAN (Dengan Detail Sakit/Izin) --}}
+        <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110">
+                <i class="ph-fill ph-chart-pie-slice text-9xl text-blue-500"></i>
+            </div>
             
             <div class="relative z-10">
-                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1"><i class="ph-bold ph-calendar-check"></i> Kehadiran</h3>
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                        <i class="ph-bold ph-calendar-check"></i> Kehadiran
+                    </h3>
+                    <div class="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-bold text-slate-500">Semester Ini</div>
+                </div>
+
                 <div class="flex items-baseline gap-2 mb-4">
                     @php 
                         $total_hari = ($hadir ?? 0) + ($sakit ?? 0) + ($izin ?? 0) + ($alpa ?? 0); 
@@ -43,59 +62,115 @@
                     <span class="text-5xl font-black text-slate-800 tracking-tight">{{ $persen }}<span class="text-2xl text-slate-400">%</span></span>
                 </div>
                 
-                <div class="w-full bg-slate-100 rounded-full h-2 mb-4 overflow-hidden">
-                    <div class="h-full rounded-full {{ $persen >= 90 ? 'bg-emerald-500' : 'bg-amber-500' }}" style="width: {{ $persen }}%"></div>
+                {{-- Progress Bar Visual --}}
+                <div class="w-full bg-slate-100 rounded-full h-3 mb-4 overflow-hidden flex">
+                    <div class="h-full bg-emerald-500" style="width: {{ $persen }}%"></div>
+                    @php
+                        $persenSakitIzin = $total_hari > 0 ? round((($sakit+$izin)/$total_hari)*100) : 0;
+                    @endphp
+                    <div class="h-full bg-blue-400" style="width: {{ $persenSakitIzin }}%"></div>
                 </div>
 
-                <div class="flex gap-2">
-                    <span class="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-xs font-bold flex items-center gap-1"><div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Hadir: {{ $hadir ?? 0 }}</span>
-                    <span class="px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-100 rounded-lg text-xs font-bold flex items-center gap-1"><div class="w-1.5 h-1.5 rounded-full bg-rose-500"></div> Alpa: {{ $alpa ?? 0 }}</span>
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="px-3 py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl text-xs font-bold flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div> 
+                        Hadir: {{ $hadir ?? 0 }}
+                    </div>
+                    <div class="px-3 py-2 bg-rose-50 text-rose-700 border border-rose-100 rounded-xl text-xs font-bold flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-rose-500"></div> 
+                        Alpa: {{ $alpa ?? 0 }}
+                    </div>
+                    {{-- [BARU] Tambahan Sakit & Izin --}}
+                    <div class="px-3 py-2 bg-blue-50 text-blue-700 border border-blue-100 rounded-xl text-xs font-bold flex items-center gap-2 col-span-2">
+                        <div class="w-2 h-2 rounded-full bg-blue-500"></div> 
+                        Sakit / Izin: {{ ($sakit ?? 0) + ($izin ?? 0) }}
+                    </div>
                 </div>
             </div>
         </div>
     @endif
     
-    <!-- Card Poin Karakter -->
-    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full">
-        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i class="ph-fill ph-star text-9xl text-amber-400"></i></div>
+    {{-- 2. CARD POIN KARAKTER (Visual Baru) --}}
+    <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110">
+            <i class="ph-fill ph-star text-9xl text-amber-400"></i>
+        </div>
         <div class="relative z-10 w-full">
             <div class="flex justify-between items-start mb-4">
-                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider flex items-center gap-1"><i class="ph-bold ph-medal"></i> Poin Karakter</h3>
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                    <i class="ph-bold ph-medal"></i> Poin Karakter
+                </h3>
                 
                 {{-- Kalkulasi Skor Perilaku (Start 200) --}}
                 @php 
                     $behaviorScore = 200 - ($total_violation_points ?? 0) + ($total_merit_points ?? 0);
+                    $scoreColor = $behaviorScore >= 180 ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : ($behaviorScore >= 150 ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-rose-600 bg-rose-50 border-rose-100');
                 @endphp
-                <span class="px-2 py-1 rounded-lg text-xs font-black {{ $behaviorScore >= 180 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
-                    Skor: {{ $behaviorScore }}
+                <span class="px-2 py-1 rounded-lg text-xs font-black border {{ $scoreColor }}">
+                    Total: {{ $behaviorScore }}
                 </span>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-emerald-50/80 p-4 rounded-2xl border border-emerald-100 text-center">
-                    <p class="text-[10px] text-emerald-600 font-bold mb-1 uppercase tracking-wider">Kebaikan</p>
-                    <p class="text-2xl font-black text-emerald-600">+{{ $total_merit_points ?? 0 }}</p>
+            <div class="grid grid-cols-2 gap-3 h-full">
+                <div class="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 text-center flex flex-col justify-center hover:bg-emerald-50 transition-colors cursor-default">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-2 text-lg shadow-sm">
+                        <i class="ph-bold ph-plus"></i>
+                    </div>
+                    <p class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Prestasi</p>
+                    <p class="text-2xl font-black text-emerald-700">{{ $total_merit_points ?? 0 }}</p>
                 </div>
-                <div class="bg-rose-50/80 p-4 rounded-2xl border border-rose-100 text-center">
-                    <p class="text-[10px] text-rose-600 font-bold mb-1 uppercase tracking-wider">Pelanggaran</p>
-                    <p class="text-2xl font-black text-rose-600">-{{ $total_violation_points ?? 0 }}</p>
+                <div class="bg-rose-50/50 p-4 rounded-2xl border border-rose-100 text-center flex flex-col justify-center hover:bg-rose-50 transition-colors cursor-default">
+                    <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-2 text-lg shadow-sm">
+                        <i class="ph-bold ph-minus"></i>
+                    </div>
+                    <p class="text-[10px] text-rose-600 font-bold uppercase tracking-wider">Pelanggaran</p>
+                    <p class="text-2xl font-black text-rose-700">{{ $total_violation_points ?? 0 }}</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Card Literasi -->
-    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full">
-        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110"><i class="ph-fill ph-books text-9xl text-purple-500"></i></div>
+    {{-- 3. CARD LITERASI (Gabungan Fisik & Digital) --}}
+    <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110">
+            <i class="ph-fill ph-books text-9xl text-purple-500"></i>
+        </div>
         <div class="relative z-10">
-            <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1"><i class="ph-bold ph-book-open"></i> Literasi</h3>
-            <div class="flex items-baseline gap-2">
-                <span class="text-5xl font-black text-slate-800 tracking-tight">{{ $library_visits ?? 0 }}</span>
-                <span class="text-xs text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-lg border border-slate-200">Kunjungan</span>
+            <div class="flex justify-between items-start mb-2">
+                <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                    <i class="ph-bold ph-book-open"></i> Literasi
+                </h3>
+                {{-- Cek route katalog perpustakaan --}}
+                <a href="{{ Route::has('student.library.index') ? route('student.library.index') : '#' }}" class="text-[10px] font-bold text-purple-600 hover:underline">
+                    Lihat Katalog
+                </a>
+            </div>
+
+            @php
+                // Gabungkan Kunjungan Fisik & E-Book Read
+                // Pastikan variabel ebookHistory ada (dikirim dari controller)
+                $ebookCount = isset($ebookHistory) ? $ebookHistory->count() : 0;
+                $totalLiterasi = ($library_visits ?? 0) + $ebookCount;
+            @endphp
+
+            <div class="flex items-baseline gap-2 mb-4">
+                <span class="text-5xl font-black text-slate-800 tracking-tight">{{ $totalLiterasi }}</span>
+                <span class="text-xs text-slate-500 font-bold bg-slate-100 px-2 py-1 rounded-lg border border-slate-200">Aktivitas</span>
             </div>
             
-            <div class="mt-6 bg-purple-50 p-3 rounded-xl border border-purple-100">
-                <p class="text-xs text-purple-700 font-medium italic text-center">"Buku adalah jendela dunia."</p>
+            <div class="space-y-2">
+                <div class="flex justify-between items-center p-3 rounded-xl bg-purple-50 border border-purple-100 hover:bg-purple-100 transition-colors">
+                    <span class="text-xs font-bold text-purple-700 flex items-center gap-2">
+                        <i class="ph-bold ph-book"></i> Pinjam Fisik
+                    </span>
+                    <span class="font-black text-purple-800">{{ $library_visits ?? 0 }}</span>
+                </div>
+                <div class="flex justify-between items-center p-3 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100 transition-colors">
+                    <span class="text-xs font-bold text-blue-700 flex items-center gap-2">
+                        <i class="ph-bold ph-device-tablet-camera"></i> E-Book
+                    </span>
+                    <span class="font-black text-blue-800">{{ $ebookCount }}</span>
+                </div>
             </div>
         </div>
     </div>

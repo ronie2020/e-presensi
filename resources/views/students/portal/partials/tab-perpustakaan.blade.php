@@ -1,51 +1,53 @@
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
     
     {{-- SIDEBAR KIRI: STATISTIK --}}
     <div class="lg:col-span-1">
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-indigo-100 sticky top-24 h-fit">
-            <h3 class="text-lg font-bold text-slate-800 mb-1">Statistik Saya</h3>
-            <p class="text-slate-400 text-xs mb-6">Ringkasan aktivitas perpustakaanmu.</p>
+        <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-indigo-100 sticky top-24 h-fit">
+            <h3 class="text-lg font-black text-slate-800 mb-1">Statistik Pustaka</h3>
+            <p class="text-slate-400 text-xs mb-6">Ringkasan aktivitas literasimu.</p>
             
             <div class="space-y-3">
                  {{-- Total E-Book Dibaca --}}
-                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 transition-all hover:bg-white hover:shadow-md">
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 transition-all hover:bg-white hover:shadow-md group">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <i class="ph-bold ph-read-cv-logo text-xl"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">E-Book Dibaca</p>
-                            <p class="text-[10px] text-slate-400">Literasi Digital</p>
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">E-Book</p>
+                            <p class="text-[10px] text-slate-400">Total Dibaca</p>
                         </div>
                     </div>
                     <span class="text-xl font-black text-slate-800">{{ isset($ebookHistory) ? $ebookHistory->count() : 0 }}</span>
                 </div>
-                {{-- Total Aktivitas --}}
-                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 transition-all hover:bg-white hover:shadow-md">
+
+                {{-- Total Aktivitas Fisik --}}
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 transition-all hover:bg-white hover:shadow-md group">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                             <i class="ph-bold ph-book-open-text text-xl"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Riwayat</p>
-                            <p class="text-[10px] text-slate-400">Peminjaman Fisik</p>
+                            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Peminjaman</p>
+                            <p class="text-[10px] text-slate-400">Buku Fisik</p>
                         </div>
                     </div>
+                    {{-- Catatan: Angka ini mungkin terlimit 5 oleh controller (logic take(5)) --}}
                     <span class="text-xl font-black text-slate-800">{{ $library_visits ?? 0 }}</span>
                 </div>
 
-                {{-- Sedang Dipinjam (Hitung Manual dari Collection History) --}}
+                {{-- Sedang Dipinjam --}}
                 @php
                     $activeLoans = isset($library_history) ? $library_history->where('status', 'borrowed')->count() : 0;
                 @endphp
-                <div class="flex items-center justify-between p-4 {{ $activeLoans > 0 ? 'bg-amber-50 border-amber-100' : 'bg-slate-50 border-slate-100' }} rounded-2xl border transition-all hover:bg-white hover:shadow-md">
+                <div class="flex items-center justify-between p-4 {{ $activeLoans > 0 ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-100' }} rounded-2xl border transition-all hover:bg-white hover:shadow-md group">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full {{ $activeLoans > 0 ? 'bg-amber-100 text-amber-600' : 'bg-slate-200 text-slate-500' }} flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-full {{ $activeLoans > 0 ? 'bg-amber-100 text-amber-600' : 'bg-slate-200 text-slate-500' }} flex items-center justify-center group-hover:scale-110 transition-transform">
                             <i class="ph-bold ph-hand-holding text-xl"></i>
                         </div>
                         <div>
-                            <p class="text-xs font-bold {{ $activeLoans > 0 ? 'text-amber-600' : 'text-slate-500' }} uppercase tracking-wider">Sedang Dipinjam</p>
-                            <p class="text-[10px] text-slate-400">Harus dikembalikan</p>
+                            <p class="text-xs font-bold {{ $activeLoans > 0 ? 'text-amber-700' : 'text-slate-500' }} uppercase tracking-wider">Sedang Dipinjam</p>
+                            <p class="text-[10px] {{ $activeLoans > 0 ? 'text-amber-600' : 'text-slate-400' }}">Harus dikembalikan</p>
                         </div>
                     </div>
                     <span class="text-xl font-black {{ $activeLoans > 0 ? 'text-amber-600' : 'text-slate-800' }}">{{ $activeLoans }}</span>
@@ -53,15 +55,15 @@
             </div>
 
             {{-- Tips Singkat --}}
-            <div class="mt-6 p-4 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-2xl text-white shadow-lg shadow-blue-500/20 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-16 h-16 bg-white/10 rounded-full blur-xl -mr-4 -mt-4"></div>
+            <div class="mt-6 p-5 bg-gradient-to-br from-indigo-600 to-violet-600 rounded-[2rem] text-white shadow-xl shadow-indigo-200 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-xl -mr-8 -mt-8"></div>
                 <div class="relative z-10">
                     <div class="flex items-center gap-2 mb-2">
-                        <i class="ph-fill ph-lightbulb text-yellow-300"></i>
-                        <span class="text-xs font-bold uppercase tracking-wider text-blue-100">Tips Literasi</span>
+                        <i class="ph-fill ph-lightbulb text-yellow-300 text-lg"></i>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-indigo-100">Tahukah Kamu?</span>
                     </div>
-                    <p class="text-xs leading-relaxed opacity-90">
-                        "Membaca satu buku E-Book per minggu dapat meningkatkan wawasanmu secara signifikan."
+                    <p class="text-xs font-medium leading-relaxed opacity-90">
+                        "Membaca 15 menit setiap hari dapat mengeksposmu pada lebih dari 1 juta kata dalam setahun!"
                     </p>
                 </div>
             </div>
@@ -71,36 +73,43 @@
     {{-- KONTEN UTAMA: E-BOOK & RIWAYAT --}}
     <div class="lg:col-span-2 space-y-8">
 
-        {{-- RIWAYAT BACA E-BOOK --}}
+        {{-- 1. RIWAYAT BACA E-BOOK (Slide Horizontal) --}}
         @if(isset($ebookHistory) && $ebookHistory->count() > 0)
-        <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 overflow-hidden">
-            <h3 class="text-lg font-black text-slate-800 flex items-center gap-2 mb-4">
-                <i class="ph-fill ph-clock-counter-clockwise text-violet-500"></i> Terakhir Dibaca
-            </h3>
-            <div class="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+        <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-6 sm:p-8 overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
+                    <i class="ph-fill ph-clock-counter-clockwise text-violet-500"></i> Lanjutkan Membaca
+                </h3>
+            </div>
+            
+            <div class="flex gap-5 overflow-x-auto pb-6 custom-scrollbar snap-x">
                 @foreach($ebookHistory as $history)
                     @if($history->book)
-                    <div class="flex-shrink-0 w-32 group relative">
-                        <div class="aspect-[2/3] bg-slate-200 rounded-xl overflow-hidden mb-2 relative shadow-md">
+                    <div class="flex-shrink-0 w-36 group relative snap-start">
+                        <div class="aspect-[2/3] bg-slate-100 rounded-2xl overflow-hidden mb-3 relative shadow-md group-hover:shadow-xl transition-all duration-300 border border-slate-100">
                             @if($history->book->cover_path)
                                 <img src="{{ asset('storage/' . $history->book->cover_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                             @else
-                                <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-100">
-                                    <i class="ph-duotone ph-book-open text-2xl mb-1"></i>
+                                <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-50">
+                                    <i class="ph-duotone ph-book-open text-3xl mb-1"></i>
                                 </div>
                             @endif
                             
-                            {{-- Overlay Lanjut Baca --}}
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
-                                <a href="{{ route('library.books.read', ['book' => $history->book->id, 'origin' => 'portal']) }}" class="px-3 py-1.5 bg-white text-blue-900 rounded-full text-[10px] font-bold shadow-xl transform scale-90 group-hover:scale-100 transition-transform flex items-center gap-1">
-                                    <i class="ph-bold ph-arrow-right"></i> Lanjut
-                                </a>
+                            {{-- Overlay Lanjut Baca (SAFE ROUTE CHECK) --}}
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                                @if(Route::has('library.books.read'))
+                                    <a href="{{ route('library.books.read', ['book' => $history->book->id, 'origin' => 'portal']) }}" class="px-4 py-2 bg-white text-violet-700 rounded-full text-[10px] font-bold shadow-lg transform scale-90 group-hover:scale-100 transition-transform flex items-center gap-1 hover:bg-violet-50">
+                                        <i class="ph-bold ph-play"></i> Lanjut
+                                    </a>
+                                @else
+                                    <span class="px-3 py-1 bg-white/90 text-slate-600 rounded-full text-[10px] font-bold">Mode Preview</span>
+                                @endif
                             </div>
                         </div>
-                        <h4 class="font-bold text-slate-800 text-[10px] line-clamp-2 leading-snug mb-0.5" title="{{ $history->book->title }}">
+                        <h4 class="font-bold text-slate-800 text-xs line-clamp-2 leading-snug mb-1 group-hover:text-violet-600 transition-colors" title="{{ $history->book->title }}">
                             {{ $history->book->title }}
                         </h4>
-                        <p class="text-[9px] text-slate-400">
+                        <p class="text-[10px] text-slate-400 font-medium">
                             {{ \Carbon\Carbon::parse($history->created_at)->diffForHumans() }}
                         </p>
                     </div>
@@ -110,142 +119,164 @@
         </div>
         @endif
         
-        {{-- BAGIAN 1: KOLEKSI E-BOOK (DENGAN PENCARIAN) --}}
-        <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 sm:p-8" 
+        {{-- 2. KOLEKSI E-BOOK (Dengan Pencarian Real-time) --}}
+        <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-6 sm:p-8" 
              x-data="{ search: '' }">
             
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                 <div>
                     <h3 class="text-xl font-black text-slate-800 flex items-center gap-2">
-                        <i class="ph-fill ph-books text-blue-500"></i> Perpustakaan Digital
+                        <i class="ph-fill ph-books text-blue-500"></i> Pustaka Digital
                     </h3>
                     <p class="text-slate-400 text-sm font-medium mt-1">
-                        {{ isset($ebooks) ? $ebooks->count() : 0 }} buku digital tersedia untuk dibaca.
+                        Akses {{ isset($ebooks) ? $ebooks->count() : 0 }} buku digital kapan saja.
                     </p>
                 </div>
                 
-                {{-- Input Pencarian Real-time --}}
-                <div class="relative w-full sm:w-64 group">
-                    <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors"></i>
-                    <input type="text" x-model="search" placeholder="Cari judul buku..." 
-                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all outline-none">
+                {{-- Input Pencarian --}}
+                <div class="relative w-full sm:w-72 group">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="ph-bold ph-magnifying-glass text-slate-400 group-focus-within:text-blue-500 transition-colors"></i>
+                    </div>
+                    <input type="text" x-model="search" placeholder="Cari judul atau penulis..." 
+                        class="block w-full pl-10 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-100 focus:bg-white transition-all placeholder:font-normal placeholder:text-slate-400">
                 </div>
             </div>
 
             @if(isset($ebooks) && $ebooks->count() > 0)
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-4 gap-y-8">
                     @foreach($ebooks as $book)
-                        {{-- x-show logic untuk memfilter berdasarkan input search --}}
-                        <div class="group relative bg-slate-50 rounded-2xl p-2.5 border border-slate-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col h-full"
+                        {{-- Logic Filter Pencarian --}}
+                        <div class="group flex flex-col h-full"
                              x-show="'{{ strtolower($book->title) }}'.includes(search.toLowerCase()) || '{{ strtolower($book->author ?? '') }}'.includes(search.toLowerCase())"
                              x-transition:enter="transition ease-out duration-300"
-                             x-transition:enter-start="opacity-0 scale-90"
+                             x-transition:enter-start="opacity-0 scale-95"
                              x-transition:enter-end="opacity-100 scale-100">
                             
                             {{-- Cover --}}
-                            <div class="aspect-[2/3] bg-slate-200 rounded-xl overflow-hidden mb-3 relative shadow-inner">
+                            <div class="aspect-[2/3] bg-slate-100 rounded-2xl overflow-hidden mb-3 relative shadow-sm group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300 border border-slate-100">
                                 @if($book->cover_path)
-                                    <img src="{{ asset('storage/' . $book->cover_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="{{ $book->title }}">
+                                    <img src="{{ asset('storage/' . $book->cover_path) }}" class="w-full h-full object-cover" alt="{{ $book->title }}">
                                 @else
-                                    <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 bg-slate-100">
+                                    <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-50">
                                         <i class="ph-duotone ph-book-open text-3xl mb-1"></i>
-                                        <span class="text-[9px] uppercase font-bold">No Cover</span>
+                                        <span class="text-[9px] uppercase font-black tracking-widest opacity-50">No Cover</span>
                                     </div>
                                 @endif
                                 
-                                {{-- Kategori Badge --}}
+                                {{-- Kategori --}}
                                 @if($book->category)
-                                    <span class="absolute top-2 right-2 bg-black/50 backdrop-blur-md text-white text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider border border-white/10">
-                                        {{ Str::limit($book->category->name, 10) }}
-                                    </span>
+                                    <div class="absolute top-2 left-2 right-2 flex justify-end">
+                                        <span class="bg-black/60 backdrop-blur-md text-white text-[9px] px-2 py-1 rounded-lg font-bold uppercase tracking-wider border border-white/10 shadow-sm truncate max-w-full">
+                                            {{ Str::limit($book->category->name, 12) }}
+                                        </span>
+                                    </div>
                                 @endif
 
-                                {{-- Tombol Baca Overlay --}}
-                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
-                                    <a href="{{ route('library.books.read', ['book' => $book->id, 'origin' => 'portal']) }}" class="px-4 py-2 bg-white text-blue-900 rounded-full text-xs font-bold shadow-xl transform scale-90 group-hover:scale-100 transition-transform flex items-center gap-1.5 hover:bg-blue-50">
-                                        <i class="ph-bold ph-read-cv-logo text-lg"></i> BACA
-                                    </a>
+                                {{-- Overlay Actions --}}
+                                <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[1px]">
+                                    @if(Route::has('library.books.read'))
+                                        <a href="{{ route('library.books.read', ['book' => $book->id, 'origin' => 'portal']) }}" class="px-5 py-2.5 bg-white text-blue-700 rounded-xl text-xs font-black shadow-xl transform scale-90 group-hover:scale-100 transition-transform flex items-center gap-2 hover:bg-blue-50">
+                                            <span>BACA</span> <i class="ph-bold ph-book-open-text"></i>
+                                        </a>
+                                    @else
+                                        <button type="button" class="px-4 py-2 bg-white/20 text-white rounded-xl text-xs font-bold backdrop-blur-md border border-white/30 cursor-not-allowed">
+                                            Preview
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                             
-                            {{-- Info Buku --}}
-                            <div class="px-1 flex flex-col flex-1">
+                            {{-- Info --}}
+                            <div>
                                 <h4 class="font-bold text-slate-800 text-xs line-clamp-2 leading-snug mb-1 group-hover:text-blue-600 transition-colors" title="{{ $book->title }}">
                                     {{ $book->title }}
                                 </h4>
-                                <p class="text-[10px] text-slate-400 line-clamp-1 mt-auto flex items-center gap-1">
-                                    <i class="ph-fill ph-pen-nib"></i> {{ $book->author ?? 'Tanpa Pengarang' }}
+                                <p class="text-[10px] text-slate-400 font-medium line-clamp-1 flex items-center gap-1">
+                                    <i class="ph-fill ph-pen-nib text-slate-300"></i> {{ $book->author ?? 'Tanpa Pengarang' }}
                                 </p>
                             </div>
                         </div>
                     @endforeach
                 </div>
                 
-                {{-- Pesan jika pencarian tidak ditemukan --}}
+                {{-- Empty State Pencarian --}}
                 <div x-show="search != '' && $el.previousElementSibling.querySelectorAll('div[x-show]:not([style*=\'display: none\'])').length === 0" 
-                     class="text-center py-10" style="display: none;">
-                    <div class="inline-flex p-3 bg-slate-100 rounded-full text-slate-400 mb-2">
-                        <i class="ph-duotone ph-magnifying-glass text-2xl"></i>
+                     class="text-center py-16" style="display: none;">
+                    <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-300">
+                        <i class="ph-duotone ph-magnifying-glass text-3xl"></i>
                     </div>
-                    <p class="text-slate-500 text-sm font-bold">Buku tidak ditemukan.</p>
+                    <p class="text-slate-600 font-bold text-sm">Buku tidak ditemukan.</p>
+                    <p class="text-slate-400 text-xs">Coba kata kunci lain.</p>
                 </div>
 
             @else
-                <div class="text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-slate-300">
-                        <i class="ph-duotone ph-books text-3xl"></i>
+                {{-- Empty State Global --}}
+                <div class="text-center py-16 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm text-slate-300">
+                        <i class="ph-duotone ph-books text-4xl"></i>
                     </div>
-                    <h3 class="text-slate-800 font-bold text-sm">Belum ada koleksi E-Book</h3>
-                    <p class="text-slate-400 text-xs mt-1">Nantikan buku-buku digital seru di sini.</p>
+                    <h3 class="text-slate-800 font-bold text-lg">Belum ada E-Book</h3>
+                    <p class="text-slate-400 text-sm mt-1 max-w-xs mx-auto">Koleksi buku digital akan segera ditambahkan di sini.</p>
                 </div>
             @endif
         </div>
 
-        {{-- BAGIAN 2: RIWAYAT PEMINJAMAN FISIK --}}
-        <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-6 sm:p-8 pb-4 border-b border-slate-50 flex justify-between items-center">
+        {{-- 3. RIWAYAT PEMINJAMAN FISIK --}}
+        <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-6 sm:p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
                 <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
-                    <i class="ph-fill ph-clock-counter-clockwise text-orange-500"></i> Riwayat Peminjaman
+                    <i class="ph-fill ph-clock-counter-clockwise text-orange-500"></i> Riwayat Fisik
                 </h3>
                 @if(isset($library_history) && count($library_history) > 0)
-                    <span class="text-xs font-bold text-slate-400">{{ count($library_history) }} Transaksi Terakhir</span>
+                    <span class="px-3 py-1 bg-white border border-slate-200 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-wide shadow-sm">
+                        Terakhir
+                    </span>
                 @endif
             </div>
             
             <div class="divide-y divide-slate-50">
                 @if(isset($library_history) && count($library_history) > 0)
                     @foreach($library_history as $loan)
-                    <div class="p-5 hover:bg-slate-50/80 transition-colors flex items-center gap-4 group">
+                    <div class="p-5 hover:bg-slate-50 transition-colors flex items-start sm:items-center gap-4 group">
                         {{-- Icon Status --}}
                         <div class="w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center shadow-sm border 
-                            {{ $loan->status == 'returned' ? 'bg-emerald-100 text-emerald-600 border-emerald-200' : ($loan->status == 'overdue' ? 'bg-rose-100 text-rose-600 border-rose-200' : 'bg-blue-100 text-blue-600 border-blue-200') }}">
+                            {{ $loan->status == 'returned' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : ($loan->status == 'overdue' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-blue-50 text-blue-600 border-blue-100') }}">
                             @if($loan->status == 'returned')
                                 <i class="ph-bold ph-check text-xl"></i>
                             @elseif($loan->status == 'overdue')
-                                <i class="ph-bold ph-warning text-xl"></i>
+                                <i class="ph-bold ph-warning text-xl animate-pulse"></i>
                             @else
                                 <i class="ph-bold ph-hourglass-medium text-xl"></i>
                             @endif
                         </div>
 
                         <div class="flex-grow min-w-0">
-                            <h4 class="font-bold text-slate-800 text-sm truncate group-hover:text-blue-700 transition-colors" title="{{ $loan->book->title ?? 'Judul Tidak Diketahui' }}">
-                                {{ $loan->book->title ?? 'Buku Dihapus' }}
-                            </h4>
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-slate-800 text-sm truncate pr-2 group-hover:text-blue-600 transition-colors" title="{{ $loan->book->title ?? 'Judul Tidak Diketahui' }}">
+                                    {{ $loan->book->title ?? 'Buku Telah Dihapus' }}
+                                </h4>
+                                {{-- Badge Status Mobile --}}
+                                <span class="sm:hidden text-[10px] font-black uppercase {{ $loan->status == 'returned' ? 'text-emerald-500' : ($loan->status == 'overdue' ? 'text-rose-500' : 'text-blue-500') }}">
+                                    {{ $loan->status == 'returned' ? 'Selesai' : ($loan->status == 'overdue' ? 'Telat' : 'Pinjam') }}
+                                </span>
+                            </div>
                             
-                            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
-                                <span class="text-xs text-slate-500 font-medium flex items-center gap-1">
-                                    <i class="ph-bold ph-calendar-blank text-slate-400"></i>
-                                    Pinjam: {{ \Carbon\Carbon::parse($loan->borrow_date)->format('d M Y') }}
+                            <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
+                                <span class="text-xs text-slate-500 font-medium flex items-center gap-1.5">
+                                    <i class="ph-bold ph-calendar-blank text-slate-300"></i>
+                                    {{ \Carbon\Carbon::parse($loan->borrow_date)->format('d M Y') }}
                                 </span>
                                 
+                                <span class="text-slate-300 text-[10px] hidden sm:inline">&bull;</span>
+
                                 @if($loan->status != 'returned')
-                                    <span class="text-xs {{ \Carbon\Carbon::now() > $loan->due_date ? 'text-rose-500' : 'text-amber-600' }} font-bold flex items-center gap-1">
+                                    <span class="text-xs {{ \Carbon\Carbon::now() > $loan->due_date ? 'text-rose-500 font-bold' : 'text-amber-600 font-bold' }} flex items-center gap-1.5">
                                         <i class="ph-bold ph-clock-countdown"></i>
                                         Tenggat: {{ \Carbon\Carbon::parse($loan->due_date)->format('d M Y') }}
                                     </span>
                                 @else
-                                    <span class="text-xs text-emerald-600 font-bold flex items-center gap-1">
+                                    <span class="text-xs text-emerald-600 font-bold flex items-center gap-1.5">
                                         <i class="ph-bold ph-calendar-check"></i>
                                         Kembali: {{ \Carbon\Carbon::parse($loan->return_date)->format('d M Y') }}
                                     </span>
@@ -253,14 +284,14 @@
                             </div>
                         </div>
 
-                        {{-- Badge Status di Kanan --}}
-                        <div class="hidden sm:block">
+                        {{-- Badge Status Desktop --}}
+                        <div class="hidden sm:block flex-shrink-0">
                             @if($loan->status == 'returned')
-                                <span class="px-3 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-emerald-100">Selesai</span>
+                                <span class="px-3 py-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-black uppercase tracking-wider rounded-xl border border-emerald-100 shadow-sm">Selesai</span>
                             @elseif($loan->status == 'overdue')
-                                <span class="px-3 py-1 bg-rose-50 text-rose-700 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-rose-100 animate-pulse">Terlambat</span>
+                                <span class="px-3 py-1.5 bg-rose-50 text-rose-700 text-[10px] font-black uppercase tracking-wider rounded-xl border border-rose-100 shadow-sm animate-pulse">Terlambat</span>
                             @else
-                                <span class="px-3 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-blue-100">Dipinjam</span>
+                                <span class="px-3 py-1.5 bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-wider rounded-xl border border-blue-100 shadow-sm">Dipinjam</span>
                             @endif
                         </div>
                     </div>
@@ -279,3 +310,11 @@
 
     </div>
 </div>
+
+{{-- Custom Scrollbar Style --}}
+<style>
+    .custom-scrollbar::-webkit-scrollbar { height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+</style>
