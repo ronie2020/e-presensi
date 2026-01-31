@@ -13,24 +13,27 @@ use Illuminate\Support\Facades\DB;
 
 class LmsMaterialController extends Controller
 {
+    /**
+     * Menampilkan daftar materi dengan grouping (agar tidak duplikat per kelas)
+     */
     public function index()
     {
         $user = Auth::user();
         
-        // 1. LOGIKA GROUPING (AGAR MUNCUL 1 KARTU SAJA UNTUK BANYAK KELAS)
+        // 1. LOGIKA GROUPING: Ambil 1 ID per judul+mapel+waktu (untuk representasi di UI)
         $subQuery = LmsMaterial::selectRaw('MIN(id) as id')
             ->where('teacher_id', $user->id)
             ->groupBy('title', 'subject_id', 'created_at');
 
-        // 2. Ambil Data Berdasarkan ID hasil grouping
+        // 2. Ambil Data Lengkap berdasarkan ID tersebut
         $materials = LmsMaterial::whereIn('id', $subQuery)
-            ->with(['subject', 'schoolClass', 'attachments'])
+            ->with(['subject', 'schoolClass', 'attachments']) // Load attachments
             ->latest()
             ->paginate(10);
 
-        // 3. Tambahkan info tambahan ke setiap item untuk tampilan
+        // 3. Inject Info Tambahan (Bulk Info)
         foreach ($materials as $material) {
-            // Hitung ada berapa kelas yang menerima materi ini
+            // Hitung ada berapa kelas yang menerima materi ini (siblings)
             $siblingsQuery = LmsMaterial::where('teacher_id', $user->id)
                 ->where('title', $material->title)
                 ->where('created_at', $material->created_at);
@@ -40,9 +43,8 @@ class LmsMaterialController extends Controller
             $material->is_bulk = $siblingsCount > 1;
             $material->total_classes = $siblingsCount;
 
-            // [PERBAIKAN] Tambahkan logika tebak jenjang agar tampilan di index tidak kosong
+            // Tebak jenjang kelas (misal "7A" -> "7")
             if ($material->is_bulk && $material->schoolClass) {
-                // Ambil angka dari nama kelas (misal "7A" -> "7")
                 preg_match('/\d+/', $material->schoolClass->name, $matches);
                 $material->target_grade = $matches[0] ?? ''; 
             }
@@ -61,6 +63,9 @@ class LmsMaterialController extends Controller
         return view('lms.materials.create', compact('subjects', 'classes'));
     }
 
+    /**
+     * Menyimpan materi baru (Bisa Bulk ke banyak kelas sekaligus)
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -70,8 +75,9 @@ class LmsMaterialController extends Controller
             'target_type' => 'required|in:class,grade',
             'class_id' => 'nullable|exists:classes,id', 
             'target_grade' => 'required_if:target_type,grade',
+            // Validasi Attachments
             'attachments' => 'nullable|array',
-            'attachments.*.file' => 'nullable|file|max:20480', 
+            'attachments.*.file' => 'nullable|file|max:20480', // Max 20MB
             'attachments.*.link' => 'nullable|url',
             'attachments.*.type' => 'required|in:file,video,link',
         ]);
@@ -80,26 +86,20 @@ class LmsMaterialController extends Controller
         $now = now(); 
 
         DB::transaction(function () use ($request, $teacherId, $now) {
+            // 1. Tentukan Target Kelas
             $targetClassIds = [];
             
             if ($request->target_type == 'class') {
                 if ($request->class_id) $targetClassIds[] = $request->class_id;
             } elseif ($request->target_type == 'grade') {
+                // Ambil semua kelas yang namanya mengandung angka jenjang (misal "7")
                 $classes = SchoolClass::where('name', 'like', $request->target_grade . '%')->get();
                 foreach ($classes as $c) $targetClassIds[] = $c->id;
             }
 
             if (empty($targetClassIds)) return; 
 
-            // Upload file fisik SEKALI saja di awal loop (opsional optimasi), 
-            // tapi agar logic sederhana, kita biarkan di storeAttachments menangani per iterasi 
-            // atau jika ingin hemat storage, upload sekali lalu pakai path-nya berkali-kali.
-            // Di sini kita pakai pendekatan simple: storeAttachments akan handle upload.
-            
-            // NOTE: Untuk efisiensi storage pada Bulk Upload, idealnya file diupload sekali.
-            // Tapi kode di bawah ini akan mengupload file berulang kali jika logic storeAttachments melakukan $file->store().
-            // Mari kita perbaiki agar file fisik cuma 1, tapi record attachment banyak.
-            
+            // 2. Proses Upload File (Dilakukan sekali, path dipakai berulang)
             $processedAttachments = [];
             if ($request->has('attachments')) {
                 foreach ($request->attachments as $index => $item) {
@@ -109,7 +109,8 @@ class LmsMaterialController extends Controller
 
                     if ($type == 'file' && isset($item['file'])) {
                         $file = $item['file'];
-                        $path = $file->store('lms-materials', 'public'); // Upload Sekali
+                        // Simpan ke storage public agar bisa diakses via asset()
+                        $path = $file->store('lms-materials', 'public');
                         $name = $file->getClientOriginalName();
                     } elseif (($type == 'link' || $type == 'video') && isset($item['link'])) {
                         $path = $item['link'];
@@ -125,6 +126,7 @@ class LmsMaterialController extends Controller
                 }
             }
 
+            // 3. Loop Create Material & Attachments untuk setiap kelas
             foreach ($targetClassIds as $classId) {
                 $material = LmsMaterial::create([
                     'teacher_id' => $teacherId,
@@ -132,12 +134,12 @@ class LmsMaterialController extends Controller
                     'class_id' => $classId,
                     'title' => $request->title,
                     'resume' => $request->resume,           
-                    'type' => 'document',
+                    'type' => 'document', // Default legacy type
                     'created_at' => $now, 
                     'updated_at' => $now,
                 ]);
 
-                // Simpan Attachment (Share Path yang sama)
+                // Hubungkan Attachment
                 foreach ($processedAttachments as $att) {
                     LmsMaterialAttachment::create([
                         'material_id' => $material->id,
@@ -160,6 +162,7 @@ class LmsMaterialController extends Controller
             abort(403);
         }
 
+        // Cek apakah materi ini bagian dari bulk upload
         $siblingsCount = LmsMaterial::where('teacher_id', $material->teacher_id)
             ->where('title', $material->title)
             ->where('created_at', $material->created_at)
@@ -173,6 +176,9 @@ class LmsMaterialController extends Controller
         return view('lms.materials.edit', compact('material', 'subjects', 'classes', 'isBulk'));
     }
 
+    /**
+     * Update Materi (Termasuk update bulk siblings & attachments)
+     */
     public function update(Request $request, $id)
     {
         $material = LmsMaterial::findOrFail($id);
@@ -184,13 +190,13 @@ class LmsMaterialController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'subject_id' => 'required|exists:subjects,id',
-            'class_id' => 'required|exists:classes,id', 
             'resume' => 'nullable|string',
             'new_attachments' => 'nullable|array',
         ]);
 
         DB::transaction(function () use ($request, $material) {
             
+            // Cari semua materi kembaran (siblings) untuk diupdate sekaligus
             $siblings = LmsMaterial::where('teacher_id', $material->teacher_id)
                 ->where('title', $material->title)
                 ->where('created_at', $material->created_at)
@@ -205,22 +211,19 @@ class LmsMaterialController extends Controller
                     'resume' => $request->resume,
                 ]);
 
-                // Hapus Attachment Terpilih (Bulk Delete)
+                // A. Hapus Attachment yang dipilih
                 if ($request->has('delete_attachments')) {
                     foreach ($request->delete_attachments as $attId) {
                         $attToDelete = LmsMaterialAttachment::find($attId);
                         if ($attToDelete) {
-                            // Hapus semua attachment di grup ini yang memiliki path file sama
+                            // Cari attachment serupa di sibling lain agar terhapus juga
                             $relatedAttachments = LmsMaterialAttachment::whereIn('material_id', $siblings->pluck('id'))
                                 ->where('file_path', $attToDelete->file_path)
                                 ->get();
 
                             foreach($relatedAttachments as $relAtt) {
-                                // [PERBAIKAN] Cek exists sebelum hapus untuk menghindari error
+                                // Hapus file fisik jika tipe file & ada di storage
                                 if ($relAtt->file_type == 'file' && Storage::disk('public')->exists($relAtt->file_path)) {
-                                    // Opsional: Hapus file fisik. 
-                                    // Hati-hati: Pastikan tidak ada materi LAIN (di luar grup ini) yang pakai file ini.
-                                    // Untuk keamanan, kode asli Anda meng-comment delete storage, kita ikuti itu atau aktifkan jika yakin.
                                     Storage::disk('public')->delete($relAtt->file_path); 
                                 }
                                 $relAtt->delete();
@@ -230,14 +233,13 @@ class LmsMaterialController extends Controller
                 }
             }
 
-            // HANDLING NEW ATTACHMENTS (BULK INSERT)
+            // B. Tambah Attachment Baru (ke semua siblings)
             if ($request->has('new_attachments')) {
                 foreach ($request->new_attachments as $item) {
                     $path = null;
                     $name = $item['name'] ?? 'Lampiran';
                     $type = $item['type'];
 
-                    // Upload Fisik Sekali
                     if ($type == 'file' && isset($item['file'])) {
                         $file = $item['file'];
                         $path = $file->store('lms-materials', 'public');
@@ -246,7 +248,6 @@ class LmsMaterialController extends Controller
                         $path = $item['link'];
                     }
 
-                    // Link ke semua record materi
                     if ($path) {
                         foreach ($siblings as $targetMaterial) {
                             LmsMaterialAttachment::create([
@@ -271,14 +272,15 @@ class LmsMaterialController extends Controller
 
         if ($user->role !== 'admin' && $material->teacher_id !== $user->id) abort(403);
         
+        // Hapus semua kembaran (siblings)
         $siblings = LmsMaterial::where('teacher_id', $material->teacher_id)
             ->where('title', $material->title)
             ->where('created_at', $material->created_at)
             ->get();
 
         foreach ($siblings as $target) {
+            // Hapus file fisik attachment
             foreach($target->attachments as $att) {
-                // [PERBAIKAN] Cek exists agar tidak error saat loop ke-2 mencoba hapus file yang sama
                 if($att->file_type == 'file' && Storage::disk('public')->exists($att->file_path)) {
                     Storage::disk('public')->delete($att->file_path);
                 }
@@ -286,9 +288,21 @@ class LmsMaterialController extends Controller
             $target->delete(); 
         }
 
-        return redirect()->route('lms.materials.index')->with('success', 'Materi berhasil dihapus dari semua kelas terkait.');
+        return redirect()->route('lms.materials.index')->with('success', 'Materi berhasil dihapus.');
     }
 
-    // Helper storeAttachments (Tidak dipakai lagi di store() baru karena sudah di-inline untuk efisiensi)
-    // Bisa dihapus jika tidak digunakan di tempat lain.
+    /**
+     * Download Helper (Opsional, jika tombol download spesifik dibutuhkan)
+     */
+    public function download($id)
+    {
+        $material = LmsMaterial::with('attachments')->findOrFail($id);
+        $attachment = $material->attachments->where('file_type', 'file')->first();
+
+        if ($attachment && Storage::disk('public')->exists($attachment->file_path)) {
+            return Storage::disk('public')->download($attachment->file_path, $attachment->file_name);
+        }
+
+        return back()->with('error', 'File tidak ditemukan.');
+    }
 }

@@ -70,7 +70,7 @@ class StudentPortalController extends Controller
         
         $classId = $student->class_id ?? $student->school_class_id ?? optional($student->schoolClass)->id;
 
-         // --- 2. DATA RAMADHAN (LOGIKA BARU) ---
+         // --- 2. DATA RAMADHAN ---
         $today = Carbon::now('Asia/Jakarta')->toDateString();
         
         // A. Log Hari Ini (Untuk Form Input)
@@ -84,8 +84,8 @@ class StudentPortalController extends Controller
                             ->orderBy('date', 'desc')
                             ->first();
 
-        // C. LEADERBOARD (LOGIKA POIN DETAIL BERBASIS AMAL)
-        // Kita gunakan logika yang lebih detail, bukan hanya 100 poin per hari
+        // C. LEADERBOARD (LOGIKA DETAIL - AMALAN)
+        // Menghitung poin berdasarkan kualitas ibadah, bukan sekedar jumlah log
         $topRamadanStudents = Student::with(['ramadanLogs', 'schoolClass'])
             ->get()
             ->map(function($s) {
@@ -114,7 +114,7 @@ class StudentPortalController extends Controller
                     // 5. Poin Laporan Jumat (30 Poin)
                     if (!empty($log->friday_khotib)) $dailyScore += 30;
 
-                    // 6. Bonus Nilai Guru (Opsional)
+                    // 6. Bonus Nilai Guru
                     if ($log->teacher_score) {
                         $dailyScore += round($log->teacher_score / 5); 
                     }
@@ -141,7 +141,7 @@ class StudentPortalController extends Controller
             } catch (\Exception $e) {}
         }
 
-        // --- 4. DATA KEHADIRAN & ABSENSI (LOGIKA LAMA - DIPERTAHANKAN) ---
+        // --- 4. DATA KEHADIRAN & ABSENSI ---
         $hadir = 0; $terlambat = 0; $sakit = 0; $izin = 0; $alpa = 0;
         $attendance_history = collect([]);
         $rawAttendanceRecords = collect([]); 
@@ -174,7 +174,7 @@ class StudentPortalController extends Controller
         $total_hari_efektif = $hadir + $sakit + $izin + $alpa;
         $attendancePercentage = $total_hari_efektif > 0 ? round(($hadir / $total_hari_efektif) * 100) : 0;
 
-        // --- 5. LOGIKA DISIPLIN & PRESTASI (LOGIKA LAMA - DIPERTAHANKAN) ---
+        // --- 5. LOGIKA DISIPLIN & PRESTASI ---
         $violations = collect([]);
         $achievements = collect([]); 
         
@@ -317,7 +317,7 @@ class StudentPortalController extends Controller
                         ->get();
         }
 
-        // --- 7. DATA LMS ---
+        // --- 7. DATA LMS (DIPERBAIKI: Menggunakan 'grade') ---
         $lms_assignments_grouped = []; 
         $lms_materials_grouped = []; 
         $lms_grades = [];
@@ -332,7 +332,8 @@ class StudentPortalController extends Controller
                 
                 if (class_exists(LmsSubmission::class)) {
                     $submissions = LmsSubmission::where('student_id', $id)->get();
-                    foreach($submissions as $sub) { $lms_grades[$sub->assignment_id] = $sub->score; }
+                    // [FIX] Gunakan kolom 'grade'
+                    foreach($submissions as $sub) { $lms_grades[$sub->assignment_id] = $sub->grade; }
                 }
             }
             if (class_exists(LmsMaterial::class)) {
@@ -428,7 +429,7 @@ class StudentPortalController extends Controller
             ]);
         }
 
-        // Statistik Sholat (Opsional, untuk debug/extra)
+        // Statistik Sholat
         $sholat_dhuha = 0; $sholat_dhuhur = 0;
         if (class_exists(AttendanceSiswa::class)) {
             $sholat_dhuha = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuha')->count();
