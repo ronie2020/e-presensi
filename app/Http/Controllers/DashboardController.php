@@ -33,7 +33,6 @@ class DashboardController extends Controller
 
         // =====================================================================
         // FILTER ALUMNI (CORE FIX)
-        // Kita buat kondisi reuseable agar kode lebih rapi
         // =====================================================================
         $filterActiveStudent = function($query) {
             $query->where('status', '!=', 'graduated'); // Pastikan bukan alumni
@@ -41,55 +40,64 @@ class DashboardController extends Controller
 
         // 2. DATA STATISTIK UTAMA (KPIS)
         
-        // [FIX 1] Hitung Total Siswa (Hanya yang Aktif)
         $totalStudents = Student::where($filterActiveStudent)->count();
 
-        // [FIX 2] Ambil data absensi hanya milik siswa AKTIF
+        // Ambil data absensi PERIODE INI
         $allAttendances = AttendanceSiswa::with('student')
-            ->whereHas('student', $filterActiveStudent) // Filter relasi
+            ->whereHas('student', $filterActiveStudent) 
             ->whereBetween('attendance_date', [$startDate, $endDate])
             ->get();
 
-        // [LOGIKA FILTER] Hanya Absensi Sekolah (Harian/Masuk/Pulang)
         $schoolAttendances = $allAttendances->filter(function ($att) {
             return in_array(strtolower($att->type), ['harian', 'masuk', 'pulang']);
         });
         
-        // [LOGIKA HADIR & TERLAMBAT]
-        $presentCount = $schoolAttendances->filter(function ($att) {
-            return in_array(strtolower($att->status), ['hadir', 'terlambat', 'tepat waktu']);
-        })->unique('student_id')->count();
-
-        $lateCount = $schoolAttendances->filter(function ($att) {
-            return strtolower($att->status) === 'terlambat';
-        })->unique('student_id')->count();
-        
+        $presentCount = $schoolAttendances->filter(fn($att) => in_array(strtolower($att->status), ['hadir', 'terlambat', 'tepat waktu']))->unique('student_id')->count();
+        $lateCount = $schoolAttendances->filter(fn($att) => strtolower($att->status) === 'terlambat')->unique('student_id')->count();
         $presentOnTimeCount = max(0, $presentCount - $lateCount);
 
-        // Hitung Sakit/Izin/Alpha
         $sickCount = $schoolAttendances->filter(fn($att) => strtolower($att->status) === 'sakit')->unique('student_id')->count();
         $permitCount = $schoolAttendances->filter(fn($att) => strtolower($att->status) === 'izin')->unique('student_id')->count();
         $alphaCount = $schoolAttendances->filter(fn($att) => in_array(strtolower($att->status), ['alpa', 'alpha']))->unique('student_id')->count();
-        
         $sickPermitCount = $sickCount + $permitCount;
         
-        $earlyLeaveCount = $schoolAttendances->filter(function ($att) {
-            return str_contains(strtolower($att->notes ?? ''), 'pulang awal');
-        })->count();
+        $earlyLeaveCount = $schoolAttendances->filter(fn($att) => str_contains(strtolower($att->notes ?? ''), 'pulang awal'))->count();
 
-        // Hitung "Belum Hadir" (Sisa siswa aktif yang belum scan)
         $notYetScannedCount = 0;
         if ($period === 'today') {
-             // Hitung siswa yang sudah ada record absensinya hari ini
              $alreadyRecorded = $schoolAttendances->unique('student_id')->count();
-             // Sisanya adalah yang belum hadir
              $notYetScannedCount = max(0, $totalStudents - $alreadyRecorded);
+        }
+
+        // =====================================================================
+        // [BARU] LOGIKA KOMPARASI TREN (Hanya jika periode = today)
+        // =====================================================================
+        $trendHadir = 0;
+        $trendTerlambat = 0;
+        $isTrendUpHadir = true;
+        
+        if ($period === 'today') {
+            // Ambil Data Kemarin (Hari Sekolah Sebelumnya)
+            $yesterday = $selectedDate->copy()->subDay();
+            if ($yesterday->isSunday()) $yesterday->subDay(2); // Skip Minggu
+            
+            $yesterdayAttendances = AttendanceSiswa::whereHas('student', $filterActiveStudent)
+                ->whereDate('attendance_date', $yesterday)
+                ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
+                ->get();
+            
+            $yesterdayPresent = $yesterdayAttendances->filter(fn($att) => in_array(strtolower($att->status), ['hadir', 'terlambat', 'tepat waktu']))->unique('student_id')->count();
+            
+            // Hitung Selisih
+            $diffHadir = $presentCount - $yesterdayPresent;
+            $trendHadir = $diffHadir;
+            $isTrendUpHadir = $diffHadir >= 0;
         }
 
         // 3. DATA KARTU (Cards)
         $cards = [
             [
-                'title' => 'Total Siswa Aktif', // Ubah label agar jelas
+                'title' => 'Total Siswa Aktif', 
                 'value' => $totalStudents,
                 'icon' => 'ph-student',
                 'filter_status' => 'all'
@@ -99,7 +107,10 @@ class DashboardController extends Controller
                 'value' => $presentCount,
                 'icon' => 'ph-check-circle',
                 'percentage' => $totalStudents > 0 ? round(($presentCount / $totalStudents) * 100, 1) : 0,
-                'filter_status' => 'present'
+                'filter_status' => 'present',
+                // Data Tren ditambahkan ke kartu ini
+                'trend' => $period === 'today' ? $trendHadir : null, 
+                'trend_label' => 'vs Kemarin'
             ],
             [
                 'title' => 'Belum Hadir',
@@ -127,9 +138,9 @@ class DashboardController extends Controller
             ]
         ];
 
-        // 4. TOP VIOLATORS (Sering Terlambat) - [FIX 3] Tambah whereHas
+        // 4. TOP VIOLATORS (Sering Terlambat)
         $topLateStudents = AttendanceSiswa::with(['student.schoolClass']) 
-            ->whereHas('student', $filterActiveStudent) // Hanya siswa aktif
+            ->whereHas('student', $filterActiveStudent) 
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang', 'harian', 'masuk', 'pulang'])
             ->where(function($query) {
                 $query->where('status', 'Terlambat')
@@ -142,9 +153,9 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // 5. TOP PUNCTUAL (Siswa Terrajin) - [FIX 4] Tambah whereHas
+        // 5. TOP PUNCTUAL (Siswa Terrajin)
         $topPunctualStudents = AttendanceSiswa::with(['student.schoolClass'])
-            ->whereHas('student', $filterActiveStudent) // Hanya siswa aktif
+            ->whereHas('student', $filterActiveStudent) 
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang', 'harian', 'masuk', 'pulang'])
             ->whereIn('status', ['Hadir', 'Tepat Waktu', 'hadir', 'tepat waktu'])
             ->whereBetween('attendance_date', [$startDate, $endDate])
@@ -154,26 +165,42 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        // 6. LOG AKTIVITAS TERBARU (Live Feed) - [FIX 5] Tambah whereHas
+        // 6. LOG AKTIVITAS TERBARU
         $recentActivities = AttendanceSiswa::with(['student.schoolClass'])
-            ->whereHas('student', $filterActiveStudent) // Hanya siswa aktif
+            ->whereHas('student', $filterActiveStudent)
             ->whereDate('attendance_date', $dateParam)
             ->latest('created_at')
             ->take(6)
             ->get();
 
-        // 7. RANKING KEHADIRAN PER KELAS - [FIX 6] Tambah where status != graduated
+        // 7. RANKING KEHADIRAN PER KELAS (TERBAIK)
         $classRanks = DB::table('attendances_siswa') 
             ->join('students', 'attendances_siswa.student_id', '=', 'students.id')
             ->join('classes', 'students.class_id', '=', 'classes.id')
-            ->where('students.status', '!=', 'graduated') // Filter Alumni di Query Builder
+            ->where('students.status', '!=', 'graduated') 
             ->whereBetween('attendances_siswa.attendance_date', [$startDate, $endDate])
-            ->whereIn('attendances_siswa.type', ['Harian', 'Masuk', 'Pulang', 'harian', 'masuk', 'pulang'])
-            ->whereIn('attendances_siswa.status', ['Hadir', 'Tepat Waktu', 'Terlambat', 'hadir', 'tepat waktu', 'terlambat'])
+            ->whereIn('attendances_siswa.type', ['Harian', 'Masuk', 'Pulang'])
+            ->whereIn('attendances_siswa.status', ['Hadir', 'Tepat Waktu', 'Terlambat'])
             ->whereNull('students.deleted_at')
             ->select('classes.name as class_name', DB::raw('count(DISTINCT attendances_siswa.student_id) as present_count'))
             ->groupBy('classes.name')
             ->orderByDesc('present_count')
+            ->take(5)
+            ->get();
+            
+        // [BARU] 7b. RANKING KEHADIRAN PER KELAS (TERENDAH / PERLU PERHATIAN)
+        // Kita cari kelas dengan jumlah Absen/Alfa terbanyak
+        $lowestClassRanks = DB::table('attendances_siswa') 
+            ->join('students', 'attendances_siswa.student_id', '=', 'students.id')
+            ->join('classes', 'students.class_id', '=', 'classes.id')
+            ->where('students.status', '!=', 'graduated') 
+            ->whereBetween('attendances_siswa.attendance_date', [$startDate, $endDate])
+            ->whereIn('attendances_siswa.type', ['Harian', 'Masuk', 'Pulang'])
+            ->whereIn('attendances_siswa.status', ['Alfa', 'Alpa', 'Alpha', 'Sakit', 'Izin']) // Hitung ketidakhadiran
+            ->whereNull('students.deleted_at')
+            ->select('classes.name as class_name', DB::raw('count(DISTINCT attendances_siswa.student_id) as absent_count'))
+            ->groupBy('classes.name')
+            ->orderByDesc('absent_count') // Urutkan dari yang paling banyak tidak masuk
             ->take(5)
             ->get();
 
@@ -183,11 +210,9 @@ class DashboardController extends Controller
         $weeklyAbsentData = [];
         $chartLabels = [];
 
-        // Jika 'today', tampilkan trend 7 hari terakhir
         $graphStart = ($period === 'today') ? $selectedDate->copy()->subDays(6) : $startDate;
         $graphEnd   = ($period === 'today') ? $selectedDate : $endDate;
 
-        // Ambil data untuk grafik - [FIX 7] Tambah whereHas
         $graphAttendances = AttendanceSiswa::with('student')
             ->whereHas('student', $filterActiveStudent)
             ->whereBetween('attendance_date', [$graphStart, $graphEnd])
@@ -203,18 +228,12 @@ class DashboardController extends Controller
             $dateStr = $periodLoop->format('Y-m-d'); 
             $chartLabels[] = $periodLoop->format('d M'); 
 
-            // Filter data per hari
             $dailyAtt = $graphAttendancesSchool->filter(function ($att) use ($dateStr) {
                 return Carbon::parse($att->attendance_date)->format('Y-m-d') === $dateStr;
             });
 
-            // 1. Hadir Tepat Waktu
             $weeklyPresentData[] = $dailyAtt->filter(fn($att) => in_array(strtolower($att->status), ['hadir', 'tepat waktu']))->unique('student_id')->count();
-            
-            // 2. Khusus Terlambat
             $weeklyLateData[] = $dailyAtt->filter(fn($att) => strtolower($att->status) === 'terlambat')->unique('student_id')->count();
-            
-            // 3. Absen (Sakit/Izin/Alpha)
             $weeklyAbsentData[] = $dailyAtt->filter(fn($att) => in_array(strtolower($att->status), ['sakit', 'izin', 'alpa', 'alpha']))->unique('student_id')->count();
 
             $periodLoop->addDay();
@@ -234,6 +253,7 @@ class DashboardController extends Controller
             'topPunctualStudents' => $topPunctualStudents,
             'recentActivities' => $recentActivities,
             'classRanks' => $classRanks,
+            'lowestClassRanks' => $lowestClassRanks, // Data baru dikirim ke view
             'chartLabels' => $chartLabels,
             'weeklyPresentData' => $weeklyPresentData, 
             'weeklyLateData' => $weeklyLateData,       

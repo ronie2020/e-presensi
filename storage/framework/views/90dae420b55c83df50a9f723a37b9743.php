@@ -163,9 +163,10 @@
                             <span x-text="(loading && loadingTarget === 'month') ? '' : 'Bulanan'"></span>
                         </button>
                         
-                        <button @click="printDashboard()" class="ml-2 bg-white/10 text-white p-2.5 rounded-lg hover:bg-white/20 hover:scale-105 active:scale-95 transition-all shadow-sm border border-white/10 shrink-0" title="Cetak">
+                        
+                        <a href="<?php echo e(route('reports.printDaily', ['date' => request('date')])); ?>" target="_blank" class="ml-2 bg-white/10 text-white p-2.5 rounded-lg hover:bg-white/20 hover:scale-105 active:scale-95 transition-all shadow-sm border border-white/10 shrink-0 flex items-center gap-2" title="Cetak Laporan Harian">
                             <i class="ph-bold ph-printer text-lg"></i>
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -282,39 +283,31 @@
                 $titleLower = strtolower($card['title']);
                 $rawIcon = $card['icon'] ?? ''; 
                 
-                // --- PERBAIKAN LOGIKA WARNA YANG LEBIH CERDAS ---
-                
-                // 1. Cek MERAH (Alpha, Alpa, Absen, Tidak Hadir) - Prioritas Tinggi
+                // --- LOGIKA WARNA ---
                 if (str_contains($titleLower, 'alpha') || str_contains($titleLower, 'alpa') || str_contains($titleLower, 'absen') || str_contains($titleLower, 'tidak hadir')) { 
                     $iconClass = 'ph-x-circle'; 
                     $colorKey = 'rose'; 
                 } 
-                // 2. Cek KUNING (Telat, Lambat)
                 elseif (str_contains($titleLower, 'telat') || str_contains($titleLower, 'lambat')) { 
                     $iconClass = 'ph-clock'; 
                     $colorKey = 'amber'; 
                 } 
-                // 3. Cek UNGU (Izin, Sakit)
                 elseif (str_contains($titleLower, 'izin') || str_contains($titleLower, 'sakit')) { 
                     $iconClass = 'ph-envelope-open'; 
                     $colorKey = 'purple'; 
                 } 
-                // 4. Cek HIJAU (Hadir) - Pastikan tidak ada kata "tidak" atau "belum"
                 elseif (str_contains($titleLower, 'hadir') && !str_contains($titleLower, 'belum') && !str_contains($titleLower, 'tidak')) { 
                     $iconClass = 'ph-check-circle'; 
                     $colorKey = 'emerald'; 
                 } 
-                // 5. Cek ABU (Belum)
                 elseif (str_contains($titleLower, 'belum')) { 
                     $iconClass = 'ph-minus-circle'; 
                     $colorKey = 'slate'; 
                 } 
-                // 6. Cek ORANGE/KUNING (Pulang)
                 elseif (str_contains($titleLower, 'pulang')) { 
                     $iconClass = 'ph-person-simple-run'; 
                     $colorKey = 'yellow'; 
                 } 
-                // 7. Cek BIRU (Total, Siswa, Default)
                 elseif (str_contains($titleLower, 'total') || str_contains($titleLower, 'siswa')) { 
                     $iconClass = 'ph-student'; 
                     $colorKey = 'blue'; 
@@ -343,15 +336,28 @@
                     <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm transition-all duration-300 <?php echo e($theme['bg']); ?> <?php echo e($theme['text']); ?> <?php echo e($theme['hover_bg']); ?> group-hover:text-white group-hover:scale-110">
                         <i class="ph-duotone <?php echo e($iconClass); ?> text-2xl animate-wiggle"></i>
                     </div>
+                    
+                    
                     <?php if(isset($card['percentage'])): ?>
                     <span class="text-[10px] font-bold px-2 py-1 rounded-lg border <?php echo e($card['percentage'] > 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'); ?>">
                         <?php echo e($card['percentage'] > 0 ? '+' : ''); ?><?php echo e($card['percentage']); ?>%
                     </span>
                     <?php endif; ?>
+                    
+                    
+                    <?php if(isset($card['trend']) && $card['trend'] !== null): ?>
+                        <div class="text-[10px] font-bold px-2 py-1 rounded-lg border flex items-center gap-1 <?php echo e($card['trend'] >= 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'); ?>">
+                            <i class="<?php echo e($card['trend'] >= 0 ? 'ph-bold ph-trend-up' : 'ph-bold ph-trend-down'); ?>"></i>
+                            <span><?php echo e(abs($card['trend'])); ?></span>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 <div class="relative z-10 mt-auto">
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 truncate <?php echo e(str_replace('text-', 'group-hover:text-', $theme['text'])); ?> transition-colors"><?php echo e($card['title']); ?></p>
                     <h3 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight count-up" data-target="<?php echo e($card['value']); ?>">0</h3>
+                    <?php if(isset($card['trend']) && $card['trend'] !== null): ?>
+                        <p class="text-[9px] text-slate-400 font-bold mt-1">vs Kemarin</p>
+                    <?php endif; ?>
                 </div>
             </a>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -493,44 +499,90 @@
             </div>
 
             
-            <div class="animate-enter bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 h-full card-print" style="animation-delay: 900ms">
-                <div class="flex items-center justify-between mb-6">
+            <div class="animate-enter bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 h-full card-print" style="animation-delay: 900ms" x-data="{ rankTab: 'best' }">
+                <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <i class="ph-fill ph-trophy text-yellow-400 text-xl drop-shadow-sm"></i> Top Kelas
+                        <i class="ph-fill ph-trophy text-yellow-400 text-xl drop-shadow-sm"></i> Peringkat Kelas
                     </h3>
-                    <span class="text-[10px] bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-1 rounded-lg font-bold uppercase tracking-wide">Terajin</span>
+                    
+                    
+                    <div class="bg-slate-100 p-1 rounded-lg flex no-print">
+                        <button @click="rankTab = 'best'" :class="rankTab === 'best' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-2 py-1 rounded-md text-[10px] font-bold transition-all">Rajin</button>
+                        <button @click="rankTab = 'worst'" :class="rankTab === 'worst' ? 'bg-white text-rose-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-2 py-1 rounded-md text-[10px] font-bold transition-all">Perlu Atensi</button>
+                    </div>
                 </div>
-                <?php if(isset($classRanks) && count($classRanks) > 0): ?>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <tbody class="divide-y divide-slate-50">
-                            <?php $__currentLoopData = $classRanks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $rank): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <tr class="group hover:bg-slate-50 transition-colors">
-                                <td class="py-4 pl-1 w-10">
-                                    <?php if($index == 0): ?> <i class="ph-fill ph-medal text-yellow-400 text-2xl drop-shadow-sm"></i>
-                                    <?php elseif($index == 1): ?> <i class="ph-fill ph-medal text-slate-300 text-xl"></i>
-                                    <?php elseif($index == 2): ?> <i class="ph-fill ph-medal text-amber-600 text-xl"></i>
-                                    <?php else: ?> <span class="font-bold text-slate-300 ml-1.5">#<?php echo e($index + 1); ?></span> <?php endif; ?>
-                                </td>
-                                <td class="py-4">
-                                    <div class="font-bold text-slate-700 mb-1"><?php echo e($rank->class_name); ?></div>
-                                    <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden max-w-[150px]">
-                                        <?php $percent = min(100, ($rank->present_count / 40) * 100); ?>
-                                        <div class="h-1.5 rounded-full <?php echo e($index == 0 ? 'bg-yellow-400' : 'bg-emerald-500'); ?>" style="width: <?php echo e($percent); ?>%"></div>
-                                    </div>
-                                </td>
-                                <td class="py-4 text-right pr-2">
-                                    <div class="font-black text-slate-800"><?php echo e(number_format($percent, 0)); ?>%</div>
-                                    <div class="text-[10px] text-slate-400 font-bold whitespace-nowrap"><?php echo e($rank->present_count); ?> Hadir</div>
-                                </td>
-                            </tr>
-                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                        </tbody>
-                    </table>
+
+                
+                <div x-show="rankTab === 'best'">
+                    <?php if(isset($classRanks) && count($classRanks) > 0): ?>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <tbody class="divide-y divide-slate-50">
+                                <?php $__currentLoopData = $classRanks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $rank): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <tr class="group hover:bg-slate-50 transition-colors">
+                                    <td class="py-4 pl-1 w-10">
+                                        <?php if($index == 0): ?> <i class="ph-fill ph-medal text-yellow-400 text-2xl drop-shadow-sm"></i>
+                                        <?php elseif($index == 1): ?> <i class="ph-fill ph-medal text-slate-300 text-xl"></i>
+                                        <?php elseif($index == 2): ?> <i class="ph-fill ph-medal text-amber-600 text-xl"></i>
+                                        <?php else: ?> <span class="font-bold text-slate-300 ml-1.5">#<?php echo e($index + 1); ?></span> <?php endif; ?>
+                                    </td>
+                                    <td class="py-4">
+                                        <div class="font-bold text-slate-700 mb-1"><?php echo e($rank->class_name); ?></div>
+                                        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden max-w-[150px]">
+                                            <?php $percent = min(100, ($rank->present_count / 40) * 100); ?>
+                                            <div class="h-1.5 rounded-full <?php echo e($index == 0 ? 'bg-yellow-400' : 'bg-emerald-500'); ?>" style="width: <?php echo e($percent); ?>%"></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 text-right pr-2">
+                                        <div class="font-black text-slate-800"><?php echo e(number_format($percent, 0)); ?>%</div>
+                                        <div class="text-[10px] text-slate-400 font-bold whitespace-nowrap"><?php echo e($rank->present_count); ?> Hadir</div>
+                                    </td>
+                                </tr>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php else: ?>
+                     <div class="flex flex-col items-center justify-center h-40 text-center text-slate-400"><p class="text-xs font-bold">Belum ada data peringkat.</p></div>
+                    <?php endif; ?>
                 </div>
-                <?php else: ?>
-                 <div class="flex flex-col items-center justify-center h-40 text-center text-slate-400"><p class="text-xs font-bold">Belum ada data peringkat.</p></div>
-                <?php endif; ?>
+
+                
+                <div x-show="rankTab === 'worst'" style="display: none;">
+                    <?php if(isset($lowestClassRanks) && count($lowestClassRanks) > 0): ?>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <tbody class="divide-y divide-slate-50">
+                                <?php $__currentLoopData = $lowestClassRanks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $rank): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <tr class="group hover:bg-rose-50/50 transition-colors">
+                                    <td class="py-4 pl-1 w-10 text-center font-bold text-slate-400">
+                                        <?php echo e($index + 1); ?>
+
+                                    </td>
+                                    <td class="py-4">
+                                        <div class="font-bold text-slate-700 mb-1"><?php echo e($rank->class_name); ?></div>
+                                        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden max-w-[150px]">
+                                            <?php $percent = min(100, ($rank->absent_count / 40) * 100); ?>
+                                            <div class="h-1.5 rounded-full bg-rose-500" style="width: <?php echo e($percent); ?>%"></div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 text-right pr-2">
+                                        <div class="font-black text-rose-600"><?php echo e($rank->absent_count); ?></div>
+                                        <div class="text-[10px] text-slate-400 font-bold whitespace-nowrap">Tidak Masuk</div>
+                                    </td>
+                                </tr>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php else: ?>
+                     <div class="flex flex-col items-center justify-center h-40 text-center text-emerald-500">
+                        <i class="ph-duotone ph-check-circle text-4xl mb-2 opacity-50"></i>
+                        <p class="text-xs font-bold">Semua kelas hadir lengkap!</p>
+                     </div>
+                    <?php endif; ?>
+                </div>
+
             </div>
         </div>
     </div>
