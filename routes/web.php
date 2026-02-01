@@ -41,6 +41,7 @@ use App\Http\Controllers\LmsMaterialController;
 use App\Http\Controllers\LmsAssignmentController;
 use App\Http\Controllers\LmsGradeController; 
 use App\Http\Controllers\StudentLmsController;
+use App\Http\Controllers\StudentQuizController; 
 
 // CBT & Ujian
 use App\Http\Controllers\CbtController;
@@ -204,7 +205,7 @@ Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
         // Upload Tugas & Kuis
         Route::post('/assignment/{id}/submit', [StudentLmsController::class, 'submitAssignment'])->name('assignment.submit');
         Route::get('/assignment/{id}/quiz', [StudentLmsController::class, 'startQuiz'])->name('assignment.quiz');
-        Route::post('/assignment/{id}/quiz', [StudentLmsController::class, 'submitQuiz'])->name('assignment.quiz.submit');
+        Route::post('/assignment/{id}/quiz', [StudentQuizController::class, 'submit'])->name('assignment.quiz.submit');
     });
 
     // B. UJIAN SISWA (CBT)    

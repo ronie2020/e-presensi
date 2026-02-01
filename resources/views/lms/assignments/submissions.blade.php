@@ -19,7 +19,6 @@
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
-                        {{-- Badges --}}
                         <div class="flex flex-wrap items-center gap-2 mb-3">
                             <span class="inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider bg-white/10 border border-white/10 text-blue-100 backdrop-blur-sm">
                                 <i class="ph-bold ph-tag mr-1.5"></i>
@@ -72,14 +71,11 @@
                                         <option value="{{ $className }}">{{ $className }}</option>
                                     @endforeach
                                 </select>
-                                <i class="ph-bold ph-funnel absolute left-3.5 top-3 text-slate-400"></i>
-                                <i class="ph-bold ph-caret-down absolute right-3 top-3 text-slate-400 pointer-events-none"></i>
                             </div>
                         @endif
 
                         <div class="relative w-full sm:w-64">
                             <input type="text" id="tableSearch" placeholder="Cari nama siswa..." class="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:ring-blue-500 focus:border-blue-500 w-full shadow-sm transition-all">
-                            <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-3 text-slate-400"></i>
                         </div>
                     </div>
                 </div>
@@ -91,7 +87,7 @@
                                 <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider w-1/4">Siswa</th>
                                 <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Kelas</th>
                                 <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Status</th>
-                                <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider w-1/4">Jawaban / Lampiran</th>
+                                <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider w-1/4">Jawaban</th>
                                 <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Nilai Final</th>
                                 <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider w-1/4">Feedback</th>
                                 <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Aksi</th>
@@ -105,6 +101,8 @@
                                     if($submission && $submission->submitted_at > $assignment->deadline) {
                                         $isLate = true;
                                     }
+                                    // Hitung jumlah jawaban untuk diagnosa
+                                    $ansCount = $submission ? $submission->answers->count() : 0;
                                 @endphp
 
                                 <tr class="group hover:bg-slate-50/80 transition-colors student-row" data-class="{{ $student->schoolClass->name ?? '-' }}">
@@ -120,7 +118,6 @@
                                         </div>
                                     </td>
                                     
-                                    <!-- Kelas -->
                                     <td class="px-6 py-4">
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
                                             {{ $student->schoolClass->name ?? '-' }}
@@ -146,10 +143,6 @@
                                         @if($submission)
                                             <div class="flex flex-col gap-2">
                                                 @if($assignment->assignment_type == 'quiz')
-                                                    {{-- 
-                                                        [PERBAIKAN LOGIKA] 
-                                                        Tombol SELALU MUNCUL agar guru bisa cek meskipun data error/kosong.
-                                                    --}}
                                                     <button type="button" 
                                                             @click="openReview(
                                                                 '{{ addslashes($student->name) }}', 
@@ -167,9 +160,13 @@
                                                             )"
                                                             class="inline-flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-600 border border-purple-200 hover:bg-purple-100 rounded-xl text-xs font-bold transition-all w-fit shadow-sm group/btn">
                                                         <i class="ph-bold ph-eye text-lg"></i>
-                                                        Koreksi & Review
-                                                        @if($submission->answers->count() == 0)
-                                                            <span class="w-2 h-2 bg-rose-500 rounded-full animate-pulse ml-1" title="Data Kosong/Eror"></span>
+                                                        Koreksi
+                                                        
+                                                        {{-- INDIKATOR DEBUG: Tampilkan jumlah data jawaban yg terbaca --}}
+                                                        @if($ansCount == 0)
+                                                            <span class="ml-1 px-1.5 py-0.5 rounded bg-rose-500 text-white text-[9px]">Kosong (0)</span>
+                                                        @else
+                                                            <span class="ml-1 px-1.5 py-0.5 rounded bg-emerald-500 text-white text-[9px]">{{ $ansCount }}</span>
                                                         @endif
                                                     </button>
                                                 @elseif($submission->file_path)
@@ -225,7 +222,7 @@
                                                 <i class="ph-bold ph-floppy-disk text-lg"></i>
                                             </button>
                                             
-                                            {{-- FORM HAPUS SUBMISSION (Untuk Reset Data Eror) --}}
+                                            {{-- FORM HAPUS SUBMISSION --}}
                                             <form action="{{ route('lms.submissions.destroy', $submission->id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('Hapus data jawaban siswa ini? Siswa harus mengerjakan ulang.')">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="w-9 h-9 rounded-xl bg-rose-50 text-rose-500 border border-rose-200 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors">
@@ -303,7 +300,7 @@
                                     <i class="ph-duotone ph-warning-circle"></i>
                                 </div>
                                 <h4 class="font-bold text-slate-800">Data Jawaban Tidak Ditemukan</h4>
-                                <p class="text-sm text-slate-500 max-w-xs mt-2">Siswa ini melakukan submit sebelum sistem diperbarui, sehingga jawaban tidak tersimpan. Harap hapus submission ini dan minta siswa mengerjakan ulang.</p>
+                                <p class="text-sm text-slate-500 max-w-xs mt-2">Siswa ini melakukan submit sebelum sistem diperbarui, atau terjadi kesalahan database. Harap hapus submission ini dan minta siswa mengerjakan ulang.</p>
                             </div>
                         </template>
                     </div>

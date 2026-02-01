@@ -91,9 +91,7 @@
                                         @foreach(['A', 'B', 'C', 'D', 'E'] as $opt)
                                             @if(isset($q->options[$opt]) && $q->options[$opt])
                                                 <label class="relative flex items-center gap-4 p-4 md:p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 group/opt select-none bg-slate-50/30 hover:bg-blue-50/30 border-slate-100 hover:border-blue-200 active:scale-[0.99]">
-                                                    {{-- 
-                                                        UPDATE: Menambahkan old() helper agar jawaban tidak hilang saat error validasi
-                                                    --}}
+                                                    {{-- UPDATE: Menambahkan old() helper agar jawaban tidak hilang saat error validasi --}}
                                                     <input type="radio" 
                                                            name="answers[{{ $q->id }}]" 
                                                            value="{{ $opt }}" 
@@ -124,9 +122,7 @@
                                             @endif
                                         @endforeach
                                     @else
-                                        {{-- 
-                                            UPDATE: Menambahkan old() pada textarea
-                                        --}}
+                                        {{-- UPDATE: Menambahkan old() pada textarea --}}
                                         <div class="relative">
                                             <textarea name="answers[{{ $q->id }}]" rows="5" 
                                                 class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-slate-700 placeholder:text-slate-400 p-4 font-medium transition-all resize-none shadow-inner" 
@@ -166,22 +162,12 @@
                 formattedTime: '00:00:00',
                 
                 startTimer() {
-                    // Update timer setiap detik
                     const interval = setInterval(() => {
                         this.timeLeft--;
-                        
-                        // Kalkulasi Jam, Menit, Detik
                         const h = Math.floor(this.timeLeft / 3600);
                         const m = Math.floor((this.timeLeft % 3600) / 60);
                         const s = this.timeLeft % 60;
-                        
-                        // Formatting String (00:00:00)
-                        this.formattedTime = 
-                            (h < 10 ? "0" + h : h) + ":" + 
-                            (m < 10 ? "0" + m : m) + ":" + 
-                            (s < 10 ? "0" + s : s);
-
-                        // Logic Waktu Habis (Auto Submit)
+                        this.formattedTime = (h < 10 ? "0" + h : h) + ":" + (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
                         if (this.timeLeft <= 0) {
                             clearInterval(interval);
                             this.forceSubmit();
@@ -198,9 +184,7 @@
                         showConfirmButton: false,
                         allowOutsideClick: false,
                         allowEscapeKey: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
+                        didOpen: () => { Swal.showLoading(); }
                     }).then(() => {
                         document.getElementById('quizForm').submit();
                     });
@@ -239,5 +223,35 @@
                 }
             });
         }
+
+        // [TAMBAHAN WAJIB] Listener untuk menangkap pesan Error/Success dari Controller
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // [FIX PENTING] Gunakan json_encode agar karakter aneh tidak merusak JavaScript
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Mengirim!',
+                    text: {!! json_encode(session('error')) !!}, // Perbaikan disini
+                    confirmButtonText: 'Coba Lagi',
+                    confirmButtonColor: '#e11d48',
+                    customClass: { popup: 'rounded-[2rem] font-sans' }
+                });
+            @endif
+
+            // Jika ada pesan Sukses
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: {!! json_encode(session('success')) !!}, // Perbaikan disini
+                    confirmButtonText: 'Lanjut',
+                    confirmButtonColor: '#1e3a8a',
+                    customClass: { popup: 'rounded-[2rem] font-sans' }
+                }).then(() => {
+                    window.location.href = "{{ route('students.learning.index') }}";
+                });
+            @endif
+        });
     </script>
 </x-student-learning-layout>

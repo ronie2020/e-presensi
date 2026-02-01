@@ -172,22 +172,12 @@
                 formattedTime: '00:00:00',
                 
                 startTimer() {
-                    // Update timer setiap detik
                     const interval = setInterval(() => {
                         this.timeLeft--;
-                        
-                        // Kalkulasi Jam, Menit, Detik
                         const h = Math.floor(this.timeLeft / 3600);
                         const m = Math.floor((this.timeLeft % 3600) / 60);
                         const s = this.timeLeft % 60;
-                        
-                        // Formatting String (00:00:00)
-                        this.formattedTime = 
-                            (h < 10 ? "0" + h : h) + ":" + 
-                            (m < 10 ? "0" + m : m) + ":" + 
-                            (s < 10 ? "0" + s : s);
-
-                        // Logic Waktu Habis (Auto Submit)
+                        this.formattedTime = (h < 10 ? "0" + h : h) + ":" + (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
                         if (this.timeLeft <= 0) {
                             clearInterval(interval);
                             this.forceSubmit();
@@ -204,9 +194,7 @@
                         showConfirmButton: false,
                         allowOutsideClick: false,
                         allowEscapeKey: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
+                        didOpen: () => { Swal.showLoading(); }
                     }).then(() => {
                         document.getElementById('quizForm').submit();
                     });
@@ -245,6 +233,36 @@
                 }
             });
         }
+
+        // [TAMBAHAN WAJIB] Listener untuk menangkap pesan Error/Success dari Controller
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // [FIX PENTING] Gunakan json_encode agar karakter aneh tidak merusak JavaScript
+            <?php if(session('error')): ?>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Mengirim!',
+                    text: <?php echo json_encode(session('error')); ?>, // Perbaikan disini
+                    confirmButtonText: 'Coba Lagi',
+                    confirmButtonColor: '#e11d48',
+                    customClass: { popup: 'rounded-[2rem] font-sans' }
+                });
+            <?php endif; ?>
+
+            // Jika ada pesan Sukses
+            <?php if(session('success')): ?>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: <?php echo json_encode(session('success')); ?>, // Perbaikan disini
+                    confirmButtonText: 'Lanjut',
+                    confirmButtonColor: '#1e3a8a',
+                    customClass: { popup: 'rounded-[2rem] font-sans' }
+                }).then(() => {
+                    window.location.href = "<?php echo e(route('students.learning.index')); ?>";
+                });
+            <?php endif; ?>
+        });
     </script>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
