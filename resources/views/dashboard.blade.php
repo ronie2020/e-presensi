@@ -94,13 +94,15 @@
             
             <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
                 <div>
+                    
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-blue-200 text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm no-print">
                         <span class="relative flex h-2 w-2">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                           <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
                         </span>
-                        System Online
+                        System Online                        
                     </div>
+                    
                     <h1 class="text-2xl md:text-5xl font-extrabold text-white tracking-tight mb-3">
                         Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">{{ Auth::user()->name ?? 'Administrator' }}</span> 
                     </h1>
@@ -236,7 +238,7 @@
         </div>
 
         {{-- QUICK ACTIONS --}}
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 no-print animate-enter quick-actions" style="animation-delay: 100ms">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 no-print animate-enter quick-actions" style="animation-delay: 100ms">
             <a href="{{ route('students.index') }}" @click.prevent="navigate('{{ route('students.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-student text-xl"></i>
@@ -263,6 +265,14 @@
                     <i class="ph-bold ph-chart-bar text-xl"></i>
                 </div>
                 <div class="text-sm font-bold text-slate-700 group-hover:text-emerald-700">Rekap Nilai</div>
+            </a>
+
+            {{-- [BARU] Tombol Laporan Kelas --}}
+            <a href="{{ route('reports.class') }}" @click.prevent="navigate('{{ route('reports.class') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-amber-200 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-files text-xl"></i>
+                </div>
+                <div class="text-sm font-bold text-slate-700 group-hover:text-amber-700">Laporan Kelas</div>
             </a>
         </div>
 

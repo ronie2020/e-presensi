@@ -35,6 +35,7 @@ use App\Http\Controllers\GraduationController;
 use App\Http\Controllers\PpdbController;
 use App\Http\Controllers\AlumniController;
 use App\Http\Controllers\StudentPermitController; 
+use App\Http\Controllers\ClassReportController;
 
 // LMS (Learning Management System)
 use App\Http\Controllers\LmsMaterialController;
@@ -234,6 +235,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/reports/classes', [ClassReportController::class, 'index'])->name('reports.class');
+    Route::get('/reports/classes/print', [ClassReportController::class, 'print'])->name('reports.class.print');
+    Route::get('/reports/classes/excel', [ClassReportController::class, 'exportExcel'])->name('reports.class.excel');
 
     // ===> LMS GURU (Materi, Tugas, & Nilai) <===
     Route::prefix('lms')->name('lms.')->group(function () {

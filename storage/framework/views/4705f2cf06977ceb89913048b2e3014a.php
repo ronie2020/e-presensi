@@ -1,11 +1,20 @@
-<x-app-layout>
-    {{-- 1. LOAD LIBRARY PENDUKUNG --}}
-    {{-- SANGAT DISARANKAN: Download file .js ini dan simpan di folder public/js/ untuk akses offline --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
-    @push('styles')
-    {{-- [PERBAIKAN] Load Font Plus Jakarta Sans agar konsisten dengan Dashboard --}}
+    <?php $__env->startPush('styles'); ?>
+    
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
 
     <style>
@@ -28,11 +37,11 @@
         .focus-indicator { transition: all 0.3s; }
         .input-focused { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2); }
     </style>
-    @endpush
+    <?php $__env->stopPush(); ?>
 
     <div class="py-6 font-sans text-slate-800 relative">
         
-        {{-- Indikator Koneksi Offline --}}
+        
         <div id="offlineIndicator" class="fixed bottom-6 right-6 z-50 hidden animate-bounce">
             <div class="bg-rose-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border-2 border-rose-400">
                 <i class="ph-bold ph-wifi-slash text-xl"></i>
@@ -45,10 +54,10 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            {{-- HEADER (UPDATED TO MATCH DASHBOARD) --}}
+            
             <div class="relative rounded-[2.5rem] bg-gradient-to-r from-blue-900 via-slate-800 to-slate-900 p-8 mb-8 text-white shadow-2xl shadow-blue-900/20 overflow-hidden border border-white/10 group">
                 
-                {{-- Decorative Blobs --}}
+                
                 <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 pointer-events-none"></div>
                 <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 pointer-events-none"></div>
                 <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none"></div>
@@ -63,14 +72,14 @@
                     </div>
                     <div class="text-center md:text-right bg-white/10 backdrop-blur-md md:bg-transparent p-3 md:p-0 rounded-xl w-full md:w-auto border border-white/10 md:border-none">
                         <div class="text-xs font-bold text-blue-300 uppercase tracking-widest">Petugas Jaga</div>
-                        <div class="font-bold text-lg text-white">{{ Auth::user()->name ?? 'Administrator' }}</div>
+                        <div class="font-bold text-lg text-white"><?php echo e(Auth::user()->name ?? 'Administrator'); ?></div>
                     </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                {{-- KOLOM KIRI: SCANNER & INPUT --}}
+                
                 <div class="lg:col-span-5 space-y-6">
                     <div class="bg-white p-6 rounded-[2rem] shadow-lg border border-slate-100">
                         <div class="flex justify-between items-center mb-4">
@@ -78,7 +87,7 @@
                                 <i class="ph-bold ph-qr-code text-indigo-600"></i> Scan Kartu
                             </h3>
                             
-                            {{-- SWITCH MODE KIOS (LOCK FOCUS) --}}
+                            
                             <div class="flex items-center gap-2" title="Aktifkan agar kursor selalu kembali ke kolom input (Cocok untuk RFID)">
                                 <label class="flex items-center cursor-pointer relative">
                                     <input type="checkbox" id="kioskModeToggle" class="sr-only peer" checked>
@@ -88,14 +97,14 @@
                             </div>
                         </div>
 
-                        {{-- TOMBOL TOGGLE KAMERA --}}
+                        
                         <div class="mb-4">
                             <button onclick="toggleCamera()" id="btnCamera" class="w-full text-xs font-bold px-3 py-3 bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 rounded-xl transition flex items-center justify-center gap-2 border border-slate-200">
                                 <i class="ph-bold ph-camera text-lg"></i> <span id="cameraText">Buka Kamera QR</span>
                             </button>
                         </div>
 
-                        {{-- AREA KAMERA (Hidden by Default) --}}
+                        
                         <div id="cameraContainer" class="hidden mb-4 relative bg-slate-900 rounded-2xl overflow-hidden shadow-inner border-4 border-slate-900">
                             <div id="reader" class="w-full"></div>
                             <div class="absolute bottom-4 left-0 right-0 text-center pointer-events-none">
@@ -103,9 +112,9 @@
                             </div>
                         </div>
                         
-                        {{-- INPUT MANUAL / SCANNER TEMBAK --}}
+                        
                         <div class="relative group">
-                            {{-- [MODIFIKASI] ID scannerInput ditambahkan class focus-indicator --}}
+                            
                             <input type="text" id="scannerInput" 
                                 class="w-full pl-12 pr-12 py-4 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-mono text-lg font-bold text-slate-700 transition-all placeholder:text-slate-300 focus-indicator" 
                                 placeholder="Tempel RFID / Scan QR..." autofocus autocomplete="off">
@@ -113,18 +122,18 @@
                                 <i class="ph-bold ph-scan text-xl"></i>
                             </div>
                             
-                            {{-- Loading Spinner --}}
+                            
                             <div id="inputSpinner" class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-indigo-500">
                                 <i class="ph-bold ph-spinner animate-spin text-xl"></i>
                             </div>
                             
-                            {{-- Search Button --}}
+                            
                             <button id="btnSearch" class="absolute right-3 top-1/2 -translate-y-1/2 bg-indigo-100 text-indigo-700 p-2 rounded-lg hover:bg-indigo-200 transition cursor-pointer">
                                 <i class="ph-bold ph-arrow-right"></i>
                             </button>
                         </div>
                         
-                        {{-- Status Fokus Input --}}
+                        
                         <div class="flex justify-between items-center mt-2 ml-1">
                             <p class="text-xs text-slate-400 flex items-center gap-1">
                                 <i class="ph-fill ph-info"></i> Pastikan kursor aktif di kolom ini.
@@ -144,33 +153,34 @@
                             <i class="ph-duotone ph-clock-counter-clockwise text-indigo-600"></i> Baru Saja Kembali
                         </h3>
                         <div id="historyContainer" class="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
-                            @forelse($todayHistory as $history)
+                            <?php $__empty_1 = true; $__currentLoopData = $todayHistory; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $history): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors animate-enter">
                                 <div class="flex items-center gap-3">
                                     <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs">
                                         <i class="ph-bold ph-check"></i>
                                     </div>
                                     <div>
-                                        <div class="text-sm font-bold text-slate-700 line-clamp-1">{{ $history->student->name }}</div>
-                                        <div class="text-[10px] text-slate-500">{{ $history->reason_category }} • <span class="font-bold text-slate-600">{{ $history->duration_minutes }} m</span></div>
+                                        <div class="text-sm font-bold text-slate-700 line-clamp-1"><?php echo e($history->student->name); ?></div>
+                                        <div class="text-[10px] text-slate-500"><?php echo e($history->reason_category); ?> • <span class="font-bold text-slate-600"><?php echo e($history->duration_minutes); ?> m</span></div>
                                     </div>
                                 </div>
                                 <div class="text-right">
                                     <div class="text-xs font-mono text-slate-400">
-                                        {{ $history->time_in->format('H:i') }}
+                                        <?php echo e($history->time_in->format('H:i')); ?>
+
                                     </div>
                                 </div>
                             </div>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <div class="text-center py-8 text-slate-400 text-sm border-2 border-dashed border-slate-100 rounded-xl">
                                 Belum ada riwayat hari ini.
                             </div>
-                            @endforelse
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
 
-                {{-- KOLOM KANAN: LIVE MONITORING --}}
+                
                 <div class="lg:col-span-7">
                     <div class="bg-white rounded-[2rem] shadow-xl border border-slate-100 overflow-hidden min-h-[600px] flex flex-col relative">
                         <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center sticky top-0 z-10 backdrop-blur-sm">
@@ -181,52 +191,56 @@
                                 <p class="text-xs text-slate-500">Timer berjalan otomatis.</p>
                             </div>
                             
-                            {{-- Counter Badge --}}
+                            
                             <span id="activeCountBadge" class="bg-orange-100 text-orange-600 py-1 px-3 rounded-full text-xs font-bold shadow-sm border border-orange-200">
-                                {{ $activePermits->count() }} Siswa
+                                <?php echo e($activePermits->count()); ?> Siswa
                             </span>
                         </div>
                         
                         <div id="activePermitsContainer" class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3 bg-slate-50/30">
-                            @forelse($activePermits as $permit)
-                            <div class="permit-card group relative bg-white p-4 rounded-2xl border-2 {{ $permit->is_overdue ? 'border-rose-200 bg-rose-50/50' : 'border-slate-100' }} hover:shadow-md transition-all animate-enter">
+                            <?php $__empty_1 = true; $__currentLoopData = $activePermits; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $permit): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <div class="permit-card group relative bg-white p-4 rounded-2xl border-2 <?php echo e($permit->is_overdue ? 'border-rose-200 bg-rose-50/50' : 'border-slate-100'); ?> hover:shadow-md transition-all animate-enter">
                                 <div class="flex justify-between items-start">
                                     <div class="flex gap-4">
-                                        <div class="w-12 h-12 rounded-xl {{ $permit->is_overdue ? 'bg-rose-100 text-rose-600' : 'bg-indigo-50 text-indigo-600' }} flex items-center justify-center text-xl font-bold">
-                                            {{ substr($permit->student->name, 0, 1) }}
+                                        <div class="w-12 h-12 rounded-xl <?php echo e($permit->is_overdue ? 'bg-rose-100 text-rose-600' : 'bg-indigo-50 text-indigo-600'); ?> flex items-center justify-center text-xl font-bold">
+                                            <?php echo e(substr($permit->student->name, 0, 1)); ?>
+
                                         </div>
                                         <div>
-                                            <h4 class="font-bold text-slate-800 text-base leading-tight">{{ $permit->student->name }}</h4>
+                                            <h4 class="font-bold text-slate-800 text-base leading-tight"><?php echo e($permit->student->name); ?></h4>
                                             <p class="text-xs text-slate-500 font-medium mb-1 mt-0.5">
-                                                {{ $permit->student->schoolClass->name ?? 'Kelas -' }} • {{ $permit->student->student_id }}
+                                                <?php echo e($permit->student->schoolClass->name ?? 'Kelas -'); ?> • <?php echo e($permit->student->student_id); ?>
+
                                             </p>
                                             <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600">
-                                                {{ $permit->reason_category }}
+                                                <?php echo e($permit->reason_category); ?>
+
                                             </div>
-                                            @if($permit->notes)
-                                                <span class="text-[10px] text-slate-400 italic ml-2 block sm:inline mt-1 sm:mt-0">"{{ Str::limit($permit->notes, 30) }}"</span>
-                                            @endif
+                                            <?php if($permit->notes): ?>
+                                                <span class="text-[10px] text-slate-400 italic ml-2 block sm:inline mt-1 sm:mt-0">"<?php echo e(Str::limit($permit->notes, 30)); ?>"</span>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                     
-                                    {{-- TIMER SECTION --}}
-                                    <div class="text-right live-timer" data-start="{{ $permit->time_out }}">
+                                    
+                                    <div class="text-right live-timer" data-start="<?php echo e($permit->time_out); ?>">
                                         <div class="text-xs text-slate-400 font-medium mb-1">Durasi</div>
-                                        <div class="text-2xl font-black font-mono {{ $permit->is_overdue ? 'text-rose-600 animate-pulse' : 'text-slate-700' }}">
-                                            <span class="timer-number">{{ $permit->minutes_elapsed }}</span><span class="text-sm text-slate-400 font-normal">m</span>
+                                        <div class="text-2xl font-black font-mono <?php echo e($permit->is_overdue ? 'text-rose-600 animate-pulse' : 'text-slate-700'); ?>">
+                                            <span class="timer-number"><?php echo e($permit->minutes_elapsed); ?></span><span class="text-sm text-slate-400 font-normal">m</span>
                                         </div>
                                         <div class="text-[10px] text-slate-400 mt-1">
-                                            Keluar: {{ $permit->time_out->format('H:i') }}
+                                            Keluar: <?php echo e($permit->time_out->format('H:i')); ?>
+
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <div class="flex flex-col items-center justify-center h-64 text-slate-400">
                                 <i class="ph-duotone ph-student text-6xl mb-4 opacity-30"></i>
                                 <p class="font-medium">Semua siswa ada di kelas.</p>
                             </div>
-                            @endforelse
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -234,7 +248,7 @@
         </div>
     </div>
 
-    {{-- MODAL --}}
+    
     <div id="permitModal" class="fixed inset-0 z-[100] hidden bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-300">
         <div class="bg-white w-full max-w-lg rounded-[2rem] shadow-2xl p-6 md:p-8 animate-enter relative transform scale-100 transition-transform duration-300">
             <button type="button" onclick="closeModal()" class="absolute top-6 right-6 text-slate-400 hover:text-rose-500 transition cursor-pointer z-10 bg-slate-100 hover:bg-rose-50 p-2 rounded-full">
@@ -256,20 +270,21 @@
                 <input type="hidden" id="modalStudentId" name="student_id">
                 
                 <div class="grid grid-cols-2 gap-3 mb-6">
-                    @foreach(['Toilet', 'UKS', 'Barang Tertinggal', 'Panggilan Guru', 'Dispensasi', 'Lainnya'] as $reason)
+                    <?php $__currentLoopData = ['Toilet', 'UKS', 'Barang Tertinggal', 'Panggilan Guru', 'Dispensasi', 'Lainnya']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $reason): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <label class="cursor-pointer relative group">
-                        <input type="radio" name="reason_category" value="{{ $reason }}" class="peer sr-only">
+                        <input type="radio" name="reason_category" value="<?php echo e($reason); ?>" class="peer sr-only">
                         <div class="p-3 rounded-xl border-2 border-slate-100 text-center text-sm font-bold text-slate-600 
                                     group-hover:bg-slate-50 group-hover:border-slate-300
                                     peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 
                                     transition-all duration-200 shadow-sm">
-                            {{ $reason }}
+                            <?php echo e($reason); ?>
+
                         </div>
                         <div class="absolute top-2 right-2 text-indigo-500 opacity-0 peer-checked:opacity-100 transition-opacity scale-0 peer-checked:scale-100 transform duration-200">
                             <i class="ph-fill ph-check-circle"></i>
                         </div>
                     </label>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
 
                 <div class="mb-6">
@@ -285,14 +300,14 @@
         </div>
     </div>
 
-    {{-- SCRIPTS --}}
+    
     <script>
         const scannerInput = document.getElementById('scannerInput');
         const modal = document.getElementById('permitModal');
         const scanFeedback = document.getElementById('scanFeedback');
         const kioskModeToggle = document.getElementById('kioskModeToggle');
         const focusStatus = document.getElementById('focusStatus');
-        const csrfToken = '{{ csrf_token() }}';
+        const csrfToken = '<?php echo e(csrf_token()); ?>';
         let isProcessing = false; 
         
         // --- 0. INDIKATOR OFFLINE/ONLINE ---
@@ -430,7 +445,7 @@
             showFeedback('Memproses...', 'info');
 
             try {
-                const res = await fetch('{{ route("permit.scan") }}', {
+                const res = await fetch('<?php echo e(route("permit.scan")); ?>', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
                     body: JSON.stringify({ identifier: code })
@@ -485,7 +500,7 @@
 
             try {
                 const payload = Object.fromEntries(formData.entries());
-                const res = await fetch('{{ route("permit.store") }}', {
+                const res = await fetch('<?php echo e(route("permit.store")); ?>', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
                     body: JSON.stringify(payload)
@@ -622,4 +637,13 @@
             });
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/permit/index.blade.php ENDPATH**/ ?>
