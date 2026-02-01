@@ -240,6 +240,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('assignments', LmsAssignmentController::class);
         Route::get('/assignments/{assignment}/submissions', [LmsAssignmentController::class, 'submissions'])->name('assignments.submissions');
         Route::post('/submissions/{submission}/grade', [LmsAssignmentController::class, 'grade'])->name('submissions.grade');
+        Route::delete('/submissions/{id}', [LmsAssignmentController::class, 'destroySubmission'])->name('submissions.destroy');
         Route::get('/grades/recap', [LmsGradeController::class, 'index'])->name('grades.index');
         Route::get('/grades/export', [LmsGradeController::class, 'exportExcel'])->name('grades.export');
         Route::get('/grades/print', [LmsGradeController::class, 'printReport'])->name('grades.print');

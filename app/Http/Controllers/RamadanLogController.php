@@ -15,18 +15,14 @@ class RamadanLogController extends Controller
 {
     /**
      * Tampilan Tracker untuk Siswa
-     * [PERBAIKAN] Menyamakan nama variabel dengan View dan menambahkan lastVerifiedLog
      */
     public function studentIndex()
     {
         $studentId = Auth::guard('student')->id();
         $today = Carbon::now('Asia/Jakarta')->toDateString();
         
-        // [FIX 1] Ubah nama variabel dari $todayLog ke $todayRamadanLog agar sesuai dengan tab-ramadan-jurnal.blade.php
         $todayRamadanLog = RamadanLog::where('student_id', $studentId)->whereDate('date', $today)->first();
 
-        // [FIX 2] Tambahkan query untuk mengambil log terakhir yang sudah dinilai guru
-        // Ini wajib ada agar section "Nilai Guru" di blade bisa muncul
         $lastVerifiedLog = RamadanLog::where('student_id', $studentId)
                             ->whereNotNull('teacher_verified_at')
                             ->orderBy('date', 'desc')
@@ -44,8 +40,6 @@ class RamadanLogController extends Controller
             ->with('schoolClass')
             ->get()
             ->map(function($s) {
-                // Contoh logika poin sederhana: 1 hari isi jurnal = 100 poin
-                // Anda bisa mengembangkannya nanti (misal: shalat 5 waktu = +50, puasa = +50)
                 $s->ramadan_points = ($s->points_raw ?? 0) * 100;
                 return $s;
             })
@@ -67,8 +61,6 @@ class RamadanLogController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1. Simpan ke Tabel Ramadan
-            // Data array untuk update/create
             $logData = [
                 'is_fasting' => $request->has('is_fasting'),
                 'prayers' => [
@@ -90,7 +82,6 @@ class RamadanLogController extends Controller
                 'murojaah_surah' => $request->murojaah_surah,
             ];
 
-            // [TAMBAHAN] Simpan Laporan Jumat jika ada inputnya
             if ($request->has('friday_khotib')) {
                 $logData['friday_khotib'] = $request->friday_khotib;
             }
@@ -103,7 +94,6 @@ class RamadanLogController extends Controller
                 $logData
             );
 
-            // 2. SINKRONISASI KE TAB KEBIASAAN / KEAGAMAAN
             StudentHabit::updateOrCreate(
                 [
                     'student_id' => $studentId, 
@@ -116,7 +106,6 @@ class RamadanLogController extends Controller
                     'prayer_maghrib' => $request->has('prayer_maghrib'),
                     'prayer_isya'    => $request->has('prayer_isya'),
                     'prayer_dhuha'   => $request->has('sunnah_dhuha'),
-                     // SINKRONISASI TILAWAH RAMADAN KE ODOA HABIT
                     'odoa_surah'     => $request->tadarus_surah,
                     'odoa_ayat'      => $request->tadarus_ayah,
                 ]
@@ -133,12 +122,16 @@ class RamadanLogController extends Controller
 
     /**
      * Rekapitulasi Admin
+     * [FIX] Menambahkan variabel $isFriday agar tidak error di View
      */
     public function adminReport(Request $request)
     {
         $classes = SchoolClass::orderBy('name', 'asc')->get();
         $selectedClass = $request->get('class_id');
         $date = $request->get('date', Carbon::now('Asia/Jakarta')->toDateString());
+
+        // [BARU] Hitung apakah hari Jumat di sini agar variabelnya selalu ada
+        $isFriday = Carbon::parse($date)->isFriday();
 
         $reports = [];
         if ($selectedClass) {
@@ -150,12 +143,12 @@ class RamadanLogController extends Controller
                         ->get();
         }
 
-        return view('ramadan.admin_report', compact('classes', 'reports', 'selectedClass', 'date'));
+        // [UPDATE] Tambahkan 'isFriday' ke dalam compact
+        return view('ramadan.admin_report', compact('classes', 'reports', 'selectedClass', 'date', 'isFriday'));
     }
 
     /**
      * [UPDATED] Simpan Feedback / Motivasi Guru (Harian & Jumat)
-     * Method ini menangani penilaian umum, tidak terbatas Jumat saja.
      */
     public function verifyFriday(Request $request, $id)
     {
@@ -163,7 +156,7 @@ class RamadanLogController extends Controller
         
         $request->validate([
             'teacher_score' => 'required|numeric|min:0|max:100',
-            'teacher_note' => 'nullable|string|max:500', // Limit diperbesar untuk motivasi panjang
+            'teacher_note' => 'nullable|string|max:500',
         ]);
 
         $log->update([

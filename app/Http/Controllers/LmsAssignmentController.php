@@ -19,7 +19,7 @@ class LmsAssignmentController extends Controller
     {
         $user = Auth::user();
 
-        // 1. LOGIKA GROUPING (TAMPILKAN 1 KARTU PER GRUP TUGAS)
+        // 1. LOGIKA GROUPING
         $subQuery = LmsAssignment::selectRaw('MIN(id) as id')
             ->groupBy('title', 'subject_id', 'deadline', 'created_at');
 
@@ -54,10 +54,9 @@ class LmsAssignmentController extends Controller
             $assignment->total_classes = $siblingsCount;
             $assignment->global_submissions_count = $globalSubmissions;
             
-            // Helper untuk view: tebak jenjang dari nama kelas (misal "9A" -> "9")
             if ($assignment->is_bulk && $assignment->schoolClass) {
-                preg_match('/\d+/', $assignment->schoolClass->name, $matches);
-                $assignment->target_grade = $matches[0] ?? ''; 
+                 preg_match('/\d+/', $assignment->schoolClass->name, $matches);
+                 $assignment->target_grade = $matches[0] ?? ''; 
             }
         }
 
@@ -112,7 +111,6 @@ class LmsAssignmentController extends Controller
                 if ($request->target_type == 'class') {
                     $targetClassIds[] = $request->class_id;
                 } elseif ($request->target_type == 'grade') {
-                    // Ambil kelas berdasarkan nama depan (misal "7" -> "7A", "7B")
                     $classes = SchoolClass::where('name', 'like', $request->target_grade . '%')->get();
                     foreach ($classes as $c) {
                         $targetClassIds[] = $c->id;
@@ -248,43 +246,40 @@ class LmsAssignmentController extends Controller
         return redirect()->route('lms.assignments.index')->with('success', 'Tugas dihapus dari semua kelas.');
     }
 
-    // --- PERBAIKAN UTAMA ADA DI SINI ---
+    // --- BAGIAN INI DIPERBARUI UNTUK MEMUAT DETAIL JAWABAN (ESSAY) ---
     public function submissions(LmsAssignment $assignment)
     {
         $user = Auth::user();
         if ($user->role !== 'admin' && $assignment->teacher_id !== $user->id) abort(403);
 
         // 1. CARI SAUDARA (Assignment di kelas lain yang satu paket)
-        // Kita gunakan logika yang sama dengan index/store: 
-        // Same Teacher + Same Title + Same Created At = Bulk Assignment Group
         $siblings = LmsAssignment::where('teacher_id', $assignment->teacher_id)
             ->where('title', $assignment->title)
             ->where('created_at', $assignment->created_at)
             ->get();
 
         // 2. Kumpulkan ID Assignment & ID Kelas
-        // Jika tidak ada siblings (tugas satuan), collection ini isinya cuma 1 ID (milik dia sendiri)
         $assignmentIds = $siblings->pluck('id');
         $classIds = $siblings->pluck('class_id');
 
-        // 3. Ambil Submission dari SEMUA assignment terkait
-        $submissions = LmsSubmission::with(['student.schoolClass']) 
+        // 3. Ambil Submission DENGAN RELASI ANSWER
+        // [FIX UTAMA] Tambahkan ->keyBy('student_id') agar pencarian di View akurat!
+        $submissions = LmsSubmission::with(['student.schoolClass', 'answers.question']) 
             ->whereIn('assignment_id', $assignmentIds)
-            ->get();
+            ->get()
+            ->keyBy('student_id'); 
         
         // 4. Ambil Siswa dari SEMUA kelas terkait
         $allStudents = Student::with('schoolClass')
                         ->whereIn('class_id', $classIds)
-                        ->orderBy('class_id') // Agar urut per kelas (7A dulu, baru 7B, dst)
-                        ->orderBy('name')     // Lalu urut nama siswa
+                        ->orderBy('class_id')
+                        ->orderBy('name')
                         ->get();
 
         // 5. Inject properti tambahan untuk View
-        // Ini penting agar View 'submissions.blade.php' bisa menampilkan badge "Semua Kelas 7"
         $assignment->is_bulk = $siblings->count() > 1;
         
         if ($assignment->is_bulk && $assignment->schoolClass) {
-             // Tebak jenjang dari nama kelas pertama (misal "9A" -> "9")
              preg_match('/\d+/', $assignment->schoolClass->name, $matches);
              $assignment->target_grade = $matches[0] ?? ''; 
         }
@@ -310,5 +305,20 @@ class LmsAssignmentController extends Controller
         ]);
 
         return back()->with('success', 'Nilai berhasil disimpan.');
+    }
+
+    // --- FUNGSI BARU UNTUK MENGHAPUS JAWABAN SISWA ---
+    public function destroySubmission($id)
+    {
+        $submission = LmsSubmission::findOrFail($id);
+        
+        // Validasi Hak Akses (Hanya Admin atau Guru yang bersangkutan)
+        if (Auth::user()->role !== 'admin' && $submission->assignment->teacher_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $submission->delete();
+
+        return back()->with('success', 'Data jawaban siswa berhasil dihapus. Siswa dapat mengerjakan ulang.');
     }
 }

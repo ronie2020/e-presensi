@@ -84,7 +84,7 @@
             $fastingCount = $reports->filter(fn($s) => $s->ramadanLogs->first()?->is_fasting)->count();
             $fullPrayerCount = $reports->filter(fn($s) => count(array_filter($s->ramadanLogs->first()?->prayers ?? [])) == 5)->count();
             $fastingPercent = $totalStudents > 0 ? round(($fastingCount / $totalStudents) * 100) : 0;
-            $isFriday = \Carbon\Carbon::parse($date)->isFriday();
+            // $isFriday dipindah ke Controller agar tidak error saat diakses global
         @endphp
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 no-print">
             <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
@@ -312,7 +312,9 @@
                                 <div class="text-xs text-slate-600 italic bg-white p-3 rounded-xl border border-slate-100" x-text="details.summary"></div>
                             </div>
                         </template>
-                         <template x-if="!details.khotib && '{{ $isFriday }}'">
+                         
+                         {{-- [FIX] Tambahkan ?? false agar tidak crash jika variabel belum ada --}}
+                         <template x-if="!details.khotib && '{{ $isFriday ?? false }}'">
                              <div class="mt-3 pt-3 border-t border-slate-200">
                                 <div class="text-[10px] font-bold text-rose-500 uppercase mb-1">Jurnal Jumat: Kosong</div>
                              </div>
