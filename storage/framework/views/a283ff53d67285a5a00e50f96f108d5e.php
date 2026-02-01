@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <!-- SEO & Meta Tags -->
     <meta name="description" content="Daftar lengkap tenaga pendidik dan guru profesional di SMP Negeri 3 Lakbok.">
-    <title>Direktori Pengajar - {{ config('app.name', 'SMP Negeri 3 Lakbok') }}</title>
+    <title>Direktori Pengajar - <?php echo e(config('app.name', 'SMP Negeri 3 Lakbok')); ?></title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
     
     <!-- Scripts & Styles -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <!-- Alpine.js untuk interaksi Modal -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -65,11 +65,11 @@
     <nav class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
-                <a href="{{ url('/') }}" class="flex items-center gap-3 group">
-                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-10 h-10 object-contain group-hover:rotate-12 transition-transform">
+                <a href="<?php echo e(url('/')); ?>" class="flex items-center gap-3 group">
+                    <img src="<?php echo e(asset('images/logo.png')); ?>" alt="Logo" class="w-10 h-10 object-contain group-hover:rotate-12 transition-transform">
                     <span class="text-lg font-extrabold text-slate-900 tracking-tight hidden sm:block">SMPN 3 LAKBOK</span>
                 </a>
-                <a href="{{ url('/') }}" class="text-sm font-bold text-slate-600 hover:text-blue-600 transition flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-full hover:bg-blue-50">
+                <a href="<?php echo e(url('/')); ?>" class="text-sm font-bold text-slate-600 hover:text-blue-600 transition flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-full hover:bg-blue-50">
                     <i class="ph-bold ph-arrow-left"></i> Kembali
                 </a>
             </div>
@@ -95,18 +95,18 @@
             </p>
 
             <!-- FORM PENCARIAN -->
-            <form action="{{ route('teachers.index') }}" method="GET" class="max-w-lg mx-auto relative group">
+            <form action="<?php echo e(route('teachers.index')); ?>" method="GET" class="max-w-lg mx-auto relative group">
                 <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                 <div class="relative">
-                    <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama atau jabatan guru..." class="w-full pl-14 pr-14 py-4 rounded-full border-0 focus:ring-0 shadow-2xl text-sm font-bold placeholder-slate-400 bg-white/95 backdrop-blur-xl text-slate-800 transition-transform focus:scale-[1.02]">
+                    <input type="text" name="q" value="<?php echo e(request('q')); ?>" placeholder="Cari nama atau jabatan guru..." class="w-full pl-14 pr-14 py-4 rounded-full border-0 focus:ring-0 shadow-2xl text-sm font-bold placeholder-slate-400 bg-white/95 backdrop-blur-xl text-slate-800 transition-transform focus:scale-[1.02]">
                     <div class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400">
                         <i class="ph-bold ph-magnifying-glass text-xl"></i>
                     </div>
-                    @if(request('q'))
-                        <a href="{{ route('teachers.index') }}" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-100 hover:text-red-600 transition-colors" title="Hapus Pencarian"><i class="ph-bold ph-x"></i></a>
-                    @else
+                    <?php if(request('q')): ?>
+                        <a href="<?php echo e(route('teachers.index')); ?>" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-100 hover:text-red-600 transition-colors" title="Hapus Pencarian"><i class="ph-bold ph-x"></i></a>
+                    <?php else: ?>
                         <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 hover:scale-110 active:scale-95"><i class="ph-bold ph-arrow-right"></i></button>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </form>
         </div>
@@ -115,34 +115,34 @@
     <!-- MAIN CONTENT -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 pb-20">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            @forelse($teachers as $index => $teacher)
+            <?php $__empty_1 = true; $__currentLoopData = $teachers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $teacher): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <div @click="openModal({
-                        name: '{{ addslashes($teacher->name) }}',
-                        nip: '{{ $teacher->nip ?? '-' }}',
-                        pangkat: '{{ $teacher->pangkat ?? '-' }}',
-                        position: '{{ addslashes($teacher->position ?? $teacher->role) }}',
-                        bio: '{{ addslashes($teacher->bio ?? 'Belum ada pesan & kesan.') }}',
-                        phone: '{{ $teacher->phone }}',
-                        instagram: '{{ $teacher->instagram }}',
-                        tiktok: '{{ $teacher->tiktok }}',
-                        facebook: '{{ $teacher->facebook }}',
-                        photo_url: '{{ $teacher->photo_path ? asset('storage/' . $teacher->photo_path) : '' }}'
+                        name: '<?php echo e(addslashes($teacher->name)); ?>',
+                        nip: '<?php echo e($teacher->nip ?? '-'); ?>',
+                        pangkat: '<?php echo e($teacher->pangkat ?? '-'); ?>',
+                        position: '<?php echo e(addslashes($teacher->position ?? $teacher->role)); ?>',
+                        bio: '<?php echo e(addslashes($teacher->bio ?? 'Belum ada pesan & kesan.')); ?>',
+                        phone: '<?php echo e($teacher->phone); ?>',
+                        instagram: '<?php echo e($teacher->instagram); ?>',
+                        tiktok: '<?php echo e($teacher->tiktok); ?>',
+                        facebook: '<?php echo e($teacher->facebook); ?>',
+                        photo_url: '<?php echo e($teacher->photo_path ? asset('storage/' . $teacher->photo_path) : ''); ?>'
                      })"
                      class="animate-enter group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-2 transition-all duration-500 border border-slate-100 flex flex-col h-full relative cursor-pointer"
-                     style="animation-delay: {{ ($index % 4) * 100 }}ms">
+                     style="animation-delay: <?php echo e(($index % 4) * 100); ?>ms">
                     
                     <!-- Foto Guru -->
                     <div class="aspect-[4/5] sm:aspect-square bg-slate-200 relative overflow-hidden">
-                        @if($teacher->photo_path)
-                            <img src="{{ asset('storage/' . $teacher->photo_path) }}" alt="{{ $teacher->name }}" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter grayscale group-hover:grayscale-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <?php if($teacher->photo_path): ?>
+                            <img src="<?php echo e(asset('storage/' . $teacher->photo_path)); ?>" alt="<?php echo e($teacher->name); ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter grayscale group-hover:grayscale-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                             <div class="hidden w-full h-full flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-slate-200 text-slate-400">
-                                <span class="text-4xl font-bold opacity-30">{{ substr($teacher->name, 0, 2) }}</span>
+                                <span class="text-4xl font-bold opacity-30"><?php echo e(substr($teacher->name, 0, 2)); ?></span>
                             </div>
-                        @else
+                        <?php else: ?>
                             <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-300">
-                                <span class="text-6xl sm:text-7xl font-black opacity-30 select-none uppercase group-hover:scale-110 transition-transform duration-500">{{ substr($teacher->name, 0, 1) }}</span>
+                                <span class="text-6xl sm:text-7xl font-black opacity-30 select-none uppercase group-hover:scale-110 transition-transform duration-500"><?php echo e(substr($teacher->name, 0, 1)); ?></span>
                             </div>
-                        @endif
+                        <?php endif; ?>
                         
                         <!-- Overlay Text (Call to Action) -->
                         <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -154,29 +154,30 @@
                     <div class="p-5 text-center flex-1 flex flex-col relative bg-white">
                         <div class="absolute -top-4 left-0 right-0 flex justify-center">
                             <span class="inline-block px-4 py-1.5 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-lg border-2 border-white transform group-hover:scale-105 transition-transform">
-                                {{ $teacher->position ?? $teacher->role }}
+                                <?php echo e($teacher->position ?? $teacher->role); ?>
+
                             </span>
                         </div>
                         <div class="mt-4 mb-2">
-                            <h3 class="text-base sm:text-lg font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors line-clamp-1">{{ $teacher->name }}</h3>
-                            @if($teacher->nip)
-                                <p class="text-[10px] sm:text-xs text-slate-400 font-mono mt-1 font-medium bg-slate-50 inline-block px-2 py-0.5 rounded">{{ $teacher->nip }}</p>
-                            @endif
+                            <h3 class="text-base sm:text-lg font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors line-clamp-1"><?php echo e($teacher->name); ?></h3>
+                            <?php if($teacher->nip): ?>
+                                <p class="text-[10px] sm:text-xs text-slate-400 font-mono mt-1 font-medium bg-slate-50 inline-block px-2 py-0.5 rounded"><?php echo e($teacher->nip); ?></p>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div class="col-span-2 lg:col-span-4 py-24 text-center animate-enter">
                     <div class="inline-flex bg-slate-100 p-6 rounded-full mb-6 text-slate-300 ring-8 ring-slate-50"><i class="ph-duotone ph-magnifying-glass text-5xl"></i></div>
                     <h3 class="text-xl font-bold text-slate-800 mb-2">Data Tidak Ditemukan</h3>
                     <p class="text-slate-500 text-sm max-w-md mx-auto mb-6">Maaf, kami tidak dapat menemukan data guru dengan kata kunci tersebut.</p>
-                    @if(request('q'))
-                        <a href="{{ route('teachers.index') }}" class="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-full hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 gap-2"><i class="ph-bold ph-arrow-counter-clockwise"></i> Reset Pencarian</a>
-                    @endif
+                    <?php if(request('q')): ?>
+                        <a href="<?php echo e(route('teachers.index')); ?>" class="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-full hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 gap-2"><i class="ph-bold ph-arrow-counter-clockwise"></i> Reset Pencarian</a>
+                    <?php endif; ?>
                 </div>
-            @endforelse
+            <?php endif; ?>
         </div>
-        <div class="mt-16 px-4 animate-enter">{{ $teachers->withQueryString()->links() }}</div>
+        <div class="mt-16 px-4 animate-enter"><?php echo e($teachers->withQueryString()->links()); ?></div>
     </div>
 
     <!-- MODAL DETAIL GURU (POPUP) -->
@@ -309,9 +310,9 @@
     <div class="bg-slate-900 text-white pt-16 pb-8 border-t border-slate-800 relative overflow-hidden mt-auto">
         <div class="absolute top-0 right-0 w-96 h-96 bg-blue-900/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            <p class="text-slate-500 text-sm">&copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Unggul & Berkarakter.</p>
+            <p class="text-slate-500 text-sm">&copy; <?php echo e(date('Y')); ?> SMP Negeri 3 Lakbok. Unggul & Berkarakter.</p>
         </div>
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/teachers.blade.php ENDPATH**/ ?>

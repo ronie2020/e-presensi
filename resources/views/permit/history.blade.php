@@ -1,7 +1,13 @@
 <x-app-layout>
     {{-- Style Tambahan --}}
     @push('styles')
+    {{-- [PERBAIKAN] Load Font Plus Jakarta Sans --}}
+    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
+
     <style>
+        /* [PERBAIKAN] Paksa penggunaan font Plus Jakarta Sans */
+        body, .font-sans { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .table-row-hover:hover td { background-color: #f8fafc; }
@@ -39,8 +45,7 @@
                 </div>
             </div>
 
-            {{-- [BARU] STATISTIK RINGKAS (SUMMARY CARDS) --}}
-            {{-- Note: Idealnya data ini dihitung di Controller, tapi kita bisa hitung dari Collection $permits untuk halaman aktif --}}
+            {{-- STATISTIK RINGKAS --}}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <!-- Card 1: Total Data -->
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
@@ -53,14 +58,13 @@
                     </div>
                 </div>
 
-                <!-- Card 2: Sedang Keluar (Estimasi Visual) -->
+                <!-- Card 2: Status Keluar -->
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4">
                     <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-xl">
                         <i class="ph-duotone ph-timer"></i>
                     </div>
                     <div>
                         <div class="text-xs text-slate-500 font-bold uppercase">Status Keluar</div>
-                        {{-- Hitung manual sederhana dari halaman aktif (atau sebaiknya pass dari controller) --}}
                         <div class="text-xl font-bold text-slate-800">
                              {{ $permits->whereNull('time_in')->count() }} <span class="text-xs font-normal text-slate-400">(Hlm ini)</span>
                         </div>

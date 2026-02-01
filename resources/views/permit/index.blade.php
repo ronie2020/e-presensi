@@ -5,7 +5,13 @@
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     @push('styles')
+    {{-- [PERBAIKAN] Load Font Plus Jakarta Sans agar konsisten dengan Dashboard --}}
+    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
+
     <style>
+        /* [PERBAIKAN] Paksa penggunaan font Plus Jakarta Sans */
+        body, .font-sans { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .animate-enter { animation: fadeUp 0.3s ease-out; }
@@ -17,10 +23,26 @@
 
         /* Transisi Smooth untuk update data tanpa reload */
         .updating-content { opacity: 0.5; pointer-events: none; transition: opacity 0.2s; }
+
+        /* [BARU] Indikator Fokus Input */
+        .focus-indicator { transition: all 0.3s; }
+        .input-focused { border-color: #6366f1; box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2); }
     </style>
     @endpush
 
-    <div class="py-6 font-sans text-slate-800">
+    <div class="py-6 font-sans text-slate-800 relative">
+        
+        {{-- Indikator Koneksi Offline --}}
+        <div id="offlineIndicator" class="fixed bottom-6 right-6 z-50 hidden animate-bounce">
+            <div class="bg-rose-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border-2 border-rose-400">
+                <i class="ph-bold ph-wifi-slash text-xl"></i>
+                <div>
+                    <div class="font-bold text-sm">Koneksi Terputus</div>
+                    <div class="text-[10px] opacity-90">Menunggu sambungan...</div>
+                </div>
+            </div>
+        </div>
+
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             {{-- HEADER --}}
@@ -32,7 +54,7 @@
                             <i class="ph-duotone ph-shield-check text-indigo-400"></i>
                             Pos Guru Piket
                         </h2>
-                        <p class="text-indigo-200 text-sm">Monitoring perizinan siswa keluar kelas real-time.</p>
+                        <p class="text-indigo-200 text-sm">Support Scan QR Code & RFID Reader (Mode Kiosk).</p>
                     </div>
                     <div class="text-center md:text-right bg-white/5 md:bg-transparent p-3 md:p-0 rounded-xl w-full md:w-auto">
                         <div class="text-xs font-bold text-indigo-400 uppercase tracking-widest">Petugas Jaga</div>
@@ -43,7 +65,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
-                {{-- KOLOM KIRI: SCANNER --}}
+                {{-- KOLOM KIRI: SCANNER & INPUT --}}
                 <div class="lg:col-span-5 space-y-6">
                     <div class="bg-white p-6 rounded-[2rem] shadow-lg border border-slate-100">
                         <div class="flex justify-between items-center mb-4">
@@ -52,11 +74,11 @@
                             </h3>
                             
                             {{-- SWITCH MODE KIOS (LOCK FOCUS) --}}
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2" title="Aktifkan agar kursor selalu kembali ke kolom input (Cocok untuk RFID)">
                                 <label class="flex items-center cursor-pointer relative">
                                     <input type="checkbox" id="kioskModeToggle" class="sr-only peer" checked>
                                     <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
-                                    <span class="ml-2 text-[10px] font-bold text-slate-400 uppercase">Auto Focus</span>
+                                    <span class="ml-2 text-[10px] font-bold text-slate-400 uppercase">Auto Focus (RFID)</span>
                                 </label>
                             </div>
                         </div>
@@ -78,39 +100,47 @@
                         
                         {{-- INPUT MANUAL / SCANNER TEMBAK --}}
                         <div class="relative group">
+                            {{-- [MODIFIKASI] ID scannerInput ditambahkan class focus-indicator --}}
                             <input type="text" id="scannerInput" 
-                                class="w-full pl-12 pr-12 py-4 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-mono text-lg font-bold text-slate-700 transition-all placeholder:text-slate-300" 
-                                placeholder="Scan Kartu / Ketik NIS..." autofocus autocomplete="off">
+                                class="w-full pl-12 pr-12 py-4 rounded-xl border-2 border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-mono text-lg font-bold text-slate-700 transition-all placeholder:text-slate-300 focus-indicator" 
+                                placeholder="Tempel RFID / Scan QR..." autofocus autocomplete="off">
                             <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
                                 <i class="ph-bold ph-scan text-xl"></i>
                             </div>
                             
-                            {{-- Loading Spinner (Hidden by default) --}}
+                            {{-- Loading Spinner --}}
                             <div id="inputSpinner" class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-indigo-500">
                                 <i class="ph-bold ph-spinner animate-spin text-xl"></i>
                             </div>
                             
-                            {{-- Search Button (Visible only when not loading) --}}
+                            {{-- Search Button --}}
                             <button id="btnSearch" class="absolute right-3 top-1/2 -translate-y-1/2 bg-indigo-100 text-indigo-700 p-2 rounded-lg hover:bg-indigo-200 transition cursor-pointer">
                                 <i class="ph-bold ph-arrow-right"></i>
                             </button>
                         </div>
-                        <p class="text-xs text-slate-400 mt-2 ml-1 flex items-center gap-1">
-                            <i class="ph-fill ph-info"></i> Pastikan kursor aktif di kolom ini.
-                        </p>
+                        
+                        {{-- Status Fokus Input --}}
+                        <div class="flex justify-between items-center mt-2 ml-1">
+                            <p class="text-xs text-slate-400 flex items-center gap-1">
+                                <i class="ph-fill ph-info"></i> Pastikan kursor aktif di kolom ini.
+                            </p>
+                            <span id="focusStatus" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded hidden">
+                                ● READY
+                            </span>
+                        </div>
                         
                         <!-- Feedback Status -->
                         <div id="scanFeedback" class="hidden mt-3 p-3 rounded-xl text-center text-sm font-bold animate-pulse transition-all"></div>
                     </div>
 
-                    <!-- Riwayat Singkat (Target Update AJAX: #historyContainer) -->
+                    <!-- Riwayat Singkat -->
                     <div class="bg-white p-6 rounded-[2rem] shadow-lg border border-slate-100 h-fit">
                         <h3 class="font-bold text-slate-700 mb-4 flex items-center gap-2">
                             <i class="ph-duotone ph-clock-counter-clockwise text-indigo-600"></i> Baru Saja Kembali
                         </h3>
                         <div id="historyContainer" class="space-y-3 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
                             @forelse($todayHistory as $history)
-                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors">
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors animate-enter">
                                 <div class="flex items-center gap-3">
                                     <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs">
                                         <i class="ph-bold ph-check"></i>
@@ -122,7 +152,7 @@
                                 </div>
                                 <div class="text-right">
                                     <div class="text-xs font-mono text-slate-400">
-                                        {{ \Carbon\Carbon::parse($history->time_in)->format('H:i') }}
+                                        {{ $history->time_in->format('H:i') }}
                                     </div>
                                 </div>
                             </div>
@@ -135,7 +165,7 @@
                     </div>
                 </div>
 
-                {{-- KOLOM KANAN: LIVE MONITORING (Target Update AJAX: #activePermitsContainer) --}}
+                {{-- KOLOM KANAN: LIVE MONITORING --}}
                 <div class="lg:col-span-7">
                     <div class="bg-white rounded-[2rem] shadow-xl border border-slate-100 overflow-hidden min-h-[600px] flex flex-col relative">
                         <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center sticky top-0 z-10 backdrop-blur-sm">
@@ -146,7 +176,7 @@
                                 <p class="text-xs text-slate-500">Timer berjalan otomatis.</p>
                             </div>
                             
-                            {{-- Counter Badge (Target Update) --}}
+                            {{-- Counter Badge --}}
                             <span id="activeCountBadge" class="bg-orange-100 text-orange-600 py-1 px-3 rounded-full text-xs font-bold shadow-sm border border-orange-200">
                                 {{ $activePermits->count() }} Siswa
                             </span>
@@ -154,7 +184,7 @@
                         
                         <div id="activePermitsContainer" class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3 bg-slate-50/30">
                             @forelse($activePermits as $permit)
-                            <div class="permit-card group relative bg-white p-4 rounded-2xl border-2 {{ $permit->is_overdue ? 'border-rose-100 bg-rose-50/30' : 'border-slate-100' }} hover:shadow-md transition-all animate-enter">
+                            <div class="permit-card group relative bg-white p-4 rounded-2xl border-2 {{ $permit->is_overdue ? 'border-rose-200 bg-rose-50/50' : 'border-slate-100' }} hover:shadow-md transition-all animate-enter">
                                 <div class="flex justify-between items-start">
                                     <div class="flex gap-4">
                                         <div class="w-12 h-12 rounded-xl {{ $permit->is_overdue ? 'bg-rose-100 text-rose-600' : 'bg-indigo-50 text-indigo-600' }} flex items-center justify-center text-xl font-bold">
@@ -181,7 +211,7 @@
                                             <span class="timer-number">{{ $permit->minutes_elapsed }}</span><span class="text-sm text-slate-400 font-normal">m</span>
                                         </div>
                                         <div class="text-[10px] text-slate-400 mt-1">
-                                            Keluar: {{ \Carbon\Carbon::parse($permit->time_out)->format('H:i') }}
+                                            Keluar: {{ $permit->time_out->format('H:i') }}
                                         </div>
                                     </div>
                                 </div>
@@ -256,10 +286,19 @@
         const modal = document.getElementById('permitModal');
         const scanFeedback = document.getElementById('scanFeedback');
         const kioskModeToggle = document.getElementById('kioskModeToggle');
+        const focusStatus = document.getElementById('focusStatus');
         const csrfToken = '{{ csrf_token() }}';
-        let isProcessing = false; // Flag untuk mencegah double submit
+        let isProcessing = false; 
         
-        // --- 0. WEB AUDIO API (Suara tanpa file) ---
+        // --- 0. INDIKATOR OFFLINE/ONLINE ---
+        window.addEventListener('offline', () => document.getElementById('offlineIndicator').classList.remove('hidden'));
+        window.addEventListener('online', () => {
+            document.getElementById('offlineIndicator').classList.add('hidden');
+            playAudio('notification');
+            Swal.fire({ icon: 'success', title: 'Terhubung Kembali', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+        });
+
+        // --- 1. WEB AUDIO API ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
         function playTone(freq, type, duration) {
@@ -282,19 +321,16 @@
             if (audioCtx.state === 'suspended') audioCtx.resume();
             
             if (type === 'success') {
-                // Suara "Ding!" (High Pitch Sine)
                 playTone(800, 'sine', 0.1);
                 setTimeout(() => playTone(1200, 'sine', 0.3), 100);
             } else if (type === 'error') {
-                // Suara "Tet!" (Low Pitch Sawtooth)
                 playTone(150, 'sawtooth', 0.3);
             } else if (type === 'notification') {
-                // Suara "Pop"
                 playTone(500, 'triangle', 0.1);
             }
         }
 
-        // --- 1. LOGIKA SCANNER KAMERA ---
+        // --- 2. LOGIKA SCANNER KAMERA ---
         let html5QrCode;
         let isCameraRunning = false;
         
@@ -326,32 +362,51 @@
         }
         
         const onCameraSuccess = (decodedText) => {
-            if(isProcessing) return; // Cegah scan saat sedang loading
-            
+            if(isProcessing) return;
             if(isCameraRunning) {
-                html5QrCode.pause(); // Pause kamera
+                html5QrCode.pause(); 
                 handleScan(decodedText).then(() => {
                     setTimeout(() => { if(isCameraRunning) html5QrCode.resume(); }, 2000);
                 });
             }
         };
 
-        // --- 2. LOGIKA UTAMA & FOCUS HANDLING ---
+        // --- 3. LOGIKA UTAMA & FOCUS (IMPROVED FOR RFID) ---
         
-        // Timer Interval untuk Update Menit Real-time
-        setInterval(updateRealtimeTimers, 60000); // Jalan setiap 1 menit
+        setInterval(updateRealtimeTimers, 30000); 
+        setInterval(refreshDashboardData, 120000);
 
+        // Visual Focus Indicator
+        scannerInput.addEventListener('focus', () => {
+            scannerInput.classList.add('input-focused');
+            focusStatus.classList.remove('hidden');
+        });
+        scannerInput.addEventListener('blur', () => {
+            scannerInput.classList.remove('input-focused');
+            focusStatus.classList.add('hidden');
+            
+            // [LOGIKA BARU] Aggressive Focus (Auto Refocus jika mode kiosk aktif)
+            // Timeout kecil agar button lain masih bisa diklik
+            if (kioskModeToggle.checked && modal.classList.contains('hidden')) {
+                setTimeout(() => {
+                    // Cek lagi apakah fokus pindah ke elemen input lain/modal?
+                    if(document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+                         scannerInput.focus();
+                    }
+                }, 200); 
+            }
+        });
+
+        // Event Listener Manual Focus (Klik di mana saja)
         document.addEventListener('click', (e) => {
-            // Hanya auto focus jika Kiosk Mode ON dan bukan sedang mengetik di input lain
             if (kioskModeToggle.checked) {
-                const isInteractive = e.target.closest('input, button, a, #permitModal');
+                const isInteractive = e.target.closest('input, button, a, #permitModal, label');
                 if (!isInteractive && modal.classList.contains('hidden')) {
                     scannerInput.focus();
                 }
             }
         });
 
-        // Event Listener untuk Scanner Tembak (biasanya diakhiri Enter)
         scannerInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -362,8 +417,6 @@
         document.getElementById('btnSearch').addEventListener('click', () => {
             handleScan(scannerInput.value);
         });
-
-        // --- 3. CORE LOGIC (SCAN & SUBMIT) ---
 
         async function handleScan(code) {
             if(!code || isProcessing) return;
@@ -384,8 +437,6 @@
                 if(data.mode === 'CHECK_IN') {
                     playAudio('success');
                     showFeedback(`✅ ${data.data.student.name} KEMBALI`, 'success');
-                    
-                    // Update tampilan tanpa reload
                     await refreshDashboardData(); 
                     
                     Swal.fire({
@@ -398,7 +449,6 @@
                     });
                     scannerInput.value = '';
                 } else {
-                    // Mode CHECK_OUT (Buka Modal)
                     playAudio('notification');
                     showFeedback('Silakan pilih alasan...', 'info');
                     openModal(data.data.student);
@@ -407,7 +457,7 @@
             } catch (err) {
                 playAudio('error');
                 showFeedback(err.message, 'error');
-                scannerInput.value = ''; // Clear input on error
+                scannerInput.value = ''; 
                 scannerInput.focus();
             } finally {
                 setProcessingState(false);
@@ -443,7 +493,6 @@
                 playAudio('success');
                 scannerInput.value = '';
                 
-                // Update tampilan tanpa reload
                 await refreshDashboardData();
 
                 Swal.fire({
@@ -460,6 +509,8 @@
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<span>Izinkan Keluar</span> <i class="ph-bold ph-arrow-right"></i>';
+                // Refocus ke scanner setelah submit
+                setTimeout(() => scannerInput.focus(), 100);
             }
         }
 
@@ -490,8 +541,6 @@
             
             scanFeedback.innerHTML = msg;
             scanFeedback.classList.remove('hidden');
-            
-            // Auto hide setelah 3 detik
             setTimeout(() => { scanFeedback.classList.add('hidden'); }, 3000);
         }
 
@@ -512,28 +561,23 @@
             scannerInput.focus();
         }
 
-        // --- 5. HOT SWAP / AJAX RELOAD LOGIC ---
-        // Fungsi ini mengambil HTML halaman saat ini di background, dan menukar isinya.
-        // Ini mensimulasikan "SPA" tanpa mengubah struktur backend Laravel.
+        // --- 5. AJAX RELOAD LOGIC ---
         async function refreshDashboardData() {
             const container1 = document.getElementById('activePermitsContainer');
             const container2 = document.getElementById('historyContainer');
             const badge = document.getElementById('activeCountBadge');
 
-            // Efek visual loading
+            if(navigator.onLine === false) return; 
+
             container1.classList.add('updating-content');
             container2.classList.add('updating-content');
 
             try {
-                // Fetch halaman saat ini (GET request biasa)
                 const response = await fetch(window.location.href);
                 const text = await response.text();
-                
-                // Parse HTML string menjadi DOM Document
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
 
-                // Swap isi container dengan yang baru
                 if(container1 && doc.getElementById('activePermitsContainer')) {
                     container1.innerHTML = doc.getElementById('activePermitsContainer').innerHTML;
                 }
@@ -542,13 +586,9 @@
                     container2.innerHTML = doc.getElementById('historyContainer').innerHTML;
                 }
                 
-                // Update badge count
                 if(badge && doc.getElementById('activeCountBadge')) {
                     badge.innerHTML = doc.getElementById('activeCountBadge').innerHTML;
                 }
-
-                // Re-apply event listeners or logic if needed
-                
             } catch (error) {
                 console.error('Gagal refresh data:', error);
             } finally {
@@ -567,11 +607,9 @@
                 const diffMs = now - startTime;
                 const diffMins = Math.floor(diffMs / 60000);
                 
-                // Update Angka
                 const numberDisplay = el.querySelector('.timer-number');
                 if(numberDisplay) numberDisplay.textContent = diffMins;
 
-                // Update Style jika Overdue (> 10 menit misal)
                 if(diffMins > 10) { 
                     el.closest('.permit-card').classList.add('border-rose-200', 'bg-rose-50');
                     if(numberDisplay) numberDisplay.classList.add('text-rose-600');

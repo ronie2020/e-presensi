@@ -38,10 +38,11 @@ class UserController extends Controller
             
             // Validasi Data Profil & Kontak
             'position' => ['nullable', 'string', 'max:50'],
+            'pangkat' => ['nullable', 'string', 'max:50'], // [PENTING] Validasi Pangkat
             'bio' => ['nullable', 'string', 'max:255'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'nip' => ['nullable', 'string', 'max:20'],
-            'phone' => ['nullable', 'string', 'max:20'], // Validasi No HP
+            'phone' => ['nullable', 'string', 'max:20'], 
             'instagram' => ['nullable', 'string', 'max:50'],
             'tiktok' => ['nullable', 'string', 'max:50'],
             'facebook' => ['nullable', 'string', 'max:50'],
@@ -58,6 +59,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
             'role' => $request->role,
             'position' => $request->position,
+            'pangkat' => $request->pangkat, // [PENTING] Simpan Pangkat
             'bio' => $request->bio,
             'photo_path' => $photoPath,
             'nip' => $request->nip,
@@ -83,6 +85,7 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'role' => ['required', 'string', 'in:Admin,Kepala Sekolah,Wali Kelas,Guru Piket,Guru'],
             'position' => ['nullable', 'string', 'max:50'],
+            'pangkat' => ['nullable', 'string', 'max:50'], // [PENTING] Validasi Pangkat
             'bio' => ['nullable', 'string', 'max:255'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
@@ -99,6 +102,7 @@ class UserController extends Controller
             'email' => $request->email,
             'role' => $request->role,
             'position' => $request->position,
+            'pangkat' => $request->pangkat, // [PENTING] Update Pangkat
             'bio' => $request->bio,
             'nip' => $request->nip,
             // Update Data Kontak
@@ -145,29 +149,23 @@ class UserController extends Controller
 
     public function export()
     {
-        // Mendownload file Excel bernama 'data-pengguna.xlsx'
         return Excel::download(new UsersExport, 'data-pengguna.xlsx');
     }
 
     public function import(Request $request)
     {
-        // Validasi file harus excel
         $request->validate([
-            'file' => 'required|mimes:xlsx,xls|max:5120' // Max 5MB
+            'file' => 'required|mimes:xlsx,xls|max:5120'
         ]);
 
         try {
-            // Proses import menggunakan Class UsersImport
             Excel::import(new UsersImport, $request->file('file'));
-            
             return redirect()->back()->with('success', 'Data pengguna berhasil di-import dari Excel!');
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-            // Jika ada error validasi di dalam Excel (misal email duplikat)
              $failures = $e->failures();
              $errorMsg = "Gagal Import. Baris ke-" . $failures[0]->row() . ": " . implode(', ', $failures[0]->errors());
              return redirect()->back()->withErrors(['file' => $errorMsg]);
         } catch (\Exception $e) {
-            // Error umum lainnya
             return redirect()->back()->withErrors(['file' => 'Terjadi kesalahan saat import: ' . $e->getMessage()]);
         }
     }

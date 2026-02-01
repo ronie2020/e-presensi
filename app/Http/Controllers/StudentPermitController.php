@@ -16,11 +16,13 @@ class StudentPermitController extends Controller
      */
     public function index()
     {
+        // Mengambil data siswa yang sedang diluar (Status OUT)
         $activePermits = StudentPermit::with(['student.schoolClass']) 
             ->where('status', 'OUT')
             ->orderBy('time_out', 'asc') 
             ->get();
 
+        // Mengambil 10 riwayat terakhir hari ini (Status RETURNED)
         $todayHistory = StudentPermit::with(['student.schoolClass'])
             ->where('status', 'RETURNED')
             ->whereDate('created_at', Carbon::today())
@@ -36,10 +38,11 @@ class StudentPermitController extends Controller
      */
     private function getFilteredQuery(Request $request)
     {
+        // Eager load relasi untuk mencegah N+1 Query
         $query = StudentPermit::with(['student.schoolClass'])
             ->latest('time_out');
 
-        // 1. Filter Pencarian
+        // 1. Filter Pencarian (Nama, NIS, NISN)
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('student', function (Builder $q) use ($search) {
@@ -49,7 +52,7 @@ class StudentPermitController extends Controller
             });
         }
 
-        // 2. Filter Tanggal
+        // 2. Filter Tanggal (Jika ada input tanggal)
         if ($request->filled('date')) {
             $query->whereDate('time_out', $request->date);
         }
@@ -61,6 +64,7 @@ class StudentPermitController extends Controller
             } elseif ($request->status == 'returned') {
                 $query->where('status', 'RETURNED');
             } elseif ($request->status == 'overdue') {
+                // Logika Telat: Masih OUT dan sudah lebih dari 15 menit
                 $query->where('status', 'OUT')
                       ->where('time_out', '<=', Carbon::now()->subMinutes(15));
             }
@@ -74,14 +78,24 @@ class StudentPermitController extends Controller
      */
     public function history(Request $request)
     {
+        // [PERBAIKAN] Logika navigasi tanggal dipindah ke sini (Skinny View)
+        $currentDate = $request->date ?? date('Y-m-d'); // Default hari ini jika null
+        
+        // Hitung Prev & Next untuk tombol navigasi
+        $prevDate = Carbon::parse($currentDate)->subDay()->format('Y-m-d');
+        $nextDate = Carbon::parse($currentDate)->addDay()->format('Y-m-d');
+
+        // Pastikan request date terisi untuk filter query
+        $request->merge(['date' => $currentDate]);
+
         $query = $this->getFilteredQuery($request);
         $permits = $query->paginate(10)->withQueryString();
 
-        return view('permit.history', compact('permits'));
+        return view('permit.history', compact('permits', 'currentDate', 'prevDate', 'nextDate'));
     }
 
     /**
-     * [BARU] Fitur Print Laporan (PDF View)
+     * Fitur Print Laporan (PDF View)
      */
     public function print(Request $request)
     {
@@ -98,18 +112,20 @@ class StudentPermitController extends Controller
     }
 
     /**
-     * [BARU] Fitur Export Excel
+     * Fitur Export Excel
      */
     public function export(Request $request)
     {
         $permits = $this->getFilteredQuery($request)->get();
         $filename = 'Laporan_Izin_' . date('Y-m-d_H-i') . '.xls';
 
-        // Header agar browser mendownload sebagai Excel
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-
-        return view('permit.excel', compact('permits'));
+        // Mengembalikan response stream agar lebih aman dan efisien
+        return response()->streamDownload(function() use ($permits) {
+            echo view('permit.excel', compact('permits'));
+        }, $filename, [
+            "Content-Type" => "application/vnd.ms-excel",
+            "Content-Disposition" => "attachment; filename=\"$filename\""
+        ]);
     }
 
     /**
@@ -119,6 +135,7 @@ class StudentPermitController extends Controller
     {
         $request->validate(['identifier' => 'required']);
 
+        // Cari siswa berdasarkan ID, NISN, atau RFID
         $student = Student::with('schoolClass')->where('student_id', $request->identifier)
             ->orWhere('nisn', $request->identifier)
             ->orWhere('rfid_id', $request->identifier)
@@ -131,12 +148,17 @@ class StudentPermitController extends Controller
             ], 404);
         }
 
+        // Cek apakah siswa sedang di luar (Status OUT)
         $existingPermit = StudentPermit::where('student_id', $student->id)
             ->where('status', 'OUT')
             ->first();
 
+        // SKENARIO 1: SISWA KEMBALI (CHECK-IN)
         if ($existingPermit) {
             $checkInTime = Carbon::now();
+            
+            // Hitung durasi
+            // Pastikan time_out dicast datetime di Model agar diffInMinutes berjalan
             $duration = (int) $existingPermit->time_out->diffInMinutes($checkInTime);
 
             $existingPermit->update([
@@ -156,6 +178,7 @@ class StudentPermitController extends Controller
             ]);
         }
 
+        // SKENARIO 2: SISWA AKAN KELUAR (PRE CHECK-OUT)
         return response()->json([
             'status' => 'success',
             'mode' => 'PRE_CHECK_OUT',
@@ -175,6 +198,7 @@ class StudentPermitController extends Controller
             'notes' => 'nullable|string'
         ]);
 
+        // Double check race condition
         if (StudentPermit::where('student_id', $request->student_id)->where('status', 'OUT')->exists()) {
             return response()->json(['status' => 'error', 'message' => 'Siswa sudah tercatat di luar!'], 422);
         }
@@ -188,7 +212,8 @@ class StudentPermitController extends Controller
             'status' => 'OUT'
         ]);
 
-        $permit->load('student');
+        // Load relasi siswa untuk dikirim balik ke frontend
+        $permit->load('student.schoolClass');
 
         return response()->json([
             'status' => 'success',

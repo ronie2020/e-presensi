@@ -13,11 +13,13 @@
             body { -webkit-print-color-adjust: exact; }
         }
         
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 3px double #000; padding-bottom: 10px; }
-        .header h1 { font-size: 14pt; margin: 0; font-weight: bold; text-transform: uppercase; }
-        .header h2 { font-size: 12pt; margin: 5px 0 0; font-weight: bold; }
-        .header p { font-size: 10pt; margin: 2px 0; }
-        
+        /* [PERBAIKAN] Header menggunakan Tabel untuk Kop Surat */
+        .header-table { width: 100%; border-bottom: 3px double #000; margin-bottom: 20px; }
+        .header-table td { vertical-align: middle; }
+        .header-title { font-size: 16pt; font-weight: bold; margin: 0; text-transform: uppercase; }
+        .header-subtitle { font-size: 12pt; font-weight: bold; margin: 5px 0 0; }
+        .header-address { font-size: 10pt; font-style: italic; margin: 2px 0; }
+
         table.data { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 10pt; }
         table.data th, table.data td { border: 1px solid #000; padding: 6px; }
         table.data th { background-color: #f3f3f3; text-align: center; font-weight: bold; text-transform: uppercase; }
@@ -49,15 +51,29 @@
         Cetak / Simpan PDF
     </button>
 
-    <div class="header">
-        <h1>LAPORAN IZIN KELUAR MASUK SISWA</h1>
-        <h2>SMP NEGERI 3 LAKBOK</h2>
-        <p>Jl. Raya Lakbok No. 123, Ciamis, Jawa Barat</p>
-    </div>
+    {{-- KOP SURAT --}}
+    <table class="header-table">
+        <tr>
+            {{-- Logo Placeholder --}}
+            <td width="15%" align="center" style="padding-bottom: 10px;">
+                <div style="width: 70px; height: 70px; background: #ddd; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #999;">LOGO</div>
+                {{-- <img src="{{ asset('img/logo.png') }}" width="70" alt="Logo"> --}}
+            </td>
+            <td align="center" style="padding-bottom: 10px;">
+                <h2 class="header-title">PEMERINTAH KABUPATEN CIAMIS</h2>
+                <h3 class="header-subtitle">SMP NEGERI 3 LAKBOK</h3>
+                <p class="header-address">Jl. Raya Lakbok No. 123, Cintaratu, Lakbok, Ciamis - 46385</p>
+            </td>
+            <td width="15%"></td>
+        </tr>
+    </table>
 
-    <div style="margin-bottom: 10px;">
-        <strong>Periode Laporan:</strong> {{ request('date') ? \Carbon\Carbon::parse(request('date'))->translatedFormat('d F Y') : 'Semua Waktu' }} <br>
-        <strong>Status:</strong> {{ request('status') ? ucfirst(request('status')) : 'Semua' }}
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h3 style="text-decoration: underline; margin: 0; font-size: 12pt; font-weight: bold;">LAPORAN MONITORING IZIN SISWA</h3>
+        <p style="margin: 5px 0; font-size: 10pt;">
+            <strong>Periode:</strong> {{ request('date') ? \Carbon\Carbon::parse(request('date'))->translatedFormat('d F Y') : 'Semua Waktu' }} 
+            | <strong>Status:</strong> {{ request('status') ? ucfirst(request('status')) : 'Semua' }}
+        </p>
     </div>
 
     <table class="data">
@@ -87,12 +103,12 @@
                     @if($permit->notes) <br><i style="font-size:9pt">"{{ $permit->notes }}"</i> @endif
                 </td>
                 <td style="text-align: center;">
-                    {{ \Carbon\Carbon::parse($permit->time_out)->format('H:i') }}<br>
-                    <small>{{ \Carbon\Carbon::parse($permit->time_out)->format('d/m/y') }}</small>
+                    {{ $permit->time_out->format('H:i') }}<br>
+                    <small>{{ $permit->time_out->format('d/m/y') }}</small>
                 </td>
                 <td style="text-align: center;">
                     @if($permit->time_in)
-                        {{ \Carbon\Carbon::parse($permit->time_in)->format('H:i') }}
+                        {{ $permit->time_in->format('H:i') }}
                     @else
                         -
                     @endif
