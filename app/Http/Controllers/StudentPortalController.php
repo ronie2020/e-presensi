@@ -18,7 +18,7 @@ use App\Models\LmsMaterial;
 use App\Models\Complaint;       
 use App\Models\LiaisonBook;     
 use App\Models\StudentHabit; 
-use App\Models\LibraryLoan;      
+use App\Models\Borrowing;        // [PERBAIKAN] Ganti LibraryLoan jadi Borrowing
 use App\Models\DisciplineRecord; 
 use App\Models\AcademicRecord;  
 use App\Models\TeachingSession;
@@ -350,9 +350,17 @@ class StudentPortalController extends Controller
         $ebooks = collect([]); 
         $ebookHistory = collect([]); 
 
-        if (class_exists(LibraryLoan::class)) {
-             $library_history = LibraryLoan::with('book')->where('student_id', $id)->latest()->take(5)->get();
-             $library_visits = $library_history->count();
+        // [PERBAIKAN] Menggunakan Model Borrowing yang benar
+        if (class_exists(Borrowing::class)) {
+             // Ambil 5 riwayat peminjaman terakhir
+             $library_history = Borrowing::with('book')
+                                ->where('student_id', $id)
+                                ->orderBy('borrow_date', 'desc')
+                                ->take(5)
+                                ->get();
+             
+             // Hitung total semua peminjaman (bukan hanya 5 terakhir)
+             $library_visits = Borrowing::where('student_id', $id)->count();
         }
 
         if (class_exists(Book::class)) {
