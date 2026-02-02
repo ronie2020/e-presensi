@@ -202,4 +202,13 @@ class Student extends Authenticatable
     {
         return $this->hasMany(RamadanLog::class, 'student_id');
     }
+
+    /**
+     * Relasi ke Data Peminjaman Buku (Borrowing)
+     * PERBAIKAN: Menambahkan relasi ini agar controller tidak error
+     */
+    public function borrowings(): HasMany
+    {
+        return $this->hasMany(Borrowing::class, 'student_id');
+    }
 }

@@ -141,7 +141,7 @@ class AttendanceSiswaController extends Controller
     }
 
     /**
-     * LOGIKA ABSENSI KBM (HARIAN) - TIDAK ADA PERUBAHAN (AMAN)
+     * LOGIKA ABSENSI KBM (HARIAN) - DENGAN POIN KETERLAMBATAN
      */
     private function processAttendance($student, $type, $request, $today)
     {
@@ -190,6 +190,24 @@ class AttendanceSiswaController extends Controller
                 'long_in' => $request->long,
                 'type' => 'Harian'
             ]);
+
+            // ==========================================================
+            // LOGIKA TAMBAHAN: PENGURANGAN POIN JIKA TERLAMBAT
+            // ==========================================================
+            if ($status == 'Terlambat') {
+                // 1. Kurangi Poin Siswa (Misal -5 Poin)
+                $student->decrement('score', 5);
+
+                // 2. Catat ke Activity Log agar muncul di riwayat pelanggaran
+                ActivityLog::create([
+                    'student_id' => $student->id,
+                    'type' => 'Violation', // Tipe Violation agar terhitung sebagai pelanggaran
+                    'activity_name' => 'Terlambat Masuk',
+                    'description' => "Terlambat datang sekolah (Limit: {$scheduleLimit}). Poin -5",
+                    'point_earned' => -5
+                ]);
+            }
+            // ==========================================================
 
             try {
                 SendWaScanNotificationJob::dispatch($attendance);
@@ -241,12 +259,12 @@ class AttendanceSiswaController extends Controller
     }
 
     /**
-     * LOGIKA RELIGI (DHUHA & DHUHUR) - DIPERBAIKI (activity_type -> type)
+     * LOGIKA RELIGI (DHUHA & DHUHUR)
      */
     private function processReligious($student, $type, $today)
     {
         $existingLog = ActivityLog::where('student_id', $student->id)
-            ->where('type', 'Religious') // FIX: activity_type -> type (untuk pengecekan juga)
+            ->where('type', 'Religious') 
             ->where('activity_name', 'Shalat ' . $type)
             ->whereDate('created_at', $today)
             ->first();
@@ -269,10 +287,9 @@ class AttendanceSiswaController extends Controller
             ]
         );
 
-        // FIX: Menggunakan kolom 'type' agar sesuai database
         ActivityLog::create([
             'student_id' => $student->id,
-            'type' => 'Religious', // SEBELUMNYA: activity_type
+            'type' => 'Religious',
             'activity_name' => 'Shalat ' . $type,
             'description' => "Siswa melakukan shalat {$type} di sekolah",
             'point_earned' => 5
@@ -304,12 +321,12 @@ class AttendanceSiswaController extends Controller
     }
 
     /**
-     * LOGIKA MAKAN - DIPERBAIKI (activity_type -> type)
+     * LOGIKA MAKAN
      */
     private function processMeal($student, $today)
     {
         $existingLog = ActivityLog::where('student_id', $student->id)
-            ->where('type', 'Meal') // FIX: activity_type -> type
+            ->where('type', 'Meal')
             ->whereDate('created_at', $today)
             ->first();
 
@@ -333,10 +350,9 @@ class AttendanceSiswaController extends Controller
             ]
         );
 
-        // FIX: Menggunakan kolom 'type'
         ActivityLog::create([
             'student_id' => $student->id,
-            'type' => 'Meal', // SEBELUMNYA: activity_type
+            'type' => 'Meal', 
             'activity_name' => 'Makan Bergizi Gratis',
             'description' => "Siswa mengambil jatah makan siang",
             'point_earned' => 2
@@ -368,7 +384,7 @@ class AttendanceSiswaController extends Controller
     }
 
     /**
-     * LOGIKA EKSKUL - DIPERBAIKI (activity_type -> type)
+     * LOGIKA EKSKUL
      */
     private function processExtra($student, $extraId, $today)
     {
