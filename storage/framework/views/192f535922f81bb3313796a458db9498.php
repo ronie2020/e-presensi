@@ -1,9 +1,18 @@
-<x-app-layout>
-    {{-- SCRIPT PENDUKUNG --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- CUSTOM STYLES --}}
+    
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -12,17 +21,17 @@
         .delay-300 { animation-delay: 0.3s; }
     </style>
 
-    {{-- ALERT ERROR JIKA DATA KOSONG --}}
-    @if(session('error'))
+    
+    <?php if(session('error')): ?>
     <script>
-        Swal.fire({ icon: 'error', title: 'Oops...', text: '{{ session('error') }}', customClass: { popup: 'rounded-[2rem]' } });
+        Swal.fire({ icon: 'error', title: 'Oops...', text: '<?php echo e(session('error')); ?>', customClass: { popup: 'rounded-[2rem]' } });
     </script>
-    @endif
+    <?php endif; ?>
 
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION --}}
+            
             <div class="animate-enter relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 mb-10 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -30,7 +39,7 @@
                 <div class="relative z-10 flex items-center justify-between">
                     <div>
                         <div class="flex items-center gap-3 mb-2">
-                            <a href="{{ route('library.dashboard') }}" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-blue-100 transition flex items-center gap-2">
+                            <a href="<?php echo e(route('library.dashboard')); ?>" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-blue-100 transition flex items-center gap-2">
                                 <i class="ph-bold ph-arrow-left"></i> Dashboard
                             </a>
                             <span class="text-blue-300 text-xs font-bold uppercase tracking-wider">Alat Admin</span>
@@ -50,10 +59,10 @@
                 </div>
             </div>
 
-            {{-- GRID MENU --}}
+            
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 
-                {{-- CARD 1: CETAK KARTU ANGGOTA (UPDATED: Support Per Kelas) --}}
+                
                 <div class="animate-enter delay-100 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 h-full flex flex-col relative overflow-hidden group hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-blue-100 transition-colors duration-500"></div>
                     
@@ -73,9 +82,9 @@
                     </div>
 
                     <div class="p-8 pt-0 mt-auto relative z-10">
-                        <form action="{{ route('library.tools.print-card') }}" method="GET" target="_blank" class="space-y-4" x-data="{ mode: 'single' }">
+                        <form action="<?php echo e(route('library.tools.print-card')); ?>" method="GET" target="_blank" class="space-y-4" x-data="{ mode: 'single' }">
                             
-                            {{-- Tab Switcher --}}
+                            
                             <div class="flex bg-slate-100 p-1 rounded-xl mb-4 border border-slate-200">
                                 <button type="button" @click="mode = 'single'" :class="mode === 'single' ? 'bg-white text-blue-700 shadow-sm font-black' : 'text-slate-500 font-bold hover:text-slate-700'" class="flex-1 py-2 text-xs rounded-lg transition-all">Per Siswa</button>
                                 <button type="button" @click="mode = 'class'" :class="mode === 'class' ? 'bg-white text-blue-700 shadow-sm font-black' : 'text-slate-500 font-bold hover:text-slate-700'" class="flex-1 py-2 text-xs rounded-lg transition-all">Per Kelas</button>
@@ -83,7 +92,7 @@
 
                             <input type="hidden" name="mode" x-model="mode">
 
-                            {{-- Input Single --}}
+                            
                             <div x-show="mode === 'single'" x-transition>
                                 <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">NISN / NIS Siswa</label>
                                 <div class="flex items-center px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus-within:border-blue-500 focus-within:bg-white focus-within:shadow-md transition-all">
@@ -92,15 +101,15 @@
                                 </div>
                             </div>
 
-                            {{-- Input Class --}}
+                            
                             <div x-show="mode === 'class'" style="display: none;" x-transition>
                                 <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Pilih Kelas</label>
                                 <div class="relative">
                                     <select name="class_id" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 font-bold text-slate-700 text-sm focus:ring-0 focus:border-blue-500 focus:bg-white focus:shadow-md transition-all appearance-none cursor-pointer">
                                         <option value="" disabled selected>-- Pilih Kelas --</option>
-                                        @foreach($classes as $class)
-                                            <option value="{{ $class->id }}">{{ $class->name }}</option>
-                                        @endforeach
+                                        <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $class): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($class->id); ?>"><?php echo e($class->name); ?></option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </select>
                                     <i class="ph-bold ph-caret-down absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
                                 </div>
@@ -114,7 +123,7 @@
                     </div>
                 </div>
 
-                {{-- CARD 2: LABEL BUKU --}}
+                
                 <div class="animate-enter delay-200 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 h-full flex flex-col relative overflow-hidden group hover:shadow-2xl hover:shadow-purple-900/10 transition-all duration-300">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-purple-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-purple-100 transition-colors duration-500"></div>
                     
@@ -134,9 +143,9 @@
                     </div>
 
                     <div class="p-8 pt-0 mt-auto relative z-10">
-                        <form action="{{ route('library.tools.print-book-label') }}" method="GET" target="_blank" class="space-y-4" x-data="{ mode: 'latest' }">
+                        <form action="<?php echo e(route('library.tools.print-book-label')); ?>" method="GET" target="_blank" class="space-y-4" x-data="{ mode: 'latest' }">
                             
-                            {{-- Tab Switcher --}}
+                            
                             <div class="flex bg-slate-100 p-1 rounded-xl mb-4 border border-slate-200">
                                 <button type="button" @click="mode = 'latest'" :class="mode === 'latest' ? 'bg-white text-purple-700 shadow-sm font-black' : 'text-slate-500 font-bold hover:text-slate-700'" class="flex-1 py-2 text-xs rounded-lg transition-all">Buku Terbaru</button>
                                 <button type="button" @click="mode = 'manual'" :class="mode === 'manual' ? 'bg-white text-purple-700 shadow-sm font-black' : 'text-slate-500 font-bold hover:text-slate-700'" class="flex-1 py-2 text-xs rounded-lg transition-all">Pilih Manual</button>
@@ -167,7 +176,7 @@
                     </div>
                 </div>
 
-                {{-- CARD 3: LAPORAN --}}
+                
                 <div class="animate-enter delay-300 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 h-full flex flex-col relative overflow-hidden group hover:shadow-2xl hover:shadow-emerald-900/10 transition-all duration-300">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none group-hover:bg-emerald-100 transition-colors duration-500"></div>
 
@@ -187,14 +196,13 @@
                     </div>
 
                     <div class="p-8 pt-0 mt-auto relative z-10">
-                        <form action="{{ route('library.tools.report') }}" method="GET" target="_blank" class="space-y-4">
+                        <form action="<?php echo e(route('library.tools.report')); ?>" method="GET" target="_blank" class="space-y-4">
                             <div>
                                 <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Jenis Laporan</label>
                                 <div class="relative">
                                     <select name="type" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 font-bold text-slate-700 text-sm focus:ring-0 focus:border-emerald-500 focus:bg-white focus:shadow-md transition-all appearance-none cursor-pointer">
                                         <option value="monthly">Sirkulasi Bulanan</option>
-                                        {{-- <option value="top_books">Buku Terpopuler</option>
-                                        <option value="fines">Laporan Denda</option> --}}
+                                        
                                     </select>
                                     <i class="ph-bold ph-caret-down absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
                                 </div>
@@ -204,16 +212,16 @@
                                     <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Bulan</label>
                                     <div class="relative">
                                         <select name="month" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 font-bold text-slate-700 text-sm focus:ring-0 focus:border-emerald-500 focus:bg-white focus:shadow-md transition-all appearance-none cursor-pointer">
-                                            @for($i = 1; $i <= 12; $i++)
-                                                <option value="{{ $i }}" {{ date('m') == $i ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $i, 10)) }}</option>
-                                            @endfor
+                                            <?php for($i = 1; $i <= 12; $i++): ?>
+                                                <option value="<?php echo e($i); ?>" <?php echo e(date('m') == $i ? 'selected' : ''); ?>><?php echo e(date('F', mktime(0, 0, 0, $i, 10))); ?></option>
+                                            <?php endfor; ?>
                                         </select>
                                         <i class="ph-bold ph-caret-down absolute right-3 top-3.5 text-slate-400 pointer-events-none"></i>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Tahun</label>
-                                    <input type="number" name="year" value="{{ date('Y') }}" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 font-bold text-slate-700 text-sm focus:ring-0 focus:border-emerald-500 focus:bg-white focus:shadow-md transition-all text-center">
+                                    <input type="number" name="year" value="<?php echo e(date('Y')); ?>" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-3 font-bold text-slate-700 text-sm focus:ring-0 focus:border-emerald-500 focus:bg-white focus:shadow-md transition-all text-center">
                                 </div>
                             </div>
                             <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg shadow-emerald-600/30 transition-all transform active:scale-95 flex items-center justify-center gap-2 group/btn">
@@ -227,4 +235,13 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/library/tools/index.blade.php ENDPATH**/ ?>

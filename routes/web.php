@@ -60,7 +60,7 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\LibraryDashboardController;
 use App\Http\Controllers\LibraryCirculationController;
 use App\Http\Controllers\LibraryKioskController;
-use App\Http\Controllers\LibraryToolController;
+use App\Http\Controllers\LibraryToolsController;
 
 
 // Persuratan & Dinas
@@ -363,9 +363,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/circulation/return', [LibraryCirculationController::class, 'returnBook'])->name('circulation.return');
      
         // ALAT BANTU & CETAK
-        Route::controller(LibraryToolController::class)->prefix('tools')->name('tools.')->group(function () {
+        Route::controller(LibraryToolsController::class)->prefix('tools')->name('tools.')->group(function () {
             Route::get('/', 'index')->name('index');             
-            Route::get('/print-card', 'printMemberCard')->name('print-card');            
+            Route::get('/print-card', 'printCard')->name('print-card');            
             Route::get('/print-label', 'printBookLabel')->name('print-book-label');            
             Route::get('/report', 'generateReport')->name('report');
         });    

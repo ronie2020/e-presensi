@@ -4,18 +4,32 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Student;
-use App\Models\Borrowing;
+use App\Models\Borrowing; // Pastikan pakai model Borrowing
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log; // Tambahkan Log untuk debugging
+use Illuminate\Support\Facades\Log;
 
 class LibraryCirculationController extends Controller
 {
+    /**
+     * MENAMPILKAN HALAMAN SIRKULASI
+     */
     public function index()
     {
-        return view('library.circulation');
+        // PERBAIKAN UTAMA DI SINI:
+        // Kita ambil 10 data peminjaman terakhir yang statusnya 'borrowed'
+        // agar variabel $recentActiveLoans tersedia di view.
+        
+        $recentActiveLoans = Borrowing::with(['student', 'book'])
+                            ->where('status', 'borrowed')
+                            ->orderBy('borrow_date', 'desc')
+                            ->limit(10)
+                            ->get();
+
+        // Kirim variabel tersebut ke view menggunakan compact
+        return view('library.circulation', compact('recentActiveLoans'));
     }
 
     /**
@@ -26,22 +40,27 @@ class LibraryCirculationController extends Controller
         try {
             $query = $request->get('q');
             
-            // Query yang diperbaiki (Logic OR dikurung agar akurat)
-            $studentQuery = Student::withCount(['borrowings' => function($q) {
-                        $q->where('status', 'borrowed');
-                    }])
-                    ->where(function($q) use ($query) {
-                        $q->where('student_id', $query)
-                          ->orWhere('rfid_id', $query)
-                          ->orWhere('nis', $query);
-                    });
-            
-            // Coba load relasi kelas dengan aman
-            // (Jika nama relasi salah di model, aplikasi tidak akan crash total)
+            // 1. CARI SISWA
+            $studentQuery = Student::where('student_id', $query)
+                        ->orWhere('rfid_id', $query)
+                        ->orWhere('nis', $query);
+
+            // Coba load relasi schoolClass dengan aman
             try {
                 $studentQuery->with('schoolClass');
+            } catch (\Exception $e) {}
+
+            // Coba load count borrowings dengan aman
+            try {
+                $studentQuery->withCount(['borrowings' => function($q) {
+                    $q->where('status', 'borrowed');
+                }]);
             } catch (\Exception $e) {
-                // Abaikan jika relasi schoolClass tidak ditemukan, lanjut proses
+                // Jika relasi borrowings belum ada di model Student, kembalikan pesan jelas
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Error Code: Relasi borrowings() tidak ditemukan di Model Student.php'
+                ]);
             }
 
             $student = $studentQuery->first();
@@ -50,28 +69,41 @@ class LibraryCirculationController extends Controller
                 return response()->json(['success' => false, 'message' => 'Anggota tidak ditemukan.']);
             }
 
-            // Ambil data buku yang telat (dengan load relasi book agar judulnya ada)
+            // 2. CEK BUKU OVERDUE
             $overdueLoans = Borrowing::with('book')
                             ->where('student_id', $student->id)
                             ->where('status', 'borrowed')
                             ->where('due_date', '<', now())
                             ->get();
 
-            // Format judul buku agar aman jika relasi buku terhapus
             $overdueTitles = $overdueLoans->map(function($loan) {
                 return $loan->book ? $loan->book->title : 'Judul Tidak Diketahui';
             });
 
+            // 3. AMBIL DETAIL BUKU YANG SEDANG DIPINJAM
+            $activeLoanDetails = Borrowing::with('book')
+                                ->where('student_id', $student->id)
+                                ->where('status', 'borrowed')
+                                ->orderBy('borrow_date', 'desc')
+                                ->get()
+                                ->map(function($loan) {
+                                    return [
+                                        'title' => $loan->book ? $loan->book->title : 'Judul Tidak Diketahui',
+                                        'due_date' => Carbon::parse($loan->due_date)->format('d M Y'),
+                                        'is_overdue' => Carbon::now()->gt($loan->due_date)
+                                    ];
+                                });
+
             return response()->json([
                 'success' => true,
                 'student' => $student,
-                'active_loans' => $student->borrowings_count,
+                'active_loans' => $student->borrowings_count ?? 0,
+                'active_loan_details' => $activeLoanDetails,
                 'has_overdue' => $overdueLoans->count() > 0,
                 'overdue_titles' => $overdueTitles
             ]);
 
         } catch (\Exception $e) {
-            // Jika ada error (misal salah nama tabel/kolom), kirim pesan errornya ke layar
             return response()->json([
                 'success' => false, 
                 'message' => 'Error Server: ' . $e->getMessage()
@@ -99,7 +131,7 @@ class LibraryCirculationController extends Controller
                 'is_available' => $book->stock > 0
             ]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Error Buku: ' . $e->getMessage()]);
         }
     }
 
@@ -115,7 +147,6 @@ class LibraryCirculationController extends Controller
                 'book_id' => 'required|exists:books,id',
             ]);
 
-            // Gunakan lockForUpdate untuk mencegah race condition (dobel klik)
             $book = Book::where('id', $request->book_id)->lockForUpdate()->first();
 
             if ($book->stock <= 0) {
@@ -123,7 +154,7 @@ class LibraryCirculationController extends Controller
                 return response()->json(['success' => false, 'message' => 'Stok buku habis.']);
             }
 
-            // Cek duplikasi pinjaman
+            // Cek Duplikasi
             $isDuplicate = Borrowing::where('student_id', $request->student_id)
                             ->where('book_id', $request->book_id)
                             ->where('status', 'borrowed')
@@ -134,14 +165,13 @@ class LibraryCirculationController extends Controller
                 return response()->json(['success' => false, 'message' => 'Siswa sedang meminjam buku judul ini.']);
             }
 
-            // Proses Transaksi
             $book->decrement('stock');
 
             Borrowing::create([
                 'student_id' => $request->student_id,
                 'book_id' => $request->book_id,
                 'borrow_date' => now(),
-                'due_date' => now()->addDays(7), // Default 7 hari
+                'due_date' => now()->addDays(7),
                 'status' => 'borrowed',
                 'served_by' => Auth::id(),
             ]);
@@ -151,7 +181,7 @@ class LibraryCirculationController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Gagal Memproses: ' . $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Gagal Proses: ' . $e->getMessage()]);
         }
     }
 
@@ -190,7 +220,7 @@ class LibraryCirculationController extends Controller
             }
 
             if ($request->has('check_only')) {
-                DB::rollBack(); // Rollback karena cuma checking
+                DB::rollBack();
                 return response()->json([
                     'success' => true,
                     'action' => 'confirm_needed',
@@ -205,7 +235,6 @@ class LibraryCirculationController extends Controller
                 ]);
             }
 
-            // Proses Pengembalian
             $borrowing->update([
                 'status' => 'returned',
                 'return_date' => now(),
@@ -219,7 +248,7 @@ class LibraryCirculationController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Error Pengembalian: ' . $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Error Kembali: ' . $e->getMessage()]);
         }
     }
 }

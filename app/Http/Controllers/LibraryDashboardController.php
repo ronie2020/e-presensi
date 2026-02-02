@@ -16,7 +16,9 @@ class LibraryDashboardController extends Controller
 {
     public function index()
     {
-        // 1. Statistik Utama (Buku & Anggota)
+        // ==========================================
+        // 1. STATISTIK UTAMA (EXISTING)
+        // ==========================================
         $totalBooks = Book::count();
         $activeMembers = Student::count(); 
         
@@ -24,9 +26,9 @@ class LibraryDashboardController extends Controller
                                     ->distinct('student_id')
                                     ->count('student_id');
 
-        // ---------------------------------------------------------
-        // 2. DATA UNTUK GRAFIK UTAMA (TREN 7 HARI TERAKHIR)
-        // ---------------------------------------------------------
+        // ==========================================
+        // 2. GRAFIK TREN 7 HARI (EXISTING)
+        // ==========================================
         
         // A. Data Kunjungan (Visit Trend)
         $todayVisits = 0;
@@ -58,14 +60,14 @@ class LibraryDashboardController extends Controller
         $loanChartLabels = $loanStats->map(fn($item) => Carbon::parse($item->loan_date)->format('d M'));
         $loanChartData = $loanStats->pluck('total');
 
-        // Fallback label chart
+        // Fallback label chart jika salah satu kosong
         if(count($visitChartLabels) == 0 && count($loanChartLabels) > 0) {
             $visitChartLabels = $loanChartLabels;
         }
 
-        // ---------------------------------------------------------
-        // 3. STATISTIK SIRKULASI & AKTIVITAS
-        // ---------------------------------------------------------
+        // ==========================================
+        // 3. SIRKULASI & AKTIVITAS (EXISTING)
+        // ==========================================
         $borrowedBooks = Borrowing::where('status', 'borrowed')->count();
         $overdueBooks  = Borrowing::where('status', 'borrowed')
                             ->where('due_date', '<', Carbon::now())
@@ -82,9 +84,9 @@ class LibraryDashboardController extends Controller
                             ->limit(5)
                             ->get();
 
-        // ---------------------------------------------------------
-        // 4. GRAFIK PER KELAS
-        // ---------------------------------------------------------
+        // ==========================================
+        // 4. GRAFIK PER KELAS (EXISTING - WAJIB ADA)
+        // ==========================================
         $classChartQuery = DB::table('borrowings')
             ->join('students', 'borrowings.student_id', '=', 'students.id')
             ->join('classes', 'students.class_id', '=', 'classes.id')
@@ -97,9 +99,9 @@ class LibraryDashboardController extends Controller
         $classChartLabels = $classChartQuery->pluck('name');
         $classChartData = $classChartQuery->pluck('total');
 
-        // ---------------------------------------------------------
-        // 5. STATISTIK LITERASI DIGITAL (E-BOOK)
-        // ---------------------------------------------------------
+        // ==========================================
+        // 5. E-BOOK (EXISTING)
+        // ==========================================
         $ebookReadsThisMonth = 0;
         $popularEbooks = collect([]);
 
@@ -120,6 +122,22 @@ class LibraryDashboardController extends Controller
             }
         } catch (\Exception $e) {}
 
+        // ==========================================
+        // 6. [BARU] ANALITIK JAM SIBUK & STOK (TAMBAHAN)
+        // ==========================================
+        
+        // Analitik Jam Kunjungan (untuk grafik baru)
+        $busyHoursStats = LibraryVisit::select(DB::raw('HOUR(time) as hour'), DB::raw('count(*) as count'))
+                            ->groupBy('hour')
+                            ->orderBy('hour')
+                            ->get();
+        
+        $busyHoursLabels = $busyHoursStats->map(fn($item) => sprintf('%02d:00', $item->hour));
+        $busyHoursData = $busyHoursStats->pluck('count');
+
+        // Widget Stok Menipis (untuk sidebar)
+        $attentionBooks = Book::where('stock', '<=', 0)->take(5)->get();
+
         return view('library.dashboard', compact(
             'totalBooks', 'activeMembers', 'membersBorrowingCount',
             'todayVisits', 'visitChartLabels', 'visitChartData',
@@ -127,14 +145,15 @@ class LibraryDashboardController extends Controller
             'recentActivities', 
             'popularBooks', 
             'loanChartLabels', 'loanChartData', 
-            'classChartLabels', 'classChartData', 
-            'ebookReadsThisMonth', 'popularEbooks'
+            'classChartLabels', 'classChartData', // Variabel lama tetap dikirim
+            'ebookReadsThisMonth', 'popularEbooks',
+            'busyHoursLabels', 'busyHoursData', // Variabel baru
+            'attentionBooks' // Variabel baru
         ));
     }
 
     /**
-     * Method Baru: Handle AJAX Request untuk Cek Status Siswa
-     * Route: POST /library/check-student (Sesuaikan route Anda ke method ini)
+     * Method AJAX untuk Cek Status Siswa (EXISTING)
      */
     public function checkStudent(Request $request)
     {
@@ -144,23 +163,19 @@ class LibraryDashboardController extends Controller
             return response()->json(['success' => false, 'message' => 'Input kosong']);
         }
 
-        // Cari siswa berdasarkan Nama, NISN, atau ID (Scan Barcode biasanya mengirim NISN/ID)
-        // Pastikan relasi 'schoolClass' (atau 'class') diload
         $student = Student::with('schoolClass') 
                     ->where('name', 'like', "%{$query}%")
-                    ->orWhere('nisn', 'like', "%{$query}%") // Asumsi kolom NISN
+                    ->orWhere('nisn', 'like', "%{$query}%")
                     ->first();
 
         if (!$student) {
             return response()->json(['success' => false, 'message' => 'Siswa tidak ditemukan']);
         }
 
-        // Hitung peminjaman aktif
         $activeLoans = Borrowing::where('student_id', $student->id)
                         ->where('status', 'borrowed')
                         ->count();
 
-        // Cek apakah ada yang terlambat (Overdue)
         $hasOverdue = Borrowing::where('student_id', $student->id)
                         ->where('status', 'borrowed')
                         ->where('due_date', '<', Carbon::now())

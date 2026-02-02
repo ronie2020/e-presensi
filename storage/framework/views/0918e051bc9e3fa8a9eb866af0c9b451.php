@@ -1,6 +1,4 @@
-@extends('layouts.kiosk-layout')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="h-screen w-full bg-slate-900 flex relative overflow-hidden font-sans selection:bg-cyan-500 selection:text-white">
     
     <!-- OVERLAY START (Untuk Audio Context Browser) -->
@@ -30,7 +28,7 @@
     <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5 pointer-events-none"></div>
 
     <!-- Tombol Kembali -->
-    <a href="{{ route('library.dashboard') }}" class="absolute top-8 left-8 z-50 flex items-center gap-3 px-5 py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full transition-all border border-slate-700 hover:border-slate-500 shadow-xl group backdrop-blur-md">
+    <a href="<?php echo e(route('library.dashboard')); ?>" class="absolute top-8 left-8 z-50 flex items-center gap-3 px-5 py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full transition-all border border-slate-700 hover:border-slate-500 shadow-xl group backdrop-blur-md">
         <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i>
         <span class="font-bold text-xs uppercase tracking-wider">Dashboard</span>
     </a>
@@ -44,7 +42,7 @@
             <!-- Header -->
             <div class="text-center mb-6 w-full flex flex-col items-center shrink-0">
                 <div class="inline-flex items-center justify-center p-3 mb-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 shadow-2xl backdrop-blur-sm">
-                    <img src="{{ asset('img/logo_sekolah.png') }}" onerror="this.style.display='none';" alt="Logo" class="w-14 h-14 object-contain">
+                    <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" onerror="this.style.display='none';" alt="Logo" class="w-14 h-14 object-contain">
                 </div>
                 
                 <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-white tracking-tight uppercase leading-tight drop-shadow-sm">
@@ -134,25 +132,26 @@
                 <h3 class="text-sm font-bold text-purple-400 uppercase tracking-wider mb-4">Rekomendasi Hari Ini</h3>
                 
                 <div class="relative h-full overflow-hidden" id="book-slider">
-                    @foreach($recommendations as $index => $book)
-                    <div class="book-slide absolute inset-0 transition-opacity duration-1000 {{ $index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0' }}">
+                    <?php $__currentLoopData = $recommendations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="book-slide absolute inset-0 transition-opacity duration-1000 <?php echo e($index === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0'); ?>">
                         <div class="flex gap-4 items-start">
                             <div class="w-16 h-24 bg-slate-700 rounded-lg shadow-lg flex items-center justify-center text-slate-500 text-xs font-bold shrink-0 overflow-hidden">
-                                {{-- Placeholder Cover --}}
+                                
                                 <div class="w-full h-full bg-gradient-to-br from-purple-900 to-slate-900 flex flex-col items-center justify-center p-1 text-center">
-                                    <span class="text-[8px] text-white/50">{{ substr($book->title, 0, 10) }}...</span>
+                                    <span class="text-[8px] text-white/50"><?php echo e(substr($book->title, 0, 10)); ?>...</span>
                                 </div>
                             </div>
                             <div>
-                                <h4 class="text-white font-bold text-sm line-clamp-2 leading-tight">{{ $book->title }}</h4>
-                                <p class="text-slate-400 text-xs mt-1">{{ $book->author }}</p>
+                                <h4 class="text-white font-bold text-sm line-clamp-2 leading-tight"><?php echo e($book->title); ?></h4>
+                                <p class="text-slate-400 text-xs mt-1"><?php echo e($book->author); ?></p>
                                 <span class="inline-block mt-2 px-2 py-0.5 bg-purple-500/20 text-purple-300 text-[10px] font-bold rounded border border-purple-500/30">
-                                    {{ $book->category->name ?? 'Umum' }}
+                                    <?php echo e($book->category->name ?? 'Umum'); ?>
+
                                 </span>
                             </div>
                         </div>
                     </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
             </div>
 
@@ -208,7 +207,7 @@
         const overdueAlert = document.getElementById('overdue-alert');
 
         // Initial Data
-        const initialData = @json($recentVisits ?? []);
+        const initialData = <?php echo json_encode($recentVisits ?? [], 15, 512) ?>;
         if(initialData && initialData.length > 0) {
             [...initialData].reverse().forEach(v => addToLog(v.name, v.status, v.message));
         }
@@ -252,9 +251,9 @@
             overdueAlert.classList.add('hidden'); // Reset alert
 
             try {
-                const res = await fetch('{{ route('library.kiosk.process') }}', {
+                const res = await fetch('<?php echo e(route('library.kiosk.process')); ?>', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ scan_data: code, mode: currentMode })
                 });
                 
@@ -419,4 +418,5 @@
     @keyframes enter { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
     .animate-enter { animation: enter 0.6s ease-out forwards; }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.kiosk-layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/library/kiosk.blade.php ENDPATH**/ ?>

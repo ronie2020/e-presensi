@@ -5,37 +5,63 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\Book;
-use App\Models\Loan; 
+use App\Models\SchoolClass; // Wajib di-import untuk dropdown kelas
+use App\Models\Borrowing;   // Gunakan 'Borrowing' sesuai fitur sirkulasi sebelumnya
 use Barryvdh\DomPDF\Facade\Pdf;
-// HAPUS: use SimpleSoftwareIO\QrCode\Facades\QrCode; (Penyebab Error)
 
-class LibraryToolController extends Controller
+class LibraryToolsController extends Controller
 {
     /**
-     * Menampilkan halaman menu Tools (Pusat Cetak & Laporan)
+     * Halaman Utama Tools
      */
     public function index()
     {
-        return view('library.tools.index');
+        // PERBAIKAN 1: Ambil data kelas untuk mengisi dropdown "Pilih Kelas" di halaman Index
+        $classes = SchoolClass::orderBy('name', 'asc')->get();
+        
+        return view('library.tools.index', compact('classes'));
     }
 
     /**
-     * Preview & Cetak Kartu Anggota
+     * Preview & Cetak Kartu Anggota (Support Satuan & Satu Kelas)
      */
-    public function printMemberCard(Request $request)
+    public function printCard(Request $request)
     {
-        $request->validate(['nisn' => 'required']);
-        
-        $student = Student::where('student_id', $request->nisn)->first();
+        $mode = $request->input('mode', 'single'); // 'single' atau 'class'
+        $students = collect(); // Koleksi kosong untuk menampung hasil
 
-        if (!$student) {
-            // Tampilkan SweetAlert2 jika siswa tidak ditemukan
-            return response()->stream(function() {
+        // LOGIKA 1: CETAK SATUAN
+        if ($mode === 'single') {
+            $request->validate(['nisn' => 'required']);
+            
+            $student = Student::with('schoolClass')
+                        ->where('student_id', $request->nisn) // Cek NISN/ID
+                        ->orWhere('nis', $request->nisn)      // Cek NIS Lokal
+                        ->first();
+
+            if ($student) {
+                $students->push($student); // Masukkan ke koleksi
+            }
+        } 
+        // PERBAIKAN 2: LOGIKA CETAK SATU KELAS
+        elseif ($mode === 'class') {
+            $request->validate(['class_id' => 'required']);
+            
+            $students = Student::with('schoolClass')
+                        ->where('class_id', $request->class_id)
+                        ->orderBy('name', 'asc')
+                        ->get();
+        }
+
+        // JIKA DATA KOSONG (Tampilkan SweetAlert Error)
+        if ($students->isEmpty()) {
+            return response()->stream(function() use ($mode) {
+                $msg = $mode === 'class' ? 'Kelas ini belum memiliki data siswa.' : 'NISN/NIS tidak ditemukan.';
                 echo '
                 <!DOCTYPE html>
                 <html lang="id">
                 <head>
-                    <title>Siswa Tidak Ditemukan</title>
+                    <title>Data Tidak Ditemukan</title>
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
                     <style>body { font-family: "Segoe UI", sans-serif; background: #f1f5f9; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }</style>
@@ -45,72 +71,10 @@ class LibraryToolController extends Controller
                         document.addEventListener("DOMContentLoaded", function() {
                             Swal.fire({
                                 icon: "error",
-                                title: "Siswa Tidak Ditemukan!",
-                                text: "NISN yang Anda masukkan tidak terdaftar dalam database.",
-                                confirmButtonText: "Tutup Window",
+                                title: "Data Kosong",
+                                text: "'.$msg.'",
+                                confirmButtonText: "Tutup",
                                 confirmButtonColor: "#ef4444",
-                                allowOutsideClick: false,
-                                allowEscapeKey: false
-                            }).then((result) => {
-                                window.close();
-                            });
-                        });
-                    </script>
-                </body>
-                </html>
-                ';
-            });
-        }
-
-        // HAPUS: Bagian generate QR Code lokal yang menyebabkan error
-        // $qrcode = QrCode::size(100)->generate($student->student_id);
-
-        // Kirim data siswa saja, QR Code ditangani oleh View (Blade) via API
-        return view('library.tools.print-card', compact('student'));
-    }
-
-    /**
-     * Cetak Label Buku (Barcode & Punggung)
-     */
-    public function printBookLabel(Request $request)
-    {
-        $books = collect();
-
-        // Opsi 1: Berdasarkan Kode Buku Manual (dipisah koma)
-        if ($request->filled('book_codes')) {
-            $codes = array_map('trim', explode(',', $request->book_codes));
-            $books = Book::whereIn('book_code', $codes)->get();
-        } 
-        // Opsi 2: Berdasarkan Jumlah Buku Terakhir (Default)
-        elseif ($request->filled('limit')) {
-            $books = Book::latest()->take($request->limit)->get();
-        }
-        else {
-            // Default fallback
-            $books = Book::latest()->take(10)->get();
-        }
-        
-        // --- LOGIKA PENANGANAN DATA KOSONG DENGAN SWEETALERT2 ---
-        if ($books->isEmpty()) {
-            return response()->stream(function() {
-                echo '
-                <!DOCTYPE html>
-                <html lang="id">
-                <head>
-                    <title>Data Buku Kosong</title>
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                    <style>body { font-family: "Segoe UI", sans-serif; background: #f1f5f9; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }</style>
-                </head>
-                <body>
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function() {
-                            Swal.fire({
-                                icon: "warning",
-                                title: "Data Buku Tidak Ditemukan",
-                                text: "Tidak ada buku yang cocok dengan kriteria pencarian Anda. Pastikan kode buku benar atau data sudah diinput.",
-                                confirmButtonText: "Mengerti & Tutup",
-                                confirmButtonColor: "#f59e0b",
                                 allowOutsideClick: false
                             }).then((result) => {
                                 window.close();
@@ -123,8 +87,57 @@ class LibraryToolController extends Controller
             });
         }
 
-        // Fix: Pastikan relasi kategori dimuat agar tidak error di view
-        $books->load('category'); 
+        // Kirim variable $students (jamak) ke view print-card
+        return view('library.tools.print-card', compact('students'));
+    }
+
+    /**
+     * Cetak Label Buku (Barcode & Punggung)
+     */
+    public function printBookLabel(Request $request)
+    {
+        $books = collect();
+
+        // Opsi 1: Berdasarkan Kode Buku Manual (dipisah koma)
+        if ($request->filled('book_codes')) {
+            $codes = array_map('trim', explode(',', $request->book_codes));
+            $books = Book::with('category')->whereIn('book_code', $codes)->get();
+        } 
+        // Opsi 2: Berdasarkan Jumlah Buku Terakhir (Default)
+        elseif ($request->filled('limit')) {
+            $books = Book::with('category')->latest()->take($request->limit)->get();
+        }
+        else {
+            // Default fallback
+            $books = Book::with('category')->latest()->take(10)->get();
+        }
+        
+        // --- LOGIKA PENANGANAN DATA KOSONG ---
+        if ($books->isEmpty()) {
+            return response()->stream(function() {
+                echo '
+                <!DOCTYPE html>
+                <html lang="id">
+                <head>
+                    <title>Data Buku Kosong</title>
+                    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                    <style>body { font-family: "Segoe UI", sans-serif; background: #f1f5f9; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }</style>
+                </head>
+                <body>
+                    <script>
+                        Swal.fire({
+                            icon: "warning",
+                            title: "Buku Tidak Ditemukan",
+                            text: "Cek kembali kode buku yang Anda masukkan.",
+                            confirmButtonText: "Tutup",
+                            confirmButtonColor: "#f59e0b"
+                        }).then(() => { window.close(); });
+                    </script>
+                </body>
+                </html>
+                ';
+            });
+        }
 
         return view('library.tools.print-book-label', compact('books'));
     }
@@ -141,33 +154,28 @@ class LibraryToolController extends Controller
         $data = [];
         $title = "";
 
+        // PERBAIKAN 3: Gunakan Model Borrowing dan kolom borrow_date
         if ($type == 'monthly') {
             $monthName = date('F', mktime(0, 0, 0, $month, 10));
             $title = "Laporan Sirkulasi - " . $monthName . " " . $year;
             
-            // Mengambil data peminjaman
-            $data = Loan::whereMonth('loan_date', $month)
-                        ->whereYear('loan_date', $year)
+            $data = Borrowing::whereMonth('borrow_date', $month)
+                        ->whereYear('borrow_date', $year)
                         ->with(['student', 'book'])
+                        ->orderBy('borrow_date', 'desc')
                         ->get();
         } 
         elseif ($type == 'top_books') {
             $title = "Laporan Buku Terpopuler (Top Borrowed)";
             // Mengambil buku dengan jumlah peminjaman terbanyak
-            $data = Book::withCount('loans')
-                        ->orderBy('loans_count', 'desc')
+            $data = Book::withCount('borrowings') // Relasi borrowings di model Book harus ada
+                        ->orderBy('borrowings_count', 'desc')
                         ->take(20)
                         ->get();
         }
 
-        // Cek jika data kosong, tampilkan pesan PDF kosong atau alert
-        if ($data->isEmpty() && $type == 'monthly') {
-             // Opsional: Jika ingin alert juga untuk laporan, bisa pakai cara stream di atas.
-             // Tapi biasanya laporan PDF tetap digenerate meski kosong (hanya tabel kosong).
-        }
-
         $pdf = Pdf::loadView('library.reports.pdf-template', compact('data', 'title', 'type'));
         
-        return $pdf->download('Laporan_Perpustakaan_' . date('Ymd_His') . '.pdf');
+        return $pdf->download('Laporan_' . $type . '_' . date('Ymd_His') . '.pdf');
     }
 }
