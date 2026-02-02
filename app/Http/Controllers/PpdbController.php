@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
+// Tambahkan Import untuk Excel Export & Import
+use App\Imports\PpdbRegistrantImport;
+use App\Exports\PpdbTemplateExport; // <--- TAMBAHKAN INI
+use Maatwebsite\Excel\Facades\Excel;
+
 class PpdbController extends Controller
 {
     /**
@@ -65,8 +70,13 @@ class PpdbController extends Controller
                 }
             }
 
+            // REVISI LOGIC NUMBER: Gunakan LockForUpdate agar aman dari race condition
             $year = date('Y');
-            $latest = PpdbRegistrant::where('academic_year', $year)->latest()->first();
+            $latest = PpdbRegistrant::where('academic_year', $year)
+                        ->lockForUpdate() // Tambahan Lock
+                        ->latest()
+                        ->first();
+                        
             $sequence = 1;
             
             if ($latest) {
@@ -97,15 +107,11 @@ class PpdbController extends Controller
     }
 
     /**
-     * BARU: Menampilkan Halaman Sukses Pendaftaran
-     * Method ini yang sebelumnya hilang menyebabkan error 500
+     * Menampilkan Halaman Sukses Pendaftaran
      */
     public function success($code)
     {
-        // Cari data pendaftar berdasarkan nomor registrasi
         $registrant = PpdbRegistrant::where('registration_number', $code)->firstOrFail();
-        
-        // Tampilkan view success.blade.php
         return view('ppdb.success', compact('registrant'));
     }
 
@@ -115,16 +121,12 @@ class PpdbController extends Controller
     private function getAnnouncementDate()
     {
         $announcementDate = null;
-        
-        // Cek file settingan dari admin
         if (Storage::exists('ppdb_schedule.json')) {
             $data = json_decode(Storage::get('ppdb_schedule.json'), true);
             if (isset($data['announcement_date'])) {
                 $announcementDate = Carbon::parse($data['announcement_date']);
             }
         }
-
-        // Default 1 tahun ke depan jika belum diset admin
         return $announcementDate ?? Carbon::now()->addYears(1);
     }
 
@@ -138,7 +140,7 @@ class PpdbController extends Controller
     }
 
     /**
-     * Memproses pencarian status siswa (SOLUSI FIX "NO CHANGE").
+     * Memproses pencarian status siswa.
      */
     public function search(Request $request)
     {
@@ -150,7 +152,6 @@ class PpdbController extends Controller
 
         // 1. Cek Apakah Pengumuman Sudah Dibuka?
         if (Carbon::now()->lessThan($announcementDate)) {
-            // PERBAIKAN: Gunakan return view(), BUKAN redirect()
             return view('ppdb.check', [
                 'announcementDate' => $announcementDate,
                 'customError' => 'Pengumuman belum dibuka. Harap tunggu waktu hitung mundur selesai.'
@@ -164,7 +165,6 @@ class PpdbController extends Controller
 
         // 2. Jika Data Tidak Ditemukan
         if (!$registrant) {
-            // PERBAIKAN: Gunakan return view() agar error tetap muncul meski session diblokir browser
             return view('ppdb.check', [
                 'announcementDate' => $announcementDate,
                 'customError' => 'Data tidak ditemukan. Pastikan Nomor Pendaftaran atau NISN benar.'
@@ -184,7 +184,6 @@ class PpdbController extends Controller
 
         if ($registrant->status !== 'accepted') {
             $announcementDate = $this->getAnnouncementDate();
-            // PERBAIKAN: Return view error langsung
             return view('ppdb.check', [
                 'announcementDate' => $announcementDate,
                 'customError' => 'Akses ditolak. Surat kelulusan hanya tersedia bagi peserta yang dinyatakan DITERIMA.'
@@ -192,5 +191,50 @@ class PpdbController extends Controller
         }
 
         return view('ppdb.print-letter', compact('registrant'));
+    }
+
+    /**
+     * Halaman Upload Kolektif (Untuk Guru SD)
+     */
+    public function collective()
+    {
+        return view('ppdb.collective');
+    }
+
+    /**
+     * Proses Upload Excel
+     */
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'file_excel' => 'required|mimes:xlsx,xls'
+        ], [
+            'file_excel.required' => 'Harap pilih file Excel terlebih dahulu.',
+            'file_excel.mimes' => 'Format file harus .xlsx atau .xls'
+        ]);
+
+        try {
+            Excel::import(new PpdbRegistrantImport, $request->file('file_excel'));
+            return redirect()->back()->with('success', 'Data siswa berhasil diimpor! Silakan cek status pendaftaran menggunakan NISN.');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+             $failures = $e->failures();
+             $errorMsg = "Gagal Import: <br>";
+             foreach ($failures as $failure) {
+                 $errorMsg .= "- Baris " . $failure->row() . ": " . implode(', ', $failure->errors()) . "<br>";
+             }
+             return redirect()->back()->with('error', $errorMsg);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * [REVISI] Download Template Excel (Auto Generate)
+     * Tidak lagi mencari file fisik, tapi membuatnya on-the-fly
+     */
+    public function downloadTemplate()
+    {
+        $fileName = 'template_ppdb_kolektif.xlsx';
+        return Excel::download(new PpdbTemplateExport, $fileName);
     }
 }

@@ -211,4 +211,26 @@ class Student extends Authenticatable
     {
         return $this->hasMany(Borrowing::class, 'student_id');
     }
+    
+    /**
+     * [BARU] Helper Static untuk Generate NIS Otomatis
+     * Digunakan oleh AdminPpdbController saat promote siswa
+     */
+    public static function generateNextNis()
+    {
+        $yearShort = date('y'); // Contoh: 24
+        
+        // Cari siswa terakhir di tahun ini
+        $lastStudent = self::where('nis', 'like', $yearShort . '%')
+                           ->orderBy('nis', 'desc')
+                           ->first();
+        
+        // Ambil sequence terakhir + 1
+        $sequence = $lastStudent ? intval(substr($lastStudent->nis, -3)) + 1 : 1;
+        
+        return [
+            'prefix' => $yearShort,
+            'sequence' => $sequence
+        ];
+    }
 }

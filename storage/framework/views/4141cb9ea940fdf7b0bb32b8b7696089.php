@@ -92,7 +92,7 @@
                         <a href="#" class="hover:text-white transition-colors">Beranda</a>
                         <a href="#profil" class="hover:text-white transition-colors">Profil</a>
                         <a href="#akademik" class="hover:text-white transition-colors">Akademik</a>
-                        <a href="<?php echo e(route('ppdb.register')); ?>" class="hover:text-white transition-colors">PPDB</a>
+                        <a href="<?php echo e(route('ppdb.create')); ?>" class="hover:text-white transition-colors">PPDB</a>
                         <a href="#galeri" class="hover:text-white transition-colors">Galeri</a>
                         <a href="<?php echo e(route('library.catalogue')); ?>"class="hover:text-white transition-colors">Katalog Buku</a> 
                     </a>
@@ -139,7 +139,7 @@
              
             <nav class="flex flex-col items-center space-y-6 text-center w-full px-8">
                 <!-- Mobile PPDB Link (Updated Color) -->
-                <a href="<?php echo e(route('ppdb.register')); ?>" class="w-full py-3 bg-blue-600 rounded-xl text-white font-bold text-lg shadow-lg">
+                <a href="<?php echo e(route('ppdb.create')); ?>" class="w-full py-3 bg-blue-600 rounded-xl text-white font-bold text-lg shadow-lg">
                     <i class="ph-bold ph-student mr-2"></i> Info PPDB 2025
                 </a>
                 
@@ -193,7 +193,7 @@
                 
                 <!-- BUTTON PPDB HERO SECTION (Diubah ke Biru untuk Konsistensi) -->
                 <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-10">
-                    <a href="<?php echo e(route('ppdb.register')); ?>" class="px-8 py-4 rounded-full bg-blue-600 text-white font-bold text-sm shadow-lg shadow-blue-600/30 hover:bg-blue-500 hover:-translate-y-1 transition-all border-2 border-blue-500 flex items-center justify-center gap-2">
+                    <a href="<?php echo e(route('ppdb.create')); ?>" class="px-8 py-4 rounded-full bg-blue-600 text-white font-bold text-sm shadow-lg shadow-blue-600/30 hover:bg-blue-500 hover:-translate-y-1 transition-all border-2 border-blue-500 flex items-center justify-center gap-2">
                         <i class="ph-bold ph-student text-xl"></i> Daftar PPDB 2025
                     </a>
                      <a href="<?php echo e(route('ppdb.check')); ?>" class="px-8 py-4 rounded-full bg-slate-800 text-white font-bold text-sm shadow-lg hover:bg-slate-700 hover:-translate-y-1 transition-all border border-slate-600 flex items-center justify-center gap-2">
@@ -248,79 +248,149 @@
         </div>
     </div>    
     
+    <!-- ========================================== -->
+    <!-- NEW SECTION: JALUR PENDAFTARAN PPDB        -->
+    <!-- (Disisipkan di sini agar terlihat jelas)   -->
+    <!-- ========================================== -->
+    <section class="py-20 bg-slate-50 relative overflow-hidden border-b border-slate-100">
+        
+        <div class="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            
+            <div class="text-center mb-12">
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider mb-3 border border-blue-200">
+                    <i class="ph-bold ph-student mr-2"></i> Penerimaan Siswa Baru
+                </span>
+                <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">Pilih Jalur Pendaftaran</h2>
+                <p class="text-slate-500 max-w-2xl mx-auto text-lg">
+                    Kami menyediakan berbagai metode pendaftaran untuk memudahkan calon siswa dan sekolah asal.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                
+                <a href="<?php echo e(route('ppdb.create')); ?>" class="group relative bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 hover:-translate-y-2 hover:shadow-blue-900/10 transition-all duration-300 h-full flex flex-col">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-3xl mb-6 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                        <i class="ph-duotone ph-student"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">Daftar Mandiri</h3>
+                    <p class="text-sm text-slate-500 font-medium leading-relaxed mb-6 flex-1">
+                        Untuk siswa atau orang tua yang ingin mengisi formulir pendaftaran secara langsung melalui website.
+                    </p>
+                    <div class="flex items-center text-blue-600 font-bold text-sm mt-auto">
+                        Isi Formulir <i class="ph-bold ph-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </a>
+
+                
+                <a href="<?php echo e(route('ppdb.collective')); ?>" class="group relative bg-gradient-to-br from-blue-900 to-slate-900 rounded-[2rem] p-8 shadow-xl shadow-blue-900/20 border border-blue-800 hover:-translate-y-2 hover:shadow-blue-900/40 transition-all duration-300 transform md:scale-105 md:-mt-4 ring-4 ring-blue-500/10 h-full flex flex-col">
+                    <div class="absolute top-4 right-4 bg-yellow-400 text-yellow-900 text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider">
+                        Khusus Guru
+                    </div>
+                    <div class="w-16 h-16 rounded-2xl bg-white/10 text-white flex items-center justify-center text-3xl mb-6 backdrop-blur-sm group-hover:scale-110 transition-all duration-300">
+                        <i class="ph-duotone ph-microsoft-excel-logo"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-white mb-2">Kolektif Guru SD/MI</h3>
+                    <p class="text-sm text-blue-100/80 font-medium leading-relaxed mb-6 flex-1">
+                        Fitur khusus bagi Guru Sekolah Dasar untuk mendaftarkan siswanya secara massal menggunakan upload Excel.
+                    </p>
+                    <div class="flex items-center text-white font-bold text-sm mt-auto">
+                        Upload Data <i class="ph-bold ph-upload-simple ml-2 group-hover:-translate-y-1 transition-transform"></i>
+                    </div>
+                </a>
+
+                
+                <a href="<?php echo e(route('ppdb.check')); ?>" class="group relative bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 border border-slate-100 hover:-translate-y-2 hover:shadow-emerald-900/10 transition-all duration-300 h-full flex flex-col">
+                    <div class="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-3xl mb-6 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+                        <i class="ph-duotone ph-magnifying-glass"></i>
+                    </div>
+                    <h3 class="text-xl font-black text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors">Cek Status</h3>
+                    <p class="text-sm text-slate-500 font-medium leading-relaxed mb-6 flex-1">
+                        Pantau status verifikasi berkas pendaftaran dan lihat pengumuman hasil seleksi PPDB secara real-time.
+                    </p>
+                    <div class="flex items-center text-emerald-600 font-bold text-sm mt-auto">
+                        Cek Sekarang <i class="ph-bold ph-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+    </section>
 
     <!-- MONITORING 7 KEBIASAAN SECTION -->
-<div class="py-24 bg-white relative overflow-hidden border-t border-slate-100">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="flex flex-col lg:flex-row items-center gap-16">
-            
-            <!-- Statistik Card -->
-            <div class="w-full lg:w-5/12" data-aos="fade-right">
-                <span class="inline-flex items-center py-1.5 px-3 rounded-full bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider mb-6 border border-blue-200">
-                    <i class="ph-fill ph-shield-check mr-2"></i> Pendidikan Karakter
-                </span>
-                <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight mb-6">
-                    Monitoring <br>
-                    <span class="text-blue-600">7 Kebiasaan Baik</span>
-                </h2>
-                <p class="text-slate-600 mb-8 leading-relaxed">
-                    Rekapitulasi harian partisipasi siswa dalam membangun karakter unggul melalui pelaporan jurnal kebiasaan baik secara digital.
-                </p>
+    <div class="py-24 bg-white relative overflow-hidden border-t border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col lg:flex-row items-center gap-16">
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 hover:shadow-xl hover:shadow-blue-500/5 transition-all group">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="p-2 bg-blue-100 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors"><i class="ph-bold ph-check-circle"></i></div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sudah Lapor</p>
-                        </div>
-                        <p class="text-3xl font-black text-slate-800"><?php echo e($habitStats['submitted'] ?? 0); ?> <span class="text-xs font-bold text-slate-400">Siswa</span></p>
-                    </div>
-
-                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 hover:shadow-xl hover:shadow-amber-500/5 transition-all group">
-                        <div class="flex items-center gap-3 mb-2">
-                            <div class="p-2 bg-amber-100 rounded-lg text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors"><i class="ph-bold ph-clock-countdown"></i></div>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Belum Lapor</p>
-                        </div>
-                        <p class="text-3xl font-black text-slate-800"><?php echo e($habitStats['missing'] ?? 0); ?> <span class="text-xs font-bold text-slate-400">Siswa</span></p>
-                    </div>
-
-                    <div class="sm:col-span-2 bg-blue-600 p-6 rounded-2xl shadow-lg shadow-blue-500/20 flex items-center justify-between group">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white text-2xl group-hover:rotate-12 transition-transform">
-                                <i class="ph-fill ph-chart-pie-slice"></i>
+                <!-- Statistik Card -->
+                <div class="w-full lg:w-5/12" data-aos="fade-right">
+                    <span class="inline-flex items-center py-1.5 px-3 rounded-full bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider mb-6 border border-blue-200">
+                        <i class="ph-fill ph-shield-check mr-2"></i> Pendidikan Karakter
+                    </span>
+                    <h2 class="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight mb-6">
+                        Monitoring <br>
+                        <span class="text-blue-600">7 Kebiasaan Baik</span>
+                    </h2>
+                    <p class="text-slate-600 mb-8 leading-relaxed">
+                        Rekapitulasi harian partisipasi siswa dalam membangun karakter unggul melalui pelaporan jurnal kebiasaan baik secara digital.
+                    </p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 hover:shadow-xl hover:shadow-blue-500/5 transition-all group">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="p-2 bg-blue-100 rounded-lg text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors"><i class="ph-bold ph-check-circle"></i></div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sudah Lapor</p>
                             </div>
-                            <div>
-                                <p class="text-[10px] font-extrabold text-blue-100 uppercase tracking-widest">Tingkat Partisipasi</p>
-                                <p class="text-3xl font-black text-white"><?php echo e($habitStats['percentage'] ?? 0); ?>%</p>
-                            </div>
+                            <p class="text-3xl font-black text-slate-800"><?php echo e($habitStats['submitted'] ?? 0); ?> <span class="text-xs font-bold text-slate-400">Siswa</span></p>
                         </div>
-                        <div class="hidden sm:block">
-                            <i class="ph-bold ph-trend-up text-4xl text-white/20"></i>
+
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 hover:shadow-xl hover:shadow-amber-500/5 transition-all group">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="p-2 bg-amber-100 rounded-lg text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors"><i class="ph-bold ph-clock-countdown"></i></div>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Belum Lapor</p>
+                            </div>
+                            <p class="text-3xl font-black text-slate-800"><?php echo e($habitStats['missing'] ?? 0); ?> <span class="text-xs font-bold text-slate-400">Siswa</span></p>
+                        </div>
+
+                        <div class="sm:col-span-2 bg-blue-600 p-6 rounded-2xl shadow-lg shadow-blue-500/20 flex items-center justify-between group">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white text-2xl group-hover:rotate-12 transition-transform">
+                                    <i class="ph-fill ph-chart-pie-slice"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-extrabold text-blue-100 uppercase tracking-widest">Tingkat Partisipasi</p>
+                                    <p class="text-3xl font-black text-white"><?php echo e($habitStats['percentage'] ?? 0); ?>%</p>
+                                </div>
+                            </div>
+                            <div class="hidden sm:block">
+                                <i class="ph-bold ph-trend-up text-4xl text-white/20"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Grafik Tren -->
-            <div class="w-full lg:w-7/12" data-aos="fade-left">
-                <div class="bg-slate-900 rounded-[2.5rem] shadow-2xl p-6 lg:p-10 border border-slate-800">
-                    <div class="flex items-center justify-between mb-8 border-b border-slate-800 pb-6">
-                        <h3 class="font-bold text-lg text-white flex items-center gap-3">
-                            <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400 border border-blue-500/20">
-                                <i class="ph-fill ph-activity text-xl"></i>
-                            </div>
-                            Tren Laporan Mingguan
-                        </h3>
-                    </div>
-                    <div class="h-64 md:h-80 relative">
-                        <canvas id="habitWeeklyChart"></canvas>
+                <!-- Grafik Tren -->
+                <div class="w-full lg:w-7/12" data-aos="fade-left">
+                    <div class="bg-slate-900 rounded-[2.5rem] shadow-2xl p-6 lg:p-10 border border-slate-800">
+                        <div class="flex items-center justify-between mb-8 border-b border-slate-800 pb-6">
+                            <h3 class="font-bold text-lg text-white flex items-center gap-3">
+                                <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400 border border-blue-500/20">
+                                    <i class="ph-fill ph-activity text-xl"></i>
+                                </div>
+                                Tren Laporan Mingguan
+                            </h3>
+                        </div>
+                        <div class="h-64 md:h-80 relative">
+                            <canvas id="habitWeeklyChart"></canvas>
+                        </div>
                     </div>
                 </div>
-            </div>
 
+            </div>
         </div>
-    </div>
-</div> 
+    </div> 
 
     <!-- MENU AKSES (ANIMATED) -->
     <div class="bg-slate-50 py-16 lg:py-20 relative z-20 -mt-8 lg:-mt-12 overflow-hidden">
@@ -340,7 +410,7 @@
             <div class="flex flex-wrap justify-center gap-6 lg:gap-8">
 
                 <!-- PPDB ONLINE CARD (DIUBAH MENJADI CARD PUTIH/BERSIH) -->
-                <a href="<?php echo e(route('ppdb.register')); ?>" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 border border-slate-100 hover:border-blue-400 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
+                <a href="<?php echo e(route('ppdb.create')); ?>" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 border border-slate-100 hover:border-blue-400 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
                     <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
                         <i class="ph-bold ph-student text-3xl"></i>
                     </div>

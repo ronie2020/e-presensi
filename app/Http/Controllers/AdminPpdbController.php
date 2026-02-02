@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PpdbRegistrant;
-use App\Models\Student;
+use App\Models\Student; // Pastikan Model Student di-import
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -140,11 +140,9 @@ class AdminPpdbController extends Controller
                 $newPhotoPath = $newFileName;
             }
 
-            // 2. Generate NIS Sementara (Format: YY001)
-            $yearShort = date('y'); 
-            $lastStudent = Student::where('nis', 'like', $yearShort . '%')->orderBy('nis', 'desc')->first();
-            $newSequence = $lastStudent ? intval(substr($lastStudent->nis, -3)) + 1 : 1;
-            $generatedNis = $yearShort . str_pad($newSequence, 3, '0', STR_PAD_LEFT);
+            // 2. Generate NIS Menggunakan Helper di Model Student
+            $nisData = Student::generateNextNis();
+            $generatedNis = $nisData['prefix'] . str_pad($nisData['sequence'], 3, '0', STR_PAD_LEFT);
 
             // 3. Simpan ke Students
             $student = Student::create([
@@ -156,7 +154,7 @@ class AdminPpdbController extends Controller
                 'gender' => $registrant->gender,
                 'birth_place' => $registrant->birth_place,
                 'birth_date' => $registrant->birth_date,
-                'religion' => $registrant->religion ?? 'Islam',
+                'religion' => $registrant->religion, // Revisi: Hapus fallback 'Islam' agar data sesuai input
                 'address' => $registrant->address,
                 'phone' => $registrant->student_phone,
                 
@@ -175,6 +173,7 @@ class AdminPpdbController extends Controller
                 'class_id' => null, // Belum punya kelas
                 'photo_path' => $newPhotoPath,
                 'general_notes' => 'Masuk Jalur ' . ucfirst($registrant->track) . ' (' . $registrant->academic_year . ')',
+                'password' => Hash::make($generatedNis),
             ]);
 
             DB::commit();
@@ -189,11 +188,15 @@ class AdminPpdbController extends Controller
     }
 
     /**
-     * [BARU] FITUR BULK PROMOTE (Pindah Massal)
+     * [REVISI] FITUR BULK PROMOTE (Pindah Massal)
+     * Ditambahkan: set_time_limit, lockForUpdate, dan Error Reporting
      */
     public function bulkPromote(Request $request)
     {
-        // 1. Validasi Input (Array ID yang dipilih)
+        // 1. Cegah Time Out (Set max execution time 5 menit)
+        set_time_limit(300);
+
+        // 2. Validasi Input (Array ID yang dipilih)
         $request->validate([
             'selected_ids' => 'required|array',
             'selected_ids.*' => 'exists:ppdb_registrants,id', 
@@ -202,23 +205,26 @@ class AdminPpdbController extends Controller
         $ids = $request->selected_ids;
         $successCount = 0;
         $failCount = 0;
+        $failedNames = []; // Array penampung nama yg gagal
 
         DB::beginTransaction();
         try {
-            // 2. Ambil data pendaftar yang dipilih (Hanya yang DITERIMA)
+            // 3. Ambil data pendaftar (Locking Row untuk cegah race condition)
             $registrants = PpdbRegistrant::whereIn('id', $ids)
-                ->where('status', 'accepted') 
+                ->where('status', 'accepted')
+                ->lockForUpdate() 
                 ->get();
 
-            // Persiapan sequence NIS untuk mass insert
-            $yearShort = date('y');
-            $lastStudent = Student::where('nis', 'like', $yearShort . '%')->orderBy('nis', 'desc')->first();
-            $sequence = $lastStudent ? intval(substr($lastStudent->nis, -3)) + 1 : 1;
+            // Persiapan sequence NIS dari Model Student
+            $nisData = Student::generateNextNis();
+            $yearShort = $nisData['prefix'];
+            $sequence = $nisData['sequence'];
 
             foreach ($registrants as $registrant) {
                 // Cek Duplikasi NISN
                 if (Student::where('nisn', $registrant->nisn)->exists()) {
                     $failCount++;
+                    $failedNames[] = $registrant->full_name . " (NISN Duplikat)";
                     continue;
                 }
 
@@ -233,8 +239,7 @@ class AdminPpdbController extends Controller
 
                 // Generate NIS Unik
                 $generatedNis = $yearShort . str_pad($sequence, 3, '0', STR_PAD_LEFT);
-                $sequence++; // Increment sequence untuk siswa berikutnya
-
+                
                 // Simpan Data
                 Student::create([
                     'student_id' => $generatedNis,
@@ -245,7 +250,7 @@ class AdminPpdbController extends Controller
                     'gender' => $registrant->gender,
                     'birth_place' => $registrant->birth_place,
                     'birth_date' => $registrant->birth_date,
-                    'religion' => $registrant->religion ?? 'Islam',
+                    'religion' => $registrant->religion,
                     'address' => $registrant->address,
                     'phone' => $registrant->student_phone,
                     'father_name' => $registrant->father_name,
@@ -263,6 +268,7 @@ class AdminPpdbController extends Controller
                     'password' => Hash::make($generatedNis), // Default password = NIS/NISN
                 ]);
 
+                $sequence++; // Increment sequence untuk siswa berikutnya
                 $successCount++;
             }
 
@@ -270,7 +276,9 @@ class AdminPpdbController extends Controller
 
             $message = "Berhasil memindahkan $successCount siswa.";
             if ($failCount > 0) {
-                $message .= " ($failCount siswa dilewati karena duplikat NISN).";
+                $message .= " Gagal: " . implode(', ', $failedNames);
+                // Return warning agar user sadar ada yg gagal
+                return redirect()->back()->with('success', $message)->with('warning', 'Beberapa siswa gagal dipindahkan karena duplikat.');
             }
 
             return redirect()->back()->with('success', $message);

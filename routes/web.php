@@ -102,13 +102,20 @@ Route::get('/testimoni', [LandingPageController::class, 'testimonials'])->name('
 Route::get('/guru', [LandingPageController::class, 'teachers'])->name('teachers.index');
 Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
 
+// --- ROUTE PPDB PUBLIK ---
 Route::prefix('ppdb')->name('ppdb.')->group(function () {
-    Route::get('/register', [PpdbController::class, 'create'])->name('register');
+    // Ubah 'register' jadi 'create' agar konsisten dengan view collective
+    Route::get('/register', [PpdbController::class, 'create'])->name('create');
     Route::post('/store', [PpdbController::class, 'store'])->name('store');
     Route::get('/success/{code}', [PpdbController::class, 'success'])->name('success');  
     Route::get('/check', [PpdbController::class, 'index'])->name('check');
     Route::post('/check', [PpdbController::class, 'search'])->name('search');
     Route::get('/print-letter/{id}', [PpdbController::class, 'printLetter'])->name('print.letter');
+
+    // Fitur Pendaftaran Kolektif (Guru SD)
+    Route::get('/kolektif', [PpdbController::class, 'collective'])->name('collective');
+    Route::post('/import', [PpdbController::class, 'importExcel'])->name('import');
+    Route::get('/template', [PpdbController::class, 'downloadTemplate'])->name('download_template');
 });
 
 Route::get('/kiosk', [KioskController::class, 'showKiosk'])->name('kiosk.show');
@@ -492,7 +499,7 @@ Route::middleware('auth')->group(function () {
     });
 
     // =========================================================================
-    //  [BARU] MODUL BIMBINGAN KONSELING (GURU BK)
+    //  MODUL BIMBINGAN KONSELING (GURU BK)
     // =========================================================================
     Route::prefix('admin/bk')->name('admin.bk.')->group(function () {  
         Route::get('/', [BkTeacherController::class, 'index'])->name('index');
