@@ -1,11 +1,21 @@
-<x-app-layout>
-    <x-slot name="header">
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+     <?php $__env->slot('header', null, []); ?> 
         <h2 class="font-semibold text-xl text-slate-800 leading-tight">
-            {{ __('Tugas & PR') }}
-        </h2>
-    </x-slot>
+            <?php echo e(__('Tugas & PR')); ?>
 
-    {{-- CUSTOM STYLES --}}
+        </h2>
+     <?php $__env->endSlot(); ?>
+
+    
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -14,16 +24,16 @@
     <div class="py-6 md:py-10 font-sans text-slate-800 pb-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION --}}
+            
             <div class="animate-enter relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 md:p-10 mb-10 text-white shadow-2xl shadow-blue-900/20 overflow-hidden border border-white/10 group">
-                {{-- Dekorasi Background --}}
+                
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 <div class="absolute -top-24 -right-24 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-blue-500/20 transition-all duration-700"></div>
                 <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-indigo-500/20 transition-all duration-700"></div>
 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
                     <div class="text-center md:text-left">
-                        <a href="{{ route('dashboard') }}" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
+                        <a href="<?php echo e(route('dashboard')); ?>" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
                             <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
                             <span>Kembali ke Dashboard</span>
                         </a>
@@ -38,8 +48,8 @@
                         </p>
                     </div>
                     
-                    {{-- Tombol Buat Tugas --}}
-                    <a href="{{ route('lms.assignments.create') }}" class="w-full md:w-auto group bg-white text-blue-900 px-7 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-900/10 hover:bg-blue-50 hover:shadow-blue-900/20 transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 border border-white/10">
+                    
+                    <a href="<?php echo e(route('lms.assignments.create')); ?>" class="w-full md:w-auto group bg-white text-blue-900 px-7 py-4 rounded-2xl font-bold text-sm shadow-xl shadow-blue-900/10 hover:bg-blue-50 hover:shadow-blue-900/20 transition-all duration-300 flex items-center justify-center gap-3 active:scale-95 border border-white/10">
                         <div class="bg-blue-100 text-blue-600 w-8 h-8 rounded-full flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
                             <i class="ph-bold ph-plus"></i>
                         </div>
@@ -48,11 +58,11 @@
                 </div>
             </div>
 
-            {{-- LIST TUGAS --}}
-            @if($assignments->count() > 0)
+            
+            <?php if($assignments->count() > 0): ?>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    @foreach($assignments as $index => $task)
-                        @php
+                    <?php $__currentLoopData = $assignments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $task): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             // Tentukan Icon & Warna Dasar Berdasarkan Tipe
                             $iconType = 'ph-file-text';
                             $labelType = 'Tugas File';
@@ -81,97 +91,100 @@
                             } elseif (str_contains($subjectName, 'informatika') || str_contains($subjectName, 'tik')) {
                                 $theme = ['bg' => 'bg-cyan-50', 'text' => 'text-cyan-700', 'border' => 'border-cyan-200', 'light' => 'bg-cyan-100', 'ring' => 'ring-cyan-100'];
                             }
-                        @endphp
+                        ?>
 
-                        <div class="animate-enter group relative bg-white border border-slate-100 rounded-[2rem] p-1 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-300 flex flex-col h-full hover:-translate-y-1 hover:border-transparent hover:ring-2 {{ $theme['ring'] }}" style="animation-delay: {{ ($index + 1) * 100 }}ms">
+                        <div class="animate-enter group relative bg-white border border-slate-100 rounded-[2rem] p-1 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-300 flex flex-col h-full hover:-translate-y-1 hover:border-transparent hover:ring-2 <?php echo e($theme['ring']); ?>" style="animation-delay: <?php echo e(($index + 1) * 100); ?>ms">
                             
-                            {{-- Inner Card --}}
+                            
                             <div class="bg-white rounded-[1.8rem] p-6 h-full flex flex-col relative overflow-hidden">
                                 
-                                {{-- Background Dekoratif --}}
-                                <div class="absolute -right-10 -top-10 w-32 h-32 rounded-full {{ $theme['bg'] }} opacity-50 group-hover:scale-150 transition-transform duration-500 pointer-events-none"></div>
+                                
+                                <div class="absolute -right-10 -top-10 w-32 h-32 rounded-full <?php echo e($theme['bg']); ?> opacity-50 group-hover:scale-150 transition-transform duration-500 pointer-events-none"></div>
 
-                                {{-- Header: Badge & Status --}}
+                                
                                 <div class="flex justify-between items-start mb-4 relative z-10">
-                                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm border {{ $theme['border'] }} {{ $theme['bg'] }} {{ $theme['text'] }} group-hover:scale-110 transition-transform duration-300">
-                                        <i class="ph-duotone {{ $iconType }}"></i>
+                                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-sm border <?php echo e($theme['border']); ?> <?php echo e($theme['bg']); ?> <?php echo e($theme['text']); ?> group-hover:scale-110 transition-transform duration-300">
+                                        <i class="ph-duotone <?php echo e($iconType); ?>"></i>
                                     </div>
                                     
                                     <div class="flex flex-col items-end gap-1">
-                                        @if($isExpired)
+                                        <?php if($isExpired): ?>
                                             <span class="bg-slate-100 text-slate-500 border border-slate-200 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
                                                 <i class="ph-bold ph-lock-key"></i> Ditutup
                                             </span>
-                                        @else
+                                        <?php else: ?>
                                             <span class="bg-rose-50 text-rose-600 border border-rose-100 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 animate-pulse">
                                                 <i class="ph-bold ph-clock"></i> Aktif
                                             </span>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                 </div>
 
-                                {{-- Judul & Mapel --}}
+                                
                                 <div class="mb-4 relative z-10">
-                                    <h3 class="font-bold text-lg text-slate-800 group-hover:text-blue-700 transition-colors line-clamp-1" title="{{ $task->title }}">
-                                        {{ $task->title }}
+                                    <h3 class="font-bold text-lg text-slate-800 group-hover:text-blue-700 transition-colors line-clamp-1" title="<?php echo e($task->title); ?>">
+                                        <?php echo e($task->title); ?>
+
                                     </h3>
-                                    <p class="text-sm font-bold text-slate-400 mt-0.5">{{ $task->subject->name }}</p>
+                                    <p class="text-sm font-bold text-slate-400 mt-0.5"><?php echo e($task->subject->name); ?></p>
                                 </div>
 
-                                {{-- Info Detail Grid --}}
+                                
                                 <div class="grid grid-cols-2 gap-3 mb-6 relative z-10">
-                                    {{-- Target Kelas --}}
+                                    
                                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
                                         <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Target</p>
                                         <div class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                                             <i class="ph-fill ph-users text-blue-500"></i>
-                                            @if($task->is_bulk)
-                                                Semua Kelas {{ $task->target_grade ?? '' }} ({{ $task->total_classes }})
-                                            @else
-                                                {{ $task->schoolClass->name ?? 'Semua' }}
-                                            @endif
+                                            <?php if($task->is_bulk): ?>
+                                                Semua Kelas <?php echo e($task->target_grade ?? ''); ?> (<?php echo e($task->total_classes); ?>)
+                                            <?php else: ?>
+                                                <?php echo e($task->schoolClass->name ?? 'Semua'); ?>
+
+                                            <?php endif; ?>
                                         </div>
                                     </div>
 
-                                    {{-- Deadline --}}
+                                    
                                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
                                         <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Deadline</p>
-                                        <div class="text-xs font-bold {{ $isExpired ? 'text-rose-600' : 'text-slate-700' }} flex items-center gap-1.5">
-                                            <i class="ph-fill ph-calendar-blank {{ $isExpired ? 'text-rose-500' : 'text-slate-400' }}"></i>
-                                            {{ $task->deadline->format('d M, H:i') }}
+                                        <div class="text-xs font-bold <?php echo e($isExpired ? 'text-rose-600' : 'text-slate-700'); ?> flex items-center gap-1.5">
+                                            <i class="ph-fill ph-calendar-blank <?php echo e($isExpired ? 'text-rose-500' : 'text-slate-400'); ?>"></i>
+                                            <?php echo e($task->deadline->format('d M, H:i')); ?>
+
                                         </div>
                                     </div>
                                 </div>
 
-                                {{-- Statistik Pengumpulan --}}
+                                
                                 <div class="mb-6 relative z-10">
                                     <div class="flex justify-between text-xs font-bold text-slate-500 mb-2">
                                         <span>Total Pengumpulan</span>
-                                        <span class="text-blue-600">{{ $task->is_bulk ? $task->global_submissions_count : $task->submissions_count }} Siswa</span>
+                                        <span class="text-blue-600"><?php echo e($task->is_bulk ? $task->global_submissions_count : $task->submissions_count); ?> Siswa</span>
                                     </div>
                                     <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
-                                        {{-- Progress bar dummy (bisa dikembangkan nanti dengan total siswa real) --}}
+                                        
                                         <div class="bg-blue-500 h-2 rounded-full" style="width: 5%"></div>
                                     </div>
                                 </div>
 
-                                {{-- Footer Actions --}}
+                                
                                 <div class="pt-4 border-t border-slate-100 mt-auto flex items-center justify-between gap-2 relative z-10">
                                     
-                                    {{-- Tombol Periksa (Utama) --}}
-                                    <a href="{{ route('lms.assignments.submissions', $task->id) }}" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 group/btn">
+                                    
+                                    <a href="<?php echo e(route('lms.assignments.submissions', $task->id)); ?>" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md flex items-center justify-center gap-2 group/btn">
                                         <i class="ph-bold ph-list-checks text-lg text-yellow-400"></i>
                                         <span>Periksa</span>
                                     </a>
 
-                                    {{-- Tombol Edit (Kuning) --}}
-                                    <a href="{{ route('lms.assignments.edit', $task->id) }}" class="w-11 h-11 rounded-xl bg-white border border-amber-100 text-amber-500 hover:bg-amber-500 hover:text-white hover:shadow-lg hover:shadow-amber-200 transition-all flex items-center justify-center shadow-sm" title="Edit Tugas">
+                                    
+                                    <a href="<?php echo e(route('lms.assignments.edit', $task->id)); ?>" class="w-11 h-11 rounded-xl bg-white border border-amber-100 text-amber-500 hover:bg-amber-500 hover:text-white hover:shadow-lg hover:shadow-amber-200 transition-all flex items-center justify-center shadow-sm" title="Edit Tugas">
                                         <i class="ph-bold ph-pencil-simple text-lg"></i>
                                     </a>
 
-                                    {{-- Tombol Hapus (Merah) --}}
-                                    <form action="{{ route('lms.assignments.destroy', $task->id) }}" method="POST" class="form-delete-task">
-                                        @csrf @method('DELETE')
+                                    
+                                    <form action="<?php echo e(route('lms.assignments.destroy', $task->id)); ?>" method="POST" class="form-delete-task">
+                                        <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                                         <button type="button" class="btn-delete w-11 h-11 rounded-xl bg-white border border-rose-100 text-rose-500 hover:bg-rose-500 hover:text-white hover:shadow-lg hover:shadow-rose-200 transition-all flex items-center justify-center shadow-sm" title="Hapus Tugas">
                                             <i class="ph-bold ph-trash text-lg"></i>
                                         </button>
@@ -179,15 +192,16 @@
                                 </div>
                             </div>
                         </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
 
-                {{-- Pagination --}}
+                
                 <div class="mt-10 animate-enter px-4" style="animation-delay: 500ms">
-                    {{ $assignments->links() }}
+                    <?php echo e($assignments->links()); ?>
+
                 </div>
-            @else
-                {{-- Empty State --}}
+            <?php else: ?>
+                
                 <div class="animate-enter bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200 p-12 flex flex-col items-center justify-center text-center group hover:border-blue-300 transition-colors" style="animation-delay: 200ms">
                     <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-6 group-hover:bg-blue-50 group-hover:text-blue-500 transition-all duration-500">
                         <i class="ph-duotone ph-clipboard-text text-5xl"></i>
@@ -196,17 +210,17 @@
                     <p class="text-slate-500 text-sm max-w-md mx-auto leading-relaxed mb-8">
                         Anda belum membuat tugas apapun. Mulailah dengan membuat tugas baru untuk dikerjakan siswa.
                     </p>
-                    <a href="{{ route('lms.assignments.create') }}" class="px-8 py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-600/30 hover:-translate-y-1 transform flex items-center gap-2 active:scale-95">
+                    <a href="<?php echo e(route('lms.assignments.create')); ?>" class="px-8 py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-600/30 hover:-translate-y-1 transform flex items-center gap-2 active:scale-95">
                         <i class="ph-bold ph-plus"></i> Buat Tugas Pertama
                     </a>
                 </div>
-            @endif
+            <?php endif; ?>
 
         </div>
     </div>
 
-    {{-- SCRIPT SWEETALERT --}}
-    @push('scripts')
+    
+    <?php $__env->startPush('scripts'); ?>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -243,11 +257,11 @@
             });
 
             // 2. Notifikasi Toast Sukses
-            @if(session('success'))
+            <?php if(session('success')): ?>
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
-                    text: "{{ session('success') }}",
+                    text: "<?php echo e(session('success')); ?>",
                     toast: true,
                     position: 'top-end',
                     showConfirmButton: false,
@@ -257,8 +271,17 @@
                         popup: 'rounded-xl border border-emerald-100 bg-white shadow-lg font-sans'
                     }
                 });
-            @endif
+            <?php endif; ?>
         });
     </script>
-    @endpush
-</x-app-layout>
+    <?php $__env->stopPush(); ?>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/lms/assignments/index.blade.php ENDPATH**/ ?>
