@@ -30,19 +30,21 @@
                 <div class="animate-enter lg:col-span-1 bg-gray-900 bg-gradient-to-br from-indigo-900 via-blue-900 to-slate-900 rounded-[2rem] p-6 text-white shadow-xl shadow-blue-900/30 relative overflow-hidden flex flex-col justify-center min-h-[160px]">
                      <div class="absolute -right-10 -top-10 w-40 h-40 bg-indigo-500/20 rounded-full blur-2xl"></div>
                      <div class="relative z-10">
-                         <a href="{{ route('dashboard') }}" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
+                         {{-- Tombol Kembali mengarah ke Summary (Halaman sebelumnya) --}}
+                         <a href="{{ route('reports.class') }}" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
                             <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
-                            <span>Kembali ke Dashboard</span>
+                            <span>Kembali ke Rekap</span>
                         </a>
                         <h1 class="text-xl lg:text-2xl font-extrabold mb-1 tracking-tight text-white flex items-center gap-2">
-                            Rekap Kelas
+                            Laporan Harian
                         </h1>
-                        <p class="text-indigo-200 text-sm font-medium">Monitoring per siswa dalam satu bulan.</p>
+                        <p class="text-indigo-200 text-sm font-medium">Detail absensi per tanggal (Matrix).</p>
                     </div>
                 </div>
 
                 <div class="animate-enter lg:col-span-3 bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm relative overflow-hidden flex items-center" style="animation-delay: 100ms">
-                     <form action="{{ route('reports.classReport') }}" method="GET" class="w-full flex flex-col md:flex-row gap-4 items-end md:items-center" @submit="loading = true">
+                     {{-- [PERBAIKAN UTAMA] Mengubah Action Form ke 'reports.class.detail' --}}
+                     <form action="{{ route('reports.class.detail') }}" method="GET" class="w-full flex flex-col md:flex-row gap-4 items-end md:items-center" @submit="loading = true">
                         
                         <div class="flex-1 w-full">
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Pilih Kelas</label>
@@ -87,7 +89,7 @@
                                 <span class="w-2 h-2 rounded-full bg-rose-500 ml-2"></span> A: Alfa
                             </div>
                             
-                            {{-- PERBAIKAN: Tombol Cetak mengarah ke route khusus PDF/Print View --}}
+                            {{-- Tombol Cetak --}}
                             <a href="{{ route('reports.printClassReport', request()->all()) }}" target="_blank" class="bg-white border border-slate-200 text-slate-600 hover:text-indigo-900 hover:border-indigo-900 w-9 h-9 flex items-center justify-center rounded-lg transition-colors no-print" title="Cetak Laporan">
                                 <i class="ph-bold ph-printer text-lg"></i>
                             </a>
