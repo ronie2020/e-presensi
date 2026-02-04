@@ -103,8 +103,7 @@ Route::get('/guru', [LandingPageController::class, 'teachers'])->name('teachers.
 Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
 
 // --- ROUTE PPDB PUBLIK ---
-Route::prefix('ppdb')->name('ppdb.')->group(function () {
-    // Ubah 'register' jadi 'create' agar konsisten dengan view collective
+Route::prefix('ppdb')->name('ppdb.')->group(function () {    
     Route::get('/register', [PpdbController::class, 'create'])->name('create');
     Route::post('/store', [PpdbController::class, 'store'])->name('store');
     Route::get('/success/{code}', [PpdbController::class, 'success'])->name('success');  
@@ -247,12 +246,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/reports/classes', [ClassReportController::class, 'index'])->name('reports.class');
     Route::get('/reports/classes/print', [ClassReportController::class, 'print'])->name('reports.class.print');
     Route::get('/reports/classes/excel', [ClassReportController::class, 'exportExcel'])->name('reports.class.excel');
-
-    // [FIX COMPATIBILITY] Alias route lama untuk Navigation Bar (Mengarah ke Summary)
+    
     Route::get('/reports/class-recap', [ClassReportController::class, 'index'])->name('reports.classReport');
 
-    // [NEW] ROUTE DETAIL HARIAN KELAS (MATRIX VIEW) - Menggunakan ReportController
-    // Ini adalah route yang akan dipanggil saat tombol "Lihat Harian" diklik
     Route::get('/reports/class-detail', [ReportController::class, 'classReport'])->name('reports.class.detail');
     Route::get('/reports/class-detail/print', [ReportController::class, 'printClassReport'])->name('reports.printClassReport');
 
