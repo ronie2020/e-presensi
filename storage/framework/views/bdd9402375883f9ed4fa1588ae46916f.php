@@ -39,6 +39,7 @@
             <img src="https://ui-avatars.com/api/?name=S&background=000&color=fff&size=64" class="w-16 h-16 object-contain" alt="Logo">
             <div>
                 <h1 class="text-xl font-bold uppercase tracking-wide">Rekapitulasi Absensi Siswa</h1>
+                <h1 class="text-xl font-bold uppercase tracking-wide">SMP NEGERI 3 LAKBOK</h1>
                 <p class="text-sm font-medium">Laporan Kehadiran Bulanan</p>
             </div>
         </div>
