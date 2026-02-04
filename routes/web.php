@@ -242,7 +242,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // [UPDATE] MENGGUNAKAN ClassReportController
     Route::get('/reports/classes', [ClassReportController::class, 'index'])->name('reports.class');
+
+    // [FIX COMPATIBILITY] Menambahkan alias route lama 'reports.classReport'
+    // Tujuannya agar link di Navigation Bar yang lama tetap berfungsi dan mengarah ke controller baru
+    Route::get('/reports/class-recap', [ClassReportController::class, 'index'])->name('reports.classReport');
+
     Route::get('/reports/classes/print', [ClassReportController::class, 'print'])->name('reports.class.print');
     Route::get('/reports/classes/excel', [ClassReportController::class, 'exportExcel'])->name('reports.class.excel');
 
@@ -437,8 +444,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/reports/manual-entry', [ReportController::class, 'storeManualEntry'])->name('reports.storeManual');
     Route::post('/reports/process-alpha', [ReportController::class, 'processAlpha'])->name('reports.processAlpha');
     Route::delete('/reports/daily', [ReportController::class, 'destroyDaily'])->name('reports.destroyDaily');
-    Route::get('/reports/class-recap', [ReportController::class, 'classReport'])->name('reports.classReport');
-    Route::get('/reports/class-recap/print', [ReportController::class, 'printClassReport'])->name('reports.printClassReport');
+    // ROUTE LAMA (DIGANTI)
+    // Route::get('/reports/class-recap', [ReportController::class, 'classReport'])->name('reports.classReport');
+    // Route::get('/reports/class-recap/print', [ReportController::class, 'printClassReport'])->name('reports.printClassReport');
+    
     Route::get('/reports/export-daily', [ReportController::class, 'exportDaily'])->name('reports.exportDaily');
     Route::get('/reports/attendance/{attendance}/edit', [ReportController::class, 'editAttendance'])->name('reports.edit');
     Route::put('/reports/attendance/{attendance}', [ReportController::class, 'updateAttendance'])->name('reports.update');

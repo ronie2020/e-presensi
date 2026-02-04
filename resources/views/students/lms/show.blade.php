@@ -3,8 +3,6 @@
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        
-        /* Hide scrollbar for tabs */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -14,7 +12,7 @@
 
     <div x-data="{ activeTab: 'materi' }" class="min-h-screen bg-slate-50/50 pb-20">
         
-        {{-- HEADER MATA PELAJARAN --}}
+        {{-- HEADER MATA PELAJARAN (TETAP SAMA) --}}
         <div class="animate-enter relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 pb-24 pt-12 px-4 sm:px-6 lg:px-8 overflow-hidden rounded-b-[3rem] shadow-2xl shadow-blue-900/20">
             <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
             <div class="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-[100px] -mr-20 -mt-20 pointer-events-none"></div>
@@ -23,7 +21,6 @@
             <div class="relative max-w-6xl mx-auto z-10">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     <div class="flex-1">
-                        {{-- Tombol Kembali --}}
                         <div class="flex items-center gap-4 mb-4">
                             <a href="{{ route('portal.show', Auth::guard('student')->id()) }}"  class="group flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-slate-300 hover:bg-white/20 hover:text-white hover:border-white/30 transition-all active:scale-95 shrink-0 shadow-sm" title="Kembali">
                                 <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-0.5 transition-transform"></i>
@@ -42,7 +39,6 @@
                         </p>
                     </div>
                     
-                    {{-- Statistik Ringkas --}}
                     <div class="flex gap-3 w-full md:w-auto overflow-x-auto no-scrollbar pb-2 md:pb-0">
                         <div class="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl text-center min-w-[100px] shadow-lg flex-1 md:flex-none">
                             <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Materi</p>
@@ -100,7 +96,7 @@
                 </button>
             </div>
 
-            {{-- KONTEN MATERI (Sama seperti sebelumnya) --}}
+            {{-- KONTEN MATERI (TETAP SAMA) --}}
             <div x-show="activeTab === 'materi'" class="space-y-6" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
                 @if($materials->isEmpty())
                     <div class="animate-enter text-center py-20 bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200 group hover:border-blue-300 transition-colors">
@@ -211,7 +207,9 @@
                             }
                         @endphp
 
-                        <div class="animate-enter bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group hover:-translate-y-1" style="animation-delay: {{ ($index + 1) * 100 }}ms" x-data="{ openUpload: false }">
+                        <div class="animate-enter bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group hover:-translate-y-1" 
+                             style="animation-delay: {{ ($index + 1) * 100 }}ms" 
+                             x-data="{ openUpload: false, submissionType: 'file' }">
                             
                             <div class="p-6 md:p-8 flex flex-col md:flex-row md:items-start justify-between gap-6 relative">
                                 {{-- Status Stripe --}}
@@ -287,7 +285,7 @@
                                                 <span class="relative">Mulai Kerjakan Kuis</span>
                                             </a>
 
-                                        {{-- TUGAS LINK (UPDATE: SWEETALERT CONFIRM) --}}
+                                        {{-- TUGAS LINK (GURU) --}}
                                         @elseif($task->assignment_type == 'link')
                                             <div class="flex flex-col sm:flex-row gap-4">
                                                 <a href="{{ $task->link_url }}" target="_blank" class="flex-1 py-3.5 bg-amber-50 text-amber-700 border border-amber-200 font-bold rounded-2xl hover:bg-amber-100 transition flex items-center justify-center gap-2 active:scale-[0.98]">
@@ -301,22 +299,51 @@
                                                 </form>
                                             </div>
 
-                                        {{-- TUGAS FILE (UPLOAD) --}}
+                                        {{-- TUGAS FILE (UPLOAD) -> MODIFIED HERE --}}
                                         @else
                                             <button @click="openUpload = !openUpload" class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-blue-600 transition shadow-lg shadow-slate-900/20 flex items-center justify-center gap-2 group/btn active:scale-[0.98]">
                                                 <i class="ph-bold ph-upload-simple text-xl text-yellow-400 group-hover/btn:-translate-y-1 transition-transform"></i>
-                                                <span x-text="openUpload ? 'Batal Upload' : 'Kerjakan & Upload File'"></span>
+                                                <span x-text="openUpload ? 'Batal' : 'Kerjakan Tugas'"></span>
                                             </button>
                                             
                                             <div x-show="openUpload" x-transition class="mt-6 p-6 md:p-8 border-2 border-dashed border-blue-200 rounded-[2rem] bg-blue-50/50">
-                                                <h4 class="font-black text-blue-900 mb-6 flex items-center gap-2 text-sm uppercase tracking-widest"><i class="ph-fill ph-cloud-arrow-up text-lg"></i> Form Pengumpulan</h4>
+                                                <h4 class="font-black text-blue-900 mb-6 flex items-center gap-2 text-sm uppercase tracking-widest"><i class="ph-fill ph-paper-plane-right text-lg"></i> Form Pengumpulan</h4>
+                                                
                                                 <form action="{{ route('students.learning.assignment.submit', $task->id) }}" method="POST" enctype="multipart/form-data">
                                                     @csrf
+                                                    
+                                                    {{-- TAB SWITCHER --}}
+                                                    <div class="flex p-1 bg-white rounded-xl mb-6 shadow-sm w-fit border border-blue-100">
+                                                        <label class="cursor-pointer">
+                                                            <input type="radio" name="submission_type" value="file" class="sr-only" x-model="submissionType">
+                                                            <div class="px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 flex items-center gap-2"
+                                                                 :class="submissionType === 'file' ? 'bg-blue-100 text-blue-700' : 'text-slate-500 hover:text-slate-700'">
+                                                                <i class="ph-bold ph-file-text"></i> Upload File
+                                                            </div>
+                                                        </label>
+                                                        <label class="cursor-pointer">
+                                                            <input type="radio" name="submission_type" value="link" class="sr-only" x-model="submissionType">
+                                                            <div class="px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 flex items-center gap-2"
+                                                                 :class="submissionType === 'link' ? 'bg-purple-100 text-purple-700' : 'text-slate-500 hover:text-slate-700'">
+                                                                <i class="ph-bold ph-link"></i> Kirim Link
+                                                            </div>
+                                                        </label>
+                                                    </div>
+
                                                     <div class="space-y-5">
-                                                        <div>
+                                                        {{-- INPUT FILE --}}
+                                                        <div x-show="submissionType === 'file'">
                                                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">File Jawaban (PDF/JPG)</label>
-                                                            <input type="file" name="file" required class="block w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-900 file:text-white hover:file:bg-blue-800 border border-slate-200 rounded-2xl bg-white shadow-sm transition cursor-pointer">
+                                                            <input type="file" name="file" class="block w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-900 file:text-white hover:file:bg-blue-800 border border-slate-200 rounded-2xl bg-white shadow-sm transition cursor-pointer">
                                                         </div>
+
+                                                        {{-- INPUT LINK --}}
+                                                        <div x-show="submissionType === 'link'" style="display: none;">
+                                                            <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Link Tugas (G-Drive / Youtube / Blog)</label>
+                                                            <input type="url" name="link_url" placeholder="https://..." class="block w-full p-4 text-sm font-medium border border-slate-200 rounded-2xl focus:border-purple-500 focus:ring-purple-500 shadow-sm">
+                                                            <p class="text-[10px] text-slate-400 mt-2 ml-1 flex items-center gap-1"><i class="ph-fill ph-info"></i> Pastikan link dapat diakses publik (Anyone with the link).</p>
+                                                        </div>
+
                                                         <div>
                                                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Catatan (Opsional)</label>
                                                             <textarea name="student_note" rows="3" class="w-full rounded-2xl border-slate-200 focus:border-blue-500 focus:ring-blue-500 text-sm p-4 placeholder:text-slate-400 transition-shadow" placeholder="Tulis pesan untuk guru di sini..."></textarea>
@@ -339,7 +366,20 @@
                                                 </div>
                                                 <div>
                                                     <p class="font-bold text-emerald-900">Tugas Berhasil Terkirim</p>
-                                                    <p class="text-xs text-emerald-600 font-medium mt-0.5">Dikirim pada {{ $mySubmission->submitted_at->translatedFormat('d F Y • H:i') }}</p>
+                                                    <div class="flex flex-wrap gap-2 mt-1">
+                                                        <p class="text-xs text-emerald-600 font-medium">Dikirim pada {{ $mySubmission->submitted_at->translatedFormat('d F Y • H:i') }}</p>
+                                                        
+                                                        {{-- Tampilkan Link jika ada --}}
+                                                        @if($mySubmission->link_url)
+                                                            <a href="{{ $mySubmission->link_url }}" target="_blank" class="text-[10px] font-bold bg-white px-2 py-0.5 rounded border border-emerald-200 text-emerald-600 hover:text-emerald-800 flex items-center gap-1">
+                                                                <i class="ph-bold ph-link"></i> Link Tugas
+                                                            </a>
+                                                        @elseif($mySubmission->file_path)
+                                                            <a href="{{ route('students.learning.material.download', $task->id) }}" class="text-[10px] font-bold bg-white px-2 py-0.5 rounded border border-emerald-200 text-emerald-600 hover:text-emerald-800 flex items-center gap-1">
+                                                                <i class="ph-bold ph-file"></i> File Tugas
+                                                            </a>
+                                                        @endif
+                                                    </div>
                                                 </div>
                                             </div>
                                             @if(!$mySubmission->grade && $task->assignment_type == 'file_upload')
@@ -348,6 +388,41 @@
                                                 </button>
                                             @endif
                                         </div>
+
+                                        {{-- FORM EDIT JAWABAN --}}
+                                        @if(!$mySubmission->grade && $task->assignment_type == 'file_upload')
+                                            <div x-show="openUpload" x-transition class="mt-6 p-6 border-t border-emerald-100">
+                                                <form action="{{ route('students.learning.assignment.submit', $task->id) }}" method="POST" enctype="multipart/form-data">
+                                                    @csrf
+                                                    {{-- TAB SWITCHER EDIT --}}
+                                                    <div class="flex p-1 bg-white rounded-xl mb-6 shadow-sm w-fit border border-blue-100">
+                                                        <label class="cursor-pointer">
+                                                            <input type="radio" name="submission_type" value="file" class="sr-only" x-model="submissionType">
+                                                            <div class="px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 flex items-center gap-2" :class="submissionType === 'file' ? 'bg-blue-100 text-blue-700' : 'text-slate-500 hover:text-slate-700'">
+                                                                <i class="ph-bold ph-file-text"></i> File
+                                                            </div>
+                                                        </label>
+                                                        <label class="cursor-pointer">
+                                                            <input type="radio" name="submission_type" value="link" class="sr-only" x-model="submissionType">
+                                                            <div class="px-5 py-2 rounded-lg text-xs font-bold transition-all duration-300 flex items-center gap-2" :class="submissionType === 'link' ? 'bg-purple-100 text-purple-700' : 'text-slate-500 hover:text-slate-700'">
+                                                                <i class="ph-bold ph-link"></i> Link
+                                                            </div>
+                                                        </label>
+                                                    </div>
+
+                                                    <div class="space-y-4">
+                                                        <div x-show="submissionType === 'file'">
+                                                            <input type="file" name="file" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200">
+                                                        </div>
+                                                        <div x-show="submissionType === 'link'" style="display: none;">
+                                                            <input type="url" name="link_url" placeholder="Update Link Tugas..." class="block w-full p-3 text-sm border border-slate-200 rounded-xl">
+                                                        </div>
+                                                        <textarea name="student_note" rows="2" class="w-full rounded-xl border-slate-200 text-sm p-3 placeholder:text-slate-400" placeholder="Update catatan...">{{ $mySubmission->student_note }}</textarea>
+                                                        <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-xl text-sm">Simpan Perubahan</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        @endif
 
                                         @if($mySubmission->teacher_feedback)
                                             <div class="mt-4 bg-white p-5 rounded-2xl border border-emerald-100 shadow-sm relative">

@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Storage;
 class StudentLmsController extends Controller
 {
     /**
-     * Dashboard Belajar
+     * Dashboard Belajar (Logika Lama Dipertahankan)
      */
     public function index()
     {
@@ -46,12 +46,11 @@ class StudentLmsController extends Controller
             }
         }
 
-        // PENTING: View harus ada di resources/views/students/lms/index.blade.php
         return view('students.lms.index', compact('student', 'allSubjects', 'prioritySubjects'));
     }
 
     /**
-     * Halaman Detail Mapel
+     * Halaman Detail Mapel (Logika Lama Dipertahankan)
      */
     public function showSubject($subjectId)
     {
@@ -71,39 +70,41 @@ class StudentLmsController extends Controller
             ->latest()
             ->get();
 
-        // PENTING: View harus ada di resources/views/students/lms/show.blade.php
         return view('students.lms.show', compact('subject', 'materials', 'assignments'));
     }
 
     /**
-     * Download Materi
+     * Download Materi (Logika Lama Dipertahankan)
      */
     public function downloadMaterial($id)
     {
         $material = LmsMaterial::findOrFail($id);
-        
-        // Pengecekan akses
         $student = Auth::guard('student')->user();
         if ($material->class_id && $material->class_id != $student->class_id) {
             abort(403);
         }
-
         return Storage::disk('public')->download($material->file_path);
     }
 
     /**
-     * Upload Tugas Biasa & Link
+     * [DIPERBARUI] Upload Tugas (Bisa File atau Link)
+     * Menggabungkan logika lama dengan fitur baru submission_type
      */
     public function submitAssignment(Request $request, $assignmentId)
     {
         $student = Auth::guard('student')->user();
         $assignment = LmsAssignment::findOrFail($assignmentId);
 
-        // Jika Tipe Link
+        // Jika Tipe Tugas Guru adalah Link (Siswa hanya baca), submission otomatis selesai saat diklik
         if ($assignment->assignment_type == 'link') {
             LmsSubmission::updateOrCreate(
                 ['assignment_id' => $assignmentId, 'student_id' => $student->id],
-                ['submitted_at' => now(), 'student_note' => 'Diselesaikan via Link Eksternal', 'grade' => null]
+                [
+                    'submitted_at' => now(), 
+                    'student_note' => 'Diselesaikan via Link Eksternal',
+                    'submission_type' => 'link_external',
+                    'grade' => null
+                ]
             );
             return back()->with('success', 'Tugas berhasil ditandai selesai!');
         }
@@ -113,43 +114,86 @@ class StudentLmsController extends Controller
             return back()->with('error', 'Maaf, batas waktu pengumpulan sudah habis.');
         }
 
+        // 1. Validasi Input Fleksibel (File atau Link)
         $request->validate([
-            'file' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
-            'student_note' => 'nullable|string|max:255',
+            'submission_type' => 'required|in:file,link',
+            'file' => 'nullable|required_if:submission_type,file|file|mimes:pdf,doc,docx,jpg,jpeg,png,ppt,pptx,xls,xlsx|max:10240', // Max 10MB
+            'link_url' => 'nullable|required_if:submission_type,link|active_url', // Validasi URL aktif
+            'student_note' => 'nullable|string|max:500',
+        ], [
+            'file.required_if' => 'Anda memilih opsi File, harap upload file tugas.',
+            'link_url.required_if' => 'Anda memilih opsi Link, harap masukkan URL tugas.',
+            'link_url.active_url' => 'Link yang dimasukkan tidak valid atau tidak dapat diakses.',
         ]);
 
-        $path = $request->file('file')->store('lms-submissions', 'public');
+        // 2. Cek submission lama (untuk cleanup file jika ganti metode)
+        $submission = LmsSubmission::where('assignment_id', $assignmentId)
+            ->where('student_id', $student->id)
+            ->first();
 
+        $filePath = $submission ? $submission->file_path : null;
+        $linkUrl = $submission ? $submission->link_url : null;
+
+        // 3. Proses Simpan File
+        if ($request->submission_type == 'file' && $request->hasFile('file')) {
+            // Hapus file lama jika ada
+            if ($filePath && Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
+            $filePath = $request->file('file')->store('lms-submissions', 'public');
+            $linkUrl = null; // Reset link jika user beralih ke upload file
+        }
+
+        // 4. Proses Simpan Link
+        if ($request->submission_type == 'link') {
+            $linkUrl = $request->link_url;
+            
+            // Opsi: Hapus file lama jika user beralih ke link (untuk hemat storage)
+            // if ($filePath && Storage::disk('public')->exists($filePath)) {
+            //    Storage::disk('public')->delete($filePath);
+            // }
+            $filePath = null; // Reset file path di DB
+        }
+
+        // 5. Simpan ke Database
         LmsSubmission::updateOrCreate(
             ['assignment_id' => $assignmentId, 'student_id' => $student->id],
-            ['file_path' => $path, 'student_note' => $request->student_note, 'submitted_at' => now()]
+            [
+                'file_path' => $filePath,
+                'link_url' => $linkUrl,
+                'submission_type' => $request->submission_type,
+                'student_note' => $request->student_note,
+                'submitted_at' => now(),
+                // 'grade' => null, // Opsional: Reset nilai jika siswa mengumpulkan ulang
+            ]
         );
 
         return back()->with('success', 'Tugas berhasil dikumpulkan!');
     }
 
-    // ===> FUNGSI MULAI KUIS <===
+    /**
+     * Mulai Kuis (Logika Lama Dipertahankan)
+     */
     public function startQuiz($id)
     {
         $student = Auth::guard('student')->user();
         $assignment = LmsAssignment::with('questions')->findOrFail($id);
 
-        // Cek apakah sudah mengerjakan?
         if ($assignment->isSubmittedBy($student->id)) {
             return redirect()->route('students.learning.subject.show', $assignment->subject_id)
                 ->with('error', 'Anda sudah mengerjakan kuis ini.');
         }
 
-        // Cek Deadline
         if (now() > $assignment->deadline && !$assignment->allow_late_submission) {
             return back()->with('error', 'Waktu pengerjaan kuis sudah habis.');
         }
 
-        // PENTING: View harus ada di resources/views/students/lms/quiz.blade.php
         return view('students.lms.quiz', compact('assignment'));
     }
 
-    // ===> FUNGSI SUBMIT KUIS <===
+    /**
+     * Submit Kuis (Logika Lama Dipertahankan)
+     */
     public function submitQuiz(Request $request, $id)
     {
         $student = Auth::guard('student')->user();
@@ -167,7 +211,6 @@ class StudentLmsController extends Controller
                 }
                 $maxScore += $question->points;
             } else {
-                // Essay sementara 0, maxScore tetap bertambah
                 $maxScore += $question->points;
             }
         }

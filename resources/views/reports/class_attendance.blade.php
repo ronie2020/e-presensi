@@ -30,31 +30,36 @@
                 </div>
 
                 {{-- Filter & Actions --}}
-                <div class="relative z-10 flex flex-col sm:flex-row gap-3 w-full xl:w-auto items-center xl:items-end">
+                {{-- [FIX] Menambahkan 'flex-wrap' dan 'justify-center xl:justify-end' agar tombol tidak terpotong (turun ke bawah jika sempit) --}}
+                <div class="relative z-10 flex flex-wrap gap-3 w-full xl:w-auto items-center justify-center xl:justify-end">
                     
                     {{-- Form Filter (Glassmorphism Style) --}}
                     <form action="{{ route('reports.class') }}" method="GET" class="flex flex-col sm:flex-row gap-2 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20 w-full sm:w-auto shadow-lg">
-                        <div class="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-blue-100 shadow-sm">
+                        <div class="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-blue-100 shadow-sm w-full sm:w-auto">
                             <span class="text-[10px] font-bold text-slate-400 uppercase">Dari</span>
-                            <input type="date" name="start_date" value="{{ $startDate }}" class="border-none p-0 text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer w-32 bg-transparent">
+                            <input type="date" name="start_date" value="{{ $startDate }}" class="border-none p-0 text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer w-full sm:w-32 bg-transparent">
                         </div>
                         <div class="hidden sm:flex items-center text-blue-300/50"><i class="ph-bold ph-arrow-right"></i></div>
-                        <div class="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-blue-100 shadow-sm">
+                        <div class="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-blue-100 shadow-sm w-full sm:w-auto">
                             <span class="text-[10px] font-bold text-slate-400 uppercase">Sampai</span>
-                            <input type="date" name="end_date" value="{{ $endDate }}" class="border-none p-0 text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer w-32 bg-transparent">
+                            <input type="date" name="end_date" value="{{ $endDate }}" class="border-none p-0 text-sm font-bold text-slate-700 focus:ring-0 cursor-pointer w-full sm:w-32 bg-transparent">
                         </div>
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-400 text-white px-4 py-2 rounded-xl font-bold text-sm transition shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2">
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-400 text-white px-4 py-2 rounded-xl font-bold text-sm transition shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 w-full sm:w-auto">
                             <i class="ph-bold ph-funnel"></i>
                         </button>
                     </form>
 
                     {{-- Export Buttons (Updated Colors for Dark Background) --}}
-                    <div class="flex gap-2">
-                        <a href="{{ route('reports.class.excel', request()->all()) }}" target="_blank" class="bg-white hover:bg-emerald-50 text-emerald-600 border border-white/20 px-4 py-3 rounded-2xl font-bold text-sm transition flex items-center gap-2 shadow-lg" title="Download Excel">
-                            <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> <span class="hidden sm:inline">Excel</span>
+                    {{-- [FIX] Flex grow pada mobile agar tombol rata lebar --}}
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <a href="{{ route('reports.class.excel', request()->all()) }}" target="_blank" class="bg-white hover:bg-emerald-50 text-emerald-600 border border-white/20 px-4 py-3 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-lg flex-1 sm:flex-none" title="Download Excel">
+                            <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> 
+                            {{-- [FIX] Teks Excel selalu muncul (hapus hidden sm:inline jika ingin selalu terlihat, atau biarkan responsif tapi aman karena wrap) --}}
+                            <span>Excel</span> 
                         </a>
-                        <a href="{{ route('reports.class.print', request()->all()) }}" target="_blank" class="bg-white hover:bg-rose-50 text-rose-600 border border-white/20 px-4 py-3 rounded-2xl font-bold text-sm transition flex items-center gap-2 shadow-lg" title="Cetak PDF">
-                            <i class="ph-bold ph-printer text-lg"></i> <span class="hidden sm:inline">Print / PDF</span>
+                        <a href="{{ route('reports.class.print', request()->all()) }}" target="_blank" class="bg-white hover:bg-rose-50 text-rose-600 border border-white/20 px-4 py-3 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-lg flex-1 sm:flex-none" title="Cetak PDF">
+                            <i class="ph-bold ph-printer text-lg"></i> 
+                            <span>Print / PDF</span>
                         </a>
                     </div>
                 </div>

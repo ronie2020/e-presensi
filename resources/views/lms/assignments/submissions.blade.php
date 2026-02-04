@@ -101,7 +101,6 @@
                                     if($submission && $submission->submitted_at > $assignment->deadline) {
                                         $isLate = true;
                                     }
-                                    // Hitung jumlah jawaban untuk diagnosa
                                     $ansCount = $submission ? $submission->answers->count() : 0;
                                 @endphp
 
@@ -138,7 +137,7 @@
                                         @endif
                                     </td>
 
-                                    <!-- Jawaban (TOMBOL REVIEW) -->
+                                    <!-- Jawaban -->
                                     <td class="px-6 py-4">
                                         @if($submission)
                                             <div class="flex flex-col gap-2">
@@ -161,25 +160,34 @@
                                                             class="inline-flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-600 border border-purple-200 hover:bg-purple-100 rounded-xl text-xs font-bold transition-all w-fit shadow-sm group/btn">
                                                         <i class="ph-bold ph-eye text-lg"></i>
                                                         Koreksi
-                                                        
-                                                        {{-- INDIKATOR DEBUG: Tampilkan jumlah data jawaban yg terbaca --}}
                                                         @if($ansCount == 0)
-                                                            <span class="ml-1 px-1.5 py-0.5 rounded bg-rose-500 text-white text-[9px]">Kosong (0)</span>
+                                                            <span class="ml-1 px-1.5 py-0.5 rounded bg-rose-500 text-white text-[9px]">Kosong</span>
                                                         @else
                                                             <span class="ml-1 px-1.5 py-0.5 rounded bg-emerald-500 text-white text-[9px]">{{ $ansCount }}</span>
                                                         @endif
                                                     </button>
+                                                
+                                                {{-- [UPDATE] Tampilkan Tombol Link --}}
+                                                @elseif($submission->link_url)
+                                                    <a href="{{ $submission->link_url }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 rounded-xl text-xs font-bold transition-all w-fit shadow-sm group/link">
+                                                        <i class="ph-bold ph-link text-lg group-hover/link:text-purple-700"></i>
+                                                        Buka Link
+                                                    </a>
+
+                                                {{-- [UPDATE] Tampilkan Tombol File --}}
                                                 @elseif($submission->file_path)
                                                     <a href="{{ asset('storage/'.$submission->file_path) }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 hover:border-blue-300 hover:text-blue-600 rounded-xl text-xs font-bold transition-all w-fit shadow-sm group/file">
                                                         <i class="ph-bold ph-file-text text-lg text-slate-400 group-hover/file:text-blue-500"></i>
                                                         Lihat File
                                                     </a>
-                                                @elseif($submission->student_note)
+                                                @endif
+
+                                                @if($submission->student_note)
                                                     <div class="bg-amber-50 p-2.5 rounded-xl border border-amber-100 text-xs text-amber-800 italic relative w-fit max-w-[200px]">
                                                         <i class="ph-fill ph-quotes text-amber-200 text-xl absolute -top-2 -left-1"></i>
                                                         <span class="relative z-10 font-medium">"{{ Str::limit($submission->student_note, 40) }}"</span>
                                                     </div>
-                                                @else
+                                                @elseif(!$submission->link_url && !$submission->file_path && $assignment->assignment_type != 'quiz')
                                                     <span class="text-xs text-slate-400 italic">Tanpa lampiran.</span>
                                                 @endif
                                             </div>
@@ -222,7 +230,6 @@
                                                 <i class="ph-bold ph-floppy-disk text-lg"></i>
                                             </button>
                                             
-                                            {{-- FORM HAPUS SUBMISSION --}}
                                             <form action="{{ route('lms.submissions.destroy', $submission->id) }}" method="POST" class="inline-block ml-1" onsubmit="return confirm('Hapus data jawaban siswa ini? Siswa harus mengerjakan ulang.')">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="w-9 h-9 rounded-xl bg-rose-50 text-rose-500 border border-rose-200 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors">
@@ -239,10 +246,11 @@
             </div>
         </div>
 
-        {{-- MODAL REVIEW JAWABAN --}}
+        {{-- MODAL REVIEW JAWABAN (Include kode JS yang sama dengan sebelumnya) --}}
         <div x-show="showReviewModal" style="display: none;" 
              class="fixed inset-0 z-[999] overflow-y-auto" role="dialog" aria-modal="true">
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+             {{-- ... (Modal review quiz tetap sama, tidak perlu diubah) ... --}}
+             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" @click="showReviewModal = false"></div>
 
                 <div class="inline-block align-bottom bg-white rounded-[2rem] text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl w-full border border-slate-200">

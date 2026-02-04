@@ -1,27 +1,19 @@
 <div x-data="{ lmsTab: 'assignments' }" class="space-y-8 animate-in fade-in duration-500 font-sans">
 
-    {{-- 1. HERO STATS (LOGIKA DIPERBAIKI) --}}
+    {{-- 1. HERO STATS --}}
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         @php
             $totalAssign = 0;
-            // $lms_grades berisi array [assignment_id => grade]
-            // Jika siswa mensubmit tapi belum dinilai, grade biasanya NULL.
-            // Kita hitung jumlah yang sudah disubmit (entah dinilai atau belum)
             $submittedCount = count($lms_grades ?? []);
             
             if(isset($lms_assignments_grouped)) {
                 foreach($lms_assignments_grouped as $group) { $totalAssign += $group->count(); }
             }
             
-            // Tugas Pending = Total Tugas - Submitted
             $pendingCount = max(0, $totalAssign - $submittedCount); 
-            
-            // Rata-rata Nilai: Hanya hitung yang SUDAH DINILAI (bukan null)
-            // Filter hanya nilai angka
             $gradedScores = array_filter($lms_grades ?? [], fn($v) => !is_null($v) && is_numeric($v));
             $avgScore = count($gradedScores) > 0 ? round(array_sum($gradedScores) / count($gradedScores)) : 0;
             
-            // Total Materi
             $totalMateri = 0; 
             if(isset($lms_materials_grouped)) {
                 foreach($lms_materials_grouped as $g) { $totalMateri += $g->count(); }
@@ -133,8 +125,12 @@
                                 $deadlineFormatted = \Carbon\Carbon::parse($task->deadline)->translatedFormat('d M, H:i');
                             @endphp
 
+                            {{-- [UPDATE] Menambahkan submissionType pada x-data --}}
                             <div class="group relative bg-white border border-slate-100 rounded-[2rem] p-1 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 flex flex-col h-full hover:-translate-y-1 hover:border-transparent hover:ring-2 {{ $theme['ring'] }}"
-                                 x-data="{ openUpload: false }">
+                                 x-data="{ 
+                                    openUpload: false, 
+                                    submissionType: '{{ ($mySubmission && $mySubmission->link_url) ? 'link' : 'file' }}' 
+                                 }">
                                 
                                 <div class="bg-white rounded-[1.8rem] p-6 h-full flex flex-col relative overflow-hidden">
                                     <div class="absolute -right-8 -top-8 w-28 h-28 rounded-full {{ $theme['bg'] }} opacity-50 group-hover:scale-150 transition-transform duration-500 pointer-events-none"></div>
@@ -200,6 +196,8 @@
                                                     </a>
                                                     <form action="{{ route('students.learning.assignment.submit', $task->id) }}" method="POST" class="flex-1" id="form-link-{{ $task->id }}">
                                                         @csrf
+                                                        {{-- Hidden input untuk tipe tugas link murni --}}
+                                                        <input type="hidden" name="submission_type" value="link"> 
                                                         <button type="button" onclick="confirmTaskSubmit('{{ $task->id }}')" 
                                                             class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md hover:-translate-y-0.5 transition-all">
                                                             <i class="ph-bold ph-check"></i> Selesai
@@ -207,17 +205,17 @@
                                                     </form>
                                                 </div>
                                             @else 
-                                                {{-- FILE UPLOAD --}}
+                                                {{-- TUGAS FILE / CAMPURAN (BUTTON TOGGLE) --}}
                                                 <button @click="openUpload = !openUpload" 
                                                     class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg hover:-translate-y-0.5 transition-all">
-                                                    <span x-text="openUpload ? 'Tutup Form' : 'Upload Jawaban'"></span>
+                                                    <span x-text="openUpload ? 'Tutup Form' : '{{ $isSubmitted ? 'Edit Jawaban' : 'Kerjakan Tugas' }}'"></span>
                                                     <i class="ph-bold" :class="openUpload ? 'ph-x' : 'ph-upload-simple'"></i>
                                                 </button>
                                             @endif
                                         @endif
                                     </div>
 
-                                    {{-- FORM UPLOAD EXPANDABLE --}}
+                                    {{-- [UPDATE] FORM UPLOAD DENGAN TAB SWITCHER --}}
                                     @if($task->assignment_type == 'file_upload' && !$isGraded)
                                         <div x-show="openUpload" 
                                              x-transition:enter="transition ease-out duration-200"
@@ -227,16 +225,45 @@
                                             
                                             <form action="{{ route('students.learning.assignment.submit', $task->id) }}" method="POST" enctype="multipart/form-data" class="space-y-3">
                                                 @csrf
-                                                <div>
-                                                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Pilih File (PDF/JPG)</label>
-                                                    <input type="file" name="file" required class="block w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-200 rounded-xl">
+                                                
+                                                {{-- TAB SWITCHER --}}
+                                                <div class="flex p-1 bg-slate-50 rounded-lg mb-3 border border-slate-200 w-full">
+                                                    <label class="flex-1 cursor-pointer text-center">
+                                                        <input type="radio" name="submission_type" value="file" class="sr-only" x-model="submissionType">
+                                                        <div class="py-1.5 rounded-md text-[10px] font-bold transition-all duration-300 flex items-center justify-center gap-1.5"
+                                                             :class="submissionType === 'file' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-slate-400 hover:text-slate-600'">
+                                                            <i class="ph-bold ph-file-text"></i> Upload File
+                                                        </div>
+                                                    </label>
+                                                    <label class="flex-1 cursor-pointer text-center">
+                                                        <input type="radio" name="submission_type" value="link" class="sr-only" x-model="submissionType">
+                                                        <div class="py-1.5 rounded-md text-[10px] font-bold transition-all duration-300 flex items-center justify-center gap-1.5"
+                                                             :class="submissionType === 'link' ? 'bg-white text-purple-600 shadow-sm ring-1 ring-black/5' : 'text-slate-400 hover:text-slate-600'">
+                                                            <i class="ph-bold ph-link"></i> Link Tugas
+                                                        </div>
+                                                    </label>
                                                 </div>
+
+                                                {{-- OPSI 1: FILE --}}
+                                                <div x-show="submissionType === 'file'">
+                                                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">File Jawaban (PDF/JPG)</label>
+                                                    <input type="file" name="file" :required="submissionType === 'file'" class="block w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-200 rounded-xl">
+                                                </div>
+
+                                                {{-- OPSI 2: LINK --}}
+                                                <div x-show="submissionType === 'link'" style="display: none;">
+                                                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">URL Link (G-Drive/Web)</label>
+                                                    <input type="url" name="link_url" :required="submissionType === 'link'" placeholder="https://..." value="{{ $mySubmission->link_url ?? '' }}" class="block w-full text-xs border border-slate-200 rounded-xl p-2.5 focus:ring-purple-500 focus:border-purple-500 text-slate-700 font-medium">
+                                                    <p class="text-[9px] text-slate-400 mt-1">Pastikan link publik (Anyone with the link).</p>
+                                                </div>
+
                                                 <div>
                                                     <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Catatan</label>
-                                                    <textarea name="student_note" rows="2" class="w-full rounded-xl border-slate-200 text-xs focus:ring-blue-500 focus:border-blue-500" placeholder="Pesan untuk guru..."></textarea>
+                                                    <textarea name="student_note" rows="2" class="w-full rounded-xl border-slate-200 text-xs focus:ring-blue-500 focus:border-blue-500 p-2.5 placeholder:text-slate-300" placeholder="Pesan untuk guru...">{{ $mySubmission->student_note ?? '' }}</textarea>
                                                 </div>
+
                                                 <button type="submit" class="w-full py-2.5 bg-slate-800 text-white rounded-xl text-xs font-bold hover:bg-slate-700 transition-colors flex items-center justify-center gap-2">
-                                                    <i class="ph-bold ph-paper-plane-right"></i> Kirim
+                                                    <i class="ph-bold ph-paper-plane-right"></i> {{ $isSubmitted ? 'Update Jawaban' : 'Kirim Jawaban' }}
                                                 </button>
                                             </form>
                                         </div>

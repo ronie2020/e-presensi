@@ -9,74 +9,93 @@ use Carbon\Carbon;
 class ClassReportController extends Controller
 {
     /**
-     * Logika Inti: Mengambil dan Mengolah Data Statistik
+     * LOGIKA INTI: Mengambil Data & Menghitung Statistik
      */
     private function getReportData($startDate, $endDate)
     {
-        // Ambil Semua Kelas dengan Siswa Aktif & Absensinya
-        $classes = SchoolClass::with(['students' => function($q) {
-                // Hanya ambil siswa aktif (bukan alumni)
-                $q->where('status', '!=', 'graduated'); 
+        // 1. Ambil Data Kelas + Siswa Aktif + Absensi mereka
+        $classes = SchoolClass::orderBy('name')
+            // Ambil relasi siswa (hanya yang aktif) dan absensinya di rentang tanggal
+            ->with(['students' => function($q) use ($startDate, $endDate) {
+                $q->where('status', '!=', 'graduated') // Filter Siswa Aktif
+                  ->orderBy('name');
             }, 'students.attendances' => function($q) use ($startDate, $endDate) {
-                // Filter absensi berdasarkan tanggal & tipe
                 $q->whereBetween('attendance_date', [$startDate, $endDate])
-                  ->whereIn('type', ['Harian', 'Masuk', 'Pulang']);
+                  ->whereIn('type', ['Harian', 'Masuk', 'Pulang']); // Filter Tipe Absen
             }])
+            // [PENTING] Hitung Total Siswa per Kelas secara otomatis
             ->withCount(['students' => function($q) {
                 $q->where('status', '!=', 'graduated');
             }])
             ->get();
 
-        // Hitung Statistik
-        $reportData = $classes->map(function($class) {
-            $totalStudents = $class->students_count;
+        // 2. Olah Data (Looping)
+        $reportData = $classes->map(function($class) use ($startDate, $endDate) {
             
+            // [A] Ambil Total Siswa dari withCount di atas
+            $totalStudents = $class->students_count;
+
             $hadirCount = 0;
             $telatCount = 0;
             $izinSakitCount = 0;
             $alphaCount = 0;
-            $totalAttendanceRecords = 0;
+            $totalLogsRecorded = 0;
 
+            // Loop setiap siswa untuk cek absensinya
             foreach ($class->students as $student) {
-                foreach ($student->attendances as $attendance) {
-                    $status = strtolower($attendance->status);
-                    $totalAttendanceRecords++;
+                // Cek apakah siswa punya data absensi di range tanggal ini
+                if ($student->attendances->isNotEmpty()) {
+                    foreach ($student->attendances as $attendance) {
+                        $status = strtolower($attendance->status);
+                        $totalLogsRecorded++;
 
-                    if (in_array($status, ['hadir', 'tepat waktu'])) {
-                        $hadirCount++;
-                    } elseif (in_array($status, ['terlambat', 'telat'])) {
-                        $telatCount++;
-                    } elseif (in_array($status, ['sakit', 'izin'])) {
-                        $izinSakitCount++;
-                    } elseif (in_array($status, ['alpha', 'alpa', 'absen'])) {
-                        $alphaCount++;
+                        if (in_array($status, ['hadir', 'tepat waktu'])) {
+                            $hadirCount++;
+                        } elseif (in_array($status, ['terlambat', 'telat'])) {
+                            $telatCount++;
+                        } elseif (in_array($status, ['sakit', 'izin', "uzur syar'i"])) {
+                            $izinSakitCount++;
+                        } elseif (in_array($status, ['alpha', 'alpa', 'absen'])) {
+                            $alphaCount++;
+                        }
                     }
+                } else {
+                    // Jika siswa tidak punya data absensi sama sekali, bisa dianggap Alpha atau Belum Absen
+                    // Tergantung kebijakan. Di sini kita biarkan tidak terhitung di log, 
+                    // tapi Total Siswa tetap tercatat sebagai penyebut.
                 }
             }
 
-            // Hitung Persentase (Hadir + Telat) / Total Rekaman
-            $attendanceRate = $totalAttendanceRecords > 0 
-                ? round((($hadirCount + $telatCount) / $totalAttendanceRecords) * 100, 1) 
-                : 0;
+            // [B] Rumus Rate Kehadiran (%)
+            // OPSI 1: Berdasarkan Record yang masuk (Dinamis)
+            // Rumus: (Hadir + Telat) / Total Log
+             $effectivePresence = $hadirCount + $telatCount;
+             $attendanceRate = $totalLogsRecorded > 0 
+                 ? round(($effectivePresence / $totalLogsRecorded) * 100) 
+                 : 0;
+            
+            // OPSI 2 (Alternatif): Berdasarkan Total Siswa (Lebih Ketat)
+            // Jika Anda ingin Rate = (Hadir/TotalSiswa), uncomment baris di bawah:
+            // $attendanceRate = $totalStudents > 0 ? round(($effectivePresence / $totalStudents) * 100) : 0;
 
             return (object) [
                 'id' => $class->id,
                 'name' => $class->name,
-                'total_students' => $totalStudents,
+                'total_students' => $totalStudents, // Data Total Siswa
                 'hadir' => $hadirCount,
                 'telat' => $telatCount,
                 'izin_sakit' => $izinSakitCount,
                 'alpha' => $alphaCount,
-                'rate' => $attendanceRate
+                'rate' => $attendanceRate,
+                'total_logs' => $totalLogsRecorded
             ];
         });
 
-        // Urutkan berdasarkan Nama Kelas
-        return $reportData->sortBy('name');
+        return $reportData;
     }
 
     /**
-     * Halaman Utama Rekap Kelas
+     * Halaman Web (View)
      */
     public function index(Request $request)
     {
@@ -89,7 +108,7 @@ class ClassReportController extends Controller
     }
 
     /**
-     * Fitur Cetak PDF (Print View)
+     * Export PDF
      */
     public function print(Request $request)
     {
@@ -97,14 +116,13 @@ class ClassReportController extends Controller
         $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
 
         $reportData = $this->getReportData($startDate, $endDate);
-        
         $title = 'Rekapitulasi Absensi Kelas';
 
         return view('reports.pdf_class_recap', compact('reportData', 'startDate', 'endDate', 'title'));
     }
 
     /**
-     * Fitur Export Excel
+     * Export Excel
      */
     public function exportExcel(Request $request)
     {
@@ -112,7 +130,7 @@ class ClassReportController extends Controller
         $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
 
         $reportData = $this->getReportData($startDate, $endDate);
-        $filename = 'Rekap_Kelas_' . $startDate . '_sd_' . $endDate . '.xls';
+        $filename = 'Rekap_Kelas_' . $startDate . '.xls';
 
         return response()->streamDownload(function() use ($reportData, $startDate, $endDate) {
             echo view('reports.excel_class_recap', compact('reportData', 'startDate', 'endDate'));
