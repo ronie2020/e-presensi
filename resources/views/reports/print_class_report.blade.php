@@ -112,8 +112,8 @@
     <div class="flex justify-between text-sm mt-8 px-8 break-inside-avoid">
         <div class="text-center">
             <p class="mb-16">Mengetahui,<br>Kepala Sekolah</p>
-            <p class="font-bold underline">_______________________</p>
-            <p>NIP. ...........................</p>
+            <strong>TANTAN SUTANDI N., S.Si, M.Pd.</strong><br>
+            NIP. 19820928 201101 1 002
         </div>
         <div class="text-center">
             <p class="mb-16">
