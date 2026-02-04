@@ -243,15 +243,18 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // [UPDATE] MENGGUNAKAN ClassReportController
+    // [UPDATE] ROUTE REKAPITULASI KELAS (SUMMARY)
     Route::get('/reports/classes', [ClassReportController::class, 'index'])->name('reports.class');
-
-    // [FIX COMPATIBILITY] Menambahkan alias route lama 'reports.classReport'
-    // Tujuannya agar link di Navigation Bar yang lama tetap berfungsi dan mengarah ke controller baru
-    Route::get('/reports/class-recap', [ClassReportController::class, 'index'])->name('reports.classReport');
-
     Route::get('/reports/classes/print', [ClassReportController::class, 'print'])->name('reports.class.print');
     Route::get('/reports/classes/excel', [ClassReportController::class, 'exportExcel'])->name('reports.class.excel');
+
+    // [FIX COMPATIBILITY] Alias route lama untuk Navigation Bar (Mengarah ke Summary)
+    Route::get('/reports/class-recap', [ClassReportController::class, 'index'])->name('reports.classReport');
+
+    // [NEW] ROUTE DETAIL HARIAN KELAS (MATRIX VIEW) - Menggunakan ReportController
+    // Ini adalah route yang akan dipanggil saat tombol "Lihat Harian" diklik
+    Route::get('/reports/class-detail', [ReportController::class, 'classReport'])->name('reports.class.detail');
+    Route::get('/reports/class-detail/print', [ReportController::class, 'printClassReport'])->name('reports.printClassReport');
 
     // ===> LMS GURU (Materi, Tugas, & Nilai) <===
     Route::prefix('lms')->name('lms.')->group(function () {
@@ -444,9 +447,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/reports/manual-entry', [ReportController::class, 'storeManualEntry'])->name('reports.storeManual');
     Route::post('/reports/process-alpha', [ReportController::class, 'processAlpha'])->name('reports.processAlpha');
     Route::delete('/reports/daily', [ReportController::class, 'destroyDaily'])->name('reports.destroyDaily');
-    // ROUTE LAMA (DIGANTI)
-    // Route::get('/reports/class-recap', [ReportController::class, 'classReport'])->name('reports.classReport');
-    // Route::get('/reports/class-recap/print', [ReportController::class, 'printClassReport'])->name('reports.printClassReport');
     
     Route::get('/reports/export-daily', [ReportController::class, 'exportDaily'])->name('reports.exportDaily');
     Route::get('/reports/attendance/{attendance}/edit', [ReportController::class, 'editAttendance'])->name('reports.edit');

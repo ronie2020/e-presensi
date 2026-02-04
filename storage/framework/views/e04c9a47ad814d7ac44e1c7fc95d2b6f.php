@@ -38,7 +38,6 @@
                 </div>
 
                 
-                
                 <div class="relative z-10 flex flex-wrap gap-3 w-full xl:w-auto items-center justify-center xl:justify-end">
                     
                     
@@ -59,9 +58,10 @@
 
                    
                     
-                    <div class="flex gap-2">
-                        <a href="<?php echo e(route('reports.class.excel', request()->all())); ?>" target="_blank" class="bg-white hover:bg-emerald-50 text-emerald-600 border border-white/20 px-4 py-3 rounded-2xl font-bold text-sm transition flex items-center gap-2 shadow-lg" title="Download Excel">
-                            <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> <span class="hidden sm:inline">Excel</span>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <a href="<?php echo e(route('reports.class.excel', request()->all())); ?>" target="_blank" class="bg-white hover:bg-emerald-50 text-emerald-600 border border-white/20 px-4 py-3 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-lg flex-1 sm:flex-none" title="Download Excel">
+                            <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> 
+                            <span>Excel</span>
                         </a>
                         <a href="<?php echo e(route('reports.class.print', request()->all())); ?>" target="_blank" class="bg-white hover:bg-rose-50 text-rose-600 border border-white/20 px-4 py-3 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-lg flex-1 sm:flex-none" title="Cetak PDF">
                             <i class="ph-bold ph-printer text-lg"></i> 
@@ -214,7 +214,7 @@
 
                                     
                                     <td class="px-6 py-4 text-right">
-                                        <a href="<?php echo e(route('reports.classReport', ['class_id' => $data->id, 'month' => \Carbon\Carbon::parse($startDate)->format('Y-m')])); ?>" 
+                                        <a href="<?php echo e(route('reports.class.detail', ['class_id' => $data->id, 'month' => \Carbon\Carbon::parse($startDate)->format('Y-m')])); ?>" 
                                            class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm group-hover:shadow-md">
                                             <span>Lihat Harian</span>
                                             <i class="ph-bold ph-caret-right"></i>
