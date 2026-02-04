@@ -48,20 +48,11 @@
                         </button>
                     </form>
 
-<<<<<<< HEAD
-                    {{-- Export Buttons (Updated Colors for Dark Background) --}}
-                    {{-- [FIX] Flex grow pada mobile agar tombol rata lebar --}}
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <a href="{{ route('reports.class.excel', request()->all()) }}" target="_blank" class="bg-white hover:bg-emerald-50 text-emerald-600 border border-white/20 px-4 py-3 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-lg flex-1 sm:flex-none" title="Download Excel">
-                            <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> 
-                            {{-- [FIX] Teks Excel selalu muncul (hapus hidden sm:inline jika ingin selalu terlihat, atau biarkan responsif tapi aman karena wrap) --}}
-                            <span>Excel</span> 
-=======
+                   
                     {{-- Export Buttons --}}
                     <div class="flex gap-2">
                         <a href="{{ route('reports.class.excel', request()->all()) }}" target="_blank" class="bg-white hover:bg-emerald-50 text-emerald-600 border border-white/20 px-4 py-3 rounded-2xl font-bold text-sm transition flex items-center gap-2 shadow-lg" title="Download Excel">
                             <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> <span class="hidden sm:inline">Excel</span>
->>>>>>> d753c61c580f6d24f408671c5b70bbb6cde73810
                         </a>
                         <a href="{{ route('reports.class.print', request()->all()) }}" target="_blank" class="bg-white hover:bg-rose-50 text-rose-600 border border-white/20 px-4 py-3 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-lg flex-1 sm:flex-none" title="Cetak PDF">
                             <i class="ph-bold ph-printer text-lg"></i> 
