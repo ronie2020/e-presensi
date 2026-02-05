@@ -229,6 +229,7 @@ class ReportController extends Controller
         $selectedDate_db = Carbon::parse($range['start']);
         $selectedActivity = $request->input('activity', 'Dhuha'); 
 
+        // 1. DATA EXISTING (LIST SISWA)
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
             ->whereHas('student', function($q) { $q->where('status', '!=', 'graduated'); })
             ->whereBetween('attendance_date', [$range['start'], $range['end']])
@@ -248,9 +249,74 @@ class ReportController extends Controller
         $attendancesHadir = $this->paginate($this->sortStudents($attendances->where('status', 'Hadir')), 20)->appends($request->all());
         $attendancesUzur = $this->paginate($this->sortStudents($attendances->whereIn('status', ["Uzur Syar'i", "Alfa", "Izin", "Sakit"])), 20)->appends($request->all());
 
+        // ============================================================
+        // 2. LOGIKA REKAP PER KELAS
+        // ============================================================
+        
+        $allClasses = SchoolClass::orderBy('name')->get();
+
+        $classRecap = $allClasses->map(function ($kelas) use ($range, $selectedActivity) {
+            // Hitung total siswa aktif di kelas ini
+            $totalSiswa = Student::where('class_id', $kelas->id)
+                            ->where('status', '!=', 'graduated')
+                            ->count();
+
+            // Hitung status kehadiran berdasarkan range tanggal & activity
+            $stats = AttendanceSiswa::whereHas('student', function($q) use ($kelas) {
+                    $q->where('class_id', $kelas->id);
+                })
+                ->whereBetween('attendance_date', [$range['start'], $range['end']])
+                ->where('type', 'Keagamaan')
+                ->where('activity', $selectedActivity)
+                // Jika range > 1 hari, hitung count data (record), bukan distinct student
+                // Agar mencerminkan volume kehadiran dalam rentang waktu tersebut
+                ->selectRaw('status, count(*) as count') 
+                ->groupBy('status')
+                ->pluck('count', 'status')
+                ->toArray();
+
+            $hadir = $stats['Hadir'] ?? 0;
+            $sakit = $stats['Sakit'] ?? 0;
+            $izin  = $stats['Izin'] ?? 0;
+            $uzur  = $stats["Uzur Syar'i"] ?? 0;
+            $alfa  = $stats['Alfa'] ?? 0;
+
+            // Perhitungan "Belum" agak tricky jika rentang mingguan/bulanan.
+            // Untuk harian: Belum = Total Siswa - (Hadir+Izin+Sakit+Alfa)
+            // Untuk range: Kita fokus menampilkan total record yang ada saja.
+            
+            // Logika Persentase (Kehadiran / Total Populasi Kelas)
+            // Jika mingguan, kita anggap target = Total Siswa * Jumlah Hari Efektif (Kompleks),
+            // Sederhananya kita pakai persentase Hadir dibanding Total Record yang masuk.
+            $totalRecordMasuk = $hadir + $sakit + $izin + $uzur + $alfa;
+            
+            // Jika Harian, kita bisa hitung Belum Absen
+            $belum = 0;
+            if ($range['type'] === 'daily') {
+                $belum = max(0, $totalSiswa - $totalRecordMasuk);
+                $persentase = $totalSiswa > 0 ? round(($hadir / $totalSiswa) * 100) : 0;
+            } else {
+                // Jika range, persentase = Hadir / Total Record (Performance rate)
+                $persentase = $totalRecordMasuk > 0 ? round(($hadir / $totalRecordMasuk) * 100) : 0;
+            }
+
+            return (object) [
+                'className' => $kelas->name,
+                'total_siswa' => $totalSiswa,
+                'hadir' => $hadir,
+                'izin_sakit' => $sakit + $izin + $uzur,
+                'alfa' => $alfa,
+                'belum' => $belum, // Valid untuk daily
+                'persentase' => $persentase,
+                'is_daily' => $range['type'] === 'daily'
+            ];
+        });
+        // ============================================================
+
         return view('reports.religious', compact(
             'selectedDate_db', 'selectedActivity', 'attendancesHadir', 'attendancesUzur',
-            'belumAbsenList', 'hadirCount', 'izinUzurCount', 'alfaCount', 'belumAbsenCount', 'range'
+            'belumAbsenList', 'hadirCount', 'izinUzurCount', 'alfaCount', 'belumAbsenCount', 'range',
+            'classRecap' // Dikirim ke View
         ));
     }
 
@@ -285,7 +351,7 @@ class ReportController extends Controller
         ));
     }
 
-    // --- FITUR BARU: REKAP PER KELAS (MATRIX VIEW) ---
+    // --- FITUR: REKAP PER KELAS (MATRIX VIEW) ---
 
     /**
      * Helper private untuk mengambil data laporan kelas
@@ -392,7 +458,7 @@ class ReportController extends Controller
         return view('reports.print_class_report', $data);
     }
 
-    // --- FITUR LAIN (TIDAK BERUBAH) ---
+    // --- FITUR LAIN ---
     public function teachingJournal(Request $request)
     {
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
@@ -587,5 +653,73 @@ class ReportController extends Controller
             ->delete();
 
         return back()->with('success', "Semua data $activity tanggal $date berhasil direset.");
+    }
+
+    // --- API / AJAX HELPERS ---
+
+    /**
+     * Mengambil riwayat keagamaan siswa (untuk Modal Detail di halaman religious report)
+     */
+    public function getStudentReligiousHistory(Request $request)
+    {
+        $studentId = $request->student_id;
+        $activity = $request->activity; // Dhuha / Dhuhur
+        
+        // Default: Ambil data bulan ini
+        $startOfMonth = Carbon::now()->startOfMonth()->toDateString();
+        $endOfMonth = Carbon::now()->endOfMonth()->toDateString();
+
+        $student = Student::with('schoolClass')->find($studentId);
+        
+        if (!$student) {
+            return '<div class="p-4 text-center text-rose-500">Siswa tidak ditemukan.</div>';
+        }
+
+        $histories = AttendanceSiswa::where('student_id', $studentId)
+            ->where('type', 'Keagamaan')
+            ->where('activity', $activity)
+            ->whereBetween('attendance_date', [$startOfMonth, $endOfMonth])
+            ->orderBy('attendance_date', 'desc')
+            ->get();
+
+        // Render HTML Partial langsung untuk responsif di AJAX
+        $html = '<div class="p-4 space-y-3">';
+        
+        // Header Info Siswa
+        $html .= '<div class="flex items-center gap-3 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">';
+        $html .= '<div class="w-10 h-10 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-sm shrink-0">'.substr($student->name,0,1).'</div>';
+        $html .= '<div><div class="font-bold text-slate-800 text-sm">'.$student->name.'</div><div class="text-xs text-slate-500">'.$student->schoolClass->name.' • '.$activity.' Bulan Ini</div></div>';
+        $html .= '</div>';
+
+        if ($histories->count() > 0) {
+            $html .= '<div class="space-y-2">';
+            foreach ($histories as $h) {
+                // Styling berdasarkan status
+                $color = match($h->status) {
+                    'Hadir' => 'text-emerald-600 bg-emerald-50 border-emerald-100',
+                    'Alfa' => 'text-rose-600 bg-rose-50 border-rose-100',
+                    'Sakit' => 'text-blue-600 bg-blue-50 border-blue-100',
+                    'Izin' => 'text-amber-600 bg-amber-50 border-amber-100',
+                    default => 'text-slate-600 bg-slate-50 border-slate-100'
+                };
+                
+                $date = Carbon::parse($h->attendance_date)->translatedFormat('d F Y');
+                $jam = Carbon::parse($h->created_at)->format('H:i');
+
+                $html .= '<div class="flex justify-between items-center p-3 rounded-xl border '.$color.'">';
+                $html .= '<div><div class="text-[10px] font-bold opacity-70 uppercase tracking-wider">'.$date.'</div><div class="font-bold text-sm">'.$h->status.'</div></div>';
+                if($h->status == 'Hadir') {
+                    $html .= '<div class="text-xs font-bold bg-white/60 px-2 py-1 rounded flex items-center gap-1"><i class="ph-bold ph-clock"></i> '.$jam.'</div>';
+                }
+                $html .= '</div>';
+            }
+            $html .= '</div>';
+        } else {
+            $html .= '<div class="text-center py-6 text-slate-400 italic text-sm">Belum ada riwayat bulan ini.</div>';
+        }
+
+        $html .= '</div>';
+
+        return $html;
     }
 }

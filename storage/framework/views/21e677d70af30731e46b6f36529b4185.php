@@ -21,13 +21,19 @@
             .no-print { display: none !important; }
             body { background-color: white; }
             [x-show] { display: block !important; }
+            .print-table { display: table !important; width: 100%; border-collapse: collapse; }
+            .print-table th, .print-table td { border: 1px solid #000; padding: 5px; font-size: 10pt; }
+            /* Sembunyikan view list saat print jika sedang mode rekap, dan sebaliknya */
+            .view-list { display: none; } 
         }
     </style>
 
     
+    
     <div class="py-6 md:py-8 font-sans text-slate-800 pb-32" x-data="{ 
         activeTab: '<?php echo e(request('activeTab', 'hadir')); ?>',
         reportType: '<?php echo e(request('report_type', 'daily')); ?>',
+        viewMode: 'list', 
         loading: false, 
         
         navigate(url) {
@@ -135,7 +141,23 @@
             </div>
 
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-8">
+            <div class="flex justify-center mb-6 no-print">
+                <div class="bg-slate-200 p-1 rounded-xl inline-flex shadow-inner">
+                    <button @click="viewMode = 'list'" 
+                        :class="viewMode === 'list' ? 'bg-white text-blue-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+                        class="px-6 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2">
+                        <i class="ph-bold ph-list-dashes"></i> Detail Siswa
+                    </button>
+                    <button @click="viewMode = 'rekap'" 
+                        :class="viewMode === 'rekap' ? 'bg-white text-blue-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+                        class="px-6 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2">
+                        <i class="ph-bold ph-chart-bar"></i> Rekap Per Kelas
+                    </button>
+                </div>
+            </div>
+
+            
+            <div x-show="viewMode === 'list'" class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-8">
                 <div class="animate-enter bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all" style="animation-delay: 200ms">
                     <div class="min-w-0">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Sudah Absen</p>
@@ -164,7 +186,7 @@
             </div>
 
             
-            <div class="animate-enter bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden min-h-[500px]" style="animation-delay: 500ms">
+            <div x-show="viewMode === 'list'" class="animate-enter bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden min-h-[500px]" style="animation-delay: 500ms">
                 
                 
                 <div class="flex flex-wrap md:flex-nowrap border-b border-slate-100 bg-slate-50/50 p-2 gap-2 sticky top-0 z-20 no-print">
@@ -201,8 +223,13 @@
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex justify-between items-center pr-2">
-                                                <h4 class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate"><?php echo e($attendance->student->name); ?></h4>
                                                 
+                                                <button type="button" onclick="openStudentHistory(<?php echo e($attendance->student->id); ?>, '<?php echo e(addslashes($attendance->student->name)); ?>')" 
+                                                    class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate text-left hover:underline decoration-blue-300 underline-offset-2">
+                                                    <?php echo e($attendance->student->name); ?>
+
+                                                </button>
+
                                                 <?php if(isset($range) && $range['type'] != 'daily'): ?>
                                                     <span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-md border border-slate-200">
                                                         <?php echo e(\Carbon\Carbon::parse($attendance->attendance_date)->format('d M')); ?>
@@ -213,12 +240,10 @@
                                             <div class="flex items-center gap-2 mt-1">
                                                 <span class="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded"><?php echo e($attendance->student->schoolClass->name); ?></span>
                                                 <span class="text-xs font-bold text-emerald-600 flex items-center gap-1"><i class="ph-bold ph-clock"></i> <?php echo e($attendance->created_at->format('H:i')); ?></span>
-                                                
                                                 <span class="text-[10px] font-bold bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded uppercase border border-emerald-100"><?php echo e($attendance->status); ?></span>
                                             </div>
                                         </div>
                                     </div>
-                                    
                                     <button onclick="openEditModalReligious(<?php echo e($attendance->id); ?>, '<?php echo e(addslashes($attendance->student->name)); ?>', '<?php echo e($attendance->status); ?>', `<?php echo e(addslashes($attendance->notes ?? '')); ?>`, '<?php echo e($attendance->activity); ?>')" 
                                         class="p-2 ml-2 md:ml-4 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all no-print shrink-0 active:scale-95">
                                         <i class="ph-bold ph-pencil-simple text-xl"></i>
@@ -268,7 +293,12 @@
                                     <div class="flex items-center gap-4 overflow-hidden">
                                         <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center font-bold text-xs shrink-0">!</div>
                                         <div class="min-w-0">
-                                            <h4 class="font-bold text-slate-800 truncate"><?php echo e($student->name); ?></h4>
+                                            
+                                            <button type="button" onclick="openStudentHistory(<?php echo e($student->id); ?>, '<?php echo e(addslashes($student->name)); ?>')" 
+                                                class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate text-left hover:underline decoration-blue-300 underline-offset-2">
+                                                <?php echo e($student->name); ?>
+
+                                            </button>
                                             <p class="text-xs text-slate-500"><?php echo e($student->schoolClass->name ?? '-'); ?></p>
                                         </div>
                                     </div>
@@ -296,7 +326,12 @@
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex justify-between items-center pr-2">
-                                                <h4 class="font-bold text-slate-800 truncate"><?php echo e($attendance->student->name); ?></h4>
+                                                
+                                                <button type="button" onclick="openStudentHistory(<?php echo e($attendance->student->id); ?>, '<?php echo e(addslashes($attendance->student->name)); ?>')" 
+                                                    class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate text-left hover:underline decoration-blue-300 underline-offset-2">
+                                                    <?php echo e($attendance->student->name); ?>
+
+                                                </button>
                                                 
                                                 <?php if(isset($range) && $range['type'] != 'daily'): ?>
                                                     <span class="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-1 rounded-md border border-slate-200">
@@ -306,7 +341,6 @@
                                                 <?php endif; ?>
                                             </div>
                                             <div class="flex items-center gap-2 mt-1">
-                                                
                                                 <span class="px-2 py-0.5 rounded text-[10px] font-bold <?php echo e($attendance->status == 'Alfa' ? 'bg-rose-50 text-rose-700' : 'bg-blue-50 text-blue-700'); ?> uppercase"><?php echo e($attendance->status); ?></span>
                                                 <?php if($attendance->notes): ?>
                                                     <span class="text-xs text-slate-400 italic max-w-[100px] md:max-w-none truncate">"<?php echo e($attendance->notes); ?>"</span>
@@ -329,6 +363,66 @@
                         </div>
                     </div>
 
+                </div>
+            </div>
+
+            
+            <div x-show="viewMode === 'rekap'" style="display: none;" class="animate-enter bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-800">Statistik Kehadiran Per Kelas</h3>
+                        <p class="text-xs text-slate-500">Rekapitulasi berdasarkan rentang waktu yang dipilih.</p>
+                    </div>
+                    <button onclick="window.print()" class="text-slate-400 hover:text-blue-900 transition-colors p-2 bg-white rounded-xl shadow-sm border border-slate-200"><i class="ph-bold ph-printer text-xl"></i></button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-bold border-b border-slate-200">
+                                <th class="p-4 pl-6">Kelas</th>
+                                <th class="p-4 text-center">Total Siswa</th>
+                                <th class="p-4 text-center text-emerald-600">Hadir</th>
+                                <th class="p-4 text-center text-blue-600">Izin/Sakit</th>
+                                <th class="p-4 text-center text-rose-600">Alfa</th>
+                                <th class="p-4 text-center text-slate-400">
+                                    <?php echo e($range['type'] === 'daily' ? 'Belum Absen' : 'Total Record'); ?>
+
+                                </th>
+                                <th class="p-4 text-center pr-6">% Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm font-bold text-slate-700 divide-y divide-slate-100">
+                            <?php $__currentLoopData = $classRecap; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $rekap): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <tr class="hover:bg-slate-50/80 transition-colors group">
+                                <td class="p-4 pl-6">
+                                    <span class="bg-blue-50 text-blue-900 px-3 py-1.5 rounded-lg group-hover:bg-blue-100 transition-colors border border-blue-100"><?php echo e($rekap->className); ?></span>
+                                </td>
+                                <td class="p-4 text-center text-slate-500"><?php echo e($rekap->total_siswa); ?></td>
+                                <td class="p-4 text-center text-emerald-600"><?php echo e($rekap->hadir); ?></td>
+                                <td class="p-4 text-center text-blue-600"><?php echo e($rekap->izin_sakit); ?></td>
+                                <td class="p-4 text-center text-rose-600"><?php echo e($rekap->alfa); ?></td>
+                                <td class="p-4 text-center text-slate-400">
+                                    <?php if($rekap->is_daily): ?>
+                                        <?php echo e($rekap->belum); ?>
+
+                                    <?php else: ?>
+                                        <?php echo e($rekap->hadir + $rekap->izin_sakit + $rekap->alfa); ?>
+
+                                    <?php endif; ?>
+                                </td>
+                                <td class="p-4 pr-6">
+                                    <div class="flex items-center gap-3">
+                                        <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full" style="width: <?php echo e($rekap->persentase); ?>%"></div>
+                                        </div>
+                                        <span class="text-xs w-8 text-right font-black"><?php echo e($rekap->persentase); ?>%</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -429,7 +523,54 @@
         </div>
     </div>
 
+    
+    <div id="historyModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
+        <div class="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl overflow-hidden border border-slate-100 animate-enter flex flex-col max-h-[80vh]">
+            <div class="bg-white border-b border-slate-100 px-6 py-4 flex justify-between items-center shrink-0">
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase">Riwayat Keagamaan</p>
+                    <h3 id="history-student-name" class="font-bold text-xl text-slate-800">Nama Siswa</h3>
+                </div>
+                <button onclick="document.getElementById('historyModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-400 transition"><i class="ph-bold ph-x"></i></button>
+            </div>
+            
+            <div id="history-content" class="p-0 overflow-y-auto grow">
+                
+                <div class="flex flex-col items-center justify-center h-40">
+                    <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-2"></div>
+                    <span class="text-xs font-bold text-slate-400">Memuat riwayat...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // --- LOGIKA MODAL HISTORY ---
+        function openStudentHistory(studentId, studentName) {
+            document.getElementById('history-student-name').innerText = studentName;
+            document.getElementById('historyModal').classList.remove('hidden');
+            
+            const contentDiv = document.getElementById('history-content');
+            contentDiv.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-40">
+                    <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-2"></div>
+                    <span class="text-xs font-bold text-slate-400">Memuat riwayat...</span>
+                </div>`;
+
+            // Asumsi URL: /reports/religious/history?student_id=X&activity=Y
+            // Anda perlu memastikan Route ini ada di web.php
+            fetch(`<?php echo e(url('reports/religious/history')); ?>?student_id=${studentId}&activity=<?php echo e($selectedActivity); ?>`)
+                .then(response => response.text())
+                .then(html => {
+                    contentDiv.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error(error);
+                    contentDiv.innerHTML = `<div class="p-6 text-center text-rose-500 font-bold text-sm">Gagal memuat data. Periksa koneksi atau route.</div>`;
+                });
+        }
+        // ----------------------------
+
         function openManualModalForStudent(id, name) {
             document.getElementById('manual-student-id').value = id;
             document.getElementById('manual-student-name-display').value = name;
