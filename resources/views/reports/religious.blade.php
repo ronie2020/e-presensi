@@ -1,6 +1,8 @@
 <x-app-layout>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
+    {{-- Menggunakan ApexCharts untuk grafik yang modern dan responsif --}}
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     {{-- CUSTOM STYLES --}}
     <style>
@@ -131,6 +133,116 @@
                 </div>
             </div>
 
+            {{-- 
+                ============================================
+                DASHBOARD VISUAL (NEW FEATURE)
+                ============================================
+            --}}
+            <div class="mb-8 no-print">
+                {{-- Row 1: Statistik Card --}}
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4 mb-6">
+                    <!-- Total Siswa -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                        <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total Siswa</p>
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-2xl md:text-3xl font-black text-slate-800">{{ $hadirCount + $izinUzurCount + $alfaCount + $belumAbsenCount }}</h3>
+                            <div class="p-1.5 bg-slate-100 rounded-lg text-slate-500"><i class="ph-bold ph-users"></i></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Total Hadir -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                        <p class="text-[10px] md:text-xs font-bold text-emerald-600/70 uppercase tracking-wider mb-2">Total Hadir</p>
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-2xl md:text-3xl font-black text-slate-800">{{ $hadirCount }}</h3>
+                            <div class="p-1.5 bg-emerald-50 rounded-lg text-emerald-600"><i class="ph-fill ph-check-circle"></i></div>
+                        </div>
+                    </div>
+
+                    <!-- Belum Hadir (Belum Absen + Alfa) -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                        <p class="text-[10px] md:text-xs font-bold text-rose-600/70 uppercase tracking-wider mb-2">Belum Hadir</p>
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-2xl md:text-3xl font-black text-slate-800">{{ $belumAbsenCount + $alfaCount }}</h3>
+                            <div class="p-1.5 bg-rose-50 rounded-lg text-rose-600"><i class="ph-fill ph-x-circle"></i></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sakit / Izin -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                        <p class="text-[10px] md:text-xs font-bold text-blue-600/70 uppercase tracking-wider mb-2">Sakit / Izin</p>
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-2xl md:text-3xl font-black text-slate-800">{{ $izinUzurCount }}</h3>
+                            <div class="p-1.5 bg-blue-50 rounded-lg text-blue-600"><i class="ph-fill ph-info"></i></div>
+                        </div>
+                    </div>
+
+                     <!-- Persentase -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 col-span-2 lg:col-span-1 flex items-center justify-between">
+                         <div>
+                            <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Kehadiran</p>
+                             @php
+                                $totalAll = $hadirCount + $izinUzurCount + $alfaCount + $belumAbsenCount;
+                                $percentage = $totalAll > 0 ? round(($hadirCount / $totalAll) * 100) : 0;
+                            @endphp
+                            <h3 class="text-2xl md:text-3xl font-black text-slate-800">{{ $percentage }}%</h3>
+                        </div>
+                        <div class="w-12 h-12 relative flex items-center justify-center">
+                            {{-- Simple SVG Donut --}}
+                            <svg viewBox="0 0 36 36" class="w-full h-full text-blue-600 transform -rotate-90">
+                                <path class="text-slate-100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="4" />
+                                <path class="text-current" stroke-dasharray="{{ $percentage }}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="4" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Row 2: Charts Area --}}
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {{-- Chart 1: Tren Kehadiran --}}
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 lg:col-span-2">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                    <i class="ph-fill ph-chart-bar text-blue-600"></i> Analisis Tren Kehadiran
+                                </h3>
+                                <p class="text-xs text-slate-500 font-medium">{{ $chartData['trendLabel'] ?? 'Statistik' }}</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <span class="px-2 py-1 bg-emerald-50 text-emerald-700 rounded text-[10px] font-bold uppercase">Hadir</span>
+                                <span class="px-2 py-1 bg-rose-50 text-rose-700 rounded text-[10px] font-bold uppercase">Absen</span>
+                            </div>
+                        </div>
+                        <div id="chartTrend" class="w-full min-h-[300px]"></div>
+                    </div>
+
+                    {{-- Chart 2: Komposisi --}}
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2 mb-6">
+                            <i class="ph-fill ph-pie-chart text-purple-600"></i> Komposisi Hari Ini
+                        </h3>
+                        <div class="relative flex items-center justify-center mb-6">
+                            <div id="chartDonut" class="w-full"></div>
+                            {{-- Center Text Absolute --}}
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
+                                <span class="text-3xl font-black text-slate-800">{{ $hadirCount }}</span>
+                                <span class="text-[10px] font-bold text-slate-400 uppercase">Hadir</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Hadir Tepat</p>
+                                <p class="text-xl font-black text-emerald-600">{{ $hadirCount }}</p>
+                            </div>
+                            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Tidak Hadir</p>
+                                <p class="text-xl font-black text-rose-600">{{ $alfaCount + $izinUzurCount }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- VIEW MODE TOGGLE --}}
             <div class="flex justify-center mb-6 no-print">
                 <div class="bg-slate-200 p-1 rounded-xl inline-flex shadow-inner">
@@ -147,36 +259,8 @@
                 </div>
             </div>
 
-            {{-- STATISTIK CARDS (Hanya muncul di mode List) --}}
-            <div x-show="viewMode === 'list'" class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-8">
-                <div class="animate-enter bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all" style="animation-delay: 200ms">
-                    <div class="min-w-0">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Sudah Absen</p>
-                        <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate">{{ $hadirCount }}</h3>
-                        <p class="text-[10px] text-slate-400 mt-1 font-medium">{{ $range['label'] }}</p>
-                    </div>
-                    <div class="w-14 h-14 lg:w-16 lg:h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-check-circle"></i></div>
-                </div>
-
-                <div class="animate-enter bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all" style="animation-delay: 300ms">
-                    <div class="min-w-0">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Izin / Uzur</p>
-                        <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate">{{ $izinUzurCount + $alfaCount }}</h3>
-                    </div>
-                    <div class="w-14 h-14 lg:w-16 lg:h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-info"></i></div>
-                </div>
-
-                <div class="animate-enter bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all" style="animation-delay: 400ms">
-                    <div class="min-w-0">
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Belum Absen</p>
-                        <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate">{{ $belumAbsenCount }}</h3>
-                    </div>
-                    <div class="w-14 h-14 lg:w-16 lg:h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-x-circle"></i></div>
-                </div>
-            </div>
-
             {{-- MAIN CONTENT AREA (LIST VIEW) --}}
-            <div x-show="viewMode === 'list'" class="animate-enter bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden min-h-[500px]" style="animation-delay: 500ms">
+            <div x-show="viewMode === 'list'" class="animate-enter bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden min-h-[500px]" style="animation-delay: 200ms">
                 
                 {{-- Tabs Header --}}
                 <div class="flex flex-wrap md:flex-nowrap border-b border-slate-100 bg-slate-50/50 p-2 gap-2 sticky top-0 z-20 no-print">
@@ -346,16 +430,14 @@
 
             {{-- 
                 ==========================================================
-                MAIN CONTENT AREA (REKAP VIEW)
-                Tombol cetak di sini sekarang mengarah ke print_religious.blade.php
-                dengan parameter view_mode=rekap
+                MAIN CONTENT AREA (REKAP VIEW - SPLIT COLUMNS)
                 ==========================================================
             --}}
             <div x-show="viewMode === 'rekap'" style="display: none;" class="animate-enter bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
                 <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <div>
-                        <h3 class="font-bold text-lg text-slate-800">Statistik Kehadiran Per Kelas</h3>
-                        <p class="text-xs text-slate-500">Rekapitulasi berdasarkan rentang waktu yang dipilih.</p>
+                        <h3 class="font-bold text-lg text-slate-800">Rekapitulasi Dhuha & Dhuhur</h3>
+                        <p class="text-xs text-slate-500">Performa kehadiran ibadah per kelas.</p>
                     </div>
                     {{-- TOMBOL CETAK KHUSUS MODE REKAP --}}
                     <a href="{{ route('reports.printReligious', array_merge(request()->all(), ['view_mode' => 'rekap'])) }}" target="_blank" 
@@ -369,39 +451,58 @@
                         <thead>
                             <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-bold border-b border-slate-200">
                                 <th class="p-4 pl-6">Kelas</th>
-                                <th class="p-4 text-center">Total Siswa</th>
-                                <th class="p-4 text-center text-emerald-600">Hadir</th>
-                                <th class="p-4 text-center text-blue-600">Izin/Sakit</th>
-                                <th class="p-4 text-center text-rose-600">Alfa</th>
-                                <th class="p-4 text-center text-slate-400">
-                                    {{ $range['type'] === 'daily' ? 'Belum Absen' : 'Total Record' }}
+                                <th class="p-4 text-center border-l border-slate-200">Total Siswa</th>
+                                
+                                {{-- HEADER DHUHA --}}
+                                <th class="p-4 text-center bg-yellow-50/50 border-l border-yellow-100 text-yellow-700 w-[30%]">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <i class="ph-fill ph-sun"></i> Dhuha
+                                    </div>
                                 </th>
-                                <th class="p-4 text-center pr-6">% Performance</th>
+
+                                {{-- HEADER DHUHUR --}}
+                                <th class="p-4 text-center bg-blue-50/50 border-l border-blue-100 text-blue-700 w-[30%]">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <i class="ph-fill ph-moon-stars"></i> Dhuhur
+                                    </div>
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="text-sm font-bold text-slate-700 divide-y divide-slate-100">
                             @foreach($classRecap as $rekap)
                             <tr class="hover:bg-slate-50/80 transition-colors group">
                                 <td class="p-4 pl-6">
-                                    <span class="bg-blue-50 text-blue-900 px-3 py-1.5 rounded-lg group-hover:bg-blue-100 transition-colors border border-blue-100">{{ $rekap->className }}</span>
+                                    <span class="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg group-hover:bg-blue-100 group-hover:text-blue-900 transition-colors border border-slate-200 group-hover:border-blue-200">{{ $rekap->className }}</span>
                                 </td>
-                                <td class="p-4 text-center text-slate-500">{{ $rekap->total_siswa }}</td>
-                                <td class="p-4 text-center text-emerald-600">{{ $rekap->hadir }}</td>
-                                <td class="p-4 text-center text-blue-600">{{ $rekap->izin_sakit }}</td>
-                                <td class="p-4 text-center text-rose-600">{{ $rekap->alfa }}</td>
-                                <td class="p-4 text-center text-slate-400">
-                                    @if($rekap->is_daily)
-                                        {{ $rekap->belum }}
-                                    @else
-                                        {{ $rekap->hadir + $rekap->izin_sakit + $rekap->alfa }}
-                                    @endif
+                                <td class="p-4 text-center text-slate-400 border-l border-slate-100">{{ $rekap->total_siswa }}</td>
+                                
+                                {{-- KOLOM DHUHA --}}
+                                <td class="p-4 border-l border-slate-100 bg-yellow-50/10">
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <span class="text-xs text-slate-400">Hadir</span>
+                                        <span class="text-emerald-600">{{ $rekap->dhuha['hadir'] }}</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2 mb-1 overflow-hidden">
+                                        <div class="bg-yellow-400 h-2 rounded-full" style="width: {{ $rekap->dhuha['percent'] }}%"></div>
+                                    </div>
+                                    <div class="flex justify-between text-[10px] font-medium opacity-70">
+                                        <span class="text-rose-500">Alfa: {{ $rekap->dhuha['alfa'] }}</span>
+                                        <span>{{ $rekap->dhuha['percent'] }}%</span>
+                                    </div>
                                 </td>
-                                <td class="p-4 pr-6">
-                                    <div class="flex items-center gap-3">
-                                        <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                                            <div class="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full" style="width: {{ $rekap->persentase }}%"></div>
-                                        </div>
-                                        <span class="text-xs w-8 text-right font-black">{{ $rekap->persentase }}%</span>
+
+                                {{-- KOLOM DHUHUR --}}
+                                <td class="p-4 border-l border-slate-100 bg-blue-50/10">
+                                     <div class="flex items-center justify-between mb-1.5">
+                                        <span class="text-xs text-slate-400">Hadir</span>
+                                        <span class="text-emerald-600">{{ $rekap->dhuhur['hadir'] }}</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2 mb-1 overflow-hidden">
+                                        <div class="bg-blue-500 h-2 rounded-full" style="width: {{ $rekap->dhuhur['percent'] }}%"></div>
+                                    </div>
+                                    <div class="flex justify-between text-[10px] font-medium opacity-70">
+                                        <span class="text-rose-500">Alfa: {{ $rekap->dhuhur['alfa'] }}</span>
+                                        <span>{{ $rekap->dhuhur['percent'] }}%</span>
                                     </div>
                                 </td>
                             </tr>
@@ -413,7 +514,7 @@
         </div>
     </div>
 
-    {{-- MODALS & SCRIPT (Tetap Sama) --}}
+    {{-- MODALS (Manual, Edit, History) --}}
     <div id="manualInputModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
         <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-enter">
             <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
@@ -525,100 +626,72 @@
     </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            @if(isset($chartData))
+                const trendOptions = {
+                    series: @json($chartData['series']),
+                    chart: { type: 'bar', height: 300, toolbar: { show: false }, fontFamily: 'Plus Jakarta Sans, sans-serif' },
+                    colors: ['#10b981', '#cbd5e1'],
+                    plotOptions: { bar: { horizontal: false, columnWidth: '50%', borderRadius: 6, borderRadiusApplication: 'end' } },
+                    dataLabels: { enabled: false },
+                    stroke: { show: true, width: 2, colors: ['transparent'] },
+                    xaxis: { categories: @json($chartData['labels']), axisBorder: { show: false }, axisTicks: { show: false }, labels: { style: { colors: '#94a3b8', fontSize: '11px', fontWeight: 600 } } },
+                    yaxis: { labels: { style: { colors: '#94a3b8', fontSize: '11px', fontWeight: 600 } } },
+                    fill: { opacity: 1 },
+                    tooltip: { y: { formatter: function (val) { return val + " Siswa" } } },
+                    grid: { borderColor: '#f1f5f9', strokeDashArray: 4 },
+                    legend: { show: false }
+                };
+                new ApexCharts(document.querySelector("#chartTrend"), trendOptions).render();
+
+                const donutOptions = {
+                    series: [{{ $chartData['composition']['hadir'] }}, {{ $chartData['composition']['uzur'] }}, {{ $chartData['composition']['alfa'] + $chartData['composition']['belum'] }}],
+                    labels: ['Hadir', 'Sakit/Izin', 'Tidak Hadir'],
+                    chart: { type: 'donut', height: 250, fontFamily: 'Plus Jakarta Sans, sans-serif' },
+                    colors: ['#10b981', '#3b82f6', '#f43f5e'],
+                    plotOptions: { pie: { donut: { size: '75%', labels: { show: false } } } },
+                    dataLabels: { enabled: false },
+                    legend: { show: false },
+                    tooltip: { enabled: true, y: { formatter: function(val) { return val + " Siswa" } } }
+                };
+                new ApexCharts(document.querySelector("#chartDonut"), donutOptions).render();
+            @endif
+        });
+
         function openStudentHistory(studentId, studentName) {
             document.getElementById('history-student-name').innerText = studentName;
             document.getElementById('historyModal').classList.remove('hidden');
-            
             const contentDiv = document.getElementById('history-content');
-            contentDiv.innerHTML = `
-                <div class="flex flex-col items-center justify-center h-40">
-                    <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-2"></div>
-                    <span class="text-xs font-bold text-slate-400">Memuat riwayat...</span>
-                </div>`;
-
-            fetch(`{{ url('reports/religious/history') }}?student_id=${studentId}&activity={{ $selectedActivity }}`)
-                .then(response => response.text())
-                .then(html => {
-                    contentDiv.innerHTML = html;
-                })
-                .catch(error => {
-                    console.error(error);
-                    contentDiv.innerHTML = `<div class="p-6 text-center text-rose-500 font-bold text-sm">Gagal memuat data. Periksa koneksi atau route.</div>`;
-                });
+            contentDiv.innerHTML = `<div class="flex flex-col items-center justify-center h-40"><div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-2"></div><span class="text-xs font-bold text-slate-400">Memuat riwayat...</span></div>`;
+            fetch(`{{ url('reports/religious/history') }}?student_id=${studentId}&activity={{ $selectedActivity }}`).then(r=>r.text()).then(h=>{contentDiv.innerHTML=h;}).catch(e=>{console.error(e);contentDiv.innerHTML=`<div class="p-6 text-center text-rose-500 font-bold text-sm">Gagal memuat data.</div>`;});
         }
-
         function openManualModalForStudent(id, name) {
             document.getElementById('manual-student-id').value = id;
             document.getElementById('manual-student-name-display').value = name;
             document.getElementById('manualInputModal').classList.remove('hidden');
         }
-        function closeManualModal() {
-            document.getElementById('manualInputModal').classList.add('hidden');
-        }
+        function closeManualModal() { document.getElementById('manualInputModal').classList.add('hidden'); }
         function confirmResetData() {
-            Swal.fire({
-                title: 'Reset Data Hari Ini?',
-                text: "Semua data kehadiran {{ $selectedActivity }} akan dihapus!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#e11d48',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal',
-                customClass: { popup: 'rounded-[2rem]' }
-            }).then((result) => {
-                if (result.isConfirmed) document.getElementById('reset-data-form').submit();
-            })
+            Swal.fire({ title: 'Reset Data Hari Ini?', text: "Semua data kehadiran {{ $selectedActivity }} akan dihapus!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', cancelButtonColor: '#64748b', confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal', customClass: { popup: 'rounded-[2rem]' } }).then((result) => { if (result.isConfirmed) document.getElementById('reset-data-form').submit(); })
         }
-        
         function confirmBulkAlphaReligious(count) {
-            Swal.fire({
-                title: 'Tandai ' + count + ' Siswa Alfa?',
-                html: "Siswa akan ditandai <b>Alfa</b> untuk Shalat {{ $selectedActivity }}.<br>" +
-                      "<div class='mt-3 text-rose-600 font-bold bg-rose-50 p-2 rounded-lg border border-rose-100 text-sm'>Poin Pelanggaran akan ditambahkan otomatis!</div>",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#e11d48',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'Ya, Proses!',
-                cancelButtonText: 'Batal',
-                customClass: { popup: 'rounded-[2rem]' }
-            }).then((result) => {
-                if (result.isConfirmed) document.getElementById('bulk-alpha-religious-form').submit();
-            })
+            Swal.fire({ title: 'Tandai ' + count + ' Siswa Alfa?', html: "Siswa akan ditandai <b>Alfa</b> untuk Shalat {{ $selectedActivity }}.<br><div class='mt-3 text-rose-600 font-bold bg-rose-50 p-2 rounded-lg border border-rose-100 text-sm'>Poin Pelanggaran akan ditambahkan otomatis!</div>", icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', cancelButtonColor: '#64748b', confirmButtonText: 'Ya, Proses!', cancelButtonText: 'Batal', customClass: { popup: 'rounded-[2rem]' } }).then((result) => { if (result.isConfirmed) document.getElementById('bulk-alpha-religious-form').submit(); })
         }
-
         const religiousModal = document.getElementById('editReligiousModal');
         const religiousForm = document.getElementById('editReligiousForm');
         const religiousStudentNameDisplay = document.getElementById('modal-religious-student-name');
         const religiousActivitySelect = document.getElementById('modal-religious-activity');
         const religiousStatusSelect = document.getElementById('modal-religious-status');
         const religiousNotesInput = document.getElementById('modal-religious-notes');
-
-        function checkEditReligiousStatus(val) {
-             const alertBox = document.getElementById('edit-religious-alert');
-             if(val === 'Alfa') {
-                alertBox.classList.remove('hidden');
-            } else {
-                alertBox.classList.add('hidden');
-            }
-        }
-
+        function checkEditReligiousStatus(val) { const alertBox = document.getElementById('edit-religious-alert'); if(val === 'Alfa') { alertBox.classList.remove('hidden'); } else { alertBox.classList.add('hidden'); } }
         function openEditModalReligious(id, name, status, notes, activity) {
             const submitBtn = religiousForm.querySelector('button[type=submit]');
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'Update';
-
+            submitBtn.disabled = false; submitBtn.innerText = 'Update';
             const updateRoute = '{{ route('reports.update', ['attendance' => '__ID__']) }}'.replace('__ID__', id);
             religiousForm.action = updateRoute;
-            religiousStudentNameDisplay.textContent = name; 
-            religiousActivitySelect.value = activity;
-            religiousStatusSelect.value = status;
-            religiousNotesInput.value = notes;
-            
-            checkEditReligiousStatus(status);
-
-            religiousModal.classList.remove('hidden');
+            religiousStudentNameDisplay.textContent = name; religiousActivitySelect.value = activity;
+            religiousStatusSelect.value = status; religiousNotesInput.value = notes;
+            checkEditReligiousStatus(status); religiousModal.classList.remove('hidden');
         }
         function closeEditModalReligious() { religiousModal.classList.add('hidden'); }
     </script>

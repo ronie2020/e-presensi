@@ -22,6 +22,10 @@ use App\Jobs\SendWaManualNotificationJob;
 
 class ReportController extends Controller
 {
+    // =========================================================================
+    // PRIVATE HELPERS (Fungsi Bantuan)
+    // =========================================================================
+
     /**
      * Helper untuk menentukan rentang tanggal berdasarkan input request.
      */
@@ -36,7 +40,6 @@ class ReportController extends Controller
         if ($reportType === 'weekly') {
             $weekStr = $request->input('week', Carbon::now()->format('Y-\WW'));
             
-            // Format input HTML type="week" adalah 2024-W01
             $parts = explode('-W', $weekStr);
             if(count($parts) === 2) {
                 $year = $parts[0];
@@ -80,7 +83,7 @@ class ReportController extends Controller
     /**
      * Helper function untuk mempaginasi Collection secara manual.
      */
-    public function paginate($items, $perPage = 20, $page = null, $options = [])
+    private function paginate($items, $perPage = 20, $page = null, $options = [])
     {
         $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
         $items = $items instanceof Collection ? $items : Collection::make($items);
@@ -140,8 +143,11 @@ class ReportController extends Controller
         }
     }
 
-    // --- REKAP ABSENSI HARIAN ---
-     public function dailyReport(Request $request)
+    // =========================================================================
+    // 1. REKAP ABSENSI HARIAN (LOGIKA LAMA - TETAP UTUH)
+    // =========================================================================
+    
+    public function dailyReport(Request $request)
     {
         $range = $this->getDateRange($request);
         $selectedDate_db = Carbon::parse($range['start']);
@@ -211,19 +217,26 @@ class ReportController extends Controller
         return view('reports.print_daily', compact('selectedDate_db', 'attendancesHadir', 'attendancesLain', 'belumAbsenList', 'stats', 'range'));
     }
     
-    // --- REKAP KEAGAMAAN (UPDATED) ---
-    public function religiousReport(Request $request)
+    // =========================================================================
+    // 2. REKAP KEAGAMAAN (FIXED: PERBAIKAN LOGIKA & PRINT)
+    // =========================================================================
+
+    /**
+     * PRIVATE METHOD: Mengambil semua data keagamaan.
+     * Digunakan oleh Web View dan Print View agar data konsisten.
+     */
+    private function getReligiousData(Request $request)
     {
         $range = $this->getDateRange($request);
         $selectedDate_db = Carbon::parse($range['start']);
         $selectedActivity = $request->input('activity', 'Dhuha'); 
 
-        // 1. DATA EXISTING (LIST SISWA)
+        // 1. DATA ATTENDANCE DETAIL (Hanya ambil sesuai Activity yang dipilih untuk list view)
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
             ->whereHas('student', function($q) { $q->where('status', '!=', 'graduated'); })
             ->whereBetween('attendance_date', [$range['start'], $range['end']])
             ->where('type', 'Keagamaan')
-            ->where('activity', $selectedActivity)
+            ->where('activity', $selectedActivity) 
             ->orderBy('attendance_date', 'desc')
             ->get();
 
@@ -231,138 +244,147 @@ class ReportController extends Controller
         $izinUzurCount = $attendances->whereIn('status', ["Uzur Syar'i", "Izin", "Sakit"])->count();
         $alfaCount = $attendances->where('status', 'Alfa')->count();
 
+        // 2. MENCARI SISWA BELUM ABSEN
         $existingIds = $attendances->pluck('student_id')->unique()->toArray();
         $belumAbsenList = $this->sortStudents(Student::with('schoolClass')->where('status', '!=', 'graduated')->whereNotIn('id', $existingIds)->get());
         $belumAbsenCount = $belumAbsenList->count();
-
-        $attendancesHadir = $this->paginate($this->sortStudents($attendances->where('status', 'Hadir')), 20)->appends($request->all());
-        $attendancesUzur = $this->paginate($this->sortStudents($attendances->whereIn('status', ["Uzur Syar'i", "Alfa", "Izin", "Sakit"])), 20)->appends($request->all());
-
-        // 2. LOGIKA BARU: REKAP PER KELAS
-        $allClasses = SchoolClass::orderBy('name')->get();
-
-        $classRecap = $allClasses->map(function ($kelas) use ($range, $selectedActivity) {
-            $totalSiswa = Student::where('class_id', $kelas->id)
-                            ->where('status', '!=', 'graduated')
-                            ->count();
-
-            $stats = AttendanceSiswa::whereHas('student', function($q) use ($kelas) {
-                    $q->where('class_id', $kelas->id);
-                })
-                ->whereBetween('attendance_date', [$range['start'], $range['end']])
-                ->where('type', 'Keagamaan')
-                ->where('activity', $selectedActivity)
-                ->selectRaw('status, count(*) as count') 
-                ->groupBy('status')
-                ->pluck('count', 'status')
-                ->toArray();
-
-            $hadir = $stats['Hadir'] ?? 0;
-            $sakit = $stats['Sakit'] ?? 0;
-            $izin  = $stats['Izin'] ?? 0;
-            $uzur  = $stats["Uzur Syar'i"] ?? 0;
-            $alfa  = $stats['Alfa'] ?? 0;
-
-            $totalRecordMasuk = $hadir + $sakit + $izin + $uzur + $alfa;
-            
-            $belum = 0;
-            if ($range['type'] === 'daily') {
-                $belum = max(0, $totalSiswa - $totalRecordMasuk);
-                $persentase = $totalSiswa > 0 ? round(($hadir / $totalSiswa) * 100) : 0;
-            } else {
-                $persentase = $totalRecordMasuk > 0 ? round(($hadir / $totalRecordMasuk) * 100) : 0;
-            }
-
-            return (object) [
-                'className' => $kelas->name,
-                'total_siswa' => $totalSiswa,
-                'hadir' => $hadir,
-                'izin_sakit' => $sakit + $izin + $uzur,
-                'alfa' => $alfa,
-                'belum' => $belum, 
-                'persentase' => $persentase,
-                'is_daily' => $range['type'] === 'daily'
-            ];
-        });
-
-        return view('reports.religious', compact(
-            'selectedDate_db', 'selectedActivity', 'attendancesHadir', 'attendancesUzur',
-            'belumAbsenList', 'hadirCount', 'izinUzurCount', 'alfaCount', 'belumAbsenCount', 'range',
-            'classRecap' // Dikirim ke view
-        ));
-    }
-
-    // --- CETAK REKAP KEAGAMAAN (UPDATED) ---
-    public function printReligious(Request $request)
-    {
-        $range = $this->getDateRange($request);
-        $selectedDate_db = Carbon::parse($range['start']);
-        $selectedActivity = $request->input('activity', 'Dhuha'); 
-        $viewMode = $request->input('view_mode', 'list'); // Menangkap parameter view_mode
-
-        $attendances = AttendanceSiswa::with(['student.schoolClass'])
-            ->whereHas('student', function($q) { $q->where('status', '!=', 'graduated'); })
-            ->whereBetween('attendance_date', [$range['start'], $range['end']])
-            ->where('type', 'Keagamaan')
-            ->where('activity', $selectedActivity)
-            ->orderBy('attendance_date', 'asc')
-            ->get();
 
         $attendancesHadir = $this->sortStudents($attendances->where('status', 'Hadir'));
         $attendancesUzur = $this->sortStudents($attendances->whereIn('status', ["Uzur Syar'i", "Alfa", "Izin", "Sakit"]));
 
-        $hadirCount = $attendancesHadir->count();
-        $izinUzurCount = $attendancesUzur->whereIn('status', ["Uzur Syar'i", "Izin", "Sakit"])->count();
-        $alfaCount = $attendances->where('status', 'Alfa')->count();
+        // 3. REKAP PER KELAS (OPTIMIZED N+1 QUERY)
+        // Ambil semua kelas
+        $allClasses = SchoolClass::orderBy('name')->get();
 
-        $existingIds = $attendances->pluck('student_id')->unique()->toArray();
-        $belumAbsenList = $this->sortStudents(Student::with('schoolClass')->where('status', '!=', 'graduated')->whereNotIn('id', $existingIds)->get());
-        $belumAbsenCount = $belumAbsenList->count();
+        // Ambil Total Siswa per Kelas dalam 1 Query (Group By) agar tidak looping query
+        $studentCounts = Student::where('status', '!=', 'graduated')
+            ->select('class_id', DB::raw('count(*) as total'))
+            ->groupBy('class_id')
+            ->pluck('total', 'class_id');
 
-        // LOGIKA REKAP KELAS UNTUK CETAK
-        $classRecap = collect([]);
-        if ($viewMode === 'rekap') {
-             $allClasses = SchoolClass::orderBy('name')->get();
-             $classRecap = $allClasses->map(function ($kelas) use ($range, $selectedActivity) {
-                $totalSiswa = Student::where('class_id', $kelas->id)->where('status', '!=', 'graduated')->count();
-                $stats = AttendanceSiswa::whereHas('student', function($q) use ($kelas) { $q->where('class_id', $kelas->id); })
-                    ->whereBetween('attendance_date', [$range['start'], $range['end']])
-                    ->where('type', 'Keagamaan')->where('activity', $selectedActivity)
-                    ->selectRaw('status, count(*) as count')->groupBy('status')->pluck('count', 'status')->toArray();
+        // Ambil Statistik Dhuha & Dhuhur sekaligus dalam 1 Query
+        $rawStats = AttendanceSiswa::with('student')
+            ->whereHas('student', function($q) { $q->where('status', '!=', 'graduated'); })
+            ->whereBetween('attendance_date', [$range['start'], $range['end']])
+            ->where('type', 'Keagamaan')
+            ->whereIn('activity', ['Dhuha', 'Dhuhur'])
+            ->get()
+            ->groupBy(['student.class_id', 'activity', 'status']);
 
-                $hadir = $stats['Hadir'] ?? 0;
-                $izin_sakit = ($stats['Sakit'] ?? 0) + ($stats['Izin'] ?? 0) + ($stats["Uzur Syar'i"] ?? 0);
-                $alfa  = $stats['Alfa'] ?? 0;
-                $totalRecordMasuk = $hadir + $izin_sakit + $alfa;
+        $classRecap = $allClasses->map(function ($kelas) use ($range, $rawStats, $studentCounts) {
+            // Menggunakan data yang sudah di-preload
+            $totalSiswa = $studentCounts[$kelas->id] ?? 0;
+            
+            $getCount = function($activity, $status) use ($rawStats, $kelas) {
+                return $rawStats->get($kelas->id)?->get($activity)?->get($status)?->count() ?? 0;
+            };
+
+            // Dhuha Data
+            $dhuha_hadir = $getCount('Dhuha', 'Hadir');
+            $dhuha_izin  = $getCount('Dhuha', 'Izin') + $getCount('Dhuha', 'Sakit') + $getCount('Dhuha', "Uzur Syar'i");
+            $dhuha_alfa  = $getCount('Dhuha', 'Alfa');
+            $dhuha_total = $dhuha_hadir + $dhuha_izin + $dhuha_alfa;
+            
+            // Dhuhur Data
+            $dhuhur_hadir = $getCount('Dhuhur', 'Hadir');
+            $dhuhur_izin  = $getCount('Dhuhur', 'Izin') + $getCount('Dhuhur', 'Sakit') + $getCount('Dhuhur', "Uzur Syar'i");
+            $dhuhur_alfa  = $getCount('Dhuhur', 'Alfa');
+            $dhuhur_total = $dhuhur_hadir + $dhuhur_izin + $dhuhur_alfa;
+
+            // Perhitungan Persentase
+            $d_percent = ($range['type'] === 'daily' ? $totalSiswa : $dhuha_total);
+            $dhuha_percent = $d_percent > 0 ? round(($dhuha_hadir / $d_percent) * 100) : 0;
+
+            $dh_percent = ($range['type'] === 'daily' ? $totalSiswa : $dhuhur_total);
+            $dhuhur_percent = $dh_percent > 0 ? round(($dhuhur_hadir / $dh_percent) * 100) : 0;
+
+            return (object) [
+                'className' => $kelas->name,
+                'total_siswa' => $totalSiswa,
+                // Fallback field untuk kompatibilitas jika view print lama
+                'hadir' => $dhuha_hadir, 
+                'izin_sakit' => $dhuha_izin, 
+                'alfa' => $dhuha_alfa, 
+                'belum' => $totalSiswa - ($dhuha_hadir + $dhuha_izin + $dhuha_alfa), 
+                'persentase' => $dhuha_percent, 
+                'is_daily' => $range['type'] === 'daily',
                 
-                $belum = 0;
-                if ($range['type'] === 'daily') {
-                    $belum = max(0, $totalSiswa - $totalRecordMasuk);
-                    $persentase = $totalSiswa > 0 ? round(($hadir / $totalSiswa) * 100) : 0;
-                } else {
-                    $persentase = $totalRecordMasuk > 0 ? round(($hadir / $totalRecordMasuk) * 100) : 0;
-                }
+                // Data Struktural Baru untuk Tampilan Web
+                'dhuha' => ['hadir' => $dhuha_hadir, 'izin' => $dhuha_izin, 'alfa' => $dhuha_alfa, 'percent' => $dhuha_percent],
+                'dhuhur' => ['hadir' => $dhuhur_hadir, 'izin' => $dhuhur_izin, 'alfa' => $dhuhur_alfa, 'percent' => $dhuhur_percent]
+            ];
+        });
 
-                return (object) [
-                    'className' => $kelas->name, 'total_siswa' => $totalSiswa, 'hadir' => $hadir,
-                    'izin_sakit' => $izin_sakit, 'alfa' => $alfa, 'belum' => $belum, 'persentase' => $persentase,
-                    'is_daily' => $range['type'] === 'daily'
-                ];
-            });
+        // 4. CHART DATA
+        $chartStart = ($range['type'] === 'daily') ? Carbon::parse($range['end'])->subDays(6)->toDateString() : $range['start'];
+        $chartEnd = $range['end'];
+        $trendLabel = ($range['type'] === 'daily') ? "Tren 7 Hari Terakhir" : "Statistik Periode Ini";
+
+        $rawTrendData = AttendanceSiswa::selectRaw('DATE(attendance_date) as date, status, count(*) as count')
+            ->whereBetween('attendance_date', [$chartStart, $chartEnd])
+            ->where('type', 'Keagamaan')
+            ->where('activity', $selectedActivity) // Chart mengikuti tab aktif
+            ->groupBy('date', 'status')
+            ->get();
+
+        $trendDates = []; $dataHadir = []; $dataTidakHadir = [];
+        $period = \Carbon\CarbonPeriod::create($chartStart, $chartEnd);
+        foreach ($period as $date) {
+            $d = $date->format('Y-m-d');
+            $trendDates[] = $date->format('d M');
+            $dataHadir[] = $rawTrendData->where('date', $d)->where('status', 'Hadir')->sum('count');
+            $dataTidakHadir[] = $rawTrendData->where('date', $d)->whereIn('status', ['Sakit', 'Izin', "Uzur Syar'i", 'Alfa'])->sum('count');
         }
 
-        return view('reports.print_religious', compact(
+        $chartData = [
+            'labels' => $trendDates,
+            'series' => [['name' => 'Hadir', 'data' => $dataHadir], ['name' => 'Tidak Hadir/Uzur', 'data' => $dataTidakHadir]],
+            'trendLabel' => $trendLabel,
+            'composition' => ['hadir' => $hadirCount, 'uzur' => $izinUzurCount, 'alfa' => $alfaCount, 'belum' => $belumAbsenCount]
+        ];
+
+        // Return array of data
+        return compact(
             'selectedDate_db', 'selectedActivity', 'attendancesHadir', 'attendancesUzur',
             'belumAbsenList', 'hadirCount', 'izinUzurCount', 'alfaCount', 'belumAbsenCount', 'range',
-            'viewMode', 'classRecap'
-        ));
+            'classRecap', 'chartData'
+        );
     }
 
-    // --- FITUR BARU: REKAP PER KELAS (MATRIX VIEW) ---
+    /**
+     * DASHBOARD VIEW KEAGAMAAN
+     */
+    public function religiousReport(Request $request)
+    {
+        $data = $this->getReligiousData($request);
+        
+        // Paginate manual untuk view Dashboard agar tidak berat saat load page
+        $data['attendancesHadir'] = $this->paginate($data['attendancesHadir'], 20)->appends($request->all());
+        $data['attendancesUzur'] = $this->paginate($data['attendancesUzur'], 20)->appends($request->all());
+        
+        return view('reports.religious', $data);
+    }
 
     /**
-     * Helper private untuk mengambil data laporan kelas
+     * PRINT VIEW KEAGAMAAN
+     * Perbaikan: Return view print_religious, bukan redirect ke dashboard.
      */
+    public function printReligious(Request $request)
+    {
+        // Ambil data yang sama persis dengan Dashboard
+        $data = $this->getReligiousData($request);
+        
+        // Tambahkan variabel viewMode untuk logic di Blade
+        $data['viewMode'] = $request->view_mode ?? 'list';
+
+        // PENTING: Return view print
+        return view('reports.print_religious', $data);
+    }
+
+    // =========================================================================
+    // 3. FITUR MATRIX VIEW (REKAP PER KELAS BULANAN - LOGIKA LAMA UTUH)
+    // =========================================================================
+
     private function getClassReportData(Request $request)
     {
         $monthStr = $request->input('month', Carbon::now()->format('Y-m'));
@@ -456,7 +478,10 @@ class ReportController extends Controller
         return view('reports.print_class_report', $data);
     }
 
-    // --- FITUR LAIN (TIDAK BERUBAH) ---
+    // =========================================================================
+    // 4. TEACHING JOURNAL (LOGIKA LAMA UTUH)
+    // =========================================================================
+
     public function teachingJournal(Request $request)
     {
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
@@ -503,6 +528,10 @@ class ReportController extends Controller
             'startDate', 'endDate', 'teacherId', 'classId', 'subjectId'
         ));
     }
+
+    // =========================================================================
+    // 5. OPERASI CRUD & HELPERS (LOGIKA LAMA UTUH)
+    // =========================================================================
 
     public function bulkAlpha(Request $request)
     {
@@ -653,17 +682,11 @@ class ReportController extends Controller
         return back()->with('success', "Semua data $activity tanggal $date berhasil direset.");
     }
 
-    // --- API / AJAX HELPERS (NEW) ---
-
-    /**
-     * Mengambil riwayat keagamaan siswa (untuk Modal Detail di halaman religious report)
-     */
     public function getStudentReligiousHistory(Request $request)
     {
         $studentId = $request->student_id;
-        $activity = $request->activity; // Dhuha / Dhuhur
+        $activity = $request->activity; 
         
-        // Default: Ambil data bulan ini
         $startOfMonth = Carbon::now()->startOfMonth()->toDateString();
         $endOfMonth = Carbon::now()->endOfMonth()->toDateString();
 
@@ -680,10 +703,7 @@ class ReportController extends Controller
             ->orderBy('attendance_date', 'desc')
             ->get();
 
-        // Render HTML Partial langsung untuk responsif di AJAX
         $html = '<div class="p-4 space-y-3">';
-        
-        // Header Info Siswa
         $html .= '<div class="flex items-center gap-3 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">';
         $html .= '<div class="w-10 h-10 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-sm shrink-0">'.substr($student->name,0,1).'</div>';
         $html .= '<div><div class="font-bold text-slate-800 text-sm">'.$student->name.'</div><div class="text-xs text-slate-500">'.$student->schoolClass->name.' • '.$activity.' Bulan Ini</div></div>';
@@ -692,7 +712,6 @@ class ReportController extends Controller
         if ($histories->count() > 0) {
             $html .= '<div class="space-y-2">';
             foreach ($histories as $h) {
-                // Styling berdasarkan status
                 $color = match($h->status) {
                     'Hadir' => 'text-emerald-600 bg-emerald-50 border-emerald-100',
                     'Alfa' => 'text-rose-600 bg-rose-50 border-rose-100',
@@ -715,9 +734,7 @@ class ReportController extends Controller
         } else {
             $html .= '<div class="text-center py-6 text-slate-400 italic text-sm">Belum ada riwayat bulan ini.</div>';
         }
-
         $html .= '</div>';
-
         return $html;
     }
 }
