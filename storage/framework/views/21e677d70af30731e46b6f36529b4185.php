@@ -29,7 +29,6 @@
     </style>
 
     
-    
     <div class="py-6 md:py-8 font-sans text-slate-800 pb-32" x-data="{ 
         activeTab: '<?php echo e(request('activeTab', 'hadir')); ?>',
         reportType: '<?php echo e(request('report_type', 'daily')); ?>',
@@ -131,6 +130,7 @@
                                     <i class="ph-bold ph-magnifying-glass"></i> <span class="md:hidden">Cari</span>
                                 </button>
                                 <div class="w-px h-11 bg-slate-200 hidden md:block"></div>
+                                
                                 <a href="<?php echo e(route('reports.printReligious', request()->all())); ?>" target="_blank" class="flex-1 md:flex-none bg-white border border-slate-200 text-slate-600 hover:text-blue-900 hover:border-blue-900 px-5 rounded-xl h-11 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-95">
                                     <i class="ph-bold ph-printer text-lg"></i> <span class="md:hidden">Cetak</span>
                                 </a>
@@ -162,7 +162,6 @@
                     <div class="min-w-0">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Sudah Absen</p>
                         <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate"><?php echo e($hadirCount); ?></h3>
-                        
                         <p class="text-[10px] text-slate-400 mt-1 font-medium"><?php echo e($range['label']); ?></p>
                     </div>
                     <div class="w-14 h-14 lg:w-16 lg:h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-check-circle"></i></div>
@@ -223,7 +222,6 @@
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex justify-between items-center pr-2">
-                                                
                                                 <button type="button" onclick="openStudentHistory(<?php echo e($attendance->student->id); ?>, '<?php echo e(addslashes($attendance->student->name)); ?>')" 
                                                     class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate text-left hover:underline decoration-blue-300 underline-offset-2">
                                                     <?php echo e($attendance->student->name); ?>
@@ -263,6 +261,7 @@
                     </div>
 
                     
+                    
                     <div x-show="activeTab === 'belum'" style="display: none;" class="w-full">
                          <?php if($belumAbsenList->count() > 0): ?>
                             <div class="p-5 bg-rose-50 border-b border-rose-100 flex flex-col md:flex-row items-center justify-between gap-4 no-print">
@@ -293,7 +292,6 @@
                                     <div class="flex items-center gap-4 overflow-hidden">
                                         <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center font-bold text-xs shrink-0">!</div>
                                         <div class="min-w-0">
-                                            
                                             <button type="button" onclick="openStudentHistory(<?php echo e($student->id); ?>, '<?php echo e(addslashes($student->name)); ?>')" 
                                                 class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate text-left hover:underline decoration-blue-300 underline-offset-2">
                                                 <?php echo e($student->name); ?>
@@ -313,7 +311,6 @@
                         </div>
                     </div>
 
-                    
                     <div x-show="activeTab === 'uzur'" style="display: none;" class="w-full">
                          <div class="grid grid-cols-1 gap-0">
                             <?php $__empty_1 = true; $__currentLoopData = $attendancesUzur; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $attendance): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
@@ -326,7 +323,6 @@
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex justify-between items-center pr-2">
-                                                
                                                 <button type="button" onclick="openStudentHistory(<?php echo e($attendance->student->id); ?>, '<?php echo e(addslashes($attendance->student->name)); ?>')" 
                                                     class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate text-left hover:underline decoration-blue-300 underline-offset-2">
                                                     <?php echo e($attendance->student->name); ?>
@@ -373,7 +369,11 @@
                         <h3 class="font-bold text-lg text-slate-800">Statistik Kehadiran Per Kelas</h3>
                         <p class="text-xs text-slate-500">Rekapitulasi berdasarkan rentang waktu yang dipilih.</p>
                     </div>
-                    <button onclick="window.print()" class="text-slate-400 hover:text-blue-900 transition-colors p-2 bg-white rounded-xl shadow-sm border border-slate-200"><i class="ph-bold ph-printer text-xl"></i></button>
+                    
+                    <a href="<?php echo e(route('reports.printReligious', array_merge(request()->all(), ['view_mode' => 'rekap']))); ?>" target="_blank" 
+                       class="text-slate-400 hover:text-blue-900 transition-colors p-2 bg-white rounded-xl shadow-sm border border-slate-200">
+                       <i class="ph-bold ph-printer text-xl"></i>
+                    </a>
                 </div>
                 
                 <div class="overflow-x-auto">
@@ -429,8 +429,6 @@
     </div>
 
     
-    
-    
     <div id="manualInputModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
         <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-enter">
             <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
@@ -477,7 +475,6 @@
         </div>
     </div>
 
-    
     <div id="editReligiousModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
         <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-enter">
             <div class="bg-slate-800 px-6 py-4 flex justify-between items-center">
@@ -523,7 +520,6 @@
         </div>
     </div>
 
-    
     <div id="historyModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
         <div class="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl overflow-hidden border border-slate-100 animate-enter flex flex-col max-h-[80vh]">
             <div class="bg-white border-b border-slate-100 px-6 py-4 flex justify-between items-center shrink-0">
@@ -535,7 +531,6 @@
             </div>
             
             <div id="history-content" class="p-0 overflow-y-auto grow">
-                
                 <div class="flex flex-col items-center justify-center h-40">
                     <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-2"></div>
                     <span class="text-xs font-bold text-slate-400">Memuat riwayat...</span>
@@ -545,7 +540,6 @@
     </div>
 
     <script>
-        // --- LOGIKA MODAL HISTORY ---
         function openStudentHistory(studentId, studentName) {
             document.getElementById('history-student-name').innerText = studentName;
             document.getElementById('historyModal').classList.remove('hidden');
@@ -557,8 +551,6 @@
                     <span class="text-xs font-bold text-slate-400">Memuat riwayat...</span>
                 </div>`;
 
-            // Asumsi URL: /reports/religious/history?student_id=X&activity=Y
-            // Anda perlu memastikan Route ini ada di web.php
             fetch(`<?php echo e(url('reports/religious/history')); ?>?student_id=${studentId}&activity=<?php echo e($selectedActivity); ?>`)
                 .then(response => response.text())
                 .then(html => {
@@ -569,7 +561,6 @@
                     contentDiv.innerHTML = `<div class="p-6 text-center text-rose-500 font-bold text-sm">Gagal memuat data. Periksa koneksi atau route.</div>`;
                 });
         }
-        // ----------------------------
 
         function openManualModalForStudent(id, name) {
             document.getElementById('manual-student-id').value = id;

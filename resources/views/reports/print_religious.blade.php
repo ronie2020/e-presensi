@@ -88,121 +88,167 @@
             <td>:</td>
             <td>{{ auth()->user()->name ?? 'Administrator' }}</td>
         </tr>
+        <tr>
+            <td class="meta-title">Tampilan</td>
+            <td>:</td>
+            <td>{{ isset($viewMode) && $viewMode == 'rekap' ? 'Rekapitulasi Per Kelas' : 'Detail Daftar Siswa' }}</td>
+        </tr>
     </table>
 
-    <div class="summary-box">
-        <div class="summary-item">
-            <span class="summary-val">{{ $hadirCount }}</span>
-            <span class="summary-label">Hadir</span>
-        </div>
-        <div class="summary-item">
-            <span class="summary-val">{{ $izinUzurCount }}</span>
-            <span class="summary-label">Uzur / Izin</span>
-        </div>
-        <div class="summary-item">
-            <span class="summary-val">{{ $alfaCount }}</span>
-            <span class="summary-label">Alfa</span>
-        </div>
-        <div class="summary-item">
-            <span class="summary-val">{{ $belumAbsenCount }}</span>
-            <span class="summary-label">Belum Absen</span>
-        </div>
-    </div>
-
-    {{-- Tabel 1: Siswa Hadir --}}
-    @if($attendancesHadir->count() > 0)
-        <div class="section-title">A. Daftar Siswa Hadir</div>
+    {{-- CONDITION: JIKA MODE REKAP --}}
+    @if(isset($viewMode) && $viewMode == 'rekap')
+        
+        <div class="section-title">Rekapitulasi Kehadiran Per Kelas</div>
         <table class="data">
             <thead>
                 <tr>
                     <th width="5%">No</th>
-                    @if($range['type'] != 'daily') <th width="15%">Tanggal</th> @endif
-                    <th width="35%">Nama Siswa</th>
                     <th width="20%">Kelas</th>
-                    <th width="20%">Waktu Absen</th>
-                    <th>Keterangan</th>
+                    <th>Total Siswa</th>
+                    <th>Hadir</th>
+                    <th>Izin/Sakit</th>
+                    <th>Alfa</th>
+                    <th>{{ $range['type'] === 'daily' ? 'Belum Absen' : 'Total Record' }}</th>
+                    <th>% Hadir</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($attendancesHadir as $index => $att)
+                @foreach($classRecap as $index => $rekap)
                 <tr>
                     <td class="center">{{ $index + 1 }}</td>
-                    @if($range['type'] != 'daily') 
-                        <td class="center">{{ \Carbon\Carbon::parse($att->attendance_date)->format('d/m/Y') }}</td> 
-                    @endif
-                    <td>{{ $att->student->name }}</td>
-                    <td class="center">{{ $att->student->schoolClass->name ?? '-' }}</td>
-                    <td class="center">{{ $att->created_at->format('H:i') }}</td>
-                    {{-- PERBAIKAN: Menggunakan $att->notes --}}
-                    <td>{{ $att->notes ?? '-' }}</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    @endif
-
-    {{-- Tabel 2: Uzur / Izin / Alfa --}}
-    @if($attendancesUzur->count() > 0)
-        <div class="section-title">B. Daftar Ketidakhadiran (Uzur / Izin / Alfa)</div>
-        <table class="data">
-            <thead>
-                <tr>
-                    <th width="5%">No</th>
-                    @if($range['type'] != 'daily') <th width="15%">Tanggal</th> @endif
-                    <th width="35%">Nama Siswa</th>
-                    <th width="20%">Kelas</th>
-                    <th width="15%">Status</th>
-                    <th>Catatan / Keterangan</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($attendancesUzur as $index => $att)
-                <tr>
-                    <td class="center">{{ $index + 1 }}</td>
-                    @if($range['type'] != 'daily') 
-                        <td class="center">{{ \Carbon\Carbon::parse($att->attendance_date)->format('d/m/Y') }}</td> 
-                    @endif
-                    <td>{{ $att->student->name }}</td>
-                    <td class="center">{{ $att->student->schoolClass->name ?? '-' }}</td>
-                    {{-- PERBAIKAN: Menggunakan $att->status --}}
-                    <td class="center" style="font-weight: bold;">
-                        {{ $att->status }}
-                        @if(in_array($att->status, ['Alfa', 'Alpa']))
-                            <br><small class="text-danger">(- Poin)</small>
+                    <td style="font-weight: bold;">{{ $rekap->className }}</td>
+                    <td class="center">{{ $rekap->total_siswa }}</td>
+                    <td class="center" style="background-color: #ecfdf5;">{{ $rekap->hadir }}</td>
+                    <td class="center" style="background-color: #eff6ff;">{{ $rekap->izin_sakit }}</td>
+                    <td class="center" style="background-color: #fff1f2; color: #d32f2f;">{{ $rekap->alfa }}</td>
+                    <td class="center" style="color: #666;">
+                        @if($rekap->is_daily)
+                            {{ $rekap->belum }}
+                        @else
+                            {{ $rekap->hadir + $rekap->izin_sakit + $rekap->alfa }}
                         @endif
                     </td>
-                    {{-- PERBAIKAN: Menggunakan $att->notes --}}
-                    <td>{{ $att->notes ?? '-' }}</td>
+                    <td class="center" style="font-weight: bold;">{{ $rekap->persentase }}%</td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
-    @endif
 
-    {{-- Tabel 3: Belum Absen --}}
-    @if($belumAbsenList->count() > 0)
-        <div class="section-title text-danger">C. Daftar Siswa Belum Absen</div>
-        <table class="data">
-            <thead>
-                <tr>
-                    <th width="5%">No</th>
-                    <th width="45%">Nama Siswa</th>
-                    <th width="25%">Kelas</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($belumAbsenList as $index => $student)
-                <tr>
-                    <td class="center">{{ $index + 1 }}</td>
-                    <td>{{ $student->name }}</td>
-                    <td class="center">{{ $student->schoolClass->name ?? '-' }}</td>
-                    <td class="center text-muted">Belum ada keterangan</td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    @endif
+    @else
+    {{-- CONDITION: JIKA MODE DETAIL (LIST SISWA - LOGIKA LAMA) --}}
+    
+        <div class="summary-box">
+            <div class="summary-item">
+                <span class="summary-val">{{ $hadirCount }}</span>
+                <span class="summary-label">Hadir</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-val">{{ $izinUzurCount }}</span>
+                <span class="summary-label">Uzur / Izin</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-val">{{ $alfaCount }}</span>
+                <span class="summary-label">Alfa</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-val">{{ $belumAbsenCount }}</span>
+                <span class="summary-label">Belum Absen</span>
+            </div>
+        </div>
+
+        {{-- Tabel 1: Siswa Hadir --}}
+        @if($attendancesHadir->count() > 0)
+            <div class="section-title">A. Daftar Siswa Hadir</div>
+            <table class="data">
+                <thead>
+                    <tr>
+                        <th width="5%">No</th>
+                        @if($range['type'] != 'daily') <th width="15%">Tanggal</th> @endif
+                        <th width="35%">Nama Siswa</th>
+                        <th width="20%">Kelas</th>
+                        <th width="20%">Waktu Absen</th>
+                        <th>Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($attendancesHadir as $index => $att)
+                    <tr>
+                        <td class="center">{{ $index + 1 }}</td>
+                        @if($range['type'] != 'daily') 
+                            <td class="center">{{ \Carbon\Carbon::parse($att->attendance_date)->format('d/m/Y') }}</td> 
+                        @endif
+                        <td>{{ $att->student->name }}</td>
+                        <td class="center">{{ $att->student->schoolClass->name ?? '-' }}</td>
+                        <td class="center">{{ $att->created_at->format('H:i') }}</td>
+                        <td>{{ $att->notes ?? '-' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+
+        {{-- Tabel 2: Uzur / Izin / Alfa --}}
+        @if($attendancesUzur->count() > 0)
+            <div class="section-title">B. Daftar Ketidakhadiran (Uzur / Izin / Alfa)</div>
+            <table class="data">
+                <thead>
+                    <tr>
+                        <th width="5%">No</th>
+                        @if($range['type'] != 'daily') <th width="15%">Tanggal</th> @endif
+                        <th width="35%">Nama Siswa</th>
+                        <th width="20%">Kelas</th>
+                        <th width="15%">Status</th>
+                        <th>Catatan / Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($attendancesUzur as $index => $att)
+                    <tr>
+                        <td class="center">{{ $index + 1 }}</td>
+                        @if($range['type'] != 'daily') 
+                            <td class="center">{{ \Carbon\Carbon::parse($att->attendance_date)->format('d/m/Y') }}</td> 
+                        @endif
+                        <td>{{ $att->student->name }}</td>
+                        <td class="center">{{ $att->student->schoolClass->name ?? '-' }}</td>
+                        <td class="center" style="font-weight: bold;">
+                            {{ $att->status }}
+                            @if(in_array($att->status, ['Alfa', 'Alpa']))
+                                <br><small class="text-danger">(- Poin)</small>
+                            @endif
+                        </td>
+                        <td>{{ $att->notes ?? '-' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+
+        {{-- Tabel 3: Belum Absen --}}
+        @if($belumAbsenList->count() > 0)
+            <div class="section-title text-danger">C. Daftar Siswa Belum Absen</div>
+            <table class="data">
+                <thead>
+                    <tr>
+                        <th width="5%">No</th>
+                        <th width="45%">Nama Siswa</th>
+                        <th width="25%">Kelas</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($belumAbsenList as $index => $student)
+                    <tr>
+                        <td class="center">{{ $index + 1 }}</td>
+                        <td>{{ $student->name }}</td>
+                        <td class="center">{{ $student->schoolClass->name ?? '-' }}</td>
+                        <td class="center text-muted">Belum ada keterangan</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+
+    @endif {{-- End If ViewMode --}}
 
     <div class="footer">
         <div class="signature-box">

@@ -20,7 +20,6 @@
     </style>
 
     {{-- Wrapper Utama --}}
-    {{-- Kita tambahkan 'viewMode' di x-data untuk mengontrol tampilan List vs Rekap --}}
     <div class="py-6 md:py-8 font-sans text-slate-800 pb-32" x-data="{ 
         activeTab: '{{ request('activeTab', 'hadir') }}',
         reportType: '{{ request('report_type', 'daily') }}',
@@ -122,6 +121,7 @@
                                     <i class="ph-bold ph-magnifying-glass"></i> <span class="md:hidden">Cari</span>
                                 </button>
                                 <div class="w-px h-11 bg-slate-200 hidden md:block"></div>
+                                {{-- TOMBOL CETAK UTAMA (Default Mode: List) --}}
                                 <a href="{{ route('reports.printReligious', request()->all()) }}" target="_blank" class="flex-1 md:flex-none bg-white border border-slate-200 text-slate-600 hover:text-blue-900 hover:border-blue-900 px-5 rounded-xl h-11 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-95">
                                     <i class="ph-bold ph-printer text-lg"></i> <span class="md:hidden">Cetak</span>
                                 </a>
@@ -131,12 +131,7 @@
                 </div>
             </div>
 
-            {{-- 
-                ==========================================================
-                VIEW MODE TOGGLE (FITUR BARU)
-                Di sini pengguna memilih mau lihat "Detail Siswa" atau "Rekap Per Kelas"
-                ==========================================================
-            --}}
+            {{-- VIEW MODE TOGGLE --}}
             <div class="flex justify-center mb-6 no-print">
                 <div class="bg-slate-200 p-1 rounded-xl inline-flex shadow-inner">
                     <button @click="viewMode = 'list'" 
@@ -158,7 +153,6 @@
                     <div class="min-w-0">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Sudah Absen</p>
                         <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate">{{ $hadirCount }}</h3>
-                        {{-- MENAMPILKAN RANGE TANGGAL --}}
                         <p class="text-[10px] text-slate-400 mt-1 font-medium">{{ $range['label'] }}</p>
                     </div>
                     <div class="w-14 h-14 lg:w-16 lg:h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-check-circle"></i></div>
@@ -218,7 +212,6 @@
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex justify-between items-center pr-2">
-                                                {{-- LINK NAMA SISWA KE MODAL HISTORY --}}
                                                 <button type="button" onclick="openStudentHistory({{ $attendance->student->id }}, '{{ addslashes($attendance->student->name) }}')" 
                                                     class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate text-left hover:underline decoration-blue-300 underline-offset-2">
                                                     {{ $attendance->student->name }}
@@ -254,7 +247,8 @@
                         </div>
                     </div>
 
-                    {{-- TAB BELUM ABSEN --}}
+                    {{-- TAB BELUM ABSEN & UZUR --}}
+                    {{-- (Isi tab lain tetap sama, tidak perlu diubah) --}}
                     <div x-show="activeTab === 'belum'" style="display: none;" class="w-full">
                          @if($belumAbsenList->count() > 0)
                             <div class="p-5 bg-rose-50 border-b border-rose-100 flex flex-col md:flex-row items-center justify-between gap-4 no-print">
@@ -285,7 +279,6 @@
                                     <div class="flex items-center gap-4 overflow-hidden">
                                         <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center font-bold text-xs shrink-0">!</div>
                                         <div class="min-w-0">
-                                            {{-- LINK NAMA SISWA KE MODAL HISTORY --}}
                                             <button type="button" onclick="openStudentHistory({{ $student->id }}, '{{ addslashes($student->name) }}')" 
                                                 class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate text-left hover:underline decoration-blue-300 underline-offset-2">
                                                 {{ $student->name }}
@@ -304,7 +297,6 @@
                         </div>
                     </div>
 
-                    {{-- TAB UZUR --}}
                     <div x-show="activeTab === 'uzur'" style="display: none;" class="w-full">
                          <div class="grid grid-cols-1 gap-0">
                             @forelse ($attendancesUzur as $attendance)
@@ -316,7 +308,6 @@
                                         </div>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex justify-between items-center pr-2">
-                                                {{-- LINK NAMA SISWA KE MODAL HISTORY --}}
                                                 <button type="button" onclick="openStudentHistory({{ $attendance->student->id }}, '{{ addslashes($attendance->student->name) }}')" 
                                                     class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate text-left hover:underline decoration-blue-300 underline-offset-2">
                                                     {{ $attendance->student->name }}
@@ -356,7 +347,8 @@
             {{-- 
                 ==========================================================
                 MAIN CONTENT AREA (REKAP VIEW)
-                Tabel Statistik Per Kelas Muncul Di Sini Saat 'viewMode' = 'rekap'
+                Tombol cetak di sini sekarang mengarah ke print_religious.blade.php
+                dengan parameter view_mode=rekap
                 ==========================================================
             --}}
             <div x-show="viewMode === 'rekap'" style="display: none;" class="animate-enter bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
@@ -365,7 +357,11 @@
                         <h3 class="font-bold text-lg text-slate-800">Statistik Kehadiran Per Kelas</h3>
                         <p class="text-xs text-slate-500">Rekapitulasi berdasarkan rentang waktu yang dipilih.</p>
                     </div>
-                    <button onclick="window.print()" class="text-slate-400 hover:text-blue-900 transition-colors p-2 bg-white rounded-xl shadow-sm border border-slate-200"><i class="ph-bold ph-printer text-xl"></i></button>
+                    {{-- TOMBOL CETAK KHUSUS MODE REKAP --}}
+                    <a href="{{ route('reports.printReligious', array_merge(request()->all(), ['view_mode' => 'rekap'])) }}" target="_blank" 
+                       class="text-slate-400 hover:text-blue-900 transition-colors p-2 bg-white rounded-xl shadow-sm border border-slate-200">
+                       <i class="ph-bold ph-printer text-xl"></i>
+                    </a>
                 </div>
                 
                 <div class="overflow-x-auto">
@@ -417,9 +413,7 @@
         </div>
     </div>
 
-    {{-- MODALS & SCRIPT --}}
-    
-    {{-- Modal Manual Input --}}
+    {{-- MODALS & SCRIPT (Tetap Sama) --}}
     <div id="manualInputModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
         <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-enter">
             <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
@@ -466,7 +460,6 @@
         </div>
     </div>
 
-    {{-- Modal Edit --}}
     <div id="editReligiousModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
         <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-enter">
             <div class="bg-slate-800 px-6 py-4 flex justify-between items-center">
@@ -512,7 +505,6 @@
         </div>
     </div>
 
-    {{-- MODAL HISTORY SISWA (BARU) --}}
     <div id="historyModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 transition-opacity no-print">
         <div class="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl overflow-hidden border border-slate-100 animate-enter flex flex-col max-h-[80vh]">
             <div class="bg-white border-b border-slate-100 px-6 py-4 flex justify-between items-center shrink-0">
@@ -524,7 +516,6 @@
             </div>
             
             <div id="history-content" class="p-0 overflow-y-auto grow">
-                {{-- Konten akan di-load via AJAX --}}
                 <div class="flex flex-col items-center justify-center h-40">
                     <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-2"></div>
                     <span class="text-xs font-bold text-slate-400">Memuat riwayat...</span>
@@ -534,7 +525,6 @@
     </div>
 
     <script>
-        // --- LOGIKA MODAL HISTORY ---
         function openStudentHistory(studentId, studentName) {
             document.getElementById('history-student-name').innerText = studentName;
             document.getElementById('historyModal').classList.remove('hidden');
@@ -546,8 +536,6 @@
                     <span class="text-xs font-bold text-slate-400">Memuat riwayat...</span>
                 </div>`;
 
-            // Asumsi URL: /reports/religious/history?student_id=X&activity=Y
-            // Anda perlu memastikan Route ini ada di web.php
             fetch(`{{ url('reports/religious/history') }}?student_id=${studentId}&activity={{ $selectedActivity }}`)
                 .then(response => response.text())
                 .then(html => {
@@ -558,7 +546,6 @@
                     contentDiv.innerHTML = `<div class="p-6 text-center text-rose-500 font-bold text-sm">Gagal memuat data. Periksa koneksi atau route.</div>`;
                 });
         }
-        // ----------------------------
 
         function openManualModalForStudent(id, name) {
             document.getElementById('manual-student-id').value = id;
