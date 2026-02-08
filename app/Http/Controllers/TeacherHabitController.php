@@ -23,45 +23,62 @@ class TeacherHabitController extends Controller
         // 2. Ambil Daftar Kelas untuk Dropdown
         $classes = SchoolClass::orderBy('name')->get();
 
-        // 3. Default Data Kosong
+        // 3. Inisialisasi Variabel
         $students = collect();
+        $latestSubmissions = collect(); 
         $stats = [
             'submitted' => 0,
             'missing' => 0,
             'percentage' => 0
         ];
 
-        // 4. Jika Kelas Dipilih, Jalankan Logika
+        // 4. Logika Utama
         if ($classId) {
-            // Kita gunakan 'class_id' karena sudah dikonfirmasi di file Student.php
+            // === KONDISI A: JIKA KELAS DIPILIH (Statistik Per Kelas) ===
+            
             $students = Student::where('class_id', $classId)
                 ->orderBy('name')
                 ->get()
                 ->map(function ($student) use ($date) {
-                    
-                    // PERBAIKAN UTAMA: Gunakan whereDate()
-                    // Ini mengatasi masalah jika di database tersimpan sebagai 'Y-m-d H:i:s'
                     $habit = StudentHabit::where('student_id', $student->id)
                                 ->whereDate('report_date', $date) 
                                 ->first();
                     
-                    // Inject status & data ke object siswa untuk dipakai di View
                     $student->habit_status = $habit ? 'submitted' : 'missing';
                     $student->habit_data = $habit; 
-                    
                     return $student;
                 });
 
-            // Hitung Statistik Dashboard
+            // Hitung Statistik Kelas
             $totalStudents = $students->count();
             $submitted = $students->where('habit_status', 'submitted')->count();
             
             $stats['submitted'] = $submitted;
             $stats['missing'] = $totalStudents - $submitted;
             $stats['percentage'] = $totalStudents > 0 ? round(($submitted / $totalStudents) * 100) : 0;
+
+        } else {
+            // === KONDISI B: JIKA BELUM PILIH KELAS (Statistik Global) ===
+            
+            // 1. Hitung Statistik Global (Satu Sekolah)
+            $totalStudentsAll = Student::count();
+            // Hitung jumlah laporan unik hari ini
+            $submittedAll = StudentHabit::whereDate('report_date', $date)->count();
+
+            $stats['submitted'] = $submittedAll;
+            $stats['missing'] = max(0, $totalStudentsAll - $submittedAll);
+            $stats['percentage'] = $totalStudentsAll > 0 ? round(($submittedAll / $totalStudentsAll) * 100) : 0;
+
+            // 2. Ambil Feed Aktivitas Terbaru
+            $latestSubmissions = StudentHabit::with(['student', 'student.schoolClass'])
+                ->whereDate('report_date', $date)
+                ->orderBy('updated_at', 'desc')
+                ->limit(10)
+                ->get();
         }
 
-        return view('habits.teacher_index', compact('classes', 'students', 'date', 'classId', 'stats'));
+        // Kirim semua variabel ke view
+        return view('habits.teacher_index', compact('classes', 'students', 'date', 'classId', 'stats', 'latestSubmissions'));
     }
 
     /**
@@ -69,12 +86,7 @@ class TeacherHabitController extends Controller
      */
     public function show($id)
     {
-        // PERBAIKAN: Eager Load 'schoolClass' agar nama kelas muncul di modal
-        // Sesuai relasi di Student.php: public function schoolClass()
         $habit = StudentHabit::with('student.schoolClass')->findOrFail($id);
-        
-        // Render view partial
-        // Pastikan file ini ada di: resources/views/habits/partials/detail_modal.blade.php
         return view('habits.partials.detail_modal', compact('habit'))->render();
     }
     
@@ -87,7 +99,7 @@ class TeacherHabitController extends Controller
         
         $habit->update([
             'teacher_feedback' => $request->feedback,
-            'teacher_id' => auth()->id(), // Pastikan guru sudah login
+            'teacher_id' => auth()->id(),
             'validated_at' => now()
         ]);
 
@@ -112,13 +124,11 @@ class TeacherHabitController extends Controller
             ->orderBy('name', 'asc')
             ->get()
             ->each(function($student) use ($date) {
-                // PERBAIKAN: Gunakan whereDate di sini juga
                 $student->habit_data = StudentHabit::where('student_id', $student->id)
                     ->whereDate('report_date', $date)
                     ->first();
             });
 
-        // Pastikan Anda sudah membuat view 'habits.print'
         return view('habits.print', compact('students', 'date', 'class'));
     }
 }
