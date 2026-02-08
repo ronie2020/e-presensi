@@ -242,7 +242,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // [UPDATE] ROUTE REKAPITULASI KELAS (SUMMARY)
+    // ROUTE REKAPITULASI KELAS (SUMMARY)
     Route::get('/reports/classes', [ClassReportController::class, 'index'])->name('reports.class');
     Route::get('/reports/classes/print', [ClassReportController::class, 'print'])->name('reports.class.print');
     Route::get('/reports/classes/excel', [ClassReportController::class, 'exportExcel'])->name('reports.class.excel');

@@ -61,7 +61,7 @@
         {{-- HEADER CETAK --}}
         <div class="print-header">
             <h1 class="text-2xl font-bold uppercase tracking-wide">Laporan Monitoring Harian</h1>
-            <p class="text-sm">SMK DIGITAL INDONESIA</p>
+            <p class="text-sm">SMP NEGERI 3 LAKBOK</p>
             <p class="text-xs mt-2">Dicetak pada: {{ now()->format('d F Y H:i') }} oleh {{ Auth::user()->name }}</p>
         </div>
 
@@ -239,6 +239,7 @@
 
         {{-- QUICK ACTIONS --}}
         <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 no-print animate-enter quick-actions" style="animation-delay: 100ms">
+            {{-- Tombol Data Siswa --}}
             <a href="{{ route('students.index') }}" @click.prevent="navigate('{{ route('students.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-student text-xl"></i>
@@ -246,6 +247,15 @@
                 <div class="text-sm font-bold text-slate-700 group-hover:text-blue-700">Data Siswa</div>
             </a>
             
+            {{-- Tombol Kebiasaan --}}
+             <a href="{{ route('teacher.habits.index') }}" @click.prevent="navigate('{{ route('teacher.habits.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-calendar-check text-xl"></i>
+                </div>
+                <div class="text-sm font-bold text-slate-700 group-hover:text-emerald-700">Rekap 7 Kebiasaan Siswa</div>
+            </a>
+            
+            {{-- Tombol Ujian CBT --}}
             <a href="{{ route('cbt.index') }}" @click.prevent="navigate('{{ route('cbt.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-purple-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-monitor-play text-xl"></i>
@@ -253,6 +263,7 @@
                 <div class="text-sm font-bold text-slate-700 group-hover:text-purple-700">Ujian CBT</div>
             </a>
 
+            {{-- Tombol Tugas & PR --}}
             <a href="{{ route('lms.assignments.index') }}" @click.prevent="navigate('{{ route('lms.assignments.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-rose-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-pencil-simple text-xl"></i>
@@ -260,6 +271,7 @@
                 <div class="text-sm font-bold text-slate-700 group-hover:text-rose-700">Tugas & PR</div>
             </a>
 
+            {{-- Tombol Rekap Nilai --}}
             <a href="{{ route('lms.grades.index') }}" @click.prevent="navigate('{{ route('lms.grades.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-chart-bar text-xl"></i>
@@ -267,12 +279,44 @@
                 <div class="text-sm font-bold text-slate-700 group-hover:text-emerald-700">Rekap Nilai</div>
             </a>
 
-            {{-- [BARU] Tombol Laporan Kelas --}}
+            {{-- Tombol Laporan Kelas --}}
             <a href="{{ route('reports.class') }}" @click.prevent="navigate('{{ route('reports.class') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-amber-200 cursor-pointer">
                 <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-files text-xl"></i>
                 </div>
                 <div class="text-sm font-bold text-slate-700 group-hover:text-amber-700">Laporan Kelas</div>
+            </a>
+
+            {{-- Tombol SKL --}}
+            <a href="{{ route('admin.graduation.index') }}" @click.prevent="navigate('{{ route('admin.graduation.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-rose-200 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-envelope-open text-xl"></i>
+                </div>
+                <div class="text-sm font-bold text-slate-700 group-hover:text-rose-700">Kelulusan</div>
+            </a>
+
+              {{-- Tombol PPDB --}}
+            <a href="{{ route('admin.ppdb.index') }}" @click.prevent="navigate('{{ route('admin.ppdb.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-amber-200 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-files text-xl"></i>
+                </div>
+                <div class="text-sm font-bold text-slate-700 group-hover:text-amber-700">SPMB/PPDB</div>
+            </a>
+
+             {{-- Tombol Data Siswa --}}
+            <a href="{{ route('letters.spt.index') }}" @click.prevent="navigate('{{ route('letters.spt.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-person-simple-run text-xl"></i>
+                </div>
+                <div class="text-sm font-bold text-slate-700 group-hover:text-blue-700">SPPD</div>
+            </a>
+
+             {{-- Tombol Perpustakaan --}}
+            <a href="{{ route('library.dashboard') }}" @click.prevent="navigate('{{ route('library.dashboard') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-purple-200 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-book-open-text text-xl"></i>
+                </div>
+                <div class="text-sm font-bold text-slate-700 group-hover:text-purple-700">Perpustakaan</div>
             </a>
         </div>
 
