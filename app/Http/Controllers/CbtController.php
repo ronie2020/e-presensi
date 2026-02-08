@@ -11,9 +11,9 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\QuestionsImport;
 use App\Exports\CbtScoreExport; 
-use App\Exports\QuestionTemplateExport; // Pastikan ini ada
+use App\Exports\QuestionTemplateExport;
 use Barryvdh\DomPDF\Facade\Pdf; 
-use Illuminate\Support\Str; // Tambahan untuk Generate Token
+use Illuminate\Support\Str;
 
 class CbtController extends Controller
 {
@@ -62,6 +62,54 @@ class CbtController extends Controller
         CbtExam::create($validated);
 
         return redirect()->route('cbt.index')->with('success', 'Jadwal ujian berhasil dibuat!');
+    }
+
+    /**
+     * [BARU] Halaman Edit Jadwal Ujian
+     */
+    public function edit($id)
+    {
+        $exam = CbtExam::findOrFail($id);
+        return view('cbt.edit', compact('exam'));
+    }
+
+    /**
+     * [BARU] Update Jadwal Ujian
+     */
+    public function update(Request $request, $id)
+    {
+        $exam = CbtExam::findOrFail($id);
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'subject_name' => 'required|string',
+            'class_level' => 'required',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+            'duration_minutes' => 'required|integer|min:1',
+            'passing_grade' => 'required|integer|min:0|max:100',
+            'token' => 'nullable|string|max:6',
+        ]);
+
+        $updateData = [
+            'title' => $request->title,
+            'subject_name' => $request->subject_name,
+            'class_level' => $request->class_level,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'duration_minutes' => $request->duration_minutes,
+            'passing_grade' => $request->passing_grade,
+            'is_active' => $request->has('is_active'),
+        ];
+
+        // Hanya update token jika user mengisi field token (agar token lama tidak hilang jika dikosongkan)
+        if ($request->filled('token')) {
+            $updateData['token'] = strtoupper($request->token);
+        }
+
+        $exam->update($updateData);
+
+        return redirect()->route('cbt.index')->with('success', 'Jadwal ujian berhasil diperbarui!');
     }
 
     /**
@@ -213,7 +261,6 @@ class CbtController extends Controller
      */
     public function downloadTemplate()
     {
-        // Menggunakan class Export yang sudah kita buat
         return Excel::download(new QuestionTemplateExport, 'template_soal_ujian.xlsx');
     }
 
