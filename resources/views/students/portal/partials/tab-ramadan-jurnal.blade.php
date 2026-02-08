@@ -2,63 +2,61 @@
         showDetail: false,
     }" class="space-y-8 animate-in fade-in duration-500">
     
-    {{-- 1. LOGIKA HITUNG PROGRESS --}}
+    {{-- 1. LOGIKA & KONFIGURASI --}}
     @php
-        // Total Poin Ideal Harian Dasar:
-        // 1 (Puasa) + 5 (Wajib) + 5 (Sunnah) + 1 (Tilawah) = 12 Poin
+        // --- KONFIGURASI TANGGAL 1 RAMADHAN ---
+        // Silakan sesuaikan tanggal ini setiap tahunnya
+        $startRamadan = \Carbon\Carbon::parse('2026-02-18'); // Contoh untuk tahun 2026
+        $currentDate = \Carbon\Carbon::parse($today);
+        
+        // Hitung Hari ke-berapa (Selisih hari + 1)
+        // diffInDays return absolute value by default, use false parameter if needed checks
+        // Disini kita asumsikan dashboard ini dibuka saat Ramadhan
+        $ramadanDay = intval($startRamadan->diffInDays($currentDate)) + 1;
+        
+        // Cek apakah belum mulai atau sudah lewat (Opsional)
+        $isBeforeRamadan = $currentDate->lt($startRamadan);
+        
+        // --- LOGIKA PROGRESS HARIAN ---
         $totalTarget = 12; 
         $currentScore = 0;
+        $isFriday = $currentDate->isFriday();
         
-        // Cek Hari Jumat
-        $isFriday = \Carbon\Carbon::parse($today)->isFriday();
-        
-        // Jika Jumat, Target nambah 1 (Laporan Jumat)
         if ($isFriday) {
             $totalTarget = 13;
         }
 
         if($todayRamadanLog) {
-            // 1. Puasa
             if($todayRamadanLog->is_fasting) $currentScore++;
-            
-            // 2. Shalat Wajib (Loop 5 waktu)
             foreach(['subuh', 'dzuhur', 'ashar', 'maghrib', 'isya'] as $p) {
                 if($todayRamadanLog->prayers[$p] ?? false) $currentScore++;
             }
-
-            // 3. Sunnah (Loop 5 item)
             foreach(['tarawih', 'witir', 'dhuha', 'rawatib', 'sedekah'] as $s) {
                 if($todayRamadanLog->sunnah_deeds[$s] ?? false) $currentScore++;
             }
-
-            // 4. Tilawah
             if($todayRamadanLog->tadarus_surah) $currentScore++;
-
-            // 5. KHUSUS JUMAT: Cek apakah Khotib sudah diisi
             if ($isFriday && !empty($todayRamadanLog->friday_khotib)) {
                 $currentScore++;
             }
         }
 
-        // Hindari pembagian dengan nol
         $progressPercent = $totalTarget > 0 ? ($currentScore / $totalTarget) * 100 : 0;
         
-        // Warna progress bar
         $progressColor = 'text-emerald-400';
         if($progressPercent < 30) $progressColor = 'text-rose-400';
         elseif($progressPercent < 70) $progressColor = 'text-amber-400';
     @endphp
 
     {{-- 2. HEADER SUMMARY & CIRCULAR PROGRESS --}}
-    <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden">
+    <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden group">
         {{-- Background Effects --}}
-        <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-600/20 rounded-full blur-[80px] -mr-32 -mt-32"></div>
+        <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-600/20 rounded-full blur-[80px] -mr-32 -mt-32 group-hover:bg-emerald-600/30 transition-all duration-1000"></div>
         <div class="absolute bottom-0 left-0 w-40 h-40 bg-teal-600/20 rounded-full blur-[60px] -ml-20 -mb-20"></div>
         <div class="absolute top-4 right-4 opacity-10"><i class="ph-fill ph-moon-stars text-8xl"></i></div>
 
         <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
             {{-- Circular Progress --}}
-            <div class="relative w-32 h-32 shrink-0 group">
+            <div class="relative w-32 h-32 shrink-0 group/circle">
                 <svg class="w-full h-full transform -rotate-90">
                     <circle cx="64" cy="64" r="56" stroke="currentColor" stroke-width="12" fill="transparent" class="text-slate-800"></circle>
                     <circle cx="64" cy="64" r="56" stroke="currentColor" stroke-width="12" fill="transparent" 
@@ -73,41 +71,57 @@
             </div>
 
             <div class="flex-1 text-center md:text-left">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div>
-                        <h2 class="text-2xl font-black mb-1">Jurnal Ibadah Ramadhan</h2>
+                        {{-- [FITUR BARU] BADGE HARI RAMADHAN --}}
+                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-emerald-300 text-[10px] font-black uppercase tracking-widest mb-2 shadow-sm backdrop-blur-sm">
+                            <i class="ph-fill ph-calendar-check"></i>
+                            @if($isBeforeRamadan)
+                                Menuju Ramadhan
+                            @else
+                                Ramadhan Hari Ke-{{ $ramadanDay }}
+                            @endif
+                        </div>
+
+                        <h2 class="text-2xl font-black mb-1 leading-tight">Jurnal Ibadah Ramadhan</h2>
                         <p class="text-emerald-100/70 text-sm leading-relaxed max-w-lg">
                             "Barangsiapa berpuasa Ramadhan atas dasar iman dan mengharap pahala dari Allah, maka dosanya yang telah lalu akan diampuni."
                         </p>
                     </div>
+                    
+                    {{-- Tanggal Masehi --}}
+                    <div class="hidden md:block text-right">
+                        <div class="text-3xl font-black text-slate-700/30 select-none">{{ \Carbon\Carbon::parse($today)->format('d') }}</div>
+                        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest -mt-1">{{ \Carbon\Carbon::parse($today)->format('M Y') }}</div>
+                    </div>
                 </div>
                 
                 {{-- Status Badges --}}
-                <div class="flex flex-wrap justify-center md:justify-start gap-2 mt-4">
+                <div class="flex flex-wrap justify-center md:justify-start gap-2 mt-6">
                     <span class="px-3 py-1 rounded-full text-xs font-bold border {{ $todayRamadanLog && $todayRamadanLog->is_fasting ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200' : 'bg-slate-700 border-slate-600 text-slate-300' }}">
                         {{ $todayRamadanLog && $todayRamadanLog->is_fasting ? 'Berpuasa Hari Ini' : 'Belum Puasa' }}
                     </span>
                     @if($isFriday)
                         <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 border border-amber-500/50 text-amber-200 flex items-center gap-1 animate-pulse">
-                            <i class="ph-fill ph-star"></i> Jumat Berkah: Jangan Lupa Laporan Jumat!
+                            <i class="ph-fill ph-star"></i> Jumat Berkah: Laporan Jumat!
                         </span>
                     @endif
                 </div>
 
                 {{-- TOMBOL AKSI CEPAT --}}
-                <div class="pt-6 mt-2 border-t border-white/10 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
+                <div class="pt-6 mt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
                     @if(!$todayRamadanLog)
                         <div class="flex items-center gap-2 text-amber-400 animate-pulse">
                             <i class="ph-fill ph-warning-circle"></i>
                             <span class="text-xs font-bold">Jurnal Kosong</span>
                         </div>
-                        <a href="{{ route('student.ramadan.index') }}" class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-400 hover:to-teal-400 font-black rounded-xl transition-all shadow-lg shadow-emerald-900/50 ring-2 ring-emerald-500/50 hover:ring-white/50">
+                        <a href="{{ route('student.ramadan.index') }}" class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-400 hover:to-teal-400 font-black rounded-xl transition-all shadow-lg shadow-emerald-900/50 ring-2 ring-emerald-500/50 hover:ring-white/50 active:scale-95">
                             <span>Isi Jurnal Sekarang</span>
                             <i class="ph-bold ph-pencil-simple group-hover:rotate-12 transition-transform"></i>
                         </a>
                     @else
-                         <a href="{{ route('student.ramadan.index') }}" class="group relative inline-flex items-center gap-2 px-6 py-2 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white font-bold text-xs rounded-xl transition-all border border-slate-700">
-                            <span>Update / Edit Data</span>
+                         <a href="{{ route('student.ramadan.index') }}" class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white font-bold text-xs rounded-xl transition-all border border-slate-700 hover:border-slate-500 active:scale-95">
+                            <span>Update Data</span>
                             <i class="ph-bold ph-pencil-simple"></i>
                         </a>
                     @endif
@@ -119,7 +133,6 @@
     {{-- 3. THE GRID (STATUS IBADAH) --}}
     <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
         @php
-            // Helper untuk status icon & warna
             $getStatus = function($condition) {
                 return $condition 
                     ? ['bg' => 'bg-emerald-50', 'border' => 'border-emerald-200', 'icon_color' => 'text-emerald-500', 'text' => 'text-slate-800', 'status' => 'Tercatat', 'check' => true]
@@ -128,13 +141,12 @@
 
             $gridItems = [];
 
-            // [LOGIKA BARU] JIKA HARI JUMAT, TAMPILKAN KARTU KHUSUS DI URUTAN PERTAMA
             if ($isFriday) {
                 $fridayFilled = !empty($todayRamadanLog->friday_khotib);
                 $gridItems[] = [
                     'label' => 'Laporan Jumat',
                     'icon' => 'mosque',
-                    'bg' => $fridayFilled ? 'bg-emerald-50' : 'bg-amber-50', // Kuning jika belum diisi agar eye-catching
+                    'bg' => $fridayFilled ? 'bg-emerald-50' : 'bg-amber-50', 
                     'border' => $fridayFilled ? 'border-emerald-200' : 'border-amber-200',
                     'icon_color' => $fridayFilled ? 'text-emerald-500' : 'text-amber-500',
                     'text' => 'text-slate-800',
@@ -173,7 +185,7 @@
                 'check' => ($todayRamadanLog->tadarus_surah ?? false)
             ];
 
-            // 5. SUNNAH LAINNYA (Summary)
+            // 5. SUNNAH LAINNYA
             $gridItems[] = [
                 'label' => 'Sunnah Lainnya', 
                 'icon' => 'sparkle',
@@ -205,10 +217,9 @@
         @endforeach
     </div>
 
-    {{-- 4. FEEDBACK GURU (Dipastikan Muncul jika ada data) --}}
+    {{-- 4. FEEDBACK GURU --}}
     @if(isset($lastVerifiedLog) && $lastVerifiedLog && $lastVerifiedLog->teacher_verified_at)
     <div class="bg-gradient-to-br from-white to-emerald-50 p-6 rounded-[2rem] border border-emerald-100 shadow-sm relative overflow-hidden">
-        {{-- Background Decorator --}}
         <div class="absolute top-0 right-0 p-4 opacity-5"><i class="ph-fill ph-quotes text-8xl text-emerald-800"></i></div>
         
         <div class="flex flex-col sm:flex-row items-start gap-4 relative z-10">
@@ -240,12 +251,11 @@
         </div>
     </div>
     @else
-        {{-- Empty State Feedback --}}
         <div class="text-center py-8 border border-dashed border-slate-200 rounded-[2rem] bg-slate-50/50">
             <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-2 text-slate-400">
                 <i class="ph-bold ph-chat-slash"></i>
             </div>
-            <p class="text-xs text-slate-400 italic font-medium">Belum ada nilai atau catatan baru dari guru untuk jurnal terakhirmu.</p>
+            <p class="text-xs text-slate-400 italic font-medium">Belum ada nilai atau catatan baru dari guru.</p>
         </div>
     @endif
 </div>

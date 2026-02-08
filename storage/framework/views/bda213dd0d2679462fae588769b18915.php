@@ -1,5 +1,14 @@
-<x-app-layout>
-    {{-- 1. CUSTOM STYLES & FONTS --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <style>
         @import url('https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap');
         
@@ -38,7 +47,7 @@
         [x-cloak] { display: none !important; }
     </style>
 
-    {{-- WRAPPER DENGAN ALPINE JS --}}
+    
     <div x-data="{
         isModalOpen: false,
         studentName: '',
@@ -74,7 +83,7 @@
                 murojaah: murojaah
             };
 
-            this.formAction = '{{ route('admin.ramadan.verify', ':id') }}'.replace(':id', id); 
+            this.formAction = '<?php echo e(route('admin.ramadan.verify', ':id')); ?>'.replace(':id', id); 
             this.isModalOpen = true;
             document.body.style.overflow = 'hidden';
         },
@@ -86,9 +95,9 @@
         setScore(value) { this.currentScore = value; }
     }" class="page-container p-4 md:p-8 space-y-8 min-h-screen bg-slate-50 font-jakarta print-container">
         
-        {{-- HERO SECTION --}}
+        
         <div class="animate-enter relative rounded-[3rem] bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900 p-8 md:p-12 text-white shadow-2xl shadow-emerald-900/30 overflow-hidden group border border-white/10 no-print">
-            {{-- Decorative Background --}}
+            
             <div class="absolute top-0 right-0 -mt-20 -mr-20 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[100px] group-hover:opacity-40 transition-opacity duration-1000 hero-decoration"></div>
             <div class="absolute bottom-0 left-0 -mb-20 -ml-20 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[80px] hero-decoration"></div>
             
@@ -102,19 +111,19 @@
                     </h1>
                     <p class="text-emerald-100/60 text-sm md:text-lg max-w-xl leading-relaxed font-medium">
                         Monitoring ibadah harian dan kegiatan Ramadhan.
-                        <br><span class="text-white font-bold">{{ \Carbon\Carbon::parse($date)->isoFormat('dddd, D MMMM Y') }}</span>
+                        <br><span class="text-white font-bold"><?php echo e(\Carbon\Carbon::parse($date)->isoFormat('dddd, D MMMM Y')); ?></span>
                     </p>
                 </div>
 
-                {{-- FILTER FORM --}}
+                
                 <div class="w-full lg:w-auto shrink-0 flex flex-col gap-4">
-                    <form action="{{ route('admin.ramadan.reports') }}" method="GET" class="bg-white/5 backdrop-blur-xl p-6 rounded-[2rem] border border-white/10 shadow-2xl flex flex-col gap-5">
+                    <form action="<?php echo e(route('admin.ramadan.reports')); ?>" method="GET" class="bg-white/5 backdrop-blur-xl p-6 rounded-[2rem] border border-white/10 shadow-2xl flex flex-col gap-5">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black text-emerald-200 uppercase tracking-widest ml-1 block">Tanggal</label>
                                 <div class="relative group">
                                     <i class="ph-bold ph-calendar absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400"></i>
-                                    <input type="date" name="date" value="{{ $date }}" onchange="this.form.submit()" 
+                                    <input type="date" name="date" value="<?php echo e($date); ?>" onchange="this.form.submit()" 
                                         class="block w-full pl-11 pr-4 py-3 bg-white/10 border-white/10 rounded-2xl text-xs font-bold text-white focus:ring-emerald-500 focus:border-emerald-500 transition-all uppercase placeholder-emerald-200/50">
                                 </div>
                             </div>
@@ -126,33 +135,34 @@
                                     <select name="class_id" onchange="this.form.submit()" 
                                         class="block w-full pl-11 pr-10 py-3 bg-white/10 border-white/10 rounded-2xl text-xs font-bold text-white focus:ring-emerald-500 focus:border-emerald-500 transition-all appearance-none">
                                         <option value="" class="bg-slate-900 text-white">Pilih Kelas</option>
-                                        @foreach($classes as $c)
-                                            <option value="{{ $c->id }}" {{ $selectedClass == $c->id ? 'selected' : '' }} class="bg-slate-900 text-white">{{ $c->name }}</option>
-                                        @endforeach
+                                        <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($c->id); ?>" <?php echo e($selectedClass == $c->id ? 'selected' : ''); ?> class="bg-slate-900 text-white"><?php echo e($c->name); ?></option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </select>
                                 </div>
                             </div>
                         </div>
                     </form>
                     
-                    @if($selectedClass)
+                    <?php if($selectedClass): ?>
                         <button onclick="window.print()" class="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-[1.5rem] font-bold shadow-lg flex items-center justify-center gap-3 transition-all active:scale-95 border border-white/10">
                             <i class="ph-bold ph-printer text-lg"></i>
                             <span class="uppercase tracking-wider text-xs">Cetak Laporan</span>
                         </button>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
 
-        {{-- BENTO GRID STATS (SELALU MUNCUL) --}}
+        
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 animate-enter no-print" style="animation-delay: 100ms">
             <div class="glass-card p-6 rounded-[2rem] flex items-center gap-4 group">
                 <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="ph-fill ph-student"></i></div>
                 <div>
-                    <div class="text-2xl font-black text-slate-800 tracking-tight">{{ $stats['total_students'] }}</div>
+                    <div class="text-2xl font-black text-slate-800 tracking-tight"><?php echo e($stats['total_students']); ?></div>
                     <div class="text-[9px] uppercase font-black text-slate-400 tracking-widest">
-                        {{ $selectedClass ? 'Siswa Kelas' : 'Total Siswa' }}
+                        <?php echo e($selectedClass ? 'Siswa Kelas' : 'Total Siswa'); ?>
+
                     </div>
                 </div>
             </div>
@@ -160,7 +170,7 @@
             <div class="glass-card p-6 rounded-[2rem] flex items-center gap-4 group">
                 <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="ph-fill ph-bowl-food"></i></div>
                 <div>
-                    <div class="text-2xl font-black text-slate-800 tracking-tight">{{ $stats['fasting_count'] }} <span class="text-xs text-emerald-500 font-bold">({{ $stats['percentage_fasting'] }}%)</span></div>
+                    <div class="text-2xl font-black text-slate-800 tracking-tight"><?php echo e($stats['fasting_count']); ?> <span class="text-xs text-emerald-500 font-bold">(<?php echo e($stats['percentage_fasting']); ?>%)</span></div>
                     <div class="text-[9px] uppercase font-black text-slate-400 tracking-widest">Berpuasa</div>
                 </div>
             </div>
@@ -168,21 +178,21 @@
             <div class="glass-card p-6 rounded-[2rem] flex items-center gap-4 group">
                 <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="ph-fill ph-hands-praying"></i></div>
                 <div>
-                    <div class="text-2xl font-black text-slate-800 tracking-tight">{{ $stats['prayer_complete_count'] }}</div>
+                    <div class="text-2xl font-black text-slate-800 tracking-tight"><?php echo e($stats['prayer_complete_count']); ?></div>
                     <div class="text-[9px] uppercase font-black text-slate-400 tracking-widest">Shalat 5W</div>
                 </div>
             </div>
 
-            @if($isFriday)
+            <?php if($isFriday): ?>
             <div class="bg-emerald-600 p-6 rounded-[2rem] flex items-center gap-4 group text-white shadow-xl shadow-emerald-500/20 relative overflow-hidden">
                 <div class="absolute -right-4 -top-4 text-emerald-500/30"><i class="ph-fill ph-mosque text-6xl"></i></div>
                 <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-xl backdrop-blur-sm"><i class="ph-fill ph-mosque"></i></div>
                 <div class="relative z-10">
-                    <div class="text-2xl font-black tracking-tight">{{ $stats['friday_log_count'] }}</div>
+                    <div class="text-2xl font-black tracking-tight"><?php echo e($stats['friday_log_count']); ?></div>
                     <div class="text-[9px] uppercase font-black text-emerald-100 tracking-widest">Jurnal Jumat</div>
                 </div>
             </div>
-            @else
+            <?php else: ?>
             <div class="bg-slate-100 p-6 rounded-[2rem] flex items-center gap-4 group border border-slate-200">
                 <div class="w-12 h-12 rounded-2xl bg-white text-slate-400 flex items-center justify-center text-xl"><i class="ph-bold ph-calendar-x"></i></div>
                 <div>
@@ -190,25 +200,26 @@
                     <div class="text-[9px] uppercase font-black text-slate-400 tracking-widest">Fitur Non-aktif</div>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
         </div>
 
-        {{-- HEADER PRINT --}}
+        
         <div class="print-header">
             <h2 class="text-xl font-bold uppercase">Laporan Harian Mutabaah Ramadhan</h2>
-            <p class="text-sm">{{ $classes->find($selectedClass)->name ?? 'Semua Kelas' }} &bull; {{ \Carbon\Carbon::parse($date)->isoFormat('dddd, D MMMM Y') }}</p>
+            <p class="text-sm"><?php echo e($classes->find($selectedClass)->name ?? 'Semua Kelas'); ?> &bull; <?php echo e(\Carbon\Carbon::parse($date)->isoFormat('dddd, D MMMM Y')); ?></p>
         </div>
 
-        {{-- KONTEN UTAMA --}}
-        @if($selectedClass)
-            {{-- === TAMPILAN TABEL KELAS (JIKA KELAS DIPILIH) === --}}
+        
+        <?php if($selectedClass): ?>
+            
             <div class="animate-enter bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden mb-12 print-container" style="animation-delay: 200ms">
                 <div class="px-8 py-6 border-b border-slate-50 flex items-center justify-between no-print">
                     <h2 class="text-xl font-black text-slate-800 flex items-center gap-3">
                         <i class="ph-bold ph-list-checks text-blue-600"></i> Data Mutabaah
                     </h2>
                     <span class="px-4 py-1.5 rounded-xl bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-wider">
-                        {{ \Carbon\Carbon::parse($date)->translatedFormat('d F Y') }}
+                        <?php echo e(\Carbon\Carbon::parse($date)->translatedFormat('d F Y')); ?>
+
                     </span>
                 </div>
 
@@ -222,122 +233,124 @@
                                 <th class="px-6 py-6 text-center">Shalat 5W</th>
                                 <th class="px-6 py-6 text-center no-print">Detail</th>
                                 
-                                @if($isFriday)
+                                <?php if($isFriday): ?>
                                 <th class="px-6 py-6 text-center text-emerald-600 bg-emerald-50/30">Jumat</th>
-                                @endif
+                                <?php endif; ?>
 
                                 <th class="px-6 py-6">Tilawah</th>
                                 <th class="px-8 py-6 text-center bg-slate-50/50">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50">
-                            @forelse($reports as $index => $student)
-                            @php 
+                            <?php $__empty_1 = true; $__currentLoopData = $reports; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <?php 
                                 $log = $student->ramadanLogs->first();
                                 $prayerCount = $log ? count(array_filter($log->prayers ?? [])) : 0;
                                 $sunnahCount = $log ? count(array_filter($log->sunnah_deeds ?? [])) : 0;
-                            @endphp
+                            ?>
                             <tr class="hover:bg-blue-50/30 transition-all group">
-                                <td class="px-8 py-5 text-center text-xs font-bold text-slate-400">{{ $index + 1 }}</td>
+                                <td class="px-8 py-5 text-center text-xs font-bold text-slate-400"><?php echo e($index + 1); ?></td>
                                 <td class="px-6 py-5">
-                                    <div class="font-black text-slate-800 text-sm group-hover:text-blue-600 transition-colors">{{ $student->name }}</div>
-                                    <div class="text-[10px] font-bold text-slate-400 mt-0.5 tracking-wider">{{ $student->student_id }}</div>
+                                    <div class="font-black text-slate-800 text-sm group-hover:text-blue-600 transition-colors"><?php echo e($student->name); ?></div>
+                                    <div class="text-[10px] font-bold text-slate-400 mt-0.5 tracking-wider"><?php echo e($student->student_id); ?></div>
                                 </td>
                                 <td class="px-6 py-5 text-center">
-                                    @if($log && $log->is_fasting)
+                                    <?php if($log && $log->is_fasting): ?>
                                         <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-sm"><i class="ph-fill ph-check"></i></div>
-                                    @elseif($log)
+                                    <?php elseif($log): ?>
                                         <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center mx-auto shadow-sm"><i class="ph-bold ph-x"></i></div>
-                                    @else
+                                    <?php else: ?>
                                         <span class="text-slate-300 font-bold">-</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-5 text-center">
-                                    @if($log)
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-black {{ $prayerCount == 5 ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600' }}">
-                                            {{ $prayerCount }}/5
+                                    <?php if($log): ?>
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-black <?php echo e($prayerCount == 5 ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'); ?>">
+                                            <?php echo e($prayerCount); ?>/5
                                         </span>
-                                    @else
+                                    <?php else: ?>
                                         <span class="text-slate-300 font-bold">-</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-5 text-center no-print">
-                                    @if($log && is_array($log->prayers))
+                                    <?php if($log && is_array($log->prayers)): ?>
                                         <div class="flex justify-center gap-1.5">
-                                            @foreach(['subuh','dzuhur','ashar','maghrib','isya'] as $p)
-                                                <div title="{{ ucfirst($p) }}" class="w-2.5 h-2.5 rounded-full {{ ($log->prayers[$p] ?? false) ? 'bg-emerald-500' : 'bg-slate-200' }}"></div>
-                                            @endforeach
+                                            <?php $__currentLoopData = ['subuh','dzuhur','ashar','maghrib','isya']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <div title="<?php echo e(ucfirst($p)); ?>" class="w-2.5 h-2.5 rounded-full <?php echo e(($log->prayers[$p] ?? false) ? 'bg-emerald-500' : 'bg-slate-200'); ?>"></div>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </div>
-                                    @else
+                                    <?php else: ?>
                                         -
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
 
-                                @if($isFriday)
+                                <?php if($isFriday): ?>
                                 <td class="px-6 py-5 text-center">
-                                    @if($log && $log->friday_khotib)
-                                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-[10px] font-black border border-emerald-200 shadow-sm" title="{{ Str::limit($log->friday_summary, 50) }}">
+                                    <?php if($log && $log->friday_khotib): ?>
+                                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-[10px] font-black border border-emerald-200 shadow-sm" title="<?php echo e(Str::limit($log->friday_summary, 50)); ?>">
                                             <i class="ph-bold ph-check-circle"></i> Ada
                                         </span>
-                                    @else
+                                    <?php else: ?>
                                         <span class="text-slate-300 text-[10px] italic font-medium">Kosong</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
-                                @endif
+                                <?php endif; ?>
 
                                 <td class="px-6 py-5">
-                                    @if($log && $log->tadarus_surah)
+                                    <?php if($log && $log->tadarus_surah): ?>
                                         <div class="flex items-center gap-2">
                                             <i class="ph-bold ph-book-open-text text-blue-500"></i>
-                                            <span class="text-xs font-bold text-slate-700">{{ Str::limit($log->tadarus_surah, 12) }} : {{ $log->tadarus_ayah }}</span>
+                                            <span class="text-xs font-bold text-slate-700"><?php echo e(Str::limit($log->tadarus_surah, 12)); ?> : <?php echo e($log->tadarus_ayah); ?></span>
                                         </div>
-                                    @else
+                                    <?php else: ?>
                                         <span class="text-slate-300 text-[10px] font-bold">-</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 
                                 <td class="px-8 py-5 text-center bg-slate-50/50">
-                                    @if($log)
+                                    <?php if($log): ?>
                                         <button type="button" 
                                             @click="openFeedback(
-                                                {{ $log->id }}, 
-                                                {{ json_encode($student->name) }}, 
-                                                '{{ $log->teacher_score }}', 
-                                                {{ json_encode($log->teacher_note) }},
-                                                {{ $log->is_fasting ? 'true' : 'false' }},
-                                                {{ json_encode($log->prayers) }}, 
-                                                {{ json_encode($log->sunnah_deeds) }},
-                                                {{ json_encode($log->friday_khotib) }},
-                                                {{ json_encode($log->friday_summary) }},
-                                                {{ json_encode($log->tadarus_surah) }},
-                                                {{ json_encode($log->tadarus_ayah) }},
-                                                {{ json_encode($log->murojaah_surah) }}
+                                                <?php echo e($log->id); ?>, 
+                                                <?php echo e(json_encode($student->name)); ?>, 
+                                                '<?php echo e($log->teacher_score); ?>', 
+                                                <?php echo e(json_encode($log->teacher_note)); ?>,
+                                                <?php echo e($log->is_fasting ? 'true' : 'false'); ?>,
+                                                <?php echo e(json_encode($log->prayers)); ?>, 
+                                                <?php echo e(json_encode($log->sunnah_deeds)); ?>,
+                                                <?php echo e(json_encode($log->friday_khotib)); ?>,
+                                                <?php echo e(json_encode($log->friday_summary)); ?>,
+                                                <?php echo e(json_encode($log->tadarus_surah)); ?>,
+                                                <?php echo e(json_encode($log->tadarus_ayah)); ?>,
+                                                <?php echo e(json_encode($log->murojaah_surah)); ?>
+
                                             )"
                                             class="w-full inline-flex justify-center items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-sm hover:shadow-md active:scale-95
-                                            {{ $log->teacher_verified_at ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-white border border-slate-200 text-slate-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600' }}">
-                                            @if($log->teacher_verified_at)
-                                                <i class="ph-bold ph-check-circle text-lg"></i> {{ $log->teacher_score }}
-                                            @else
+                                            <?php echo e($log->teacher_verified_at ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-white border border-slate-200 text-slate-500 hover:bg-emerald-600 hover:text-white hover:border-emerald-600'); ?>">
+                                            <?php if($log->teacher_verified_at): ?>
+                                                <i class="ph-bold ph-check-circle text-lg"></i> <?php echo e($log->teacher_score); ?>
+
+                                            <?php else: ?>
                                                 <i class="ph-bold ph-pencil-simple text-lg"></i> Nilai
-                                            @endif
+                                            <?php endif; ?>
                                         </button>
-                                    @else
+                                    <?php else: ?>
                                         <span class="text-slate-300 text-[10px] italic font-bold">Belum Ada</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                             </tr>
-                            @empty
-                            <tr><td colspan="{{ $isFriday ? 8 : 7 }}" class="text-center py-20 text-slate-400 font-medium italic">Data siswa tidak ditemukan untuk kelas ini.</td></tr>
-                            @endforelse
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                            <tr><td colspan="<?php echo e($isFriday ? 8 : 7); ?>" class="text-center py-20 text-slate-400 font-medium italic">Data siswa tidak ditemukan untuk kelas ini.</td></tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
             </div>
-        @else
-            {{-- === TAMPILAN FEED DASHBOARD (JIKA BELUM PILIH KELAS) === --}}
+        <?php else: ?>
+            
             <div class="animate-enter space-y-6 no-print" style="animation-delay: 100ms">
                 
-                {{-- Header Feed --}}
+                
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
                     <div>
                         <h3 class="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
@@ -348,98 +361,105 @@
                     </div>
                     <div class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-600 uppercase tracking-widest shadow-sm">
                         <i class="ph-bold ph-calendar-check text-emerald-500"></i>
-                        {{ \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y') }}
+                        <?php echo e(\Carbon\Carbon::parse($date)->translatedFormat('l, d F Y')); ?>
+
                     </div>
                 </div>
 
-                {{-- Grid Card Siswa --}}
-                @if(isset($latestLogs) && $latestLogs->count() > 0)
+                
+                <?php if(isset($latestLogs) && $latestLogs->count() > 0): ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        @foreach($latestLogs as $log)
-                        @php
+                        <?php $__currentLoopData = $latestLogs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $log): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             $prayerCount = count(array_filter($log->prayers ?? []));
-                        @endphp
+                        ?>
                         <div class="group bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-emerald-900/5 hover:border-emerald-200 transition-all duration-300 relative overflow-hidden">
                             
-                            {{-- Dekorasi --}}
+                            
                             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-50 to-slate-50 rounded-bl-[4rem] -mr-6 -mt-6 transition-transform group-hover:scale-110 opacity-50"></div>
 
                             <div class="relative z-10">
-                                {{-- Profil Siswa --}}
+                                
                                 <div class="flex items-center gap-4 mb-6">
                                     <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 font-black text-lg shadow-inner group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-500 transition-all duration-300">
-                                        {{ substr($log->student->name, 0, 1) }}
+                                        <?php echo e(substr($log->student->name, 0, 1)); ?>
+
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h4 class="font-black text-slate-800 text-sm truncate group-hover:text-emerald-600 transition-colors">
-                                            {{ $log->student->name }}
+                                            <?php echo e($log->student->name); ?>
+
                                         </h4>
                                         <div class="flex items-center gap-2 mt-1.5">
                                             <span class="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-[9px] font-bold text-slate-500 uppercase truncate max-w-[80px]">
-                                                {{ $log->student->schoolClass->name ?? 'N/A' }}
+                                                <?php echo e($log->student->schoolClass->name ?? 'N/A'); ?>
+
                                             </span>
                                             <span class="text-[9px] text-slate-400 font-bold flex items-center gap-1 shrink-0">
-                                                <i class="ph-bold ph-clock"></i> {{ $log->updated_at->format('H:i') }}
+                                                <i class="ph-bold ph-clock"></i> <?php echo e($log->updated_at->format('H:i')); ?>
+
                                             </span>
                                         </div>
                                     </div>
                                 </div>
 
-                                {{-- Quick Stats Ramadhan --}}
+                                
                                 <div class="flex gap-2 mb-6">
-                                    {{-- Puasa --}}
+                                    
                                     <div class="flex-1 py-2.5 px-1 rounded-2xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm" title="Status Puasa">
-                                        <i class="ph-fill ph-bowl-food text-xl {{ $log->is_fasting ? 'text-emerald-500' : 'text-rose-400' }} mb-1.5 block"></i>
+                                        <i class="ph-fill ph-bowl-food text-xl <?php echo e($log->is_fasting ? 'text-emerald-500' : 'text-rose-400'); ?> mb-1.5 block"></i>
                                         <span class="text-[8px] font-black text-slate-400 uppercase tracking-wide">Puasa</span>
                                     </div>
                                     
-                                    {{-- Shalat --}}
+                                    
                                     <div class="flex-1 py-2.5 px-1 rounded-2xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm" title="Shalat Wajib">
-                                        <div class="flex items-center justify-center gap-0.5 text-xl font-black {{ $prayerCount == 5 ? 'text-emerald-500' : 'text-amber-500' }} mb-1.5">
-                                            {{ $prayerCount }}<span class="text-[10px] text-slate-400">/5</span>
+                                        <div class="flex items-center justify-center gap-0.5 text-xl font-black <?php echo e($prayerCount == 5 ? 'text-emerald-500' : 'text-amber-500'); ?> mb-1.5">
+                                            <?php echo e($prayerCount); ?><span class="text-[10px] text-slate-400">/5</span>
                                         </div>
                                         <span class="text-[8px] font-black text-slate-400 uppercase tracking-wide">Wajib</span>
                                     </div>
                                     
-                                    {{-- Tilawah --}}
+                                    
                                     <div class="flex-1 py-2.5 px-1 rounded-2xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm" title="Tilawah">
-                                        <i class="ph-fill ph-book-open-text text-xl {{ $log->tadarus_surah ? 'text-blue-500' : 'text-slate-300' }} mb-1.5 block"></i>
+                                        <i class="ph-fill ph-book-open-text text-xl <?php echo e($log->tadarus_surah ? 'text-blue-500' : 'text-slate-300'); ?> mb-1.5 block"></i>
                                         <span class="text-[8px] font-black text-slate-400 uppercase tracking-wide">Qur'an</span>
                                     </div>
                                 </div>
 
-                                {{-- Tombol Action --}}
+                                
                                 <div class="flex items-center justify-between gap-3 pt-5 border-t border-slate-50">
-                                    @if($log->teacher_verified_at)
+                                    <?php if($log->teacher_verified_at): ?>
                                         <div class="flex items-center gap-1.5 text-emerald-600 text-[10px] font-black uppercase tracking-wide bg-emerald-50 px-2 py-1 rounded-lg">
-                                            <i class="ph-bold ph-check-circle"></i> Nilai: {{ $log->teacher_score }}
+                                            <i class="ph-bold ph-check-circle"></i> Nilai: <?php echo e($log->teacher_score); ?>
+
                                         </div>
-                                    @else
+                                    <?php else: ?>
                                         <div class="flex items-center gap-1.5 text-amber-500 text-[10px] font-black uppercase tracking-wide bg-amber-50 px-2 py-1 rounded-lg animate-pulse">
                                             <i class="ph-bold ph-clock"></i> Menunggu
                                         </div>
-                                    @endif
+                                    <?php endif; ?>
 
                                     <button @click="openFeedback(
-                                        {{ $log->id }}, 
-                                        {{ json_encode($log->student->name) }}, 
-                                        '{{ $log->teacher_score }}', 
-                                        {{ json_encode($log->teacher_note) }},
-                                        {{ $log->is_fasting ? 'true' : 'false' }},
-                                        {{ json_encode($log->prayers) }}, 
-                                        {{ json_encode($log->sunnah_deeds) }},
-                                        {{ json_encode($log->friday_khotib) }},
-                                        {{ json_encode($log->friday_summary) }},
-                                        {{ json_encode($log->tadarus_surah) }},
-                                        {{ json_encode($log->tadarus_ayah) }},
-                                        {{ json_encode($log->murojaah_surah) }}
+                                        <?php echo e($log->id); ?>, 
+                                        <?php echo e(json_encode($log->student->name)); ?>, 
+                                        '<?php echo e($log->teacher_score); ?>', 
+                                        <?php echo e(json_encode($log->teacher_note)); ?>,
+                                        <?php echo e($log->is_fasting ? 'true' : 'false'); ?>,
+                                        <?php echo e(json_encode($log->prayers)); ?>, 
+                                        <?php echo e(json_encode($log->sunnah_deeds)); ?>,
+                                        <?php echo e(json_encode($log->friday_khotib)); ?>,
+                                        <?php echo e(json_encode($log->friday_summary)); ?>,
+                                        <?php echo e(json_encode($log->tadarus_surah)); ?>,
+                                        <?php echo e(json_encode($log->tadarus_ayah)); ?>,
+                                        <?php echo e(json_encode($log->murojaah_surah)); ?>
+
                                     )" class="pl-4 pr-3 py-2 bg-slate-900 hover:bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-200 hover:shadow-emerald-200 transition-all active:scale-95 flex items-center gap-2 group-hover:translate-x-1">
                                         Tinjau <i class="ph-bold ph-caret-right"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                     
                     <div class="mt-10 flex justify-center">
@@ -448,8 +468,8 @@
                             Menampilkan 10 laporan terbaru
                         </div>
                     </div>
-                @else
-                    {{-- Empty State jika Feed Kosong --}}
+                <?php else: ?>
+                    
                     <div class="text-center py-32 bg-white rounded-[2.5rem] border border-slate-100 border-dashed shadow-sm">
                         <div class="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-slate-300 rotate-3 transition-transform hover:rotate-0">
                             <i class="ph-duotone ph-moon-stars text-5xl"></i>
@@ -457,26 +477,26 @@
                         <h3 class="text-xl font-black text-slate-800 tracking-tight">Belum Ada Aktivitas Ramadhan</h3>
                         <p class="text-slate-500 text-sm mt-2 max-w-sm mx-auto">Tampaknya belum ada siswa yang mengisi mutabaah pada tanggal ini.</p>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
-        @endif
+        <?php endif; ?>
 
-        {{-- MODAL FEEDBACK & MOTIVASI (DESIGN DI-UPDATE SESUAI STUDENT INPUT) --}}
+        
         <div x-cloak x-show="isModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center px-4 modal-backdrop">
-            {{-- Backdrop --}}
+            
             <div x-show="isModalOpen" 
                 x-transition.opacity.duration.300ms
                 @click="closeModal()"
                 class="absolute inset-0 bg-slate-900/80 backdrop-blur-xl"></div>
 
-            {{-- Modal Content --}}
+            
             <div x-show="isModalOpen" 
                 x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 scale-95 translate-y-8"
                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
                 class="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh] border border-white/20">
                 
-                {{-- Header --}}
+                
                 <div class="relative bg-gradient-to-r from-emerald-600 to-teal-500 p-8 text-white shrink-0 overflow-hidden">
                     <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/20 rounded-full blur-2xl"></div>
                     <div class="relative z-10">
@@ -488,14 +508,14 @@
                     <button @click="closeModal()" class="absolute top-6 right-6 p-2 bg-white/20 hover:bg-white/30 rounded-xl transition text-white backdrop-blur-md"><i class="ph-bold ph-x text-lg"></i></button>
                 </div>
 
-                {{-- Body (GRID LAYOUT MIRIP STUDENT) --}}
+                
                 <div class="p-8 overflow-y-auto custom-scrollbar space-y-6 bg-slate-50/50">
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         
-                        {{-- KOLOM KIRI: WAJIB --}}
+                        
                         <div class="space-y-6">
-                            {{-- 1. Status Puasa --}}
+                            
                             <div class="bg-white p-5 rounded-[1.5rem] border border-slate-100 shadow-sm flex items-center justify-between">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg" :class="details.fasting ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-500'">
@@ -508,7 +528,7 @@
                                 </div>
                             </div>
 
-                            {{-- 2. Shalat 5 Waktu --}}
+                            
                             <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100">
                                 <h4 class="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
                                     <i class="ph-fill ph-clock text-emerald-500"></i> Shalat Wajib
@@ -526,7 +546,7 @@
                                 </div>
                             </div>
 
-                            {{-- 3. Quran (Tilawah) --}}
+                            
                             <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100">
                                 <h4 class="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
                                     <i class="ph-fill ph-book-open text-blue-500"></i> Tilawah & Murojaah
@@ -547,9 +567,9 @@
                             </div>
                         </div>
 
-                        {{-- KOLOM KANAN: SUNNAH & LAINNYA --}}
+                        
                         <div class="space-y-6">
-                            {{-- 4. Amalan Sunnah --}}
+                            
                             <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 h-full">
                                 <h4 class="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
                                     <i class="ph-fill ph-star text-amber-500"></i> Amalan Sunnah
@@ -567,8 +587,8 @@
                         </div>
                     </div>
 
-                    {{-- 5. Laporan Jumat --}}
-                    {{-- A. JIKA ADA ISI --}}
+                    
+                    
                     <template x-if="details.khotib">
                         <div class="bg-emerald-50/50 p-6 rounded-[1.5rem] border border-emerald-100">
                             <h4 class="font-bold text-emerald-800 text-sm mb-3 flex items-center gap-2">
@@ -587,8 +607,8 @@
                         </div>
                     </template>
 
-                    {{-- B. JIKA HARI JUMAT TAPI KOSONG --}}
-                    <template x-if="!details.khotib && '{{ $isFriday ? 1 : 0 }}' == '1'">
+                    
+                    <template x-if="!details.khotib && '<?php echo e($isFriday ? 1 : 0); ?>' == '1'">
                         <div class="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-100 text-center opacity-70">
                             <h4 class="font-bold text-slate-400 text-sm mb-1 flex items-center justify-center gap-2">
                                 <i class="ph-bold ph-warning-circle"></i> Laporan Jumat Kosong
@@ -597,37 +617,51 @@
                         </div>
                     </template>
 
-                    {{-- FORM INPUT GURU --}}
+                    
                     <form :action="formAction" method="POST" id="gradingForm" class="space-y-5 pt-4 border-t border-slate-200 border-dashed">
-                        @csrf
+                        <?php echo csrf_field(); ?>
                         <div class="flex flex-col md:flex-row gap-5">
                             <div class="w-full md:w-1/3">
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Nilai (0-100)</label>
                                 <div class="flex items-center gap-2">
                                     <input type="number" name="teacher_score" x-model="currentScore" min="0" max="100" class="w-full pl-4 pr-2 py-3 rounded-2xl border-slate-200 font-bold focus:ring-emerald-500 focus:border-emerald-500 text-xl text-slate-800 shadow-sm text-center" placeholder="0">
                                     
-                                    {{-- Quick Buttons --}}
+                                    
                                     <div class="flex flex-col gap-1">
                                         <button type="button" @click="setScore(100)" class="px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-[10px] font-bold hover:bg-emerald-200">100</button>
                                         <button type="button" @click="setScore(80)" class="px-2 py-1 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold hover:bg-slate-200">80</button>
                                     </div>
                                 </div>
-                                @error('teacher_score')
-                                    <p class="text-rose-500 text-[10px] mt-1 font-bold">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['teacher_score'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-rose-500 text-[10px] mt-1 font-bold"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                             <div class="w-full md:w-2/3">
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Catatan / Motivasi</label>
                                 <textarea name="teacher_note" x-model="currentNote" rows="2" class="w-full p-3 rounded-2xl border-slate-200 text-sm font-medium focus:ring-emerald-500 focus:border-emerald-500 leading-relaxed shadow-sm placeholder:text-slate-300 resize-none" placeholder="Berikan semangat..."></textarea>
-                                @error('teacher_note')
-                                    <p class="text-rose-500 text-[10px] mt-1 font-bold">{{ $message }}</p>
-                                @enderror
+                                <?php $__errorArgs = ['teacher_note'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <p class="text-rose-500 text-[10px] mt-1 font-bold"><?php echo e($message); ?></p>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
                     </form>
                 </div>
 
-                {{-- Footer --}}
+                
                 <div class="p-6 border-t border-slate-100 bg-white flex justify-end gap-3 shrink-0">
                     <button @click="closeModal()" class="px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition text-xs uppercase tracking-widest">Batal</button>
                     <button type="submit" form="gradingForm" class="px-8 py-3 rounded-xl font-black text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 transition text-xs uppercase tracking-widest shadow-lg shadow-emerald-500/20 flex items-center gap-2 transform active:scale-95">
@@ -637,4 +671,13 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/ramadan/admin_report.blade.php ENDPATH**/ ?>
