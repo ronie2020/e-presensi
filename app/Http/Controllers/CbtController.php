@@ -10,10 +10,10 @@ use App\Models\Student;
 use Illuminate\Support\Facades\Storage; 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\QuestionsImport;
-use App\Exports\CbtScoreExport; 
-use App\Exports\QuestionTemplateExport;
-use Barryvdh\DomPDF\Facade\Pdf; 
-use Illuminate\Support\Str;
+use App\Models\LmsAssignment;
+use App\Models\LmsGrade;
+use App\Models\Subject;
+use App\Models\SchoolClass;
 
 class CbtController extends Controller
 {
@@ -59,13 +59,18 @@ class CbtController extends Controller
         ]);
 
         $validated['is_active'] = $request->has('is_active');
+        // Jika token kosong, generate otomatis
+        if (empty($validated['token'])) {
+            $validated['token'] = strtoupper(Str::random(5));
+        }
+
         CbtExam::create($validated);
 
         return redirect()->route('cbt.index')->with('success', 'Jadwal ujian berhasil dibuat!');
     }
 
     /**
-     * [BARU] Halaman Edit Jadwal Ujian
+     * Halaman Edit Jadwal Ujian
      */
     public function edit($id)
     {
@@ -74,7 +79,7 @@ class CbtController extends Controller
     }
 
     /**
-     * [BARU] Update Jadwal Ujian
+     * Update Jadwal Ujian
      */
     public function update(Request $request, $id)
     {
@@ -102,7 +107,7 @@ class CbtController extends Controller
             'is_active' => $request->has('is_active'),
         ];
 
-        // Hanya update token jika user mengisi field token (agar token lama tidak hilang jika dikosongkan)
+        // Hanya update token jika user mengisi field token
         if ($request->filled('token')) {
             $updateData['token'] = strtoupper($request->token);
         }
@@ -113,12 +118,13 @@ class CbtController extends Controller
     }
 
     /**
-     * HAPUS DATA UJIAN (Jadwal, Soal, & Hasil)
+     * Hapus Data Ujian
      */
     public function destroy($id)
     {
         $exam = CbtExam::with('questions')->findOrFail($id);
 
+        // Hapus gambar soal terkait
         foreach ($exam->questions as $question) {
             if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
                 Storage::delete('public/' . $question->question_image);
@@ -183,7 +189,7 @@ class CbtController extends Controller
     }
 
     /**
-     * UPDATE SOAL
+     * Update Soal
      */
     public function updateQuestion(Request $request, $id)
     {
@@ -197,6 +203,14 @@ class CbtController extends Controller
         ]);
 
         $question = CbtQuestion::findOrFail($id);
+
+        // Handle Image
+        if ($request->has('delete_image') && $request->delete_image == 'true') {
+            if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
+                Storage::delete('public/' . $question->question_image);
+            }
+            $question->question_image = null;
+        }
 
         if ($request->hasFile('question_image')) {
             if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
@@ -271,8 +285,10 @@ class CbtController extends Controller
     {
         $exam = CbtExam::withCount('questions')->findOrFail($id);
 
+        // Ambil siswa sesuai kelas ujian
         $students = Student::with('schoolClass')
             ->whereHas('schoolClass', function($query) use ($exam) {
+                // Asumsi: class_level di exam (misal '7') cocok dengan nama kelas (misal '7A', '7B')
                 $query->where('name', 'like', $exam->class_level . '%');
             })
             ->orderBy('name')
@@ -356,7 +372,7 @@ class CbtController extends Controller
             ->orderBy('cbt_student_exams.total_score', 'desc')
             ->get();
 
-        // 3. LOGIKA HITUNG MANUAL
+        // 3. LOGIKA HITUNG MANUAL (Untuk memastikan akurasi Benar/Salah)
         foreach ($results as $row) {
             $correct = 0;
             $wrong = 0;
@@ -393,6 +409,59 @@ class CbtController extends Controller
     }
 
     /**
+     * [BARU] Halaman Detail Jawaban Siswa
+     */
+    public function resultDetail($exam_id, $student_id)
+    {
+        $exam = CbtExam::findOrFail($exam_id);
+        $student = Student::with('schoolClass')->findOrFail($student_id);
+
+        // Ambil sesi ujian siswa untuk dapat nilai total
+        $examSession = DB::table('cbt_student_exams')
+            ->where('cbt_exam_id', $exam_id)
+            ->where('student_id', $student_id)
+            ->first();
+
+        if (!$examSession) {
+            return back()->with('error', 'Siswa ini belum mengerjakan ujian.');
+        }
+
+        // Ambil list soal beserta jawaban siswa dan kunci jawaban
+        // FIX: Mengambil kolom 'options' (JSON) bukan 'option_A' dst secara langsung
+        $answers = DB::table('cbt_student_answers')
+            ->join('cbt_questions', 'cbt_student_answers.cbt_question_id', '=', 'cbt_questions.id')
+            ->where('cbt_student_answers.cbt_student_exam_id', $examSession->id)
+            ->select(
+                'cbt_questions.question_text',
+                'cbt_questions.question_image',
+                'cbt_questions.options', // Ganti select individual column dengan kolom JSON ini
+                'cbt_questions.correct_answer',
+                'cbt_questions.score_weight',
+                'cbt_student_answers.answer as student_answer'
+            )
+            ->get();
+
+        // Transformasi hasil untuk memecah JSON options menjadi properti A, B, C, D
+        $answers->transform(function ($item) {
+            $opts = json_decode($item->options, true);
+            // Assign manual agar view result_detail tidak perlu diubah
+            $item->option_A = $opts['A'] ?? '';
+            $item->option_B = $opts['B'] ?? '';
+            $item->option_C = $opts['C'] ?? '';
+            $item->option_D = $opts['D'] ?? '';
+            return $item;
+        });
+
+        // Hitung statistik ringkas untuk header detail
+        $stats = [
+            'correct' => $answers->filter(fn($q) => strtoupper($q->student_answer) == strtoupper($q->correct_answer))->count(),
+            'wrong'   => $answers->filter(fn($q) => strtoupper($q->student_answer) != strtoupper($q->correct_answer) && !is_null($q->student_answer))->count(),
+        ];
+
+        return view('cbt.result_detail', compact('exam', 'student', 'examSession', 'answers', 'stats'));
+    }
+
+    /**
      * Export Excel / PDF
      */
     public function export($id, $type)
@@ -423,6 +492,9 @@ class CbtController extends Controller
             ->where('cbt_exam_id', $exam_id)
             ->where('student_id', $student_id)
             ->delete(); 
+        
+        // Opsional: Hapus jawaban detail juga jika tidak cascade
+        // DB::table('cbt_student_answers')->where(...)->delete();
 
         return back()->with('success', 'Status ujian siswa berhasil di-reset. Siswa dapat login kembali.');
     }
@@ -505,23 +577,79 @@ class CbtController extends Controller
     }
 
     /**
-     * [BARU] AUTO ROTATE TOKEN (AJAX)
-     * Digunakan oleh halaman Monitoring untuk ganti token otomatis.
+     * [BARU] Sync Nilai CBT ke Buku Nilai (LMS)
      */
-    public function autoRotateToken($id)
+    public function syncToGradebook(Request $request, $id)
     {
         $exam = CbtExam::findOrFail($id);
-        // Generate Token 6 Digit Huruf
-        $newToken = strtoupper(Str::random(6));
-        
-        $exam->update([
-            'token' => $newToken
-        ]);
 
-        return response()->json([
-            'status' => 'success',
-            'token' => $newToken,
-            'generated_at' => now()->format('H:i:s')
-        ]);
+        // 1. Cari Subject ID berdasarkan nama mapel di CBT
+        // (Pastikan penulisan nama mapel di CBT sama persis dengan di Data Master Mapel)
+        $subject = Subject::where('name', 'like', '%' . $exam->subject_name . '%')->first();
+
+        if (!$subject) {
+            return back()->with('error', 'Gagal: Mata Pelajaran "' . $exam->subject_name . '" tidak ditemukan di Data Master Mapel. Pastikan namanya sesuai.');
+        }
+
+        // 2. Cari Kelas-kelas yang sesuai dengan Level Ujian
+        // Misal Level "7", maka cari kelas "7A", "7B", dst.
+        $targetClasses = SchoolClass::where('name', 'like', $exam->class_level . '%')->get();
+
+        if ($targetClasses->isEmpty()) {
+            return back()->with('error', 'Gagal: Tidak ditemukan kelas untuk tingkat ' . $exam->class_level);
+        }
+
+        $countSynced = 0;
+
+        DB::beginTransaction();
+        try {
+            foreach ($targetClasses as $class) {
+                // 3. Buat/Cari Assignment di LMS untuk kelas ini
+                $assignment = LmsAssignment::firstOrCreate(
+                    [
+                        'class_id' => $class->id,
+                        'subject_id' => $subject->id,
+                        'title' => 'NILAI UJIAN: ' . $exam->title, // Judul tugas di gradebook
+                    ],
+                    [
+                        'assignment_type' => 'exam', // Tipe tugas
+                        'description' => 'Nilai import otomatis dari CBT.',
+                        'due_date' => $exam->end_time,
+                    ]
+                );
+
+                // 4. Ambil Nilai Siswa di Kelas Ini yang sudah selesai ujian
+                $studentResults = DB::table('cbt_student_exams')
+                    ->join('students', 'cbt_student_exams.student_id', '=', 'students.id')
+                    ->where('cbt_student_exams.cbt_exam_id', $exam->id)
+                    ->where('cbt_student_exams.status', 'finished')
+                    ->where('students.class_id', $class->id)
+                    ->select('students.id as student_id', 'cbt_student_exams.total_score')
+                    ->get();
+
+                // 5. Masukkan ke Tabel Nilai (LMS Grades)
+                foreach ($studentResults as $res) {
+                    LmsGrade::updateOrCreate(
+                        [
+                            'lms_assignment_id' => $assignment->id,
+                            'student_id' => $res->student_id
+                        ],
+                        [
+                            'score' => $res->total_score,
+                            'status' => 'graded',
+                            'graded_at' => now(),
+                        ]
+                    );
+                    $countSynced++;
+                }
+            }
+            
+            DB::commit();
+            return back()->with('success', "Berhasil memposting nilai ke Buku Nilai! ($countSynced siswa diperbarui). Silakan cek menu Rekap Nilai Siswa.");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan saat posting nilai: ' . $e->getMessage());
+        }
     }
 }

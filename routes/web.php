@@ -308,6 +308,8 @@ Route::middleware('auth')->group(function () {
         
         // REKAP NILAI & EXPORT
         Route::get('/recap/{id}', [CbtController::class, 'recap'])->name('recap');
+        Route::get('/recap/{exam}/{student}/detail', [CbtController::class, 'resultDetail'])->name('result.detail');
+        Route::post('/recap/{id}/sync', [CbtController::class, 'syncToGradebook'])->name('sync_grades');
         Route::get('/export/{id}/{type}', [CbtController::class, 'export'])->name('export');
         Route::get('/exam/{exam}/questions', [CbtController::class, 'manageQuestions'])->name('questions.manage');
         Route::post('/exam/{exam}/questions', [CbtController::class, 'storeQuestion'])->name('questions.store');
