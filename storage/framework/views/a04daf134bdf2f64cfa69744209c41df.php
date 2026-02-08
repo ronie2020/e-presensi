@@ -3,10 +3,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Ujian - {{ $exam->title }}</title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title>Ujian - <?php echo e($exam->title); ?></title>
     
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     
     <script src="https://unpkg.com/@phosphor-icons/web" async></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" async></script>
@@ -28,7 +28,7 @@
     </style>
 
     <script>
-        window.examData = { questions: @json($questions), timeLeft: {{ $timeLeft ?? 0 }}, sessionId: {{ $sessionId }}, examId: {{ $exam->id }} };
+        window.examData = { questions: <?php echo json_encode($questions, 15, 512) ?>, timeLeft: <?php echo e($timeLeft ?? 0); ?>, sessionId: <?php echo e($sessionId); ?>, examId: <?php echo e($exam->id); ?> };
 
         window.examApp = function() {
             return {
@@ -116,7 +116,7 @@
                     this.saveStatus = 'saving';
                     try {
                         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                        const response = await fetch("{{ route('student.exam.saveAnswer') }}", {
+                        const response = await fetch("<?php echo e(route('student.exam.saveAnswer')); ?>", {
                             method: 'POST', 
                             headers: { 
                                 'Content-Type': 'application/json', 
@@ -304,7 +304,7 @@
                     // Submit Form
                     const form = document.createElement('form'); 
                     form.method = 'POST'; 
-                    form.action = "{{ route('student.exam.finish', ':id') }}".replace(':id', this.examId);
+                    form.action = "<?php echo e(route('student.exam.finish', ':id')); ?>".replace(':id', this.examId);
                     
                     const t = document.createElement('input'); 
                     t.type = 'hidden'; 
@@ -349,8 +349,8 @@
                 <i class="ph-bold ph-graduation-cap text-xl"></i>
             </div>
             <div class="truncate">
-                <h1 class="font-bold text-sm lg:text-base truncate">{{ $exam->title }}</h1>
-                <p class="text-[10px] lg:text-xs text-slate-400 font-bold uppercase tracking-wider truncate">{{ $exam->subject_name }}</p>
+                <h1 class="font-bold text-sm lg:text-base truncate"><?php echo e($exam->title); ?></h1>
+                <p class="text-[10px] lg:text-xs text-slate-400 font-bold uppercase tracking-wider truncate"><?php echo e($exam->subject_name); ?></p>
             </div>
         </div>
 
@@ -533,4 +533,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/cbt/student/exam_runner.blade.php ENDPATH**/ ?>

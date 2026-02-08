@@ -1,6 +1,4 @@
-@extends('layouts.student')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <style>
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -33,16 +31,18 @@
                 <div class="flex gap-4">
                     <div class="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-2xl text-center min-w-[110px] shadow-lg">
                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Tersedia</p>
-                        {{-- Hitung yang statusnya 'open' atau 'ongoing' --}}
+                        
                         <p class="text-3xl font-black text-yellow-400">
-                            {{ isset($exams) ? $exams->filter(fn($e) => in_array($e->student_status, ['open', 'ongoing']))->count() : 0 }}
+                            <?php echo e(isset($exams) ? $exams->filter(fn($e) => in_array($e->student_status, ['open', 'ongoing']))->count() : 0); ?>
+
                         </p>
                     </div>
                     <div class="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-2xl text-center min-w-[110px] shadow-lg">
                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Selesai</p>
-                        {{-- Hitung yang statusnya 'finished' --}}
+                        
                         <p class="text-3xl font-black text-white">
-                            {{ isset($exams) ? $exams->where('student_status', 'finished')->count() : 0 }}
+                            <?php echo e(isset($exams) ? $exams->where('student_status', 'finished')->count() : 0); ?>
+
                         </p>
                     </div>
                 </div>
@@ -54,21 +54,21 @@
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20">
         
         <!-- ALERT ERROR -->
-        @if(session('error'))
+        <?php if(session('error')): ?>
             <div class="animate-enter mb-6 bg-rose-50 border border-rose-100 text-rose-800 px-5 py-4 rounded-2xl flex items-center gap-3 shadow-lg shadow-rose-900/5">
                 <div class="bg-rose-100 p-2 rounded-xl text-rose-600"><i class="ph-fill ph-warning-circle text-xl"></i></div>
-                <span class="font-bold text-sm">{{ session('error') }}</span>
+                <span class="font-bold text-sm"><?php echo e(session('error')); ?></span>
             </div>
-        @endif
+        <?php endif; ?>
         
-        @if(session('success'))
+        <?php if(session('success')): ?>
             <div class="animate-enter mb-6 bg-emerald-50 border border-emerald-100 text-emerald-800 px-5 py-4 rounded-2xl flex items-center gap-3 shadow-lg shadow-emerald-900/5">
                 <div class="bg-emerald-100 p-2 rounded-xl text-emerald-600"><i class="ph-fill ph-check-circle text-xl"></i></div>
-                <span class="font-bold text-sm">{{ session('success') }}</span>
+                <span class="font-bold text-sm"><?php echo e(session('success')); ?></span>
             </div>
-        @endif
+        <?php endif; ?>
 
-        @if(!isset($exams) || $exams->isEmpty())
+        <?php if(!isset($exams) || $exams->isEmpty()): ?>
             <!-- STATE KOSONG -->
             <div class="animate-enter bg-white rounded-[2.5rem] p-12 text-center border border-slate-200 shadow-xl shadow-slate-200/50" style="animation-delay: 100ms">
                 <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
@@ -77,11 +77,11 @@
                 <h3 class="text-xl font-bold text-slate-800">Tidak Ada Ujian Aktif</h3>
                 <p class="text-slate-500 mt-2 font-medium">Saat ini belum ada jadwal ujian yang tersedia untuk Anda.</p>
             </div>
-        @else
+        <?php else: ?>
             <!-- DAFTAR UJIAN -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                @foreach($exams as $index => $examItem)
-                    @php
+                <?php $__currentLoopData = $exams; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $examItem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
                         // Logika Status Real dari Controller
                         $status = $examItem->student_status; // values: upcoming, open, ongoing, finished
                         
@@ -99,9 +99,9 @@
                             $statusLabel = 'Belum Mulai';
                             $statusClass = 'bg-slate-100 text-slate-500 border-slate-200';
                         }
-                    @endphp
+                    ?>
 
-                    <div class="animate-enter group bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 hover:border-blue-200 transition-all duration-300 overflow-hidden flex flex-col h-full hover:-translate-y-1" style="animation-delay: {{ ($index + 1) * 100 }}ms">
+                    <div class="animate-enter group bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 hover:border-blue-200 transition-all duration-300 overflow-hidden flex flex-col h-full hover:-translate-y-1" style="animation-delay: <?php echo e(($index + 1) * 100); ?>ms">
                         
                         <!-- Header Card -->
                         <div class="p-6 md:p-7 relative overflow-hidden">
@@ -112,17 +112,20 @@
                                 <div class="w-14 h-14 rounded-2xl bg-white border border-slate-100 text-blue-600 flex items-center justify-center shadow-md group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all duration-300">
                                     <i class="ph-duotone ph-exam text-2xl"></i>
                                 </div>
-                                <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border shadow-sm {{ $statusClass }}">
-                                    {{ $statusLabel }}
+                                <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border shadow-sm <?php echo e($statusClass); ?>">
+                                    <?php echo e($statusLabel); ?>
+
                                 </span>
                             </div>
                             
                             <h3 class="relative z-10 text-lg md:text-xl font-bold text-slate-800 leading-tight group-hover:text-blue-700 transition-colors mb-2 line-clamp-2">
-                                {{ $examItem->title ?? 'Judul Ujian' }}
+                                <?php echo e($examItem->title ?? 'Judul Ujian'); ?>
+
                             </h3>
                             <div class="relative z-10 flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-50 w-fit px-3 py-1.5 rounded-lg border border-slate-100">
                                 <i class="ph-fill ph-chalkboard-teacher text-blue-500"></i>
-                                {{ $examItem->subject_name ?? 'Mata Pelajaran' }}
+                                <?php echo e($examItem->subject_name ?? 'Mata Pelajaran'); ?>
+
                             </div>
                         </div>
 
@@ -133,74 +136,78 @@
                                     <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Tanggal</p>
                                     <p class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                                         <i class="ph-bold ph-calendar-blank text-rose-500"></i>
-                                        {{ \Carbon\Carbon::parse($examItem->start_time)->format('d M Y') }}
+                                        <?php echo e(\Carbon\Carbon::parse($examItem->start_time)->format('d M Y')); ?>
+
                                     </p>
                                 </div>
                                 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
                                     <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Durasi</p>
                                     <p class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                                         <i class="ph-bold ph-timer text-amber-500"></i>
-                                        {{ $examItem->duration_minutes }} Menit
+                                        <?php echo e($examItem->duration_minutes); ?> Menit
                                     </p>
                                 </div>
                                 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
                                     <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Soal</p>
                                     <p class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                                         <i class="ph-bold ph-list-numbers text-purple-500"></i>
-                                        {{ $examItem->questions_count ?? 0 }} Butir
+                                        <?php echo e($examItem->questions_count ?? 0); ?> Butir
                                     </p>
                                 </div>
                                 
-                                {{-- Jika selesai, tampilkan nilai (Opsional, jika ingin ditampilkan) --}}
-                                @if($status == 'finished')
+                                
+                                <?php if($status == 'finished'): ?>
                                 <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
                                     <p class="text-[10px] uppercase font-bold text-emerald-600 mb-1">Nilai Anda</p>
                                     <p class="text-xs font-bold text-emerald-800 flex items-center gap-1.5">
                                         <i class="ph-fill ph-medal text-emerald-500"></i>
-                                        {{ $examItem->student_score ?? 0 }}
+                                        <?php echo e($examItem->student_score ?? 0); ?>
+
                                     </p>
                                 </div>
-                                @else
+                                <?php else: ?>
                                 <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
                                     <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">KKM</p>
                                     <p class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                                         <i class="ph-bold ph-target text-emerald-500"></i>
-                                        {{ $examItem->passing_grade ?? 75 }}
+                                        <?php echo e($examItem->passing_grade ?? 75); ?>
+
                                     </p>
                                 </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
 
                         <!-- Footer Action -->
                         <div class="p-4 bg-slate-50 border-t border-slate-100">
-                            @if($status == 'finished')
+                            <?php if($status == 'finished'): ?>
                                 <button disabled class="w-full py-3.5 rounded-xl bg-slate-200 text-slate-400 font-bold text-sm cursor-not-allowed flex items-center justify-center gap-2">
                                     <i class="ph-fill ph-check-circle"></i> Sudah Dikerjakan
                                 </button>
-                            @elseif($status == 'upcoming')
+                            <?php elseif($status == 'upcoming'): ?>
                                 <button disabled class="w-full py-3.5 rounded-xl bg-slate-100 text-slate-400 font-bold text-sm cursor-not-allowed flex items-center justify-center gap-2 border border-slate-200">
                                     <i class="ph-bold ph-lock-key"></i> Belum Dibuka
                                 </button>
-                            @elseif($status == 'ongoing')
-                                <a href="{{ route('student.exam.run', $examItem->id) }}" class="w-full py-3.5 rounded-xl bg-amber-500 text-white font-bold text-sm shadow-lg shadow-amber-500/20 hover:bg-amber-600 hover:shadow-amber-600/30 transition-all flex items-center justify-center gap-2 group/btn relative overflow-hidden">
+                            <?php elseif($status == 'ongoing'): ?>
+                                <a href="<?php echo e(route('student.exam.run', $examItem->id)); ?>" class="w-full py-3.5 rounded-xl bg-amber-500 text-white font-bold text-sm shadow-lg shadow-amber-500/20 hover:bg-amber-600 hover:shadow-amber-600/30 transition-all flex items-center justify-center gap-2 group/btn relative overflow-hidden">
                                     <span class="relative z-10">Lanjutkan Mengerjakan</span>
                                     <i class="ph-bold ph-arrow-right relative z-10 group-hover/btn:translate-x-1 transition-transform"></i>
                                 </a>
-                            @else
-                                {{-- Status: Open --}}
-                                <a href="{{ route('student.exam.show', $examItem->id) }}" class="w-full py-3.5 rounded-xl bg-slate-900 text-white font-bold text-sm shadow-lg shadow-slate-900/20 hover:bg-blue-600 hover:shadow-blue-600/30 transition-all flex items-center justify-center gap-2 group/btn relative overflow-hidden">
+                            <?php else: ?>
+                                
+                                <a href="<?php echo e(route('student.exam.show', $examItem->id)); ?>" class="w-full py-3.5 rounded-xl bg-slate-900 text-white font-bold text-sm shadow-lg shadow-slate-900/20 hover:bg-blue-600 hover:shadow-blue-600/30 transition-all flex items-center justify-center gap-2 group/btn relative overflow-hidden">
                                     <span class="relative z-10">Masuk Ruang Ujian</span>
                                     <i class="ph-bold ph-arrow-right relative z-10 group-hover/btn:translate-x-1 transition-transform"></i>
                                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover/btn:animate-[shimmer_1.5s_infinite]"></div>
                                 </a>
-                            @endif
+                            <?php endif; ?>
                         </div>
 
                     </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.student', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/cbt/student/index.blade.php ENDPATH**/ ?>
