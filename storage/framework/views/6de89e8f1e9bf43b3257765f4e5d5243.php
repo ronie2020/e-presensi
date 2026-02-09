@@ -1,7 +1,5 @@
-@extends('layouts.public')
+<?php $__env->startSection('content'); ?>
 
-@section('content')
-{{-- STYLE KHUSUS (Sinkron dengan Register & Check) --}}
 <style>
     .glass-card {
         background: rgba(15, 23, 42, 0.7);
@@ -32,7 +30,7 @@
 
 <div class="min-h-screen w-full relative overflow-hidden bg-slate-950 font-sans pb-20 flex flex-col items-center justify-center py-10">
     
-    {{-- Background Ornaments --}}
+    
     <div class="absolute inset-0 z-0 pointer-events-none">
         <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900"></div>
         <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
@@ -42,7 +40,7 @@
 
     <div class="relative z-10 w-full max-w-5xl px-4">
         
-        {{-- Header Section --}}
+        
         <div class="text-center mb-10" data-aos="fade-down">
             <span class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
                 <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
@@ -56,10 +54,10 @@
             </p>
         </div>
 
-        {{-- Main Glass Card --}}
+        
         <div class="glass-card rounded-[2.5rem] overflow-hidden" x-data="{ step: 1 }">
             
-            {{-- Navigasi Step --}}
+            
             <div class="flex border-b border-white/5 bg-black/20 overflow-x-auto">
                 <button type="button" @click="step = 1" :class="step === 1 ? 'tab-btn-active' : 'tab-btn-inactive'" class="tab-btn-dark w-1/2 justify-center">
                     <span class="w-6 h-6 rounded-full border-2 border-current flex items-center justify-center text-[10px]">1</span>
@@ -73,7 +71,7 @@
 
             <div class="p-8 md:p-12 min-h-[400px]">
                 
-                {{-- STEP 1: DOWNLOAD --}}
+                
                 <div x-show="step === 1" class="animate-fade-in h-full flex flex-col justify-between">
                     <div class="max-w-3xl mx-auto w-full">
                         <div class="mb-8 text-center md:text-left">
@@ -93,7 +91,7 @@
                                     <p class="text-slate-500 text-xs uppercase tracking-wider font-bold mt-1">Format Resmi Sekolah</p>
                                 </div>
                             </div>
-                            <a href="{{ route('ppdb.download_template') }}" class="w-full md:w-auto px-8 py-4 bg-white text-blue-900 font-bold rounded-xl hover:bg-blue-50 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                            <a href="<?php echo e(route('ppdb.download_template')); ?>" class="w-full md:w-auto px-8 py-4 bg-white text-blue-900 font-bold rounded-xl hover:bg-blue-50 transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                                 <i class="ph-bold ph-download-simple text-xl"></i> Unduh Sekarang
                             </a>
                         </div>
@@ -114,7 +112,7 @@
                     </div>
                 </div>
 
-                {{-- STEP 2: UPLOAD --}}
+                
                 <div x-show="step === 2" class="animate-fade-in h-full flex flex-col justify-between" style="display: none;">
                     <div class="max-w-2xl mx-auto w-full">
                         <div class="text-center mb-8">
@@ -122,23 +120,23 @@
                             <p class="text-slate-400 text-sm">Unggah file Excel yang telah selesai Anda lengkapi.</p>
                         </div>
                         
-                        {{-- Flash Messages --}}
-                        @if(session('success'))
+                        
+                        <?php if(session('success')): ?>
                             <div class="mb-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold flex items-start gap-3">
                                 <i class="ph-fill ph-check-circle text-xl shrink-0"></i>
-                                <div>{{ session('success') }}</div>
+                                <div><?php echo e(session('success')); ?></div>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
-                        @if(session('error'))
+                        <?php if(session('error')): ?>
                             <div class="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold flex items-start gap-3">
                                 <i class="ph-fill ph-warning-circle text-xl shrink-0"></i>
-                                <div>{!! session('error') !!}</div>
+                                <div><?php echo session('error'); ?></div>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
-                        <form action="{{ route('ppdb.import') }}" method="POST" enctype="multipart/form-data" class="space-y-6 bg-slate-900/40 p-6 rounded-3xl border border-white/5">
-                            @csrf
+                        <form action="<?php echo e(route('ppdb.import')); ?>" method="POST" enctype="multipart/form-data" class="space-y-6 bg-slate-900/40 p-6 rounded-3xl border border-white/5">
+                            <?php echo csrf_field(); ?>
                             
                             <div class="relative group">
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Pilih File Excel (.xlsx / .xls)</label>
@@ -161,7 +159,7 @@
                         <button type="button" @click="step = 1" class="px-6 py-4 text-slate-400 font-bold hover:text-white transition-all flex items-center gap-2">
                             <i class="ph-bold ph-arrow-left"></i> Kembali
                         </button>
-                        <a href="{{ route('ppdb.create') }}" class="px-6 py-4 text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2 bg-blue-500/5 rounded-xl border border-blue-500/10 hover:border-blue-500/30">
+                        <a href="<?php echo e(route('ppdb.create')); ?>" class="px-6 py-4 text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2 bg-blue-500/5 rounded-xl border border-blue-500/10 hover:border-blue-500/30">
                             <i class="ph-bold ph-user"></i> Pendaftaran Reguler
                         </a>
                     </div>
@@ -171,8 +169,9 @@
         </div>
 
         <div class="mt-8 text-center border-t border-white/5 pt-6">
-            <p class="text-xs text-slate-500 font-medium tracking-wide">&copy; {{ date('Y') }} Panitia PPDB SMPN 3 Lakbok</p>
+            <p class="text-xs text-slate-500 font-medium tracking-wide">&copy; <?php echo e(date('Y')); ?> Panitia PPDB SMPN 3 Lakbok</p>
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.public', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/ppdb/collective.blade.php ENDPATH**/ ?>

@@ -1,7 +1,5 @@
-@extends('layouts.public')
+<?php $__env->startSection('content'); ?>
 
-@section('content')
-{{-- STYLE KHUSUS (Dark Theme & Glassmorphism) --}}
 <style>
     .glass-card {
         background: rgba(15, 23, 42, 0.7);
@@ -50,7 +48,7 @@
 
 <div class="min-h-screen w-full relative overflow-hidden bg-slate-950 font-sans pb-20">
     
-    {{-- Background Ornaments --}}
+    
     <div class="absolute inset-0 z-0 pointer-events-none">
         <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900"></div>
         <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
@@ -60,11 +58,12 @@
 
     <div class="relative z-10 max-w-5xl mx-auto px-4 pt-10">
         
-        {{-- Header Section --}}
+        
         <div class="text-center mb-10" data-aos="fade-down">
             <span class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
                 <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
-                PPDB Online {{ date('Y') }}
+                PPDB Online <?php echo e(date('Y')); ?>
+
             </span>
             <h1 class="text-4xl md:text-5xl font-black text-white tracking-tight mb-4">
                 Formulir <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Pendaftaran</span>
@@ -75,7 +74,7 @@
         </div>
 
         <!-- ERROR ALERT -->
-        @if ($errors->any())
+        <?php if($errors->any()): ?>
             <div class="mb-8 p-1 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 shadow-lg shadow-rose-900/20 animate-pulse">
                 <div class="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
                     <div class="p-2.5 bg-rose-500/20 rounded-full text-rose-400 shrink-0">
@@ -84,21 +83,21 @@
                     <div>
                         <h3 class="text-white font-bold text-lg mb-1">Terjadi Kesalahan!</h3>
                         <ul class="list-disc list-inside text-sm text-slate-300 space-y-1">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
+                            <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><?php echo e($error); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </ul>
                     </div>
                 </div>
             </div>
-        @endif
+        <?php endif; ?>
 
-        {{-- Main Glass Card --}}
+        
         <div class="glass-card rounded-[2.5rem] overflow-hidden" 
              x-data="{ 
                 tab: 'jalur', 
-                track: '{{ old('track', '') }}',
-                achievement_type: '{{ old('achievement_type', '') }}',
+                track: '<?php echo e(old('track', '')); ?>',
+                achievement_type: '<?php echo e(old('achievement_type', '')); ?>',
                 
                 nextTab(target) {
                     this.tab = target;
@@ -106,9 +105,9 @@
                 }
              }">
             
-            {{-- Navigasi Tab (Premium Look) --}}
+            
             <div class="flex border-b border-white/5 bg-black/20 overflow-x-auto no-scrollbar">
-                @php
+                <?php
                     $tabs = [
                         'jalur' => ['icon' => 'ph-path', 'label' => 'Jalur'],
                         'pribadi' => ['icon' => 'ph-user', 'label' => 'Data Diri'],
@@ -116,21 +115,22 @@
                         'orangtua' => ['icon' => 'ph-users-three', 'label' => 'Orang Tua'],
                         'upload' => ['icon' => 'ph-cloud-arrow-up', 'label' => 'Berkas'],
                     ];
-                @endphp
+                ?>
 
-                @foreach($tabs as $key => $item)
-                    <button type="button" @click="tab = '{{ $key }}'" 
-                        :class="tab === '{{ $key }}' ? 'tab-btn-active' : 'tab-btn-inactive'" 
+                <?php $__currentLoopData = $tabs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <button type="button" @click="tab = '<?php echo e($key); ?>'" 
+                        :class="tab === '<?php echo e($key); ?>' ? 'tab-btn-active' : 'tab-btn-inactive'" 
                         class="tab-btn-dark">
-                        <i class="ph-bold {{ $item['icon'] }} text-lg"></i> {{ $item['label'] }}
+                        <i class="ph-bold <?php echo e($item['icon']); ?> text-lg"></i> <?php echo e($item['label']); ?>
+
                     </button>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
 
-            <form id="ppdbForm" action="{{ route('ppdb.store') }}" method="POST" enctype="multipart/form-data" class="p-6 md:p-10 min-h-[400px]">
-                @csrf
+            <form id="ppdbForm" action="<?php echo e(route('ppdb.store')); ?>" method="POST" enctype="multipart/form-data" class="p-6 md:p-10 min-h-[400px]">
+                <?php echo csrf_field(); ?>
 
-                {{-- ================= TAB 1: JALUR ================= --}}
+                
                 <div x-show="tab === 'jalur'" class="space-y-8 animate-fade-in">
                     <div class="mb-6 border-l-4 border-blue-500 pl-4">
                         <h3 class="text-xl font-bold text-white">Pilih Jalur Pendaftaran</h3>
@@ -138,29 +138,29 @@
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        @foreach([
+                        <?php $__currentLoopData = [
                             ['val' => 'zonasi', 'icon' => 'ph-map-pin', 'label' => 'Zonasi', 'desc' => 'Jarak Domisili'],
                             ['val' => 'prestasi', 'icon' => 'ph-trophy', 'label' => 'Prestasi', 'desc' => 'Akademik/Non'],
                             ['val' => 'afirmasi', 'icon' => 'ph-hand-heart', 'label' => 'Afirmasi', 'desc' => 'KIP/KPS/PKH'],
                             ['val' => 'pindah_tugas', 'icon' => 'ph-briefcase', 'label' => 'Pindah', 'desc' => 'Tugas Ortu'],
-                        ] as $opt)
+                        ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <label class="cursor-pointer group">
-                            <input type="radio" name="track" value="{{ $opt['val'] }}" class="peer sr-only" x-model="track" required>
+                            <input type="radio" name="track" value="<?php echo e($opt['val']); ?>" class="peer sr-only" x-model="track" required>
                             <div class="p-5 rounded-2xl border-2 border-white/5 bg-slate-900/30 peer-checked:border-blue-500 peer-checked:bg-blue-500/10 transition-all h-full hover:border-blue-500/30 flex flex-col items-center text-center relative overflow-hidden group-hover:bg-slate-900/50">
                                 <div class="w-12 h-12 rounded-full bg-slate-800 shadow-sm flex items-center justify-center text-slate-400 peer-checked:text-white peer-checked:bg-blue-500 mb-3 transition-colors">
-                                    <i class="ph-duotone {{ $opt['icon'] }} text-2xl"></i>
+                                    <i class="ph-duotone <?php echo e($opt['icon']); ?> text-2xl"></i>
                                 </div>
-                                <span class="font-bold text-slate-400 peer-checked:text-white">{{ $opt['label'] }}</span>
-                                <span class="text-[10px] text-slate-500 mt-1 uppercase tracking-wide">{{ $opt['desc'] }}</span>
+                                <span class="font-bold text-slate-400 peer-checked:text-white"><?php echo e($opt['label']); ?></span>
+                                <span class="text-[10px] text-slate-500 mt-1 uppercase tracking-wide"><?php echo e($opt['desc']); ?></span>
                                 <div class="absolute top-3 right-3 opacity-0 peer-checked:opacity-100 transition-opacity text-blue-500">
                                     <i class="ph-fill ph-check-circle text-xl"></i>
                                 </div>
                             </div>
                         </label>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
 
-                    {{-- DETAIL PRESTASI --}}
+                    
                     <div x-show="track === 'prestasi'" x-transition class="pt-6 border-t border-white/5">
                         <div class="bg-blue-900/20 p-6 rounded-2xl border border-blue-500/20">
                             <h4 class="font-bold text-blue-300 mb-4 flex items-center gap-2">
@@ -187,7 +187,7 @@
                                 </div>
                             </div>
 
-                            {{-- Input Non-Akademik --}}
+                            
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-show="achievement_type === 'non_akademik'" x-transition>
                                 <div class="form-group">
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nama Lomba <span class="text-rose-500">*</span></label>
@@ -229,7 +229,7 @@
                     </div>
                 </div>
 
-                {{-- ================= TAB 2: PRIBADI ================= --}}
+                
                 <div x-show="tab === 'pribadi'" class="space-y-6 animate-fade-in" style="display: none;">
                     <div class="mb-6 border-l-4 border-blue-500 pl-4">
                         <h3 class="text-xl font-bold text-white">Data Calon Siswa</h3>
@@ -239,31 +239,31 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="md:col-span-2 form-group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Nama Lengkap</label>
-                            <input type="text" name="full_name" value="{{ old('full_name') }}" class="form-input-dark" placeholder="Nama Lengkap sesuai Ijazah" required>
+                            <input type="text" name="full_name" value="<?php echo e(old('full_name')); ?>" class="form-input-dark" placeholder="Nama Lengkap sesuai Ijazah" required>
                             <i class="ph-bold ph-user input-icon-dark"></i>
                         </div>
                         
                         <div class="form-group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">NISN (10 Digit)</label>
-                            <input type="number" name="nisn" value="{{ old('nisn') }}" class="form-input-dark" placeholder="0012345678" required>
+                            <input type="number" name="nisn" value="<?php echo e(old('nisn')); ?>" class="form-input-dark" placeholder="0012345678" required>
                             <i class="ph-bold ph-identification-card input-icon-dark"></i>
                         </div>
 
                         <div class="form-group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">NIK (No. KK)</label>
-                            <input type="number" name="nik" value="{{ old('nik') }}" class="form-input-dark" placeholder="3207xxxxxxxxxxxx" required>
+                            <input type="number" name="nik" value="<?php echo e(old('nik')); ?>" class="form-input-dark" placeholder="3207xxxxxxxxxxxx" required>
                             <i class="ph-bold ph-address-book input-icon-dark"></i>
                         </div>
 
                         <div class="form-group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Tempat Lahir</label>
-                            <input type="text" name="birth_place" value="{{ old('birth_place') }}" class="form-input-dark" placeholder="Kota/Kabupaten" required>
+                            <input type="text" name="birth_place" value="<?php echo e(old('birth_place')); ?>" class="form-input-dark" placeholder="Kota/Kabupaten" required>
                             <i class="ph-bold ph-map-pin input-icon-dark"></i>
                         </div>
 
                         <div class="form-group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Tanggal Lahir</label>
-                            <input type="date" name="birth_date" value="{{ old('birth_date') }}" class="form-input-dark" required>
+                            <input type="date" name="birth_date" value="<?php echo e(old('birth_date')); ?>" class="form-input-dark" required>
                             <i class="ph-bold ph-calendar-blank input-icon-dark"></i>
                         </div>
 
@@ -271,8 +271,8 @@
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Jenis Kelamin</label>
                             <select name="gender" class="form-input-dark appearance-none cursor-pointer" required>
                                 <option value="">-- Pilih --</option>
-                                <option value="L" {{ old('gender') == 'L' ? 'selected' : '' }}>Laki-laki</option>
-                                <option value="P" {{ old('gender') == 'P' ? 'selected' : '' }}>Perempuan</option>
+                                <option value="L" <?php echo e(old('gender') == 'L' ? 'selected' : ''); ?>>Laki-laki</option>
+                                <option value="P" <?php echo e(old('gender') == 'P' ? 'selected' : ''); ?>>Perempuan</option>
                             </select>
                             <i class="ph-bold ph-gender-intersex input-icon-dark"></i>
                             <i class="ph-bold ph-caret-down absolute right-4 top-[42px] text-slate-500 pointer-events-none"></i>
@@ -295,13 +295,13 @@
 
                         <div class="form-group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">No. WhatsApp Siswa (Opsional)</label>
-                            <input type="number" name="student_phone" value="{{ old('student_phone') }}" class="form-input-dark" placeholder="08xxxxxxxxxx">
+                            <input type="number" name="student_phone" value="<?php echo e(old('student_phone')); ?>" class="form-input-dark" placeholder="08xxxxxxxxxx">
                             <i class="ph-bold ph-device-mobile input-icon-dark"></i>
                         </div>
 
                         <div class="md:col-span-2 form-group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Alamat Lengkap</label>
-                            <textarea name="address" rows="3" class="form-input-dark pl-4 h-auto leading-relaxed resize-none" placeholder="Jalan/Dusun, RT/RW, Desa/Kelurahan, Kecamatan, Kode Pos" required>{{ old('address') }}</textarea>
+                            <textarea name="address" rows="3" class="form-input-dark pl-4 h-auto leading-relaxed resize-none" placeholder="Jalan/Dusun, RT/RW, Desa/Kelurahan, Kecamatan, Kode Pos" required><?php echo e(old('address')); ?></textarea>
                             <p class="text-[10px] text-slate-500 mt-1 ml-1">* Sesuai dengan Kartu Keluarga.</p>
                         </div>
                     </div>
@@ -316,7 +316,7 @@
                     </div>
                 </div>
 
-                {{-- ================= TAB 3: SEKOLAH ================= --}}
+                
                 <div x-show="tab === 'sekolah'" class="space-y-6 animate-fade-in" style="display: none;">
                     <div class="mb-6 border-l-4 border-blue-500 pl-4">
                         <h3 class="text-xl font-bold text-white">Sekolah Asal & Nilai</h3>
@@ -326,18 +326,18 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="form-group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Nama Sekolah Asal</label>
-                            <input type="text" name="school_origin" value="{{ old('school_origin') }}" class="form-input-dark" placeholder="SDN 1 Lakbok" required>
+                            <input type="text" name="school_origin" value="<?php echo e(old('school_origin')); ?>" class="form-input-dark" placeholder="SDN 1 Lakbok" required>
                             <i class="ph-bold ph-buildings input-icon-dark"></i>
                         </div>
                         <div class="form-group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">NPSN Sekolah (Opsional)</label>
-                            <input type="number" name="npsn_school_origin" value="{{ old('npsn_school_origin') }}" class="form-input-dark" placeholder="Nomor Pokok Sekolah">
+                            <input type="number" name="npsn_school_origin" value="<?php echo e(old('npsn_school_origin')); ?>" class="form-input-dark" placeholder="Nomor Pokok Sekolah">
                             <i class="ph-bold ph-hash input-icon-dark"></i>
                         </div>
                         <div class="md:col-span-2 form-group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Rata-rata Nilai Rapor (Total)</label>
                             <div class="relative">
-                                <input type="number" step="0.01" name="average_grade" value="{{ old('average_grade') }}" class="form-input-dark pl-12 text-lg font-bold text-emerald-400" placeholder="00.00" required>
+                                <input type="number" step="0.01" name="average_grade" value="<?php echo e(old('average_grade')); ?>" class="form-input-dark pl-12 text-lg font-bold text-emerald-400" placeholder="00.00" required>
                                 <div class="absolute left-0 top-0 bottom-0 w-12 flex items-center justify-center text-emerald-500 text-xl border-r border-white/10">
                                     <i class="ph-bold ph-percent"></i>
                                 </div>
@@ -345,19 +345,19 @@
                             <p class="text-[10px] text-slate-500 mt-1 ml-1">Rata-rata akumulasi nilai rapor kelas 4, 5, dan 6 (Semester 1).</p>
                         </div>
 
-                        {{-- INPUT NILAI PRESTASI AKADEMIK --}}
+                        
                         <div class="md:col-span-2" x-show="track === 'prestasi' && achievement_type === 'akademik'" x-transition>
                             <div class="bg-emerald-900/10 p-6 rounded-2xl border border-emerald-500/20 mt-2">
                                 <h4 class="font-bold text-emerald-400 mb-4 flex items-center gap-2 text-sm border-b border-emerald-500/20 pb-2">
                                     <i class="ph-bold ph-list-numbers"></i> Input Nilai Rapor (Rata-Rata Semester 7-11)
                                 </h4>
                                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                    @foreach(['PAI', 'PKn', 'B.Indo', 'MTK', 'IPA', 'IPS', 'SBdP', 'PJOK'] as $mapel)
+                                    <?php $__currentLoopData = ['PAI', 'PKn', 'B.Indo', 'MTK', 'IPA', 'IPS', 'SBdP', 'PJOK']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $mapel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <div>
-                                        <label class="text-xs font-bold text-slate-400 mb-1 block">{{ $mapel }}</label>
-                                        <input type="number" step="0.01" name="grade_{{ Str::slug($mapel) }}" class="w-full rounded-lg bg-slate-900 border-emerald-500/30 text-white focus:border-emerald-400 focus:ring-emerald-500/20 text-sm font-bold text-center py-2" placeholder="00" :required="track === 'prestasi' && achievement_type === 'akademik'">
+                                        <label class="text-xs font-bold text-slate-400 mb-1 block"><?php echo e($mapel); ?></label>
+                                        <input type="number" step="0.01" name="grade_<?php echo e(Str::slug($mapel)); ?>" class="w-full rounded-lg bg-slate-900 border-emerald-500/30 text-white focus:border-emerald-400 focus:ring-emerald-500/20 text-sm font-bold text-center py-2" placeholder="00" :required="track === 'prestasi' && achievement_type === 'akademik'">
                                     </div>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </div>
                         </div>
@@ -373,7 +373,7 @@
                     </div>
                 </div>
 
-                {{-- ================= TAB 4: ORANG TUA ================= --}}
+                
                 <div x-show="tab === 'orangtua'" class="space-y-6 animate-fade-in" style="display: none;">
                     <div class="mb-6 border-l-4 border-blue-500 pl-4">
                         <h3 class="text-xl font-bold text-white">Data Orang Tua / Wali</h3>
@@ -383,22 +383,22 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="form-group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Nama Ayah / Wali</label>
-                            <input type="text" name="father_name" value="{{ old('father_name') }}" class="form-input-dark" required>
+                            <input type="text" name="father_name" value="<?php echo e(old('father_name')); ?>" class="form-input-dark" required>
                             <i class="ph-bold ph-user input-icon-dark"></i>
                         </div>
                         <div class="form-group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Nama Ibu</label>
-                            <input type="text" name="mother_name" value="{{ old('mother_name') }}" class="form-input-dark" required>
+                            <input type="text" name="mother_name" value="<?php echo e(old('mother_name')); ?>" class="form-input-dark" required>
                             <i class="ph-bold ph-user-circle input-icon-dark"></i>
                         </div>
                         <div class="form-group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">No. WhatsApp Orang Tua</label>
-                            <input type="number" name="parent_phone" value="{{ old('parent_phone') }}" class="form-input-dark" placeholder="08xxxxxxxxxx" required>
+                            <input type="number" name="parent_phone" value="<?php echo e(old('parent_phone')); ?>" class="form-input-dark" placeholder="08xxxxxxxxxx" required>
                             <i class="ph-bold ph-whatsapp-logo input-icon-dark"></i>
                         </div>
                         <div class="form-group">
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-2 ml-1">Pekerjaan Ayah/Wali</label>
-                            <input type="text" name="parent_job" value="{{ old('parent_job') }}" class="form-input-dark" placeholder="Wiraswasta/PNS/Buruh">
+                            <input type="text" name="parent_job" value="<?php echo e(old('parent_job')); ?>" class="form-input-dark" placeholder="Wiraswasta/PNS/Buruh">
                             <i class="ph-bold ph-briefcase input-icon-dark"></i>
                         </div>
                         
@@ -427,7 +427,7 @@
                     </div>
                 </div>
 
-                {{-- ================= TAB 5: UPLOAD ================= --}}
+                
                 <div x-show="tab === 'upload'" class="space-y-6 animate-fade-in" style="display: none;">
                     <div class="mb-6 border-l-4 border-blue-500 pl-4">
                         <h3 class="text-xl font-bold text-white">Upload Dokumen</h3>
@@ -435,34 +435,34 @@
                     </div>
 
                     <div class="space-y-6">
-                        @foreach([
+                        <?php $__currentLoopData = [
                             ['name' => 'file_photo', 'label' => 'Pas Foto (3x4)', 'desc' => 'Latar belakang merah/biru', 'icon' => 'ph-user-focus', 'required' => true],
                             ['name' => 'file_kk', 'label' => 'Kartu Keluarga (KK)', 'desc' => 'Scan asli atau fotocopy legalisir', 'icon' => 'ph-users-three', 'required' => true],
                             ['name' => 'file_akta', 'label' => 'Akta Kelahiran', 'desc' => 'Scan asli dokumen akta', 'icon' => 'ph-scroll', 'required' => true],
                             ['name' => 'file_grades', 'label' => 'Scan Rapor', 'desc' => 'Bagian nilai pengetahuan (Smt 7-11)', 'icon' => 'ph-exam', 'required' => true],
-                        ] as $file)
+                        ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $file): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="form-group">
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">{{ $file['label'] }} <span class="text-rose-500">*</span></label>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1"><?php echo e($file['label']); ?> <span class="text-rose-500">*</span></label>
                             
                             <div class="relative group">
-                                <input type="file" name="{{ $file['name'] }}" id="{{ $file['name'] }}" 
+                                <input type="file" name="<?php echo e($file['name']); ?>" id="<?php echo e($file['name']); ?>" 
                                        class="peer absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer" 
-                                       onchange="previewFile(this)" {{ $file['required'] ? 'required' : '' }}>
+                                       onchange="previewFile(this)" <?php echo e($file['required'] ? 'required' : ''); ?>>
                                 
-                                <div id="preview-{{ $file['name'] }}-default" class="file-box-default border border-white/10 rounded-2xl bg-slate-900/50 p-4 flex flex-col sm:flex-row items-center gap-4 transition-all group-hover:border-blue-500/50 group-hover:bg-slate-900 peer-focus:border-blue-500 peer-focus:ring-4 peer-focus:ring-blue-500/10">
+                                <div id="preview-<?php echo e($file['name']); ?>-default" class="file-box-default border border-white/10 rounded-2xl bg-slate-900/50 p-4 flex flex-col sm:flex-row items-center gap-4 transition-all group-hover:border-blue-500/50 group-hover:bg-slate-900 peer-focus:border-blue-500 peer-focus:ring-4 peer-focus:ring-blue-500/10">
                                     <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-blue-400 transition-colors shrink-0 border border-white/5">
-                                        <i class="ph-duotone {{ $file['icon'] }} text-2xl"></i>
+                                        <i class="ph-duotone <?php echo e($file['icon']); ?> text-2xl"></i>
                                     </div>
                                     <div class="text-center sm:text-left flex-1">
                                         <p class="font-bold text-slate-300 text-sm mb-0.5">Klik untuk unggah file</p>
-                                        <p class="text-xs text-slate-500">{{ $file['desc'] }}</p>
+                                        <p class="text-xs text-slate-500"><?php echo e($file['desc']); ?></p>
                                     </div>
                                     <div class="bg-slate-800 border border-white/10 text-slate-400 px-4 py-2 rounded-lg text-xs font-bold shadow-sm group-hover:bg-blue-600 group-hover:text-white group-hover:border-transparent transition-colors shrink-0">
                                         Pilih
                                     </div>
                                 </div>
 
-                                <div id="preview-{{ $file['name'] }}-selected" class="hidden border border-emerald-500/50 bg-emerald-500/10 rounded-2xl p-4 flex items-center justify-between gap-4 transition-all">
+                                <div id="preview-<?php echo e($file['name']); ?>-selected" class="hidden border border-emerald-500/50 bg-emerald-500/10 rounded-2xl p-4 flex items-center justify-between gap-4 transition-all">
                                     <div class="flex items-center gap-3 overflow-hidden">
                                         <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
                                             <i class="ph-fill ph-check-circle text-xl"></i>
@@ -472,13 +472,13 @@
                                             <p class="text-xs text-emerald-500/70 font-semibold">Siap diupload</p>
                                         </div>
                                     </div>
-                                    <button type="button" class="text-xs font-bold text-rose-400 hover:text-rose-300 underline shrink-0 z-30 relative" onclick="resetFile('{{ $file['name'] }}', event)">Ganti</button>
+                                    <button type="button" class="text-xs font-bold text-rose-400 hover:text-rose-300 underline shrink-0 z-30 relative" onclick="resetFile('<?php echo e($file['name']); ?>', event)">Ganti</button>
                                 </div>
                             </div>
                         </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-                        {{-- UPLOAD KHUSUS PRESTASI --}}
+                        
                         <div x-show="track === 'prestasi' && achievement_type === 'non_akademik'" x-transition class="pt-6 border-t border-white/5">
                             <div class="form-group">
                                 <label class="block text-xs font-bold text-blue-400 uppercase mb-2 ml-1">
@@ -505,7 +505,7 @@
                             </div>
                         </div>
 
-                        {{-- DOKUMEN PENDUKUNG (KIP) --}}
+                        
                         <div class="pt-6 border-t border-white/5">
                             <h4 class="font-bold text-white mb-4 flex items-center gap-2 text-sm">
                                 Dokumen Pendukung <span class="px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-wider border border-white/10">Opsional</span>
@@ -534,7 +534,7 @@
                         </div>
                     </div>
 
-                    {{-- PERNYATAAN --}}
+                    
                     <div class="mt-8 bg-slate-900/50 rounded-2xl p-5 border border-white/10">
                         <label class="flex items-start gap-3 cursor-pointer group">
                             <div class="relative flex items-center mt-0.5">
@@ -567,11 +567,11 @@
         </div>
 
         <div class="mt-8 text-center text-xs text-slate-500 font-medium tracking-wide">
-            &copy; {{ date('Y') }} Panitia PPDB SMPN 3 Lakbok. Hak Cipta Dilindungi.
+            &copy; <?php echo e(date('Y')); ?> Panitia PPDB SMPN 3 Lakbok. Hak Cipta Dilindungi.
         </div>
     </div>
 
-    {{-- Script untuk Preview File & Loading --}}
+    
     <script>
         function previewFile(input) {
             const file = input.files[0];
@@ -614,4 +614,5 @@
         });
     </script>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.public', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/ppdb/register.blade.php ENDPATH**/ ?>
