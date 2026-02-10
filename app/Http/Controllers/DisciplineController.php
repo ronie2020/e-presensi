@@ -12,94 +12,126 @@ use Carbon\Carbon;
 class DisciplineController extends Controller
 {
     /**
-     * Menampilkan halaman utama Catatan Disiplin.
+     * Menampilkan halaman utama Catatan Disiplin (Dashboard Guru).
      */
     public function index(Request $request)
     {
-        // 1. Ambil data untuk dropdown form (Input Manual)
-        // PERBAIKAN: Filter siswa aktif & Urutkan berdasarkan Kelas lalu Nama
-        $students = Student::with('schoolClass')
-            ->where('status', '!=', 'graduated') // Hanya siswa aktif
-            ->get()
-            ->sortBy(function ($student) {
-                // Kunci pengurutan: "Nama Kelas" + "Nama Siswa"
-                // Contoh: "7A Ahmad", "7A Budi", "7B Caca"
-                $className = $student->schoolClass->name ?? 'ZZZ'; // ZZZ agar yang tidak punya kelas ada di bawah
-                return $className . ' ' . $student->name;
-            }, SORT_NATURAL | SORT_FLAG_CASE); // Sort Natural agar "7A, 7B, 8A" urut benar
+        // ==========================================
+        // 1. DATA MASTER (DROPDOWN & FORM)
+        // ==========================================
         
-        // Sembunyikan 'Alfa' dari dropdown manual disiplin (harus via Absensi)
+        $studentsRaw = Student::with(['schoolClass', 'disciplineRecords.disciplineType'])
+            ->where('status', '!=', 'graduated') 
+            ->get();
+
+        // Data Dropdown (Sorted by Class then Name)
+        $students = $studentsRaw->sortBy(function ($student) {
+                $className = $student->schoolClass->name ?? 'ZZZ'; 
+                return $className . ' ' . $student->name;
+            }, SORT_NATURAL | SORT_FLAG_CASE);
+        
         $violationTypes = DisciplineType::where('type', 'Pelanggaran')
             ->where('name', 'NOT LIKE', '%Alfa%')
             ->where('name', 'NOT LIKE', '%Alpa%')
             ->where('name', 'NOT LIKE', '%Tidak Masuk%')
+            ->where('name', 'NOT LIKE', '%Tanpa Keterangan%')
             ->orderBy('name', 'asc')
             ->get();
 
         $meritTypes = DisciplineType::where('type', 'Kebaikan')->orderBy('name', 'asc')->get();
 
-        // 2. LOGIKA RINGKASAN POIN (Summary)
-        $studentSummaries = Student::with(['schoolClass', 'disciplineRecords.disciplineType'])
-            ->where('status', '!=', 'graduated')
-            ->get()
-            ->map(function ($student) {
-                // Hitung Poin Pelanggaran
-                $violationPoints = $student->disciplineRecords->filter(function ($record) {
-                    return optional($record->disciplineType)->type == 'Pelanggaran';
-                })->sum(function ($record) {
-                    return optional($record->disciplineType)->point_value;
+        // ==========================================
+        // 2. STATISTIK HARI INI
+        // ==========================================
+        $todayViolations = DisciplineRecord::whereDate('created_at', Carbon::today())
+            ->whereHas('disciplineType', fn($q) => $q->where('type', 'Pelanggaran'))
+            ->count();
+            
+        $todayMerits = DisciplineRecord::whereDate('created_at', Carbon::today())
+            ->whereHas('disciplineType', fn($q) => $q->where('type', 'Kebaikan'))
+            ->count();
+
+        // ==========================================
+        // 3. LOGIKA REKAP PER KELAS
+        // ==========================================
+        $classSummaries = $studentsRaw->groupBy(function ($student) {
+                return $student->schoolClass->name ?? 'Tanpa Kelas';
+            })
+            ->map(function ($studentsInClass, $className) {
+                $totalViolation = $studentsInClass->sum(function ($student) {
+                    return $student->disciplineRecords->filter(fn($r) => optional($r->disciplineType)->type == 'Pelanggaran')
+                        ->sum(fn($r) => optional($r->disciplineType)->point_value);
                 });
 
-                // Hitung Poin Kebaikan
-                $meritPoints = $student->disciplineRecords->filter(function ($record) {
-                    return optional($record->disciplineType)->type == 'Kebaikan';
-                })->sum(function ($record) {
-                    return optional($record->disciplineType)->point_value;
+                $totalMerit = $studentsInClass->sum(function ($student) {
+                    return $student->disciplineRecords->filter(fn($r) => optional($r->disciplineType)->type == 'Kebaikan')
+                        ->sum(fn($r) => optional($r->disciplineType)->point_value);
                 });
 
                 return (object) [
-                    'id' => $student->id,
-                    'name' => $student->name,
-                    'class' => $student->schoolClass->name ?? '-',
-                    'total_violation' => $violationPoints,
-                    'total_merit' => $meritPoints,
+                    'class_name' => $className,
+                    'student_count' => $studentsInClass->count(),
+                    'total_violation' => $totalViolation,
+                    'total_merit' => $totalMerit,
                 ];
             })
-            ->filter(function ($summary) {
-                return $summary->total_violation > 0 || $summary->total_merit > 0;
-            })
-            ->sortByDesc('total_violation') 
-            ->take(10); 
+            ->sortBy('class_name', SORT_NATURAL);
 
-        // 3. LOGIKA RIWAYAT (History) dengan FILTER
-        $query = DisciplineRecord::with(['student.schoolClass', 'disciplineType', 'recorder'])
-            ->latest(); 
+        // ==========================================
+        // 4. LOGIKA TOP RANK SISWA (PELANGGARAN VS PRESTASI)
+        // ==========================================
+        
+        // A. Hitung dulu poin semua siswa
+        $allStudentPoints = $studentsRaw->map(function ($student) {
+            $violationPoints = $student->disciplineRecords->filter(fn($r) => optional($r->disciplineType)->type == 'Pelanggaran')
+                ->sum(fn($r) => optional($r->disciplineType)->point_value);
+
+            $meritPoints = $student->disciplineRecords->filter(fn($r) => optional($r->disciplineType)->type == 'Kebaikan')
+                ->sum(fn($r) => optional($r->disciplineType)->point_value);
+
+            return (object) [
+                'id' => $student->id,
+                'name' => $student->name,
+                'class' => $student->schoolClass->name ?? '-',
+                'total_violation' => $violationPoints,
+                'total_merit' => $meritPoints,
+            ];
+        });
+
+        // B. Ambil Top 10 Pelanggaran
+        $topViolators = $allStudentPoints
+            ->where('total_violation', '>', 0)
+            ->sortByDesc('total_violation')
+            ->take(10);
+
+        // C. Ambil Top 10 Prestasi (SISWA TELADAN)
+        $topMerits = $allStudentPoints
+            ->where('total_merit', '>', 0)
+            ->sortByDesc('total_merit')
+            ->take(10);
+
+        // ==========================================
+        // 5. DATA RIWAYAT
+        // ==========================================
+        $query = DisciplineRecord::with(['student.schoolClass', 'disciplineType', 'recorder'])->latest(); 
 
         if ($request->has('search') && $request->search != '') {
-            $query->whereHas('student', function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%');
-            });
+            $query->whereHas('student', fn($q) => $q->where('name', 'like', '%' . $request->search . '%'));
         }
-
         if ($request->has('filter_date') && $request->filter_date != '') {
             $query->whereDate('date', $request->filter_date);
         }
 
         $historyRecords = $query->paginate(10)->withQueryString();
 
-        return view('discipline.index', [
-            'students' => $students,
-            'violationTypes' => $violationTypes,
-            'meritTypes' => $meritTypes,
-            'studentSummaries' => $studentSummaries, 
-            'historyRecords' => $historyRecords,     
-        ]);
+        return view('discipline.index', compact(
+            'students', 'violationTypes', 'meritTypes', 
+            'classSummaries', 'topViolators', 'topMerits', 'historyRecords', // Kirim variable baru
+            'todayViolations', 'todayMerits'
+        ));
     }
 
-    public function create()
-    {
-        return redirect()->route('discipline.index');
-    }
+    public function create() { return redirect()->route('discipline.index'); }
 
     public function store(Request $request)
     {
@@ -107,15 +139,22 @@ class DisciplineController extends Controller
             'student_id' => 'required|integer|exists:students,id',
             'discipline_type_id' => 'required|integer|exists:discipline_types,id',
             'notes' => 'nullable|string',
-            'date' => 'required|date',
+            'date' => 'nullable|date',
         ]);
 
         $data = $request->all();
         $data['recorded_by_user_id'] = Auth::id();
+        
+        if (empty($data['date'])) {
+            $data['date'] = Carbon::today()->toDateString();
+        }
 
         DisciplineRecord::create($data);
+        
+        $type = DisciplineType::find($request->discipline_type_id);
+        $msg = ($type->type == 'Pelanggaran') ? 'Pelanggaran tercatat.' : 'Prestasi berhasil ditambahkan!';
 
-        return redirect()->route('discipline.index')->with('success', 'Catatan disiplin berhasil disimpan.');
+        return redirect()->route('discipline.index')->with('success', $msg);
     }
 
     public function destroy(DisciplineRecord $discipline)
