@@ -183,30 +183,38 @@ class AttendanceSiswaController extends Controller
             $limitTime = Carbon::parse($scheduleLimit);
             $status = $now->gt($limitTime) ? 'Terlambat' : 'Hadir';
 
-            $attendance->update([
-                'time_in' => $timeString,
-                'status' => $status,
-                'lat_in' => $request->lat,
-                'long_in' => $request->long,
-                'type' => 'Harian'
-            ]);
-
             // ==========================================================
-            // LOGIKA TAMBAHAN: PENGURANGAN POIN JIKA TERLAMBAT
+            // LOGIKA TAMBAHAN: PENGURANGAN POIN & CATATAN
             // ==========================================================
+            $noteMessage = null;
+            
             if ($status == 'Terlambat') {
                 // 1. Kurangi Poin Siswa (Misal -5 Poin)
                 $student->decrement('score', 5);
 
-                // 2. Catat ke Activity Log agar muncul di riwayat pelanggaran
+                // 2. Set Catatan untuk disimpan di tabel AttendanceSiswa
+                $noteMessage = "Terlambat (Poin -5)";
+
+                // 3. Catat ke Activity Log (Riwayat Pelanggaran)
                 ActivityLog::create([
                     'student_id' => $student->id,
-                    'type' => 'Violation', // Tipe Violation agar terhitung sebagai pelanggaran
+                    'type' => 'Violation',
                     'activity_name' => 'Terlambat Masuk',
                     'description' => "Terlambat datang sekolah (Limit: {$scheduleLimit}). Poin -5",
                     'point_earned' => -5
                 ]);
             }
+
+            // UPDATE DATA ABSENSI
+            // Tambahkan kolom 'notes' agar muncul di rekap harian
+            $attendance->update([
+                'time_in' => $timeString,
+                'status' => $status,
+                'lat_in' => $request->lat,
+                'long_in' => $request->long,
+                'type' => 'Harian',
+                'notes' => $noteMessage // [BARU] Simpan info poin disini
+            ]);
             // ==========================================================
 
             try {

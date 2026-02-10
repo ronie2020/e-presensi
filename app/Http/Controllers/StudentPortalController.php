@@ -18,7 +18,7 @@ use App\Models\LmsMaterial;
 use App\Models\Complaint;       
 use App\Models\LiaisonBook;     
 use App\Models\StudentHabit; 
-use App\Models\Borrowing;        // [PERBAIKAN] Ganti LibraryLoan jadi Borrowing
+use App\Models\Borrowing;        
 use App\Models\DisciplineRecord; 
 use App\Models\AcademicRecord;  
 use App\Models\TeachingSession;
@@ -231,7 +231,29 @@ class StudentPortalController extends Controller
                 ];
             });
 
-        $violations = $manualViolations->concat($alpaViolations)->sortByDesc('date');
+        // C. [BARU] Pelanggaran Otomatis (TERLAMBAT)
+        // Logika: Ambil status 'Terlambat', mapping ke object violation dengan poin 5
+        $lateViolations = $rawAttendanceRecords
+            ->filter(function ($att) {
+                return in_array(strtolower($att->status), ['terlambat']);
+            })
+            ->map(function ($att) {
+                return (object) [
+                    'date' => $att->attendance_date,
+                    // Gunakan notes dari DB (yang sudah kita fix di controller sebelumnya) atau default
+                    'notes' => $att->notes ?? 'Terlambat Datang Sekolah',
+                    'point' => 5, // Poin Konsisten dengan AttendanceSiswaController
+                    'type' => 'auto_late',
+                    'recorder' => (object) ['name' => 'Sistem Otomatis'],
+                    'disciplineType' => (object) ['name' => 'Keterlambatan', 'point_value' => 5]
+                ];
+            });
+
+        // GABUNGKAN SEMUA PELANGGARAN
+        $violations = $manualViolations
+                        ->concat($alpaViolations)
+                        ->concat($lateViolations) // Gabungkan data terlambat
+                        ->sortByDesc('date');
 
         // C. Prestasi
         $manualMerits = collect([]);
@@ -302,6 +324,7 @@ class StudentPortalController extends Controller
 
         $achievements = $realAchievements->concat($manualMerits)->concat($prayerAchievements)->sortByDesc('date');
 
+        // HITUNG TOTAL POIN (Violations akan otomatis menyertakan poin terlambat)
         $total_violation_points = $violations->sum(fn($v) => $v->point ?? $v->disciplineType->point_value ?? 0);
         $total_merit_points = $manualMerits->sum(fn($a) => $a->point ?? $a->disciplineType->point_value ?? 0) + $prayerAchievements->sum(fn($a) => $a->point ?? 0);
         $finalScore = 100 - $total_violation_points + $total_merit_points;

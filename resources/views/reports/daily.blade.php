@@ -190,8 +190,17 @@
                                                 <span class="flex items-center gap-1 font-bold text-slate-600">
                                                     <i class="ph-bold ph-arrow-left-circle text-blue-500"></i> {{ $att->time_out ? \Carbon\Carbon::parse($att->time_out)->format('H:i') : '-' }}
                                                 </span>
+                                                
+                                                {{-- [PERBAIKAN] Tampilkan Status Terlambat & Note Pengurangan Poin --}}
                                                 @if($att->status == 'Terlambat')
-                                                    <span class="text-amber-600 font-bold uppercase tracking-wider text-[10px] bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">Terlambat</span>
+                                                    <span class="text-amber-600 font-bold uppercase tracking-wider text-[10px] bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+                                                        Terlambat
+                                                    </span>
+                                                    @if($att->notes)
+                                                        <span class="text-rose-600 font-bold text-[10px] bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100 animate-pulse">
+                                                            {{ $att->notes }}
+                                                        </span>
+                                                    @endif
                                                 @endif
                                             </div>
                                         </div>

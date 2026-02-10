@@ -47,11 +47,9 @@ class AcademicYearController extends Controller
      * Mengaktifkan tahun ajaran tertentu.
      */
     public function activate($id)
-    {
-        // Non-aktifkan semua dulu
+    {       
         AcademicYear::query()->update(['is_active' => false]);
-
-        // Aktifkan yang dipilih
+       
         $year = AcademicYear::findOrFail($id);
         $year->update(['is_active' => true]);
 

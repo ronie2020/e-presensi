@@ -202,8 +202,18 @@
                                                     <i class="ph-bold ph-arrow-left-circle text-blue-500"></i> <?php echo e($att->time_out ? \Carbon\Carbon::parse($att->time_out)->format('H:i') : '-'); ?>
 
                                                 </span>
+                                                
+                                                
                                                 <?php if($att->status == 'Terlambat'): ?>
-                                                    <span class="text-amber-600 font-bold uppercase tracking-wider text-[10px] bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">Terlambat</span>
+                                                    <span class="text-amber-600 font-bold uppercase tracking-wider text-[10px] bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+                                                        Terlambat
+                                                    </span>
+                                                    <?php if($att->notes): ?>
+                                                        <span class="text-rose-600 font-bold text-[10px] bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100 animate-pulse">
+                                                            <?php echo e($att->notes); ?>
+
+                                                        </span>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
                                             </div>
                                         </div>

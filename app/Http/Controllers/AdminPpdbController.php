@@ -146,15 +146,15 @@ class AdminPpdbController extends Controller
 
             // 3. Simpan ke Students
             $student = Student::create([
-                'student_id' => $generatedNis, // ID Sistem (bisa sama dengan NIS)
-                'nis' => $generatedNis,        // NIS Lokal
-                'nisn' => $registrant->nisn,   // NISN Nasional
+                'student_id' => $generatedNis, 
+                'nis' => $generatedNis,        
+                'nisn' => $registrant->nisn,   
                 'name' => $registrant->full_name,
                 'nik' => $registrant->nik,
                 'gender' => $registrant->gender,
                 'birth_place' => $registrant->birth_place,
                 'birth_date' => $registrant->birth_date,
-                'religion' => $registrant->religion, // Revisi: Hapus fallback 'Islam' agar data sesuai input
+                'religion' => $registrant->religion, 
                 'address' => $registrant->address,
                 'phone' => $registrant->student_phone,
                 
@@ -188,7 +188,7 @@ class AdminPpdbController extends Controller
     }
 
     /**
-     * [REVISI] FITUR BULK PROMOTE (Pindah Massal)
+     * FITUR BULK PROMOTE (Pindah Massal)
      * Ditambahkan: set_time_limit, lockForUpdate, dan Error Reporting
      */
     public function bulkPromote(Request $request)
@@ -205,7 +205,7 @@ class AdminPpdbController extends Controller
         $ids = $request->selected_ids;
         $successCount = 0;
         $failCount = 0;
-        $failedNames = []; // Array penampung nama yg gagal
+        $failedNames = []; 
 
         DB::beginTransaction();
         try {
@@ -265,7 +265,7 @@ class AdminPpdbController extends Controller
                     'class_id' => null,
                     'photo_path' => $newPhotoPath,
                     'general_notes' => 'Masuk Jalur ' . ucfirst($registrant->track) . ' (' . $registrant->academic_year . ')',
-                    'password' => Hash::make($generatedNis), // Default password = NIS/NISN
+                    'password' => Hash::make($generatedNis), 
                 ]);
 
                 $sequence++; // Increment sequence untuk siswa berikutnya

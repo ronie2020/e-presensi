@@ -244,7 +244,7 @@ class AdminAlumniController extends Controller
                         'status' => 'graduated',
                         'graduated_date' => $year . '-05-20',
                         'graduation_year' => $year,
-                        'password' => Hash::make($nisn), // Password Default = NISN (Proses ini yang berat)
+                        'password' => Hash::make($nisn), 
                         'email' => null, 
                         'class_id' => null, 
                     ]
