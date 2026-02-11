@@ -5,37 +5,48 @@
     
     <?php
         // --- KONFIGURASI TANGGAL 1 RAMADHAN ---
-        // Silakan sesuaikan tanggal ini setiap tahunnya
-        $startRamadan = \Carbon\Carbon::parse('2026-02-18'); // Contoh untuk tahun 2026
+        // Sesuaikan dengan konstanta di Controller
+        $startRamadan = \Carbon\Carbon::parse('2026-02-18'); 
         $currentDate = \Carbon\Carbon::parse($today);
         
-        // Hitung Hari ke-berapa (Selisih hari + 1)
-        // diffInDays return absolute value by default, use false parameter if needed checks
-        // Disini kita asumsikan dashboard ini dibuka saat Ramadhan
+        // Hitung Hari ke-berapa
         $ramadanDay = intval($startRamadan->diffInDays($currentDate)) + 1;
-        
-        // Cek apakah belum mulai atau sudah lewat (Opsional)
         $isBeforeRamadan = $currentDate->lt($startRamadan);
         
         // --- LOGIKA PROGRESS HARIAN ---
-        $totalTarget = 12; 
+        // Target Lama: 12. Target Baru (+Kultum): 13
+        $totalTarget = 13; 
         $currentScore = 0;
         $isFriday = $currentDate->isFriday();
         
         if ($isFriday) {
-            $totalTarget = 13;
+            $totalTarget = 14; // +1 untuk Laporan Jumat
         }
 
         if($todayRamadanLog) {
+            // 1. Puasa
             if($todayRamadanLog->is_fasting) $currentScore++;
+            
+            // 2. Shalat Wajib (5 Poin)
             foreach(['subuh', 'dzuhur', 'ashar', 'maghrib', 'isya'] as $p) {
                 if($todayRamadanLog->prayers[$p] ?? false) $currentScore++;
             }
+            
+            // 3. Sunnah (5 Poin)
             foreach(['tarawih', 'witir', 'dhuha', 'rawatib', 'sedekah'] as $s) {
                 if($todayRamadanLog->sunnah_deeds[$s] ?? false) $currentScore++;
             }
+            
+            // 4. Tilawah
             if($todayRamadanLog->tadarus_surah) $currentScore++;
+            
+            // 5. Jumat
             if ($isFriday && !empty($todayRamadanLog->friday_khotib)) {
+                $currentScore++;
+            }
+
+            // 6. KULTUM (BARU)
+            if (!empty($todayRamadanLog->kultum_summary)) {
                 $currentScore++;
             }
         }
@@ -187,13 +198,26 @@
                 'check' => ($todayRamadanLog->tadarus_surah ?? false)
             ];
 
-            // 5. SUNNAH LAINNYA
+            // 5. KULTUM (BARU - UNGU)
+            $kultumFilled = !empty($todayRamadanLog->kultum_summary);
+            $gridItems[] = [
+                'label' => 'Laporan Kultum', 
+                'icon' => 'microphone-stage',
+                'bg' => $kultumFilled ? 'bg-purple-50' : 'bg-slate-50',
+                'border' => $kultumFilled ? 'border-purple-200' : 'border-slate-100',
+                'icon_color' => $kultumFilled ? 'text-purple-500' : 'text-slate-300',
+                'text' => 'text-slate-800',
+                'status' => $kultumFilled ? 'Tercatat' : 'Belum',
+                'check' => $kultumFilled
+            ];
+
+            // 6. SUNNAH LAINNYA (UBAH KE TEAL/CYAN AGAR BEDA DENGAN KULTUM)
             $gridItems[] = [
                 'label' => 'Sunnah Lainnya', 
                 'icon' => 'sparkle',
-                'bg' => 'bg-purple-50',
-                'border' => 'border-purple-100',
-                'icon_color' => 'text-purple-500',
+                'bg' => 'bg-teal-50',
+                'border' => 'border-teal-100',
+                'icon_color' => 'text-teal-500',
                 'text' => 'text-slate-800',
                 'status' => ($todayRamadanLog ? 
                     ( ($todayRamadanLog->sunnah_deeds['sedekah']??0) + ($todayRamadanLog->sunnah_deeds['dhuha']??0) + ($todayRamadanLog->sunnah_deeds['witir']??0) + ($todayRamadanLog->sunnah_deeds['rawatib']??0) ) 

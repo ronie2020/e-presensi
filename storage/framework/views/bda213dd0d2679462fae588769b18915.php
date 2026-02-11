@@ -53,25 +53,27 @@
         studentName: '',
         details: {
             fasting: false,
-            prayers: {}, // Objek Shalat Wajib
-            sunnahs: {}, // Objek Sunnah
+            prayers: {}, 
+            sunnahs: {}, 
             khotib: '',
             summary: '',
             tadarus_surah: '',
             tadarus_ayah: '',
-            murojaah: ''
+            murojaah: '',
+            // === NEW FIELDS ===
+            kultum_penceramah: '',
+            kultum_summary: ''
         }, 
         formAction: '',
         currentScore: '',
         currentNote: '',
         
-        // FUNGSI BUKA MODAL
-        openFeedback(id, name, score, note, fasting, prayers, sunnahs, khotib, summary, t_surah, t_ayah, murojaah) {
+        // FUNGSI BUKA MODAL (UPDATED PARAMS)
+        openFeedback(id, name, score, note, fasting, prayers, sunnahs, khotib, summary, t_surah, t_ayah, murojaah, k_penceramah, k_summary) {
             this.studentName = name;
             this.currentScore = score ? score : 100;
             this.currentNote = note;
             
-            // Mapping data detail untuk ditampilkan di modal
             this.details = {
                 fasting: fasting,
                 prayers: prayers || {},
@@ -80,7 +82,10 @@
                 summary: summary,
                 tadarus_surah: t_surah,
                 tadarus_ayah: t_ayah,
-                murojaah: murojaah
+                murojaah: murojaah,
+                // === MAPPING DATA BARU ===
+                kultum_penceramah: k_penceramah,
+                kultum_summary: k_summary
             };
 
             this.formAction = '<?php echo e(route('admin.ramadan.verify', ':id')); ?>'.replace(':id', id); 
@@ -97,7 +102,6 @@
         
         
         <div class="animate-enter relative rounded-[3rem] bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900 p-8 md:p-12 text-white shadow-2xl shadow-emerald-900/30 overflow-hidden group border border-white/10 no-print">
-            
             <div class="absolute top-0 right-0 -mt-20 -mr-20 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[100px] group-hover:opacity-40 transition-opacity duration-1000 hero-decoration"></div>
             <div class="absolute bottom-0 left-0 -mb-20 -ml-20 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[80px] hero-decoration"></div>
             
@@ -246,7 +250,6 @@
                             <?php 
                                 $log = $student->ramadanLogs->first();
                                 $prayerCount = $log ? count(array_filter($log->prayers ?? [])) : 0;
-                                $sunnahCount = $log ? count(array_filter($log->sunnah_deeds ?? [])) : 0;
                             ?>
                             <tr class="hover:bg-blue-50/30 transition-all group">
                                 <td class="px-8 py-5 text-center text-xs font-bold text-slate-400"><?php echo e($index + 1); ?></td>
@@ -322,7 +325,9 @@
                                                 <?php echo e(json_encode($log->friday_summary)); ?>,
                                                 <?php echo e(json_encode($log->tadarus_surah)); ?>,
                                                 <?php echo e(json_encode($log->tadarus_ayah)); ?>,
-                                                <?php echo e(json_encode($log->murojaah_surah)); ?>
+                                                <?php echo e(json_encode($log->murojaah_surah)); ?>,
+                                                <?php echo e(json_encode($log->kultum_penceramah)); ?>,
+                                                <?php echo e(json_encode($log->kultum_summary)); ?>
 
                                             )"
                                             class="w-full inline-flex justify-center items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-sm hover:shadow-md active:scale-95
@@ -350,7 +355,6 @@
             
             <div class="animate-enter space-y-6 no-print" style="animation-delay: 100ms">
                 
-                
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
                     <div>
                         <h3 class="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
@@ -370,14 +374,9 @@
                 <?php if(isset($latestLogs) && $latestLogs->count() > 0): ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         <?php $__currentLoopData = $latestLogs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $log): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <?php
-                            $prayerCount = count(array_filter($log->prayers ?? []));
-                        ?>
+                        <?php $prayerCount = count(array_filter($log->prayers ?? [])); ?>
                         <div class="group bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-emerald-900/5 hover:border-emerald-200 transition-all duration-300 relative overflow-hidden">
-                            
-                            
                             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-50 to-slate-50 rounded-bl-[4rem] -mr-6 -mt-6 transition-transform group-hover:scale-110 opacity-50"></div>
-
                             <div class="relative z-10">
                                 
                                 <div class="flex items-center gap-4 mb-6">
@@ -386,46 +385,33 @@
 
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <h4 class="font-black text-slate-800 text-sm truncate group-hover:text-emerald-600 transition-colors">
-                                            <?php echo e($log->student->name); ?>
-
-                                        </h4>
+                                        <h4 class="font-black text-slate-800 text-sm truncate group-hover:text-emerald-600 transition-colors"><?php echo e($log->student->name); ?></h4>
                                         <div class="flex items-center gap-2 mt-1.5">
                                             <span class="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-[9px] font-bold text-slate-500 uppercase truncate max-w-[80px]">
                                                 <?php echo e($log->student->schoolClass->name ?? 'N/A'); ?>
 
                                             </span>
-                                            <span class="text-[9px] text-slate-400 font-bold flex items-center gap-1 shrink-0">
-                                                <i class="ph-bold ph-clock"></i> <?php echo e($log->updated_at->format('H:i')); ?>
-
-                                            </span>
+                                            <span class="text-[9px] text-slate-400 font-bold flex items-center gap-1 shrink-0"><i class="ph-bold ph-clock"></i> <?php echo e($log->updated_at->format('H:i')); ?></span>
                                         </div>
                                     </div>
                                 </div>
-
                                 
                                 <div class="flex gap-2 mb-6">
-                                    
                                     <div class="flex-1 py-2.5 px-1 rounded-2xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm" title="Status Puasa">
                                         <i class="ph-fill ph-bowl-food text-xl <?php echo e($log->is_fasting ? 'text-emerald-500' : 'text-rose-400'); ?> mb-1.5 block"></i>
                                         <span class="text-[8px] font-black text-slate-400 uppercase tracking-wide">Puasa</span>
                                     </div>
-                                    
-                                    
                                     <div class="flex-1 py-2.5 px-1 rounded-2xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm" title="Shalat Wajib">
                                         <div class="flex items-center justify-center gap-0.5 text-xl font-black <?php echo e($prayerCount == 5 ? 'text-emerald-500' : 'text-amber-500'); ?> mb-1.5">
                                             <?php echo e($prayerCount); ?><span class="text-[10px] text-slate-400">/5</span>
                                         </div>
                                         <span class="text-[8px] font-black text-slate-400 uppercase tracking-wide">Wajib</span>
                                     </div>
-                                    
-                                    
                                     <div class="flex-1 py-2.5 px-1 rounded-2xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm" title="Tilawah">
                                         <i class="ph-fill ph-book-open-text text-xl <?php echo e($log->tadarus_surah ? 'text-blue-500' : 'text-slate-300'); ?> mb-1.5 block"></i>
                                         <span class="text-[8px] font-black text-slate-400 uppercase tracking-wide">Qur'an</span>
                                     </div>
                                 </div>
-
                                 
                                 <div class="flex items-center justify-between gap-3 pt-5 border-t border-slate-50">
                                     <?php if($log->teacher_verified_at): ?>
@@ -451,7 +437,9 @@
                                         <?php echo e(json_encode($log->friday_summary)); ?>,
                                         <?php echo e(json_encode($log->tadarus_surah)); ?>,
                                         <?php echo e(json_encode($log->tadarus_ayah)); ?>,
-                                        <?php echo e(json_encode($log->murojaah_surah)); ?>
+                                        <?php echo e(json_encode($log->murojaah_surah)); ?>,
+                                        <?php echo e(json_encode($log->kultum_penceramah)); ?>,
+                                        <?php echo e(json_encode($log->kultum_summary)); ?>
 
                                     )" class="pl-4 pr-3 py-2 bg-slate-900 hover:bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-200 hover:shadow-emerald-200 transition-all active:scale-95 flex items-center gap-2 group-hover:translate-x-1">
                                         Tinjau <i class="ph-bold ph-caret-right"></i>
@@ -510,9 +498,7 @@
 
                 
                 <div class="p-8 overflow-y-auto custom-scrollbar space-y-6 bg-slate-50/50">
-                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        
                         
                         <div class="space-y-6">
                             
@@ -588,7 +574,6 @@
                     </div>
 
                     
-                    
                     <template x-if="details.khotib">
                         <div class="bg-emerald-50/50 p-6 rounded-[1.5rem] border border-emerald-100">
                             <h4 class="font-bold text-emerald-800 text-sm mb-3 flex items-center gap-2">
@@ -608,12 +593,21 @@
                     </template>
 
                     
-                    <template x-if="!details.khotib && '<?php echo e($isFriday ? 1 : 0); ?>' == '1'">
-                        <div class="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-100 text-center opacity-70">
-                            <h4 class="font-bold text-slate-400 text-sm mb-1 flex items-center justify-center gap-2">
-                                <i class="ph-bold ph-warning-circle"></i> Laporan Jumat Kosong
+                    <template x-if="details.kultum_summary || details.kultum_penceramah">
+                        <div class="bg-purple-50/50 p-6 rounded-[1.5rem] border border-purple-100">
+                            <h4 class="font-bold text-purple-800 text-sm mb-3 flex items-center gap-2">
+                                <i class="ph-fill ph-microphone-stage text-purple-600"></i> Laporan Kultum
                             </h4>
-                            <p class="text-[10px] text-slate-400">Siswa belum mengisi nama khotib & ringkasan.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <p class="text-[10px] text-purple-600 font-bold uppercase tracking-wide mb-1">Penceramah</p>
+                                    <p class="text-sm font-bold text-slate-700 bg-white p-2 rounded-lg border border-purple-100" x-text="details.kultum_penceramah || '-'"></p>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <p class="text-[10px] text-purple-600 font-bold uppercase tracking-wide mb-1">Ringkasan Materi</p>
+                                    <p class="text-sm text-slate-600 italic bg-white p-3 rounded-lg border border-purple-100 leading-relaxed" x-text="details.kultum_summary || '-'"></p>
+                                </div>
+                            </div>
                         </div>
                     </template>
 
@@ -625,8 +619,6 @@
                                 <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Nilai (0-100)</label>
                                 <div class="flex items-center gap-2">
                                     <input type="number" name="teacher_score" x-model="currentScore" min="0" max="100" class="w-full pl-4 pr-2 py-3 rounded-2xl border-slate-200 font-bold focus:ring-emerald-500 focus:border-emerald-500 text-xl text-slate-800 shadow-sm text-center" placeholder="0">
-                                    
-                                    
                                     <div class="flex flex-col gap-1">
                                         <button type="button" @click="setScore(100)" class="px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-[10px] font-bold hover:bg-emerald-200">100</button>
                                         <button type="button" @click="setScore(80)" class="px-2 py-1 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold hover:bg-slate-200">80</button>

@@ -25,11 +25,15 @@ class RamadanLog extends Model
         'friday_khotib',
         'friday_summary',
 
-        // [TAMBAHAN PENTING] Kolom Penilaian Guru (Wajib ada agar feedback tersimpan)
+        // [TAMBAHAN PENTING] Kolom Penilaian Guru
         'teacher_id',
         'teacher_score',
         'teacher_note',
         'teacher_verified_at',
+
+        // === [FIX] TAMBAHKAN INI AGAR DATA KULTUM TERSIMPAN ===
+        'kultum_penceramah',
+        'kultum_summary',
     ];
 
     /**
@@ -56,7 +60,6 @@ class RamadanLog extends Model
      */
     public function teacher()
     {
-        // Sesuaikan 'User' jika model guru Anda berbeda (misal 'Teacher')
         return $this->belongsTo(User::class, 'teacher_id'); 
     }
 }
