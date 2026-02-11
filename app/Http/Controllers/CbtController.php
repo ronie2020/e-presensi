@@ -10,10 +10,13 @@ use App\Models\Student;
 use Illuminate\Support\Facades\Storage; 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\QuestionsImport;
+use App\Exports\CbtScoreExport; 
 use App\Models\LmsAssignment;
 use App\Models\LmsGrade;
 use App\Models\Subject;
 use App\Models\SchoolClass;
+use Illuminate\Support\Str; 
+use Illuminate\Support\Facades\Auth; // Tambahkan Auth
 
 class CbtController extends Controller
 {
@@ -467,17 +470,73 @@ class CbtController extends Controller
     public function export($id, $type)
     {
         $exam = CbtExam::findOrFail($id);
-        $fileName = 'REKAP_NILAI_' . \Illuminate\Support\Str::slug($exam->title) . '_' . date('Y-m-d');
+        $fileName = 'REKAP_NILAI_' . Str::slug($exam->title) . '_' . date('Y-m-d');
+
+        // Logic pengambilan data (DUPLICATED FROM RECAP METHOD)
+        // Kita duplicate agar bisa mengirim variabel lengkap ke view PDF
+        
+        // 1. Ambil Kunci Jawaban
+        $questions = DB::table('cbt_questions')
+            ->where('cbt_exam_id', $id)
+            ->pluck('correct_answer', 'id');
+
+        // 2. Ambil Data Ujian Siswa
+        $results = DB::table('cbt_student_exams')
+            ->join('students', 'cbt_student_exams.student_id', '=', 'students.id')
+            ->leftJoin('classes', 'students.class_id', '=', 'classes.id')
+            ->where('cbt_student_exams.cbt_exam_id', $id)
+            ->where('cbt_student_exams.status', 'finished') 
+            ->select(
+                'cbt_student_exams.*',
+                'students.name as student_name',
+                'students.student_id as student_nisn',
+                'classes.name as class_name'
+            )
+            ->orderBy('cbt_student_exams.total_score', 'desc')
+            ->get();
+
+        // 3. LOGIKA HITUNG MANUAL
+        foreach ($results as $row) {
+            $correct = 0;
+            $wrong = 0;
+
+            try {
+                $studentAnswers = DB::table('cbt_student_answers')
+                    ->where('cbt_student_exam_id', $row->id)
+                    ->get();
+
+                foreach ($studentAnswers as $ans) {
+                    if (isset($questions[$ans->cbt_question_id])) {
+                        if (strtoupper($ans->answer) == strtoupper($questions[$ans->cbt_question_id])) {
+                            $correct++;
+                        } else {
+                            $wrong++;
+                        }
+                    }
+                }
+            } catch (\Exception $e) {}
+
+            $row->correct_answers = $correct;
+            $row->wrong_answers = $wrong;
+        }
+
+        // Hitung Statistik
+        $stats = [
+            'average' => $results->avg('total_score') ?? 0,
+            'max_score' => $results->max('total_score') ?? 0,
+            'min_score' => $results->min('total_score') ?? 0,
+            'passed_count' => $results->where('total_score', '>=', $exam->passing_grade)->count(),
+        ];
+
+        // --- END DUPLICATE LOGIC ---
 
         if ($type == 'excel') {
-            $recapData = $this->recap($id);
-            $results = $recapData->getData()['results']; 
-
             return Excel::download(new CbtScoreExport($results, $exam->passing_grade), $fileName . '.xlsx');
         } 
         
         if ($type == 'pdf') {
-            return back()->with('error', 'Fitur PDF belum dikonfigurasi sepenuhnya. Gunakan Excel terlebih dahulu.');
+            // TAMPILKAN VIEW CETAK (Halaman HTML khusus Print)
+            return view('cbt.pdf_export', compact('exam', 'results', 'stats'));
         }
 
         return back()->with('error', 'Tipe file tidak valid.');
@@ -555,7 +614,7 @@ class CbtController extends Controller
 </dict>
 </plist>';
 
-        $fileName = \Illuminate\Support\Str::slug($exam->title) . '.seb';
+        $fileName = Str::slug($exam->title) . '.seb';
 
         return response()->streamDownload(function () use ($sebConfig) {
             echo $sebConfig;

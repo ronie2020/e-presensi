@@ -2,7 +2,6 @@
 
 namespace App\Exports;
 
-use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -12,36 +11,26 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class CbtScoreExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
-    protected $examId;
+    protected $results;
     protected $passingGrade;
 
-    public function __construct($examId, $passingGrade)
+    /**
+     * Constructor menerima data Collection dari Controller
+     * agar sinkron dengan logika "Hitung Manual" di CbtController
+     */
+    public function __construct($results, $passingGrade)
     {
-        $this->examId = $examId;
+        $this->results = $results;
         $this->passingGrade = $passingGrade;
     }
 
     /**
-     * Ambil data dari database
-     * FIX: Menggunakan tabel 'classes' dan kolom 'class_id'
+     * Mengembalikan data collection yang dikirim dari Controller
      */
     public function collection()
     {
-        return DB::table('cbt_student_exams')
-            ->join('students', 'cbt_student_exams.student_id', '=', 'students.id')
-            ->leftJoin('classes', 'students.class_id', '=', 'classes.id') // <-- FIX: class_id
-            ->where('cbt_student_exams.cbt_exam_id', $this->examId)
-            ->where('cbt_student_exams.status', 'finished')
-            ->select(
-                'students.name',
-                'students.student_id as nisn', 
-                'classes.name as class_name',
-                'cbt_student_exams.correct_answers',
-                'cbt_student_exams.wrong_answers',
-                'cbt_student_exams.total_score'
-            )
-            ->orderBy('cbt_student_exams.total_score', 'desc')
-            ->get();
+        // Pastikan ini adalah Collection, jika array ubah jadi collect()
+        return collect($this->results);
     }
 
     /**
@@ -50,41 +39,46 @@ class CbtScoreExport implements FromCollection, WithHeadings, WithMapping, WithS
     public function headings(): array
     {
         return [
-            'Nama Siswa',
-            'NISN / ID',
-            'Kelas',
-            'Jumlah Benar',
-            'Jumlah Salah',
-            'Nilai Akhir',
-            'Status Kelulusan',
+            'NAMA SISWA',
+            'NISN',
+            'KELAS',
+            'BENAR',
+            'SALAH',
+            'NILAI AKHIR',
+            'STATUS KELULUSAN',
         ];
     }
 
     /**
      * Mapping data per baris
+     * Menyesuaikan nama field dari query di CbtController->recap()
      */
     public function map($row): array
     {
+        // Logika kelulusan
         $status = $row->total_score >= $this->passingGrade ? 'LULUS' : 'REMEDIAL';
 
         return [
-            $row->name,
-            $row->nisn,
-            $row->class_name ?? '-',
-            $row->correct_answers ?? 0,
-            $row->wrong_answers ?? 0,
-            $row->total_score,
+            $row->student_name,         // Dari alias di controller
+            $row->student_nisn ?? '-',  // Dari alias di controller
+            $row->class_name ?? '-',    // Dari alias di controller
+            $row->correct_answers ?? 0, // Hasil hitung manual controller
+            $row->wrong_answers ?? 0,   // Hasil hitung manual controller
+            $row->total_score ?? 0,
             $status,
         ];
     }
 
     /**
-     * Styling sederhana (Bold Header)
+     * Styling Header (Bold)
      */
     public function styles(Worksheet $sheet)
     {
         return [
-            1 => ['font' => ['bold' => true, 'size' => 12]],
+            1 => [
+                'font' => ['bold' => true, 'size' => 12],
+                'alignment' => ['horizontal' => 'center'],
+            ],
         ];
     }
 }
