@@ -44,6 +44,15 @@ class RamadanLogController extends Controller
         $today = Carbon::now('Asia/Jakarta')->toDateString();
         $now = Carbon::now('Asia/Jakarta');
         
+        // 1. Ambil Start Date dari Konstanta Class
+        $startDate = self::RAMADAN_START_DATE;
+
+        // 2. Ambil History Log untuk Kalender (Array Key = Tanggal)
+        // Ini diperlukan agar kalender di view bisa menandai hari yang sudah diisi (hijau)
+        $calendarLogs = RamadanLog::where('student_id', $studentId)
+                            ->pluck('id', 'date') // Key: tanggal, Value: ID
+                            ->toArray();
+        
         // Logika Waktu Pengisian
         $canFill = true;
         // Contoh Logika: Jika ingin membatasi jam pengisian
@@ -63,13 +72,16 @@ class RamadanLogController extends Controller
         $ramadanDay = $this->getRamadanDay($today);
         $isBeforeRamadan = Carbon::parse($today)->lt(Carbon::parse(self::RAMADAN_START_DATE));
 
+        // PERBAIKAN: Tambahkan startDate dan calendarLogs ke compact()
         return view('ramadan.student_index', compact(
             'todayRamadanLog', 
             'today', 
             'lastVerifiedLog',
             'canFill',
             'ramadanDay',
-            'isBeforeRamadan'
+            'isBeforeRamadan',
+            'startDate',    // <-- Variable yang sebelumnya missing
+            'calendarLogs'  // <-- Variable untuk loop kalender
         ));
     }
 

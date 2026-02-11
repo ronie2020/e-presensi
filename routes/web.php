@@ -259,9 +259,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/assignments/{assignment}/submissions', [LmsAssignmentController::class, 'submissions'])->name('assignments.submissions');
         Route::post('/submissions/{submission}/grade', [LmsAssignmentController::class, 'grade'])->name('submissions.grade');
         Route::delete('/submissions/{id}', [LmsAssignmentController::class, 'destroySubmission'])->name('submissions.destroy');
+        
         Route::get('/grades/recap', [LmsGradeController::class, 'index'])->name('grades.index');
         Route::get('/grades/export', [LmsGradeController::class, 'exportExcel'])->name('grades.export');
         Route::get('/grades/print', [LmsGradeController::class, 'printReport'])->name('grades.print');
+
     });
 
     // Jurnal Mengajar
@@ -271,6 +273,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/start/{schedule_id}', [TeachingController::class, 'start'])->name('start');
         Route::post('/attendance/manual', [TeachingController::class, 'storeManual'])->name('manual');
         Route::get('/session/{id}', [TeachingController::class, 'show'])->name('show');
+        
+        // --- ROUTE BARU DI SINI ---
+        Route::get('/session/{id}/edit', [TeachingController::class, 'edit'])->name('edit');
+        
         Route::put('/session/{id}', [TeachingController::class, 'update'])->name('update');
         Route::post('/scan', [TeachingController::class, 'scan'])->name('scan');
         Route::post('/close/{id}', [TeachingController::class, 'close'])->name('close');

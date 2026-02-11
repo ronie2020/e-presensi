@@ -59,7 +59,7 @@ class TeachingController extends Controller
         return redirect()->route('teaching.show', $session->id);
     }
 
-    // --- HALAMAN KELAS BERLANGSUNG ---
+    // --- HALAMAN KELAS BERLANGSUNG (LIVE) ---
     public function show($id)
     {
         // Load semua relasi yang dibutuhkan
@@ -75,7 +75,7 @@ class TeachingController extends Controller
         // 3. Cek Status Kelas
         $isOpen = $session->status == 'open';
 
-        // 4. LOGIKA STATISTIK (DIPINDAHKAN DARI BLADE KE SINI)
+        // 4. LOGIKA STATISTIK
         $stats = [
             'present'    => $attendances->where('status', 'present')->count(),
             'sick'       => $attendances->where('status', 'sick')->count(),
@@ -86,13 +86,26 @@ class TeachingController extends Controller
         return view('teaching.show', compact('session', 'allStudents', 'attendances', 'isOpen', 'stats'));
     }
 
+    // --- [BARU] HALAMAN EDIT (REVISI SETELAH TUTUP) ---
+    public function edit($id)
+    {
+        // Sama seperti show, tapi diarahkan ke view teaching.edit
+        $session = TeachingSession::with(['schedule.schoolClass.students', 'schedule.subject', 'attendances'])
+                    ->findOrFail($id);
+        
+        $allStudents = $session->schedule->schoolClass->students->sortBy('name');
+        $attendances = $session->attendances->keyBy('student_id');
+
+        return view('teaching.edit', compact('session', 'allStudents', 'attendances'));
+    }
+
     // --- UPDATE JURNAL ---
     public function update(Request $request, $id)
     {
         $session = TeachingSession::findOrFail($id);
         
         $request->validate([
-            'topic' => 'required|string|max:255', // Ubah ke required agar jurnal tidak kosong
+            'topic' => 'required|string|max:255', 
             'activities' => 'nullable|string',
             'photo_proof' => 'nullable|image|max:5120', 
             'video_link' => 'nullable|url',
@@ -187,7 +200,7 @@ class TeachingController extends Controller
         ]);
     }
 
-    // --- ABSEN MANUAL ---
+    // --- ABSEN MANUAL & EDIT STATUS ---
     public function storeManual(Request $request)
     {
         $request->validate([
@@ -204,6 +217,7 @@ class TeachingController extends Controller
              $data = null;
              $status = null;
         } else {
+            // Gunakan updateOrCreate agar bisa untuk absen baru ATAU revisi
             $attendance = ClassAttendance::updateOrCreate(
                 [
                     'teaching_session_id' => $request->session_id,
@@ -234,7 +248,6 @@ class TeachingController extends Controller
             $session = TeachingSession::with('schedule.schoolClass')->findOrFail($id);
             
             if ($session->status == 'closed') {
-                // UPDATE: Redirect ke halaman Index (Jadwal), bukan Dashboard
                 return redirect()->route('teaching.index')->with('info', 'Kelas sudah ditutup sebelumnya.');
             }
 
@@ -281,7 +294,7 @@ class TeachingController extends Controller
             ]);
 
             DB::commit();
-            // UPDATE: Redirect ke halaman Index (Jadwal), bukan Dashboard
+            
             return redirect()->route('teaching.index')->with('success', "Kelas ditutup. $alphaCount siswa ditandai Alpha & mendapat poin.");
 
         } catch (\Exception $e) {
