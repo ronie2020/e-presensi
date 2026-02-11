@@ -200,7 +200,7 @@
                 </div>
             </div>
 
-            <!-- BAGIAN 3: RIWAYAT / LOG (LOGIKA LAMA DI-OPTIMALKAN) -->
+            <!-- BAGIAN 3: RIWAYAT / LOG -->
             @if(isset($historyRecords))
             <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden mb-10">
                 <div class="p-8 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -274,8 +274,7 @@
             </div>
             @endif
 
-            <!-- BAGIAN 4: STATISTIK & KLASEMEN (REKAP KELAS, TOP PELANGGARAN, TOP PRESTASI) -->
-            {{-- Menggunakan 3 Kolom Grid agar rapi --}}
+            <!-- BAGIAN 4: STATISTIK & KLASEMEN -->
             @if(isset($classSummaries) && isset($topViolators) && isset($topMerits))
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
                 
@@ -474,7 +473,7 @@
                         showError("Tidak ada kamera ditemukan.");
                     }
                 }).catch(err => {
-                    showError("Izin kamera ditolak.");
+                    showError("Izin kamera ditolak atau tidak tersedia.");
                 });
             }, 500);
         }
@@ -488,23 +487,34 @@
         }
 
         function onScanSuccess(decodedText, decodedResult) {
-            const scannedText = decodedText.trim();
+            // 1. Bersihkan teks hasil scan (hilangkan spasi depan/belakang)
+            const scannedText = String(decodedText).trim();
+            
+            // LOG DEBUG: Cek console browser (F12) jika masih error
+            console.log("-----------------------------------");
+            console.log("QR Terbaca:", scannedText);
+            
             let selectElement = document.getElementById(currentTargetInput);
             
             let found = false;
             let foundName = "";
 
-            // Logic pencarian siswa di dropdown
+            // 2. Loop mencari data di dropdown
             for (let i = 0; i < selectElement.options.length; i++) {
                 const option = selectElement.options[i];
                 
-                if (option.value == scannedText || 
-                   option.getAttribute('data-nis') == scannedText || 
-                   option.getAttribute('data-nisn') == scannedText) {
+                // Ambil data atribut dan pastikan jadi String lalu trim
+                const optValue = String(option.value).trim();
+                const optNis = option.getAttribute('data-nis') ? String(option.getAttribute('data-nis')).trim() : '';
+                const optNisn = option.getAttribute('data-nisn') ? String(option.getAttribute('data-nisn')).trim() : '';
+
+                // Logika pencocokan (Value ID atau NIS atau NISN)
+                if (optValue === scannedText || optNis === scannedText || optNisn === scannedText) {
                     
                     selectElement.selectedIndex = i;
                     found = true;
                     foundName = option.text;
+                    console.log("MATCH FOUND:", foundName);
                     break;
                 }
             }
@@ -522,10 +532,15 @@
                 });
             } else {
                 if (navigator.vibrate) navigator.vibrate(200);
+                
+                // Tampilkan pesan error yang lebih detail
+                console.warn("TIDAK DITEMUKAN. Pastikan data-nis di HTML sesuai dengan QR.");
+                
                 Swal.fire({
                     icon: 'error', 
                     title: 'Tidak Ditemukan',
-                    text: `Kode "${scannedText}" tidak terdaftar.`,
+                    // Tampilkan kurung siku [] agar user tau jika ada spasi tersembunyi
+                    text: `Kode terbaca: [${scannedText}] tidak ada di data siswa.`,
                     customClass: { popup: 'rounded-[2rem]' }
                 });
             }
@@ -546,15 +561,19 @@
         }
 
         function playBeep() {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillator.frequency.value = 880; 
-            gainNode.gain.value = 0.1;
-            oscillator.start();
-            setTimeout(() => oscillator.stop(), 100);
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.frequency.value = 880; 
+                gainNode.gain.value = 0.1;
+                oscillator.start();
+                setTimeout(() => oscillator.stop(), 100);
+            } catch (e) {
+                console.log("Audio play failed");
+            }
         }
     </script>
 </x-app-layout>
