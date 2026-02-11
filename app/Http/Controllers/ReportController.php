@@ -382,8 +382,59 @@ class ReportController extends Controller
     }
 
     // =========================================================================
-    // 3. FITUR MATRIX VIEW (REKAP PER KELAS BULANAN - LOGIKA LAMA UTUH)
+    // 3. FITUR REKAPITULASI KELAS (SUMMARY & MATRIX VIEW)
     // =========================================================================
+
+    /**
+     * [BARU] Menampilkan Halaman Rekapitulasi Kelas (Summary)
+     * Mengisi variabel $reportData untuk view 'reports.class_attendance'
+     */
+    public function indexClass(Request $request)
+    {
+        // Default tanggal: 1 bulan terakhir atau bulan berjalan
+        $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
+        $endDate = $request->input('end_date', Carbon::now()->toDateString());
+
+        // Ambil data kelas + siswa aktif + absensi mereka dalam range tanggal
+        // Filter absensi hanya tipe 'Harian' atau 'Masuk' (sesuaikan dengan sistem Anda)
+        $classes = SchoolClass::with(['students' => function($q) {
+                $q->where('status', 'active'); 
+            }, 'students.attendances' => function($q) use ($startDate, $endDate) {
+                $q->whereBetween('attendance_date', [$startDate, $endDate])
+                  ->whereIn('type', ['Harian', 'Masuk']);
+            }])
+            ->orderBy('name')
+            ->get();
+
+        // Proses kalkulasi rekapitulasi
+        $reportData = $classes->map(function ($kelas) {
+            $hadir = 0;
+            $telat = 0;
+            $izin_sakit = 0;
+            $alpha = 0;
+
+            foreach ($kelas->students as $student) {
+                // Hitung dari collection yang sudah di-eager-load (Memory efficient)
+                $hadir += $student->attendances->where('status', 'Hadir')->count();
+                $telat += $student->attendances->where('status', 'Terlambat')->count();
+                $izin_sakit += $student->attendances->whereIn('status', ['Izin', 'Sakit', "Uzur Syar'i"])->count();
+                $alpha += $student->attendances->whereIn('status', ['Alfa', 'Alpa', 'Alpha'])->count();
+            }
+
+            // Inject properti ke object kelas untuk dibaca View
+            $kelas->total_students = $kelas->students->count();
+            $kelas->hadir = $hadir;
+            $kelas->telat = $telat;
+            $kelas->izin_sakit = $izin_sakit;
+            $kelas->alpha = $alpha;
+            
+            return $kelas;
+        });
+
+        // Kirim ke View 'class_attendance.blade.php'
+        // Pastikan view ada di folder resources/views/reports/class_attendance.blade.php
+        return view('reports.class_attendance', compact('reportData', 'startDate', 'endDate'));
+    }
 
     private function getClassReportData(Request $request)
     {
@@ -436,15 +487,15 @@ class ReportController extends Controller
                             case 'Hadir':
                                 $code = 'H'; $color = 'text-black font-bold'; $summary['H']++; break;
                             case 'Terlambat':
-                                $code = 'T'; $color = 'text-black font-bold'; $summary['H']++; break;
+                                $code = 'T'; $color = 'text-amber-600 font-bold'; $summary['H']++; break; // Dianggap hadir tapi telat
                             case 'Sakit':
-                                $code = 'S'; $color = 'text-black font-bold'; $summary['S']++; break;
+                                $code = 'S'; $color = 'text-blue-600 font-bold'; $summary['S']++; break;
                             case 'Izin':
-                                $code = 'I'; $color = 'text-black font-bold'; $summary['I']++; break;
+                                $code = 'I'; $color = 'text-indigo-600 font-bold'; $summary['I']++; break;
                             case 'Alfa':
                             case 'Alpa':
                             case 'Alpha':
-                                $code = 'A'; $color = 'text-black font-bold'; $summary['A']++; break;
+                                $code = 'A'; $color = 'text-rose-600 font-bold'; $summary['A']++; break;
                         }
                     }
 
@@ -464,6 +515,9 @@ class ReportController extends Controller
         return compact('classes', 'classId', 'students', 'dates', 'monthStr', 'startDate', 'selectedClass');
     }
 
+    /**
+     * Menampilkan Detail Matrix Absensi per Kelas (Detail Page)
+     */
     public function classReport(Request $request)
     {
         $data = $this->getClassReportData($request);
@@ -476,6 +530,24 @@ class ReportController extends Controller
         if(!$data['classId']) return redirect()->back()->with('error', 'Pilih kelas terlebih dahulu');
         
         return view('reports.print_class_report', $data);
+    }
+    
+    /**
+     * Stub untuk Export Excel
+     */
+    public function exportClassExcel(Request $request)
+    {
+        // Fitur ini bisa dikembangkan lebih lanjut menggunakan Maatwebsite/Excel
+        return redirect()->back()->with('warning', 'Fitur Export Excel belum tersedia.');
+    }
+
+    /**
+     * Stub untuk Print Summary
+     */
+    public function printClassSummary(Request $request)
+    {
+        // Menggunakan logic indexClass, bisa diarahkan ke view khusus print jika ada
+        return $this->indexClass($request); 
     }
 
     // =========================================================================
@@ -726,7 +798,7 @@ class ReportController extends Controller
                 $html .= '<div class="flex justify-between items-center p-3 rounded-xl border '.$color.'">';
                 $html .= '<div><div class="text-[10px] font-bold opacity-70 uppercase tracking-wider">'.$date.'</div><div class="font-bold text-sm">'.$h->status.'</div></div>';
                 if($h->status == 'Hadir') {
-                    $html .= '<div class="text-xs font-bold bg-white/60 px-2 py-1 rounded flex items-center gap-1"><i class="ph-bold ph-clock"></i> '.$jam.'</div>';
+                    $html .= '<div class="text-xs font-bold bg-white/60 px-2 py-1 rounded flex items-center gap-1"><i class=\"ph-bold ph-clock\"></i> '.$jam.'</div>';
                 }
                 $html .= '</div>';
             }

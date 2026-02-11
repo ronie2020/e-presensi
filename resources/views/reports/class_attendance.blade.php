@@ -32,6 +32,7 @@
                 <div class="relative z-10 flex flex-wrap gap-3 w-full xl:w-auto items-center justify-center xl:justify-end">
                     
                     {{-- Form Filter --}}
+                    {{-- Action mengarah ke route('reports.class') yang di-handle oleh indexClass di Controller --}}
                     <form action="{{ route('reports.class') }}" method="GET" class="flex flex-col sm:flex-row gap-2 bg-white/10 backdrop-blur-md p-2 rounded-2xl border border-white/20 w-full sm:w-auto shadow-lg">
                         <div class="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-blue-100 shadow-sm w-full sm:w-auto">
                             <span class="text-[10px] font-bold text-slate-400 uppercase">Dari</span>
@@ -109,12 +110,9 @@
                             @forelse($reportData as $data)
                                 @php
                                     // Hitung Total Log (Hadir + Telat + Izin/Sakit + Alpha)
-                                    // Asumsi: Jika ada field 'total_sesi' di $data, gunakan itu sebagai pembagi.
-                                    // Jika tidak, gunakan sum dari log yang ada.
                                     $logsCount = $data->hadir + $data->telat + $data->izin_sakit + $data->alpha;
                                     
-                                    // Gunakan total siswa * sesi jika tersedia, atau logsCount sebagai fallback
-                                    // Disini kita gunakan logsCount agar persentase total 100% berdasarkan data yang masuk
+                                    // Gunakan total log sebagai pembagi agar 100% mewakili data yang masuk
                                     $divider = $logsCount > 0 ? $logsCount : 1; 
 
                                     // Persentase
@@ -123,11 +121,10 @@
                                     $pctIzin  = round(($data->izin_sakit / $divider) * 100, 1);
                                     $pctAlpha = round(($data->alpha / $divider) * 100, 1);
                                     
-                                    // Logic 'Tidak Absen' (Sisa dari 100% jika pembagi menggunakan total ekspektasi)
-                                    // Jika menggunakan logsCount murni, ini akan 0. 
-                                    // Mari kita buat visualisasi menarik: Anggap sisa yang "Belum tercatat"
-                                    $pctNA = 100 - ($pctHadir + $pctTelat + $pctIzin + $pctAlpha);
-                                    if($pctNA < 0) $pctNA = 0;
+                                    // Logic 'Tidak Absen' jika pembagi mau pakai total siswa,
+                                    // Tapi karena logic di atas pakai logsCount, NA akan 0. 
+                                    // Jika ingin menampilkan 'Belum Absen', divider harus $data->total_students * hari
+                                    $pctNA = 0; 
                                 @endphp
 
                                 <tr class="group hover:bg-slate-50 transition-colors">
@@ -158,9 +155,6 @@
                                             @endif
                                             @if($pctAlpha > 0)
                                                 <div style="width: {{ $pctAlpha }}%" class="bg-rose-500 hover:bg-rose-400 transition-all" title="Alpha: {{ $pctAlpha }}%"></div>
-                                            @endif
-                                             @if($pctNA > 1) {{-- Hanya tampilkan jika signifikan --}}
-                                                <div style="width: {{ $pctNA }}%" class="bg-slate-300 hover:bg-slate-200 transition-all pattern-diagonal-lines" title="Tidak Absen / Data Kosong"></div>
                                             @endif
                                         </div>
                                         <div class="flex justify-between mt-1 text-[10px] font-bold text-slate-400">
@@ -202,7 +196,8 @@
                                         </div>
                                     </td>
 
-                                    {{-- Action Button (UPDATE ROUTE DISINI) --}}
+                                    {{-- Action Button --}}
+                                    {{-- Mengarah ke route detail (matrix) --}}
                                     <td class="px-6 py-4 text-right">
                                         <a href="{{ route('reports.class.detail', ['class_id' => $data->id, 'month' => \Carbon\Carbon::parse($startDate)->format('Y-m')]) }}" 
                                            class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm group-hover:shadow-md">
