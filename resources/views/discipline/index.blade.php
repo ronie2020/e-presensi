@@ -21,9 +21,8 @@
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION (TAMPILAN KARTU DIKEMBALIKAN) --}}
+            {{-- HERO SECTION --}}
             <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 mb-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
-                {{-- Pattern Background --}}
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
                 
@@ -37,7 +36,6 @@
                         </p>
                     </div>
                     
-                    {{-- Tombol ke Halaman Master Data --}}
                     <a href="{{ route('discipline-types.index') }}" class="group bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm border border-white/10 transition-all flex items-center gap-2 shadow-lg">
                         <i class="ph-bold ph-gear text-xl group-hover:rotate-90 transition-transform duration-500"></i>
                         <span>Atur Jenis Poin</span>
@@ -84,10 +82,13 @@
                                     <div class="relative flex-1">
                                         <select name="student_id" id="student_select_violation" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-rose-500 focus:ring-rose-500 text-sm font-bold text-slate-700 py-3.5 pl-4 pr-10 appearance-none cursor-pointer">
                                             <option value="">-- Cari / Pilih Nama Siswa --</option>
+                                            {{-- UPDATED: Menambahkan data-student-id dan data-rfid --}}
                                             @foreach ($students as $student)
                                                 <option value="{{ $student->id }}" 
                                                         data-nis="{{ $student->nis ?? '' }}" 
                                                         data-nisn="{{ $student->nisn ?? '' }}"
+                                                        data-student-id="{{ $student->student_id ?? '' }}"
+                                                        data-rfid="{{ $student->rfid_id ?? '' }}"
                                                         data-class="{{ $student->schoolClass->name ?? '' }}">
                                                     {{ $student->name }} ({{ $student->schoolClass->name ?? 'N/A' }})
                                                 </option>
@@ -154,10 +155,13 @@
                                     <div class="relative flex-1">
                                         <select name="student_id" id="student_select_merit" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 text-sm font-bold text-slate-700 py-3.5 pl-4 pr-10 appearance-none cursor-pointer">
                                             <option value="">-- Cari / Pilih Nama Siswa --</option>
+                                            {{-- UPDATED: Menambahkan data-student-id dan data-rfid --}}
                                             @foreach ($students as $student)
                                                 <option value="{{ $student->id }}" 
                                                         data-nis="{{ $student->nis ?? '' }}" 
                                                         data-nisn="{{ $student->nisn ?? '' }}"
+                                                        data-student-id="{{ $student->student_id ?? '' }}"
+                                                        data-rfid="{{ $student->rfid_id ?? '' }}"
                                                         data-class="{{ $student->schoolClass->name ?? '' }}">
                                                     {{ $student->name }} ({{ $student->schoolClass->name ?? 'N/A' }})
                                                 </option>
@@ -277,7 +281,6 @@
             <!-- BAGIAN 4: STATISTIK & KLASEMEN -->
             @if(isset($classSummaries) && isset($topViolators) && isset($topMerits))
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                
                 {{-- A. REKAP PER KELAS --}}
                 <div class="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm xl:col-span-1">
                     <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
@@ -487,10 +490,9 @@
         }
 
         function onScanSuccess(decodedText, decodedResult) {
-            // 1. Bersihkan teks hasil scan (hilangkan spasi depan/belakang)
+            // 1. Bersihkan teks hasil scan
             const scannedText = String(decodedText).trim();
             
-            // LOG DEBUG: Cek console browser (F12) jika masih error
             console.log("-----------------------------------");
             console.log("QR Terbaca:", scannedText);
             
@@ -503,19 +505,42 @@
             for (let i = 0; i < selectElement.options.length; i++) {
                 const option = selectElement.options[i];
                 
-                // Ambil data atribut dan pastikan jadi String lalu trim
-                const optValue = String(option.value).trim();
+                // Ambil data atribut
+                const optValue = String(option.value).trim(); // Student ID (PK)
                 const optNis = option.getAttribute('data-nis') ? String(option.getAttribute('data-nis')).trim() : '';
                 const optNisn = option.getAttribute('data-nisn') ? String(option.getAttribute('data-nisn')).trim() : '';
+                // UPDATED: Ambil student_id dan rfid_id dari atribut
+                const optStudentId = option.getAttribute('data-student-id') ? String(option.getAttribute('data-student-id')).trim() : '';
+                const optRfid = option.getAttribute('data-rfid') ? String(option.getAttribute('data-rfid')).trim() : '';
 
-                // Logika pencocokan (Value ID atau NIS atau NISN)
-                if (optValue === scannedText || optNis === scannedText || optNisn === scannedText) {
+                // --- LOGIKA 1: EXACT MATCH (String sama persis) ---
+                // Cek ke semua kemungkinan field: NIS, NISN, StudentID, RFID
+                if (optValue === scannedText || 
+                    optNis === scannedText || 
+                    optNisn === scannedText || 
+                    optStudentId === scannedText || 
+                    optRfid === scannedText) {
                     
                     selectElement.selectedIndex = i;
                     found = true;
                     foundName = option.text;
-                    console.log("MATCH FOUND:", foundName);
                     break;
+                }
+
+                // --- LOGIKA 2: NUMBER MATCH (Smart Match) ---
+                // Hanya jalankan jika scannedText berupa angka saja
+                if (/^\d+$/.test(scannedText)) {
+                    const scanNum = parseInt(scannedText, 10);
+                    
+                    // Helper untuk cek number match
+                    const checkNum = (val) => val && /^\d+$/.test(val) && parseInt(val, 10) === scanNum;
+
+                    if (checkNum(optNis) || checkNum(optNisn) || checkNum(optStudentId)) {
+                        selectElement.selectedIndex = i;
+                        found = true;
+                        foundName = option.text;
+                        break;
+                    }
                 }
             }
 
@@ -533,13 +558,11 @@
             } else {
                 if (navigator.vibrate) navigator.vibrate(200);
                 
-                // Tampilkan pesan error yang lebih detail
-                console.warn("TIDAK DITEMUKAN. Pastikan data-nis di HTML sesuai dengan QR.");
+                console.warn("TIDAK DITEMUKAN. Pastikan data-nis/student-id di HTML sesuai dengan QR.");
                 
                 Swal.fire({
                     icon: 'error', 
                     title: 'Tidak Ditemukan',
-                    // Tampilkan kurung siku [] agar user tau jika ada spasi tersembunyi
                     text: `Kode terbaca: [${scannedText}] tidak ada di data siswa.`,
                     customClass: { popup: 'rounded-[2rem]' }
                 });
