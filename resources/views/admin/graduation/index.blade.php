@@ -16,6 +16,10 @@
                 
                 <div class="relative z-10 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8">
                     <div class="space-y-2">
+                        <a href="{{ route('dashboard') }}" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
+                            <i class="ph-bold ph-arrow-left text-m group-hover:-translate-x-1 transition-transform"></i>
+                            <span>Kembali ke Dashboard</span>
+                        </a>
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-bold uppercase tracking-widest backdrop-blur-sm">
                             <i class="ph-fill ph-graduation-cap"></i> Manajemen Akademik
                         </div>

@@ -318,6 +318,48 @@
                 </div>
                 <div class="text-sm font-bold text-slate-700 group-hover:text-purple-700">Perpustakaan</div>
             </a>
+
+            {{-- Tombol Atur Jadwal --}}
+             <a href="{{ route('schedules.index') }}" @click.prevent="navigate('{{ route('schedules.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-aemerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-clock text-xl"></i>
+                </div>
+                <div class="text-sm font-bold text-slate-700 group-hover:text-emerald-700">Atur Jadwal</div>
+            </a>
+
+            {{-- Tombol Jurnal Mengajar --}}
+            <a href="{{ route('teaching.index') }}" @click.prevent="navigate('{{ route('teaching.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-chalkboard-teacher text-xl"></i>
+                </div>
+                <div class="text-sm font-bold text-slate-700 group-hover:text-blue-700">Jurnal Mengajar</div>
+            </a>
+
+            {{-- Tombol Disiplin --}}
+            <a href="{{ route('discipline.index') }}" @click.prevent="navigate('{{ route('discipline.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-rose-200 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-warning-circle text-xl"></i>
+                </div>
+                <div class="text-sm font-bold text-slate-700 group-hover:text-rose-700">Laporan Kedisiplinan</div>
+            </a>
+
+             {{-- Tombol Ramadhan --}}
+             <a href="{{ route('admin.ramadan.reports') }}" @click.prevent="navigate('{{ route('admin.ramadan.reports') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-book-open text-xl"></i>
+                </div>
+                <div class="text-sm font-bold text-slate-700 group-hover:text-emerald-700">Rekap Aktivitas Ramadhan</div>
+            </a>
+
+              {{-- Tombol Ekstrakurikuler --}}
+            <a href="{{ route('extracurriculars.reports') }}" @click.prevent="navigate('{{ route('extracurriculars.reports') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-amber-200 cursor-pointer">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-file-text text-xl"></i>
+                </div>
+                <div class="text-sm font-bold text-slate-700 group-hover:text-amber-700">Rekap Ekstrakurikuler</div>
+            </a>
+
+
         </div>
 
         {{-- KPI CARDS --}}

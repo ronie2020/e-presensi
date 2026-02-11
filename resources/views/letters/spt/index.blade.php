@@ -12,6 +12,10 @@
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div class="text-center md:text-left">
+                         <a href="{{ route('dashboard') }}" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
+                                <i class="ph-bold ph-arrow-left text-m group-hover:-translate-x-1 transition-transform"></i>
+                                <span>Kembali ke Dashboard</span>
+                            </a>
                         <h1 class="text-3xl font-black tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3">
                             <span class="text-4xl">✈️</span> Surat Perintah Tugas
                         </h1>
