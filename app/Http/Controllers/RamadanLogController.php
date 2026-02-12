@@ -22,6 +22,7 @@ class RamadanLogController extends Controller
     {
         $start = Carbon::parse(self::RAMADAN_START_DATE);
         $current = Carbon::parse($date);
+        // Jika sebelum Ramadhan, return 0
         if ($current->lt($start)) return 0;
         return $current->diffInDays($start) + 1;
     }
@@ -30,16 +31,34 @@ class RamadanLogController extends Controller
     {
         $studentId = Auth::guard('student')->id();
         $today = Carbon::now('Asia/Jakarta')->toDateString();
+        $now = Carbon::now('Asia/Jakarta');
+        
         $startDate = self::RAMADAN_START_DATE;
 
+        // Ambil log untuk kalender grid
         $calendarLogs = RamadanLog::where('student_id', $studentId)
                             ->pluck('id', 'date') 
                             ->toArray();
         
-        $canFill = true;
+        // --- LOGIKA CAN FILL (DIPERBAIKI) ---
+        // 1. Cek apakah hari ini masih dalam rentang jam pengisian
+        $startTime = Carbon::parse($today . ' ' . self::FILL_START_TIME, 'Asia/Jakarta');
+        $endTime = Carbon::parse($today . ' ' . self::FILL_END_TIME, 'Asia/Jakarta');
+        
+        // Default false, cek kondisi
+        $canFill = false;
 
-        $todayRamadanLog = RamadanLog::where('student_id', $studentId)->whereDate('date', $today)->first();
+        // Jika sekarang berada di antara jam mulai dan jam akhir
+        if ($now->between($startTime, $endTime)) {
+            $canFill = true;
+        }
 
+        // Ambil data log hari ini
+        $todayRamadanLog = RamadanLog::where('student_id', $studentId)
+                            ->whereDate('date', $today)
+                            ->first();
+
+        // Log terakhir yang dinilai guru (untuk notifikasi/info)
         $lastVerifiedLog = RamadanLog::where('student_id', $studentId)
                             ->whereNotNull('teacher_verified_at')
                             ->orderBy('date', 'desc')
@@ -62,6 +81,7 @@ class RamadanLogController extends Controller
 
     public function leaderboard()
     {
+        // Optimasi: Gunakan Eager Loading untuk log agar query tidak berat
         $students = Student::with(['ramadanLogs', 'schoolClass'])->get();
 
         $topStudents = $students->map(function($student) {
@@ -72,10 +92,11 @@ class RamadanLogController extends Controller
                 if ($log->is_fasting) $totalPoints += 50;
 
                 // 2. Shalat Wajib (10 Poin per waktu)
-                $prayers = array_filter($log->prayers ?? []);
+                // Pastikan prayers berbentuk array sebelum dihitung
+                $prayers = is_array($log->prayers) ? array_filter($log->prayers) : [];
                 $totalPoints += (count($prayers) * 10);
 
-                // 3. Sunnah
+                // 3. Sunnah (Menggunakan data_get atau null coalescing agar aman)
                 if ($log->sunnah_deeds['tarawih'] ?? false) $totalPoints += 15;
                 if ($log->sunnah_deeds['witir'] ?? false) $totalPoints += 5;
                 if ($log->sunnah_deeds['dhuha'] ?? false) $totalPoints += 5;
@@ -88,7 +109,7 @@ class RamadanLogController extends Controller
                 // 5. Jumat (20 Poin)
                 if (!empty($log->friday_khotib)) $totalPoints += 20;
 
-                // 6. KULTUM (15 Poin) - NEW
+                // 6. KULTUM (15 Poin)
                 if (!empty($log->kultum_summary)) $totalPoints += 15;
             }
 
@@ -96,8 +117,8 @@ class RamadanLogController extends Controller
             return $student;
         })
         ->sortByDesc('ramadan_points')
-        ->take(10)
-        ->values();
+        ->values()
+        ->take(10); // Ambil 10 besar saja setelah sorting
 
         return view('ramadan.leaderboard', compact('topStudents'));
     }
@@ -105,11 +126,29 @@ class RamadanLogController extends Controller
     public function store(Request $request)
     {
         $studentId = Auth::guard('student')->id();
-        $date = $request->input('date', Carbon::now('Asia/Jakarta')->toDateString());
+        
+        // Ambil tanggal hari ini server side untuk keamanan
+        $today = Carbon::now('Asia/Jakarta')->toDateString();
+        
+        // Input date dari form (biasanya hidden input)
+        $requestDate = $request->input('date', $today);
 
-        if (Carbon::parse($date)->isFuture()) {
-            return redirect()->back()->with('error', 'Anda tidak dapat mengisi jurnal untuk hari esok.');
+        // KEAMANAN: Pastikan siswa hanya mengisi untuk hari ini
+        // Jika ingin membolehkan backdate (mengisi kemarin), hapus kondisi 'ne' (not equal) ini.
+        if ($requestDate !== $today) {
+             return redirect()->back()->with('error', 'Anda hanya dapat mengisi jurnal untuk hari ini.');
         }
+
+        // VALIDASI INPUT
+        $request->validate([
+            'tadarus_surah' => 'nullable|string|max:100',
+            'tadarus_ayah' => 'nullable|numeric|max:300',
+            'murojaah_surah' => 'nullable|string|max:100',
+            'friday_khotib' => 'nullable|string|max:100',
+            'friday_summary' => 'nullable|string|max:1000',
+            'kultum_penceramah' => 'nullable|string|max:100',
+            'kultum_summary' => 'nullable|string|max:1000',
+        ]);
 
         try {
             DB::beginTransaction();
@@ -138,6 +177,7 @@ class RamadanLogController extends Controller
                 'kultum_summary' => $request->kultum_summary,
             ];
 
+            // Tambahkan data Jumat jika ada
             if ($request->has('friday_khotib')) {
                 $logData['friday_khotib'] = $request->friday_khotib;
             }
@@ -145,15 +185,17 @@ class RamadanLogController extends Controller
                 $logData['friday_summary'] = $request->friday_summary;
             }
 
+            // Simpan ke RamadanLog
             $ramadanLog = RamadanLog::updateOrCreate(
-                ['student_id' => $studentId, 'date' => $date],
+                ['student_id' => $studentId, 'date' => $requestDate],
                 $logData
             );
 
+            // Sinkronisasi ke StudentHabit (Sistem Habit Tracker Sekolah)
             StudentHabit::updateOrCreate(
                 [
                     'student_id' => $studentId, 
-                    'report_date' => $date
+                    'report_date' => $requestDate
                 ],
                 [
                     'prayer_subuh'   => $request->has('prayer_subuh'),
@@ -168,11 +210,11 @@ class RamadanLogController extends Controller
             );
 
             DB::commit();
-            return redirect()->back()->with('success', 'Jurnal Ramadhan berhasil disimpan! Poin anda bertambah.');
+            return redirect()->back()->with('success', 'Alhamdulillah! Jurnal Ramadhan berhasil disimpan.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal sinkronisasi: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
     }
 
@@ -202,19 +244,38 @@ class RamadanLogController extends Controller
                         ->get();
 
             $stats['total_students'] = $reports->count();
-            $stats['fasting_count'] = $reports->filter(fn($s) => $s->ramadanLogs->first()?->is_fasting)->count();
-            $stats['prayer_complete_count'] = $reports->filter(fn($s) => count(array_filter($s->ramadanLogs->first()?->prayers ?? [])) == 5)->count();
-            $stats['friday_log_count'] = $reports->filter(fn($s) => $s->ramadanLogs->first()?->friday_khotib)->count();
+            
+            // Perbaikan Logika Count menggunakan filter
+            $stats['fasting_count'] = $reports->filter(function($s) {
+                return $s->ramadanLogs->first()?->is_fasting;
+            })->count();
+
+            $stats['prayer_complete_count'] = $reports->filter(function($s) {
+                $log = $s->ramadanLogs->first();
+                // Pastikan prayers array sebelum dihitung
+                $prayers = isset($log->prayers) && is_array($log->prayers) ? $log->prayers : [];
+                return count(array_filter($prayers)) == 5;
+            })->count();
+
+            $stats['friday_log_count'] = $reports->filter(function($s) {
+                return !empty($s->ramadanLogs->first()?->friday_khotib);
+            })->count();
 
         } else {
+            // Stats Global
             $stats['total_students'] = Student::count();
             $logsToday = RamadanLog::whereDate('date', $date)->get();
+            
             $stats['fasting_count'] = $logsToday->where('is_fasting', true)->count();
+            
             $stats['prayer_complete_count'] = $logsToday->filter(function($log) {
-                return count(array_filter($log->prayers ?? [])) == 5;
+                $prayers = is_array($log->prayers) ? $log->prayers : [];
+                return count(array_filter($prayers)) == 5;
             })->count();
+            
             $stats['friday_log_count'] = $logsToday->whereNotNull('friday_khotib')->count();
 
+            // Feed Terbaru
             $latestLogs = RamadanLog::with(['student.schoolClass'])
                 ->whereDate('date', $date)
                 ->orderBy('updated_at', 'desc')
@@ -253,6 +314,7 @@ class RamadanLogController extends Controller
             'teacher_score' => $validated['teacher_score'],
             'teacher_note' => $validated['teacher_note'],
             'teacher_verified_at' => now(),
+            // Pastikan Auth guard guru aktif, jika tidak gunakan id user login biasa
             'teacher_id' => Auth::id(), 
         ]);
 

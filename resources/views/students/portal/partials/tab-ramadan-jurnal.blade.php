@@ -5,7 +5,7 @@
     {{-- 1. LOGIKA & KONFIGURASI --}}
     @php
         // --- KONFIGURASI TANGGAL 1 RAMADHAN ---
-        // Sesuaikan dengan konstanta di Controller
+        // (Pastikan sama dengan Controller: 2026-02-18)
         $startRamadan = \Carbon\Carbon::parse('2026-02-18'); 
         $currentDate = \Carbon\Carbon::parse($today);
         
@@ -14,25 +14,25 @@
         $isBeforeRamadan = $currentDate->lt($startRamadan);
         
         // --- LOGIKA PROGRESS HARIAN ---
-        // Target Lama: 12. Target Baru (+Kultum): 13
         $totalTarget = 13; 
         $currentScore = 0;
         $isFriday = $currentDate->isFriday();
         
         if ($isFriday) {
-            $totalTarget = 14; // +1 untuk Laporan Jumat
+            $totalTarget = 14; 
         }
 
+        // PERBAIKAN: Cek dulu apakah log ada sebelum menghitung skor
         if($todayRamadanLog) {
             // 1. Puasa
             if($todayRamadanLog->is_fasting) $currentScore++;
             
-            // 2. Shalat Wajib (5 Poin)
+            // 2. Shalat Wajib
             foreach(['subuh', 'dzuhur', 'ashar', 'maghrib', 'isya'] as $p) {
                 if($todayRamadanLog->prayers[$p] ?? false) $currentScore++;
             }
             
-            // 3. Sunnah (5 Poin)
+            // 3. Sunnah
             foreach(['tarawih', 'witir', 'dhuha', 'rawatib', 'sedekah'] as $s) {
                 if($todayRamadanLog->sunnah_deeds[$s] ?? false) $currentScore++;
             }
@@ -45,7 +45,7 @@
                 $currentScore++;
             }
 
-            // 6. KULTUM (BARU)
+            // 6. KULTUM (Fitur Baru)
             if (!empty($todayRamadanLog->kultum_summary)) {
                 $currentScore++;
             }
@@ -109,8 +109,9 @@
                 
                 {{-- Status Badges --}}
                 <div class="flex flex-wrap justify-center md:justify-start gap-2 mt-6">
-                    <span class="px-3 py-1 rounded-full text-xs font-bold border {{ $todayRamadanLog && $todayRamadanLog->is_fasting ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200' : 'bg-slate-700 border-slate-600 text-slate-300' }}">
-                        {{ $todayRamadanLog && $todayRamadanLog->is_fasting ? 'Berpuasa Hari Ini' : 'Belum Puasa' }}
+                    {{-- PERBAIKAN: Gunakan optional() agar aman jika log kosong --}}
+                    <span class="px-3 py-1 rounded-full text-xs font-bold border {{ optional($todayRamadanLog)->is_fasting ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200' : 'bg-slate-700 border-slate-600 text-slate-300' }}">
+                        {{ optional($todayRamadanLog)->is_fasting ? 'Berpuasa Hari Ini' : 'Belum Puasa' }}
                     </span>
                     @if($isFriday)
                         <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 border border-amber-500/50 text-amber-200 flex items-center gap-1 animate-pulse">
@@ -152,8 +153,11 @@
 
             $gridItems = [];
 
+            // Helper untuk akses aman (mencegah error on null)
+            $log = $todayRamadanLog; // Singkatan
+
             if ($isFriday) {
-                $fridayFilled = !empty($todayRamadanLog->friday_khotib);
+                $fridayFilled = !empty($log->friday_khotib);
                 $gridItems[] = [
                     'label' => 'Laporan Jumat',
                     'icon' => 'mosque',
@@ -166,38 +170,45 @@
                 ];
             }
 
-            // 1. PUASA
-            $gridItems[] = array_merge(['label' => 'Puasa Hari Ini', 'icon' => 'bowl-food'], $getStatus($todayRamadanLog->is_fasting ?? false));
+            // 1. PUASA (Safe check)
+            $gridItems[] = array_merge(['label' => 'Puasa Hari Ini', 'icon' => 'bowl-food'], $getStatus(optional($log)->is_fasting));
             
-            // 2. SHALAT 5 WAKTU
+            // 2. SHALAT 5 WAKTU (Safe check)
+            $prayerCount = 0;
+            if ($log && isset($log->prayers)) {
+                $prayerCount = count(array_filter($log->prayers));
+            }
+
             $gridItems[] = [
                 'label' => 'Shalat Wajib', 
                 'icon' => 'clock-afternoon',
-                'bg' => ($todayRamadanLog && count(array_filter($todayRamadanLog->prayers)) == 5) ? 'bg-blue-50' : 'bg-slate-50',
-                'border' => ($todayRamadanLog && count(array_filter($todayRamadanLog->prayers)) == 5) ? 'border-blue-200' : 'border-slate-100',
-                'icon_color' => ($todayRamadanLog && count(array_filter($todayRamadanLog->prayers)) >= 1) ? 'text-blue-500' : 'text-slate-300',
+                'bg' => ($prayerCount == 5) ? 'bg-blue-50' : 'bg-slate-50',
+                'border' => ($prayerCount == 5) ? 'border-blue-200' : 'border-slate-100',
+                'icon_color' => ($prayerCount >= 1) ? 'text-blue-500' : 'text-slate-300',
                 'text' => 'text-slate-800',
-                'status' => ($todayRamadanLog ? count(array_filter($todayRamadanLog->prayers)) : 0) . '/5 Waktu',
-                'check' => ($todayRamadanLog && count(array_filter($todayRamadanLog->prayers)) == 5)
+                'status' => $prayerCount . '/5 Waktu',
+                'check' => ($prayerCount == 5)
             ];
 
-            // 3. TARAWIH
-            $gridItems[] = array_merge(['label' => 'Shalat Tarawih', 'icon' => 'moon-stars'], $getStatus($todayRamadanLog->sunnah_deeds['tarawih'] ?? false));
+            // 3. TARAWIH (Safe check)
+            $isTarawih = $log && isset($log->sunnah_deeds['tarawih']) && $log->sunnah_deeds['tarawih'];
+            $gridItems[] = array_merge(['label' => 'Shalat Tarawih', 'icon' => 'moon-stars'], $getStatus($isTarawih));
 
-            // 4. TILAWAH
+            // 4. TILAWAH (Safe check)
+            $isTilawah = !empty($log->tadarus_surah);
             $gridItems[] = [
                 'label' => 'Tilawah Quran', 
                 'icon' => 'book-open-text',
-                'bg' => ($todayRamadanLog->tadarus_surah ?? false) ? 'bg-amber-50' : 'bg-slate-50',
-                'border' => ($todayRamadanLog->tadarus_surah ?? false) ? 'border-amber-200' : 'border-slate-100',
-                'icon_color' => ($todayRamadanLog->tadarus_surah ?? false) ? 'text-amber-500' : 'text-slate-300',
+                'bg' => $isTilawah ? 'bg-amber-50' : 'bg-slate-50',
+                'border' => $isTilawah ? 'border-amber-200' : 'border-slate-100',
+                'icon_color' => $isTilawah ? 'text-amber-500' : 'text-slate-300',
                 'text' => 'text-slate-800',
-                'status' => $todayRamadanLog->tadarus_surah ?? 'Belum ada',
-                'check' => ($todayRamadanLog->tadarus_surah ?? false)
+                'status' => $log->tadarus_surah ?? 'Belum ada',
+                'check' => $isTilawah
             ];
 
-            // 5. KULTUM (BARU - UNGU)
-            $kultumFilled = !empty($todayRamadanLog->kultum_summary);
+            // 5. KULTUM (BARU - UNGU) - Safe check
+            $kultumFilled = !empty($log->kultum_summary);
             $gridItems[] = [
                 'label' => 'Laporan Kultum', 
                 'icon' => 'microphone-stage',
@@ -209,7 +220,12 @@
                 'check' => $kultumFilled
             ];
 
-            // 6. SUNNAH LAINNYA (UBAH KE TEAL/CYAN AGAR BEDA DENGAN KULTUM)
+            // 6. SUNNAH LAINNYA
+            $sunnahCount = 0;
+            if ($log && isset($log->sunnah_deeds)) {
+                 $sunnahCount = ($log->sunnah_deeds['sedekah']??0) + ($log->sunnah_deeds['dhuha']??0) + ($log->sunnah_deeds['witir']??0) + ($log->sunnah_deeds['rawatib']??0);
+            }
+
             $gridItems[] = [
                 'label' => 'Sunnah Lainnya', 
                 'icon' => 'sparkle',
@@ -217,9 +233,7 @@
                 'border' => 'border-teal-100',
                 'icon_color' => 'text-teal-500',
                 'text' => 'text-slate-800',
-                'status' => ($todayRamadanLog ? 
-                    ( ($todayRamadanLog->sunnah_deeds['sedekah']??0) + ($todayRamadanLog->sunnah_deeds['dhuha']??0) + ($todayRamadanLog->sunnah_deeds['witir']??0) + ($todayRamadanLog->sunnah_deeds['rawatib']??0) ) 
-                    : 0) . ' Amalan',
+                'status' => $sunnahCount . ' Amalan',
                 'check' => false
             ];
         @endphp
