@@ -82,7 +82,10 @@ class RamadanLogController extends Controller
     public function leaderboard()
     {
         // Optimasi: Gunakan Eager Loading untuk log agar query tidak berat
-        $students = Student::with(['ramadanLogs', 'schoolClass'])->get();
+        // FIX: Tambahkan whereHas('schoolClass') agar alumni tidak masuk leaderboard
+        $students = Student::whereHas('schoolClass')
+                    ->with(['ramadanLogs', 'schoolClass'])
+                    ->get();
 
         $topStudents = $students->map(function($student) {
             $totalPoints = 0;
@@ -134,7 +137,6 @@ class RamadanLogController extends Controller
         $requestDate = $request->input('date', $today);
 
         // KEAMANAN: Pastikan siswa hanya mengisi untuk hari ini
-        // Jika ingin membolehkan backdate (mengisi kemarin), hapus kondisi 'ne' (not equal) ini.
         if ($requestDate !== $today) {
              return redirect()->back()->with('error', 'Anda hanya dapat mengisi jurnal untuk hari ini.');
         }
@@ -252,7 +254,6 @@ class RamadanLogController extends Controller
 
             $stats['prayer_complete_count'] = $reports->filter(function($s) {
                 $log = $s->ramadanLogs->first();
-                // Pastikan prayers array sebelum dihitung
                 $prayers = isset($log->prayers) && is_array($log->prayers) ? $log->prayers : [];
                 return count(array_filter($prayers)) == 5;
             })->count();
@@ -262,9 +263,16 @@ class RamadanLogController extends Controller
             })->count();
 
         } else {
-            // Stats Global
-            $stats['total_students'] = Student::count();
-            $logsToday = RamadanLog::whereDate('date', $date)->get();
+            // Stats Global (JIKA BELUM PILIH KELAS)
+            
+            // === FIX: HANYA HITUNG SISWA AKTIF (YANG PUNYA KELAS) ===
+            // Sebelumnya: Student::count(); (Ini menghitung alumni juga)
+            $stats['total_students'] = Student::whereHas('schoolClass')->count();
+            
+            // Ambil logs hari ini hanya dari siswa yang punya kelas
+            $logsToday = RamadanLog::whereHas('student.schoolClass')
+                        ->whereDate('date', $date)
+                        ->get();
             
             $stats['fasting_count'] = $logsToday->where('is_fasting', true)->count();
             
@@ -277,6 +285,7 @@ class RamadanLogController extends Controller
 
             // Feed Terbaru
             $latestLogs = RamadanLog::with(['student.schoolClass'])
+                ->whereHas('student.schoolClass') // Pastikan yang muncul cuma siswa aktif
                 ->whereDate('date', $date)
                 ->orderBy('updated_at', 'desc')
                 ->limit(10)
@@ -314,7 +323,6 @@ class RamadanLogController extends Controller
             'teacher_score' => $validated['teacher_score'],
             'teacher_note' => $validated['teacher_note'],
             'teacher_verified_at' => now(),
-            // Pastikan Auth guard guru aktif, jika tidak gunakan id user login biasa
             'teacher_id' => Auth::id(), 
         ]);
 
