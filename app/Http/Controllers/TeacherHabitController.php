@@ -61,9 +61,14 @@ class TeacherHabitController extends Controller
             // === KONDISI B: JIKA BELUM PILIH KELAS (Statistik Global) ===
             
             // 1. Hitung Statistik Global (Satu Sekolah)
-            $totalStudentsAll = Student::count();
-            // Hitung jumlah laporan unik hari ini
-            $submittedAll = StudentHabit::whereDate('report_date', $date)->count();
+            // FIX: Hanya hitung siswa yang punya kelas (Siswa Aktif)
+            // Sebelumnya: Student::count(); -> Ini menghitung alumni juga
+            $totalStudentsAll = Student::whereHas('schoolClass')->count();
+
+            // Hitung jumlah laporan unik hari ini (Hanya dari siswa aktif)
+            $submittedAll = StudentHabit::whereDate('report_date', $date)
+                                ->whereHas('student.schoolClass') // Safety: Pastikan siswa masih aktif
+                                ->count();
 
             $stats['submitted'] = $submittedAll;
             $stats['missing'] = max(0, $totalStudentsAll - $submittedAll);
@@ -71,6 +76,7 @@ class TeacherHabitController extends Controller
 
             // 2. Ambil Feed Aktivitas Terbaru
             $latestSubmissions = StudentHabit::with(['student', 'student.schoolClass'])
+                ->whereHas('student.schoolClass') // FIX: Filter agar alumni tidak muncul di feed
                 ->whereDate('report_date', $date)
                 ->orderBy('updated_at', 'desc')
                 ->limit(10)
