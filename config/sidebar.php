@@ -193,6 +193,12 @@ return [
                 'route' => 'teacher.habits.index',
                 'active_check' => 'teacher.habits.*',
                 'icon' => 'ph-check-square-offset', 
+            ],           
+            [
+                'name' => 'Monitoring Literasi', 
+                'route' => 'admin.literacy.index', 
+                'active_check' => 'admin.literacy.*',
+                'icon' => 'ph-read-cv-logo'
             ],
             [
                 'name' => 'E-Counseling (BK)',
@@ -247,13 +253,7 @@ return [
                 'route' => 'library.dashboard',
                 'icon' => 'ph-books'
             ],
-            // ---Menu Guru---
-            [
-                'name' => 'Monitoring Literasi', 
-                'route' => 'admin.literacy.index', 
-                'active_check' => 'admin.literacy.*',
-                'icon' => 'ph-read-cv-logo'
-            ],
+            
             [
                 'name' => 'Sirkulasi',
                 'route' => 'library.circulation.index',
