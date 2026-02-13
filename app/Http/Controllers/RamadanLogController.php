@@ -15,7 +15,7 @@ class RamadanLogController extends Controller
 {
     // KONFIGURASI SENTRAL
     const RAMADAN_START_DATE = '2026-02-18'; 
-    const FILL_START_TIME = '12:00'; 
+    const FILL_START_TIME = '00:00'; 
     const FILL_END_TIME = '23:59';  
 
     private function getRamadanDay($date)
