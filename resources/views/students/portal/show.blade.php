@@ -53,16 +53,22 @@
                 @include('students.portal.partials.tab-kebiasaan')
             </div>
 
+            <!-- [BARU] TAB JURNAL LITERASI MANDIRI -->
+            <!-- Pastikan file tab-literasi-mandiri.blade.php ada di folder students/portal/partials -->
+            <div x-show="activeTab === 'literasi_mandiri'" x-cloak x-transition:enter="transition ease-out duration-300">
+                @include('students.portal.partials.tab-literasi-mandiri')
+            </div>
+            <!-- ============================== -->
+
             <!-- Tab Buku Penghubung -->
             <div x-show="activeTab === 'penghubung'" x-cloak x-transition:enter="transition ease-out duration-300">
                 @include('students.portal.partials.tab-penghubung')
             </div>
             
-            <!-- [BARU] TAB E-COUNSELING (BK) -->
+            <!-- Tab E-COUNSELING (BK) -->
             <div x-show="activeTab === 'bk'" x-cloak x-transition:enter="transition ease-out duration-300">
                 @include('students.portal.partials.tab-bk')
             </div>
-            <!-- ============================== -->
 
             <!-- Tab Pengaduan -->
             <div x-show="activeTab === 'pengaduan'" x-cloak x-transition:enter="transition ease-out duration-300">

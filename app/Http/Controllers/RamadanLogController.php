@@ -47,18 +47,14 @@ class RamadanLogController extends Controller
         
         // Default false, cek kondisi
         $canFill = false;
-
-        // Jika sekarang berada di antara jam mulai dan jam akhir
         if ($now->between($startTime, $endTime)) {
             $canFill = true;
         }
-
-        // Ambil data log hari ini
+     
         $todayRamadanLog = RamadanLog::where('student_id', $studentId)
                             ->whereDate('date', $today)
                             ->first();
-
-        // Log terakhir yang dinilai guru (untuk notifikasi/info)
+       
         $lastVerifiedLog = RamadanLog::where('student_id', $studentId)
                             ->whereNotNull('teacher_verified_at')
                             ->orderBy('date', 'desc')
@@ -81,8 +77,7 @@ class RamadanLogController extends Controller
 
     public function leaderboard()
     {
-        // Optimasi: Gunakan Eager Loading untuk log agar query tidak berat
-        // FIX: Tambahkan whereHas('schoolClass') agar alumni tidak masuk leaderboard
+        // Optimasi: Gunakan Eager Loading untuk log agar query tidak berat   
         $students = Student::whereHas('schoolClass')
                     ->with(['ramadanLogs', 'schoolClass'])
                     ->get();
@@ -94,12 +89,11 @@ class RamadanLogController extends Controller
                 // 1. Puasa (50 Poin)
                 if ($log->is_fasting) $totalPoints += 50;
 
-                // 2. Shalat Wajib (10 Poin per waktu)
-                // Pastikan prayers berbentuk array sebelum dihitung
+                // 2. Shalat Wajib (10 Poin per waktu)                
                 $prayers = is_array($log->prayers) ? array_filter($log->prayers) : [];
                 $totalPoints += (count($prayers) * 10);
 
-                // 3. Sunnah (Menggunakan data_get atau null coalescing agar aman)
+                // 3. Sunnah 
                 if ($log->sunnah_deeds['tarawih'] ?? false) $totalPoints += 15;
                 if ($log->sunnah_deeds['witir'] ?? false) $totalPoints += 5;
                 if ($log->sunnah_deeds['dhuha'] ?? false) $totalPoints += 5;
@@ -121,7 +115,7 @@ class RamadanLogController extends Controller
         })
         ->sortByDesc('ramadan_points')
         ->values()
-        ->take(10); // Ambil 10 besar saja setelah sorting
+        ->take(10); 
 
         return view('ramadan.leaderboard', compact('topStudents'));
     }
@@ -173,8 +167,7 @@ class RamadanLogController extends Controller
                 ],
                 'tadarus_surah' => $request->tadarus_surah,
                 'tadarus_ayah' => $request->tadarus_ayah,
-                'murojaah_surah' => $request->murojaah_surah,
-                // NEW KULTUM DATA
+                'murojaah_surah' => $request->murojaah_surah,        
                 'kultum_penceramah' => $request->kultum_penceramah,
                 'kultum_summary' => $request->kultum_summary,
             ];
@@ -262,11 +255,7 @@ class RamadanLogController extends Controller
                 return !empty($s->ramadanLogs->first()?->friday_khotib);
             })->count();
 
-        } else {
-            // Stats Global (JIKA BELUM PILIH KELAS)
-            
-            // === FIX: HANYA HITUNG SISWA AKTIF (YANG PUNYA KELAS) ===
-            // Sebelumnya: Student::count(); (Ini menghitung alumni juga)
+        } else {  
             $stats['total_students'] = Student::whereHas('schoolClass')->count();
             
             // Ambil logs hari ini hanya dari siswa yang punya kelas
@@ -285,7 +274,7 @@ class RamadanLogController extends Controller
 
             // Feed Terbaru
             $latestLogs = RamadanLog::with(['student.schoolClass'])
-                ->whereHas('student.schoolClass') // Pastikan yang muncul cuma siswa aktif
+                ->whereHas('student.schoolClass') 
                 ->whereDate('date', $date)
                 ->orderBy('updated_at', 'desc')
                 ->limit(10)

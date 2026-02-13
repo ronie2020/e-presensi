@@ -51,16 +51,22 @@
                 <?php echo $__env->make('students.portal.partials.tab-kebiasaan', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
 
+            <!-- [BARU] TAB JURNAL LITERASI MANDIRI -->
+            <!-- Pastikan file tab-literasi-mandiri.blade.php ada di folder students/portal/partials -->
+            <div x-show="activeTab === 'literasi_mandiri'" x-cloak x-transition:enter="transition ease-out duration-300">
+                <?php echo $__env->make('students.portal.partials.tab-literasi-mandiri', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+            </div>
+            <!-- ============================== -->
+
             <!-- Tab Buku Penghubung -->
             <div x-show="activeTab === 'penghubung'" x-cloak x-transition:enter="transition ease-out duration-300">
                 <?php echo $__env->make('students.portal.partials.tab-penghubung', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
             
-            <!-- [BARU] TAB E-COUNSELING (BK) -->
+            <!-- Tab E-COUNSELING (BK) -->
             <div x-show="activeTab === 'bk'" x-cloak x-transition:enter="transition ease-out duration-300">
                 <?php echo $__env->make('students.portal.partials.tab-bk', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
-            <!-- ============================== -->
 
             <!-- Tab Pengaduan -->
             <div x-show="activeTab === 'pengaduan'" x-cloak x-transition:enter="transition ease-out duration-300">

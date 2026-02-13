@@ -172,7 +172,11 @@ Route::middleware(['auth:student'])->group(function () {
         Route::post('/simpan', [StudentHabitController::class, 'store'])->name('store');
     });
 
-     //---- 5. SISTEM RAMADHAN SISWA ---
+    // --- 5. JURNAL Literasi Mandiri ---
+     Route::post('/portal/literacy', [StudentPortalController::class, 'storeLiteracy'])
+        ->name('portal.literacy.store');
+
+     //---- 6. SISTEM RAMADHAN SISWA ---
     Route::prefix('student/ramadan')->name('student.ramadan.')->group(function() {
         Route::get('/tracker', [RamadanLogController::class, 'studentIndex'])->name('index');
         Route::post('/save', [RamadanLogController::class, 'store'])->name('save');
@@ -181,7 +185,7 @@ Route::middleware(['auth:student'])->group(function () {
     Route::get('/ramadan/leaderboard-alias', [RamadanLogController::class, 'leaderboard'])->name('ramadan.leaderboard');
     });
 
-    // --- 6. LAYANAN E-COUNSELING (BK) UNTUK SISWA ---
+    // --- 7. LAYANAN E-COUNSELING (BK) UNTUK SISWA ---
     Route::prefix('student/bk')->name('student.bk.')->group(function() {
         Route::get('/', [BkStudentController::class, 'index'])->name('index'); 
         Route::get('/konsultasi', [BkStudentController::class, 'create'])->name('create'); 
@@ -272,11 +276,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/history', [TeachingController::class, 'history'])->name('history');
         Route::post('/start/{schedule_id}', [TeachingController::class, 'start'])->name('start');
         Route::post('/attendance/manual', [TeachingController::class, 'storeManual'])->name('manual');
-        Route::get('/session/{id}', [TeachingController::class, 'show'])->name('show');
-        
-        // --- ROUTE BARU DI SINI ---
-        Route::get('/session/{id}/edit', [TeachingController::class, 'edit'])->name('edit');
-        
+        Route::get('/session/{id}', [TeachingController::class, 'show'])->name('show');            
+        Route::get('/session/{id}/edit', [TeachingController::class, 'edit'])->name('edit');        
         Route::put('/session/{id}', [TeachingController::class, 'update'])->name('update');
         Route::post('/scan', [TeachingController::class, 'scan'])->name('scan');
         Route::post('/close/{id}', [TeachingController::class, 'close'])->name('close');
@@ -390,6 +391,13 @@ Route::middleware('auth')->group(function () {
             Route::get('/print-label', 'printBookLabel')->name('print-book-label');            
             Route::get('/report', 'generateReport')->name('report');
         });    
+    });
+        
+        // ROUTE ADMIN LITERASI (MONITORING)      
+        Route::prefix('admin/literacy')->name('admin.literacy.')->group(function() {
+            Route::get('/', [App\Http\Controllers\AdminLiteracyController::class, 'index'])->name('index');
+            Route::post('/{id}/verify', [App\Http\Controllers\AdminLiteracyController::class, 'verify'])->name('verify');
+            Route::delete('/{id}', [App\Http\Controllers\AdminLiteracyController::class, 'destroy'])->name('destroy');
     });
 
     // Manajemen Kelulusan

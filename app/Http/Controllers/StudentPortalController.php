@@ -26,6 +26,8 @@ use App\Models\Achievement;
 use App\Models\BkSession;
 use App\Models\Book; 
 use App\Models\EbookRead; 
+use App\Models\LiteracyJournal;
+use Illuminate\Support\Facades\Storage;
 
 class StudentPortalController extends Controller
 {
@@ -84,8 +86,7 @@ class StudentPortalController extends Controller
                             ->orderBy('date', 'desc')
                             ->first();
 
-        // C. LEADERBOARD (LOGIKA DETAIL - AMALAN)
-        // Menghitung poin berdasarkan kualitas ibadah, bukan sekedar jumlah log
+        // C. LEADERBOARD (LOGIKA DETAIL - AMALAN)        
         $topRamadanStudents = Student::with(['ramadanLogs', 'schoolClass'])
             ->get()
             ->map(function($s) {
@@ -354,8 +355,7 @@ class StudentPortalController extends Controller
                 $lms_assignments_grouped = $assignments->groupBy(fn($i) => $i->subject->name ?? 'Umum');
                 
                 if (class_exists(LmsSubmission::class)) {
-                    $submissions = LmsSubmission::where('student_id', $id)->get();
-                    // [FIX] Gunakan kolom 'grade'
+                    $submissions = LmsSubmission::where('student_id', $id)->get();                    
                     foreach($submissions as $sub) { $lms_grades[$sub->assignment_id] = $sub->grade; }
                 }
             }
@@ -372,10 +372,8 @@ class StudentPortalController extends Controller
         $library_visits = 0; $library_history = collect([]);
         $ebooks = collect([]); 
         $ebookHistory = collect([]); 
-
-        // [PERBAIKAN] Menggunakan Model Borrowing yang benar
-        if (class_exists(Borrowing::class)) {
-             // Ambil 5 riwayat peminjaman terakhir
+  
+        if (class_exists(Borrowing::class)) {       
              $library_history = Borrowing::with('book')
                                 ->where('student_id', $id)
                                 ->orderBy('borrow_date', 'desc')
@@ -443,6 +441,7 @@ class StudentPortalController extends Controller
         } else {
             $tabs = array_merge($tabs, [
                 'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan'],
+                'literasi_mandiri' => ['icon' => 'pencil-circle', 'label' => 'Jurnal Literasi'],
                 'ramadan_jurnal' => ['icon' => 'moon-stars', 'label' => 'Jurnal Ramadhan'], 
                 'ramadan_rank'   => ['icon' => 'trophy', 'label' => 'Peringkat Kebaikan'], 
                 'bk' => ['icon' => 'heart-beat', 'label' => 'Konseling BK'],
@@ -467,7 +466,56 @@ class StudentPortalController extends Controller
             $sholat_dhuhur = AttendanceSiswa::where('student_id', $id)->where('type', 'Keagamaan')->where('activity', 'Dhuhur')->count();
         }
 
-        // --- 13. COMPACT DATA ---
+         // --- 13. DATA LITERASI MANDIRI & GAMIFIKASI ---
+        $literacy_journals = collect([]);
+        $literacy_stats = [
+            'total_books' => 0,
+            'total_pages' => 0,
+            'points' => 0,
+            'level' => 'Warga Biasa',
+            'progress' => 0,
+            'next_target' => 100
+        ];
+
+        if (class_exists(LiteracyJournal::class)) {
+            // Ambil data jurnal siswa
+            $literacy_journals = LiteracyJournal::where('student_id', $id)
+                                ->latest()
+                                ->take(20) // Batasi 20 terakhir agar ringan
+                                ->get();
+
+            // Hitung Statistik
+            $total_entries = LiteracyJournal::where('student_id', $id)->count();
+            $total_pages = LiteracyJournal::where('student_id', $id)->sum('pages_read');
+            
+            // Rumus Poin Sederhana: (Jumlah Buku x 50) + (Jumlah Halaman x 1)
+            $points = ($total_entries * 50) + $total_pages;
+
+            // Tentukan Level berdasarkan Poin
+            $level = 'Pemula';
+            $next_target = 100;
+            
+            if ($points >= 2500) { $level = 'Sultan Pustaka'; $next_target = 5000; }
+            elseif ($points >= 1000) { $level = 'Pujangga Muda'; $next_target = 2500; }
+            elseif ($points >= 500) { $level = 'Kutu Buku'; $next_target = 1000; }
+            elseif ($points >= 100) { $level = 'Gemar Baca'; $next_target = 500; }
+
+            // Hitung % Progress ke level selanjutnya
+            // (Logika sederhana, bisa disesuaikan)
+            $progress = ($points / $next_target) * 100;
+            if($progress > 100) $progress = 100;
+
+            $literacy_stats = [
+                'total_books' => $total_entries,
+                'total_pages' => $total_pages,
+                'points' => $points,
+                'level' => $level,
+                'progress' => round($progress),
+                'next_target' => $next_target
+            ];
+        }
+
+        // --- 14. COMPACT DATA ---
         $data = compact(
             'student', 'isAlumni', 'tabs', 'attendancePercentage',
             'liaison_messages', 'complaints', 
@@ -487,7 +535,9 @@ class StudentPortalController extends Controller
             'today', 
             'todayRamadanLog', 
             'lastVerifiedLog',
-            'topRamadanStudents'
+            'topRamadanStudents',
+            'literacy_journals', 
+            'literacy_stats'     
         );
 
         if (view()->exists('students.portal.show')) {
@@ -497,6 +547,46 @@ class StudentPortalController extends Controller
         return view('portal.show', $data);
     }
 
+    public function storeLiteracy(Request $request)
+        {
+            $request->validate([
+                'student_id' => 'required|exists:students,id',
+                'title' => 'required|string|max:255',
+                'author' => 'nullable|string|max:150',
+                'pages' => 'required|numeric|min:1',
+                'summary' => 'required|string|min:10',
+                'proof' => 'nullable|image|mimes:jpg,jpeg,png|max:2048' // Max 2MB
+            ]);
+
+            // Pastikan siswa hanya bisa mengisi untuk dirinya sendiri
+            if (Auth::guard('student')->id() != $request->student_id) {
+                return back()->with('error', 'Akses tidak valid.');
+            }
+
+            try {
+                $data = [
+                    'student_id' => $request->student_id,
+                    'title' => $request->title,
+                    'author' => $request->author,
+                    'pages_read' => $request->pages,
+                    'summary' => $request->summary,
+                    'verified_at' => null // Default belum diverifikasi
+                ];
+
+                // Handle Upload Foto
+                if ($request->hasFile('proof')) {
+                    $path = $request->file('proof')->store('literacy_proofs', 'public');
+                    $data['proof_image'] = $path;
+                }
+
+                LiteracyJournal::create($data);
+
+                return back()->with('success', 'Hebat! Jurnal literasi berhasil disimpan. Poinmu bertambah!');
+            } catch (\Exception $e) {
+                return back()->with('error', 'Gagal menyimpan jurnal. Coba lagi.');
+            }
+        }
+        
     public function printCard($id)
     {
         if (!Auth::guard('student')->check() || Auth::guard('student')->id() != $id) {
