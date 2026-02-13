@@ -10,288 +10,264 @@
 <?php $component->withAttributes([]); ?>
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
     
     <?php $__env->startPush('styles'); ?>
     <style>
         /* Animasi Scanner */
+        .scanner-container { position: relative; overflow: hidden; border-radius: 1.5rem; }
         .scanner-overlay {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            border: 2px solid rgba(59, 130, 246, 0.5); border-radius: 1.5rem; 
-            pointer-events: none; overflow: hidden; transition: box-shadow 0.3s ease;
+            position: absolute; inset: 0; pointer-events: none;
+            border: 4px solid transparent; border-radius: 1.5rem;
+            transition: all 0.3s ease; z-index: 20;
         }
-        .scan-success-effect { box-shadow: inset 0 0 50px rgba(34, 197, 94, 0.8); border-color: #22c55e; }
-        .scan-warning-effect { box-shadow: inset 0 0 50px rgba(245, 158, 11, 0.8); border-color: #f59e0b; }
-        .scan-error-effect { box-shadow: inset 0 0 50px rgba(239, 68, 68, 0.8); border-color: #ef4444; }
-        /* Efek khusus makan siang */
-        .scan-makan-effect { box-shadow: inset 0 0 50px rgba(249, 115, 22, 0.8); border-color: #f97316; }
+        
+        .scan-success-effect { box-shadow: inset 0 0 60px rgba(34, 197, 94, 0.6); border-color: #22c55e; }
+        .scan-warning-effect { box-shadow: inset 0 0 60px rgba(245, 158, 11, 0.6); border-color: #f59e0b; }
+        .scan-error-effect { box-shadow: inset 0 0 60px rgba(239, 68, 68, 0.6); border-color: #ef4444; }
+        .scan-makan-effect { box-shadow: inset 0 0 60px rgba(249, 115, 22, 0.6); border-color: #f97316; }
 
         .scanner-line {
-            position: absolute; width: 100%; height: 4px;
-            background: linear-gradient(to right, transparent, #3b82f6, transparent);
-            top: 0; animation: scanMove 2s infinite linear;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+            position: absolute; width: 100%; height: 3px;
+            background: #3b82f6; box-shadow: 0 0 10px #3b82f6;
+            top: 0; animation: scanMove 2.5s infinite linear;
+            z-index: 10;
         }
-        @keyframes scanMove { 0% { top: 0; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        @keyframes scanMove { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         
         /* Utility */
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; } 
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; } 
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
         .hidden-col { display: none !important; }
         .hidden-row { display: none !important; }
-        @keyframes highlightRow { 0% { background-color: #ffedd5; } 100% { background-color: transparent; } } /* Orange highlight */
-        .new-row-entry { animation: highlightRow 2s ease-out; }
-        .holiday-overlay { position: absolute; inset: 0; z-index: 50; background: rgba(255, 255, 255, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 1.5rem; }
+        
+        @keyframes highlightRow { 0% { background-color: #dbeafe; } 100% { background-color: transparent; } }
+        .new-row-entry { animation: highlightRow 3s ease-out; }
+        
+        /* Layout Improvements */
+        .scan-type-btn.active .indicator-dot { transform: scale(1.2); }
     </style>
     <?php $__env->stopPush(); ?>
 
     <?php
-        // [LOGIKA LAMA - TETAP DIPERTAHANKAN]
-        // Pengecekan Null Safety agar tidak error jika variabel tidak dikirim controller
-        $safeSchedule = isset($scheduleConfig) ? $scheduleConfig : [];
+        $safeSchedule = $scheduleConfig ?? [];
         $scheduleJson = json_encode($safeSchedule);
-        
-        // Pastikan $statsConfig terdefinisi sebagai array sebelum diakses
-        $statsData = isset($statsConfig) ? $statsConfig : [];
-        $totalTarget = $statsData['total_target'] ?? 0;
-        $currentTaken = $statsData['current_taken'] ?? 0;
+        $totalTarget = $statsConfig['total_target'] ?? 0;
+        $currentTaken = $statsConfig['current_taken'] ?? 0;
     ?>
 
     
-    <div class="py-4 md:py-8 font-sans text-slate-800" onclick="initAudio()"> 
+    <div class="py-4 md:py-6 font-sans text-slate-800 select-none"> 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8">
                 
                 
+                <div class="lg:col-span-12 order-1">
+                    <div class="relative rounded-3xl bg-slate-900 overflow-hidden shadow-xl border border-slate-800">
+                        <div class="absolute inset-0 bg-gradient-to-r from-blue-900 to-slate-900 opacity-90"></div>
+                        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+                        
+                        <div class="relative z-10 flex flex-col md:flex-row justify-between items-center p-6 gap-6">
+                            <div class="text-center md:text-left">
+                                <h2 class="text-2xl md:text-3xl font-black text-white tracking-tight mb-2">
+                                  Aktifitas Siswa  <span class="text-blue-400">Scanner</span>
+                                </h2>
+                                <div class="flex flex-wrap justify-center md:justify-start gap-2">
+                                    <?php if(isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false)): ?>
+                                        <span class="px-3 py-1 rounded-full bg-rose-500/20 text-rose-200 border border-rose-500/30 text-xs font-bold uppercase tracking-wider">Libur: <?php echo e($scheduleConfig['description']); ?></span>
+                                    <?php else: ?>
+                                        <span class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-200 border border-blue-500/30 text-xs font-bold uppercase tracking-wider">
+                                            <?php echo e(\Carbon\Carbon::now()->translatedFormat('l, d F Y')); ?>
+
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="bg-white/10 backdrop-blur-md border border-white/10 px-6 py-3 rounded-2xl flex items-center gap-4 shadow-lg">
+                                <div class="p-3 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-600/30"><i class="ph-bold ph-clock text-2xl"></i></div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-0.5">Waktu Server</p>
+                                    <div id="clock" class="text-3xl font-black text-white font-mono leading-none tracking-widest">00:00:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 
-                
-                <div class="lg:col-span-5 flex flex-col order-1 lg:order-3">
+                <div class="lg:col-span-5 flex flex-col gap-5 order-2 lg:order-2">
                     
-                    <div class="bg-white rounded-[1.5rem] md:rounded-[2rem] p-3 md:p-4 shadow-xl shadow-slate-200/60 border border-slate-100 h-fit sticky top-4 z-0">
-                        <div class="flex justify-between items-center mb-3 md:mb-4 px-2">
-                            <h3 class="font-bold text-slate-800 flex items-center gap-2 text-sm md:text-base">
-                                <i class="ph-fill ph-camera text-blue-600 text-lg md:text-xl"></i> Kamera
+                    
+                    <div class="bg-white rounded-3xl p-4 shadow-xl shadow-slate-200/50 border border-slate-100 relative">
+                        <div class="flex justify-between items-center mb-4 px-2">
+                            <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                                <div class="w-2 h-6 bg-blue-500 rounded-full"></div> Kamera Aktif
                             </h3>
-                            <div id="mode-badge" class="px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-wider bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-1.5 md:gap-2">
-                                <span class="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-slate-400"></span>
+                            <div id="mode-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-slate-400"></span>
                                 <span id="mode-text">Standby</span>
                             </div>
                         </div>
 
                         
-                        <div class="relative bg-slate-900 rounded-[1rem] md:rounded-[1.5rem] overflow-hidden aspect-auto min-h-[300px] border-[3px] md:border-[4px] border-slate-900 shadow-inner group">
-                            <?php if(isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false)): ?>
-                            <div class="holiday-overlay text-center p-6">
-                                <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4"><i class="ph-duotone ph-prohibit text-3xl"></i></div>
-                                <h3 class="text-xl font-black text-slate-800 mb-2">Scanner Nonaktif</h3>
-                            </div>
-                            <?php endif; ?>
+                        <div class="scanner-container relative bg-slate-950 aspect-[4/3] w-full group">
                             <div id="qr-reader" class="w-full h-full object-cover"></div>
-                            <div id="scanner-overlay-el" class="scanner-overlay z-20"><div class="scanner-line"></div></div>
-                            <div class="absolute bottom-6 left-0 right-0 flex justify-center z-30 px-6">
-                                <div id="scan-status" class="bg-white/90 backdrop-blur-md text-slate-800 text-[10px] md:text-xs py-2 px-4 rounded-full font-bold border border-white/20 shadow-lg flex items-center gap-2">
-                                    <i class="ph-bold ph-circle-notch animate-spin text-blue-600"></i> Menunggu...
+                            
+                            
+                            <div id="scanner-overlay-el" class="scanner-overlay">
+                                <div class="scanner-line"></div>
+                                
+                                <div class="absolute top-4 left-4 w-8 h-8 border-t-4 border-l-4 border-white/50 rounded-tl-xl"></div>
+                                <div class="absolute top-4 right-4 w-8 h-8 border-t-4 border-r-4 border-white/50 rounded-tr-xl"></div>
+                                <div class="absolute bottom-4 left-4 w-8 h-8 border-b-4 border-l-4 border-white/50 rounded-bl-xl"></div>
+                                <div class="absolute bottom-4 right-4 w-8 h-8 border-b-4 border-r-4 border-white/50 rounded-br-xl"></div>
+                            </div>
+
+                            
+                            <div class="absolute bottom-6 inset-x-0 flex justify-center z-30 pointer-events-none">
+                                <div id="scan-status" class="bg-black/60 backdrop-blur-md text-white text-xs py-2 px-6 rounded-full font-bold border border-white/10 shadow-lg flex items-center gap-2 transition-all">
+                                    <i class="ph-bold ph-circle-notch animate-spin text-blue-400"></i> Memuat Kamera...
                                 </div>
                             </div>
                         </div>
 
-                        <div id="scan-result" class="mt-4 p-3 rounded-xl font-bold text-xs md:text-sm text-center hidden transition-all duration-500 shadow-sm border border-transparent"></div>
                         
-                        <button id="btn-reset-auto" class="hidden w-full mt-3 py-2.5 rounded-xl border-2 border-dashed border-blue-200 text-blue-600 font-bold text-xs md:text-sm hover:bg-blue-50 transition-colors flex items-center justify-center gap-2" onclick="resetAutoMode()">
-                            <i class="ph-bold ph-arrows-clockwise"></i> Kembali ke Otomatis
+                        <div id="scan-result" class="mt-4 p-4 rounded-2xl font-bold text-sm text-center hidden transition-all duration-300 transform scale-95 opacity-0 border border-transparent"></div>
+                        
+                        <button id="btn-reset-auto" class="hidden w-full mt-3 py-3 rounded-xl border-2 border-dashed border-blue-300 text-blue-600 font-bold text-sm hover:bg-blue-50 transition-all flex items-center justify-center gap-2" onclick="resetAutoMode()">
+                            <i class="ph-bold ph-arrows-clockwise"></i> Kembali ke Mode Otomatis
                         </button>
                     </div>
-                </div>
 
-                
-                
-                
-                <div class="lg:col-span-12 order-2 lg:order-1">
-                    <div class="relative rounded-[1.5rem] md:rounded-[2rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-5 md:p-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
-                        <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                        <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-4 md:gap-6">
-                            <div class="text-center md:text-left">
-                                <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight mb-2 flex items-center justify-center md:justify-start gap-2">
-                                    Scan QR Aktifitas <span class="animate-pulse"></span>
-                                </h2>
-                                <div class="flex flex-wrap justify-center md:justify-start gap-2 items-center text-blue-300 text-xs md:text-sm font-medium">
-                                    <?php if(isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false)): ?>
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-rose-500/20 text-rose-200 border border-rose-500/30">Libur: <?php echo e($scheduleConfig['description']); ?></span>
-                                    <?php else: ?>
-                                        <span class="opacity-90">Sistem pencatatan kehadiran, ibadah & gizi siswa.</span>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                            <div class="bg-slate-900/40 backdrop-blur-md border border-white/10 px-4 py-3 md:px-6 md:py-4 rounded-2xl flex items-center gap-3 shadow-lg">
-                                <div class="p-2 md:p-3 bg-blue-600 rounded-xl text-white shadow-lg"><i class="ph-bold ph-clock text-lg md:text-2xl"></i></div>
-                                <div>
-                                    <p class="text-[9px] md:text-[10px] font-bold text-blue-300 uppercase tracking-widest">Waktu Perangkat</p>
-                                    <div id="clock" class="text-2xl md:text-3xl font-black text-white font-mono tracking-widest leading-none mt-1">00:00:00</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                
-                
-                
-                <div class="lg:col-span-12 order-3 lg:order-2 flex flex-col gap-6">
                     
-                    
-                    <div id="makan-stats-panel" class="hidden grid-cols-1 md:grid-cols-3 gap-4 animate-enter">
-                        <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4 relative overflow-hidden group">
-                            <div class="w-14 h-14 rounded-2xl bg-slate-50 text-slate-500 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 transition-transform">
-                                <i class="ph-duotone ph-users-three"></i>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Sasaran</p>
-                                <h3 class="text-3xl font-black text-slate-800 tracking-tight" id="stat-total"><?php echo e($totalTarget); ?></h3>
-                            </div>
+                    <div id="makan-stats-panel" class="hidden grid-cols-2 gap-4 animate-fade-in-up">
+                        <div class="bg-orange-500 p-5 rounded-3xl text-white shadow-lg shadow-orange-500/20 relative overflow-hidden">
+                            <i class="ph-fill ph-check-circle absolute -right-2 -bottom-2 text-6xl text-white/20"></i>
+                            <p class="text-[10px] font-bold text-orange-100 uppercase tracking-widest mb-1">Sudah Ambil</p>
+                            <h3 class="text-4xl font-black tracking-tight" id="stat-taken"><?php echo e($currentTaken); ?></h3>
                         </div>
-
-                        <div class="bg-orange-500 p-5 rounded-[2rem] border border-orange-400 shadow-lg shadow-orange-500/20 flex items-center gap-4 relative overflow-hidden text-white group">
-                            <div class="absolute right-0 top-0 p-4 opacity-10 group-hover:scale-110 transition-transform"><i class="ph-fill ph-check-circle text-6xl"></i></div>
-                            <div class="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-3xl shrink-0 border border-white/20">
-                                <i class="ph-fill ph-hand-grabbing"></i>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-black text-orange-100 uppercase tracking-widest mb-1">Sudah Mengambil</p>
-                                <h3 class="text-3xl font-black text-white tracking-tight" id="stat-taken"><?php echo e($currentTaken); ?></h3>
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4 relative overflow-hidden group">
-                            <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center text-3xl shrink-0 group-hover:scale-110 transition-transform">
-                                <i class="ph-duotone ph-cookie"></i>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Sisa Belum Ambil</p>
-                                <h3 class="text-3xl font-black text-slate-800 tracking-tight" id="stat-remaining"><?php echo e($totalTarget - $currentTaken); ?></h3>
-                            </div>
+                        <div class="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm relative overflow-hidden">
+                            <i class="ph-duotone ph-users absolute -right-2 -bottom-2 text-6xl text-slate-100"></i>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Belum Ambil</p>
+                            <h3 class="text-4xl font-black text-slate-800 tracking-tight" id="stat-remaining"><?php echo e($totalTarget - $currentTaken); ?></h3>
                         </div>
                     </div>
 
                     
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         <?php $__currentLoopData = [
-                            ['id'=>'harian', 'label'=>'Absen Harian', 'sub'=>'Masuk & Pulang', 'icon'=>'calendar-check', 'color'=>'blue', 'type'=>'Harian'],
-                            ['id'=>'makan', 'label'=>'Makan Bergizi', 'sub'=>'Jam Makan Siang', 'icon'=>'bowl-food', 'color'=>'orange', 'type'=>'Makan'],
+                            ['id'=>'harian', 'label'=>'Absen Harian', 'sub'=>'Masuk/Pulang', 'icon'=>'calendar-check', 'color'=>'blue', 'type'=>'Harian'],
+                            ['id'=>'makan', 'label'=>'Makan Siang', 'sub'=>'Scan Gizi', 'icon'=>'bowl-food', 'color'=>'orange', 'type'=>'Makan'],
                             ['id'=>'dhuha', 'label'=>'Sholat Dhuha', 'sub'=>'Ibadah Pagi', 'icon'=>'sun-horizon', 'color'=>'emerald', 'type'=>'Dhuha'],
                             ['id'=>'dhuhur', 'label'=>'Sholat Dhuhur', 'sub'=>'Ibadah Siang', 'icon'=>'moon-stars', 'color'=>'amber', 'type'=>'Dhuhur'],
-                            ['id'=>'ekskul', 'label'=>'Ekskul', 'sub'=>'Kegiatan Sore', 'icon'=>'basketball', 'color'=>'purple', 'type'=>'Ekstrakurikuler']
+                            ['id'=>'ekskul', 'label'=>'Ekstrakurikuler', 'sub'=>'Kegiatan Sore', 'icon'=>'basketball', 'color'=>'purple', 'type'=>'Ekstrakurikuler']
                         ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $mode): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <button id="btn-<?php echo e($mode['id']); ?>" data-type="<?php echo e($mode['type']); ?>" class="scan-type-btn group relative bg-white p-3 md:p-4 rounded-2xl md:rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-md transition-all text-left overflow-hidden ring-2 ring-transparent">
-                            <div class="flex items-center justify-between mb-2 md:mb-3">
-                                <div class="p-2 md:p-3 rounded-xl md:rounded-2xl bg-<?php echo e($mode['color']); ?>-50 text-<?php echo e($mode['color']); ?>-600 group-hover:bg-<?php echo e($mode['color']); ?>-600 group-hover:text-white transition-colors">
-                                    <i class="ph-bold ph-<?php echo e($mode['icon']); ?> text-xl md:text-2xl"></i>
-                                </div>
-                                <div class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border-2 border-slate-200 indicator-dot transition-all"></div>
+                        <button id="btn-<?php echo e($mode['id']); ?>" data-type="<?php echo e($mode['type']); ?>" class="scan-type-btn bg-white p-3 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md hover:border-<?php echo e($mode['color']); ?>-200 transition-all text-left group">
+                            <div class="w-10 h-10 rounded-xl bg-<?php echo e($mode['color']); ?>-50 text-<?php echo e($mode['color']); ?>-600 flex items-center justify-center text-xl mb-2 group-hover:scale-110 transition-transform">
+                                <i class="ph-bold ph-<?php echo e($mode['icon']); ?>"></i>
                             </div>
-                            <h3 class="font-bold text-slate-700 text-xs md:text-sm group-hover:text-<?php echo e($mode['color']); ?>-700 transition-colors"><?php echo e($mode['label']); ?></h3>
-                            <p class="text-[9px] md:text-[10px] text-slate-400 mt-0.5 font-medium truncate"><?php echo e($mode['sub']); ?></p>
-                            <div class="absolute inset-0 border-2 border-<?php echo e($mode['color']); ?>-500 rounded-2xl md:rounded-[2rem] opacity-0 scale-95 transition-all active-border"></div>
+                            <h3 class="font-bold text-slate-700 text-xs md:text-sm"><?php echo e($mode['label']); ?></h3>
+                            <div class="flex items-center justify-between mt-1">
+                                <p class="text-[10px] text-slate-400"><?php echo e($mode['sub']); ?></p>
+                                <div class="w-2 h-2 rounded-full border border-slate-200 indicator-dot transition-colors"></div>
+                            </div>
                         </button>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
 
                     
-                    <div id="extra-selector-container" class="hidden animate-fade-in-down">
-                        <div class="bg-white p-4 rounded-[1.5rem] border border-slate-200 shadow-sm flex flex-col md:flex-row items-center gap-4">
-                            <div class="p-2 bg-purple-100 text-purple-600 rounded-xl"><i class="ph-fill ph-trophy text-2xl"></i></div>
-                            <div class="flex-1 w-full">
-                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-1">Pilih Jenis Kegiatan</label>
-                                <select id="extra-activity-select" class="w-full rounded-xl border-slate-300 focus:border-purple-500 font-bold text-slate-700 h-10 md:h-12 text-sm">
-                                    <option value="">-- Pilih Ekstrakurikuler --</option>
-                                    <?php if(isset($extracurriculars)): ?>
-                                        <?php $__currentLoopData = $extracurriculars; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ekskul): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                            <option value="<?php echo e($ekskul->id); ?>"><?php echo e($ekskul->name); ?></option>
-                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                    <?php endif; ?>
-                                </select>
-                            </div>
-                        </div>
+                    <div id="extra-selector-container" class="hidden bg-white p-4 rounded-3xl border border-slate-200 shadow-sm animate-fade-in-down">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide block mb-2 px-1">Pilih Kegiatan Ekskul</label>
+                        <select id="extra-activity-select" class="w-full rounded-xl border-slate-200 focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700 h-12 text-sm bg-slate-50">
+                            <option value="">-- Pilih Ekstrakurikuler --</option>
+                            <?php if(isset($extracurriculars)): ?>
+                                <?php $__currentLoopData = $extracurriculars; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ekskul): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($ekskul->id); ?>"><?php echo e($ekskul->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <?php endif; ?>
+                        </select>
                     </div>
                 </div>
 
                 
-                
-                
-                <div class="lg:col-span-7 flex flex-col order-4 lg:order-4">
-                    <div class="bg-white rounded-[1.5rem] md:rounded-[2rem] shadow-xl shadow-slate-200/60 border border-slate-100 flex flex-col h-full min-h-[400px] md:min-h-[500px] relative overflow-hidden">
+                <div class="lg:col-span-7 order-3 lg:order-3">
+                    <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col h-[600px] lg:h-full lg:min-h-[600px] overflow-hidden">
                         
-                        <div class="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                        
+                        <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                             <div>
-                                <h3 class="font-bold text-slate-800 text-sm md:text-lg flex items-center gap-2">
-                                    <i class="ph-duotone ph-list-dashes text-blue-600 text-lg md:text-xl"></i> Riwayat
+                                <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                                    <i class="ph-duotone ph-list-dashes text-blue-600"></i> Log Aktivitas
                                 </h3>
-                                <p class="text-[10px] md:text-xs text-slate-400 font-medium mt-0.5">Real-time update.</p>
+                                <p class="text-xs text-slate-400 font-medium">Monitoring kehadiran realtime</p>
                             </div>
-                            <div class="flex items-center gap-1.5 md:gap-2 px-2 py-1 md:px-3 md:py-1.5 bg-emerald-50 border border-emerald-100 rounded-lg">
-                                <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span>
-                                <span class="text-[9px] md:text-[10px] font-black uppercase tracking-wider text-emerald-600">Online</span>
+                            <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-full">
+                                <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span></span>
+                                <span class="text-[10px] font-black uppercase tracking-wider text-emerald-600">Live</span>
                             </div>
                         </div>
+                        
                         
                         <div class="flex-1 overflow-hidden relative">
                             <div class="absolute inset-0 overflow-auto custom-scrollbar">
                                 <table class="w-full text-left border-collapse">
-                                    <thead class="bg-white sticky top-0 z-10 shadow-sm text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                    <thead class="bg-white sticky top-0 z-10 shadow-sm text-xs font-bold text-slate-400 uppercase tracking-wider">
                                         <tr>
-                                            <th class="px-3 py-3 md:px-6 md:py-4 rounded-tl-2xl">Siswa</th>
-                                            <th class="col-harian px-2 py-3 md:px-4 md:py-4 text-center">Masuk</th>
-                                            <th class="col-harian px-2 py-3 md:px-4 md:py-4 text-center">Pulang</th>
-                                            <th class="col-waktu hidden-col px-2 py-3 md:px-4 md:py-4 text-center">Waktu</th>
-                                            <th class="col-kegiatan hidden-col px-2 py-3 md:px-4 md:py-4 text-center">Kegiatan</th>
-                                            <th class="px-3 py-3 md:px-6 md:py-4 text-right rounded-tr-2xl">Status</th>
+                                            <th class="px-6 py-4">Siswa</th>
+                                            <th class="col-harian px-4 py-4 text-center">Masuk</th>
+                                            <th class="col-harian px-4 py-4 text-center">Pulang</th>
+                                            <th class="col-waktu hidden-col px-4 py-4 text-center">Waktu Scan</th>
+                                            <th class="col-kegiatan hidden-col px-4 py-4 text-center">Kegiatan</th>
+                                            <th class="px-6 py-4 text-right">Status</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="scan-log" class="text-xs md:text-sm divide-y divide-slate-50">
+                                    <tbody id="scan-log" class="text-sm divide-y divide-slate-50">
                                         <?php if(isset($recentScans)): ?>
                                             <?php $__currentLoopData = $recentScans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $scan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <tr class="log-entry group hover:bg-slate-50/80 transition-colors" 
-                                                    data-harian="<?php echo e(($scan['data_harian'] ?? false) ? 'true' : 'false'); ?>"
-                                                    data-makan="<?php echo e(($scan['data_makan'] ?? false) ? 'true' : 'false'); ?>"
-                                                    data-dhuha="<?php echo e(($scan['data_dhuha'] ?? false) ? 'true' : 'false'); ?>"
-                                                    data-dhuhur="<?php echo e(($scan['data_dhuhur'] ?? false) ? 'true' : 'false'); ?>"
-                                                    data-ekskul="<?php echo e(($scan['data_ekskul'] ?? false) ? 'true' : 'false'); ?>">
+                                                
+                                                <tr class="log-entry group hover:bg-slate-50 transition-colors"
+                                                    data-type-raw="<?php echo e($scan['type_raw']); ?>">
                                                     
-                                                    <td class="px-3 py-3 md:px-6 md:py-4">
-                                                        <div class="font-bold text-slate-800 line-clamp-1 max-w-[100px] md:max-w-none"><?php echo e($scan['student_name']); ?></div>
-                                                        <div class="text-[9px] md:text-[10px] text-slate-400 font-mono mt-0.5"><?php echo e($scan['student_id']); ?></div>
+                                                    <td class="px-6 py-4">
+                                                        <div class="font-bold text-slate-800"><?php echo e($scan['student_name']); ?></div>
+                                                        <div class="text-[10px] text-slate-400 font-mono"><?php echo e($scan['student_id']); ?></div>
                                                     </td>
-                                                    <td class="col-harian px-2 py-3 md:px-4 md:py-4 text-center">
-                                                        <?php if($scan['time_in'] ?? false): ?> <span class="font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs"><?php echo e(\Carbon\Carbon::parse($scan['time_in'])->format('H:i')); ?></span>
+                                                    
+                                                    
+                                                    <td class="col-harian px-4 py-4 text-center">
+                                                        <?php if($scan['time_in']): ?> <span class="font-mono font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded text-xs"><?php echo e($scan['time_in']); ?></span>
                                                         <?php else: ?> <span class="text-slate-300">-</span> <?php endif; ?>
                                                     </td>
-                                                    <td class="col-harian px-2 py-3 md:px-4 md:py-4 text-center">
-                                                        <?php if($scan['time_out'] ?? false): ?> <span class="font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs"><?php echo e(\Carbon\Carbon::parse($scan['time_out'])->format('H:i')); ?></span>
+                                                    <td class="col-harian px-4 py-4 text-center">
+                                                        <?php if($scan['time_out']): ?> <span class="font-mono font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded text-xs"><?php echo e($scan['time_out']); ?></span>
                                                         <?php else: ?> <span class="text-slate-300">-</span> <?php endif; ?>
                                                     </td>
-                                                    <td class="col-waktu hidden-col px-2 py-3 md:px-4 md:py-4 text-center">
-                                                        <?php $timeFormat = function($t) { return $t ? \Carbon\Carbon::parse($t)->format('H:i') : '-'; }; ?>
-                                                        <span class="time-makan font-mono font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs <?php echo e(($scan['makan_time'] ?? false) ? '' : 'hidden'); ?>"><?php echo e($timeFormat($scan['makan_time'] ?? false)); ?></span>
-                                                        <span class="time-dhuha font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs <?php echo e(($scan['dhuha_time'] ?? false) ? '' : 'hidden'); ?>"><?php echo e($timeFormat($scan['dhuha_time'] ?? false)); ?></span>
-                                                        <span class="time-dhuhur font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs <?php echo e(($scan['dhuhur_time'] ?? false) ? '' : 'hidden'); ?>"><?php echo e($timeFormat($scan['dhuhur_time'] ?? false)); ?></span>
-                                                        <span class="time-ekskul font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs <?php echo e(($scan['ekskul_time'] ?? false) ? '' : 'hidden'); ?>"><?php echo e($timeFormat($scan['ekskul_time'] ?? false)); ?></span>
+
+                                                    
+                                                    <td class="col-waktu hidden-col px-4 py-4 text-center">
+                                                         <span class="font-mono font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded text-xs"><?php echo e($scan['time_in'] ?? now()->format('H:i')); ?></span>
                                                     </td>
-                                                    <td class="col-kegiatan hidden-col px-2 py-3 md:px-4 md:py-4 text-center text-slate-600 font-medium text-[10px] md:text-xs line-clamp-1">
-                                                        <?php echo e($scan['ekskul_name'] ?? '-'); ?>
+
+                                                    
+                                                    <td class="col-kegiatan hidden-col px-4 py-4 text-center text-slate-600 font-medium text-xs">
+                                                        <?php echo e($scan['ekskul_name'] ?? $scan['type_raw']); ?>
 
                                                     </td>
-                                                    <td class="log-status px-3 py-3 md:px-6 md:py-4 text-right">
-                                                        <span class="badge-harian inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide <?php echo e(($scan['status'] ?? '') == 'Masuk' ? 'bg-emerald-100 text-emerald-700' : (($scan['status'] ?? '') == 'Terlambat' ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500')); ?>">
-                                                            <?php echo e($scan['status'] ?? '-'); ?>
+
+                                                    <td class="px-6 py-4 text-right">
+                                                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide 
+                                                            <?php echo e(Str::contains($scan['status'], 'Terlambat') ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'); ?>">
+                                                            <?php echo e($scan['status']); ?>
 
                                                         </span>
-                                                        <span class="badge-makan hidden inline-flex items-center gap-1 px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide bg-orange-100 text-orange-700"><i class="ph-fill ph-check"></i> Diambil</span>
-                                                        <span class="badge-dhuha hidden inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide bg-emerald-100 text-emerald-700">Selesai</span>
-                                                        <span class="badge-dhuhur hidden inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide bg-amber-100 text-amber-700">Selesai</span>
-                                                        <span class="badge-ekskul hidden inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide bg-purple-100 text-purple-700">Hadir</span>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -299,9 +275,10 @@
                                     </tbody>
                                 </table>
                                 
-                                <div id="no-log-entry" class="<?php echo e((isset($recentScans) && count($recentScans) > 0) ? 'hidden' : ''); ?> flex flex-col items-center justify-center py-10 md:py-20 text-center">
-                                    <div class="w-12 h-12 md:w-16 md:h-16 bg-slate-50 rounded-full flex items-center justify-center mb-3 md:mb-4"><i class="ph-duotone ph-qr-code text-2xl md:text-3xl text-slate-300"></i></div>
-                                    <p class="text-slate-400 font-medium text-xs md:text-sm">Belum ada data scan.</p>
+                                
+                                <div id="no-log-entry" class="<?php echo e(count($recentScans) > 0 ? 'hidden' : ''); ?> flex flex-col items-center justify-center py-20 text-center">
+                                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4"><i class="ph-duotone ph-qr-code text-4xl text-slate-300"></i></div>
+                                    <p class="text-slate-400 font-medium">Belum ada data scan hari ini.</p>
                                 </div>
                             </div>
                         </div>
@@ -312,458 +289,308 @@
     </div>
 
     
-    
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
-        const SCHEDULE_DATA = <?php echo $scheduleJson; ?>;
-        
-        let statsData = {
-            total: <?php echo e($totalTarget); ?>,
-            taken: <?php echo e($currentTaken); ?>
-
+        const CONFIG = {
+            schedule: <?php echo $scheduleJson; ?>,
+            routes: { process: '<?php echo e(route('scan.process')); ?>' },
+            token: '<?php echo e(csrf_token()); ?>'
         };
 
-        // AUDIO CONTEXT
-        let audioCtx;
-        function initAudio() { 
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
-            if (audioCtx.state === 'suspended') audioCtx.resume(); 
+        // State Management
+        let state = {
+            mode: 'Harian',
+            extraId: '',
+            isProcessing: false,
+            processedQr: new Set(),
+            manualOverride: false,
+            audioCtx: null
+        };
+
+        // Audio System (Lebih Robust)
+        function initAudio() {
+            if (!state.audioCtx) {
+                state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (state.audioCtx.state === 'suspended') {
+                state.audioCtx.resume();
+            }
         }
 
-        function escapeHtml(text) { if (!text) return text; return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;"); }
+        // Trigger initAudio saat user klik di mana saja pertama kali
+        document.body.addEventListener('click', initAudio, { once: true });
+        document.body.addEventListener('touchstart', initAudio, { once: true });
 
-        document.addEventListener('DOMContentLoaded', (event) => {
-            if(SCHEDULE_DATA.is_holiday) return;
+        function playBeep(type = 'success') {
+            if (!state.audioCtx) return;
             
-            const toMinutes = (timeStr) => { 
-                if(!timeStr) return 0; 
-                const [h, m] = timeStr.split(':').map(Number); 
-                return h * 60 + m; 
+            const osc = state.audioCtx.createOscillator();
+            const gain = state.audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(state.audioCtx.destination);
+            
+            osc.type = type === 'error' ? 'sawtooth' : 'sine';
+            
+            // Frequency map
+            const freqs = { success: 880, warning: 440, error: 150, makan: 600 };
+            const freq = freqs[type] || 880;
+
+            osc.frequency.setValueAtTime(freq, state.audioCtx.currentTime);
+            if(type === 'success') {
+                osc.frequency.exponentialRampToValueAtTime(freq * 2, state.audioCtx.currentTime + 0.1);
+            }
+            
+            gain.gain.setValueAtTime(0.1, state.audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, state.audioCtx.currentTime + 0.3);
+            
+            osc.start(state.audioCtx.currentTime);
+            osc.stop(state.audioCtx.currentTime + 0.3);
+        }
+
+        // Time Helpers
+        const toMinutes = (s) => { const [h, m] = s.split(':'); return h * 60 + +m; };
+        
+        // --- CORE LOGIC ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const dom = {
+                clock: document.getElementById('clock'),
+                scanStatus: document.getElementById('scan-status'),
+                scanResult: document.getElementById('scan-result'),
+                modeText: document.getElementById('mode-text'),
+                modeBadge: document.getElementById('mode-badge'),
+                overlay: document.getElementById('scanner-overlay-el'),
+                tableBody: document.getElementById('scan-log'),
+                extraContainer: document.getElementById('extra-selector-container'),
+                extraSelect: document.getElementById('extra-activity-select'),
+                btnReset: document.getElementById('btn-reset-auto'),
+                statTaken: document.getElementById('stat-taken'),
+                statRemaining: document.getElementById('stat-remaining'),
+                makanPanel: document.getElementById('makan-stats-panel')
             };
-            
-            // --- 1. KONFIGURASI DINAMIS DARI DATABASE ---
-            const MODE_TIMES = {
-                MAKAN_START: toMinutes(SCHEDULE_DATA.makan_start || '09:00'), 
-                MAKAN_END: toMinutes(SCHEDULE_DATA.makan_end || '10:00'),
-                DHUHA_START: toMinutes(SCHEDULE_DATA.dhuha_start || '07:30'), 
-                DHUHA_END: toMinutes(SCHEDULE_DATA.dhuha_end || '09:00'),
-                DHUHUR_START: toMinutes(SCHEDULE_DATA.dhuhur_start || '11:45'), 
-                DHUHUR_END: toMinutes(SCHEDULE_DATA.dhuhur_end || '12:30')
-            };
 
-            let currentScanMode = 'Harian'; 
-            let selectedExtra = ''; 
-            let manualOverride = false; 
-            let isProcessing = false;
-            
-            const processedSet = new Set(); 
+            // 1. Clock & Auto Mode
+            setInterval(() => {
+                const now = new Date();
+                dom.clock.textContent = now.toLocaleTimeString('id-ID', { hour12: false });
+                if (!state.manualOverride) checkAutoMode(now);
+            }, 1000);
 
-            const csrfToken = '<?php echo e(csrf_token()); ?>'; 
-            const scanProcessUrl = '<?php echo e(route('scan.process')); ?>'; 
+            function checkAutoMode(now) {
+                const mins = now.getHours() * 60 + now.getMinutes();
+                let nextMode = 'Harian';
 
-            const logTableBody = document.getElementById('scan-log');
-            const scanStatus = document.getElementById('scan-status');
-            const scanResult = document.getElementById('scan-result');
-            const modeBadgeText = document.getElementById('mode-text');
-            const modeBadge = document.getElementById('mode-badge');
-            const extraContainer = document.getElementById('extra-selector-container');
-            const extraSelect = document.getElementById('extra-activity-select');
-            const btnResetAuto = document.getElementById('btn-reset-auto');
-            const scannerOverlay = document.getElementById('scanner-overlay-el');
-            
-            const makanStatsPanel = document.getElementById('makan-stats-panel');
-            const elStatTaken = document.getElementById('stat-taken');
-            const elStatRemaining = document.getElementById('stat-remaining');
+                if (inRange(mins, CONFIG.schedule.makan_start, CONFIG.schedule.makan_end)) nextMode = 'Makan';
+                else if (inRange(mins, CONFIG.schedule.dhuha_start, CONFIG.schedule.dhuha_end)) nextMode = 'Dhuha';
+                else if (inRange(mins, CONFIG.schedule.dhuhur_start, CONFIG.schedule.dhuhur_end)) nextMode = 'Dhuhur';
 
-            function playBeep(type = 'success') {
-                try { 
-                    initAudio(); 
-                    const osc = audioCtx.createOscillator(); 
-                    const gain = audioCtx.createGain(); 
-                    osc.connect(gain); 
-                    gain.connect(audioCtx.destination); 
-                    osc.type = 'sine';
-                    
-                    let freq = 880; 
-                    if(type === 'warning') freq = 440; 
-                    else if(type === 'error') freq = 200;
-                    else if(type === 'makan') freq = 600; 
-
-                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime); 
-                    gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
-                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5); 
-                    osc.start(audioCtx.currentTime); 
-                    osc.stop(audioCtx.currentTime + 0.5);
-                } catch (e) { console.log("Audio err", e); }
+                if (state.mode !== nextMode && state.mode !== 'Ekstrakurikuler') {
+                    setMode(nextMode, true);
+                }
             }
 
-            const visualConfig = { 
-                'Harian': {color:'blue',label:'Absen Harian'}, 
-                'Makan': {color:'orange',label:'Makan Bergizi'},
-                'Dhuha': {color:'emerald',label:'Sholat Dhuha'}, 
-                'Dhuhur': {color:'amber',label:'Sholat Dhuhur'}, 
-                'Ekstrakurikuler': {color:'purple',label:'Ekstrakurikuler'} 
-            };
-            
-            const clockElement = document.getElementById('clock');
-            if(clockElement) { setInterval(() => { clockElement.textContent = new Date().toLocaleTimeString('id-ID', { hour12: false }); }, 1000); }
-
-            function autoSelectMode() {
-                if (manualOverride) return;
-                const now = new Date(); 
-                const currentMinutes = now.getHours() * 60 + now.getMinutes();
-                let newMode = 'Harian';
-                
-                if (currentMinutes >= MODE_TIMES.MAKAN_START && currentMinutes < MODE_TIMES.MAKAN_END) newMode = 'Makan';
-                else if (currentMinutes >= MODE_TIMES.DHUHA_START && currentMinutes < MODE_TIMES.DHUHA_END) newMode = 'Dhuha';
-                else if (currentMinutes >= MODE_TIMES.DHUHUR_START && currentMinutes < MODE_TIMES.DHUHUR_END) newMode = 'Dhuhur';
-                
-                if (currentScanMode !== newMode && currentScanMode !== 'Ekstrakurikuler') selectScanMode(newMode, true);
+            function inRange(val, start, end) {
+                return val >= toMinutes(start || '00:00') && val < toMinutes(end || '00:00');
             }
 
-            window.resetAutoMode = function() { manualOverride = false; btnResetAuto.classList.add('hidden'); autoSelectMode(); }
-
-            function selectScanMode(type, isAuto = false) {
-                if (!isAuto) { manualOverride = true; btnResetAuto.classList.remove('hidden'); initAudio(); } else { btnResetAuto.classList.add('hidden'); }
-                currentScanMode = type; 
-                const config = visualConfig[type];
+            // 2. Mode Switching
+            window.setMode = function(mode, isAuto = false) {
+                state.mode = mode;
+                state.manualOverride = !isAuto;
                 
+                // UI Updates
+                dom.btnReset.classList.toggle('hidden', isAuto);
+                dom.extraContainer.classList.toggle('hidden', mode !== 'Ekstrakurikuler');
+                dom.makanPanel.classList.toggle('hidden', mode !== 'Makan');
+                dom.makanPanel.classList.toggle('grid', mode === 'Makan');
+                
+                // Active Button State
                 document.querySelectorAll('.scan-type-btn').forEach(btn => {
-                    const btnType = btn.getAttribute('data-type'); 
-                    const activeBorder = btn.querySelector('.active-border'); 
-                    const indicator = btn.querySelector('.indicator-dot');
-                    
-                    if (btnType === type) { 
-                        activeBorder.classList.remove('opacity-0', 'scale-95'); 
-                        indicator.className = `w-2.5 h-2.5 md:w-3 md:h-3 rounded-full indicator-dot bg-${config.color}-500 shadow-[0_0_8px_rgba(0,0,0,0.2)]`; 
-                    } else { 
-                        activeBorder.classList.add('opacity-0', 'scale-95'); 
-                        indicator.className = `w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border-2 border-slate-200 indicator-dot`; 
-                    }
+                    const isActive = btn.dataset.type === mode;
+                    btn.classList.toggle('ring-2', isActive);
+                    btn.classList.toggle('ring-blue-500', isActive);
+                    btn.querySelector('.indicator-dot').className = `w-2 h-2 rounded-full indicator-dot transition-colors ${isActive ? 'bg-blue-500' : 'border border-slate-200'}`;
                 });
-                
-                modeBadgeText.innerText = config.label;
-                modeBadge.className = `px-2 py-1 md:px-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-wider border flex items-center gap-1.5 md:gap-2 bg-${config.color}-50 text-${config.color}-600 border-${config.color}-100`;
-                modeBadge.querySelector('span').className = `w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-${config.color}-500 animate-pulse`;
 
-                extraContainer.classList.add('hidden');
+                // Badge & Status Text
+                const labels = { Harian: 'Absen Harian', Makan: 'Makan Siang', Dhuha: 'Sholat Dhuha', Dhuhur: 'Sholat Dhuhur', Ekstrakurikuler: 'Ekstrakurikuler' };
+                dom.modeText.innerText = isAuto ? `Auto: ${labels[mode]}` : labels[mode];
+                dom.scanStatus.innerHTML = mode === 'Ekstrakurikuler' 
+                    ? `<i class="ph-bold ph-warning text-amber-400"></i> Pilih Kegiatan Dulu` 
+                    : `<i class="ph-bold ph-qr-code"></i> Siap Scan ${labels[mode]}`;
                 
-                if (type === 'Makan') {
-                    makanStatsPanel.classList.remove('hidden');
-                    makanStatsPanel.classList.add('grid');
-                    scanStatus.innerHTML = `<i class="ph-bold ph-bowl-food text-orange-500"></i> Scan Ambil Makan`;
-                } else {
-                    makanStatsPanel.classList.add('hidden');
-                    makanStatsPanel.classList.remove('grid');
-                    
-                    if (type === 'Ekstrakurikuler') {
-                        extraContainer.classList.remove('hidden');
-                        scanStatus.innerHTML = selectedExtra ? `<i class="ph-bold ph-check text-purple-500"></i> Siap: ${selectedExtra}` : `<i class="ph-bold ph-warning text-amber-500"></i> Pilih Kegiatan!`;
-                    } else {
-                        scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-slate-500"></i> Scan QR ${type}`;
-                    }
-                }
-                
-                updateTableLayout(type); 
-                filterLogs(type);
-            }
-
-            document.querySelectorAll('.scan-type-btn').forEach(btn => { btn.addEventListener('click', () => selectScanMode(btn.getAttribute('data-type'))); });
-            
-            extraSelect.addEventListener('change', (e) => {
-                selectedExtra = e.target.value; 
-                const selectedText = e.target.options[e.target.selectedIndex].text; 
-                
-                if (selectedExtra) scanStatus.innerHTML = `<i class="ph-bold ph-check text-purple-500"></i> Siap: ${selectedText}`;
-                else scanStatus.innerHTML = `<i class="ph-bold ph-warning text-amber-500"></i> Pilih Kegiatan!`;
-            });
-            
-            autoSelectMode(); 
-            setInterval(autoSelectMode, 60000); 
-
-            function updateTableLayout(type) {
-                const harianCols = document.querySelectorAll('.col-harian'); 
-                const waktuCols = document.querySelectorAll('.col-waktu'); 
-                const kegiatanCols = document.querySelectorAll('.col-kegiatan');
-                
-                harianCols.forEach(el => el.classList.add('hidden-col')); 
-                waktuCols.forEach(el => el.classList.add('hidden-col')); 
-                kegiatanCols.forEach(el => el.classList.add('hidden-col'));
-                
-                if (type === 'Harian') harianCols.forEach(el => el.classList.remove('hidden-col'));
-                else if (type === 'Ekstrakurikuler') { waktuCols.forEach(el => el.classList.remove('hidden-col')); kegiatanCols.forEach(el => el.classList.remove('hidden-col')); }
-                else waktuCols.forEach(el => el.classList.remove('hidden-col')); 
-            }
-
-            function filterLogs(type) {
-                const rows = logTableBody.querySelectorAll('.log-entry'); 
-                let visibleCount = 0;
-                rows.forEach(row => {
-                    let shouldShow = false;
-                    if (type === 'Harian') shouldShow = row.getAttribute('data-harian') === 'true';
-                    else if (type === 'Makan') shouldShow = row.getAttribute('data-makan') === 'true';
-                    else if (type === 'Dhuha') shouldShow = row.getAttribute('data-dhuha') === 'true';
-                    else if (type === 'Dhuhur') shouldShow = row.getAttribute('data-dhuhur') === 'true';
-                    else if (type === 'Ekstrakurikuler') shouldShow = row.getAttribute('data-ekskul') === 'true';
-                    
-                    if (shouldShow) { 
-                        row.classList.remove('hidden-row'); 
-                        toggleCells(row, type.toLowerCase()); 
-                        visibleCount++; 
-                    } else {
-                        row.classList.add('hidden-row');
-                    }
-                });
-                
-                const noLogEntry = document.getElementById('no-log-entry');
-                if (visibleCount === 0) noLogEntry.classList.remove('hidden'); else noLogEntry.classList.add('hidden');
-            }
-
-            function toggleCells(row, activeType) {
-                row.querySelectorAll('.badge-harian, .badge-makan, .badge-dhuha, .badge-dhuhur, .badge-ekskul').forEach(el => el.classList.add('hidden'));
-                row.querySelectorAll('.col-waktu span').forEach(el => el.classList.add('hidden'));
-                
-                let badgeClass = `.badge-${activeType}`; 
-                if(row.querySelector(badgeClass)) row.querySelector(badgeClass).classList.remove('hidden');
-                
-                if (activeType !== 'harian') { 
-                    let timeClass = `.time-${activeType}`; 
-                    if(row.querySelector(timeClass)) row.querySelector(timeClass).classList.remove('hidden'); 
-                }
-            }
-
-            function updateMakanStats(serverTotal) {
-                if(typeof serverTotal === 'number') statsData.taken = serverTotal;
-                else statsData.taken++; 
-                
-                elStatTaken.textContent = statsData.taken;
-                elStatRemaining.textContent = statsData.total - statsData.taken;
-                
-                elStatTaken.parentElement.classList.add('scale-105');
-                setTimeout(() => elStatTaken.parentElement.classList.remove('scale-105'), 200);
-            }
-
-            function addNewRowToTable(scanData, scanType) {
-                const now = new Date(); 
-                const timeString = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                const name = scanData.student_name || 'Siswa'; 
-                const id = scanData.student_id || 'ID'; 
-                const status = scanData.status || 'Hadir';
-                
-                document.getElementById('no-log-entry').classList.add('hidden');
-
-                const row = document.createElement('tr');
-                row.className = 'log-entry group hover:bg-slate-50/80 transition-colors new-row-entry';
-                
-                row.setAttribute('data-harian', scanType === 'Harian'); 
-                row.setAttribute('data-makan', scanType === 'Makan');
-                row.setAttribute('data-dhuha', scanType === 'Dhuha'); 
-                row.setAttribute('data-dhuhur', scanType === 'Dhuhur'); 
-                row.setAttribute('data-ekskul', scanType === 'Ekstrakurikuler');
-                
-                let statusClass = 'bg-slate-100 text-slate-500';
-                if(status === 'Masuk' || status === 'Hadir') statusClass = 'bg-emerald-100 text-emerald-700';
-                else if(String(status).includes('Terlambat')) statusClass = 'bg-amber-100 text-amber-700';
-
-                let statusBadgeHtml = '';
-                if(scanType === 'Makan') statusBadgeHtml = `<span class="badge-makan inline-flex items-center gap-1 px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide bg-orange-100 text-orange-700"><i class="ph-fill ph-check"></i> Diambil</span>`;
-                else if (scanType === 'Harian') statusBadgeHtml = `<span class="badge-harian inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide ${statusClass}">${escapeHtml(status)}</span>`;
-                else statusBadgeHtml = `<span class="inline-flex items-center px-1.5 py-0.5 md:px-2.5 md:py-1 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wide bg-emerald-100 text-emerald-700">Selesai</span>`;
-
-                let extraName = scanData.extra_name || '-';
-                if(extraName === '-' && scanType === 'Ekstrakurikuler' && extraSelect.selectedIndex >= 0) {
-                     extraName = extraSelect.options[extraSelect.selectedIndex].text;
-                }
-
-                row.innerHTML = `
-                    <td class="px-3 py-3 md:px-6 md:py-4">
-                        <div class="font-bold text-slate-800 line-clamp-1 max-w-[100px] md:max-w-none">${escapeHtml(name)}</div>
-                        <div class="text-[9px] md:text-[10px] text-slate-400 font-mono mt-0.5">${escapeHtml(id)}</div>
-                    </td>
-                    <td class="col-harian px-2 py-3 md:px-4 md:py-4 text-center ${scanType !== 'Harian' ? 'hidden-col' : ''}">
-                        <span class="font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs">${scanType === 'Harian' ? timeString : '-'}</span>
-                    </td>
-                    <td class="col-harian px-2 py-3 md:px-4 md:py-4 text-center ${scanType !== 'Harian' ? 'hidden-col' : ''}">-</td>
-                    <td class="col-waktu px-2 py-3 md:px-4 md:py-4 text-center ${scanType === 'Harian' ? 'hidden-col' : ''}">
-                        <span class="font-mono font-bold ${scanType === 'Makan' ? 'text-orange-600 bg-orange-50' : 'text-slate-600 bg-slate-100'} px-1.5 py-0.5 md:px-2 md:py-1 rounded text-[10px] md:text-xs">${scanType !== 'Harian' ? timeString : '-'}</span>
-                    </td>
-                    <td class="col-kegiatan px-2 py-3 md:px-4 md:py-4 text-center text-slate-600 font-medium text-[10px] md:text-xs line-clamp-1 ${scanType === 'Harian' ? 'hidden-col' : ''}">
-                        ${scanType === 'Ekstrakurikuler' ? escapeHtml(extraName) : '-'}
-                    </td>
-                    <td class="px-3 py-3 md:px-6 md:py-4 text-right">
-                        ${statusBadgeHtml}
-                    </td>
-                `;
-                logTableBody.insertBefore(row, logTableBody.firstChild); 
-                filterLogs(currentScanMode);
-            }
-
-            async function processScan(studentId, type, activity = null) {
-                try {
-                    const body = { 
-                        student_id: studentId, 
-                        type: type,
-                        lat: null, 
-                        long: null
-                    }; 
-                    if(activity) body.extra_id = activity; 
-                    
-                    const response = await fetch(scanProcessUrl, { 
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, 
-                        body: JSON.stringify(body) 
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (response.ok) {
-                        const isLate = String(result.message || '').toUpperCase().includes('TERLAMBAT');
-                        
-                        if (type === 'Makan') {
-                             triggerScanEffect('success'); 
-                             playBeep('makan');
-                             updateMakanStats(result.stats ? result.stats.taken : null); 
-                        } else {
-                             triggerScanEffect(isLate ? 'warning' : 'success'); 
-                             playBeep(isLate ? 'warning' : 'success'); 
-                        }
-                        
-                        let feedbackMessage = result.message;
-                        if(result.scan && result.scan.student_name) {
-                            feedbackMessage = `${result.scan.student_name} - ${result.message}`;
-                            
-                            Swal.fire({
-                                icon: isLate ? 'warning' : 'success',
-                                title: result.scan.student_name,
-                                text: result.message,
-                                timer: 2000,
-                                showConfirmButton: false,
-                                customClass: { popup: 'rounded-[2rem]' }
-                            });
-                        }
-
-                        showScanResult(isLate ? 'warning' : 'success', feedbackMessage);
-                        if(result.scan) addNewRowToTable(result.scan, currentScanMode); 
-                    } else { 
-                        triggerScanEffect('error'); 
-                        showScanResult(response.status === 409 ? 'warning' : 'error', result.message || 'Error Server'); 
-                        playBeep('error'); 
-                    }
-                } catch (error) { 
-                    triggerScanEffect('error'); 
-                    showScanResult('error', 'Gagal koneksi server.'); 
-                    playBeep('error'); 
-                } finally { 
-                    resumeScanner(); 
-                }
-            }
-
-            const onScanSuccess = (decodedText, decodedResult) => {
-                if (isProcessing) return;
-
-                if (processedSet.has(decodedText)) {
-                    console.log(`Scan diabaikan: ${decodedText} (Cooldown)`);
-                    return; 
-                }
-
-                if (currentScanMode === 'Ekstrakurikuler' && !selectedExtra) {
-                    Swal.fire({ icon: 'warning', title: 'Pilih Kegiatan!', text: 'Silakan pilih jenis ekstrakurikuler.', timer: 2000, showConfirmButton: false }); return;
-                }
-
-                isProcessing = true; 
-                html5QrCode.pause(); 
-                
-                processedSet.add(decodedText);
-                setTimeout(() => processedSet.delete(decodedText), 5000); 
-
-                scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-blue-600"></i> Memproses...`;
-                
-                if (decodedText.length < 3 || decodedText.length > 50) { 
-                    showScanResult('error', 'QR Invalid'); 
-                    triggerScanEffect('error'); 
-                    playBeep('error'); 
-                    resumeScanner(); 
-                    return; 
-                }
-                
-                let handler;
-                
-                if (currentScanMode === 'Harian') {
-                    const now = new Date();
-                    const currentMinutes = now.getHours() * 60 + now.getMinutes();
-                    
-                    let switchMinutes = 12 * 60; 
-                    
-                    if (SCHEDULE_DATA && SCHEDULE_DATA.start_out) {
-                        const parts = SCHEDULE_DATA.start_out.split(':');
-                        const h = parseInt(parts[0]);
-                        const m = parseInt(parts[1]);
-                        switchMinutes = (h * 60) + m;
-                    }
-
-                    const timeType = currentMinutes < switchMinutes ? 'Masuk' : 'Pulang';
-                    
-                    handler = () => processScan(decodedText, timeType);
-                }
-                else if (currentScanMode === 'Makan') handler = () => processScan(decodedText, 'Makan', null);
-                else handler = () => processScan(decodedText, currentScanMode, selectedExtra);
-                
-                handler();
+                filterLogTable(mode);
             };
 
-            const html5QrCode = new Html5Qrcode("qr-reader");
-            const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
-            
-            function startCamera() {
-                Html5Qrcode.getCameras().then(cameras => {
-                    if (cameras && cameras.length) {
-                        const rearCamera = cameras.find(c => c.label.toLowerCase().includes('back')) || cameras[0];
-                        html5QrCode.start(rearCamera.id, config, onScanSuccess)
-                            .catch(err => {
-                                console.error(err);
-                                html5QrCode.start(cameras[0].id, config, onScanSuccess);
-                            });
-                    } else { 
-                        scanStatus.textContent = "Kamera tidak ditemukan"; 
-                        Swal.fire('Error', 'Kamera tidak ditemukan.', 'error'); 
-                    }
-                }).catch(err => { 
-                    scanStatus.textContent = "Izin kamera ditolak"; 
-                    Swal.fire('Error', 'Izin kamera ditolak.', 'error'); 
+            // Event Listeners for Buttons
+            document.querySelectorAll('.scan-type-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    initAudio(); // Ensure audio context ready
+                    setMode(btn.dataset.type);
                 });
-            }
-            startCamera();
+            });
 
-            function triggerScanEffect(type) {
-                scannerOverlay.classList.remove('scan-success-effect', 'scan-error-effect', 'scan-warning-effect', 'scan-makan-effect'); 
-                if (currentScanMode === 'Makan' && type === 'success') scannerOverlay.classList.add('scan-makan-effect');
-                else scannerOverlay.classList.add(`scan-${type}-effect`);
-                setTimeout(() => scannerOverlay.classList.remove(`scan-${type}-effect`, 'scan-makan-effect'), 500);
+            window.resetAutoMode = () => {
+                state.manualOverride = false;
+                checkAutoMode(new Date());
+            };
+
+            dom.extraSelect.addEventListener('change', (e) => {
+                state.extraId = e.target.value;
+                const text = e.target.options[e.target.selectedIndex].text;
+                dom.scanStatus.innerHTML = state.extraId 
+                    ? `<i class="ph-bold ph-check text-green-400"></i> Siap: ${text}` 
+                    : `<i class="ph-bold ph-warning text-amber-400"></i> Pilih Kegiatan Dulu`;
+            });
+
+            // 3. Table Logic
+            function filterLogTable(mode) {
+                const rows = dom.tableBody.querySelectorAll('tr');
+                const colsHarian = document.querySelectorAll('.col-harian');
+                const colsWaktu = document.querySelectorAll('.col-waktu');
+                const colsKegiatan = document.querySelectorAll('.col-kegiatan');
+
+                // Column Visibility
+                const isHarian = mode === 'Harian';
+                const isExtra = mode === 'Ekstrakurikuler';
+
+                colsHarian.forEach(el => el.classList.toggle('hidden-col', !isHarian));
+                colsWaktu.forEach(el => el.classList.toggle('hidden-col', isHarian));
+                colsKegiatan.forEach(el => el.classList.toggle('hidden-col', !isExtra));
+
+                // Row Filtering
+                let count = 0;
+                rows.forEach(row => {
+                    const rowType = row.dataset.typeRaw; // "Harian", "Meal", "Keagamaan", "Extracurricular"
+                    let match = false;
+
+                    if (mode === 'Harian') match = ['Harian', 'Masuk', 'Pulang'].includes(rowType);
+                    else if (mode === 'Makan') match = ['Meal', 'Makan'].includes(rowType);
+                    else if (mode === 'Dhuha' || mode === 'Dhuhur') match = rowType === 'Keagamaan'; // Bisa diperjelas jika ada data activity di tr
+                    else if (mode === 'Ekstrakurikuler') match = rowType === 'Extracurricular';
+
+                    row.classList.toggle('hidden-row', !match);
+                    if(match) count++;
+                });
+                
+                document.getElementById('no-log-entry').classList.toggle('hidden', count > 0);
             }
 
-            function resumeScanner() {
-                setTimeout(() => { 
-                    html5QrCode.resume(); 
-                    let statusText = currentScanMode;
-                    if (currentScanMode === 'Ekstrakurikuler') statusText = (selectedExtra ? document.getElementById('extra-activity-select').options[document.getElementById('extra-activity-select').selectedIndex].text : 'Pilih Kegiatan');
-                    if (currentScanMode === 'Makan') statusText = 'Ambil Makan';
-                    
-                    scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-slate-500"></i> Scan QR ${statusText}`; 
-                    isProcessing = false; 
-                }, 1500); 
+            // 4. Scanner Logic
+            const onScanSuccess = async (decodedText) => {
+                if (state.isProcessing) return;
+                if (state.processedQr.has(decodedText)) return; // Debounce client side
+
+                // Validation Extras
+                if (state.mode === 'Ekstrakurikuler' && !state.extraId) {
+                    playBeep('warning');
+                    Swal.fire({ toast: true, position: 'top', icon: 'warning', title: 'Pilih Ekskul dulu!', showConfirmButton: false, timer: 1500 });
+                    return;
+                }
+
+                state.isProcessing = true;
+                state.processedQr.add(decodedText);
+                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Memproses...`;
+
+                try {
+                    // Determine Harian Sub-type (Masuk/Pulang)
+                    let finalType = state.mode;
+                    if (state.mode === 'Harian') {
+                        const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+                        const switchMin = toMinutes(CONFIG.schedule.start_out || '12:00');
+                        finalType = nowMin < switchMin ? 'Masuk' : 'Pulang';
+                    }
+
+                    const res = await fetch(CONFIG.routes.process, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CONFIG.token, 'Accept': 'application/json' },
+                        body: JSON.stringify({ student_id: decodedText, type: finalType, extra_id: state.extraId })
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        handleSuccess(data, finalType);
+                    } else {
+                        handleError(data.message || 'Error Server');
+                    }
+                } catch (e) {
+                    handleError('Koneksi Gagal');
+                } finally {
+                    // Cooldown 2 detik sebelum bisa scan lagi
+                    setTimeout(() => {
+                        state.isProcessing = false;
+                        state.processedQr.delete(decodedText);
+                        setMode(state.mode, !state.manualOverride); // Reset text status
+                    }, 2000);
+                }
+            };
+
+            function handleSuccess(data, type) {
+                const isLate = (data.scan?.status || '').includes('Terlambat');
+                const flavor = type === 'Makan' ? 'makan' : (isLate ? 'warning' : 'success');
+                
+                playBeep(type === 'Makan' ? 'makan' : (isLate ? 'warning' : 'success'));
+                triggerOverlay(flavor);
+                
+                // Show floating result
+                dom.scanResult.innerHTML = `<span class="${isLate ? 'text-amber-600' : 'text-emerald-600'}">${data.message}</span>`;
+                dom.scanResult.classList.remove('hidden', 'opacity-0', 'scale-95');
+                
+                setTimeout(() => dom.scanResult.classList.add('opacity-0', 'scale-95'), 3000);
+
+                // Update Stats if Makan
+                if (data.stats) {
+                    dom.statTaken.innerText = data.stats.taken;
+                    dom.statRemaining.innerText = <?php echo e($totalTarget); ?> - data.stats.taken;
+                }
+
+                // Add to Table
+                if (data.scan) addTableRow(data.scan);
             }
 
-            let resultTimeout;
-            function showScanResult(type, message) {
-                if (resultTimeout) clearTimeout(resultTimeout);
-                scanResult.className = 'mt-3 md:mt-4 p-3 md:p-4 rounded-xl font-bold text-xs md:text-sm text-center transition-all duration-500 shadow-sm transform scale-100 opacity-100 border';
-                const colors = { success: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' }, warning: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' }, error: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' } };
-                const c = colors[type] || colors.error;
-                scanResult.classList.add(c.bg, c.text, c.border); 
-                scanResult.innerHTML = `<span>${escapeHtml(message)}</span>`; 
-                scanResult.classList.remove('hidden');
-                resultTimeout = setTimeout(() => { scanResult.classList.add('opacity-0', 'scale-95'); setTimeout(() => scanResult.classList.add('hidden'), 300); }, 3000); 
+            function handleError(msg) {
+                playBeep('error');
+                triggerOverlay('error');
+                dom.scanResult.innerHTML = `<span class="text-rose-600">${msg}</span>`;
+                dom.scanResult.classList.remove('hidden', 'opacity-0', 'scale-95');
+                setTimeout(() => dom.scanResult.classList.add('opacity-0', 'scale-95'), 3000);
             }
+
+            function triggerOverlay(type) {
+                dom.overlay.className = `scanner-overlay scan-${type}-effect`;
+                setTimeout(() => dom.overlay.className = 'scanner-overlay', 500);
+            }
+
+            function addTableRow(scan) {
+                // Remove empty state
+                document.getElementById('no-log-entry').classList.add('hidden');
+                
+                const row = document.createElement('tr');
+                row.className = 'new-row-entry border-b border-slate-50';
+                row.dataset.typeRaw = scan.type_raw;
+
+                // Simple template (simplified for brevity)
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-bold text-slate-800">${scan.student_name}</td>
+                    <td class="col-harian px-4 py-4 text-center">${scan.time_in || '-'}</td>
+                    <td class="col-harian px-4 py-4 text-center">-</td>
+                    <td class="col-waktu hidden-col px-4 py-4 text-center">${scan.time_in}</td>
+                    <td class="col-kegiatan hidden-col px-4 py-4 text-center">${scan.ekskul_name || '-'}</td>
+                    <td class="px-6 py-4 text-right"><span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">${scan.status}</span></td>
+                `;
+
+                dom.tableBody.prepend(row);
+                filterLogTable(state.mode); // Re-apply filter to show/hide columns correctly
+            }
+
+            // Init Scanner
+            const qrScanner = new Html5Qrcode("qr-reader");
+            qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess)
+                .catch(err => {
+                    dom.scanStatus.innerHTML = `<span class="text-rose-400">Kamera Error: ${err}</span>`;
+                });
+            
+            // Initial call
+            checkAutoMode(new Date());
         });
     </script>
  <?php echo $__env->renderComponent(); ?>

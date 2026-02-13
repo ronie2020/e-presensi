@@ -30,7 +30,7 @@
                             Atur Jadwal
                         </h1>
                         <p class="text-blue-100/80 text-sm md:text-base font-medium leading-relaxed max-w-lg">
-                            Kelola jadwal pelajaran (KBM) per kelas dengan format Jam Pelajaran (JP).
+                            Kelola jadwal pelajaran (KBM) per kelas dengan format Jam Pelajaran (JP) serta jam operasional scanner.
                         </p>
                     </div>
                     
@@ -363,15 +363,27 @@ unset($__errorArgs, $__bag); ?>
                                         <label class="block text-[10px] uppercase font-bold text-slate-400 mb-2 text-center">Masuk</label>
                                         <div class="flex gap-1.5">
                                             
-                                            <input type="time" name="start_in[]" value="<?php echo e(optional($regularSchedules->get('Biasa'))->start_in ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->start_in)->format('H:i') : ''); ?>" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm">
-                                            <input type="time" name="end_in[]" value="<?php echo e(optional($regularSchedules->get('Biasa'))->end_in ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->end_in)->format('H:i') : ''); ?>" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm">
+                                            <div class="w-full">
+                                                <input type="time" name="start_in[]" value="<?php echo e(optional($regularSchedules->get('Biasa'))->start_in ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->start_in)->format('H:i') : ''); ?>" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm focus:ring-blue-500" title="Jam Buka Scanner Masuk">
+                                                <p class="text-[9px] text-slate-400 text-center mt-1">Buka Scan</p>
+                                            </div>
+                                            <div class="w-full">
+                                                <input type="time" name="end_in[]" value="<?php echo e(optional($regularSchedules->get('Biasa'))->end_in ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->end_in)->format('H:i') : ''); ?>" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm focus:ring-blue-500" title="Batas Terlambat">
+                                                <p class="text-[9px] text-slate-400 text-center mt-1">Batas Telat</p>
+                                            </div>
                                         </div>
                                     </div>
                                     <div>
                                         <label class="block text-[10px] uppercase font-bold text-slate-400 mb-2 text-center">Pulang</label>
                                         <div class="flex gap-1.5">
-                                            <input type="time" name="start_out[]" value="<?php echo e(optional($regularSchedules->get('Biasa'))->start_out ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->start_out)->format('H:i') : ''); ?>" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm">
-                                            <input type="time" name="end_out[]" value="<?php echo e(optional($regularSchedules->get('Biasa'))->end_out ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->end_out)->format('H:i') : ''); ?>" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm">
+                                            <div class="w-full">
+                                                <input type="time" name="start_out[]" value="<?php echo e(optional($regularSchedules->get('Biasa'))->start_out ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->start_out)->format('H:i') : ''); ?>" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm focus:ring-blue-500" title="Jam Boleh Pulang">
+                                                <p class="text-[9px] text-slate-400 text-center mt-1">Boleh Plg</p>
+                                            </div>
+                                            <div class="w-full">
+                                                <input type="time" name="end_out[]" value="<?php echo e(optional($regularSchedules->get('Biasa'))->end_out ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->end_out)->format('H:i') : ''); ?>" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm focus:ring-blue-500" title="Tutup Scanner Pulang">
+                                                <p class="text-[9px] text-slate-400 text-center mt-1">Tutup Scan</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -389,16 +401,23 @@ unset($__errorArgs, $__bag); ?>
                                     <div>
                                         <label class="block text-[10px] uppercase font-bold text-purple-400 mb-2 text-center">Masuk</label>
                                         <div class="flex gap-1.5">
-                                            
-                                            <input type="time" name="start_in[]" value="<?php echo e(optional($regularSchedules->get('Jumat'))->start_in ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->start_in)->format('H:i') : ''); ?>" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
-                                            <input type="time" name="end_in[]" value="<?php echo e(optional($regularSchedules->get('Jumat'))->end_in ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->end_in)->format('H:i') : ''); ?>" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
+                                            <div class="w-full">
+                                                <input type="time" name="start_in[]" value="<?php echo e(optional($regularSchedules->get('Jumat'))->start_in ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->start_in)->format('H:i') : ''); ?>" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
+                                            </div>
+                                            <div class="w-full">
+                                                <input type="time" name="end_in[]" value="<?php echo e(optional($regularSchedules->get('Jumat'))->end_in ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->end_in)->format('H:i') : ''); ?>" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
+                                            </div>
                                         </div>
                                     </div>
                                     <div>
                                         <label class="block text-[10px] uppercase font-bold text-purple-400 mb-2 text-center">Pulang</label>
                                         <div class="flex gap-1.5">
-                                            <input type="time" name="start_out[]" value="<?php echo e(optional($regularSchedules->get('Jumat'))->start_out ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->start_out)->format('H:i') : ''); ?>" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
-                                            <input type="time" name="end_out[]" value="<?php echo e(optional($regularSchedules->get('Jumat'))->end_out ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->end_out)->format('H:i') : ''); ?>" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
+                                            <div class="w-full">
+                                                <input type="time" name="start_out[]" value="<?php echo e(optional($regularSchedules->get('Jumat'))->start_out ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->start_out)->format('H:i') : ''); ?>" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
+                                            </div>
+                                            <div class="w-full">
+                                                <input type="time" name="end_out[]" value="<?php echo e(optional($regularSchedules->get('Jumat'))->end_out ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->end_out)->format('H:i') : ''); ?>" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 shadow-sm text-purple-900 focus:ring-purple-500">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -450,10 +469,22 @@ unset($__errorArgs, $__bag); ?>
                                 <div x-show="!isHoliday" x-transition class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
                                     <p class="text-[10px] font-black text-center text-slate-400 uppercase tracking-wide border-b border-slate-200 pb-2">Jam Operasional (Opsional)</p>
                                     <div class="grid grid-cols-2 gap-2">
-                                        <input type="time" name="start_in" class="rounded-xl border-slate-200 text-xs text-center font-bold py-2">
-                                        <input type="time" name="end_in" class="rounded-xl border-slate-200 text-xs text-center font-bold py-2">
-                                        <input type="time" name="start_out" class="rounded-xl border-slate-200 text-xs text-center font-bold py-2">
-                                        <input type="time" name="end_out" class="rounded-xl border-slate-200 text-xs text-center font-bold py-2">
+                                        <div class="text-center">
+                                            <input type="time" name="start_in" class="w-full rounded-xl border-slate-200 text-xs text-center font-bold py-2">
+                                            <p class="text-[9px] text-slate-400 mt-1">Buka Masuk</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <input type="time" name="end_in" class="w-full rounded-xl border-slate-200 text-xs text-center font-bold py-2">
+                                            <p class="text-[9px] text-slate-400 mt-1">Batas Telat</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <input type="time" name="start_out" class="w-full rounded-xl border-slate-200 text-xs text-center font-bold py-2">
+                                            <p class="text-[9px] text-slate-400 mt-1">Boleh Plg</p>
+                                        </div>
+                                        <div class="text-center">
+                                            <input type="time" name="end_out" class="w-full rounded-xl border-slate-200 text-xs text-center font-bold py-2">
+                                            <p class="text-[9px] text-slate-400 mt-1">Tutup Plg</p>
+                                        </div>
                                     </div>
                                 </div>
 
