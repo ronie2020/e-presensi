@@ -571,46 +571,79 @@
         </div>
     </div>
 
-    {{-- Script untuk Preview File & Loading --}}
+     {{-- Script Validasi & AutoSave --}}
     <script>
-        function previewFile(input) {
+        // 1. Validasi File Size & Preview
+        function validateAndPreview(input) {
             const file = input.files[0];
             const id = input.id;
             const defaultView = document.getElementById(`preview-${id}-default`);
             const selectedView = document.getElementById(`preview-${id}-selected`);
-            const nameText = selectedView.querySelector('.file-name-text');
+            const errorView = document.getElementById(`preview-${id}-error`);
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Reset
+            defaultView.classList.remove('hidden');
+            selectedView.classList.add('hidden');
+            errorView.classList.add('hidden');
+            errorView.classList.remove('flex');
 
             if (file) {
+                // Cek ukuran > 2MB (2 * 1024 * 1024)
+                if (file.size > 2097152) {
+                    input.value = ''; // Reset input
+                    errorView.classList.remove('hidden');
+                    errorView.classList.add('flex');
+                    alert('Maaf, ukuran file ' + file.name + ' terlalu besar. Maksimal 2MB.');
+                    return;
+                }
+
                 defaultView.classList.add('hidden');
-                defaultView.classList.remove('flex');
                 selectedView.classList.remove('hidden');
                 selectedView.classList.add('flex');
-                nameText.textContent = file.name;
-                // Animation effect
-                selectedView.classList.add('scale-[1.02]');
-                setTimeout(() => selectedView.classList.remove('scale-[1.02]'), 200);
+                selectedView.querySelector('.file-name-text').textContent = file.name;
+                selectedView.querySelector('.file-size-text').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
             }
         }
 
-        function resetFile(id, event) {
-            if(event) event.preventDefault();
-            const input = document.getElementById(id);
-            const defaultView = document.getElementById(`preview-${id}-default`);
-            const selectedView = document.getElementById(`preview-${id}-selected`);
-            input.value = ''; 
-            defaultView.classList.remove('hidden');
-            defaultView.classList.add('flex');
-            selectedView.classList.add('hidden');
-            selectedView.classList.remove('flex');
-        }
+        // 2. LocalStorage Auto-Save Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('.save-local');
+            
+            // Load data
+            let hasData = false;
+            inputs.forEach(input => {
+                const key = 'ppdb_' + input.dataset.key;
+                const savedValue = localStorage.getItem(key);
+                if(savedValue) {
+                    input.value = savedValue;
+                    hasData = true;
+                }
+                
+                // Save on input
+                input.addEventListener('input', (e) => {
+                    localStorage.setItem(key, e.target.value);
+                });
+            });
 
-        document.getElementById('ppdbForm').addEventListener('submit', function() {
-            const btn = document.getElementById('submitBtn');
-            const text = document.getElementById('btnText');
-            const loading = document.getElementById('btnLoading');
-            btn.disabled = true;
-            text.classList.add('hidden');
-            loading.classList.remove('hidden');
+            if(hasData) document.getElementById('draft-alert').classList.remove('hidden');
+
+            // Clear storage on successful submit
+            document.getElementById('ppdbForm').addEventListener('submit', function() {
+                const btn = document.getElementById('submitBtn');
+                const text = document.getElementById('btnText');
+                const loading = document.getElementById('btnLoading');
+                
+                btn.disabled = true;
+                text.classList.add('hidden');
+                loading.classList.remove('hidden');
+
+                // Kita asumsikan sukses kirim, hapus storage
+                // Idealnya dihapus di halaman 'Success', tapi di sini juga oke
+                inputs.forEach(input => localStorage.removeItem('ppdb_' + input.dataset.key));
+                localStorage.removeItem('ppdb_track');
+                localStorage.removeItem('ppdb_achievement_type');
+            });
         });
     </script>
 </div>
