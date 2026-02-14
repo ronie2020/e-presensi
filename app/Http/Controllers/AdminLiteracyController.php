@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\LiteracyJournal;
 use App\Models\SchoolClass;
-use App\Models\Student; // Jangan lupa import ini
+use App\Models\Student; 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB; // Untuk query aggregate
+use Illuminate\Support\Facades\DB; 
 
 class AdminLiteracyController extends Controller
 {
@@ -16,7 +16,7 @@ class AdminLiteracyController extends Controller
     {
         // Filter Data
         $classId = $request->class_id;
-        $date = $request->date; // Default null jika tidak dipilih
+        $date = $request->date; 
 
         // 1. BASE QUERY JURNAL
         $journalQuery = LiteracyJournal::with(['student.schoolClass'])
@@ -33,12 +33,12 @@ class AdminLiteracyController extends Controller
         $journals = (clone $journalQuery)->latest()->paginate(10);
 
         // 3. STATISTIK PARTISIPASI
-        // A. Hitung Total Siswa (Sesuai Filter Kelas)
+        // A. Hitung Total Siswa 
         $totalStudents = Student::query()
             ->when($classId, function($q) use ($classId) {
                 $q->whereHas('schoolClass', fn($sq) => $sq->where('id', $classId));
             })
-            ->whereNull('deleted_at') // Asumsi pakai soft delete atau filter status aktif
+            ->whereNull('deleted_at') 
             ->count();
 
         // B. Hitung Siswa yang Sudah Mengisi (Unik ID)

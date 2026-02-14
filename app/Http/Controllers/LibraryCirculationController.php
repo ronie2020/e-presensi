@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Student;
-use App\Models\Borrowing; // Pastikan pakai model Borrowing
+use App\Models\Borrowing; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -17,18 +17,13 @@ class LibraryCirculationController extends Controller
      * MENAMPILKAN HALAMAN SIRKULASI
      */
     public function index()
-    {
-        // PERBAIKAN UTAMA DI SINI:
-        // Kita ambil 10 data peminjaman terakhir yang statusnya 'borrowed'
-        // agar variabel $recentActiveLoans tersedia di view.
-        
+    {     
         $recentActiveLoans = Borrowing::with(['student', 'book'])
                             ->where('status', 'borrowed')
                             ->orderBy('borrow_date', 'desc')
                             ->limit(10)
                             ->get();
-
-        // Kirim variabel tersebut ke view menggunakan compact
+        
         return view('library.circulation', compact('recentActiveLoans'));
     }
 
@@ -44,8 +39,6 @@ class LibraryCirculationController extends Controller
             $studentQuery = Student::where('student_id', $query)
                         ->orWhere('rfid_id', $query)
                         ->orWhere('nis', $query);
-
-            // Coba load relasi schoolClass dengan aman
             try {
                 $studentQuery->with('schoolClass');
             } catch (\Exception $e) {}
@@ -55,8 +48,7 @@ class LibraryCirculationController extends Controller
                 $studentQuery->withCount(['borrowings' => function($q) {
                     $q->where('status', 'borrowed');
                 }]);
-            } catch (\Exception $e) {
-                // Jika relasi borrowings belum ada di model Student, kembalikan pesan jelas
+            } catch (\Exception $e) {              
                 return response()->json([
                     'success' => false, 
                     'message' => 'Error Code: Relasi borrowings() tidak ditemukan di Model Student.php'

@@ -16,7 +16,7 @@ use App\Models\LmsGrade;
 use App\Models\Subject;
 use App\Models\SchoolClass;
 use Illuminate\Support\Str; 
-use Illuminate\Support\Facades\Auth; // Tambahkan Auth
+use Illuminate\Support\Facades\Auth; 
 
 class CbtController extends Controller
 {
@@ -290,8 +290,7 @@ class CbtController extends Controller
 
         // Ambil siswa sesuai kelas ujian
         $students = Student::with('schoolClass')
-            ->whereHas('schoolClass', function($query) use ($exam) {
-                // Asumsi: class_level di exam (misal '7') cocok dengan nama kelas (misal '7A', '7B')
+            ->whereHas('schoolClass', function($query) use ($exam) {               
                 $query->where('name', 'like', $exam->class_level . '%');
             })
             ->orderBy('name')
@@ -412,7 +411,7 @@ class CbtController extends Controller
     }
 
     /**
-     * [BARU] Halaman Detail Jawaban Siswa
+     * Halaman Detail Jawaban Siswa
      */
     public function resultDetail($exam_id, $student_id)
     {
@@ -429,15 +428,14 @@ class CbtController extends Controller
             return back()->with('error', 'Siswa ini belum mengerjakan ujian.');
         }
 
-        // Ambil list soal beserta jawaban siswa dan kunci jawaban
-        // FIX: Mengambil kolom 'options' (JSON) bukan 'option_A' dst secara langsung
+        // Ambil list soal beserta jawaban siswa dan kunci jawaban      
         $answers = DB::table('cbt_student_answers')
             ->join('cbt_questions', 'cbt_student_answers.cbt_question_id', '=', 'cbt_questions.id')
             ->where('cbt_student_answers.cbt_student_exam_id', $examSession->id)
             ->select(
                 'cbt_questions.question_text',
                 'cbt_questions.question_image',
-                'cbt_questions.options', // Ganti select individual column dengan kolom JSON ini
+                'cbt_questions.options', 
                 'cbt_questions.correct_answer',
                 'cbt_questions.score_weight',
                 'cbt_student_answers.answer as student_answer'
@@ -446,8 +444,7 @@ class CbtController extends Controller
 
         // Transformasi hasil untuk memecah JSON options menjadi properti A, B, C, D
         $answers->transform(function ($item) {
-            $opts = json_decode($item->options, true);
-            // Assign manual agar view result_detail tidak perlu diubah
+            $opts = json_decode($item->options, true);        
             $item->option_A = $opts['A'] ?? '';
             $item->option_B = $opts['B'] ?? '';
             $item->option_C = $opts['C'] ?? '';
@@ -472,8 +469,7 @@ class CbtController extends Controller
         $exam = CbtExam::findOrFail($id);
         $fileName = 'REKAP_NILAI_' . Str::slug($exam->title) . '_' . date('Y-m-d');
 
-        // Logic pengambilan data (DUPLICATED FROM RECAP METHOD)
-        // Kita duplicate agar bisa mengirim variabel lengkap ke view PDF
+        // Logic pengambilan data (DUPLICATED FROM RECAP METHOD)      
         
         // 1. Ambil Kunci Jawaban
         $questions = DB::table('cbt_questions')
@@ -535,7 +531,7 @@ class CbtController extends Controller
         } 
         
         if ($type == 'pdf') {
-            // TAMPILKAN VIEW CETAK (Halaman HTML khusus Print)
+            // Halaman HTML khusus Print
             return view('cbt.pdf_export', compact('exam', 'results', 'stats'));
         }
 
@@ -636,7 +632,7 @@ class CbtController extends Controller
     }
 
     /**
-     * [BARU] Sync Nilai CBT ke Buku Nilai (LMS)
+     * Sync Nilai CBT ke Buku Nilai (LMS)
      */
     public function syncToGradebook(Request $request, $id)
     {
@@ -650,8 +646,7 @@ class CbtController extends Controller
             return back()->with('error', 'Gagal: Mata Pelajaran "' . $exam->subject_name . '" tidak ditemukan di Data Master Mapel. Pastikan namanya sesuai.');
         }
 
-        // 2. Cari Kelas-kelas yang sesuai dengan Level Ujian
-        // Misal Level "7", maka cari kelas "7A", "7B", dst.
+        // 2. Cari Kelas-kelas yang sesuai dengan Level Ujian      
         $targetClasses = SchoolClass::where('name', 'like', $exam->class_level . '%')->get();
 
         if ($targetClasses->isEmpty()) {

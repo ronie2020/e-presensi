@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use App\Models\Book;
-use App\Models\SchoolClass; // Wajib di-import untuk dropdown kelas
-use App\Models\Borrowing;   // Gunakan 'Borrowing' sesuai fitur sirkulasi sebelumnya
+use App\Models\SchoolClass; 
+use App\Models\Borrowing;  
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class LibraryToolsController extends Controller
@@ -16,7 +16,7 @@ class LibraryToolsController extends Controller
      */
     public function index()
     {
-        // PERBAIKAN 1: Ambil data kelas untuk mengisi dropdown "Pilih Kelas" di halaman Index
+        // 1: Ambil data kelas untuk mengisi dropdown "Pilih Kelas" di halaman Index
         $classes = SchoolClass::orderBy('name', 'asc')->get();
         
         return view('library.tools.index', compact('classes'));
@@ -27,7 +27,7 @@ class LibraryToolsController extends Controller
      */
     public function printCard(Request $request)
     {
-        $mode = $request->input('mode', 'single'); // 'single' atau 'class'
+        $mode = $request->input('mode', 'single'); 
         $students = collect(); // Koleksi kosong untuk menampung hasil
 
         // LOGIKA 1: CETAK SATUAN
@@ -35,15 +35,15 @@ class LibraryToolsController extends Controller
             $request->validate(['nisn' => 'required']);
             
             $student = Student::with('schoolClass')
-                        ->where('student_id', $request->nisn) // Cek NISN/ID
-                        ->orWhere('nis', $request->nisn)      // Cek NIS Lokal
+                        ->where('student_id', $request->nisn) 
+                        ->orWhere('nis', $request->nisn)      
                         ->first();
 
             if ($student) {
-                $students->push($student); // Masukkan ke koleksi
+                $students->push($student); 
             }
         } 
-        // PERBAIKAN 2: LOGIKA CETAK SATU KELAS
+        // 2: LOGIKA CETAK SATU KELAS
         elseif ($mode === 'class') {
             $request->validate(['class_id' => 'required']);
             
@@ -147,7 +147,7 @@ class LibraryToolsController extends Controller
      */
     public function generateReport(Request $request)
     {
-        $type = $request->type; // 'monthly', 'top_books'
+        $type = $request->type; 
         $month = $request->month ?? date('m');
         $year = $request->year ?? date('Y');
 
@@ -166,9 +166,8 @@ class LibraryToolsController extends Controller
                         ->get();
         } 
         elseif ($type == 'top_books') {
-            $title = "Laporan Buku Terpopuler (Top Borrowed)";
-            // Mengambil buku dengan jumlah peminjaman terbanyak
-            $data = Book::withCount('borrowings') // Relasi borrowings di model Book harus ada
+            $title = "Laporan Buku Terpopuler (Top Borrowed)";            
+            $data = Book::withCount('borrowings') 
                         ->orderBy('borrowings_count', 'desc')
                         ->take(20)
                         ->get();

@@ -262,8 +262,7 @@ class LmsAssignmentController extends Controller
         $assignmentIds = $siblings->pluck('id');
         $classIds = $siblings->pluck('class_id');
 
-        // 3. Ambil Submission DENGAN RELASI ANSWER
-        // [FIX UTAMA] Tambahkan ->keyBy('student_id') agar pencarian di View akurat!
+        // 3. Ambil Submission DENGAN RELASI ANSWER        
         $submissions = LmsSubmission::with(['student.schoolClass', 'answers.question']) 
             ->whereIn('assignment_id', $assignmentIds)
             ->get()

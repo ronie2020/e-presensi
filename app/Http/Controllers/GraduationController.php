@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use App\Models\Graduation;
 use App\Models\SchoolClass;
-use App\Models\AlumniProfile; // Pastikan import model ini
+use App\Models\AlumniProfile; 
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;

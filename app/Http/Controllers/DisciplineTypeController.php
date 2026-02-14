@@ -12,7 +12,6 @@ class DisciplineTypeController extends Controller
      */
     public function index()
     {
-        // Ambil data dan pisahkan agar mudah ditampilkan di 2 tabel berbeda
         $violationTypes = DisciplineType::where('type', 'Pelanggaran')->orderBy('name')->get();
         $meritTypes = DisciplineType::where('type', 'Kebaikan')->orderBy('name')->get();
 
@@ -46,7 +45,7 @@ class DisciplineTypeController extends Controller
     {
         $type = DisciplineType::findOrFail($id);
         
-        // [PERBAIKAN UTAMA] PROTEKSI SYSTEM DEFAULT
+        // PROTEKSI SYSTEM DEFAULT
         // Mencegah user menghapus kategori "Alfa" yang dibutuhkan oleh ReportController (Absensi)
         $protectedKeywords = ['Alfa', 'Alpa', 'Alpha', 'Tidak Masuk', 'Tanpa Keterangan'];
         foreach ($protectedKeywords as $keyword) {

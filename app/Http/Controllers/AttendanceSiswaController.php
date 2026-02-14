@@ -18,7 +18,7 @@ use App\Jobs\SendWaScanNotificationJob;
 
 class AttendanceSiswaController extends Controller
 {
-    // Konfigurasi Jam (Bisa dipindah ke DB Settings kedepannya)
+    // Konfigurasi Jam 
     private $timeConfig = [
         'dhuha_start' => '07:30', 'dhuha_end' => '08:00',
         'makan_start' => '09:00', 'makan_end' => '10:00',
@@ -91,7 +91,7 @@ class AttendanceSiswaController extends Controller
                     })
                     ->first();
 
-        // 2. [DIKEMBALIKAN] Logika Validasi Status Siswa yang Spesifik
+        // 2. Logika Validasi Status Siswa yang Spesifik
         if (!$student) {
             return response()->json(['message' => 'Data siswa tidak ditemukan di database!'], 404);
         }
@@ -285,7 +285,6 @@ class AttendanceSiswaController extends Controller
             if ($detailAtt->wasRecentlyCreated) {
                 $this->logActivity($student, 'Extracurricular', $extra->name, "Hadir kegiatan {$extra->name}", 5);
                 
-                // [DIKEMBALIKAN] Logic Cek Member vs Tamu
                 // Agar operator tahu apakah siswa ini anggota resmi atau tidak
                 $isMember = ExtracurricularMember::where('student_id', $student->id)
                             ->where('extracurricular_id', $extraId)
@@ -357,7 +356,7 @@ class AttendanceSiswaController extends Controller
     {
         $schedule = ScheduleSpecial::where('date', $date->toDateString())->first();
         if (!$schedule) {
-            $dayName = $date->locale('id')->isoFormat('dddd'); // Senin, Selasa...
+            $dayName = $date->locale('id')->isoFormat('dddd'); 
             // Fallback manual jika server locale bahasa inggris
             $enToId = ['Monday'=>'Senin','Tuesday'=>'Selasa','Wednesday'=>'Rabu','Thursday'=>'Kamis','Friday'=>'Jumat','Saturday'=>'Sabtu','Sunday'=>'Minggu'];
             if(isset($enToId[$date->format('l')])) $dayName = $enToId[$date->format('l')];

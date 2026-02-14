@@ -207,7 +207,7 @@ class LandingPageController extends Controller
             'announcements', 'achievements', 'activities', 'teachers',
             'guestbooks', 'allGuestbooks', 'extracurriculars', 'agendas', 'schoolStats',
             'alumniStats', 'alumniTestimonials', 'habitLabels', 'habitData', 'habitStats',
-            'latestBooks' // <--- Masukkan variabel ini agar view bisa mengaksesnya
+            'latestBooks' 
         ));
     }
 

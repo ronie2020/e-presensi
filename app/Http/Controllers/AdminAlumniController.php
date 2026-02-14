@@ -50,7 +50,7 @@ class AdminAlumniController extends Controller
 
         $alumni = $query->orderBy('name', 'asc')->paginate(20)->withQueryString();
 
-        // Statistik (DIPERBAIKI)
+        // Statistik 
         $stats = [
             'total' => Student::where('status', 'graduated')->count(),            
            
@@ -72,7 +72,7 @@ class AdminAlumniController extends Controller
      */
     public function testimonials()
     {
-        // Ambil data profil alumni yang testimoninya TIDAK KOSONG
+        // Ambil data profil alumni 
         $testimonials = AlumniProfile::with('student')
             ->whereNotNull('testimony')
             ->where('testimony', '!=', '')
@@ -194,7 +194,7 @@ class AdminAlumniController extends Controller
     public function processImport(Request $request)
     {
         // --- batas waktu eksekusi agar tidak timeout ---
-        set_time_limit(300); // 300 detik = 5 menit
+        set_time_limit(300); 
         ini_set('max_execution_time', 300); 
 
         $request->validate([
@@ -227,7 +227,7 @@ class AdminAlumniController extends Controller
                 if (count($row) < 3) continue;
 
                 $name = $row[0];
-                $nisn = preg_replace('/[^0-9]/', '', $row[1]); // Hanya angka
+                $nisn = preg_replace('/[^0-9]/', '', $row[1]); 
                 $year = $row[2];
                 $gender = isset($row[3]) ? strtoupper(trim($row[3])) : 'L';
 

@@ -17,8 +17,7 @@ class BkTeacherController extends Controller
      */
     public function index(Request $request)
     {
-        // PERBAIKAN: Hanya load 'student' dan 'category'. 
-        // Menghapus 'student.schoolClass' untuk mencegah error "Relation Not Found" jika nama relasinya berbeda.
+        
         $query = BkSession::with(['student', 'category']);
 
         // Filter Status (Logika Tetap)
@@ -38,8 +37,7 @@ class BkTeacherController extends Controller
      * Menampilkan detail sesi dan form approval/jurnal.
      */
     public function show($id)
-    {
-        // PERBAIKAN: Sama seperti index, hapus nested relation yang berisiko
+    {        
         $session = BkSession::with(['student', 'category', 'record'])->findOrFail($id);
         
         return view('admin.bk.show', compact('session'));

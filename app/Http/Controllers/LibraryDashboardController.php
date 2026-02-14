@@ -123,7 +123,7 @@ class LibraryDashboardController extends Controller
         } catch (\Exception $e) {}
 
         // ==========================================
-        // 6. [BARU] ANALITIK JAM SIBUK & STOK (TAMBAHAN)
+        // 6. ANALITIK JAM SIBUK & STOK (TAMBAHAN)
         // ==========================================
         
         // Analitik Jam Kunjungan (untuk grafik baru)
@@ -145,10 +145,10 @@ class LibraryDashboardController extends Controller
             'recentActivities', 
             'popularBooks', 
             'loanChartLabels', 'loanChartData', 
-            'classChartLabels', 'classChartData', // Variabel lama tetap dikirim
+            'classChartLabels', 'classChartData', 
             'ebookReadsThisMonth', 'popularEbooks',
-            'busyHoursLabels', 'busyHoursData', // Variabel baru
-            'attentionBooks' // Variabel baru
+            'busyHoursLabels', 'busyHoursData', 
+            'attentionBooks' 
         ));
     }
 

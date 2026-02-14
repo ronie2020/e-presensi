@@ -42,7 +42,7 @@ class LibraryKioskController extends Controller
     public function process(Request $request)
     {
         $scanData = $request->scan_data;
-        $mode = $request->mode ?? 'attendance'; // 'attendance' atau 'check'
+        $mode = $request->mode ?? 'attendance'; 
 
         // 1. Cari Siswa
         $student = Student::where('rfid_id', $scanData)
@@ -58,7 +58,7 @@ class LibraryKioskController extends Controller
             ]);
         }
 
-        // 2. [LOGIKA LAMA] Cek Overdue (Tunggakan)
+        // 2. Cek Overdue (Tunggakan)
         $overdueBooks = Borrowing::with('book')
                         ->where('student_id', $student->id)
                         ->where('status', 'borrowed')
@@ -68,13 +68,13 @@ class LibraryKioskController extends Controller
         $hasOverdue = $overdueBooks->count() > 0;
         $overdueTitles = $overdueBooks->map(fn($b) => $b->book->title)->implode(', ');
 
-        // 3. [LOGIKA LAMA] Cek Ulang Tahun
+        // 3. Cek Ulang Tahun
         $isBirthday = $student->dob ? Carbon::parse($student->dob)->isBirthday() : false;
 
-        // 4. [LOGIKA LAMA + BARU] Hitung Statistik Kunjungan
+        // 4. Hitung Statistik Kunjungan
         $visitCount = LibraryVisit::where('student_id', $student->id)->count() + 1; // Total Kunjungan
         
-        // [BARU] Hitung Kunjungan Minggu Ini
+        // Hitung Kunjungan Minggu Ini
         $weeklyVisits = LibraryVisit::where('student_id', $student->id)
                         ->whereBetween('date', [now()->startOfWeek(), now()->endOfWeek()])
                         ->count() + 1;
@@ -121,7 +121,7 @@ class LibraryKioskController extends Controller
                 'time' => now(),
             ]);
 
-            // --- [BARU] LOGIKA PENENTUAN PESAN (Message Priority) ---
+            // --- LOGIKA PENENTUAN PESAN (Message Priority) ---
             $firstName = explode(' ', trim($student->name))[0];
             
             // Default Message
@@ -148,8 +148,8 @@ class LibraryKioskController extends Controller
                 'success' => true,
                 'mode' => 'attendance',
                 'student_name' => $student->name,
-                'message' => $titleMsg,        // Judul Utama
-                'sub_message' => $subMsg,      // [PERBAIKAN] Subtitle motivasi dikirim ke view
+                'message' => $titleMsg,        
+                'sub_message' => $subMsg,     
                 'is_birthday' => $isBirthday,
                 'visit_count' => $visitCount,
                 'has_overdue' => $hasOverdue,

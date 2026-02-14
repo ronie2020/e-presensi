@@ -9,21 +9,20 @@ use Carbon\Carbon;
 class ClassReportController extends Controller
 {
     /**
-     * LOGIKA INTI: Mengambil Data & Menghitung Statistik
+     * Mengambil Data & Menghitung Statistik
      */
     private function getReportData($startDate, $endDate)
     {
-        // 1. Ambil Data Kelas + Siswa Aktif + Absensi mereka
-        $classes = SchoolClass::orderBy('name')
-            // Ambil relasi siswa (hanya yang aktif) dan absensinya di rentang tanggal
+        // 1. Ambil Data Kelas + Siswa Aktif + Absensi
+        $classes = SchoolClass::orderBy('name')            
             ->with(['students' => function($q) use ($startDate, $endDate) {
-                $q->where('status', '!=', 'graduated') // Filter Siswa Aktif
+                $q->where('status', '!=', 'graduated') 
                   ->orderBy('name');
             }, 'students.attendances' => function($q) use ($startDate, $endDate) {
                 $q->whereBetween('attendance_date', [$startDate, $endDate])
-                  ->whereIn('type', ['Harian', 'Masuk', 'Pulang']); // Filter Tipe Absen
+                  ->whereIn('type', ['Harian', 'Masuk', 'Pulang']); 
             }])
-            // [PENTING] Hitung Total Siswa per Kelas secara otomatis
+            // Hitung Total Siswa per Kelas secara otomatis
             ->withCount(['students' => function($q) {
                 $q->where('status', '!=', 'graduated');
             }])
@@ -72,17 +71,12 @@ class ClassReportController extends Controller
              $effectivePresence = $hadirCount + $telatCount;
              $attendanceRate = $totalLogsRecorded > 0 
                  ? round(($effectivePresence / $totalLogsRecorded) * 100) 
-                 : 0;
-            
-            // OPSI 2 (Alternatif): Berdasarkan Total Siswa (Lebih Ketat)
-            // Jika Anda ingin Rate = (Hadir/TotalSiswa), uncomment baris di bawah:
-            // $attendanceRate = $totalStudents > 0 ? round(($effectivePresence / $totalStudents) * 100) : 0;
+                 : 0;                    
 
             return (object) [
                 'id' => $class->id,
                 'name' => $class->name,
-                'total_students' => $totalStudents, // Data Total Siswa
-                'hadir' => $hadirCount,
+                'total_students' => $totalStudents, 
                 'telat' => $telatCount,
                 'izin_sakit' => $izinSakitCount,
                 'alpha' => $alphaCount,

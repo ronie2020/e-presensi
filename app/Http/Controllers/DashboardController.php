@@ -35,7 +35,7 @@ class DashboardController extends Controller
         // FILTER ALUMNI (CORE FIX)
         // =====================================================================
         $filterActiveStudent = function($query) {
-            $query->where('status', '!=', 'graduated'); // Pastikan bukan alumni
+            $query->where('status', '!=', 'graduated'); 
         };
 
         // 2. DATA STATISTIK UTAMA (KPIS)
@@ -70,7 +70,7 @@ class DashboardController extends Controller
         }
 
         // =====================================================================
-        // [BARU] LOGIKA KOMPARASI TREN (Hanya jika periode = today)
+        // LOGIKA KOMPARASI TREN (Hanya jika periode = today)
         // =====================================================================
         $trendHadir = 0;
         $trendTerlambat = 0;
@@ -107,8 +107,7 @@ class DashboardController extends Controller
                 'value' => $presentCount,
                 'icon' => 'ph-check-circle',
                 'percentage' => $totalStudents > 0 ? round(($presentCount / $totalStudents) * 100, 1) : 0,
-                'filter_status' => 'present',
-                // Data Tren ditambahkan ke kartu ini
+                'filter_status' => 'present',            
                 'trend' => $period === 'today' ? $trendHadir : null, 
                 'trend_label' => 'vs Kemarin'
             ],
@@ -188,7 +187,7 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
             
-        // [BARU] 7b. RANKING KEHADIRAN PER KELAS (TERENDAH / PERLU PERHATIAN)
+        // RANKING KEHADIRAN PER KELAS (TERENDAH / PERLU PERHATIAN)
         // Kita cari kelas dengan jumlah Absen/Alfa terbanyak
         $lowestClassRanks = DB::table('attendances_siswa') 
             ->join('students', 'attendances_siswa.student_id', '=', 'students.id')
@@ -253,7 +252,7 @@ class DashboardController extends Controller
             'topPunctualStudents' => $topPunctualStudents,
             'recentActivities' => $recentActivities,
             'classRanks' => $classRanks,
-            'lowestClassRanks' => $lowestClassRanks, // Data baru dikirim ke view
+            'lowestClassRanks' => $lowestClassRanks, 
             'chartLabels' => $chartLabels,
             'weeklyPresentData' => $weeklyPresentData, 
             'weeklyLateData' => $weeklyLateData,       

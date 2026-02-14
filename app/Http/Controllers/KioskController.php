@@ -134,7 +134,7 @@ class KioskController extends Controller
                 ]);
             }
 
-            // [FIX] Try-Catch untuk Notifikasi WA agar tidak crash 500
+            // Try-Catch untuk Notifikasi WA agar tidak crash 500
             try {
                 SendWaScanNotificationJob::dispatch($attendanceRecord);
             } catch (\Exception $e) {

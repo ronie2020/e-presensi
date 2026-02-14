@@ -54,7 +54,7 @@ class LiaisonBookController extends Controller
                         ->latest()
                         ->paginate(10);
         
-        // LOGIKA BARU: Tandai semua catatan di halaman ini sebagai sudah dibaca
+        // Tandai semua catatan di halaman ini sebagai sudah dibaca
         LiaisonBook::where('student_id', $studentId)
                     ->where('is_read_by_parent', false)
                     ->update(['is_read_by_parent' => true]);
@@ -94,7 +94,7 @@ class LiaisonBookController extends Controller
     {
         $liaison = LiaisonBook::findOrFail($id);
         
-        // Pastikan hanya pemilik atau admin yang bisa hapus
+        // hanya admin yang bisa hapus
         if($liaison->teacher_id == Auth::id() || Auth::user()->role == 'admin') {
             $liaison->delete();
             return redirect()->route('liaison.index')->with('success', 'Catatan berhasil dihapus.');
@@ -140,7 +140,7 @@ class LiaisonBookController extends Controller
             $query->where('name', 'like', '%' . $search . '%');
         }
 
-        // PERBAIKAN DI SINI: Menambahkan ->with('schoolClass')
+        // Menambahkan ->with('schoolClass')
         $students = $query->select('id', 'name', $classColumn)
             ->with('schoolClass') // <--- PENTING: Memuat relasi agar nama kelas muncul
             ->withCount(['liaisonChats as unread_count' => function($q) {

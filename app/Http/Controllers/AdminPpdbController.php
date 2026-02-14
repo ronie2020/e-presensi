@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PpdbRegistrant;
-use App\Models\Student; // Pastikan Model Student di-import
+use App\Models\Student; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -83,9 +83,8 @@ class AdminPpdbController extends Controller
      */
     public function show($id)
     {
-        $registrant = PpdbRegistrant::findOrFail($id);
-        
-        // Cek apakah sudah dipromosikan (berdasarkan NISN)        
+        $registrant = PpdbRegistrant::findOrFail($id);        
+      
         $isPromoted = false;
         if (Schema::hasColumn('students', 'nisn')) {
             $isPromoted = Student::where('nisn', $registrant->nisn)->exists();
@@ -188,15 +187,14 @@ class AdminPpdbController extends Controller
     }
 
     /**
-     * FITUR BULK PROMOTE (Pindah Massal)
-     * Ditambahkan: set_time_limit, lockForUpdate, dan Error Reporting
+     * FITUR BULK PROMOTE (Pindah Massal)    
      */
     public function bulkPromote(Request $request)
     {
         // 1. Cegah Time Out (Set max execution time 5 menit)
         set_time_limit(300);
 
-        // 2. Validasi Input (Array ID yang dipilih)
+        // 2. Validasi Input 
         $request->validate([
             'selected_ids' => 'required|array',
             'selected_ids.*' => 'exists:ppdb_registrants,id', 
@@ -209,7 +207,7 @@ class AdminPpdbController extends Controller
 
         DB::beginTransaction();
         try {
-            // 3. Ambil data pendaftar (Locking Row untuk cegah race condition)
+            // 3. Ambil data pendaftar 
             $registrants = PpdbRegistrant::whereIn('id', $ids)
                 ->where('status', 'accepted')
                 ->lockForUpdate() 
@@ -268,7 +266,7 @@ class AdminPpdbController extends Controller
                     'password' => Hash::make($generatedNis), 
                 ]);
 
-                $sequence++; // Increment sequence untuk siswa berikutnya
+                $sequence++; 
                 $successCount++;
             }
 
@@ -276,8 +274,7 @@ class AdminPpdbController extends Controller
 
             $message = "Berhasil memindahkan $successCount siswa.";
             if ($failCount > 0) {
-                $message .= " Gagal: " . implode(', ', $failedNames);
-                // Return warning agar user sadar ada yg gagal
+                $message .= " Gagal: " . implode(', ', $failedNames);              
                 return redirect()->back()->with('success', $message)->with('warning', 'Beberapa siswa gagal dipindahkan karena duplikat.');
             }
 

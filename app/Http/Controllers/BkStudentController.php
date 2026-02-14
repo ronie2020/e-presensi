@@ -20,15 +20,13 @@ class BkStudentController extends Controller
             ->latest()
             ->paginate(10);
 
-        // PERBAIKAN: Menggunakan 'students' (jamak) sesuai nama folder Anda
         return view('students.bk.index', compact('histories'));
     }
 
     // Form Pengajuan Konseling Baru
     public function create()
     {
-        $categories = BkCategory::all();
-        // PERBAIKAN: Menggunakan 'students.bk.create'
+        $categories = BkCategory::all();       
         return view('students.bk.create', compact('categories'));
     }
 
@@ -48,8 +46,7 @@ class BkStudentController extends Controller
             'method' => $request->method,
             'status' => 'pending', 
         ]);
-
-        // Redirect tetap menggunakan nama route yang ada di web.php (student.bk.index)
+       
         return redirect()->route('student.bk.index')
             ->with('success', 'Pengajuan konseling berhasil dikirim. Menunggu respon Guru BK.');
     }
@@ -59,9 +56,8 @@ class BkStudentController extends Controller
     {
         $session = BkSession::where('student_id', Auth::guard('student')->id())
             ->with(['record', 'teacher', 'category'])
-            ->findOrFail($id);
-            
-        // PERBAIKAN: Menggunakan 'students.bk.show'
+            ->findOrFail($id);            
+      
         return view('students.bk.show', compact('session'));
     }
 }

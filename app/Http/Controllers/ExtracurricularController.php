@@ -12,8 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class ExtracurricularController extends Controller
-{
-    // ... Method index, store, update, destroy TETAP SAMA ... 
+{    
     public function index()
     {
         $extracurriculars = Extracurricular::withCount('members')->get();
@@ -134,7 +133,7 @@ class ExtracurricularController extends Controller
         return view('extracurriculars.members', compact('extracurriculars', 'selectedEkskulId', 'members', 'students', 'classes', 'studentsForJs'));
     }
 
-    // [DIPERBAIKI] Hapus joined_at agar tidak error
+    // Hapus joined_at agar tidak error
     public function storeMember(Request $request)
     {
         $request->validate([

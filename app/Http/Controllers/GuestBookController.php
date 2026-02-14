@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\GuestBook; // Pastikan Anda membuat Model ini nanti
+use App\Models\GuestBook; 
 
 class GuestBookController extends Controller
 {
@@ -17,8 +17,7 @@ class GuestBookController extends Controller
             'message' => 'required|string',
         ]);
 
-        // 2. Simpan ke Database
-        // Pastikan Anda sudah membuat Model GuestBook dan Migration-nya
+        // 2. Simpan ke Database      
         if (class_exists(GuestBook::class)) {
             GuestBook::create($validated);
         }

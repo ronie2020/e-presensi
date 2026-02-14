@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 // Library Excel
 use Maatwebsite\Excel\Facades\Excel;
 
-// Import & Export Classes (Pastikan file-file ini sudah dibuat di folder App/Imports dan App/Exports)
+// Import & Export Classes 
 use App\Imports\GradesImport;         
 use App\Imports\StudentGradesImport;  
 use App\Exports\TemplateMapelExport;   
@@ -28,8 +28,7 @@ class GradeController extends Controller
     public function index(Request $request)
     {
         $classes = SchoolClass::orderBy('name')->get();
-        $subjects = Subject::orderBy('order')->get();
-        // Mengambil tahun ajaran, urutkan dari yang terbaru
+        $subjects = Subject::orderBy('order')->get();       
         $years = AcademicYear::select('name')->distinct()->orderBy('name', 'desc')->get();
         $activeYear = AcademicYear::where('is_active', true)->first();
 
@@ -100,8 +99,7 @@ class GradeController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-            foreach ($request->grades as $studentId => $score) {
-                // Skip jika nilai kosong
+            foreach ($request->grades as $studentId => $score) {          
                 if ($score === null) continue;
 
                 // 1. Buat atau Ambil Record Rapor Utama
@@ -256,7 +254,7 @@ class GradeController extends Controller
     // =========================================================================
 
     /**
-     * [AJAX] Mengambil daftar siswa berdasarkan kelas (Untuk Dropdown Frontend)
+     * Mengambil daftar siswa berdasarkan kelas (Untuk Dropdown Frontend)
      */
     public function getStudentsByClass($class_id)
     {
@@ -348,8 +346,7 @@ class GradeController extends Controller
      * Helper: Menghitung Predikat Nilai
      */
     private function calculatePredicate($score)
-    {
-        // Sesuaikan interval ini dengan kebijakan sekolah
+    {        
         if ($score >= 92) return 'A';
         if ($score >= 83) return 'B';
         if ($score >= 75) return 'C';
@@ -392,7 +389,7 @@ class GradeController extends Controller
 
     /**
      * Halaman Detail/Preview Rapor Siswa
-     * UPDATE: Penambahan logika Navigasi Siswa (Prev/Next)
+     * Penambahan logika Navigasi Siswa (Prev/Next)
      */
     public function reportCard($student_id)
     {
@@ -423,8 +420,7 @@ class GradeController extends Controller
         // LOGIKA NAVIGASI PREV/NEXT (Update Baru)
         // ------------------------------------------------------------------
         
-        // 1. Ambil daftar ID siswa sekelas, urut abjad
-        // Pastikan 'name' asc agar urutannya sama dengan di daftar
+        // 1. Ambil daftar ID siswa sekelas, urut abjad        
         $classmates = Student::where('class_id', $student->class_id)
                         ->orderBy('name', 'asc')
                         ->pluck('id')
@@ -455,8 +451,8 @@ class GradeController extends Controller
             'subjects' => $subjects,
             'year' => $academic_year,
             'semester' => $semester,
-            'prevStudentId' => $prevStudentId, // Variable baru untuk tombol Prev
-            'nextStudentId' => $nextStudentId  // Variable baru untuk tombol Next
+            'prevStudentId' => $prevStudentId, 
+            'nextStudentId' => $nextStudentId  
         ]);
     }
 }
