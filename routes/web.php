@@ -337,7 +337,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/scan', [AttendanceSiswaController::class, 'showScanner'])->name('scan.show');
     Route::post('/scan', [AttendanceSiswaController::class, 'processScan'])->name('scan.process');
     
-    
     // --- SISTEM IZIN KELUAR (GURU PIKET) ---
     Route::prefix('permit')->name('permit.')->group(function() {
         Route::get('/', [StudentPermitController::class, 'index'])->name('index');
@@ -469,6 +468,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/reports/religious', [ReportController::class, 'destroyReligious'])->name('reports.destroyReligious');
     Route::get('/reports/export-religious', [ReportController::class, 'exportReligious'])->name('reports.exportReligious');
     Route::post('/reports/bulk-alpha', [ReportController::class, 'bulkAlpha'])->name('reports.bulkAlpha');
+    
+    // API Helper untuk Checklist Per Kelas
+    Route::get('/reports/api/students-by-class', [ReportController::class, 'getStudentsByClass'])->name('reports.getStudentsByClass');
+    // Action Simpan Checklist
+    Route::post('/reports/store-class', [ReportController::class, 'storeClassAttendance'])->name('reports.storeClass');
 
    // Route Admin PPDB
     Route::prefix('admin/ppdb')->name('admin.ppdb.')->group(function () {

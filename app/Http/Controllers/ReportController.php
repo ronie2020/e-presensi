@@ -218,7 +218,7 @@ class ReportController extends Controller
     }
     
     // =========================================================================
-    // 2. REKAP KEAGAMAAN (FIXED: PERBAIKAN LOGIKA & PRINT)
+    // 2. REKAP KEAGAMAAN
     // =========================================================================
 
     /**
@@ -323,7 +323,7 @@ class ReportController extends Controller
         $rawTrendData = AttendanceSiswa::selectRaw('DATE(attendance_date) as date, status, count(*) as count')
             ->whereBetween('attendance_date', [$chartStart, $chartEnd])
             ->where('type', 'Keagamaan')
-            ->where('activity', $selectedActivity) // Chart mengikuti tab aktif
+            ->where('activity', $selectedActivity) 
             ->groupBy('date', 'status')
             ->get();
 
@@ -342,12 +342,15 @@ class ReportController extends Controller
             'trendLabel' => $trendLabel,
             'composition' => ['hadir' => $hadirCount, 'uzur' => $izinUzurCount, 'alfa' => $alfaCount, 'belum' => $belumAbsenCount]
         ];
+        
+        // Pass All Classes for checklist mode
+        $allClasses = SchoolClass::orderBy('name')->get();
 
         // Return array of data
         return compact(
             'selectedDate_db', 'selectedActivity', 'attendancesHadir', 'attendancesUzur',
             'belumAbsenList', 'hadirCount', 'izinUzurCount', 'alfaCount', 'belumAbsenCount', 'range',
-            'classRecap', 'chartData'
+            'classRecap', 'chartData', 'allClasses'
         );
     }
 
@@ -377,7 +380,6 @@ class ReportController extends Controller
         // Tambahkan variabel viewMode untuk logic di Blade
         $data['viewMode'] = $request->view_mode ?? 'list';
 
-        // PENTING: Return view print
         return view('reports.print_religious', $data);
     }
 
@@ -395,8 +397,7 @@ class ReportController extends Controller
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
         $endDate = $request->input('end_date', Carbon::now()->toDateString());
 
-        // Ambil data kelas + siswa aktif + absensi mereka dalam range tanggal
-        // Filter absensi hanya tipe 'Harian' atau 'Masuk' (sesuaikan dengan sistem Anda)
+        // Ambil data kelas + siswa aktif + absensi mereka dalam range tanggal       
         $classes = SchoolClass::with(['students' => function($q) {
                 $q->where('status', 'active'); 
             }, 'students.attendances' => function($q) use ($startDate, $endDate) {
@@ -431,8 +432,7 @@ class ReportController extends Controller
             return $kelas;
         });
 
-        // Kirim ke View 'class_attendance.blade.php'
-        // Pastikan view ada di folder resources/views/reports/class_attendance.blade.php
+        // Kirim ke View 'class_attendance.blade.php'       
         return view('reports.class_attendance', compact('reportData', 'startDate', 'endDate'));
     }
 
@@ -537,7 +537,7 @@ class ReportController extends Controller
      */
     public function exportClassExcel(Request $request)
     {
-        // Fitur ini bisa dikembangkan lebih lanjut menggunakan Maatwebsite/Excel
+        // Fitur ini menggunakan Maatwebsite/Excel
         return redirect()->back()->with('warning', 'Fitur Export Excel belum tersedia.');
     }
 
@@ -808,5 +808,114 @@ class ReportController extends Controller
         }
         $html .= '</div>';
         return $html;
+    }
+
+     // =========================================================================
+    // FITUR BARU: MODE CHECKLIST PER KELAS (DINAMIS UNTUK HARIAN & KEAGAMAAN)
+    // =========================================================================
+
+    /**
+     * API untuk mengambil daftar siswa di kelas tertentu beserta status absen hari ini
+     */
+    public function getStudentsByClass(Request $request)
+    {
+        $classId = $request->class_id;
+        $date = $request->date;
+        $type = $request->type ?? 'Keagamaan'; // Default Keagamaan untuk kompatibilitas lama
+        $activity = $request->activity; 
+
+        if (!$classId || !$date) {
+            return response()->json(['error' => 'Parameter tidak lengkap'], 400);
+        }
+
+        $students = Student::where('class_id', $classId)
+            ->where('status', 'active')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        // Ambil data absensi yang sudah ada (Dinamis berdasarkan Tipe)
+        $query = AttendanceSiswa::whereIn('student_id', $students->pluck('id'))
+            ->where('attendance_date', $date)
+            ->where('type', $type);
+            
+        // Jika tipe Keagamaan, filter spesifik activity (Dhuha/Dhuhur)
+        if ($type == 'Keagamaan' && $activity) {
+            $query->where('activity', $activity);
+        }
+
+        $attendances = $query->get()->keyBy('student_id');
+
+        $data = $students->map(function ($student) use ($attendances) {
+            $att = $attendances->get($student->id);
+            return [
+                'id' => $student->id,
+                'name' => $student->name,
+                'status' => $att ? $att->status : 'Hadir', // Default 'Hadir'
+                'notes' => $att ? $att->notes : '',
+                'has_record' => $att ? true : false 
+            ];
+        });
+
+        return response()->json($data);
+    }
+
+    /**
+     * Menyimpan data checklist satu kelas sekaligus
+     */
+    public function storeClassAttendance(Request $request)
+    {
+        $request->validate([
+            'class_id' => 'required',
+            'date' => 'required|date',
+            'students' => 'required|array',
+            'type' => 'nullable'
+        ]);
+
+        $date = $request->date;
+        $type = $request->input('type', 'Keagamaan'); // Ambil tipe dari form
+        $activity = $request->activity;
+        
+        $violationType = DisciplineType::firstOrCreate(
+            ['name' => 'Tidak Masuk Sekolah (Alfa)'],
+            ['type' => 'Pelanggaran', 'point_value' => 10]
+        );
+
+        DB::transaction(function () use ($request, $date, $activity, $type, $violationType) {
+            foreach ($request->students as $item) {
+                // Kondisi pencarian data (Where Clause)
+                $conditions = [
+                    'student_id' => $item['id'],
+                    'attendance_date' => $date,
+                    'type' => $type
+                ];
+                
+                // Tambahkan activity hanya jika Keagamaan
+                if ($type == 'Keagamaan') {
+                    $conditions['activity'] = $activity;
+                }
+
+                // Tentukan Jam Masuk (Jika Hadir/Telat set NOW, jika tidak 00:00:00)
+                $timeIn = '00:00:00';
+                if(in_array($item['status'], ['Hadir', 'Terlambat'])) {
+                    // Cek apakah sudah ada jam masuk sebelumnya agar tidak tertimpa
+                    $existing = AttendanceSiswa::where($conditions)->first();
+                    $timeIn = $existing && $existing->time_in != '00:00:00' ? $existing->time_in : now()->format('H:i:s');
+                }
+
+                // Update atau Create Absensi
+                AttendanceSiswa::updateOrCreate(
+                    $conditions,
+                    [
+                        'status' => $item['status'],
+                        'time_in' => $timeIn,
+                        'notes' => $item['notes'] ?? null,
+                    ]
+                );
+
+                $this->handleAutoPunishment($item['id'], $date, $item['status'], $type, $violationType);
+            }
+        });
+
+        return back()->with('success', 'Data absensi kelas berhasil disimpan!');
     }
 }
