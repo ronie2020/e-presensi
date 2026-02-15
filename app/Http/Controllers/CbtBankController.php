@@ -53,7 +53,7 @@ class CbtBankController extends Controller
     public function manage($id)
     {
         $bank = CbtQuestionBank::with('questions')->findOrFail($id);
-        return view('cbt.bank.manage', compact('bank'));
+        return view('cbt.bank.questions', compact('bank'));
     }
 
     /**
