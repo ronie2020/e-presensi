@@ -22,11 +22,14 @@
 
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
         
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #f8fafc; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; border: 2px solid #f8fafc; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Utility Animations */
         .animate-blob { animation: blob 7s infinite; }
         .animation-delay-2000 { animation-delay: 2s; }
         .animation-delay-4000 { animation-delay: 4s; }
@@ -37,6 +40,31 @@
             66% { transform: translate(-20px, 20px) scale(0.9); }
             100% { transform: translate(0px, 0px) scale(1); }
         }
+
+        /* Glassmorphism Utilities */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Book Cover 3D Effect */
+        .book-card { perspective: 1000px; }
+        .book-inner { transition: transform 0.5s; transform-style: preserve-3d; }
+        .book-card:hover .book-inner { transform: rotateY(-10deg) scale(1.05); }
+
+        /* Preloader */
+        #preloader { position: fixed; inset: 0; z-index: 9999; background: #0f172a; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s ease-out; }
+        .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: #3b82f6; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .hide-preloader { opacity: 0; visibility: hidden; }
     </style>
 </head>
 <body class="antialiased text-slate-800 bg-slate-50 overflow-x-hidden selection:bg-blue-500 selection:text-white" 
@@ -48,6 +76,7 @@
         activeAnnouncement: null,
         scrolled: false,
         showBackToTop: false,
+        activeSection: 'home',
         
         openAnnouncementByIndex(index) {
             if (window.announcementsData && window.announcementsData[index]) {
@@ -61,12 +90,39 @@
             this.modalOpen = false;
             setTimeout(() => { this.activeAnnouncement = null }, 300);
             document.body.style.overflow = 'auto';
+        },
+
+        init() {
+            // Preloader logic
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    document.getElementById('preloader').classList.add('hide-preloader');
+                }, 800);
+            });
         }
     }" 
     @scroll.window="
         scrolled = (window.pageYOffset > 20) ? true : false;
         showBackToTop = (window.pageYOffset > 500) ? true : false;
+        
+        // Simple Scroll Spy
+        const sections = ['home', 'profil', 'kegiatan', 'prestasi', 'kontak'];
+        for (const section of sections) {
+            const el = document.getElementById(section);
+            if (el && window.scrollY >= (el.offsetTop - 150)) {
+                activeSection = section;
+            }
+        }
     ">
+
+    <!-- PRELOADER -->
+    <div id="preloader">
+        <div class="flex flex-col items-center gap-4">
+            <span class="loader"></span>
+            <p class="text-white text-xs font-bold tracking-widest uppercase animate-pulse">Memuat Netila Berjaya...</p>
+        </div>
+    </div>
+
 
     <!-- NAVBAR (TEMA: DARK CORPORATE - HARMONIZED) -->
     <nav :class="{ 'bg-slate-900/95 backdrop-blur-md shadow-xl border-b border-slate-800': scrolled, 'bg-transparent border-transparent': !scrolled }" class="fixed top-0 w-full z-50 transition-all duration-300">
@@ -75,15 +131,15 @@
                 
                 <!-- Logo Brand -->
                 <a href="<?php echo e(url('/')); ?>" class="flex items-center gap-3 shrink-0 group z-50">
-                    <div class="relative w-10 h-10 bg-blue-950 border border-blue-800 rounded-xl flex items-center justify-center text-yellow-400 shadow-lg shadow-blue-900/50 group-hover:scale-105 transition-transform overflow-hidden">
-                         <img src="<?php echo e(asset('images/logo.png')); ?>" alt="Logo" class="w-6 h-6 object-contain z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                    <div class="relative w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-900 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:rotate-6 transition-transform overflow-hidden border border-white/10">
+                         <img src="<?php echo e(asset('images/logo.png')); ?>" alt="Logo" class="w-7 h-7 object-contain z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
                          <i class="ph-bold ph-buildings text-xl hidden z-10"></i>
                     </div>
                     
                     <div class="flex flex-col leading-tight">
                         <span class="font-bold text-white text-lg tracking-tight group-hover:text-blue-200 transition-colors">SMPN 3 LAKBOK</span>
                         <span class="font-bold text-slate-400 uppercase tracking-widest group-hover:text-yellow-400 transition-colors">Berjaya </span>
-                        <span class="text-[8px] font-bold text-slate-200 uppercase tracking-widest group-hover:text-yellow-200 transition-colors">(Berakhlak Mulia, Enerjik, Resilien, Jujur, Arif, Yakin, Adaptif) </span>
+                        <span class="text-[8px] font-bold text-slate-200 uppercase tracking-widest group-hover:text-yellow-200 transition-colors">Jujur dan Berkarakter </span>
                     </div>
                 </a>
 
@@ -92,51 +148,55 @@
                     <div class="flex gap-6 text-sm font-medium text-slate-300">
                         <a href="#" class="hover:text-white transition-colors">Beranda</a>
                         <a href="#profil" class="hover:text-white transition-colors">Profil</a>
-                        <a href="#akademik" class="hover:text-white transition-colors">Akademik</a>
-                        <a href="<?php echo e(route('ppdb.create')); ?>" class="hover:text-white transition-colors">PPDB</a>
+                        <a href="#akademik" class="hover:text-white transition-colors">Akademik</a>                        
                         <a href="#galeri" class="hover:text-white transition-colors">Galeri</a>
-                        <a href="<?php echo e(route('library.catalogue')); ?>"class="hover:text-white transition-colors">Katalog Buku</a> 
-                    </a>
-                        <a href="#kontak" class="hover:text-white transition-colors">Kontak</a>
-                    </div>
-                    
+                        <a href="#kontak" class="hover:text-white transition-colors">Kontak</a>   
+                    </div>                    
 
                     <!-- Divider -->
                     <div class="h-6 w-px bg-slate-700"></div>                   
                         
-                         <!-- PORTAL SISWA & LOGIN STAFF -->
-
-                        <a href="<?php echo e(route('portal.index')); ?>" class="text-sm font-bold text-blue-400 hover:text-white transition flex items-center gap-2">
+                         <?php if(Auth::guard('student')->check()): ?>
+                        <a href="<?php echo e(route('students.learning.index')); ?>" class="px-5 py-2.5 rounded-full bg-blue-600 text-white text-xs font-bold shadow-lg shadow-blue-500/40 hover:bg-blue-500 transition border-t border-white/20 flex items-center gap-2 group">
+                            <span>Dashboard</span>
+                            <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    <?php else: ?>
+                       
+                         <a href="<?php echo e(route('library.catalogue')); ?>" class="text-sm font-bold text-blue-400 hover:text-white transition flex items-center gap-2">
+                            Katalog Buku
+                        </a>
+                         <a href="<?php echo e(route('ppdb.create')); ?>" class="text-sm font-bold text-blue-400 hover:text-white transition flex items-center gap-2">
+                            PPDB
+                        </a> 
+                        <a href="<?php echo e(route('portal.index')); ?>" class="mr-2 text-sm font-bold text-blue-300 hover:text-white transition">
                             Portal Siswa
                         </a>
-
-                        <?php if(Auth::guard('student')->check()): ?>
-                            <a href="<?php echo e(route('students.learning.index')); ?>" class="px-5 py-2.5 rounded-full bg-blue-600 text-white text-xs font-bold shadow-lg shadow-blue-900/30 hover:bg-blue-500 transition border border-blue-500 flex items-center gap-2">
-                                <i class="ph-bold ph-student"></i> Dashboard
-                            </a>
-                        <?php else: ?>
-                            <a href="<?php echo e(route('login')); ?>" class="px-5 py-2.5 rounded-full bg-slate-800 text-slate-300 text-xs font-bold hover:text-white hover:bg-slate-700 transition border border-slate-700 flex items-center gap-2">
-                                <i class="ph-bold ph-key"></i> Login Staff
-                            </a>
-                        <?php endif; ?>
+                        <a href="<?php echo e(route('login')); ?>" class="px-5 py-2.5 rounded-full bg-slate-700 text-slate-200 text-xs font-bold hover:text-white hover:bg-slate-600 transition border border-slate-600 flex items-center gap-2">
+                            <i class="ph-bold ph-lock-key"></i> Staff
+                        </a>
+                    <?php endif; ?>
                     </div>
                 </div>
 
                 <!-- Mobile Menu Button -->
                 <div class="flex md:hidden items-center z-50">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 text-slate-300 hover:text-white rounded-lg transition-colors focus:outline-none">
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 text-slate-300 hover:text-white bg-white/10 rounded-lg transition-colors focus:outline-none backdrop-blur-sm">
                         <i class="ph-bold text-2xl" :class="mobileMenuOpen ? 'ph-x' : 'ph-list'"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Mobile Menu Overlay -->
+         <!-- Mobile Menu Overlay -->
         <div x-show="mobileMenuOpen" x-cloak
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-5"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             class="absolute top-0 left-0 w-full h-screen bg-slate-900/98 backdrop-blur-xl flex flex-col items-center justify-center space-y-8 z-40 md:hidden">
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-x-full"
+             x-transition:enter-end="opacity-100 translate-x-0"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-x-0"
+             x-transition:leave-end="opacity-0 translate-x-full"
+             class="fixed inset-0 bg-slate-900 z-40 md:hidden flex flex-col pt-24 px-6 overflow-y-auto">
              
             <nav class="flex flex-col items-center space-y-6 text-center w-full px-8">
                 <!-- Mobile PPDB Link (Updated Color) -->
@@ -165,55 +225,59 @@
     </nav>
 
     <!-- HERO SECTION (Updated to Match Dark Theme) -->
-    <div class="relative bg-slate-900 pt-28 pb-12 lg:pt-36 lg:pb-20 overflow-hidden min-h-[85vh] flex items-center">
+    <div id="home" class="relative bg-slate-900 pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden min-h-[90vh] flex items-center">
         <!-- Background -->
-        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
-        <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900/95 to-blue-900/90"></div>
+        <div class="absolute inset-0 z-0">
+             <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-30 transform scale-105 animate-[pulse_10s_ease-in-out_infinite]"></div>
+             <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/95 to-blue-950/80"></div>
+             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+        </div>
         
         <!-- Animated Blobs -->
-        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob"></div>
-        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-600 rounded-full mix-blend-multiply filter blur-[100px] opacity-20 animate-blob animation-delay-2000"></div>
+        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 animate-blob"></div>
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-600 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 animate-blob animation-delay-2000"></div>
 
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-10 lg:gap-20 z-10 w-full">
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-12 lg:gap-20 z-10 w-full">
             <!-- Text Content -->
             <div class="lg:w-1/2 text-center lg:text-left" data-aos="fade-right" data-aos-duration="1000">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-900/50 border border-blue-700/50 text-blue-300 text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-sm shadow-sm">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-md">
                     <span class="relative flex h-2 w-2">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                     </span>
                     Sistem Informasi Akademik Terpadu
                 </div>
-                <h1 class="text-4xl lg:text-6xl xl:text-7xl font-extrabold text-white tracking-tight mb-6 leading-[1.1] drop-shadow-sm">
+                <h1 class="text-4xl lg:text-6xl xl:text-7xl font-black text-white tracking-tight mb-6 leading-[1.1] drop-shadow-lg">
                     Membangun Generasi <br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-yellow-300">Cerdas & Berkarakter</span>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-300">Cerdas & Berkarakter</span>
                 </h1>
-                <p class="text-slate-300 text-lg mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
-                    SIMADU (Sistem Informasi Akademik Terpadu) ini adalah Platform digital terintegrasi SMPN 3 Lakbok untuk pemantauan akademik, absensi kehadiran, Pengembangan Karakter dan literasi siswa secara real-time.
+                <p class="text-slate-300 text-lg mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
+                    Platform digital terintegrasi SMPN 3 Lakbok untuk pemantauan akademik, absensi kehadiran, dan pengembangan karakter siswa secara real-time.
                 </p>
                 
-                <!-- BUTTON PPDB HERO SECTION (Diubah ke Biru untuk Konsistensi) -->
-                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-10">
-                    <a href="<?php echo e(route('ppdb.create')); ?>" class="px-8 py-4 rounded-full bg-blue-600 text-white font-bold text-sm shadow-lg shadow-blue-600/30 hover:bg-blue-500 hover:-translate-y-1 transition-all border-2 border-blue-500 flex items-center justify-center gap-2">
-                        <i class="ph-bold ph-student text-xl"></i> Daftar PPDB 2025
+                <!-- Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-12">
+                    <a href="<?php echo e(route('ppdb.create')); ?>" class="group relative px-8 py-4 rounded-full bg-blue-600 text-white font-bold text-sm shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] hover:-translate-y-1 transition-all overflow-hidden">
+                        <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1s_infinite]"></div>
+                        <span class="relative flex items-center gap-2"><i class="ph-bold ph-student text-xl"></i> Daftar PPDB 2025</span>
                     </a>
-                     <a href="<?php echo e(route('ppdb.check')); ?>" class="px-8 py-4 rounded-full bg-slate-800 text-white font-bold text-sm shadow-lg hover:bg-slate-700 hover:-translate-y-1 transition-all border border-slate-600 flex items-center justify-center gap-2">
+                     <a href="<?php echo e(route('ppdb.check')); ?>" class="px-8 py-4 rounded-full glass-dark text-white font-bold text-sm hover:bg-white/10 hover:-translate-y-1 transition-all flex items-center justify-center gap-2">
                         <i class="ph-bold ph-magnifying-glass text-xl"></i> Cek Kelulusan
                     </a>
                 </div>
                 
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-3 gap-4 max-w-md mx-auto lg:mx-0">
-                    <div class="bg-slate-800/50 backdrop-blur-md p-4 rounded-2xl border border-slate-700 shadow-lg group cursor-default hover:bg-slate-800 transition">
-                        <div class="text-3xl font-bold text-emerald-400 mb-1 group-hover:scale-110 transition-transform origin-left"><?php echo e($stats['hadir'] ?? 0); ?></div>
-                        <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Hadir</div>
+                    <div class="glass-dark p-4 rounded-2xl hover:bg-slate-800/80 transition group">
+                        <div class="text-3xl font-black text-emerald-400 mb-1 group-hover:scale-110 transition-transform origin-left"><?php echo e($stats['hadir'] ?? 0); ?></div>
+                        <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Hadir Hari Ini</div>
                     </div>
-                    <div class="bg-slate-800/50 backdrop-blur-md p-4 rounded-2xl border border-slate-700 shadow-lg group cursor-default hover:bg-slate-800 transition">
-                        <div class="text-3xl font-bold text-amber-400 mb-1 group-hover:scale-110 transition-transform origin-left"><?php echo e($stats['terlambat'] ?? 0); ?></div>
+                    <div class="glass-dark p-4 rounded-2xl hover:bg-slate-800/80 transition group">
+                        <div class="text-3xl font-black text-amber-400 mb-1 group-hover:scale-110 transition-transform origin-left"><?php echo e($stats['terlambat'] ?? 0); ?></div>
                         <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Terlambat</div>
                     </div>
-                    <div class="bg-slate-800/50 backdrop-blur-md p-4 rounded-2xl border border-slate-700 shadow-lg group cursor-default hover:bg-slate-800 transition">
-                        <div class="text-3xl font-bold text-rose-400 mb-1 group-hover:scale-110 transition-transform origin-left"><?php echo e($stats['tidak_hadir'] ?? 0); ?></div>
+                    <div class="glass-dark p-4 rounded-2xl hover:bg-slate-800/80 transition group">
+                        <div class="text-3xl font-black text-rose-400 mb-1 group-hover:scale-110 transition-transform origin-left"><?php echo e($stats['tidak_hadir'] ?? 0); ?></div>
                         <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Absen</div>
                     </div>
                 </div>
@@ -221,22 +285,26 @@
 
             <!-- Chart / Visual Content -->
             <div class="lg:w-1/2 w-full" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
-                <div class="relative bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl p-6 lg:p-8 border border-slate-700 ring-1 ring-white/10 transform hover:scale-[1.01] transition duration-500">
-                    <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-4">
-                        <h3 class="font-bold text-lg text-white flex items-center gap-2">
-                            <div class="p-2 bg-blue-900/50 rounded-lg text-blue-400 border border-blue-800">
+                <div class="relative glass-dark rounded-[2.5rem] p-6 lg:p-8 shadow-2xl transform hover:rotate-1 transition duration-500 border-t border-white/10">
+                    <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-4">
+                        <h3 class="font-bold text-lg text-white flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">
                                 <i class="ph-fill ph-chart-bar text-xl"></i>
                             </div>
                             Statistik Kehadiran
                         </h3>
-                        <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-900/30 text-emerald-400 px-2 py-1 rounded-md border border-emerald-800 flex items-center gap-1">
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-3 py-1.5 rounded-full border border-emerald-500/20 flex items-center gap-1.5">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live
                         </span>
                     </div>
                     <!-- Height disesuaikan -->
-                    <div class="h-[260px] lg:h-[280px] w-full relative">
+                    <div class="h-[280px] lg:h-[320px] w-full relative">
                          <canvas id="publicWeeklyChart"></canvas>
                     </div>
+                    
+                    <!-- Decorative Elements -->
+                    <div class="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl -z-10 blur-xl opacity-40"></div>
+                    <div class="absolute -bottom-4 -left-4 w-20 h-20 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-2xl -z-10 blur-xl opacity-40"></div>
                 </div>
             </div>
         </div>
@@ -248,6 +316,7 @@
              </svg>
         </div>
     </div>    
+
     
     <!-- ========================================== -->
     <!-- NEW SECTION: JALUR PENDAFTARAN PPDB        -->
@@ -393,13 +462,11 @@
         </div>
     </div> 
 
-    <!-- MENU AKSES (ANIMATED) -->
-    <div class="bg-slate-50 py-16 lg:py-20 relative z-20 -mt-8 lg:-mt-12 overflow-hidden">
-        
-        <!-- Animated Background Blobs -->
-        <div class="absolute inset-0 pointer-events-none z-0">
-            <div class="absolute top-10 left-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-            <div class="absolute top-10 right-10 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+     <!-- QUICK ACCESS MENU -->
+    <div class="bg-slate-50 py-20 relative z-20 overflow-hidden">
+        <div class="absolute inset-0 pointer-events-none">
+            <div class="absolute top-10 left-10 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+            <div class="absolute top-10 right-10 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -408,115 +475,32 @@
                 <p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">Menu layanan digital terintegrasi untuk seluruh civitas akademika.</p>
             </div>
             
-            <div class="flex flex-wrap justify-center gap-6 lg:gap-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 md:gap-6">
+                <?php
+                    $menus = [
+                        ['icon' => 'ph-student', 'color' => 'blue', 'title' => 'PPDB Online', 'desc' => 'Pendaftaran Siswa Baru', 'link' => route('ppdb.create')],
+                        ['icon' => 'ph-graduation-cap', 'color' => 'purple', 'title' => 'Cek Kelulusan', 'desc' => 'Pengumuman Kelas IX', 'link' => route('graduation.index')],
+                        ['icon' => 'ph-desktop', 'color' => 'indigo', 'title' => 'Portal Siswa', 'desc' => 'Dashboard Akademik', 'link' => route('portal.index')],
+                        ['icon' => 'ph-megaphone', 'color' => 'rose', 'title' => 'Pengaduan', 'desc' => 'Layanan Suara Siswa', 'link' => route('student.complaints.index')],
+                        ['icon' => 'ph-chalkboard-simple', 'color' => 'teal', 'title' => 'E-Learning', 'desc' => 'LMS & Tugas Online', 'link' => route('student.login')],
+                        ['icon' => 'ph-monitor-play', 'color' => 'amber', 'title' => 'Ujian CBT', 'desc' => 'Portal Ujian Online', 'link' => route('student.login')],
+                        ['icon' => 'ph-qr-code', 'color' => 'emerald', 'title' => 'Mesin Absensi', 'desc' => 'Mode Kiosk Sekolah', 'link' => route('kiosk.show')],
+                        ['icon' => 'ph-books', 'color' => 'purple', 'title' => 'E-Library', 'desc' => 'Perpustakaan Digital', 'link' => route('library.kiosk.index')],
+                        ['icon' => 'ph-chalkboard-teacher', 'color' => 'slate', 'title' => 'Login Staff', 'desc' => 'Admin & Guru', 'link' => route('login')],
+                        ['icon' => 'ph-presentation-chart', 'color' => 'cyan', 'title' => 'Jurnal Mengajar', 'desc' => 'Pembelajaran Guru', 'link' => route('teaching.index')],                       
 
-                <!-- PPDB ONLINE CARD (DIUBAH MENJADI CARD PUTIH/BERSIH) -->
-                <a href="<?php echo e(route('ppdb.create')); ?>" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 border border-slate-100 hover:border-blue-400 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
-                    <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
-                        <i class="ph-bold ph-student text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">PPDB Online</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed">Pendaftaran siswa baru tahun ajaran 2025/2026. Daftar sekarang!</p>
-                </a>
+                    ];  
+                ?>
 
-                  <!-- PENGUMUMAN KELULUSAN -->
-                <a href="<?php echo e(route('graduation.index')); ?>" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up">
-                    <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
-                        <i class="ph-duotone ph-graduation-cap text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-purple-600 transition-colors">Cek Kelulusan</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed">Pengumuman resmi kelulusan siswa kelas IX Tahun Pelajaran <?php echo e(date('Y')); ?>.</p>
-                </a>
-
-                <!-- Portal Siswa -->
-                <a href="<?php echo e(route('portal.index')); ?>" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 border border-slate-100 hover:border-blue-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="100">
-                    <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
-                        <i class="ph-duotone ph-student text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-blue-600 transition-colors">Portal Siswa</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed">Cek kehadiran, nilai akademik, dan poin kedisiplinan.</p>
-                </a>
-
-                <!-- LAYANAN PENGADUAN SISWA (BARU) -->
-                <a href="<?php echo e(route('student.complaints.index')); ?>" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-rose-500/10 border border-slate-100 hover:border-rose-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="120">
-                    <div class="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 mb-6 group-hover:bg-rose-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
-                        <i class="ph-duotone ph-megaphone text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-rose-600 transition-colors">Layanan Pengaduan</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed">Laporkan masalah, bullying, atau kehilangan secara aman dan rahasia.</p>
-                </a>
-
-                <!-- E-LEARNING / LMS -->
-                <a href="<?php echo e(route('student.login')); ?>" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-teal-500/10 border border-slate-100 hover:border-teal-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="150">
-                    <div class="w-16 h-16 bg-teal-50 rounded-2xl flex items-center justify-center text-teal-600 mb-6 group-hover:bg-teal-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
-                        <i class="ph-duotone ph-chalkboard-simple text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-teal-600 transition-colors">E-Learning (LMS)</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed">Ruang belajar digital, materi pelajaran, dan pengumpulan tugas.</p>
-                </a>
-
-                 <!-- UJIAN CBT -->                
-                <a href="<?php echo e(route('student.login')); ?>" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-rose-500/10 border border-slate-100 hover:border-rose-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="200">
-                    <div class="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600 mb-6 group-hover:bg-rose-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
-                        <i class="ph-duotone ph-desktop text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-rose-600 transition-colors">Ujian CBT</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed">Login peserta ujian berbasis komputer (PTS/PAS).</p>
-                </a>
-                
-                <!-- Mesin Absensi -->
-                <a href="<?php echo e(route('kiosk.show')); ?>" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-purple-500/10 border border-slate-100 hover:border-purple-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="250">
-                    <div class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-6 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
-                        <i class="ph-duotone ph-qr-code text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-purple-600 transition-colors">Mesin Absensi</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed">Mode Kiosk untuk pemindaian kartu pelajar saat kehadiran.</p>
-                </a>
-                
-                <!-- E-Library -->
-                <a href="<?php echo e(route('library.kiosk.index')); ?>" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-emerald-500/10 border border-slate-100 hover:border-emerald-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="300">
-                    <div class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
-                        <i class="ph-duotone ph-books text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors">E-Library</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed">Buku tamu digital dan katalog perpustakaan sekolah.</p>
-                </a>
-                
-                <!-- Login Guru -->
-                <a href="<?php echo e(route('login')); ?>" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-orange-500/10 border border-slate-100 hover:border-orange-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="350">
-                    <div class="w-16 h-16 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 mb-6 group-hover:bg-orange-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
-                        <i class="ph-duotone ph-chalkboard-teacher text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-orange-600 transition-colors">Login Staff</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed">Panel administrasi untuk Guru, Wali Kelas dan TU.</p>
-                </a>
-
-                <!-- JURNAL MENGAJAR -->
-                <a href="<?php echo e(route('teaching.index')); ?>" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 border border-slate-100 hover:border-indigo-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="400">
-                    <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
-                        <i class="ph-duotone ph-presentation-chart text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">Jurnal Mengajar</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed">Akses cepat guru untuk mengisi jurnal KBM dan absensi kelas.</p>
-                </a>
-
-                <!-- PEMILU OSIS -->
-                <a href="https://pemilu-osis.smpn3lakbok.sch.id/" target="_blank" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-cyan-500/10 border border-slate-100 hover:border-cyan-200 transition-all duration-300 hover:-translate-y-2 w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="450">
-                    <div class="w-16 h-16 bg-cyan-50 rounded-2xl flex items-center justify-center text-cyan-600 mb-6 group-hover:bg-cyan-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
-                        <i class="ph-duotone ph-check-square-offset text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-cyan-600 transition-colors">Pemilu OSIS</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed">Platform E-Voting Pemilihan Ketua OSIS masa bakti terbaru.</p>
-                </a>
-
-                <!-- BUKU TAMU -->
-                <div @click="guestBookModalOpen = true" class="group bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:shadow-pink-500/10 border border-slate-100 hover:border-pink-200 transition-all duration-300 hover:-translate-y-2 cursor-pointer w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex-1 min-w-[280px]" data-aos="fade-up" data-aos-delay="500">
-                    <div class="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center text-pink-600 mb-6 group-hover:bg-pink-600 group-hover:text-white transition-all duration-300 group-hover:scale-110 shadow-inner">
-                        <i class="ph-duotone ph-book-open-text text-3xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2 group-hover:text-pink-600 transition-colors">Buku Tamu</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed">Isi buku tamu kunjungan sekolah secara digital.</p>
-                </div>
+                <?php $__currentLoopData = $menus; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $menu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <a href="<?php echo e($menu['link']); ?>" class="glass bg-white/60 p-6 rounded-2xl hover:bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group text-center md:text-left flex flex-col items-center md:items-start" data-aos="fade-up" data-aos-delay="<?php echo e($loop->index * 50); ?>">
+                        <div class="w-12 h-12 rounded-xl bg-<?php echo e($menu['color']); ?>-50 text-<?php echo e($menu['color']); ?>-600 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 group-hover:bg-<?php echo e($menu['color']); ?>-600 group-hover:text-white transition-all shadow-sm">
+                            <i class="ph-duotone <?php echo e($menu['icon']); ?>"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 group-hover:text-<?php echo e($menu['color']); ?>-600 transition-colors"><?php echo e($menu['title']); ?></h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed hidden md:block"><?php echo e($menu['desc']); ?></p>
+                    </a>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
         </div>
     </div>  
@@ -556,25 +540,27 @@
                 <!-- Background Decoration -->
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
                 
-                <div class="relative shrink-0" data-aos="fade-right">
-                    <div class="w-48 h-48 md:w-56 md:h-56 rounded-full border-4 border-white/20 overflow-hidden shadow-lg bg-white">
-                         <img src="<?php echo e(asset('images/kasek.png')); ?>" loading="lazy" alt="Kepala Sekolah" class="w-full h-full object-cover">
+                 <div class="relative shrink-0" data-aos="zoom-in">
+                    <div class="w-48 h-48 md:w-64 md:h-64 rounded-full border-4 border-slate-700 p-2 relative z-10 bg-slate-800">
+                        <img src="<?php echo e(asset('images/kasek.png')); ?>" alt="Kepala Sekolah" class="w-full h-full object-cover rounded-full filter grayscale hover:grayscale-0 transition-all duration-500">
                     </div>
-                    <div class="absolute bottom-2 right-2 bg-white text-blue-600 rounded-full p-2 shadow-lg">
-                        <i class="ph-fill ph-quotes text-xl"></i>
+                    <div class="absolute -bottom-4 -right-4 bg-yellow-500 text-slate-900 w-12 h-12 rounded-full flex items-center justify-center shadow-lg z-20">
+                        <i class="ph-fill ph-quotes text-2xl"></i>
                     </div>
                 </div>
                 
-                <div class="text-center md:text-left text-white" data-aos="fade-left">
-                    <h3 class="text-2xl md:text-3xl font-bold mb-4">Sambutan Kepala Sekolah</h3>
-                    <p class="text-blue-100 text-lg italic leading-relaxed mb-6">
-                        "Pendidikan bukan sekadar transfer ilmu, melainkan proses pembentukan karakter dan penggalian potensi diri. Mari bersama membangun generasi emas yang berakhlak mulia dan kompeten di era global."
+                 <div class="text-center md:text-left text-white relative z-10" data-aos="fade-left">
+                    <span class="text-blue-400 font-bold uppercase tracking-widest text-xs mb-2 block">Sambutan Kepala Sekolah</span>
+                    <h3 class="text-3xl md:text-4xl font-black mb-6 leading-tight">Membangun Generasi Emas</h3>
+                    <p class="text-slate-300 text-lg italic leading-relaxed mb-8 font-light">
+                        "Pendidikan bukan sekadar transfer ilmu, melainkan proses pembentukan karakter dan penggalian potensi diri. Mari bersama membangun generasi yang berakhlak mulia dan kompeten di era global."
                     </p>
                     <div>
-                        <p class="font-bold text-xl">TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.</p>
-                        <p class="text-blue-200 text-sm opacity-80">Kepala SMPN 3 Lakbok</p>
+                        <p class="font-bold text-xl text-white">TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.</p>
+                        <p class="text-blue-400 font-medium">Kepala SMPN 3 Lakbok</p>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
