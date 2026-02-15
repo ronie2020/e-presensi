@@ -86,7 +86,7 @@ class TeachingController extends Controller
         return view('teaching.show', compact('session', 'allStudents', 'attendances', 'isOpen', 'stats'));
     }
 
-    // --- [BARU] HALAMAN EDIT (REVISI SETELAH TUTUP) ---
+    // --- HALAMAN EDIT (REVISI SETELAH TUTUP) ---
     public function edit($id)
     {
         // Sama seperti show, tapi diarahkan ke view teaching.edit

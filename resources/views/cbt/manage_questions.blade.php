@@ -1,164 +1,174 @@
 <x-app-layout>
-    {{-- MathJax Config (Untuk Rumus Matematika) --}}
+    {{-- LOAD TRIX EDITOR RESOURCES --}}
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2.0.8/dist/trix.css">
+    <script type="text/javascript" src="https://unpkg.com/trix@2.0.8/dist/trix.umd.min.js"></script>
+    
+    <style>
+        trix-toolbar .trix-button-group--file-tools { display: none; }
+        trix-editor { min-height: 150px; background-color: #f8fafc; border-radius: 1rem; border-color: #e2e8f0; }
+        .trix-content ul { list-style-type: disc; padding-left: 1.5rem; }
+        .trix-content ol { list-style-type: decimal; padding-left: 1.5rem; }
+    </style>
+
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
-            svg: { fontCache: 'global' }
+            svg: { fontCache: 'global' },
+            startup: {
+                ready: () => {
+                    MathJax.startup.defaultReady();
+                    window.renderMath = () => { MathJax.typesetPromise(); };
+                }
+            }
         };
     </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <div x-data="{ 
         showImportModal: false, 
+        showBankModal: false, 
+        showExportBankModal: false, // [BARU] Modal Simpan ke Bank
         showEditModal: false,
         questionSearch: '', 
         editState: {
-            url: '',
-            question_text: '',
-            question_image: '', 
+            url: '', question_text: '', question_image: '', 
             option_A: '', option_B: '', option_C: '', option_D: '',
             correct_answer: 'A', score_weight: 2
         },
         newImagePreview: null,
         deleteImage: false,
+        createQuestionText: '',
+        exportMode: 'new', // [BARU] State untuk mode export
         
+        init() {
+            this.$watch('questionSearch', () => {
+                this.$nextTick(() => { if (window.renderMath) window.renderMath(); });
+            });
+        },
+
         openEdit(data, url) {
             this.editState = { ...data, url: url };
             this.newImagePreview = null;
             this.deleteImage = false;
             this.showEditModal = true;
+            this.$nextTick(() => {
+                const trix = document.getElementById('edit-trix-editor');
+                if(trix) trix.editor.loadHTML(this.editState.question_text);
+                if (window.renderMath) window.renderMath();
+            });
         },
         
         handleEditImage(event) {
             const file = event.target.files[0];
-            if (file) {
-                this.newImagePreview = URL.createObjectURL(file);
-                this.deleteImage = false;
-            }
+            if (file) { this.newImagePreview = URL.createObjectURL(file); this.deleteImage = false; }
         },
 
         removeCurrentImage() {
-            this.deleteImage = true;
-            this.newImagePreview = null;
-            this.$refs.editFileInput.value = '';
+            this.deleteImage = true; this.newImagePreview = null; this.$refs.editFileInput.value = '';
+        },
+
+        updatePreview(elementId) {
+            this.$nextTick(() => {
+                const previewEl = document.getElementById(elementId);
+                if (window.MathJax && previewEl) MathJax.typesetPromise([previewEl]);
+            });
         }
     }">
         
         <x-slot name="header">
-            <h2 class="font-semibold text-xl text-slate-800 leading-tight">
-                {{ __('Kelola Soal Ujian') }}
-            </h2>
+            <h2 class="font-semibold text-xl text-slate-800 leading-tight">{{ __('Kelola Soal Ujian') }}</h2>
         </x-slot>
 
         <div class="py-8 sm:py-10 font-sans text-slate-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
                 
-                {{-- HERO INFO UJIAN --}}
+                {{-- HERO INFO --}}
                 <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
                     <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                    
                     <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                         <div>
                             <div class="flex items-center gap-2 mb-2">
-                                <a href="{{ route('cbt.index') }}" class="text-xs font-bold text-blue-300 hover:text-white transition flex items-center gap-1">
-                                    <i class="ph-bold ph-arrow-left"></i> Dashboard
-                                </a>
+                                <a href="{{ route('cbt.index') }}" class="text-xs font-bold text-blue-300 hover:text-white transition flex items-center gap-1"><i class="ph-bold ph-arrow-left"></i> Dashboard</a>
                                 <span class="text-white/30 text-xs">•</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wide bg-white/10 text-white border border-white/10">
-                                    {{ $exam->subject_name }}
-                                </span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wide bg-white/10 text-white border border-white/10">{{ $exam->subject_name }}</span>
                             </div>
                             <h1 class="text-3xl font-black tracking-tight leading-none text-white mb-1">{{ $exam->title }}</h1>
                         </div>
-                        
-                        <div class="flex items-center gap-4 w-full md:w-auto">
-                            <button @click="showImportModal = true" class="group flex-1 md:flex-none px-5 py-3 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-500 transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95">
-                                <i class="ph-bold ph-microsoft-excel-logo text-xl"></i> 
-                                <span>Import Excel</span>
+                        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                            {{-- [BARU] Tombol Simpan Ke Bank --}}
+                            @if($exam->questions->count() > 0)
+                                <button @click="showExportBankModal = true" class="group px-4 py-2.5 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition flex items-center justify-center gap-2 border border-white/10 text-xs">
+                                    <i class="ph-bold ph-upload-simple text-lg"></i> <span>Simpan ke Bank</span>
+                                </button>
+                            @endif
+
+                            {{-- Tombol Tarik Bank Soal --}}
+                            <button @click="showBankModal = true" class="group px-4 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-500 transition flex items-center justify-center gap-2 shadow-lg active:scale-95 border border-indigo-400 text-xs">
+                                <i class="ph-bold ph-download-simple text-lg"></i> <span>Ambil Bank</span>
                             </button>
 
-                            <div class="hidden md:block bg-white/10 backdrop-blur-md px-5 py-2 rounded-2xl border border-white/10 text-center min-w-[100px]">
-                                <p class="text-3xl font-black text-white leading-none">{{ $exam->questions->count() }}</p>
-                                <p class="text-[9px] font-bold text-blue-300 uppercase tracking-wider mt-1">Total Soal</p>
-                            </div>
+                            <button @click="showImportModal = true" class="group px-4 py-2.5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 transition flex items-center justify-center gap-2 shadow-lg active:scale-95 border border-emerald-400 text-xs">
+                                <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> <span>Import Excel</span>
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <div class="flex flex-col lg:flex-row gap-8 items-start">
                     
-                    {{-- FORM INPUT MANUAL (KIRI - Sticky) --}}
+                    {{-- INPUT MANUAL --}}
                     <div class="w-full lg:w-2/5 order-2 lg:order-1">
-                        <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 lg:sticky lg:top-8"
-                             x-data="{ createPreview: null }">
-                             
+                        <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 lg:sticky lg:top-8">
                             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-50">
-                                <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg shadow-sm border border-blue-100">
-                                    <i class="ph-fill ph-plus-circle"></i>
-                                </div>
+                                <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg shadow-sm border border-blue-100"><i class="ph-fill ph-plus-circle"></i></div>
                                 <div>
                                     <h3 class="font-black text-slate-800 text-lg leading-none">Buat Soal Baru</h3>
-                                    <p class="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wider">Input Manual</p>
+                                    <p class="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wider">Editor Visual</p>
                                 </div>
                             </div>
 
                             <form action="{{ route('cbt.questions.store', $exam->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5" id="createQuestionForm">
                                 @csrf
                                 
-                                {{-- 1. INPUT PERTANYAAN --}}
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pertanyaan</label>
-                                    <textarea name="question_text" rows="4" required class="w-full rounded-2xl border-slate-200 text-sm focus:ring-blue-500 focus:border-blue-500 bg-slate-50 focus:bg-white p-4 font-medium text-slate-700 leading-relaxed placeholder:text-slate-400" placeholder="Tulis pertanyaan di sini... (Gunakan $...$ untuk rumus matematika)"></textarea>
+                                    <input id="q_input_create" type="hidden" name="question_text">
+                                    <trix-editor input="q_input_create" @trix-change="createQuestionText = $event.target.value; updatePreview('create-preview')" placeholder="Tulis soal di sini..." class="prose prose-sm max-w-none"></trix-editor>
+                                    <div x-show="createQuestionText.length > 0" class="mt-2 bg-slate-50 border border-slate-200 rounded-xl p-3"><p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Preview Rumus:</p><div id="create-preview" class="text-sm text-slate-800 trix-content" x-html="createQuestionText"></div></div>
                                 </div>
 
-                                {{-- 2. INPUT GAMBAR (DIPULIHKAN) --}}
-                                <div>
+                                <div x-data="{ createPreviewImage: null }">
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Gambar (Opsional)</label>
-                                    <template x-if="createPreview">
+                                    <template x-if="createPreviewImage">
                                         <div class="mb-3 relative w-full group">
-                                            <img :src="createPreview" class="w-full h-40 object-cover rounded-2xl border border-slate-200">
-                                            <button type="button" @click="createPreview = null; $refs.fileInput.value = ''" class="absolute top-2 right-2 bg-rose-500 text-white p-1.5 rounded-xl shadow-lg hover:bg-rose-600 transition transform hover:scale-110">
-                                                <i class="ph-bold ph-trash"></i>
-                                            </button>
+                                            <img :src="createPreviewImage" class="w-full h-40 object-cover rounded-2xl border border-slate-200">
+                                            <button type="button" @click="createPreviewImage = null; $refs.fileInput.value = ''" class="absolute top-2 right-2 bg-rose-500 text-white p-1.5 rounded-xl shadow-lg hover:bg-rose-600 transition"><i class="ph-bold ph-trash"></i></button>
                                         </div>
                                     </template>
-                                    <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all group/upload bg-slate-50">
-                                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <i class="ph-duotone ph-image text-2xl text-slate-300 group-hover/upload:text-blue-500 mb-1 transition-colors"></i>
-                                            <p class="text-xs text-slate-400 group-hover/upload:text-slate-600 font-bold">Upload Gambar</p>
-                                        </div>
-                                        <input type="file" x-ref="fileInput" name="question_image" @change="createPreview = URL.createObjectURL($event.target.files[0])" accept="image/*" class="hidden">
+                                    <label class="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all bg-slate-50">
+                                        <div class="flex items-center gap-2"><i class="ph-duotone ph-image text-xl text-slate-400"></i><span class="text-xs font-bold text-slate-500">Upload Gambar</span></div>
+                                        <input type="file" x-ref="fileInput" name="question_image" @change="createPreviewImage = URL.createObjectURL($event.target.files[0])" accept="image/*" class="hidden">
                                     </label>
                                 </div>
 
-                                {{-- 3. INPUT PILIHAN GANDA --}}
                                 <div class="space-y-3 pt-2">
                                     <label class="block text-xs font-bold text-slate-400 uppercase ml-1">Pilihan Jawaban</label>
                                     @foreach(['A','B','C','D'] as $opt)
                                     <div class="flex gap-3 items-center group">
                                         <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-black text-sm group-focus-within:bg-blue-600 group-focus-within:text-white transition-colors shrink-0">{{ $opt }}</span>
-                                        <input type="text" name="option_{{ $opt }}" required class="flex-1 rounded-xl border-slate-200 bg-white text-sm py-2.5 px-4 focus:ring-blue-500 focus:border-blue-500 font-medium transition-shadow focus:shadow-md" placeholder="Jawaban {{ $opt }}">
+                                        <input type="text" name="option_{{ $opt }}" required class="flex-1 rounded-xl border-slate-200 bg-white text-sm py-2.5 px-4 focus:ring-blue-500 focus:border-blue-500 font-medium" placeholder="Jawaban {{ $opt }}">
                                     </div>
                                     @endforeach
                                 </div>
 
-                                {{-- 4. KUNCI & BOBOT --}}
                                 <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Kunci Jawaban</label>
-                                        <div class="relative">
-                                            <select name="correct_answer" required class="w-full rounded-xl border-slate-200 text-sm font-bold text-slate-700 bg-slate-50 cursor-pointer h-11 px-4 appearance-none focus:ring-blue-500 focus:border-blue-500">
-                                                <option value="A">A</option>
-                                                <option value="B">B</option>
-                                                <option value="C">C</option>
-                                                <option value="D">D</option>
-                                            </select>
-                                            <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
-                                        </div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Kunci</label>
+                                        <div class="relative"><select name="correct_answer" required class="w-full rounded-xl border-slate-200 text-sm font-bold text-slate-700 bg-slate-50 h-11 px-4 appearance-none focus:ring-blue-500"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select><div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div></div>
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Bobot Poin</label>
-                                        <input type="number" name="score_weight" value="2" required class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-center h-11 focus:ring-blue-500 focus:border-blue-500">
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Bobot</label>
+                                        <input type="number" name="score_weight" value="2" required class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-center h-11 focus:ring-blue-500">
                                     </div>
                                 </div>
 
@@ -169,74 +179,45 @@
                         </div>
                     </div>
 
-                    {{-- LIST SOAL (KANAN) --}}
+                    {{-- LIST SOAL --}}
                     <div class="w-full lg:w-3/5 order-1 lg:order-2 space-y-6">
                         <div class="flex flex-col sm:flex-row justify-between items-center px-2 gap-4">
                             <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
                                 <i class="ph-fill ph-list-dashes text-blue-500"></i> Daftar Soal
-                                <span class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
-                                    {{ $exam->questions->count() }}
-                                </span>
+                                <span class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">{{ $exam->questions->count() }}</span>
                             </h3>
-                            
-                            {{-- Input Pencarian --}}
                             <div class="relative w-full sm:w-64">
                                 <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input type="text" x-model="questionSearch" placeholder="Cari isi pertanyaan..." 
-                                       class="w-full pl-10 pr-4 py-2 text-sm font-bold border-slate-200 rounded-xl focus:ring-blue-500 bg-white shadow-sm">
+                                <input type="text" x-model="questionSearch" placeholder="Cari isi pertanyaan..." class="w-full pl-10 pr-4 py-2 text-sm font-bold border-slate-200 rounded-xl focus:ring-blue-500 bg-white shadow-sm transition">
                             </div>
                         </div>
                         
                         @forelse($exam->questions as $index => $q)
-                            {{-- Logic x-show untuk filter --}}
-                            <div x-show="questionSearch === '' || '{{ strtolower(addslashes($q->question_text)) }}'.includes(questionSearch.toLowerCase())"
+                            <div x-show="questionSearch === '' || '{{ strtolower(addslashes(strip_tags($q->question_text))) }}'.includes(questionSearch.toLowerCase())"
                                  class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative group hover:border-blue-200 hover:shadow-lg transition-all duration-300">
-                                
-                                <!-- Nomor -->
-                                <div class="absolute top-6 left-6 w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center font-black text-slate-500 text-sm group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-inner">
-                                    {{ $index + 1 }}
-                                </div>
-                                
-                                <!-- Konten -->
+                                <div class="absolute top-6 left-6 w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center font-black text-slate-500 text-sm group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-inner">{{ $index + 1 }}</div>
                                 <div class="pl-16">
                                     @if($q->question_image)
                                         <div class="mb-4 group/img relative w-fit">
-                                            {{-- Fitur Image Zoom pada Click --}}
-                                            <img src="{{ asset('storage/' . $q->question_image) }}" 
-                                                 class="max-h-48 rounded-2xl border border-slate-100 shadow-sm object-cover cursor-zoom-in hover:opacity-90 transition" 
-                                                 alt="Gambar Soal"
-                                                 onclick="viewImage('{{ asset('storage/' . $q->question_image) }}')">
-                                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover/img:opacity-100 transition">
-                                                <span class="bg-black/50 text-white p-2 rounded-full backdrop-blur-sm"><i class="ph-bold ph-magnifying-glass-plus"></i></span>
-                                            </div>
+                                            <img src="{{ asset('storage/' . $q->question_image) }}" class="max-h-48 rounded-2xl border border-slate-100 shadow-sm object-cover cursor-zoom-in hover:opacity-90 transition" onclick="viewImage('{{ asset('storage/' . $q->question_image) }}')">
                                         </div>
                                     @endif
-                                    
-                                    <p class="text-slate-800 font-bold text-lg mb-5 leading-relaxed whitespace-pre-line">{{ $q->question_text }}</p>
-                                    
-                                    <!-- Opsi -->
+                                    <div class="text-slate-800 font-medium text-lg mb-5 leading-relaxed trix-content prose prose-sm max-w-none">{!! $q->question_text !!}</div>
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                                         @foreach(['A','B','C','D'] as $opt)
                                             @php $val = isset($q->{'option_'.$opt}) ? $q->{'option_'.$opt} : ($q->options[$opt] ?? '-'); @endphp
                                             <div class="flex items-start gap-3 p-2.5 rounded-xl border transition-colors {{ $opt == $q->correct_answer ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50/50 border-transparent' }}">
-                                                <span class="w-6 h-6 flex items-center justify-center rounded-lg border {{ $opt == $q->correct_answer ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 text-slate-400 bg-white' }} text-[10px] font-black shrink-0 mt-0.5">
-                                                    {{ $opt }}
-                                                </span>
+                                                <span class="w-6 h-6 flex items-center justify-center rounded-lg border {{ $opt == $q->correct_answer ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 text-slate-400 bg-white' }} text-[10px] font-black shrink-0 mt-0.5">{{ $opt }}</span>
                                                 <span class="leading-relaxed {{ $opt == $q->correct_answer ? 'text-emerald-800 font-bold' : 'text-slate-600 font-medium' }}">{{ $val }}</span>
                                             </div>
                                         @endforeach
                                     </div>
-                                    
                                     <div class="mt-5 pt-3 border-t border-slate-50 flex items-center gap-3">
                                         <span class="text-[10px] font-bold text-slate-400 uppercase bg-slate-50 px-2 py-1 rounded-md border border-slate-100">Bobot: {{ $q->score_weight }} Poin</span>
                                     </div>
                                 </div>
-
-                                <!-- Action Buttons -->
                                 <div class="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                    <button 
-                                        type="button"
-                                        @click="openEdit({
+                                    <button type="button" @click="openEdit({
                                             question_text: {{ json_encode($q->question_text) }},
                                             question_image: {{ json_encode($q->question_image) }}, 
                                             option_A: {{ json_encode($q->option_A ?? '') }},
@@ -246,23 +227,16 @@
                                             correct_answer: '{{ $q->correct_answer }}',
                                             score_weight: {{ $q->score_weight }}
                                         }, '{{ route('cbt.questions.update', $q->id) }}')"
-                                        class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 shadow-sm flex items-center justify-center transition-all hover:scale-105" title="Edit">
-                                        <i class="ph-bold ph-pencil-simple text-lg"></i>
-                                    </button>
-
+                                        class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 shadow-sm flex items-center justify-center transition-all hover:scale-105"><i class="ph-bold ph-pencil-simple text-lg"></i></button>
                                     <form action="{{ route('cbt.questions.destroy', $q->id) }}" method="POST" class="delete-form">
                                         @csrf @method('DELETE')
-                                        <button type="button" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 shadow-sm flex items-center justify-center transition-all hover:scale-105 btn-delete" title="Hapus">
-                                            <i class="ph-bold ph-trash text-lg"></i>
-                                        </button>
+                                        <button type="button" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 shadow-sm flex items-center justify-center transition-all hover:scale-105 btn-delete"><i class="ph-bold ph-trash text-lg"></i></button>
                                     </form>
                                 </div>
                             </div>
                         @empty
                             <div class="text-center py-16 bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                                <div class="w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-4 text-slate-300 animate-pulse">
-                                    <i class="ph-duotone ph-clipboard-text text-4xl"></i>
-                                </div>
+                                <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300 animate-pulse"><i class="ph-duotone ph-clipboard-text text-4xl"></i></div>
                                 <h3 class="text-slate-800 font-black text-xl mb-1">Bank Soal Kosong</h3>
                                 <p class="text-slate-500 text-sm max-w-xs mx-auto font-medium">Mulai tambahkan soal secara manual atau import dari file Excel.</p>
                             </div>
@@ -270,222 +244,229 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        {{-- MODAL IMPORT --}}
-        <div x-show="showImportModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
-             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showImportModal = false"></div>
-            <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all sm:w-full sm:max-w-md border border-slate-100">
-                    <div class="bg-white p-8 text-center">
-                        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-50 mb-6 border border-emerald-100 shadow-sm">
-                            <i class="ph-duotone ph-microsoft-excel-logo text-emerald-600 text-3xl"></i>
+            {{-- MODAL IMPORT BANK (Tarik Soal) --}}
+            <div x-show="showBankModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
+                 <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showBankModal = false"></div>
+                <div class="flex min-h-screen items-center justify-center p-4">
+                    <div class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all sm:w-full sm:max-w-md border border-slate-100">
+                        <div class="bg-white p-8 text-center">
+                            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-indigo-50 mb-6 border border-indigo-100 shadow-sm"><i class="ph-duotone ph-books text-indigo-600 text-3xl"></i></div>
+                            <h3 class="text-2xl font-black text-slate-800 mb-2">Tarik Soal dari Bank</h3>
+                            <p class="text-sm text-slate-500 mb-6 font-medium">Pilih bank soal yang tersedia untuk menyalin soalnya ke ujian ini.</p>
+                            @php $banks = \App\Models\CbtQuestionBank::withCount('questions')->orderBy('created_at', 'desc')->get(); @endphp
+                            <form action="{{ route('cbt.import_from_bank', $exam->id) }}" method="POST" class="space-y-5 text-left">
+                                @csrf
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pilih Paket Bank Soal</label>
+                                    <select name="bank_id" required class="w-full rounded-xl border-slate-200 font-bold text-slate-700 py-3 px-4 focus:ring-indigo-500 bg-white">
+                                        <option value="" disabled selected>-- Pilih Bank Soal --</option>
+                                        @foreach($banks as $b)
+                                            <option value="{{ $b->id }}">{{ $b->title }} ({{ $b->subject_name }} - Kls {{ $b->class_level }}) - {{ $b->questions_count }} Soal</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button type="button" @click="showBankModal = false" class="flex-1 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50">Batal</button>
+                                    <button type="submit" class="flex-1 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-lg">Tarik Soal</button>
+                                </div>
+                            </form>
                         </div>
-                        <h3 class="text-2xl font-black text-slate-800 mb-2">Import Soal Excel</h3>
-                        
-                        <p class="text-sm text-slate-500 mb-2 font-medium">Silakan download template di bawah ini agar format sesuai.</p>
-                        
-                        <div class="mb-6">
-                            <a href="{{ route('cbt.questions.template') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-200 hover:text-slate-800 transition border border-slate-200">
-                                <i class="ph-bold ph-download-simple text-lg"></i> Download Template Excel
-                            </a>
-                        </div>
-                        
-                        <form action="{{ route('cbt.questions.import', $exam->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5 text-left" id="importQuestionForm">
-                            @csrf
-                            <label class="block w-full border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center hover:bg-slate-50 hover:border-emerald-300 transition-all cursor-pointer relative group">
-                                <input type="file" name="file" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                                <i class="ph-duotone ph-cloud-arrow-up text-4xl text-slate-300 group-hover:text-emerald-500 mb-3 transition-colors inline-block"></i>
-                                <p class="text-sm font-bold text-slate-600 group-hover:text-emerald-700">Klik untuk upload file</p>
-                                <p class="text-[10px] text-slate-400 mt-1 font-bold uppercase tracking-wider">Format: .xlsx</p>
-                            </label>
+                    </div>
+                </div>
+            </div>
+
+            {{-- [BARU] MODAL EKSPOR KE BANK (Simpan Soal) --}}
+            <div x-show="showExportBankModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
+                 <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showExportBankModal = false"></div>
+                <div class="flex min-h-screen items-center justify-center p-4">
+                    <div class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all sm:w-full sm:max-w-md border border-slate-100">
+                        <div class="bg-white p-8 text-center">
+                            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-50 mb-6 border border-blue-100 shadow-sm">
+                                <i class="ph-duotone ph-upload-simple text-blue-600 text-3xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-black text-slate-800 mb-2">Simpan ke Bank Soal</h3>
+                            <p class="text-sm text-slate-500 mb-6 font-medium">Amankan {{ $exam->questions->count() }} soal ini ke dalam Bank Soal agar bisa digunakan kembali.</p>
                             
-                            <div class="flex gap-3">
-                                <button type="button" @click="showImportModal = false" class="flex-1 py-3.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 transition shadow-sm text-sm">Batal</button>
-                                <button type="submit" class="flex-1 py-3.5 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition text-sm">Proses Import</button>
+                            <form action="{{ route('cbt.export_to_bank', $exam->id) }}" method="POST" class="space-y-5 text-left">
+                                @csrf
+                                
+                                {{-- Pilihan Mode --}}
+                                <div class="grid grid-cols-2 gap-3 p-1 bg-slate-100 rounded-xl mb-4">
+                                    <button type="button" @click="exportMode = 'new'" :class="exportMode === 'new' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'" class="py-2 rounded-lg text-xs font-bold transition">Buat Baru</button>
+                                    <button type="button" @click="exportMode = 'existing'" :class="exportMode === 'existing' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'" class="py-2 rounded-lg text-xs font-bold transition">Bank Lama</button>
+                                    <input type="hidden" name="mode" x-model="exportMode">
+                                </div>
+
+                                {{-- Input Judul Baru --}}
+                                <div x-show="exportMode === 'new'">
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Judul Paket Bank Baru</label>
+                                    <input type="text" name="new_title" value="Bank Soal: {{ $exam->title }}" class="w-full rounded-xl border-slate-200 font-bold text-slate-700 py-3 px-4 focus:ring-blue-500">
+                                </div>
+
+                                {{-- Select Bank Lama --}}
+                                <div x-show="exportMode === 'existing'">
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pilih Bank Tujuan</label>
+                                    <select name="bank_id" class="w-full rounded-xl border-slate-200 font-bold text-slate-700 py-3 px-4 focus:ring-blue-500 bg-white">
+                                        @foreach($banks as $b)
+                                            <option value="{{ $b->id }}">{{ $b->title }}</option>
+                                        @endforeach
+                                    </select>
+                                    <p class="text-[10px] text-amber-600 mt-2 font-bold"><i class="ph-bold ph-warning"></i> Soal akan ditambahkan ke bank ini.</p>
+                                </div>
+
+                                <div class="flex gap-3 pt-2">
+                                    <button type="button" @click="showExportBankModal = false" class="flex-1 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50">Batal</button>
+                                    <button type="submit" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg">Simpan</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- MODAL IMPORT EXCEL --}}
+            <div x-show="showImportModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
+                 <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showImportModal = false"></div>
+                <div class="flex min-h-screen items-center justify-center p-4">
+                    <div class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all sm:w-full sm:max-w-md border border-slate-100">
+                        <div class="bg-white p-8 text-center">
+                            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-emerald-50 mb-6 border border-emerald-100 shadow-sm"><i class="ph-duotone ph-microsoft-excel-logo text-emerald-600 text-3xl"></i></div>
+                            <h3 class="text-2xl font-black text-slate-800 mb-2">Import Soal Excel</h3>
+                            <div class="mb-6"><a href="{{ route('cbt.questions.template') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-200 border border-slate-200"><i class="ph-bold ph-download-simple text-lg"></i> Download Template</a></div>
+                            <form action="{{ route('cbt.questions.import', $exam->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5 text-left" id="importQuestionForm">
+                                @csrf
+                                <label class="block w-full border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center hover:bg-slate-50 hover:border-emerald-300 transition-all cursor-pointer relative group">
+                                    <input type="file" name="file" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                    <i class="ph-duotone ph-cloud-arrow-up text-4xl text-slate-300 group-hover:text-emerald-500 mb-3 transition-colors inline-block"></i>
+                                    <p class="text-sm font-bold text-slate-600 group-hover:text-emerald-700">Klik untuk upload file</p>
+                                </label>
+                                <div class="flex gap-3">
+                                    <button type="button" @click="showImportModal = false" class="flex-1 py-3.5 bg-white border border-slate-200 text-slate-600 font-bold rounded-2xl hover:bg-slate-50 transition shadow-sm text-sm">Batal</button>
+                                    <button type="submit" class="flex-1 py-3.5 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition text-sm">Proses Import</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- MODAL EDIT SOAL --}}
+            <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
+                 <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showEditModal = false"></div>
+                <div class="flex min-h-screen items-center justify-center p-4">
+                    <div class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all sm:w-full sm:max-w-2xl border border-slate-100">
+                        <form :action="editState.url" method="POST" enctype="multipart/form-data" id="editQuestionForm">
+                            @csrf @method('PUT')
+                            <input type="hidden" name="delete_image" x-model="deleteImage">
+
+                            <div class="bg-white px-8 py-6 border-b border-slate-100 flex justify-between items-center">
+                                <h3 class="text-xl font-black text-slate-800 flex items-center gap-2"><i class="ph-fill ph-pencil-simple text-blue-600"></i> Edit Soal</h3>
+                                <button type="button" @click="showEditModal = false" class="text-slate-400 hover:text-rose-500 transition bg-slate-50 w-10 h-10 rounded-xl flex items-center justify-center"><i class="ph-bold ph-x text-lg"></i></button>
+                            </div>
+
+                            <div class="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar bg-slate-50/30">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pertanyaan</label>
+                                    <input id="q_input_edit" type="hidden" name="question_text" x-model="editState.question_text">
+                                    <trix-editor id="edit-trix-editor" input="q_input_edit" @trix-change="editState.question_text = $event.target.value; updatePreview('edit-preview')" class="prose prose-sm max-w-none bg-white"></trix-editor>
+                                    <div class="mt-2 bg-slate-50 border border-slate-200 rounded-xl p-3"><p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Preview:</p><div id="edit-preview" class="text-sm text-slate-800 trix-content" x-html="editState.question_text"></div></div>
+                                </div>
+
+                                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100">
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Gambar Soal</label>
+                                    <div class="flex flex-col gap-4">
+                                        <template x-if="newImagePreview">
+                                            <div class="relative w-fit">
+                                                <p class="text-[10px] font-bold text-emerald-600 mb-2 flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded-md w-fit"><i class="ph-bold ph-check"></i> Akan Diganti:</p>
+                                                <img :src="newImagePreview" class="h-32 rounded-xl border-2 border-emerald-500 shadow-sm object-cover">
+                                                <button type="button" @click="newImagePreview = null; $refs.editFileInput.value = ''" class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-xl p-1.5 shadow-lg hover:bg-rose-600 transition"><i class="ph-bold ph-x text-sm"></i></button>
+                                            </div>
+                                        </template>
+                                        <template x-if="!newImagePreview && editState.question_image && !deleteImage">
+                                            <div class="relative w-fit group">
+                                                <p class="text-[10px] font-bold text-slate-400 mb-2">Gambar Saat Ini:</p>
+                                                <img :src="'/storage/' + editState.question_image" class="h-24 rounded-xl border border-slate-200 shadow-sm object-cover opacity-90">
+                                                <button type="button" @click="removeCurrentImage()" class="absolute inset-0 bg-rose-900/80 backdrop-blur-[1px] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-xl font-bold text-xs gap-2"><i class="ph-bold ph-trash"></i> Hapus</button>
+                                            </div>
+                                        </template>
+                                        <template x-if="deleteImage && !newImagePreview"><div class="text-xs text-rose-600 font-bold bg-rose-50 p-3 rounded-xl border border-rose-100 flex items-center gap-2"><i class="ph-bold ph-trash"></i> Gambar akan dihapus. <button type="button" @click="deleteImage = false" class="text-blue-600 underline ml-auto">Batalkan</button></div></template>
+                                        <div class="flex-1">
+                                            <input type="file" x-ref="editFileInput" name="question_image" @change="handleEditImage" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-white file:text-blue-600 hover:file:bg-blue-50 cursor-pointer border border-slate-200 rounded-xl bg-slate-50">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <label class="block text-xs font-bold text-slate-400 uppercase ml-1">Edit Pilihan</label>
+                                    <div class="grid grid-cols-1 gap-3">
+                                        @foreach(['A','B','C','D'] as $opt)
+                                        <div class="flex gap-3 items-center">
+                                            <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-black text-sm">{{ $opt }}</span>
+                                            <input type="text" name="option_{{ $opt }}" x-model="editState.option_{{ $opt }}" required class="flex-1 rounded-xl border-slate-200 text-sm py-2.5 px-4 focus:ring-blue-500 font-medium">
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Kunci</label>
+                                        <div class="relative"><select name="correct_answer" x-model="editState.correct_answer" required class="w-full rounded-xl border-slate-200 text-sm font-bold text-slate-700 bg-white h-11 appearance-none px-4"><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option></select><div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div></div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Bobot</label>
+                                        <input type="number" name="score_weight" x-model="editState.score_weight" required class="w-full rounded-xl border-slate-200 text-sm font-bold text-center h-11">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white px-8 py-5 flex justify-end gap-3 rounded-b-[2.5rem] border-t border-slate-100 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] relative z-10">
+                                <button type="button" @click="showEditModal = false" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition text-sm">Batal</button>
+                                <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 text-sm flex items-center gap-2"><i class="ph-bold ph-floppy-disk text-lg"></i> Simpan</button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
+
         </div>
 
-        {{-- MODAL EDIT SOAL --}}
-        <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
-             <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showEditModal = false"></div>
-            <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all sm:w-full sm:max-w-2xl border border-slate-100">
-                    <form :action="editState.url" method="POST" enctype="multipart/form-data" id="editQuestionForm">
-                        @csrf @method('PUT')
-                        <input type="hidden" name="delete_image" x-model="deleteImage">
-
-                        <div class="bg-white px-8 py-6 border-b border-slate-100 flex justify-between items-center">
-                            <h3 class="text-xl font-black text-slate-800 flex items-center gap-2">
-                                <i class="ph-fill ph-pencil-simple text-blue-600"></i> Edit Soal
-                            </h3>
-                            <button type="button" @click="showEditModal = false" class="text-slate-400 hover:text-rose-500 transition bg-slate-50 w-10 h-10 rounded-xl flex items-center justify-center">
-                                <i class="ph-bold ph-x text-lg"></i>
-                            </button>
-                        </div>
-
-                        <div class="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar bg-slate-50/30">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pertanyaan</label>
-                                <textarea name="question_text" x-model="editState.question_text" rows="4" required class="w-full rounded-2xl border-slate-200 text-sm focus:ring-blue-500 focus:border-blue-500 bg-white font-medium p-4"></textarea>
-                            </div>
-
-                            <!-- Gambar Update -->
-                            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100">
-                                <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Gambar Soal</label>
-                                <div class="flex flex-col gap-4">
-                                    <template x-if="newImagePreview">
-                                        <div class="relative w-fit">
-                                            <p class="text-[10px] font-bold text-emerald-600 mb-2 flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded-md w-fit"><i class="ph-bold ph-check"></i> Akan Diganti:</p>
-                                            <img :src="newImagePreview" class="h-32 rounded-xl border-2 border-emerald-500 shadow-sm object-cover">
-                                            <button type="button" @click="newImagePreview = null; $refs.editFileInput.value = ''" class="absolute -top-2 -right-2 bg-rose-500 text-white rounded-xl p-1.5 shadow-lg hover:bg-rose-600 transition">
-                                                <i class="ph-bold ph-x text-sm"></i>
-                                            </button>
-                                        </div>
-                                    </template>
-
-                                    <template x-if="!newImagePreview && editState.question_image && !deleteImage">
-                                        <div class="relative w-fit group">
-                                            <p class="text-[10px] font-bold text-slate-400 mb-2">Gambar Saat Ini:</p>
-                                            <img :src="'/storage/' + editState.question_image" class="h-24 rounded-xl border border-slate-200 shadow-sm object-cover opacity-90">
-                                            <button type="button" @click="removeCurrentImage()" class="absolute inset-0 bg-rose-900/80 backdrop-blur-[1px] text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-xl font-bold text-xs gap-2">
-                                                <i class="ph-bold ph-trash"></i> Hapus
-                                            </button>
-                                        </div>
-                                    </template>
-                                    
-                                    <template x-if="deleteImage && !newImagePreview">
-                                        <div class="text-xs text-rose-600 font-bold bg-rose-50 p-3 rounded-xl border border-rose-100 flex items-center gap-2">
-                                            <i class="ph-bold ph-trash"></i> Gambar akan dihapus saat disimpan.
-                                            <button type="button" @click="deleteImage = false" class="text-blue-600 underline ml-auto">Batalkan</button>
-                                        </div>
-                                    </template>
-
-                                    <div class="flex-1">
-                                        <input type="file" 
-                                               x-ref="editFileInput"
-                                               name="question_image" 
-                                               @change="handleEditImage"
-                                               accept="image/*"
-                                               class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-white file:text-blue-600 hover:file:bg-blue-50 cursor-pointer border border-slate-200 rounded-xl bg-slate-50">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="space-y-4">
-                                <label class="block text-xs font-bold text-slate-400 uppercase ml-1">Edit Pilihan</label>
-                                <div class="grid grid-cols-1 gap-3">
-                                    @foreach(['A','B','C','D'] as $opt)
-                                    <div class="flex gap-3 items-center">
-                                        <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-black text-sm">{{ $opt }}</span>
-                                        <input type="text" name="option_{{ $opt }}" x-model="editState.option_{{ $opt }}" required class="flex-1 rounded-xl border-slate-200 text-sm py-2.5 px-4 focus:ring-blue-500 font-medium">
-                                    </div>
-                                    @endforeach
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Kunci</label>
-                                    <div class="relative">
-                                        <select name="correct_answer" x-model="editState.correct_answer" required class="w-full rounded-xl border-slate-200 text-sm font-bold text-slate-700 bg-white h-11 appearance-none px-4">
-                                            <option value="A">A</option>
-                                            <option value="B">B</option>
-                                            <option value="C">C</option>
-                                            <option value="D">D</option>
-                                        </select>
-                                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Bobot</label>
-                                    <input type="number" name="score_weight" x-model="editState.score_weight" required class="w-full rounded-xl border-slate-200 text-sm font-bold text-center h-11">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-white px-8 py-5 flex justify-end gap-3 rounded-b-[2.5rem] border-t border-slate-100 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] relative z-10">
-                            <button type="button" @click="showEditModal = false" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition text-sm">
-                                Batal
-                            </button>
-                            <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 text-sm flex items-center gap-2">
-                                <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    {{-- SCRIPT SAMA SEPERTI SEBELUMNYA --}}
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const deleteButtons = document.querySelectorAll('.btn-delete');
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const form = this.closest('.delete-form');
-                    Swal.fire({
-                        title: 'Hapus Soal Ini?',
-                        text: "Soal yang dihapus tidak dapat dikembalikan!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#e11d48',
-                        cancelButtonColor: '#64748b',
-                        confirmButtonText: 'Ya, Hapus!',
-                        cancelButtonText: 'Batal',
-                        customClass: { popup: 'rounded-[2rem]' }
-                    }).then((result) => {
-                        if (result.isConfirmed) form.submit();
-                    });
-                });
-            });
-
-            const setupLoading = (formId, text = 'Menyimpan Soal...') => {
-                const form = document.getElementById(formId);
-                if(form) {
-                    form.addEventListener('submit', function() {
+        {{-- SCRIPT --}}
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const deleteButtons = document.querySelectorAll('.btn-delete');
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const form = this.closest('.delete-form');
                         Swal.fire({
-                            title: text,
-                            allowOutsideClick: false,
-                            didOpen: () => Swal.showLoading(),
-                            customClass: { popup: 'rounded-[2rem]' }
-                        });
+                            title: 'Hapus Soal Ini?', text: "Soal yang dihapus tidak dapat dikembalikan!", icon: 'warning',
+                            showCancelButton: true, confirmButtonColor: '#e11d48', cancelButtonColor: '#64748b',
+                            confirmButtonText: 'Ya, Hapus!', cancelButtonText: 'Batal', customClass: { popup: 'rounded-[2rem]' }
+                        }).then((result) => { if (result.isConfirmed) form.submit(); });
                     });
-                }
-            };
-            setupLoading('createQuestionForm');
-            setupLoading('editQuestionForm', 'Memperbarui Soal...');
-            setupLoading('importQuestionForm', 'Mengimport Soal...');
-
-            @if(session('success'))
-                Swal.fire({
-                    icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}",
-                    toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
-                    customClass: { popup: 'rounded-xl' }
                 });
-            @endif
-        });
-
-        function viewImage(url) {
-            Swal.fire({
-                imageUrl: url,
-                imageAlt: 'Gambar Soal',
-                showConfirmButton: false,
-                showCloseButton: true,
-                customClass: {
-                    popup: 'rounded-[2rem]',
-                    image: 'rounded-2xl'
-                },
-                width: 'auto'
+                const setupLoading = (formId, text = 'Menyimpan Soal...') => {
+                    const form = document.getElementById(formId);
+                    if(form) {
+                        form.addEventListener('submit', function() {
+                            Swal.fire({ title: text, allowOutsideClick: false, didOpen: () => Swal.showLoading(), customClass: { popup: 'rounded-[2rem]' } });
+                        });
+                    }
+                };
+                setupLoading('createQuestionForm'); setupLoading('editQuestionForm', 'Memperbarui Soal...'); setupLoading('importQuestionForm', 'Mengimport Soal...');
+                @if(session('success'))
+                    Swal.fire({ icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}", toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, customClass: { popup: 'rounded-xl' } });
+                @endif
+                @if(session('error'))
+                    Swal.fire({ icon: 'error', title: 'Gagal!', text: "{{ session('error') }}", toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, customClass: { popup: 'rounded-xl' } });
+                @endif
             });
-        }
-    </script>
+            function viewImage(url) {
+                Swal.fire({ imageUrl: url, imageAlt: 'Gambar Soal', showConfirmButton: false, showCloseButton: true, customClass: { popup: 'rounded-[2rem]', image: 'rounded-2xl' }, width: 'auto' });
+            }
+        </script>
+    </div>
 </x-app-layout>

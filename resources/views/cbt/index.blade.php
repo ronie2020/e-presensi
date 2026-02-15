@@ -133,9 +133,12 @@
                                 <i class="ph-bold ph-chart-bar text-lg mr-2"></i> Rekapitulasi & Export
                             </a>
 
-                            <!-- TOMBOL BARU: Edit (Full Width) -->
-                            <a href="{{ route('cbt.edit', $exam->id) }}" class="col-span-2 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 hover:text-blue-600 transition-all group/edit">
-                                <i class="ph-bold ph-pencil-simple text-lg mr-2 group-hover/edit:text-blue-600"></i> Edit Informasi Ujian
+                            <!-- TOMBOL BARU: Test Config & Edit (Full Width) -->
+                            <a href="{{ route('cbt.download_seb', $exam->id) }}" class="col-span-1 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 hover:text-blue-600 transition-all" title="Download Config SEB untuk Test">
+                                <i class="ph-bold ph-file-lock text-lg mr-2"></i> Test SEB
+                            </a>
+                            <a href="{{ route('cbt.edit', $exam->id) }}" class="col-span-1 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 hover:text-blue-600 transition-all group/edit">
+                                <i class="ph-bold ph-pencil-simple text-lg mr-2 group-hover/edit:text-blue-600"></i> Edit
                             </a>
 
                             <!-- Tombol Hapus (Full Width) -->

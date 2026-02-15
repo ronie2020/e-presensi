@@ -21,8 +21,7 @@
     <div class="py-8 sm:py-10 font-sans text-slate-800" x-data="{ search: '' }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-            {{-- HERO SECTION (Purple Theme for Report) --}}
-            {{-- Tambahkan class 'print:hidden' agar tidak boros tinta saat diprint --}}
+            {{-- HERO SECTION --}}
             <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 p-8 text-white shadow-xl shadow-indigo-900/30 overflow-hidden border border-white/10 print:hidden">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 
@@ -39,26 +38,31 @@
                         <p class="text-indigo-200 text-sm font-medium">Mapel: {{ $exam->subject_name }} • Kelas {{ $exam->class_level }}</p>
                     </div>
 
-                                        
-                    <div class="flex gap-3">                       
+                    <div class="flex flex-wrap gap-3">
+                        
+                        {{-- [BARU] Tombol Analisis Butir Soal --}}
+                        <a href="{{ route('cbt.analysis', $exam->id) }}" class="group px-5 py-3 bg-white text-indigo-900 font-bold rounded-2xl hover:bg-indigo-50 transition flex items-center gap-2 shadow-lg shadow-black/10">
+                            <i class="ph-duotone ph-chart-pie-slice text-xl"></i>
+                            <span class="hidden sm:inline">Analisis Soal</span>
+                        </a>
 
                         {{-- Tombol Export Excel --}}
                         <a href="{{ route('cbt.export', ['id' => $exam->id, 'type' => 'excel']) }}" target="_blank" class="group px-5 py-3 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-500 transition flex items-center gap-2 shadow-lg shadow-emerald-900/20">
                             <i class="ph-duotone ph-microsoft-excel-logo text-xl group-hover:scale-110 transition-transform"></i> 
                             <span class="hidden sm:inline">Excel</span>
                         </a>
+                        
                         {{-- Tombol Export PDF --}}
                         <a href="{{ route('cbt.export', ['id' => $exam->id, 'type' => 'pdf']) }}" target="_blank" class="group px-5 py-3 bg-rose-600 text-white font-bold rounded-2xl hover:bg-rose-500 transition flex items-center gap-2 shadow-lg shadow-rose-900/20">
                             <i class="ph-duotone ph-file-pdf text-xl group-hover:scale-110 transition-transform"></i> 
                             <span class="hidden sm:inline">PDF</span>
                         </a>
 
-                        {{-- [BARU] Tombol Posting ke Gradebook --}}
-                        <form action="{{ route('cbt.sync_grades', $exam->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin memposting nilai ini ke Buku Nilai (LMS)?\n\nData akan masuk sebagai Tugas Baru di rekap nilai siswa.')">
+                        {{-- Tombol Posting ke Gradebook --}}
+                        <form action="{{ route('cbt.sync_grades', $exam->id) }}" method="POST" onsubmit="return confirm('Posting nilai ke Buku Nilai (LMS)?')">
                             @csrf
                             <button type="submit" class="group px-5 py-3 bg-amber-500 text-white font-bold rounded-2xl hover:bg-amber-400 transition flex items-center gap-2 shadow-lg shadow-amber-900/20 border border-amber-400">
                                 <i class="ph-bold ph-book-bookmark text-xl group-hover:scale-110 transition-transform"></i> 
-                                <span class="hidden sm:inline">Posting Nilai</span>
                             </button>
                         </form>
 
@@ -195,8 +199,6 @@
 
                                     {{-- Action Button (Hidden on Print) --}}
                                     <td class="px-6 py-4 text-right print:hidden">
-                                        {{-- Asumsi ada route 'cbt.result.detail' yang menerima ID Ujian dan ID Siswa/Result --}}
-                                        {{-- Jika belum ada route-nya, ganti href="#" --}}
                                         <a href="{{ route('cbt.result.detail', ['exam' => $exam->id, 'student' => $res->student_id]) }}" 
                                            class="w-8 h-8 rounded-xl bg-white border border-slate-200 text-slate-400 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition inline-flex items-center justify-center shadow-sm" 
                                            title="Lihat Detail Jawaban">

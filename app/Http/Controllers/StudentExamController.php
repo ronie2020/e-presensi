@@ -6,302 +6,254 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage; // Penting untuk fitur Upload Foto Proctoring
 use App\Models\CbtExam;
 use App\Models\CbtStudentExam;
 use App\Models\CbtStudentAnswer;
+use App\Models\CbtQuestion;
 use Carbon\Carbon;
 
 class StudentExamController extends Controller
 {
-    /**
-     * Helper untuk mendapatkan ID Siswa yang sedang login
-     */
     private function getStudentId() {
         return Auth::guard('student')->id();
     }
 
-    /**
-     * DASHBOARD SISWA (Daftar Ujian)
-     */
     public function index()
     {
         $student = Auth::guard('student')->user();
-
-        // 1. DETEKSI KELAS SISWA (PENTING)
-        // Agar siswa kelas 9 tidak melihat soal kelas 7, dan sebaliknya.
-        // Asumsi: Nama kelas formatnya "9A", "9-B", dll. Kita ambil angkanya saja.
         $className = $student->schoolClass->name ?? '';
         $classLevel = preg_replace('/[^0-9]/', '', $className); 
 
-        // 2. QUERY UJIAN (PERBAIKAN LOGIKA WAKTU)
         $exams = CbtExam::where('is_active', true)
-            // Filter Kelas (Jika class_level kosong/null di DB, anggap untuk semua kelas)
             ->where(function($q) use ($classLevel) {
                 if (!empty($classLevel)) {
                     $q->where('class_level', $classLevel);
                 }
             })
-            // Tampilkan ujian yang:
-            // - Waktu SELESAI-nya belum lewat (masih bisa dikerjakan)
-            // - ATAU Waktu MULAI-nya hari ini (status upcoming)
-            ->where(function($query) {
-                $query->where('end_time', '>', Carbon::now())
-                      ->orWhereDate('start_time', Carbon::today());
-            })
-            ->withCount('questions')
-            ->orderBy('start_time', 'asc')
+            ->orderBy('created_at', 'desc')
             ->get();
 
-        // 3. CEK STATUS PENGERJAAN PER SISWA (PENTING UNTUK TAMPILAN BUTTON)
-        // Tanpa ini, tombol di View tidak akan berubah jadi "Selesai" atau "Lanjutkan"
-        $exams->transform(function ($exam) {
-            $studentExam = CbtStudentExam::where('cbt_exam_id', $exam->id)
-                ->where('student_id', $this->getStudentId())
+        foreach($exams as $exam) {
+            $session = CbtStudentExam::where('student_id', $this->getStudentId())
+                ->where('cbt_exam_id', $exam->id)
                 ->first();
+            
+            $exam->student_status = $session ? $session->status : 'open'; 
+            $exam->session_id = $session ? $session->id : null;
+        }
 
-            // Default values untuk View
-            $exam->student_status = 'open'; // status: upcoming, open, ongoing, finished
-            $exam->student_score = 0;
-
-            if ($studentExam) {
-                if ($studentExam->status == 'finished') {
-                    $exam->student_status = 'finished';
-                    $exam->student_score = $studentExam->total_score;
-                } else {
-                    $exam->student_status = 'ongoing';
-                }
-            } else {
-                // Jika belum ada data pengerjaan, cek apakah waktu belum mulai
-                if (Carbon::now() < $exam->start_time) {
-                    $exam->student_status = 'upcoming';
-                }
-            }
-
-            return $exam;
-        });
-
+        // [PERBAIKAN PATH VIEW] Sesuai folder resources/views/cbt/student/index.blade.php
         return view('cbt.student.index', compact('exams'));
     }
 
-    /**
-     * HALAMAN KONFIRMASI (Sebelum Masuk)
-     */
     public function showStart($exam_id)
-    {
-        $exam = CbtExam::withCount('questions')->findOrFail($exam_id);
-        
-        $existingSession = CbtStudentExam::where('cbt_exam_id', $exam->id)
-            ->where('student_id', $this->getStudentId()) 
-            ->first();
-
-        // Cek Status Pengerjaan
-        if ($existingSession) {
-            if ($existingSession->status == 'finished') {
-                return redirect()->route('student.exam.index')->with('error', 'Anda sudah menyelesaikan ujian ini.');
-            }
-            // Jika status masih ongoing (misal refresh/mati lampu), langsung lempar ke halaman ujian (Runner)
-            return redirect()->route('student.exam.run', $exam->id);
-        }
-
-        // Cek Waktu (Hard Limit)
-        if (Carbon::now() > $exam->end_time) {
-            return redirect()->route('student.exam.index')->with('error', 'Waktu ujian telah berakhir.');
-        }
-
-        if (Carbon::now() < $exam->start_time) {
-            return redirect()->route('student.exam.index')->with('error', 'Ujian belum dimulai.');
-        }
-
-        return view('cbt.student.start_confirmation', compact('exam')); 
-    }
-
-    /**
-     * PROSES MULAI (Validasi Token & Buat Sesi)
-     */
-    public function start(Request $request, $exam_id)
     {
         $exam = CbtExam::findOrFail($exam_id);
         
-        // Cek Token
+        $existingSession = CbtStudentExam::where('student_id', $this->getStudentId())
+            ->where('cbt_exam_id', $exam_id)
+            ->first();
+
+        if ($existingSession && $existingSession->status == 'finished') {
+            return redirect()->route('student.exam.index')->with('error', 'Anda sudah menyelesaikan ujian ini.');
+        }
+
+        if ($existingSession && $existingSession->status == 'ongoing') {
+            return redirect()->route('student.exam.run', $exam_id);
+        }
+
+        // [PERBAIKAN PATH VIEW] Sesuai folder resources/views/cbt/student/start_confirmation.blade.php
+        return view('cbt.student.start_confirmation', compact('exam'));
+    }
+
+    public function start(Request $request, $exam_id)
+    {
+        $exam = CbtExam::findOrFail($exam_id);
+
         if ($exam->token) {
-            if (!$request->token) {
-                return back()->withInput()->withErrors(['token' => 'Token wajib diisi.']);
-            }
+            $request->validate(['token' => 'required|string']);
             if (strtoupper($request->token) !== strtoupper($exam->token)) {
-                return back()->withInput()->withErrors(['token' => 'Token ujian salah! Silakan tanya pengawas.']);
+                return back()->withErrors(['token' => 'Token ujian salah!']);
             }
         }
 
-        // Buat atau Ambil Sesi Ujian
-        CbtStudentExam::firstOrCreate(
+        CbtStudentExam::updateOrInsert(
             [
-                'cbt_exam_id' => $exam->id, 
-                'student_id' => $this->getStudentId() 
+                'student_id' => $this->getStudentId(),
+                'cbt_exam_id' => $exam->id,
             ],
             [
-                'start_time' => now(), // Pastikan nama kolom di DB 'start_time' atau 'started_at' (sesuaikan)
+                'created_at' => now(),
                 'status' => 'ongoing',
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->header('User-Agent')
+                'user_agent' => $request->userAgent(),
+                'ip_address' => $request->ip()
             ]
         );
 
         return redirect()->route('student.exam.run', $exam->id);
     }
 
-    /**
-     * HALAMAN PENGERJAAN SOAL (Runner)
-     */
     public function run($exam_id)
     {
-        // Ambil Data Ujian beserta Soal-soalnya
-        $exam = CbtExam::with(['questions' => function($q) {
-            $q->select('id', 'cbt_exam_id', 'question_text', 'question_image', 'options', 'score_weight'); 
-        }])->findOrFail($exam_id);
+        $exam = CbtExam::findOrFail($exam_id);
+        $studentId = $this->getStudentId();
 
-        // Cek Sesi Siswa
-        $session = CbtStudentExam::where('cbt_exam_id', $exam_id)
-            ->where('student_id', $this->getStudentId()) 
-            ->firstOrFail();
+        $session = CbtStudentExam::where('student_id', $studentId)
+            ->where('cbt_exam_id', $exam_id)
+            ->first();
 
-        // Jika sudah selesai, tolak akses
-        if ($session->status === 'finished') {
-            return redirect()->route('student.exam.index')->with('error', 'Ujian telah selesai.');
+        if (!$session || $session->status == 'finished') {
+            return redirect()->route('student.exam.index');
         }
 
-        // --- LOGIKA HITUNG SISA WAKTU (PENTING) ---
-        // Waktu selesai = Waktu mulai siswa + Durasi Ujian
-        // Tapi tidak boleh melebihi Jadwal Selesai Global Ujian (Hard Limit)
-        // Perhatikan kolom di DB: 'start_time' atau 'started_at' (disini saya handle keduanya)
-        $sessionStart = $session->start_time ?? $session->started_at;
+        // Logika Hitung Waktu (Server Side) - Logika Asli Tetap Ada
+        $startTime = Carbon::parse($session->created_at);
+        $endTimeByDuration = $startTime->copy()->addMinutes($exam->duration_minutes);
+        $endTimeBySchedule = Carbon::parse($exam->end_time);
         
-        $examEndTimeGlobal = Carbon::parse($exam->end_time);
-        $studentEndTime = Carbon::parse($sessionStart)->addMinutes($exam->duration_minutes);
-        
-        // Ambil waktu mana yang lebih dulu habis
-        $finalEndTime = $examEndTimeGlobal->lt($studentEndTime) ? $examEndTimeGlobal : $studentEndTime;
-        
-        $timeLeft = now()->diffInSeconds($finalEndTime, false);
+        $finalEndTime = $endTimeByDuration->lessThan($endTimeBySchedule) ? $endTimeByDuration : $endTimeBySchedule;
+        $timeLeft = Carbon::now()->diffInSeconds($finalEndTime, false);
 
-        // Jika waktu habis, paksa selesai
-        if ($timeLeft <= 0) return $this->finishProcess($session, $exam);
+        if ($timeLeft <= 0) {
+            return $this->finishProcess($session, $exam);
+        }
 
-        // Ambil jawaban yang sudah tersimpan (agar saat refresh jawaban tidak hilang)
-        $existingAnswers = CbtStudentAnswer::where('cbt_student_exam_id', $session->id)
+        $questions = CbtQuestion::where('cbt_exam_id', $exam_id)
+            ->select('id', 'question_text', 'question_image', 'options') 
+            ->inRandomOrder($session->id) 
+            ->get();
+
+        $savedAnswers = CbtStudentAnswer::where('cbt_student_exam_id', $session->id)
             ->pluck('answer', 'cbt_question_id');
 
-        // Format data soal untuk Frontend (AlpineJS)
-        $questionsData = $exam->questions->map(function($q) use ($existingAnswers) {
-            // Decode JSON options jika perlu
-            $options = is_string($q->options) ? json_decode($q->options, true) : $q->options;
-            
-            return [
-                'id' => $q->id,
-                'text' => $q->question_text,
-                'image' => $q->question_image ? asset('storage/'.$q->question_image) : null,
-                'options' => $options, 
-                'saved_answer' => $existingAnswers[$q->id] ?? null
-            ];
+        $questions->transform(function ($q) use ($savedAnswers) {
+            $opts = is_string($q->options) ? json_decode($q->options, true) : $q->options;
+            $q->options = $opts; 
+            $q->saved_answer = $savedAnswers[$q->id] ?? null;
+            return $q;
         });
 
-        return view('cbt.student.exam_runner', [
-            'exam' => $exam,
-            'questions' => $questionsData,
-            'timeLeft' => $timeLeft,
-            'sessionId' => $session->id,
-            'examId' => $exam->id
-        ]);
+        $sessionId = $session->id;
+
+        // Cek keberadaan view di folder student, jika tidak ada fallback ke folder cbt
+        if (view()->exists('cbt.student.exam_runner')) {
+             return view('cbt.student.exam_runner', compact('exam', 'questions', 'timeLeft', 'sessionId'));
+        } else {
+             return view('cbt.exam_runner', compact('exam', 'questions', 'timeLeft', 'sessionId'));
+        }
     }
 
-    /**
-     * SIMPAN JAWABAN PER NOMOR (AJAX)
-     */
     public function saveAnswer(Request $request)
     {
         $request->validate([
             'session_id' => 'required',
             'question_id' => 'required',
-            'answer' => 'required'
+            'answer' => 'nullable'
         ]);
 
         $session = CbtStudentExam::where('id', $request->session_id)
-            ->where('student_id', $this->getStudentId()) 
-            ->firstOrFail();
+            ->where('student_id', $this->getStudentId())
+            ->first();
 
-        if ($session->status !== 'ongoing') {
-            return response()->json(['status' => 'error', 'message' => 'Ujian sudah selesai'], 403);
+        if (!$session || $session->status == 'finished') {
+            return response()->json(['status' => 'error', 'message' => 'Sesi tidak valid'], 403);
         }
 
-        CbtStudentAnswer::updateOrCreate(
+        CbtStudentAnswer::updateOrInsert(
             [
                 'cbt_student_exam_id' => $session->id,
                 'cbt_question_id' => $request->question_id
             ],
-            ['answer' => $request->answer]
+            [
+                'answer' => $request->answer,
+                'updated_at' => now()
+            ]
         );
 
-        return response()->json(['status' => 'saved']);
+        return response()->json(['status' => 'success']);
     }
 
-    /**
-     * SELESAIKAN UJIAN (Action dari Tombol Selesai)
-     */
     public function finish($exam_id)
     {
-        $exam = CbtExam::with('questions')->findOrFail($exam_id);
-        
-        $session = CbtStudentExam::where('cbt_exam_id', $exam_id)
-            ->where('student_id', $this->getStudentId()) 
-            ->firstOrFail();
+        $session = CbtStudentExam::where('student_id', $this->getStudentId())
+            ->where('cbt_exam_id', $exam_id)
+            ->where('status', 'ongoing')
+            ->first();
 
-        return $this->finishProcess($session, $exam);
+        if ($session) {
+            $exam = CbtExam::find($exam_id);
+            return $this->finishProcess($session, $exam);
+        }
+
+        return redirect()->route('student.exam.index');
     }
 
-    /**
-     * LOGIKA HITUNG NILAI AKHIR (Private Helper)
-     */
-    private function finishProcess($session, $exam = null)
+    // METHOD FOTO PROCTORING (LOGIKA TETAP DIPERTAHANKAN)
+    public function uploadPhoto(Request $request)
     {
-        if ($session->status == 'finished') {
-            return redirect()->route('student.exam.index')->with('success', 'Ujian sudah selesai.');
+        $request->validate([
+            'session_id' => 'required',
+            'photo' => 'required|string',
+        ]);
+
+        $session = CbtStudentExam::where('id', $request->session_id)
+            ->where('student_id', $this->getStudentId())
+            ->first();
+
+        if (!$session || $session->status == 'finished') {
+            return response()->json(['status' => 'error'], 403);
         }
 
-        // Jika exam object belum diload, load dulu beserta soalnya
-        if (!$exam) {
-            $exam = CbtExam::with('questions')->find($session->cbt_exam_id);
-        }
+        try {
+            $imageData = $request->photo;
+            $imageData = str_replace('data:image/jpeg;base64,', '', $imageData);
+            $imageData = str_replace(' ', '+', $imageData);
+            
+            $fileName = 'proctoring/' . $session->cbt_exam_id . '/' . $session->student_id . '_' . time() . '.jpg';
+            
+            Storage::disk('public')->put($fileName, base64_decode($imageData));
 
-        // Ambil semua jawaban siswa
+            DB::table('cbt_exam_photos')->insert([
+                'cbt_student_exam_id' => $session->id,
+                'photo_path' => $fileName,
+                'captured_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            return response()->json(['status' => 'success']);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    private function finishProcess($session, $exam)
+    {
+        if (!$session) return redirect()->route('student.exam.index');
+
         $studentAnswers = CbtStudentAnswer::where('cbt_student_exam_id', $session->id)->get();
-        $questions = $exam->questions->keyBy('id');
+        $questions = CbtQuestion::where('cbt_exam_id', $session->cbt_exam_id)->get()->keyBy('id');
 
         $totalScore = 0;
 
         foreach ($studentAnswers as $ans) {
             if (isset($questions[$ans->cbt_question_id])) {
                 $q = $questions[$ans->cbt_question_id];
-                
-                // Bandingkan Jawaban (Case Insensitive)
                 $isCorrect = strtoupper($ans->answer) === strtoupper($q->correct_answer);
-                
-                // Simpan status ke DB (opsional)
-                $ans->is_correct = $isCorrect;
-                $ans->save();
-
-                // Tambahkan Bobot Nilai jika benar
                 if ($isCorrect) {
                     $totalScore += $q->score_weight;
                 }
             }
         }
 
-        // Update Sesi Ujian menjadi Selesai
         $session->update([
-            'end_time' => now(), // Sesuaikan kolom DB: 'end_time' atau 'finished_at'
+            'status' => 'finished',
             'total_score' => $totalScore,
-            'status' => 'finished'
+            'finished_at' => now()
         ]);
 
-        return redirect()->route('student.exam.index')->with('success', 'Ujian selesai! Jawaban berhasil dikirim.');
+        return redirect()->route('student.exam.index')->with('success', 'Ujian selesai dikerjakan.');
     }
 }

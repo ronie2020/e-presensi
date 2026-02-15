@@ -6,9 +6,23 @@
         }
         .animate-bounce-slow { animation: bounce-slow 3s infinite ease-in-out; }
         .bg-pattern { background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; }
+        
+        /* Animasi Pulse untuk indikator status */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.33); }
+            80%, 100% { opacity: 0; }
+        }
+        .ring-animate::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
     </style>
 
-    <div class="min-h-screen flex items-center justify-center p-4 bg-slate-50 bg-pattern">
+    <div class="min-h-screen flex items-center justify-center p-4 bg-slate-50 bg-pattern" x-data="{ isSeb: navigator.userAgent.includes('SEB') }">
         
         {{-- Card Konfirmasi --}}
         <div class="max-w-xl w-full bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200 border border-white overflow-hidden relative transform transition-all">
@@ -31,10 +45,16 @@
                     <p class="text-slate-300 font-bold text-xs uppercase tracking-wide">{{ $exam->subject_name }}</p>
                 </div>
 
-                {{-- Badge SEB --}}
+                {{-- Badge Status Lingkungan (SEB vs Browser Biasa) --}}
                 <div class="absolute top-6 right-6 z-20">
-                    <span class="bg-emerald-500/20 text-emerald-300 text-[10px] font-black px-3 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1 uppercase tracking-wide backdrop-blur-md shadow-sm">
-                        <i class="ph-fill ph-shield-check"></i> Secure
+                    {{-- Tampil jika di dalam SEB --}}
+                    <span x-show="isSeb" class="bg-emerald-500/20 text-emerald-300 text-[10px] font-black px-3 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1 uppercase tracking-wide backdrop-blur-md shadow-sm ring-animate text-emerald-400">
+                        <i class="ph-fill ph-shield-check"></i> Terproteksi SEB
+                    </span>
+
+                    {{-- Tampil jika BUKAN SEB (Browser Biasa) --}}
+                    <span x-show="!isSeb" class="bg-amber-500/20 text-amber-300 text-[10px] font-black px-3 py-1 rounded-full border border-amber-500/30 flex items-center gap-1 uppercase tracking-wide backdrop-blur-md shadow-sm" title="Akses via Browser Biasa">
+                        <i class="ph-fill ph-warning-circle"></i> Browser Biasa
                     </span>
                 </div>
             </div>
@@ -59,18 +79,16 @@
                     </div>
                 </div>
 
-                {{-- Warning Box --}}
-                <div class="bg-amber-50 border border-amber-100 rounded-2xl p-5 mb-8 flex gap-4 items-start">
-                    <div class="shrink-0 mt-0.5 bg-amber-100 text-amber-600 rounded-lg w-8 h-8 flex items-center justify-center">
+                {{-- Warning Box (Khusus Non-SEB) --}}
+                <div x-show="!isSeb" class="bg-rose-50 border border-rose-100 rounded-2xl p-5 mb-6 flex gap-4 items-start animate-pulse">
+                    <div class="shrink-0 mt-0.5 bg-rose-100 text-rose-600 rounded-lg w-8 h-8 flex items-center justify-center">
                         <i class="ph-bold ph-warning"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-amber-800 text-sm mb-1">Peraturan Penting</h4>
-                        <ul class="text-xs text-amber-700 space-y-1.5 font-medium list-disc list-inside leading-relaxed">
-                            <li>Waktu berjalan otomatis setelah klik <b>Mulai</b>.</li>
-                            <li>Dilarang pindah tab/browser (Terdeteksi sistem).</li>
-                            <li>Pastikan baterai dan internet aman.</li>
-                        </ul>
+                        <h4 class="font-bold text-rose-800 text-sm mb-1">Peringatan Browser</h4>
+                        <p class="text-xs text-rose-700 font-medium leading-relaxed">
+                            Anda tidak menggunakan <b>Safe Exam Browser</b>. Pastikan pengawas mengizinkan ujian menggunakan browser biasa (Chrome/Edge).
+                        </p>
                     </div>
                 </div>
 

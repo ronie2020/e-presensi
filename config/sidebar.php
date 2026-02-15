@@ -5,10 +5,6 @@ return [
     |--------------------------------------------------------------------------
     | Sidebar Navigation Menu
     |--------------------------------------------------------------------------
-    |
-    | Configuration for Phosphor Icons classes.
-    | Usage: 'icon' => 'ph-house' (without <i class="...">)
-    |
     */
 
     'menus' => [
@@ -125,12 +121,33 @@ return [
                 'route' => 'grades.index',
                 'active_check' => 'grades.*',
                 'icon' => 'ph-pencil-line'
+            ],   
+            [
+                'name' => 'Bank Soal',
+                'route' => 'bank.index',
+                'active_check' => 'bank.*',
+                'icon' => 'ph-stack'
             ],
             [
                 'name' => 'CBT / Ujian Online',
                 'route' => 'cbt.index',
-                'active_check' => 'cbt.*',
+                'active_check' => [
+                    'cbt.index', 
+                    'cbt.create', 
+                    'cbt.edit', 
+                    'cbt.questions.*', 
+                    'cbt.monitoring', 
+                    'cbt.recap', 
+                    'cbt.analysis',
+                    'cbt.result.*'
+                ],
                 'icon' => 'ph-desktop'
+            ],
+            [
+                'name' => 'Cetak Kartu Ujian',
+                'route' => 'cbt.cards.index',
+                'active_check' => 'cbt.cards.*', 
+                'icon' => 'ph-identification-card'
             ]
         ],
         'Kesiswaan' => [

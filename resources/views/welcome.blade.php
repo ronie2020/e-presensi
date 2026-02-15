@@ -82,7 +82,8 @@
                     
                     <div class="flex flex-col leading-tight">
                         <span class="font-bold text-white text-lg tracking-tight group-hover:text-blue-200 transition-colors">SMPN 3 LAKBOK</span>
-                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-yellow-400 transition-colors">Unggul & Berkarakter</span>
+                        <span class="font-bold text-slate-400 uppercase tracking-widest group-hover:text-yellow-400 transition-colors">Berjaya </span>
+                        <span class="text-[8px] font-bold text-slate-200 uppercase tracking-widest group-hover:text-yellow-200 transition-colors">(Berakhlak Mulia, Enerjik, Resilien, Jujur, Arif, Yakin, Adaptif) </span>
                     </div>
                 </a>
 
@@ -188,7 +189,7 @@
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-yellow-300">Cerdas & Berkarakter</span>
                 </h1>
                 <p class="text-slate-300 text-lg mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
-                    Platform digital terintegrasi SMPN 3 Lakbok untuk pemantauan akademik, absensi kehadiran, dan literasi siswa secara real-time.
+                    SIMADU (Sistem Informasi Akademik Terpadu) ini adalah Platform digital terintegrasi SMPN 3 Lakbok untuk pemantauan akademik, absensi kehadiran, Pengembangan Karakter dan literasi siswa secara real-time.
                 </p>
                 
                 <!-- BUTTON PPDB HERO SECTION (Diubah ke Biru untuk Konsistensi) -->

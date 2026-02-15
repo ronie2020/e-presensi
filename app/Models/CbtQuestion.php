@@ -9,17 +9,27 @@ class CbtQuestion extends Model
 {
     use HasFactory;
 
+    // UPDATE: Tambahkan 'cbt_question_bank_id' ke fillable
     protected $fillable = [
-        'cbt_exam_id', 'question_text', 'question_image',
-        'options', 'correct_answer', 'score_weight'
+        'cbt_exam_id', 
+        'cbt_question_bank_id', // <-- Kolom baru
+        'question_text', 
+        'question_image',
+        'options', 
+        'correct_answer', 
+        'score_weight'
     ];
 
-    // Menyimpan opsi sebagai array JSON otomatis
     protected $casts = [
         'options' => 'array', 
     ];
 
     public function exam() {
         return $this->belongsTo(CbtExam::class, 'cbt_exam_id');
+    }
+
+    // UPDATE: Tambahkan Relasi ke Bank Soal
+    public function bank() {
+        return $this->belongsTo(CbtQuestionBank::class, 'cbt_question_bank_id');
     }
 }

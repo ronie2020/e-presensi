@@ -47,6 +47,7 @@ use App\Http\Controllers\StudentQuizController;
 // CBT & Ujian
 use App\Http\Controllers\CbtController;
 use App\Http\Controllers\SebController;
+use App\Http\Controllers\CbtBankController;
 
 // Portal Siswa
 use App\Http\Controllers\StudentPortalController;
@@ -61,7 +62,6 @@ use App\Http\Controllers\LibraryDashboardController;
 use App\Http\Controllers\LibraryCirculationController;
 use App\Http\Controllers\LibraryKioskController;
 use App\Http\Controllers\LibraryToolsController;
-
 
 // Persuratan & Dinas
 use App\Http\Controllers\LetterIncomingController;
@@ -222,6 +222,10 @@ Route::middleware(['auth:student', CheckSebMode::class])->group(function () {
     // B. UJIAN SISWA (CBT)    
     Route::prefix('student/exam')->name('student.exam.')->group(function () {
         Route::get('/', [StudentExamController::class, 'index'])->name('index');   
+        
+        // Upload Foto Kamera
+        Route::post('/photo', [StudentExamController::class, 'uploadPhoto'])->name('photo');
+
         Route::middleware(['seb'])->group(function () {
             Route::get('/{exam}/start', [StudentExamController::class, 'showStart'])->name('show');
             Route::post('/{exam}/start', [StudentExamController::class, 'start'])->name('start');
@@ -309,28 +313,59 @@ Route::middleware('auth')->group(function () {
     Route::post('/schedules/special', [ScheduleController::class, 'storeSpecial'])->name('schedules.special.store');
     Route::delete('/schedules/special/{schedule}', [ScheduleController::class, 'destroySpecial'])->name('schedules.special.destroy');
 
-    // CBT & Ujian
-    Route::prefix('cbt')->name('cbt.')->group(function () {
+     // =========================================================================
+    //  CBT & UJIAN (ADMIN/GURU)
+    // =========================================================================
+    Route::prefix('cbt')->name('cbt.')->group(function () {    
+        
+        // 1. CETAK KARTU PESERTA
+        Route::get('/cards', [CbtController::class, 'cardIndex'])->name('cards.index');
+        Route::get('/cards/print', [CbtController::class, 'printCards'])->name('cards.print');
+        
+        // 2. HASIL GLOBAL
+        Route::get('/results', [CbtController::class, 'results'])->name('results');     
+
+        // 3. RESOURCE UTAMA (CRUD UJIAN)
         Route::resource('/', CbtController::class)->parameters(['' => 'exam']);
         
-        // REKAP NILAI & EXPORT
+        // 4. REKAP & ANALISIS
         Route::get('/recap/{id}', [CbtController::class, 'recap'])->name('recap');
+        Route::get('/analysis/{id}', [CbtController::class, 'analysis'])->name('analysis');
         Route::get('/recap/{exam}/{student}/detail', [CbtController::class, 'resultDetail'])->name('result.detail');
         Route::post('/recap/{id}/sync', [CbtController::class, 'syncToGradebook'])->name('sync_grades');
         Route::get('/export/{id}/{type}', [CbtController::class, 'export'])->name('export');
+        
+        // 5. MANAJEMEN SOAL
         Route::get('/exam/{exam}/questions', [CbtController::class, 'manageQuestions'])->name('questions.manage');
         Route::post('/exam/{exam}/questions', [CbtController::class, 'storeQuestion'])->name('questions.store');
         Route::put('/questions/{question}/update', [CbtController::class, 'updateQuestion'])->name('questions.update');
-        Route::post('/exam/{exam}/refresh-token', [CbtController::class, 'refreshToken'])->name('refresh_token');
         Route::delete('/questions/{id}', [CbtController::class, 'destroyQuestion'])->name('questions.destroy');
         Route::post('/exam/{exam}/import', [CbtController::class, 'importQuestions'])->name('questions.import');
         Route::get('/questions/template', [CbtController::class, 'downloadTemplate'])->name('questions.template');
+        Route::post('/exam/{exam}/refresh-token', [CbtController::class, 'refreshToken'])->name('refresh_token');
+        
+        // 6. MONITORING & RESET
         Route::get('/monitoring/{exam_id}', [CbtController::class, 'monitoring'])->name('monitoring');
         Route::post('/reset/{exam}/{student}', [CbtController::class, 'resetExam'])->name('reset');
-        Route::get('/results', [CbtController::class, 'results'])->name('results');
+        Route::get('/monitoring/{id}/data', [CbtController::class, 'getMonitoringData'])->name('monitoring_data');
+        Route::post('/monitoring/{id}/auto-token', [CbtController::class, 'autoRotateToken'])->name('auto_token');
+        
+        // 7. FOTO PENGAWASAN (PROCTORING)
+        Route::get('/monitoring/{exam}/{student}/photos', [CbtController::class, 'getStudentPhotos'])->name('monitoring.photos');
 
-        // Route Auto Rotate Token (AJAX)
-        Route::post('/exam/{exam}/auto-token', [CbtController::class, 'autoRotateToken'])->name('auto_token');
+        // 8. INTEGRASI BANK SOAL (TARIK & SIMPAN)
+        Route::post('/exam/{exam}/pull-from-bank', [CbtBankController::class, 'importToExam'])->name('import_from_bank');
+        Route::post('/exam/{exam}/export-to-bank', [CbtBankController::class, 'storeFromExam'])->name('export_to_bank');
+    });
+
+    // === BANK SOAL TERPUSAT (Gudang Soal) ===
+    Route::prefix('bank-soal')->name('bank.')->group(function() {
+        Route::get('/', [CbtBankController::class, 'index'])->name('index');
+        Route::post('/', [CbtBankController::class, 'store'])->name('store');
+        Route::get('/{id}/manage', [CbtBankController::class, 'manage'])->name('manage');
+        Route::put('/{id}', [CbtBankController::class, 'update'])->name('update');
+        Route::delete('/{id}', [CbtBankController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/questions', [CbtBankController::class, 'storeQuestion'])->name('questions.store');
     });
 
     // Kedisiplinan & Penilaian
