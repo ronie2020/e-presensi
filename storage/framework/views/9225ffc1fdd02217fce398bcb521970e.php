@@ -1,5 +1,14 @@
-<x-app-layout>
-    {{-- CUSTOM STYLES & ANIMATIONS (Diambil dari Dashboard) --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -10,26 +19,26 @@
         .glass-panel { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 
-    {{-- LOGIC JADWAL --}}
-    @php
+    
+    <?php
         $announcementTime = isset($scheduleData['announcement_date']) ? \Carbon\Carbon::parse($scheduleData['announcement_date']) : null;
         $isSet = $announcementTime != null;
         $isPast = $isSet && \Carbon\Carbon::now()->greaterThanOrEqualTo($announcementTime);
-    @endphp
+    ?>
 
     <div class="relative space-y-8 min-h-screen pb-10 font-sans text-slate-800">
         
-        {{-- HERO SECTION --}}
+        
         <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-r from-blue-900 via-slate-800 to-slate-900 p-6 md:p-10 text-white shadow-2xl shadow-blue-900/20 overflow-hidden group border border-white/10">
             
-            {{-- Background Decorations --}}
+            
             <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000"></div>
             <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20"></div>
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none"></div>
 
             <div class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
                 
-                {{-- KIRI: JUDUL & INTRO --}}
+                
                 <div>
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-blue-200 text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm">
                         <span class="relative flex h-2 w-2">
@@ -47,13 +56,13 @@
                     </p>
 
                     <div class="flex gap-3">
-                        <a href="{{ route('dashboard') }}" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-xl transition border border-white/10 flex items-center gap-2">
+                        <a href="<?php echo e(route('dashboard')); ?>" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-sm font-bold rounded-xl transition border border-white/10 flex items-center gap-2">
                             <i class="ph-bold ph-arrow-left"></i> Kembali ke Dashboard
                         </a>
                     </div>
                 </div>
 
-                {{-- KANAN: WIDGET JADWAL (GLASS) --}}
+                
                 <div class="glass-panel p-6 rounded-[2rem] relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-4 opacity-10 text-white pointer-events-none">
                         <i class="ph-fill ph-calendar-check text-8xl"></i>
@@ -64,31 +73,32 @@
                     </h3>
                     <p class="text-blue-100 text-xs font-medium mb-4 relative z-10">Atur kapan hasil seleksi dapat dilihat siswa.</p>
                     
-                    {{-- Status Indikator --}}
+                    
                     <div class="mb-4 p-3 rounded-xl bg-black/20 border border-white/10 relative z-10">
-                        @if($isSet)
+                        <?php if($isSet): ?>
                             <div class="flex items-center gap-3 mb-1">
-                                <span class="text-[10px] font-black uppercase tracking-wider {{ $isPast ? 'text-emerald-300' : 'text-blue-300' }}">
-                                    {{ $isPast ? '● Sudah Dibuka' : '● Terjadwal' }}
+                                <span class="text-[10px] font-black uppercase tracking-wider <?php echo e($isPast ? 'text-emerald-300' : 'text-blue-300'); ?>">
+                                    <?php echo e($isPast ? '● Sudah Dibuka' : '● Terjadwal'); ?>
+
                                 </span>
                             </div>
                             <p class="text-white text-sm font-bold tracking-wide font-mono">
-                                {{ $announcementTime->translatedFormat('d M Y, H:i') }} WIB
+                                <?php echo e($announcementTime->translatedFormat('d M Y, H:i')); ?> WIB
                             </p>
-                        @else
+                        <?php else: ?>
                             <div class="flex items-center gap-3 mb-1">
                                 <span class="text-[10px] font-black uppercase tracking-wider text-amber-300">● Belum Diatur</span>
                             </div>
                             <p class="text-white/60 text-xs italic">Siswa belum dapat melihat hasil.</p>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
-                    {{-- Form --}}
-                    <form action="{{ route('admin.ppdb.set_schedule') }}" method="POST" class="space-y-2 relative z-10">
-                        @csrf
+                    
+                    <form action="<?php echo e(route('admin.ppdb.set_schedule')); ?>" method="POST" class="space-y-2 relative z-10">
+                        <?php echo csrf_field(); ?>
                         <div class="flex gap-2">
                             <input type="datetime-local" name="announcement_date" required 
-                                   value="{{ $isSet ? $announcementTime->format('Y-m-d\TH:i') : '' }}"
+                                   value="<?php echo e($isSet ? $announcementTime->format('Y-m-d\TH:i') : ''); ?>"
                                    class="block w-full px-4 py-2.5 rounded-xl border-white/20 bg-white/10 focus:bg-white text-white focus:text-slate-900 text-xs font-bold shadow-lg focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer">
                             <button type="submit" class="p-2.5 bg-blue-500 hover:bg-blue-400 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center" title="Simpan">
                                 <i class="ph-bold ph-floppy-disk text-lg"></i>
@@ -99,7 +109,7 @@
             </div>
         </div>
 
-        {{-- STATS CARDS (GRID STYLE DASHBOARD) --}}
+        
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 animate-enter" style="animation-delay: 100ms">
             <!-- Total Pendaftar -->
             <div class="group bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] hover:shadow-xl hover:shadow-blue-100/50 hover:border-blue-200 transition-all duration-300 relative overflow-hidden flex items-center gap-4">
@@ -108,7 +118,7 @@
                 </div>
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 group-hover:text-blue-600 transition-colors">Total Pendaftar</p>
-                    <h3 class="text-3xl font-extrabold text-slate-800 tracking-tight count-up" data-target="{{ $stats['total'] }}">0</h3>
+                    <h3 class="text-3xl font-extrabold text-slate-800 tracking-tight count-up" data-target="<?php echo e($stats['total']); ?>">0</h3>
                 </div>
             </div>
 
@@ -119,7 +129,7 @@
                 </div>
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 group-hover:text-emerald-600 transition-colors">Lulus Seleksi</p>
-                    <h3 class="text-3xl font-extrabold text-slate-800 tracking-tight count-up" data-target="{{ $stats['accepted'] }}">0</h3>
+                    <h3 class="text-3xl font-extrabold text-slate-800 tracking-tight count-up" data-target="<?php echo e($stats['accepted']); ?>">0</h3>
                 </div>
             </div>
 
@@ -130,60 +140,60 @@
                 </div>
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 group-hover:text-amber-600 transition-colors">Perlu Cek</p>
-                    <h3 class="text-3xl font-extrabold text-slate-800 tracking-tight count-up" data-target="{{ $stats['pending'] }}">0</h3>
+                    <h3 class="text-3xl font-extrabold text-slate-800 tracking-tight count-up" data-target="<?php echo e($stats['pending']); ?>">0</h3>
                 </div>
             </div>
         </div>
 
-        {{-- MAIN CONTENT: TABEL DATA --}}
+        
         <div class="animate-enter bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col min-h-[600px]" style="animation-delay: 200ms">
             
-            {{-- Toolbar --}}
+            
             <div class="p-6 md:p-8 border-b border-slate-50 bg-slate-50/30 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
                 
-                {{-- Tabs Filter --}}
+                
                 <div class="bg-slate-100 p-1.5 rounded-xl flex flex-wrap gap-1 w-full md:w-auto overflow-x-auto no-scrollbar">
-                    @php
+                    <?php
                         $tabClass = "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap";
                         $activeClass = "bg-white text-slate-800 shadow-sm";
                         $inactiveClass = "text-slate-500 hover:text-slate-700 hover:bg-slate-200/50";
-                    @endphp
+                    ?>
 
-                    <a href="{{ route('admin.ppdb.index') }}" class="{{ $tabClass }} {{ !request('status') ? $activeClass : $inactiveClass }}">
+                    <a href="<?php echo e(route('admin.ppdb.index')); ?>" class="<?php echo e($tabClass); ?> <?php echo e(!request('status') ? $activeClass : $inactiveClass); ?>">
                        <i class="ph-bold ph-squares-four"></i> Semua
                     </a>
-                    <a href="{{ route('admin.ppdb.index', ['status' => 'pending']) }}" class="{{ $tabClass }} {{ request('status') == 'pending' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30' : $inactiveClass }}">
+                    <a href="<?php echo e(route('admin.ppdb.index', ['status' => 'pending'])); ?>" class="<?php echo e($tabClass); ?> <?php echo e(request('status') == 'pending' ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/30' : $inactiveClass); ?>">
                        <i class="ph-bold ph-clock"></i> Pending
                     </a>
-                    <a href="{{ route('admin.ppdb.index', ['status' => 'verified']) }}" class="{{ $tabClass }} {{ request('status') == 'verified' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : $inactiveClass }}">
+                    <a href="<?php echo e(route('admin.ppdb.index', ['status' => 'verified'])); ?>" class="<?php echo e($tabClass); ?> <?php echo e(request('status') == 'verified' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : $inactiveClass); ?>">
                        <i class="ph-bold ph-check-circle"></i> Verified
                     </a>
-                    <a href="{{ route('admin.ppdb.index', ['status' => 'accepted']) }}" class="{{ $tabClass }} {{ request('status') == 'accepted' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : $inactiveClass }}">
+                    <a href="<?php echo e(route('admin.ppdb.index', ['status' => 'accepted'])); ?>" class="<?php echo e($tabClass); ?> <?php echo e(request('status') == 'accepted' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : $inactiveClass); ?>">
                        <i class="ph-bold ph-medal"></i> Diterima
                     </a>
                 </div>
                 
-                {{-- Search & Bulk Actions --}}
+                
                 <div class="flex flex-col md:flex-row gap-3 w-full xl:w-auto">
-                    {{-- Bulk Button --}}
+                    
                     <button type="button" onclick="submitBulk()" class="px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-slate-800 transition flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20">
                         <i class="ph-bold ph-user-plus"></i> Promote Terpilih
                     </button>
 
-                    {{-- Search --}}
+                    
                     <form method="GET" class="relative group w-full md:w-64">
-                        <input type="hidden" name="status" value="{{ request('status') }}">
+                        <input type="hidden" name="status" value="<?php echo e(request('status')); ?>">
                         <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"></i>
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Siswa..." 
+                        <input type="text" name="search" value="<?php echo e(request('search')); ?>" placeholder="Cari Siswa..." 
                                class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 text-sm font-bold text-slate-700 transition-all shadow-sm placeholder:font-normal">
                     </form>
                 </div>
             </div>
 
-            {{-- Table Wrapper --}}
+            
             <div class="overflow-x-auto flex-1">
-                <form action="{{ route('admin.ppdb.bulk_promote') }}" method="POST" id="bulkForm">
-                    @csrf
+                <form action="<?php echo e(route('admin.ppdb.bulk_promote')); ?>" method="POST" id="bulkForm">
+                    <?php echo csrf_field(); ?>
                     <table class="w-full text-sm text-left text-slate-600">
                         <thead class="bg-slate-50/80 text-xs font-extrabold text-slate-400 uppercase tracking-wider sticky top-0 z-10 backdrop-blur-sm">
                             <tr>
@@ -197,77 +207,80 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50">
-                            @forelse($registrants as $item)
+                            <?php $__empty_1 = true; $__currentLoopData = $registrants; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr class="hover:bg-blue-50/30 transition-colors group">
-                                {{-- Checkbox --}}
+                                
                                 <td class="px-6 py-4 text-center">
-                                    @if($item->status == 'accepted')
-                                        <input type="checkbox" name="selected_ids[]" value="{{ $item->id }}" class="check-item rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer">
-                                    @else
+                                    <?php if($item->status == 'accepted'): ?>
+                                        <input type="checkbox" name="selected_ids[]" value="<?php echo e($item->id); ?>" class="check-item rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer">
+                                    <?php else: ?>
                                         <i class="ph-bold ph-minus text-slate-200"></i>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 
-                                {{-- Siswa --}}
+                                
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-4">
                                         <div class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 border border-slate-300 flex items-center justify-center text-slate-500 font-black text-sm shadow-sm group-hover:scale-110 transition-transform">
-                                            {{ substr($item->full_name, 0, 1) }}
+                                            <?php echo e(substr($item->full_name, 0, 1)); ?>
+
                                         </div>
                                         <div>
-                                            <div class="font-bold text-slate-800 text-base">{{ $item->full_name }}</div>
+                                            <div class="font-bold text-slate-800 text-base"><?php echo e($item->full_name); ?></div>
                                             <div class="text-xs text-slate-400 font-mono mt-0.5 flex items-center gap-1">
-                                                <i class="ph-bold ph-barcode"></i> {{ $item->registration_number }}
+                                                <i class="ph-bold ph-barcode"></i> <?php echo e($item->registration_number); ?>
+
                                             </div>
                                         </div>
                                     </div>
                                 </td>
 
-                                {{-- Jalur & Nilai --}}
+                                
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex flex-col items-center gap-1">
                                         <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border 
-                                            {{ $item->track == 'prestasi' ? 'bg-purple-50 text-purple-600 border-purple-100' : 'bg-blue-50 text-blue-600 border-blue-100' }}">
-                                            {{ $item->track }}
+                                            <?php echo e($item->track == 'prestasi' ? 'bg-purple-50 text-purple-600 border-purple-100' : 'bg-blue-50 text-blue-600 border-blue-100'); ?>">
+                                            <?php echo e($item->track); ?>
+
                                         </span>
-                                        <span class="text-xs font-bold text-slate-500">{{ $item->average_grade }}</span>
+                                        <span class="text-xs font-bold text-slate-500"><?php echo e($item->average_grade); ?></span>
                                     </div>
                                 </td>
 
-                                {{-- Status --}}
+                                
                                 <td class="px-6 py-4 text-center">
-                                    @if($item->status == 'pending')
+                                    <?php if($item->status == 'pending'): ?>
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200 shadow-sm">
                                             <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Pending
                                         </span>
-                                    @elseif($item->status == 'accepted')
+                                    <?php elseif($item->status == 'accepted'): ?>
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm">
                                             <i class="ph-fill ph-check-circle"></i> Diterima
                                         </span>
-                                    @elseif($item->status == 'verified')
+                                    <?php elseif($item->status == 'verified'): ?>
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-200 shadow-sm">
                                             <i class="ph-fill ph-check"></i> Terverifikasi
                                         </span>
-                                    @else
+                                    <?php else: ?>
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200 shadow-sm">
                                             <i class="ph-fill ph-x-circle"></i> Ditolak
                                         </span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
 
-                                {{-- Aksi --}}
+                                
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 duration-200">
-                                        <a href="{{ route('admin.ppdb.show', $item->id) }}" class="p-2 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all" title="Detail">
+                                        <a href="<?php echo e(route('admin.ppdb.show', $item->id)); ?>" class="p-2 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 border border-transparent hover:border-blue-100 transition-all" title="Detail">
                                             <i class="ph-bold ph-eye text-lg"></i>
                                         </a>
-                                        <button type="button" onclick="confirmDelete('{{ $item->id }}', '{{ $item->full_name }}')" class="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all" title="Hapus">
+                                        <button type="button" onclick="confirmDelete('<?php echo e($item->id); ?>', '<?php echo e($item->full_name); ?>')" class="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition-all" title="Hapus">
                                             <i class="ph-bold ph-trash text-lg"></i>
                                         </button>
                                     </div>
                                 </td>
                             </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
                                 <td colspan="5" class="py-20 text-center">
                                     <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
@@ -277,28 +290,29 @@
                                     <p class="text-xs text-slate-400 mt-1">Silakan cek filter atau data masuk.</p>
                                 </td>
                             </tr>
-                            @endforelse
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </form>
 
-                {{-- Hidden Delete Forms --}}
-                @foreach($registrants as $item)
-                    <form action="{{ route('admin.ppdb.destroy', $item->id) }}" method="POST" id="delete-form-{{ $item->id }}" class="hidden">
-                        @csrf @method('DELETE')
+                
+                <?php $__currentLoopData = $registrants; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <form action="<?php echo e(route('admin.ppdb.destroy', $item->id)); ?>" method="POST" id="delete-form-<?php echo e($item->id); ?>" class="hidden">
+                        <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                     </form>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
 
-            @if($registrants->hasPages())
+            <?php if($registrants->hasPages()): ?>
             <div class="p-6 border-t border-slate-50 bg-slate-50/50">
-                {{ $registrants->withQueryString()->links() }}
+                <?php echo e($registrants->withQueryString()->links()); ?>
+
             </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 
-    {{-- SCRIPTS (SweetAlert & Animations) --}}
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -316,16 +330,16 @@
             });
 
             // SweetAlert Session
-            @if(session('success'))
+            <?php if(session('success')): ?>
                 Swal.fire({
-                    icon: 'success', title: 'Berhasil!', text: '{{ session('success') }}',
+                    icon: 'success', title: 'Berhasil!', text: '<?php echo e(session('success')); ?>',
                     confirmButtonColor: '#1e3a8a',
                     customClass: { popup: 'rounded-[2rem] font-sans', confirmButton: 'px-6 py-3 rounded-xl' }
                 });
-            @endif
-            @if(session('error'))
-                Swal.fire({ icon: 'error', title: 'Error', text: '{{ session('error') }}' });
-            @endif
+            <?php endif; ?>
+            <?php if(session('error')): ?>
+                Swal.fire({ icon: 'error', title: 'Error', text: '<?php echo e(session('error')); ?>' });
+            <?php endif; ?>
 
             // Checkbox All Logic
             const checkAll = document.getElementById('checkAll');
@@ -371,4 +385,13 @@
             });
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/admin/ppdb/index.blade.php ENDPATH**/ ?>

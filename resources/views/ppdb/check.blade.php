@@ -2,75 +2,86 @@
 
 @section('content')
 @php
-    // Logika Waktu (Sama seperti sebelumnya, tapi disesuaikan variabelnya)
     $currentTime = \Carbon\Carbon::now();
     $isOpen = isset($announcementDate) ? $currentTime->greaterThanOrEqualTo($announcementDate) : false;
     
-    // Paksa buka jika ada error (agar user bisa baca errornya)
+    // Debug/Fallback
     if(isset($customError) || session('error')) {
         $isOpen = true; 
     }
 @endphp
 
-{{-- STYLE KHUSUS (Copy dari halaman Kelulusan) --}}
+{{-- STYLE KHUSUS --}}
 <style>
-    .glass-card {
-        background: rgba(15, 23, 42, 0.6);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    
+    .countdown-box {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     }
-    .text-shadow { text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-    .countdown-item { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .countdown-item:hover { transform: translateY(-5px); background: rgba(255, 255, 255, 0.05); border-color: rgba(59, 130, 246, 0.5); }
+    
+    .search-input {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        transition: all 0.3s ease;
+    }
+    .search-input:focus {
+        background: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
 </style>
 
-<div class="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-slate-950 font-sans py-10">
+<div class="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-slate-50 font-sans py-10">
     
-    <div class="absolute inset-0 z-0">
-        <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900"></div>
-        <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-        <div class="absolute -top-40 -right-40 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[100px] animate-pulse"></div>
-        <div class="absolute -bottom-40 -left-40 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[100px]"></div>
+    {{-- Background Ornaments --}}
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-blue-100/50 rounded-full blur-[100px] opacity-60 mix-blend-multiply"></div>
+        <div class="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-100/50 rounded-full blur-[100px] opacity-60 mix-blend-multiply"></div>
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-30"></div>
     </div>
 
     <div class="relative z-10 w-full max-w-4xl px-4">
         
-        <div class="text-center mb-10" data-aos="fade-down">
-            <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight leading-tight mb-3 text-shadow uppercase">
-                Pengumuman <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">PPDB</span>
+        {{-- Header --}}
+        <div class="text-center mb-12 animate-enter">
+            <div class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-white border border-blue-100 mb-6 shadow-sm">
+                <span class="relative flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600"></span>
+                </span>
+                <span class="text-xs font-black text-slate-600 tracking-wider uppercase">Portal Pengumuman</span>
+            </div>
+            
+            <h1 class="text-4xl md:text-6xl font-black text-slate-900 tracking-tight mb-4">
+                Hasil Seleksi <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">PPDB {{ date('Y') }}</span>
             </h1>
-            <p class="text-blue-200 text-lg font-medium tracking-widest uppercase opacity-80">
-                Penerimaan Peserta Didik Baru {{ date('Y') }}
-            </p>
         </div>
 
-        <div class="glass-card rounded-[2.5rem] overflow-hidden relative" data-aos="fade-up">
-            {{-- Garis Aksen --}}
-            <div class="h-1.5 w-full bg-gradient-to-r from-blue-500 via-indigo-600 to-violet-600"></div>
-
-            <div class="p-8 md:p-12">
+        <div class="bg-white rounded-[2.5rem] overflow-hidden relative shadow-2xl shadow-slate-200/50 border border-slate-100 animate-enter" style="animation-delay: 100ms">
+            
+            <div class="p-8 md:p-16">
                 
                 {{-- MODE 1: HITUNG MUNDUR --}}
                 <div id="countdown-wrapper" class="{{ $isOpen ? 'hidden' : 'block' }}">
                     <div class="text-center max-w-3xl mx-auto">
                         <div class="mb-10">
-                            <span class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-amber-500/10 text-amber-300 text-xs font-bold tracking-widest border border-amber-500/20 mb-6 uppercase">
-                                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> Segera Dibuka
-                            </span>
-                            <h2 class="text-3xl font-bold text-white mb-2">Menuju Pengumuman Resmi</h2>
+                            <h2 class="text-2xl font-black text-slate-800 mb-2">Pengumuman Segera Dibuka</h2>
                             @if(isset($announcementDate))
-                                <p class="text-slate-400">Hasil seleksi PPDB dapat diakses pada:</p>
-                                <p class="text-lg text-amber-400 font-bold mt-1 font-mono tracking-wide">{{ $announcementDate->translatedFormat('l, d F Y - H:i') }} WIB</p>
+                                <p class="text-slate-500 font-medium mb-6">Hasil seleksi dapat diakses secara online pada:</p>
+                                <div class="inline-block px-6 py-3 rounded-2xl bg-blue-50 border border-blue-100">
+                                    <p class="text-xl text-blue-600 font-black font-mono">{{ $announcementDate->translatedFormat('l, d F Y - H:i') }} WIB</p>
+                                </div>
                             @endif
                         </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                             @foreach(['Hari' => 'days', 'Jam' => 'hours', 'Menit' => 'minutes', 'Detik' => 'seconds'] as $label => $id)
-                                <div class="countdown-item bg-slate-800/50 border border-white/5 rounded-3xl p-5 shadow-inner">
-                                    <span id="{{ $id }}" class="block text-4xl md:text-6xl font-black text-white font-mono tracking-tighter">00</span>
-                                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1 block">{{ $label }}</span>
+                                <div class="countdown-box rounded-2xl p-6 flex flex-col items-center justify-center aspect-square md:aspect-auto group hover:border-blue-200 transition-colors">
+                                    <span id="{{ $id }}" class="text-4xl md:text-5xl font-black text-slate-800 font-mono tracking-tighter mb-2 group-hover:text-blue-600 transition-colors">00</span>
+                                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{{ $label }}</span>
                                 </div>
                             @endforeach
                         </div>
@@ -78,34 +89,34 @@
                 </div>
 
                 {{-- MODE 2: FORM PENCARIAN --}}
-                <div id="main-content" class="{{ $isOpen ? 'block animate-fade-in' : 'hidden' }}">
-                    <div class="max-w-xl mx-auto text-center">
-                        <div class="mb-8">
-                            <h2 class="text-2xl font-bold text-white mb-2">Cek Hasil Seleksi</h2>
-                            <p class="text-slate-400">Masukkan Nomor Pendaftaran atau NISN Siswa.</p>
+                <div id="main-content" class="{{ $isOpen ? 'block animate-enter' : 'hidden' }}">
+                    <div class="max-w-xl mx-auto">
+                        <div class="text-center mb-10">
+                            <h2 class="text-2xl font-black text-slate-800 mb-2">Cek Status Kelulusan</h2>
+                            <p class="text-slate-500 font-medium text-sm">Masukkan Nomor Pendaftaran (Format: REG-xxxx) atau NISN Siswa.</p>
                         </div>
 
                         <form action="{{ route('ppdb.search') }}" method="POST" class="relative group">
                             @csrf
                             <div class="relative mb-6">
                                 <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
-                                    <i class="ph-bold ph-magnifying-glass text-2xl text-slate-500 group-focus-within:text-blue-400 transition-colors"></i>
+                                    <i class="ph-duotone ph-magnifying-glass text-3xl text-slate-400 group-focus-within:text-blue-600 transition-colors"></i>
                                 </div>
-                                <input type="text" name="search" class="block w-full pl-16 pr-6 py-5 bg-slate-900/50 border-2 border-slate-700 text-white text-lg font-bold rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-600 outline-none shadow-inner" placeholder="Contoh: REG-2025-001" required autocomplete="off">
+                                <input type="text" name="search" class="search-input block w-full pl-16 pr-6 py-5 text-slate-800 text-lg font-bold rounded-2xl placeholder:text-slate-400 placeholder:font-normal outline-none" placeholder="Cari data siswa..." required autocomplete="off">
                             </div>
                             
-                            <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-600/30 transform hover:-translate-y-1 transition-all flex items-center justify-center gap-3">
-                                <span>Cek Status Sekarang</span>
-                                <i class="ph-bold ph-arrow-right text-xl"></i>
+                            <button type="submit" class="w-full bg-slate-900 hover:bg-blue-600 text-white font-bold py-5 rounded-2xl shadow-lg shadow-slate-900/20 hover:shadow-blue-600/30 transform hover:-translate-y-1 transition-all flex items-center justify-center gap-3 text-lg">
+                                <span>Lihat Hasil Seleksi</span>
+                                <i class="ph-bold ph-arrow-right"></i>
                             </button>
                         </form>
 
                         @if(session('error') || isset($customError))
-                            <div class="mt-8 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-4 text-left animate-pulse">
-                                <div class="bg-rose-500/20 p-2.5 rounded-full text-rose-400"><i class="ph-fill ph-warning-circle text-xl"></i></div>
+                            <div class="mt-8 p-5 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-4">
+                                <div class="bg-rose-100 p-2 rounded-xl text-rose-600 mt-0.5"><i class="ph-fill ph-warning-circle text-xl"></i></div>
                                 <div>
-                                    <h4 class="font-bold text-rose-400 text-sm">Pemberitahuan</h4>
-                                    <p class="text-xs text-rose-300/80">{{ session('error') ?? $customError }}</p>
+                                    <h4 class="font-bold text-rose-700 text-sm mb-1">Data Tidak Ditemukan</h4>
+                                    <p class="text-xs text-rose-600/80 font-medium leading-relaxed">{{ session('error') ?? $customError }}</p>
                                 </div>
                             </div>
                         @endif
@@ -114,14 +125,13 @@
 
             </div>
             
-            <div class="bg-slate-900/80 border-t border-white/5 p-4 text-center backdrop-blur-sm">
-                <p class="text-xs text-slate-500 font-medium tracking-wide">&copy; {{ date('Y') }} Panitia PPDB SMPN 3 Lakbok</p>
+            <div class="bg-slate-50 border-t border-slate-100 p-6 text-center">
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">&copy; {{ date('Y') }} Panitia PPDB SMPN 3 Lakbok</p>
             </div>
         </div>
     </div>
 </div>
 
-{{-- SCRIPT JS SAMA SEPERTI SEBELUMNYA --}}
 @if(!$isOpen && isset($announcementDate))
 <script>
     const targetDateStr = "{{ $announcementDate->format('Y-m-d H:i:s') }}";
