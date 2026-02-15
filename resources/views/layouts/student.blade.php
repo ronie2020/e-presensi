@@ -90,7 +90,7 @@
         </main>
 
         <footer class="text-center py-6 text-slate-400 text-[10px] font-medium pb-20 md:pb-6">
-            <p>Computer Based Test (CBT) System &copy; {{ date('Y') }}</p>
+            <p>Computer Based Test (CBT) System Netil@ Berjaya Ri.. &copy; {{ date('Y') }}</p>
         </footer>
     </div>
 </body>

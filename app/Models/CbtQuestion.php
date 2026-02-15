@@ -12,7 +12,8 @@ class CbtQuestion extends Model
     // UPDATE: Tambahkan 'cbt_question_bank_id' ke fillable
     protected $fillable = [
         'cbt_exam_id', 
-        'cbt_question_bank_id', // <-- Kolom baru
+        'cbt_question_bank_id', 
+        'question_type',
         'question_text', 
         'question_image',
         'options', 

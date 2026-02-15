@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage; // Penting untuk fitur Upload Foto Proctoring
+use Illuminate\Support\Facades\Storage; 
 use App\Models\CbtExam;
 use App\Models\CbtStudentExam;
 use App\Models\CbtStudentAnswer;
@@ -41,9 +41,9 @@ class StudentExamController extends Controller
             
             $exam->student_status = $session ? $session->status : 'open'; 
             $exam->session_id = $session ? $session->id : null;
+            $exam->student_score = $session ? $session->total_score : 0; // data score siswa
         }
 
-        // [PERBAIKAN PATH VIEW] Sesuai folder resources/views/cbt/student/index.blade.php
         return view('cbt.student.index', compact('exams'));
     }
 
@@ -63,7 +63,6 @@ class StudentExamController extends Controller
             return redirect()->route('student.exam.run', $exam_id);
         }
 
-        // [PERBAIKAN PATH VIEW] Sesuai folder resources/views/cbt/student/start_confirmation.blade.php
         return view('cbt.student.start_confirmation', compact('exam'));
     }
 
@@ -98,6 +97,7 @@ class StudentExamController extends Controller
     {
         $exam = CbtExam::findOrFail($exam_id);
         $studentId = $this->getStudentId();
+        $student = Auth::guard('student')->user();
 
         $session = CbtStudentExam::where('student_id', $studentId)
             ->where('cbt_exam_id', $exam_id)
@@ -107,7 +107,7 @@ class StudentExamController extends Controller
             return redirect()->route('student.exam.index');
         }
 
-        // Logika Hitung Waktu (Server Side) - Logika Asli Tetap Ada
+        // Logika Hitung Waktu
         $startTime = Carbon::parse($session->created_at);
         $endTimeByDuration = $startTime->copy()->addMinutes($exam->duration_minutes);
         $endTimeBySchedule = Carbon::parse($exam->end_time);
@@ -119,8 +119,9 @@ class StudentExamController extends Controller
             return $this->finishProcess($session, $exam);
         }
 
+        // Ambil soal dan acak        
         $questions = CbtQuestion::where('cbt_exam_id', $exam_id)
-            ->select('id', 'question_text', 'question_image', 'options') 
+            ->select('id', 'question_text', 'question_image', 'options', 'question_type') 
             ->inRandomOrder($session->id) 
             ->get();
 
@@ -130,17 +131,26 @@ class StudentExamController extends Controller
         $questions->transform(function ($q) use ($savedAnswers) {
             $opts = is_string($q->options) ? json_decode($q->options, true) : $q->options;
             $q->options = $opts; 
-            $q->saved_answer = $savedAnswers[$q->id] ?? null;
+                        
+            $saved = $savedAnswers[$q->id] ?? null;
+                      
+            if ($q->question_type === 'matching' && $saved && is_string($saved)) {
+                $decoded = json_decode($saved, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $saved = $decoded;
+                }
+            }
+            
+            $q->saved_answer = $saved;
             return $q;
         });
 
         $sessionId = $session->id;
 
-        // Cek keberadaan view di folder student, jika tidak ada fallback ke folder cbt
         if (view()->exists('cbt.student.exam_runner')) {
-             return view('cbt.student.exam_runner', compact('exam', 'questions', 'timeLeft', 'sessionId'));
+             return view('cbt.student.exam_runner', compact('exam', 'questions', 'timeLeft', 'sessionId', 'student'));
         } else {
-             return view('cbt.exam_runner', compact('exam', 'questions', 'timeLeft', 'sessionId'));
+             return view('cbt.exam_runner', compact('exam', 'questions', 'timeLeft', 'sessionId', 'student'));
         }
     }
 
@@ -149,7 +159,7 @@ class StudentExamController extends Controller
         $request->validate([
             'session_id' => 'required',
             'question_id' => 'required',
-            'answer' => 'nullable'
+            'answer' => 'nullable' 
         ]);
 
         $session = CbtStudentExam::where('id', $request->session_id)
@@ -159,14 +169,16 @@ class StudentExamController extends Controller
         if (!$session || $session->status == 'finished') {
             return response()->json(['status' => 'error', 'message' => 'Sesi tidak valid'], 403);
         }
-
+        
+        $answerToSave = is_array($request->answer) ? json_encode($request->answer) : $request->answer;
+      
         CbtStudentAnswer::updateOrInsert(
             [
                 'cbt_student_exam_id' => $session->id,
                 'cbt_question_id' => $request->question_id
             ],
             [
-                'answer' => $request->answer,
+                'answer' => $answerToSave,                
                 'updated_at' => now()
             ]
         );
@@ -189,7 +201,6 @@ class StudentExamController extends Controller
         return redirect()->route('student.exam.index');
     }
 
-    // METHOD FOTO PROCTORING (LOGIKA TETAP DIPERTAHANKAN)
     public function uploadPhoto(Request $request)
     {
         $request->validate([
@@ -209,9 +220,7 @@ class StudentExamController extends Controller
             $imageData = $request->photo;
             $imageData = str_replace('data:image/jpeg;base64,', '', $imageData);
             $imageData = str_replace(' ', '+', $imageData);
-            
             $fileName = 'proctoring/' . $session->cbt_exam_id . '/' . $session->student_id . '_' . time() . '.jpg';
-            
             Storage::disk('public')->put($fileName, base64_decode($imageData));
 
             DB::table('cbt_exam_photos')->insert([
@@ -234,6 +243,7 @@ class StudentExamController extends Controller
         if (!$session) return redirect()->route('student.exam.index');
 
         $studentAnswers = CbtStudentAnswer::where('cbt_student_exam_id', $session->id)->get();
+        // Mengambil data soal lengkap termasuk question_type
         $questions = CbtQuestion::where('cbt_exam_id', $session->cbt_exam_id)->get()->keyBy('id');
 
         $totalScore = 0;
@@ -241,9 +251,43 @@ class StudentExamController extends Controller
         foreach ($studentAnswers as $ans) {
             if (isset($questions[$ans->cbt_question_id])) {
                 $q = $questions[$ans->cbt_question_id];
-                $isCorrect = strtoupper($ans->answer) === strtoupper($q->correct_answer);
+                                
+                $type = $q->question_type ?? 'choice'; 
+                $isCorrect = false;
+
+                $studentAns = trim($ans->answer);
+                $correctAns = trim($q->correct_answer);
+
+                if ($type === 'choice' || $type === 'true_false') {        // pilihan ganda            
+                    if (strcasecmp($studentAns, $correctAns) == 0) {
+                        $isCorrect = true;
+                    }
+                } 
+                elseif ($type === 'matching') {                         // matching
+                    $keyMap = json_decode($correctAns, true) ?? [];
+                    $studentMap = json_decode($studentAns, true) ?? [];
+                    
+                    if (is_array($keyMap)) ksort($keyMap);
+                    if (is_array($studentMap)) ksort($studentMap);
+
+                    if (!empty($keyMap) && $keyMap == $studentMap) {
+                        $isCorrect = true;
+                    }
+                }
+                elseif ($type === 'essay') {                            // essai    
+                    if (!empty($correctAns) && strcasecmp($studentAns, $correctAns) == 0) {
+                        $isCorrect = true;
+                    }
+                }
+
                 if ($isCorrect) {
                     $totalScore += $q->score_weight;
+                    // status benar/salah per butir soal (opsional, untuk analisis)
+                    $ans->is_correct = true;
+                    $ans->save();
+                } else {
+                    $ans->is_correct = false;
+                    $ans->save();
                 }
             }
         }

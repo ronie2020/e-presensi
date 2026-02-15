@@ -183,8 +183,7 @@ Route::middleware(['auth:student'])->group(function () {
     });
     Route::get('/ramadan/leaderboard', [RamadanLogController::class, 'leaderboard'])->name('leaderboard');
     Route::get('/ramadan/leaderboard-alias', [RamadanLogController::class, 'leaderboard'])->name('ramadan.leaderboard');
-    });
-
+    
     // --- 7. LAYANAN E-COUNSELING (BK) UNTUK SISWA ---
     Route::prefix('student/bk')->name('student.bk.')->group(function() {
         Route::get('/', [BkStudentController::class, 'index'])->name('index'); 
@@ -192,6 +191,7 @@ Route::middleware(['auth:student'])->group(function () {
         Route::post('/', [BkStudentController::class, 'store'])->name('store'); 
         Route::get('/{id}', [BkStudentController::class, 'show'])->name('show'); 
     });
+});
 
 // =========================================================================
 //  AREA ALUMNI (SETELAH LULUS)
@@ -353,7 +353,7 @@ Route::middleware('auth')->group(function () {
         // 7. FOTO PENGAWASAN (PROCTORING)
         Route::get('/monitoring/{exam}/{student}/photos', [CbtController::class, 'getStudentPhotos'])->name('monitoring.photos');
 
-        // 8. INTEGRASI BANK SOAL (TARIK & SIMPAN)
+        // 8. INTEGRASI BANK SOAL (TARIK & SIMPAN)        
         Route::post('/exam/{exam}/pull-from-bank', [CbtBankController::class, 'importToExam'])->name('import_from_bank');
         Route::post('/exam/{exam}/export-to-bank', [CbtBankController::class, 'storeFromExam'])->name('export_to_bank');
     });
@@ -363,9 +363,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [CbtBankController::class, 'index'])->name('index');
         Route::post('/', [CbtBankController::class, 'store'])->name('store');
         Route::get('/{id}/manage', [CbtBankController::class, 'manage'])->name('manage');
-        Route::put('/{id}', [CbtBankController::class, 'update'])->name('update');
+        Route::put('/{id}', [CbtBankController::class, 'update'])->name('update'); // Opsional: Edit header bank
         Route::delete('/{id}', [CbtBankController::class, 'destroy'])->name('destroy');
         Route::post('/{id}/questions', [CbtBankController::class, 'storeQuestion'])->name('questions.store');
+        Route::delete('/questions/{id}', [CbtBankController::class, 'destroyQuestion'])->name('questions.destroy'); // Hapus soal dari bank
     });
 
     // Kedisiplinan & Penilaian

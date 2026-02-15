@@ -48,14 +48,8 @@
                                 : 'text-slate-500 border-transparent hover:bg-slate-50 hover:text-slate-700' }}">
                             <i class="{{ request()->routeIs('students.learning.*') ? 'ph-fill' : 'ph-bold' }} ph-chalkboard-teacher text-lg"></i>
                             Materi & Tugas
-                        </a>
-                        
-                        {{-- Link Switch ke Ujian (Tombol Aksi) --}}
-                        <a href="{{ route('student.exam.index') }}" 
-                           class="px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all text-slate-500 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 group" title="Pindah ke Mode Ujian">
-                            <i class="ph-bold ph-desktop text-lg group-hover:scale-110 transition-transform"></i>
-                            Mode Ujian
-                        </a>
+                        </a>                        
+                      
                     </div>
                 </div>
 
