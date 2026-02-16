@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>" class="scroll-smooth">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Website Resmi SMP Negeri 3 Lakbok. Informasi akademik, kesiswaan, dan prestasi sekolah terkini.">
-    <title><?php echo e(config('app.name', 'SMP Negeri 3 Lakbok')); ?></title>
+    <title>{{ config('app.name', 'SMP Negeri 3 Lakbok') }}</title>
     
-    
-    <?php echo $__env->make('landing.styles', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    {{-- Memanggil Partial Styles --}}
+    @include('landing.styles')
 </head>
 <body class="antialiased text-slate-800 bg-slate-50 overflow-x-hidden selection:bg-blue-500 selection:text-white" 
     x-data="{ 
@@ -37,8 +37,7 @@
         init() {
             window.addEventListener('load', () => {
                 setTimeout(() => {
-                    const preloader = document.getElementById('preloader');
-                    if(preloader) preloader.classList.add('hide-preloader');
+                    document.getElementById('preloader').classList.add('hide-preloader');
                 }, 800);
             });
         }
@@ -63,62 +62,62 @@
         </div>
     </div>
 
-    <!-- NAVBAR -->
-    <?php echo $__env->make('landing.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    <!-- NAVBAR (Fixed Z-Index Mobile) -->
+    @include('landing.navbar')
 
     <!-- HERO SECTION -->
-    <?php echo $__env->make('landing.hero', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.hero')
 
     <!-- PPDB TRACKS -->
-    <?php echo $__env->make('landing.ppdb', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.ppdb')
 
     <!-- 7 HABITS (KARAKTER) -->
-    <?php echo $__env->make('landing.character', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.character')
 
     <!-- QUICK ACCESS MENU -->
-    <?php echo $__env->make('landing.quick-access', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.quick-access')
 
     <!-- DOWNLOAD AREA -->
-    <?php echo $__env->make('landing.downloads', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.downloads')
 
     <!-- KEPALA SEKOLAH -->
-    <?php echo $__env->make('landing.headmaster', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.headmaster')
 
     <!-- PROFIL SEKOLAH -->
-    <?php echo $__env->make('landing.profile', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.profile')
 
     <!-- VIDEO PROFIL -->
-    <?php echo $__env->make('landing.video', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.video')
 
     <!-- GURU & STAFF -->
-    <?php echo $__env->make('landing.teachers', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.teachers')
 
     <!-- KEGIATAN -->
-    <?php echo $__env->make('landing.activities', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.activities')
 
     <!-- PRESTASI -->
-    <?php echo $__env->make('landing.achievements', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.achievements')
 
     <!-- EKSTRAKURIKULER -->
-    <?php echo $__env->make('landing.extracurricular', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.extracurricular')
 
     <!-- ALUMNI -->
-    <?php echo $__env->make('landing.alumni', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.alumni')
 
     <!-- KATA MEREKA / GUESTBOOK -->
-    <?php echo $__env->make('landing.guestbook', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.guestbook')
 
     <!-- LIBRARY -->
-    <?php echo $__env->make('landing.library', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.library')
 
     <!-- E-BOOKS -->
-    <?php echo $__env->make('landing.ebooks', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.ebooks')
 
     <!-- ANNOUNCEMENTS, AGENDA & FOOTER -->
-    <?php echo $__env->make('landing.footer', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.footer')
 
     <!-- MODALS -->
-    <?php echo $__env->make('landing.modals', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include('landing.modals')
 
     <!-- BACK TO TOP -->
     <button 
@@ -135,8 +134,8 @@
         <i class="ph-bold ph-arrow-up text-xl"></i>
     </button>
 
-    
-    <?php echo $__env->make('landing.scripts', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    {{-- Memanggil Partial Scripts --}}
+    @include('landing.scripts')
 
 </body>
-</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/welcome.blade.php ENDPATH**/ ?>
+</html>
