@@ -1,26 +1,33 @@
-<x-app-layout>
-    <x-slot name="header">
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+     <?php $__env->slot('header', null, []); ?> 
         <h2 class="font-semibold text-xl text-slate-800 leading-tight">
-            {{ __('Monitoring Live') }}
-        </h2>
-    </x-slot>
+            <?php echo e(__('Monitoring Live')); ?>
 
-    {{-- 
-        LOGIKA MONITORING LENGKAP (Alpine.js)
-        Updated: Menggunakan x-teleport untuk fix masalah modal tertutup sidebar
-    --}}
+        </h2>
+     <?php $__env->endSlot(); ?>
+
+    
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('monitoringData', () => ({
                 // --- DATA MONITORING ---
-                students: @json($monitoringData),
-                stats: @json($stats),
+                students: <?php echo json_encode($monitoringData, 15, 512) ?>,
+                stats: <?php echo json_encode($stats, 15, 512) ?>,
                 search: '', 
                 timer: 10,
                 isUpdating: false,
                 
                 // --- DATA TOKEN ---
-                currentToken: '{{ $exam->token }}',
+                currentToken: '<?php echo e($exam->token); ?>',
                 autoRotate: false,
                 intervalMinutes: 15,
                 tokenIsLoading: false,
@@ -36,10 +43,10 @@
                 
                 // --- URL ROUTE ---
                 urls: {
-                    monitoring: '{{ route('cbt.monitoring_data', $exam->id) }}',
-                    autoToken: '{{ route('cbt.auto_token', $exam->id) }}',
-                    resetBase: '{{ route('cbt.reset', ['exam' => $exam->id, 'student' => 'ID_PLACEHOLDER']) }}',
-                    photosBase: '{{ route("cbt.monitoring.photos", ["exam" => $exam->id, "student" => "ID_PLACEHOLDER"]) }}'
+                    monitoring: '<?php echo e(route('cbt.monitoring_data', $exam->id)); ?>',
+                    autoToken: '<?php echo e(route('cbt.auto_token', $exam->id)); ?>',
+                    resetBase: '<?php echo e(route('cbt.reset', ['exam' => $exam->id, 'student' => 'ID_PLACEHOLDER'])); ?>',
+                    photosBase: '<?php echo e(route("cbt.monitoring.photos", ["exam" => $exam->id, "student" => "ID_PLACEHOLDER"])); ?>'
                 },
 
                 init() {
@@ -100,7 +107,7 @@
 
                 // --- FUNGSI TOKEN ---
                 loadTokenState() {
-                    const saved = JSON.parse(localStorage.getItem('token_monitor_{{ $exam->id }}'));
+                    const saved = JSON.parse(localStorage.getItem('token_monitor_<?php echo e($exam->id); ?>'));
                     if (saved) {
                         this.autoRotate = saved.autoRotate;
                         this.intervalMinutes = saved.intervalMinutes;
@@ -116,7 +123,7 @@
 
                 saveTokenState() {
                     const now = Math.floor(Date.now() / 1000);
-                    localStorage.setItem('token_monitor_{{ $exam->id }}', JSON.stringify({
+                    localStorage.setItem('token_monitor_<?php echo e($exam->id); ?>', JSON.stringify({
                         autoRotate: this.autoRotate, 
                         intervalMinutes: this.intervalMinutes, 
                         targetTime: now + this.tokenTimeLeft
@@ -142,14 +149,14 @@
                 stopTokenTimer() { 
                     clearInterval(this.tokenTimer); 
                     this.tokenProgress = 100; 
-                    localStorage.removeItem('token_monitor_{{ $exam->id }}'); 
+                    localStorage.removeItem('token_monitor_<?php echo e($exam->id); ?>'); 
                 },
 
                 rotateTokenNow() {
                     this.tokenIsLoading = true;
                     fetch(this.urls.autoToken, {
                         method: 'POST', 
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' }
                     })
                     .then(r => r.json())
                     .then(d => { if (d.status === 'success') this.currentToken = d.token; })
@@ -189,38 +196,38 @@
          
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-            {{-- HEADER INFO & TOKEN --}}
+            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {{-- Info Ujian --}}
+                
                 <div class="md:col-span-2 relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
                     <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                     <div class="relative z-10">
                         <div class="flex items-center gap-3 mb-2">
-                            @if($exam->is_active)
+                            <?php if($exam->is_active): ?>
                                 <span class="bg-emerald-500/20 border border-emerald-500/50 text-emerald-300 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider animate-pulse flex items-center gap-1.5">
                                     <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span> Live Active
                                 </span>
-                            @else
+                            <?php else: ?>
                                 <span class="bg-white/10 border border-white/10 text-slate-300 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider">Non-Aktif</span>
-                            @endif
-                            <span class="text-blue-300 text-xs font-bold uppercase tracking-wider">Kelas {{ $exam->class_level }}</span>
+                            <?php endif; ?>
+                            <span class="text-blue-300 text-xs font-bold uppercase tracking-wider">Kelas <?php echo e($exam->class_level); ?></span>
                         </div>
-                        <h1 class="text-3xl font-black tracking-tight leading-none mb-4">{{ $exam->title }}</h1>
+                        <h1 class="text-3xl font-black tracking-tight leading-none mb-4"><?php echo e($exam->title); ?></h1>
                         
                         <div class="flex gap-3">
                             <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10 text-center min-w-[90px]">
-                                <h4 class="text-2xl font-black text-white leading-none" x-text="stats.working">{{ $stats['working'] }}</h4>
+                                <h4 class="text-2xl font-black text-white leading-none" x-text="stats.working"><?php echo e($stats['working']); ?></h4>
                                 <p class="text-[9px] uppercase font-bold text-blue-300 mt-1">Proses</p>
                             </div>
                             <div class="bg-emerald-500/20 backdrop-blur-md px-5 py-3 rounded-2xl border border-emerald-500/30 text-center min-w-[90px]">
-                                <h4 class="text-2xl font-black text-emerald-300 leading-none" x-text="stats.finished">{{ $stats['finished'] }}</h4>
+                                <h4 class="text-2xl font-black text-emerald-300 leading-none" x-text="stats.finished"><?php echo e($stats['finished']); ?></h4>
                                 <p class="text-[9px] uppercase font-bold text-emerald-200 mt-1">Selesai</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Token Card --}}
+                
                 <div class="md:col-span-1 bg-white p-6 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col justify-between relative overflow-hidden">
                     <div>
                         <div class="flex justify-between items-start mb-2">
@@ -231,7 +238,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-3 mb-4">
-                            <h2 class="text-5xl font-mono font-black tracking-widest text-slate-800" x-text="currentToken">{{ $exam->token ?? '-----' }}</h2>
+                            <h2 class="text-5xl font-mono font-black tracking-widest text-slate-800" x-text="currentToken"><?php echo e($exam->token ?? '-----'); ?></h2>
                             <button @click="rotateTokenNow()" :disabled="tokenIsLoading" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition disabled:opacity-50">
                                 <i class="ph-bold ph-arrows-clockwise text-xl" :class="tokenIsLoading ? 'animate-spin' : ''"></i>
                             </button>
@@ -254,9 +261,9 @@
                 </div>
             </div>
 
-            {{-- TOOLBAR BAWAH --}}
+            
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <a href="{{ route('cbt.index') }}" class="group inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 transition">
+                <a href="<?php echo e(route('cbt.index')); ?>" class="group inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 transition">
                     <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke List
                 </a>
 
@@ -280,7 +287,7 @@
                     </div>
                 </div>
                 
-                {{-- TABLE DESKTOP --}}
+                
                 <div class="hidden md:block overflow-x-auto">
                     <table class="w-full text-left text-sm text-slate-600">
                         <thead class="bg-slate-50 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100">
@@ -300,11 +307,11 @@
                                     <td class="px-6 py-4 text-center font-bold text-slate-400" x-text="index + 1"></td>
                                     <td class="px-6 py-4 font-bold text-slate-800" x-text="student.name"></td>
                                     
-                                    {{-- Kolom Keamanan (SEB) --}}
+                                    
                                     <td class="px-6 py-4 text-center">
                                         <template x-if="student.status !== 'Belum Mengerjakan'">
                                             <div class="flex items-center justify-center gap-2">
-                                                {{-- Indikator SEB --}}
+                                                
                                                 <template x-if="student.is_seb">
                                                     <span title="Menggunakan SEB (Aman)" class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600">
                                                         <i class="ph-fill ph-shield-check text-lg"></i>
@@ -316,7 +323,7 @@
                                                     </span>
                                                 </template>
 
-                                                {{-- Indikator Perangkat --}}
+                                                
                                                 <template x-if="student.device === 'Mobile'">
                                                     <span title="Menggunakan HP" class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-500">
                                                         <i class="ph-bold ph-device-mobile text-lg"></i>
@@ -334,7 +341,7 @@
                                         </template>
                                     </td>
 
-                                    {{-- Status --}}
+                                    
                                     <td class="px-6 py-4 text-center">
                                         <template x-if="student.status === 'Sedang Mengerjakan'">
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black bg-blue-100 text-blue-700 border border-blue-200 uppercase tracking-wide">
@@ -369,7 +376,7 @@
                                         </template>
                                         <template x-if="student.is_active">
                                             <form :action="getResetUrl(student.id)" method="POST" onsubmit="return confirm('Peringatan: Reset akan memaksa siswa logout. Lanjutkan?')">
-                                                @csrf
+                                                <?php echo csrf_field(); ?>
                                                 <button class="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white flex items-center justify-center transition" title="Reset Login">
                                                     <i class="ph-bold ph-power"></i>
                                                 </button>
@@ -386,7 +393,7 @@
                     </table>
                 </div>
 
-                {{-- MOBILE LIST --}}
+                
                 <div class="md:hidden p-4 space-y-3 bg-slate-50/50">
                     <template x-for="student in filteredStudents" :key="'m-' + student.id">
                         <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
@@ -421,7 +428,7 @@
                                         <i class="ph-bold ph-camera"></i> Foto
                                     </button>
                                     <form :action="getResetUrl(student.id)" method="POST" onsubmit="return confirm('Reset login siswa ini?')">
-                                        @csrf
+                                        <?php echo csrf_field(); ?>
                                         <button class="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1.5 rounded-lg">
                                             <i class="ph-bold ph-power"></i> Reset
                                         </button>
@@ -434,10 +441,7 @@
             </div>
         </div>
 
-        {{-- 
-            MODAL FOTO PROCTORING 
-            FIX: Menggunakan x-teleport="body" agar modal render di luar main container
-        --}}
+        
         <template x-teleport="body">
             <div x-show="showPhotoModal" style="display: none;" class="fixed inset-0 z-[999] overflow-y-auto" @keydown.escape.window="showPhotoModal = false">
                 <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="showPhotoModal = false"></div>
@@ -456,24 +460,24 @@
                         </div>
 
                         <div class="bg-slate-50 rounded-2xl p-6 min-h-[300px] max-h-[60vh] overflow-y-auto custom-scroll">
-                            {{-- Loading State --}}
+                            
                             <div x-show="loadingPhotos" class="flex flex-col items-center justify-center h-48 text-slate-400">
                                 <i class="ph-bold ph-spinner animate-spin text-3xl mb-2"></i>
                                 <span class="text-xs font-bold uppercase tracking-wider">Memuat Foto...</span>
                             </div>
 
-                            {{-- Empty State --}}
+                            
                             <div x-show="!loadingPhotos && studentPhotos.length === 0" class="flex flex-col items-center justify-center h-48 text-slate-400">
                                 <i class="ph-duotone ph-image-broken text-4xl mb-2"></i>
                                 <span class="text-xs font-bold">Tidak ada foto terekam.</span>
                             </div>
 
-                            {{-- Photos Grid --}}
+                            
                             <div x-show="!loadingPhotos && studentPhotos.length > 0" class="grid grid-cols-2 md:grid-cols-3 gap-4">
                                 <template x-for="photo in studentPhotos">
                                     <div class="bg-white p-2 rounded-xl shadow-sm border border-slate-200 group">
                                         <div class="relative overflow-hidden rounded-lg aspect-video bg-slate-200">
-                                            {{-- Gunakan asset helper jika perlu, atau pastikan URL dari backend lengkap --}}
+                                            
                                             <img :src="photo.url" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
                                         </div>
                                         <div class="mt-2 flex justify-between items-center px-1">
@@ -490,4 +494,13 @@
         </template>
 
     </div>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/cbt/monitoring.blade.php ENDPATH**/ ?>
