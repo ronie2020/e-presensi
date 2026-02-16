@@ -71,7 +71,6 @@ use App\Http\Controllers\SppdController;
 // CheckSebMode
 use App\Http\Middleware\CheckSebMode;
 
-// Admin alumni
 use App\Http\Controllers\AdminAlumniController;
 
 // Buku Penghubung, Pengaduan & Kebiasaan Guru
@@ -251,8 +250,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // ROUTE REKAPITULASI KELAS (SUMMARY)
-    Route::get('/reports/classes', [ClassReportController::class, 'index'])->name('reports.class');
+    // =========================================================================
+    //  PERBAIKAN: ROUTE REKAPITULASI KELAS (SUMMARY)
+    //  Menggunakan ReportController::indexClass karena logic perhitungan ada di sana
+    // =========================================================================
+    Route::get('/reports/classes', [ReportController::class, 'indexClass'])->name('reports.class');
+    
     Route::get('/reports/classes/print', [ClassReportController::class, 'print'])->name('reports.class.print');
     Route::get('/reports/classes/excel', [ClassReportController::class, 'exportExcel'])->name('reports.class.excel');
     
