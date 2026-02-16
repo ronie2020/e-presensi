@@ -119,8 +119,8 @@
                             setTimeout(() => { if(window.renderMath) window.renderMath(); }, 100);
                         });
 
-                        // Aktifkan Kamera (Proctoring)
-                        setTimeout(() => { this.initCamera(); }, 1000);
+                        // Aktifkan Kamera (Proctoring) - Delay sedikit agar halaman siap
+                        setTimeout(() => { this.initCamera(); }, 2000);
 
                     } catch (error) { 
                         console.error('System Error:', error);
@@ -349,7 +349,7 @@
                     form.submit();
                 },
 
-                // --- KAMERA PROCTORING ---
+                // --- KAMERA PROCTORING (DIPERBAIKI AGAR TIDAK HITAM) ---
                 async initCamera() {
                     // Cek support browser
                     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
@@ -361,7 +361,12 @@
                         // Minta izin kamera
                         const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
                         video.srcObject = stream;
-                        this.cameraActive = true;
+                        
+                        // [FIXED] Pastikan video di-play secara eksplisit saat metadata dimuat
+                        video.onloadedmetadata = () => {
+                            video.play();
+                            this.cameraActive = true;
+                        };
                         
                         // Foto pertama setelah 5 detik
                         setTimeout(() => this.capturePhoto(), 5000);
@@ -381,6 +386,13 @@
 
                     try {
                         const video = document.getElementById('webcam-video');
+                        
+                        // [FIXED] Cek apakah video sudah siap (HAVE_ENOUGH_DATA = 4)
+                        // Ini mencegah pengiriman frame kosong/hitam
+                        if (video.readyState !== 4) {
+                            return; // Skip cycle ini
+                        }
+
                         const canvas = document.createElement('canvas');
                         canvas.width = 320;
                         canvas.height = 240;
@@ -423,7 +435,8 @@
     @offline.window="isOnline = false">
 
     
-    <video id="webcam-video" autoplay playsinline muted style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px;"></video>
+    
+    <video id="webcam-video" autoplay playsinline muted style="position: fixed; top: 0; left: 0; width: 320px; height: 240px; opacity: 0; pointer-events: none; z-index: -100;"></video>
 
     
     <div id="loading-overlay">

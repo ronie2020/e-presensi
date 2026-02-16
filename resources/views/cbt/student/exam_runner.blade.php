@@ -119,8 +119,8 @@
                             setTimeout(() => { if(window.renderMath) window.renderMath(); }, 100);
                         });
 
-                        // Aktifkan Kamera (Proctoring)
-                        setTimeout(() => { this.initCamera(); }, 1000);
+                        // Aktifkan Kamera (Proctoring) - Delay sedikit agar halaman siap
+                        setTimeout(() => { this.initCamera(); }, 2000);
 
                     } catch (error) { 
                         console.error('System Error:', error);
@@ -361,7 +361,12 @@
                         // Minta izin kamera
                         const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
                         video.srcObject = stream;
-                        this.cameraActive = true;
+                        
+                        // video di-play secara eksplisit saat metadata dimuat
+                        video.onloadedmetadata = () => {
+                            video.play();
+                            this.cameraActive = true;
+                        };
                         
                         // Foto pertama setelah 5 detik
                         setTimeout(() => this.capturePhoto(), 5000);
@@ -380,7 +385,13 @@
                     if (!this.cameraActive || !this.isOnline) return;
 
                     try {
-                        const video = document.getElementById('webcam-video');
+                        const video = document.getElementById('webcam-video');                        
+                        
+                        // Ini mencegah pengiriman frame kosong/hitam
+                        if (video.readyState !== 4) {
+                            return; // Skip cycle ini
+                        }
+
                         const canvas = document.createElement('canvas');
                         canvas.width = 320;
                         canvas.height = 240;
@@ -408,7 +419,7 @@
             }
         }
         
-        // [FAIL-SAFE] Paksa hapus loader setelah 10 detik jika script macet
+        // hapus loader setelah 10 detik jika script macet
         setTimeout(() => {
             const overlay = document.getElementById('loading-overlay');
             if(overlay && overlay.style.display !== 'none') overlay.style.display = 'none';
@@ -422,8 +433,9 @@
     @online.window="isOnline = true; syncPendingAnswers()"
     @offline.window="isOnline = false">
 
-    {{-- VIDEO KAMERA HIDDEN (Untuk Proctoring) --}}
-    <video id="webcam-video" autoplay playsinline muted style="position: absolute; top: -9999px; left: -9999px; width: 1px; height: 1px;"></video>
+    {{-- VIDEO KAMERA HIDDEN --}}
+    {{-- Menggunakan opacity 0 dan position fixed agar tetap dirender browser --}}
+    <video id="webcam-video" autoplay playsinline muted style="position: fixed; top: 0; left: 0; width: 320px; height: 240px; opacity: 0; pointer-events: none; z-index: -100;"></video>
 
     {{-- LOADING OVERLAY --}}
     <div id="loading-overlay">
