@@ -71,6 +71,7 @@ use App\Http\Controllers\SppdController;
 // CheckSebMode
 use App\Http\Middleware\CheckSebMode;
 
+// Admin alumni
 use App\Http\Controllers\AdminAlumniController;
 
 // Buku Penghubung, Pengaduan & Kebiasaan Guru
@@ -363,10 +364,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [CbtBankController::class, 'index'])->name('index');
         Route::post('/', [CbtBankController::class, 'store'])->name('store');
         Route::get('/{id}/manage', [CbtBankController::class, 'manage'])->name('manage');
-        Route::put('/{id}', [CbtBankController::class, 'update'])->name('update'); // Opsional: Edit header bank
+        Route::put('/{id}', [CbtBankController::class, 'update'])->name('update'); 
         Route::delete('/{id}', [CbtBankController::class, 'destroy'])->name('destroy');
-        Route::post('/{id}/questions', [CbtBankController::class, 'storeQuestion'])->name('questions.store');
-        Route::delete('/questions/{id}', [CbtBankController::class, 'destroyQuestion'])->name('questions.destroy'); // Hapus soal dari bank
+        Route::post('/{id}/questions', [CbtBankController::class, 'storeQuestion'])->name('questions.store');       
+        Route::put('/questions/{id}', [CbtBankController::class, 'updateQuestion'])->name('questions.update');     
+        Route::delete('/questions/{id}', [CbtBankController::class, 'destroyQuestion'])->name('questions.destroy');
     });
 
     // Kedisiplinan & Penilaian
@@ -380,8 +382,7 @@ Route::middleware('auth')->group(function () {
         
         //--- Cetak & Export
         Route::get('/print', [StudentPermitController::class, 'print'])->name('print');
-        Route::get('/export', [StudentPermitController::class, 'export'])->name('export');
-        
+        Route::get('/export', [StudentPermitController::class, 'export'])->name('export');        
         Route::post('/scan', [StudentPermitController::class, 'scan'])->name('scan');
         Route::post('/store', [StudentPermitController::class, 'store'])->name('store');    
     });

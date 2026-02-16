@@ -129,6 +129,80 @@ class CbtBankController extends Controller
         return back()->with('success', 'Soal berhasil ditambahkan ke Bank!');
     }
 
+     /**
+     * [BARU] Update Soal (Untuk mengatasi error Route update)
+     */
+    public function updateQuestion(Request $request, $id)
+    {
+        $question = CbtQuestion::findOrFail($id);
+        
+        $request->validate([
+            'question_text' => 'required',
+            'score_weight' => 'required|integer|min:1',
+        ]);
+
+        // Handle Image Update
+        if ($request->has('delete_image') && $request->delete_image == 'true') {
+            if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
+                Storage::delete('public/' . $question->question_image);
+            }
+            $question->question_image = null;
+        }
+        if ($request->hasFile('question_image')) {
+            if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
+                Storage::delete('public/' . $question->question_image);
+            }
+            $question->question_image = $request->file('question_image')->store('soal', 'public');
+        }
+
+        // Gunakan tipe baru jika ada, atau tetap tipe lama
+        $type = $request->question_type ?? $question->question_type;
+        $options = [];
+        $correctAnswer = '';
+
+        // Logika Update Berdasarkan Tipe
+        if ($type === 'choice') {
+            $options = array_filter([
+                'A' => $request->option_A, 'B' => $request->option_B, 
+                'C' => $request->option_C, 'D' => $request->option_D, 'E' => $request->option_E
+            ], fn($v) => !is_null($v) && $v !== '');
+            $correctAnswer = $request->correct_answer;
+
+        } elseif ($type === 'true_false') {
+            $options = ['A' => 'Benar', 'B' => 'Salah'];
+            $correctAnswer = $request->correct_answer;
+
+        } elseif ($type === 'matching') {
+            $pairs = [];
+            $correctMap = [];
+            if($request->has('matches')) {
+                foreach($request->matches as $match) {
+                    if(!empty($match['left']) && !empty($match['right'])) {
+                        $pairs[] = ['left' => $match['left'], 'right' => $match['right']];
+                        $correctMap[$match['left']] = $match['right'];
+                    }
+                }
+            }
+            $options = ['pairs' => $pairs];
+            $correctAnswer = json_encode($correctMap);
+
+        } elseif ($type === 'essay') {
+            $options = []; 
+            $correctAnswer = $request->correct_answer ?? '';
+        }
+
+        $question->update([
+            'question_type' => $type,
+            'question_text' => $request->question_text,
+            'question_image' => $question->question_image, // Pastikan tersimpan
+            'options' => $options,
+            'correct_answer' => $correctAnswer,
+            'score_weight' => $request->score_weight
+        ]);
+        
+        return back()->with('success', 'Soal berhasil diperbarui!');
+    }
+
     /**
      * Hapus Bank Soal
      */
@@ -159,11 +233,7 @@ class CbtBankController extends Controller
     // =================================================================
     //  FITUR INTEGRASI UJIAN <-> BANK SOAL
     // =================================================================
-
-    /**
-     * [TOMBOL: Simpan ke Bank]
-     * Mengcopy semua soal DARI Ujian KE Bank Soal
-     */
+    
     public function storeFromExam(Request $request, $exam_id)
     {
         $exam = CbtExam::with('questions')->findOrFail($exam_id);
@@ -197,14 +267,10 @@ class CbtBankController extends Controller
 
             // Proses Duplikasi Soal
             $count = 0;
-            foreach ($exam->questions as $q) {
-                // Replicate menduplikasi model data tanpa menyimpannya
+            foreach ($exam->questions as $q) {               
                 $newQ = $q->replicate();
-                
-                // Ubah relasi: Dari Ujian -> Ke Bank
                 $newQ->cbt_exam_id = null; 
-                $newQ->cbt_question_bank_id = $targetBankId;
-                
+                $newQ->cbt_question_bank_id = $targetBankId;                
                 $newQ->save();
                 $count++;
             }
@@ -218,8 +284,7 @@ class CbtBankController extends Controller
         }
     }
 
-    /**
-     * [TOMBOL: Ambil Bank]
+    /**    
      * Mengcopy semua soal DARI Bank Soal KE Ujian
      */
     public function importToExam(Request $request, $exam_id)
