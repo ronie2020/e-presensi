@@ -1,8 +1,6 @@
-@extends('layouts.public')
+<?php $__env->startSection('title', 'Arsip Prestasi - ' . config('app.name', 'SMP Negeri 3 Lakbok')); ?>
 
-@section('title', 'Arsip Prestasi - ' . config('app.name', 'SMP Negeri 3 Lakbok'))
-
-@push('styles')
+<?php $__env->startPush('styles'); ?>
     <style>
         /* Animasi Custom Khusus Halaman Ini */
         @keyframes shine { 
@@ -23,8 +21,8 @@
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
     </style>
-@endpush
-@section('content')
+<?php $__env->stopPush(); ?>
+<?php $__env->startSection('content'); ?>
 
     <!-- HEADER SECTION (Hall of Fame Style) -->
     <div class="relative overflow-hidden bg-slate-900 py-20 sm:py-24">
@@ -52,29 +50,30 @@
     <!-- FILTER SECTION (Sticky Glass) -->
     <div class="sticky top-20 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/60 shadow-sm transition-all">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <form action="{{ route('public.achievements') }}" method="GET" class="flex flex-col md:flex-row gap-4 items-center justify-between">
+            <form action="<?php echo e(route('public.achievements')); ?>" method="GET" class="flex flex-col md:flex-row gap-4 items-center justify-between">
                 <!-- Filter Level Pills -->
                 <div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 no-scrollbar mask-gradient">
-                    <a href="{{ route('public.achievements') }}" 
-                       class="whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-bold border transition-all hover:shadow-md hover:-translate-y-0.5 {{ !request('level') ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-transparent shadow-lg shadow-yellow-500/30' : 'bg-white text-slate-600 border-slate-200 hover:border-yellow-400' }}">
+                    <a href="<?php echo e(route('public.achievements')); ?>" 
+                       class="whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-bold border transition-all hover:shadow-md hover:-translate-y-0.5 <?php echo e(!request('level') ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-transparent shadow-lg shadow-yellow-500/30' : 'bg-white text-slate-600 border-slate-200 hover:border-yellow-400'); ?>">
                        Semua
                     </a>
-                    @foreach($levels as $lvl)
-                        <a href="{{ route('public.achievements', array_merge(request()->query(), ['level' => $lvl])) }}" 
-                           class="whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-bold border transition-all hover:shadow-md hover:-translate-y-0.5 {{ request('level') == $lvl ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-transparent shadow-lg shadow-yellow-500/30' : 'bg-white text-slate-600 border-slate-200 hover:border-yellow-400' }}">
-                           {{ $lvl }}
+                    <?php $__currentLoopData = $levels; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lvl): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <a href="<?php echo e(route('public.achievements', array_merge(request()->query(), ['level' => $lvl]))); ?>" 
+                           class="whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-bold border transition-all hover:shadow-md hover:-translate-y-0.5 <?php echo e(request('level') == $lvl ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-transparent shadow-lg shadow-yellow-500/30' : 'bg-white text-slate-600 border-slate-200 hover:border-yellow-400'); ?>">
+                           <?php echo e($lvl); ?>
+
                         </a>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
 
                 <!-- Search Input -->
                 <div class="relative w-full md:w-80 group">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari prestasi..." 
+                    <input type="text" name="search" value="<?php echo e(request('search')); ?>" placeholder="Cari prestasi..." 
                            class="w-full pl-12 pr-4 py-2.5 rounded-full border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/10 text-sm font-medium transition-all shadow-inner">
                     <i class="ph-bold ph-magnifying-glass absolute left-4 top-3 text-slate-400 group-focus-within:text-yellow-500 transition-colors"></i>
-                    @if(request('level'))
-                        <input type="hidden" name="level" value="{{ request('level') }}">
-                    @endif
+                    <?php if(request('level')): ?>
+                        <input type="hidden" name="level" value="<?php echo e(request('level')); ?>">
+                    <?php endif; ?>
                 </div>
             </form>
         </div>
@@ -85,9 +84,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                @forelse($achievements as $index => $prestasi)
+                <?php $__empty_1 = true; $__currentLoopData = $achievements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $prestasi): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <div class="animate-enter group bg-white rounded-[1.5rem] border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-2 transition-all duration-500 relative overflow-hidden flex flex-col h-full"
-                         style="animation-delay: {{ $index * 100 }}ms;">
+                         style="animation-delay: <?php echo e($index * 100); ?>ms;">
                         
                         <!-- Watermark Icon -->
                         <i class="ph-duotone ph-trophy absolute -right-4 -bottom-4 text-9xl text-slate-50 transform rotate-12 group-hover:rotate-0 group-hover:scale-110 transition-transform duration-700 z-0"></i>
@@ -97,9 +96,9 @@
                             <!-- Shine Effect Overlay -->
                             <div class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 z-20 w-1/2 h-full -skew-x-12 animate-shine opacity-0 group-hover:opacity-100"></div>
 
-                            @if(!empty($prestasi->photo_path))
-                                <img src="{{ asset('storage/' . $prestasi->photo_path) }}" 
-                                     alt="{{ $prestasi->title }}" 
+                            <?php if(!empty($prestasi->photo_path)): ?>
+                                <img src="<?php echo e(asset('storage/' . $prestasi->photo_path)); ?>" 
+                                     alt="<?php echo e($prestasi->title); ?>" 
                                      loading="lazy"
                                      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
@@ -107,16 +106,17 @@
                                 <div class="hidden w-full h-full items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-white">
                                     <i class="ph-duotone ph-trophy text-5xl animate-bounce"></i>
                                 </div>
-                            @else
+                            <?php else: ?>
                                 <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-yellow-400 to-amber-500 text-white group-hover:scale-105 transition-transform duration-700">
                                     <i class="ph-duotone ph-trophy text-6xl drop-shadow-md"></i>
                                 </div>
-                            @endif
+                            <?php endif; ?>
                             
                             <!-- Level Badge -->
                             <div class="absolute top-4 right-4 z-20">
                                  <span class="px-3 py-1 rounded-full bg-white/95 backdrop-blur-md border border-white/30 text-[10px] font-black uppercase text-yellow-700 tracking-wide shadow-lg flex items-center gap-1">
-                                    <i class="ph-fill ph-star"></i> {{ $prestasi->level ?? 'Sekolah' }}
+                                    <i class="ph-fill ph-star"></i> <?php echo e($prestasi->level ?? 'Sekolah'); ?>
+
                                  </span>
                             </div>
                         </div>
@@ -125,25 +125,27 @@
                         <div class="p-6 flex-1 flex flex-col relative z-10">
                              <div class="text-[11px] font-bold text-slate-400 mb-3 flex items-center gap-1.5 uppercase tracking-wide">
                                 <i class="ph-duotone ph-calendar-blank text-lg text-yellow-500"></i> 
-                                {{ isset($prestasi->date) ? \Carbon\Carbon::parse($prestasi->date)->format('d M Y') : '-' }}
+                                <?php echo e(isset($prestasi->date) ? \Carbon\Carbon::parse($prestasi->date)->format('d M Y') : '-'); ?>
+
                              </div>
                             <h4 class="text-lg font-black text-slate-900 mb-3 leading-snug group-hover:text-amber-600 transition-colors line-clamp-2">
-                                {{ $prestasi->title ?? 'Juara Lomba' }}
+                                <?php echo e($prestasi->title ?? 'Juara Lomba'); ?>
+
                             </h4>
-                            <p class="text-sm text-slate-500 line-clamp-2 mb-6 font-medium">{{ $prestasi->description }}</p>
+                            <p class="text-sm text-slate-500 line-clamp-2 mb-6 font-medium"><?php echo e($prestasi->description); ?></p>
 
                             <div class="mt-auto pt-4 border-t border-slate-50 flex items-center gap-3">
                                 <div class="w-9 h-9 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 text-sm shrink-0">
                                     <i class="ph-bold ph-student"></i>
                                 </div>
                                 <div class="min-w-0">
-                                    <p class="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-indigo-600 transition-colors" title="{{ $prestasi->achiever_name }}">{{ $prestasi->achiever_name ?? 'Siswa' }}</p>
-                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">{{ $prestasi->type ?? 'Siswa' }}</p>
+                                    <p class="text-xs font-bold text-slate-800 line-clamp-1 group-hover:text-indigo-600 transition-colors" title="<?php echo e($prestasi->achiever_name); ?>"><?php echo e($prestasi->achiever_name ?? 'Siswa'); ?></p>
+                                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider"><?php echo e($prestasi->type ?? 'Siswa'); ?></p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="col-span-full py-24 text-center animate-enter">
                         <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-slate-100 mb-6 text-slate-300 ring-8 ring-slate-50">
                             <i class="ph-duotone ph-trophy-slash text-5xl"></i>
@@ -152,17 +154,19 @@
                         <p class="text-slate-500 font-medium max-w-md mx-auto">
                             Data prestasi belum tersedia untuk kategori atau pencarian ini.
                         </p>
-                        <a href="{{ route('public.achievements') }}" class="inline-flex items-center gap-2 mt-6 px-6 py-2.5 rounded-full bg-slate-800 text-white font-bold text-sm hover:bg-slate-700 hover:-translate-y-1 transition-all">
+                        <a href="<?php echo e(route('public.achievements')); ?>" class="inline-flex items-center gap-2 mt-6 px-6 py-2.5 rounded-full bg-slate-800 text-white font-bold text-sm hover:bg-slate-700 hover:-translate-y-1 transition-all">
                             <i class="ph-bold ph-arrow-counter-clockwise"></i> Reset Filter
                         </a>
                     </div>
-                @endforelse
+                <?php endif; ?>
             </div>
 
             <!-- Pagination -->
             <div class="mt-16">
-                {{ $achievements->withQueryString()->links() }}
+                <?php echo e($achievements->withQueryString()->links()); ?>
+
             </div>
         </div>
     </main>    
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.public', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/achievements.blade.php ENDPATH**/ ?>

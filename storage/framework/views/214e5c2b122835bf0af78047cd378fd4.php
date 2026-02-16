@@ -3,9 +3,9 @@
         <div class="flex justify-between h-20 items-center">
             
             <!-- Logo Brand -->
-            <a href="{{ url('/') }}" class="flex items-center gap-3 shrink-0 group z-50">
+            <a href="<?php echo e(url('/')); ?>" class="flex items-center gap-3 shrink-0 group z-50">
                 <div class="relative w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-900 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group-hover:rotate-6 transition-transform overflow-hidden border border-white/10">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-7 h-7 object-contain z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                        <img src="<?php echo e(asset('images/logo.png')); ?>" alt="Logo" class="w-7 h-7 object-contain z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
                         <i class="ph-bold ph-buildings text-xl hidden z-10"></i>
                 </div>
                 
@@ -29,26 +29,26 @@
                 <!-- Divider -->
                 <div class="h-6 w-px bg-slate-700"></div>                   
                     
-                        @if(Auth::guard('student')->check())
-                    <a href="{{ route('students.learning.index') }}" class="px-5 py-2.5 rounded-full bg-blue-600 text-white text-xs font-bold shadow-lg shadow-blue-500/40 hover:bg-blue-500 transition border-t border-white/20 flex items-center gap-2 group">
+                        <?php if(Auth::guard('student')->check()): ?>
+                    <a href="<?php echo e(route('students.learning.index')); ?>" class="px-5 py-2.5 rounded-full bg-blue-600 text-white text-xs font-bold shadow-lg shadow-blue-500/40 hover:bg-blue-500 transition border-t border-white/20 flex items-center gap-2 group">
                         <span>Dashboard</span>
                         <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </a>
-                @else
+                <?php else: ?>
                     
-                        <a href="{{ route('library.catalogue')}}" class="text-sm font-bold text-blue-400 hover:text-white transition flex items-center gap-2">
+                        <a href="<?php echo e(route('library.catalogue')); ?>" class="text-sm font-bold text-blue-400 hover:text-white transition flex items-center gap-2">
                         Katalog Buku
                     </a>
-                        <a href="{{ route('ppdb.create') }}" class="text-sm font-bold text-blue-400 hover:text-white transition flex items-center gap-2">
+                        <a href="<?php echo e(route('ppdb.create')); ?>" class="text-sm font-bold text-blue-400 hover:text-white transition flex items-center gap-2">
                         PPDB
                     </a> 
-                    <a href="{{ route('portal.index') }}" class="mr-2 text-sm font-bold text-blue-300 hover:text-white transition">
+                    <a href="<?php echo e(route('portal.index')); ?>" class="mr-2 text-sm font-bold text-blue-300 hover:text-white transition">
                         Portal Siswa
                     </a>
-                    <a href="{{ route('login') }}" class="px-5 py-2.5 rounded-full bg-slate-700 text-slate-200 text-xs font-bold hover:text-white hover:bg-slate-600 transition border border-slate-600 flex items-center gap-2">
+                    <a href="<?php echo e(route('login')); ?>" class="px-5 py-2.5 rounded-full bg-slate-700 text-slate-200 text-xs font-bold hover:text-white hover:bg-slate-600 transition border border-slate-600 flex items-center gap-2">
                         <i class="ph-bold ph-lock-key"></i> Staff
                     </a>
-                @endif
+                <?php endif; ?>
             </div>
 
             <!-- Mobile Menu Button -->
@@ -72,7 +72,7 @@
             
         <nav class="flex flex-col items-center space-y-6 text-center w-full px-8">
             <!-- Mobile PPDB Link (Updated Color) -->
-            <a href="{{ route('ppdb.create') }}" class="w-full py-3 bg-blue-600 rounded-xl text-white font-bold text-lg shadow-lg">
+            <a href="<?php echo e(route('ppdb.create')); ?>" class="w-full py-3 bg-blue-600 rounded-xl text-white font-bold text-lg shadow-lg">
                 <i class="ph-bold ph-student mr-2"></i> Info PPDB 2025
             </a>
             
@@ -85,13 +85,13 @@
             <hr class="w-16 border-slate-700">
 
             <div class="flex flex-col gap-4 w-full">
-                <a href="{{ route('portal.index') }}" class="text-lg font-bold text-blue-400">Portal Siswa</a>
-                @if(Auth::guard('student')->check())
-                    <a href="{{ route('students.learning.index') }}" class="block w-full py-3 rounded-xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-900/30">Dashboard Siswa</a>
-                @else
-                    <a href="{{ route('login') }}" class="block w-full py-3 rounded-xl bg-slate-800 text-white font-bold border border-slate-700">Login Staff</a>
-                @endif
+                <a href="<?php echo e(route('portal.index')); ?>" class="text-lg font-bold text-blue-400">Portal Siswa</a>
+                <?php if(Auth::guard('student')->check()): ?>
+                    <a href="<?php echo e(route('students.learning.index')); ?>" class="block w-full py-3 rounded-xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-900/30">Dashboard Siswa</a>
+                <?php else: ?>
+                    <a href="<?php echo e(route('login')); ?>" class="block w-full py-3 rounded-xl bg-slate-800 text-white font-bold border border-slate-700">Login Staff</a>
+                <?php endif; ?>
             </div>
         </nav>
     </div>
-</nav>
+</nav><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/landing/navbar.blade.php ENDPATH**/ ?>

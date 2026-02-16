@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 
-    <title>@yield('title', config('app.name', 'SMP Negeri 3 Lakbok'))</title>
+    <title><?php echo $__env->yieldContent('title', config('app.name', 'SMP Negeri 3 Lakbok')); ?></title>
     
     <!-- Meta Description (Optional via stack) -->
-    @stack('meta')
+    <?php echo $__env->yieldPushContent('meta'); ?>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
     
     <!-- Scripts & Styles (Vite) -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     
     <!-- Library Eksternal (Dipertahankan dari file lama) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -45,7 +45,7 @@
         .animate-float { animation: float 6s ease-in-out infinite; }
     </style>
 
-    @stack('styles')
+    <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
 <body class="antialiased text-slate-800 bg-slate-50 overflow-x-hidden flex flex-col min-h-screen selection:bg-blue-500 selection:text-white"
     x-data="{ 
@@ -61,10 +61,10 @@
             <div class="flex justify-between h-20 items-center">
                 
                 <!-- Logo Brand -->
-                <a href="{{ url('/') }}" class="flex items-center gap-3 shrink-0 group">
+                <a href="<?php echo e(url('/')); ?>" class="flex items-center gap-3 shrink-0 group">
                     <!-- Icon Box (Dark Blue + Gold) -->
                     <div class="relative w-10 h-10 bg-blue-950 border border-blue-800 rounded-xl flex items-center justify-center text-yellow-400 shadow-lg shadow-blue-900/50 group-hover:scale-105 transition-transform overflow-hidden">
-                         <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-6 h-6 object-contain z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                         <img src="<?php echo e(asset('images/logo.png')); ?>" alt="Logo" class="w-6 h-6 object-contain z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
                          <i class="ph-bold ph-buildings text-xl hidden z-10"></i>
                          <!-- Glow Effect -->
                          <div class="absolute inset-0 bg-blue-500/20 blur-md rounded-full"></div>
@@ -82,15 +82,15 @@
                     
                     <!-- Grup 1: Menu Informasi (Text Light) -->
                     <div class="flex items-center gap-6">
-                        <a href="{{ url('/') }}#profil" class="text-sm font-bold text-slate-300 hover:text-yellow-400 transition relative group">
+                        <a href="<?php echo e(url('/')); ?>#profil" class="text-sm font-bold text-slate-300 hover:text-yellow-400 transition relative group">
                             Profil
                             <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 transition-all group-hover:w-full"></span>
                         </a>
-                        <a href="{{ url('/') }}#guru" class="text-sm font-bold text-slate-300 hover:text-yellow-400 transition relative group">
+                        <a href="<?php echo e(url('/')); ?>#guru" class="text-sm font-bold text-slate-300 hover:text-yellow-400 transition relative group">
                             Guru
                             <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 transition-all group-hover:w-full"></span>
                         </a>
-                        <a href="{{ url('/') }}#prestasi" class="text-sm font-bold text-slate-300 hover:text-yellow-400 transition relative group">
+                        <a href="<?php echo e(url('/')); ?>#prestasi" class="text-sm font-bold text-slate-300 hover:text-yellow-400 transition relative group">
                             Prestasi
                             <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-400 transition-all group-hover:w-full"></span>
                         </a>
@@ -101,38 +101,38 @@
 
                     <!-- Grup 2: Menu Aplikasi -->
                     <div class="flex items-center gap-4">
-                        <a href="{{ route('portal.index') }}" class="text-sm font-bold {{ request()->routeIs('portal.*') ? 'text-blue-400' : 'text-slate-300 hover:text-white' }} transition flex items-center gap-2">
+                        <a href="<?php echo e(route('portal.index')); ?>" class="text-sm font-bold <?php echo e(request()->routeIs('portal.*') ? 'text-blue-400' : 'text-slate-300 hover:text-white'); ?> transition flex items-center gap-2">
                             Portal Siswa
                         </a>
 
-                        {{-- [LOGIKA TOMBOL DINAMIS] --}}
-                        @if(Auth::guard('student')->check())
+                        
+                        <?php if(Auth::guard('student')->check()): ?>
                             <!-- Jika Login sebagai SISWA -->
                             <div class="flex items-center gap-3 pl-2">
-                                <a href="{{ route('students.learning.index') }}" class="text-xs font-bold px-4 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-500 transition shadow-lg shadow-blue-900/30 border border-blue-500 flex items-center gap-2">
+                                <a href="<?php echo e(route('students.learning.index')); ?>" class="text-xs font-bold px-4 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-500 transition shadow-lg shadow-blue-900/30 border border-blue-500 flex items-center gap-2">
                                     <i class="ph-bold ph-student"></i> Area Siswa
                                 </a>
                                 <!-- Tombol Logout -->
-                                <form method="POST" action="{{ route('student.logout') }}">
-                                    @csrf
+                                <form method="POST" action="<?php echo e(route('student.logout')); ?>">
+                                    <?php echo csrf_field(); ?>
                                     <button type="submit" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-rose-400 hover:bg-slate-700 flex items-center justify-center transition border border-slate-700" title="Keluar">
                                         <i class="ph-bold ph-sign-out text-lg"></i>
                                     </button>
                                 </form>
                             </div>
 
-                        @elseif(Auth::check())
+                        <?php elseif(Auth::check()): ?>
                             <!-- Jika Login sebagai GURU/ADMIN -->
-                            <a href="{{ route('dashboard') }}" class="text-xs font-bold px-5 py-2.5 rounded-full bg-slate-700 text-white hover:bg-slate-600 transition shadow-lg border border-slate-600">
+                            <a href="<?php echo e(route('dashboard')); ?>" class="text-xs font-bold px-5 py-2.5 rounded-full bg-slate-700 text-white hover:bg-slate-600 transition shadow-lg border border-slate-600">
                                 Dashboard Guru
                             </a>
 
-                        @else
+                        <?php else: ?>
                             <!-- Jika BELUM LOGIN -->
-                            <a href="{{ route('login') }}" class="text-xs font-bold px-5 py-2.5 rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition shadow-lg border border-slate-700">
+                            <a href="<?php echo e(route('login')); ?>" class="text-xs font-bold px-5 py-2.5 rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition shadow-lg border border-slate-700">
                                 Login Staff
                             </a>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -157,24 +157,24 @@
              class="absolute top-20 left-0 w-full bg-slate-900 border-b border-slate-800 shadow-2xl md:hidden">
              
             <nav class="flex flex-col p-6 space-y-4">
-                <a href="{{ url('/') }}#profil" class="text-lg font-bold text-slate-300 hover:text-yellow-400">Profil Sekolah</a>
-                <a href="{{ url('/') }}#guru" class="text-lg font-bold text-slate-300 hover:text-yellow-400">Guru & Staff</a>
-                <a href="{{ url('/') }}#prestasi" class="text-lg font-bold text-slate-300 hover:text-yellow-400">Prestasi</a>
-                <a href="{{ route('portal.index') }}" class="text-lg font-bold text-blue-400">Portal Siswa</a>
+                <a href="<?php echo e(url('/')); ?>#profil" class="text-lg font-bold text-slate-300 hover:text-yellow-400">Profil Sekolah</a>
+                <a href="<?php echo e(url('/')); ?>#guru" class="text-lg font-bold text-slate-300 hover:text-yellow-400">Guru & Staff</a>
+                <a href="<?php echo e(url('/')); ?>#prestasi" class="text-lg font-bold text-slate-300 hover:text-yellow-400">Prestasi</a>
+                <a href="<?php echo e(route('portal.index')); ?>" class="text-lg font-bold text-blue-400">Portal Siswa</a>
                 
                 <hr class="border-slate-800">
                 
-                @if(Auth::guard('student')->check())
-                    <a href="{{ route('students.learning.index') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-900/20">Dashboard Siswa</a>
-                    <form method="POST" action="{{ route('student.logout') }}" class="block w-full">
-                        @csrf
+                <?php if(Auth::guard('student')->check()): ?>
+                    <a href="<?php echo e(route('students.learning.index')); ?>" class="block w-full text-center px-6 py-3 rounded-xl bg-blue-600 text-white font-bold shadow-lg shadow-blue-900/20">Dashboard Siswa</a>
+                    <form method="POST" action="<?php echo e(route('student.logout')); ?>" class="block w-full">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" class="w-full text-center px-6 py-3 rounded-xl border border-rose-900/50 text-rose-400 font-bold hover:bg-rose-900/20">Keluar</button>
                     </form>
-                @elseif(Auth::check())
-                    <a href="{{ route('dashboard') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-slate-800 text-white font-bold border border-slate-700">Dashboard Guru</a>
-                @else
-                    <a href="{{ route('login') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-slate-800 text-slate-300 font-bold border border-slate-700">Login Staff</a>
-                @endif
+                <?php elseif(Auth::check()): ?>
+                    <a href="<?php echo e(route('dashboard')); ?>" class="block w-full text-center px-6 py-3 rounded-xl bg-slate-800 text-white font-bold border border-slate-700">Dashboard Guru</a>
+                <?php else: ?>
+                    <a href="<?php echo e(route('login')); ?>" class="block w-full text-center px-6 py-3 rounded-xl bg-slate-800 text-slate-300 font-bold border border-slate-700">Login Staff</a>
+                <?php endif; ?>
             </nav>
         </div>
     </nav>
@@ -188,11 +188,12 @@
              <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] -ml-20 -mb-20"></div>
         </div>
 
-        @hasSection('content')
-            @yield('content')
-        @else
-            {{ $slot ?? '' }}
-        @endif
+        <?php if (! empty(trim($__env->yieldContent('content')))): ?>
+            <?php echo $__env->yieldContent('content'); ?>
+        <?php else: ?>
+            <?php echo e($slot ?? ''); ?>
+
+        <?php endif; ?>
     </main>
 
     <!-- === FOOTER === -->
@@ -202,7 +203,7 @@
                 <div class="col-span-1 md:col-span-2 pr-0 md:pr-12">
                     <div class="flex items-center gap-3 mb-6">
                         <div class="w-10 h-10 bg-blue-950 border border-blue-800 rounded-xl flex items-center justify-center text-yellow-400 shadow-lg shadow-blue-900/50">
-                             <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-6 h-6 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                             <img src="<?php echo e(asset('images/logo.png')); ?>" alt="Logo" class="w-6 h-6 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
                              <i class="ph-bold ph-buildings text-xl hidden"></i>
                         </div>
                         <span class="text-xl font-bold tracking-tight text-white">SMPN 3 LAKBOK</span>
@@ -214,9 +215,9 @@
                 <div>
                     <h4 class="text-white font-bold mb-6 text-lg">Akses Cepat</h4>
                     <ul class="space-y-3 text-sm text-slate-400">
-                        <li><a href="{{ url('/') }}" class="hover:text-yellow-400 transition-colors">Beranda</a></li>
-                        <li><a href="{{ route('portal.index') }}" class="hover:text-yellow-400 transition-colors">Portal Siswa</a></li>
-                        <li><a href="{{ route('library.kiosk.index') }}" class="hover:text-yellow-400 transition-colors">E-Library</a></li>
+                        <li><a href="<?php echo e(url('/')); ?>" class="hover:text-yellow-400 transition-colors">Beranda</a></li>
+                        <li><a href="<?php echo e(route('portal.index')); ?>" class="hover:text-yellow-400 transition-colors">Portal Siswa</a></li>
+                        <li><a href="<?php echo e(route('library.kiosk.index')); ?>" class="hover:text-yellow-400 transition-colors">E-Library</a></li>
                     </ul>
                 </div>
                 <div>
@@ -229,7 +230,7 @@
             </div>
             <div class="text-center pt-8 border-t border-slate-800">
                 <p class="text-slate-500 text-sm">
-                    &copy; {{ date('Y') }} SMP Negeri 3 Lakbok. Unggul & Berkarakter. All rights reserved.
+                    &copy; <?php echo e(date('Y')); ?> SMP Negeri 3 Lakbok. Unggul & Berkarakter. All rights reserved.
                 </p>
             </div>
         </div>
@@ -249,6 +250,6 @@
         });
     </script>
     
-    @stack('scripts')
+    <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
-</html>
+</html><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/layouts/public.blade.php ENDPATH**/ ?>
