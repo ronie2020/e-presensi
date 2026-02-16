@@ -43,7 +43,7 @@ return [
             ],
             [
                 'name' => 'Rekap Kelas',
-                'route' => 'reports.classReport',
+                'route' => 'reports.class',
                 'icon' => 'ph-chalkboard-teacher'
             ],
         ],

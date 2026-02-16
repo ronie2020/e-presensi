@@ -118,21 +118,25 @@
                         <tbody class="divide-y divide-slate-50">
                             <?php $__empty_1 = true; $__currentLoopData = $reportData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $data): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <?php
-                                    // Hitung Total Log (Hadir + Telat + Izin/Sakit + Alpha)
-                                    $logsCount = $data->hadir + $data->telat + $data->izin_sakit + $data->alpha;
+                                    // REVISI: Menggunakan data_get() untuk mengakses properti dengan aman
+                                    // Jika $data->hadir tidak ada (misal stdClass kosong), akan default ke 0
+                                    $hadir = data_get($data, 'hadir', 0);
+                                    $telat = data_get($data, 'telat', 0);
+                                    $izin  = data_get($data, 'izin_sakit', 0);
+                                    $alpha = data_get($data, 'alpha', 0);
+                                    
+                                    // Hitung Total Log
+                                    $logsCount = $hadir + $telat + $izin + $alpha;
                                     
                                     // Gunakan total log sebagai pembagi agar 100% mewakili data yang masuk
                                     $divider = $logsCount > 0 ? $logsCount : 1; 
 
                                     // Persentase
-                                    $pctHadir = round(($data->hadir / $divider) * 100, 1);
-                                    $pctTelat = round(($data->telat / $divider) * 100, 1);
-                                    $pctIzin  = round(($data->izin_sakit / $divider) * 100, 1);
-                                    $pctAlpha = round(($data->alpha / $divider) * 100, 1);
+                                    $pctHadir = round(($hadir / $divider) * 100, 1);
+                                    $pctTelat = round(($telat / $divider) * 100, 1);
+                                    $pctIzin  = round(($izin / $divider) * 100, 1);
+                                    $pctAlpha = round(($alpha / $divider) * 100, 1);
                                     
-                                    // Logic 'Tidak Absen' jika pembagi mau pakai total siswa,
-                                    // Tapi karena logic di atas pakai logsCount, NA akan 0. 
-                                    // Jika ingin menampilkan 'Belum Absen', divider harus $data->total_students * hari
                                     $pctNA = 0; 
                                 ?>
 
@@ -141,12 +145,12 @@
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
                                             <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm flex items-center justify-center border border-slate-200 group-hover:bg-indigo-600 group-hover:text-white transition-colors shadow-sm">
-                                                <?php echo e(substr($data->name, 0, 2)); ?>
+                                                <?php echo e(substr(data_get($data, 'name', '??'), 0, 2)); ?>
 
                                             </div>
                                             <div>
-                                                <div class="font-bold text-slate-700"><?php echo e($data->name); ?></div>
-                                                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wide"><?php echo e($data->total_students); ?> Siswa</div>
+                                                <div class="font-bold text-slate-700"><?php echo e(data_get($data, 'name', 'Kelas ?')); ?></div>
+                                                <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wide"><?php echo e(data_get($data, 'total_students', 0)); ?> Siswa</div>
                                             </div>
                                         </div>
                                     </td>
@@ -178,25 +182,25 @@
                                     <td class="px-2 py-4 text-center">
                                         <div class="flex flex-col">
                                             <span class="font-bold text-emerald-600"><?php echo e($pctHadir); ?>%</span>
-                                            <span class="text-[10px] text-slate-400"><?php echo e($data->hadir); ?></span>
+                                            <span class="text-[10px] text-slate-400"><?php echo e($hadir); ?></span>
                                         </div>
                                     </td>
                                     <td class="px-2 py-4 text-center">
                                         <div class="flex flex-col">
                                             <span class="font-bold text-amber-600"><?php echo e($pctTelat); ?>%</span>
-                                            <span class="text-[10px] text-slate-400"><?php echo e($data->telat); ?></span>
+                                            <span class="text-[10px] text-slate-400"><?php echo e($telat); ?></span>
                                         </div>
                                     </td>
                                     <td class="px-2 py-4 text-center">
                                         <div class="flex flex-col">
                                             <span class="font-bold text-blue-600"><?php echo e($pctIzin); ?>%</span>
-                                            <span class="text-[10px] text-slate-400"><?php echo e($data->izin_sakit); ?></span>
+                                            <span class="text-[10px] text-slate-400"><?php echo e($izin); ?></span>
                                         </div>
                                     </td>
                                     <td class="px-2 py-4 text-center">
                                         <div class="flex flex-col">
                                             <span class="font-bold text-rose-600"><?php echo e($pctAlpha); ?>%</span>
-                                            <span class="text-[10px] text-slate-400"><?php echo e($data->alpha); ?></span>
+                                            <span class="text-[10px] text-slate-400"><?php echo e($alpha); ?></span>
                                         </div>
                                     </td>
                                     <td class="px-2 py-4 text-center border-l border-slate-100 border-dashed">
@@ -207,9 +211,8 @@
                                     </td>
 
                                     
-                                    
                                     <td class="px-6 py-4 text-right">
-                                        <a href="<?php echo e(route('reports.class.detail', ['class_id' => $data->id, 'month' => \Carbon\Carbon::parse($startDate)->format('Y-m')])); ?>" 
+                                        <a href="<?php echo e(route('reports.class.detail', ['class_id' => data_get($data, 'id'), 'month' => \Carbon\Carbon::parse($startDate)->format('Y-m')])); ?>" 
                                            class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm group-hover:shadow-md">
                                             <span>Lihat Harian</span>
                                             <i class="ph-bold ph-caret-right"></i>

@@ -147,7 +147,7 @@ class ReportController extends Controller
     // 1. REKAP ABSENSI HARIAN (LOGIKA LAMA - TETAP UTUH)
     // =========================================================================
     
-    public function dailyReport(Request $request)
+     public function dailyReport(Request $request)
     {
         $range = $this->getDateRange($request);
         $selectedDate_db = Carbon::parse($range['start']);
@@ -186,7 +186,7 @@ class ReportController extends Controller
         ));
     }
 
-    public function printDaily(Request $request)
+   public function printDaily(Request $request)
     {
         $range = $this->getDateRange($request);
         $selectedDate_db = Carbon::parse($range['start']);
@@ -225,7 +225,7 @@ class ReportController extends Controller
      * PRIVATE METHOD: Mengambil semua data keagamaan.
      * Digunakan oleh Web View dan Print View agar data konsisten.
      */
-    private function getReligiousData(Request $request)
+   private function getReligiousData(Request $request)
     {
         $range = $this->getDateRange($request);
         $selectedDate_db = Carbon::parse($range['start']);
@@ -357,7 +357,7 @@ class ReportController extends Controller
     /**
      * DASHBOARD VIEW KEAGAMAAN
      */
-    public function religiousReport(Request $request)
+   public function religiousReport(Request $request)
     {
         $data = $this->getReligiousData($request);
         
@@ -367,6 +367,7 @@ class ReportController extends Controller
         
         return view('reports.religious', $data);
     }
+
 
     /**
      * PRINT VIEW KEAGAMAAN
@@ -387,11 +388,10 @@ class ReportController extends Controller
     // 3. FITUR REKAPITULASI KELAS (SUMMARY & MATRIX VIEW)
     // =========================================================================
 
-    /**
-     * [BARU] Menampilkan Halaman Rekapitulasi Kelas (Summary)
+    /**    
      * Mengisi variabel $reportData untuk view 'reports.class_attendance'
      */
-    public function indexClass(Request $request)
+     public function indexClass(Request $request)
     {
         // Default tanggal: 1 bulan terakhir atau bulan berjalan
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
@@ -408,6 +408,7 @@ class ReportController extends Controller
             ->get();
 
         // Proses kalkulasi rekapitulasi
+        // REVISI: Mengembalikan object stdClass eksplisit agar properti 'hadir' dkk terbaca di View
         $reportData = $classes->map(function ($kelas) {
             $hadir = 0;
             $telat = 0;
@@ -422,20 +423,22 @@ class ReportController extends Controller
                 $alpha += $student->attendances->whereIn('status', ['Alfa', 'Alpa', 'Alpha'])->count();
             }
 
-            // Inject properti ke object kelas untuk dibaca View
-            $kelas->total_students = $kelas->students->count();
-            $kelas->hadir = $hadir;
-            $kelas->telat = $telat;
-            $kelas->izin_sakit = $izin_sakit;
-            $kelas->alpha = $alpha;
-            
-            return $kelas;
+            // FIX: Return object baru yang bersih untuk memastikan properti tersedia 
+            // dan menghindari error Undefined property pada stdClass
+            return (object) [
+                'id' => $kelas->id,
+                'name' => $kelas->name,
+                'total_students' => $kelas->students->count(),
+                'hadir' => $hadir,
+                'telat' => $telat,
+                'izin_sakit' => $izin_sakit,
+                'alpha' => $alpha
+            ];
         });
 
         // Kirim ke View 'class_attendance.blade.php'       
         return view('reports.class_attendance', compact('reportData', 'startDate', 'endDate'));
     }
-
     private function getClassReportData(Request $request)
     {
         $monthStr = $request->input('month', Carbon::now()->format('Y-m'));
