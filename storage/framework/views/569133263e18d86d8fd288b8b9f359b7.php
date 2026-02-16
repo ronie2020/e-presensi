@@ -1,11 +1,44 @@
 <div x-data="{
         showDetail: false,
-    }" class="space-y-8 animate-in fade-in duration-500">
+    }" class="space-y-6 animate-in fade-in duration-500">
     
+    
+    <div x-data="portalPrayerWidget()" x-init="init()" class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-[2rem] p-6 text-white shadow-lg relative overflow-hidden group">
+        <!-- Background Decoration -->
+        <div class="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-1000"></div>
+        <div class="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-black/10 rounded-full blur-2xl"></div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+            
+            <div class="text-center md:text-left">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 border border-white/20 text-[10px] font-bold uppercase tracking-wider mb-2 backdrop-blur-sm">
+                    <i class="ph-fill ph-map-pin"></i> <span x-text="locationName">Memuat...</span>
+                </div>
+                <h3 class="text-2xl md:text-3xl font-black tracking-tight mb-0.5" x-text="nextEventName">...</h3>
+                <p class="text-emerald-100 text-xs font-medium opacity-90">
+                    <span x-text="countdown" class="font-mono font-bold">00:00:00</span> Menuju Waktu Berikutnya
+                </p>
+            </div>
+
+            
+            <div class="w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+                <div class="flex md:grid md:grid-cols-6 gap-2 min-w-max">
+                    <template x-for="(time, name) in schedule" :key="name">
+                        <div class="flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all min-w-[80px]"
+                            :class="currentEvent === name ? 'bg-white text-emerald-700 border-white shadow-md scale-105 font-bold' : 'bg-white/10 text-white border-white/10'">
+                            <span class="text-[9px] uppercase tracking-wider opacity-80 mb-0.5" x-text="name"></span>
+                            <span class="text-xs" :class="currentEvent === name ? 'font-black' : 'font-medium'" x-text="time"></span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
     
     <?php
         // --- KONFIGURASI TANGGAL 1 RAMADHAN ---
-        // (Pastikan sama dengan Controller: 2026-02-18)
+        // (Sesuaikan dengan tahun berjalan jika perlu)
         $startRamadan = \Carbon\Carbon::parse('2026-02-18'); 
         $currentDate = \Carbon\Carbon::parse($today);
         
@@ -22,7 +55,7 @@
             $totalTarget = 14; 
         }
 
-        // PERBAIKAN: Cek dulu apakah log ada sebelum menghitung skor
+        // Cek log
         if($todayRamadanLog) {
             // 1. Puasa
             if($todayRamadanLog->is_fasting) $currentScore++;
@@ -45,7 +78,7 @@
                 $currentScore++;
             }
 
-            // 6. KULTUM (Fitur Baru)
+            // 6. KULTUM
             if (!empty($todayRamadanLog->kultum_summary)) {
                 $currentScore++;
             }
@@ -61,8 +94,8 @@
     
     <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden group">
         
-        <div class="absolute top-0 right-0 w-64 h-64 bg-emerald-600/20 rounded-full blur-[80px] -mr-32 -mt-32 group-hover:bg-emerald-600/30 transition-all duration-1000"></div>
-        <div class="absolute bottom-0 left-0 w-40 h-40 bg-teal-600/20 rounded-full blur-[60px] -ml-20 -mb-20"></div>
+        <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-600/20 rounded-full blur-[80px] -mr-32 -mt-32 group-hover:bg-indigo-600/30 transition-all duration-1000"></div>
+        <div class="absolute bottom-0 left-0 w-40 h-40 bg-blue-600/20 rounded-full blur-[60px] -ml-20 -mb-20"></div>
         <div class="absolute top-4 right-4 opacity-10"><i class="ph-fill ph-moon-stars text-8xl"></i></div>
 
         <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
@@ -85,7 +118,7 @@
                 <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div>
                         
-                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-emerald-300 text-[10px] font-black uppercase tracking-widest mb-2 shadow-sm backdrop-blur-sm">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-slate-800 border border-slate-700 rounded-lg text-slate-300 text-[10px] font-black uppercase tracking-widest mb-2 shadow-sm">
                             <i class="ph-fill ph-calendar-check"></i>
                             <?php if($isBeforeRamadan): ?>
                                 Menuju Ramadhan
@@ -95,8 +128,8 @@
                             <?php endif; ?>
                         </div>
 
-                        <h2 class="text-2xl font-black mb-1 leading-tight">Jurnal Ibadah Ramadhan</h2>
-                        <p class="text-emerald-100/70 text-sm leading-relaxed max-w-lg">
+                        <h2 class="text-2xl font-black mb-1 leading-tight">Jurnal Ibadah</h2>
+                        <p class="text-slate-400 text-sm leading-relaxed max-w-lg">
                             "Barangsiapa berpuasa Ramadhan atas dasar iman dan mengharap pahala dari Allah, maka dosanya yang telah lalu akan diampuni."
                         </p>
                     </div>
@@ -110,7 +143,6 @@
                 
                 
                 <div class="flex flex-wrap justify-center md:justify-start gap-2 mt-6">
-                    
                     <span class="px-3 py-1 rounded-full text-xs font-bold border <?php echo e(optional($todayRamadanLog)->is_fasting ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200' : 'bg-slate-700 border-slate-600 text-slate-300'); ?>">
                         <?php echo e(optional($todayRamadanLog)->is_fasting ? 'Berpuasa Hari Ini' : 'Belum Puasa'); ?>
 
@@ -129,7 +161,7 @@
                             <i class="ph-fill ph-warning-circle"></i>
                             <span class="text-xs font-bold">Jurnal Kosong</span>
                         </div>
-                        <a href="<?php echo e(route('student.ramadan.index')); ?>" class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:from-emerald-400 hover:to-teal-400 font-black rounded-xl transition-all shadow-lg shadow-emerald-900/50 ring-2 ring-emerald-500/50 hover:ring-white/50 active:scale-95">
+                        <a href="<?php echo e(route('student.ramadan.index')); ?>" class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:from-blue-400 hover:to-indigo-400 font-black rounded-xl transition-all shadow-lg shadow-blue-900/50 ring-2 ring-blue-500/50 hover:ring-white/50 active:scale-95">
                             <span>Isi Jurnal Sekarang</span>
                             <i class="ph-bold ph-pencil-simple group-hover:rotate-12 transition-transform"></i>
                         </a>
@@ -154,9 +186,7 @@
             };
 
             $gridItems = [];
-
-            // Helper untuk akses aman (mencegah error on null)
-            $log = $todayRamadanLog; // Singkatan
+            $log = $todayRamadanLog; 
 
             if ($isFriday) {
                 $fridayFilled = !empty($log->friday_khotib);
@@ -172,10 +202,10 @@
                 ];
             }
 
-            // 1. PUASA (Safe check)
+            // 1. PUASA 
             $gridItems[] = array_merge(['label' => 'Puasa Hari Ini', 'icon' => 'bowl-food'], $getStatus(optional($log)->is_fasting));
             
-            // 2. SHALAT 5 WAKTU (Safe check)
+            // 2. SHALAT 5 WAKTU 
             $prayerCount = 0;
             if ($log && isset($log->prayers)) {
                 $prayerCount = count(array_filter($log->prayers));
@@ -192,11 +222,11 @@
                 'check' => ($prayerCount == 5)
             ];
 
-            // 3. TARAWIH (Safe check)
+            // 3. TARAWIH 
             $isTarawih = $log && isset($log->sunnah_deeds['tarawih']) && $log->sunnah_deeds['tarawih'];
             $gridItems[] = array_merge(['label' => 'Shalat Tarawih', 'icon' => 'moon-stars'], $getStatus($isTarawih));
 
-            // 4. TILAWAH (Safe check)
+            // 4. TILAWAH 
             $isTilawah = !empty($log->tadarus_surah);
             $gridItems[] = [
                 'label' => 'Tilawah Quran', 
@@ -209,7 +239,7 @@
                 'check' => $isTilawah
             ];
 
-            // 5. KULTUM (BARU - UNGU) - Safe check
+            // 5. KULTUM 
             $kultumFilled = !empty($log->kultum_summary);
             $gridItems[] = [
                 'label' => 'Laporan Kultum', 
@@ -300,4 +330,101 @@
             <p class="text-xs text-slate-400 italic font-medium">Belum ada nilai atau catatan baru dari guru.</p>
         </div>
     <?php endif; ?>
-</div><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/students/portal/partials/tab-ramadan-jurnal.blade.php ENDPATH**/ ?>
+</div>
+
+
+<script>
+    function portalPrayerWidget() {
+        return {
+            city: 'Ciamis', // Ubah sesuai lokasi default sekolah
+            country: 'Indonesia',
+            
+            schedule: {},
+            nextEventName: 'Memuat...',
+            countdown: '00:00:00',
+            locationName: 'Memuat...',
+            currentEvent: '',
+            
+            async init() {
+                this.locationName = `${this.city}, ${this.country}`;
+                await this.fetchTimes();
+                setInterval(() => this.updateCountdown(), 1000);
+            },
+
+            async fetchTimes() {
+                try {
+                    const date = new Date();
+                    const url = `https://api.aladhan.com/v1/timingsByCity/${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}?city=${this.city}&country=${this.country}&method=20`;
+                    
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    
+                    if(data.code === 200) {
+                        const timings = data.data.timings;
+                        this.schedule = {
+                            'Imsak': timings.Imsak,
+                            'Subuh': timings.Fajr,
+                            'Dzuhur': timings.Dhuhr,
+                            'Ashar': timings.Asr,
+                            'Maghrib': timings.Maghrib,
+                            'Isya': timings.Isha
+                        };
+                        this.updateCountdown();
+                    }
+                } catch (e) {
+                    console.error("Gagal mengambil jadwal shalat", e);
+                    this.nextEventName = "Offline";
+                }
+            },
+
+            updateCountdown() {
+                const now = new Date();
+                let nextTime = null;
+                let nextName = '';
+                let minDiff = Infinity;
+
+                for (const [name, timeStr] of Object.entries(this.schedule)) {
+                    const [hours, minutes] = timeStr.split(':');
+                    const timeDate = new Date();
+                    timeDate.setHours(hours, minutes, 0);
+
+                    if (timeDate < now) continue;
+
+                    const diff = timeDate - now;
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        nextTime = timeDate;
+                        nextName = name;
+                    }
+                }
+
+                if (!nextTime && this.schedule['Imsak']) {
+                    const [hours, minutes] = this.schedule['Imsak'].split(':');
+                    nextTime = new Date();
+                    nextTime.setDate(nextTime.getDate() + 1);
+                    nextTime.setHours(hours, minutes, 0);
+                    nextName = 'Imsak (Besok)';
+                    minDiff = nextTime - now;
+                }
+
+                if (nextTime) {
+                    const h = Math.floor(minDiff / (1000 * 60 * 60));
+                    const m = Math.floor((minDiff % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((minDiff % (1000 * 60)) / 1000);
+                    
+                    this.countdown = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                    
+                    if(nextName === 'Maghrib') {
+                        this.nextEventName = 'Menuju Berbuka';
+                    } else if (nextName === 'Imsak' || nextName === 'Imsak (Besok)') {
+                        this.nextEventName = 'Menuju Imsak';
+                    } else {
+                        this.nextEventName = `Menuju ${nextName}`;
+                    }
+                    
+                    this.currentEvent = nextName.replace(' (Besok)', '');
+                }
+            }
+        }
+    }
+</script><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/students/portal/partials/tab-ramadan-jurnal.blade.php ENDPATH**/ ?>
