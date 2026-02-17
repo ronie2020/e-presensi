@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 class RamadanLogController extends Controller
 {
     // KONFIGURASI SENTRAL
-    const RAMADAN_START_DATE = '2026-02-18'; 
+    const RAMADAN_START_DATE = '2026-02-19'; 
     const FILL_START_TIME = '00:00'; 
     const FILL_END_TIME = '23:59';  
 
@@ -39,8 +39,7 @@ class RamadanLogController extends Controller
         $calendarLogs = RamadanLog::where('student_id', $studentId)
                             ->pluck('id', 'date') 
                             ->toArray();
-        
-        // --- LOGIKA CAN FILL (DIPERBAIKI) ---
+               
         // 1. Cek apakah hari ini masih dalam rentang jam pengisian
         $startTime = Carbon::parse($today . ' ' . self::FILL_START_TIME, 'Asia/Jakarta');
         $endTime = Carbon::parse($today . ' ' . self::FILL_END_TIME, 'Asia/Jakarta');

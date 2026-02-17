@@ -2,8 +2,8 @@
         showDetail: false,
     }" class="space-y-8 animate-in fade-in duration-500 font-sans">
     
-    {{-- 1. LOGIKA & KONFIGURASI PHP --}}
-    @php
+    
+    <?php
         // Menggunakan Config atau Default
         $ramadanStartStr = config('school.ramadan_start', '2026-02-18');
         $startRamadan = \Carbon\Carbon::parse($ramadanStartStr); 
@@ -58,14 +58,12 @@
         $barColor = 'bg-emerald-500';
         if($progressPercent < 30) { $progressColor = 'text-rose-500'; $barColor = 'bg-rose-500'; }
         elseif($progressPercent < 70) { $progressColor = 'text-amber-500'; $barColor = 'bg-amber-500'; }
-    @endphp
+    ?>
 
-    {{-- 
-        === WIDGET JADWAL SHALAT (THEME: MOSQUE ARCH) === 
-    --}}
+    
     <div x-data="portalPrayerWidget()" x-init="init()" class="relative">
         
-        {{-- SKELETON --}}
+        
         <template x-if="isLoading">
             <div class="bg-slate-100 rounded-[2rem] p-6 shadow-sm animate-pulse h-48 w-full relative overflow-hidden border border-slate-200">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-6 relative z-10 h-full">
@@ -77,7 +75,7 @@
             </div>
         </template>
 
-        {{-- CONTENT WIDGET --}}
+        
         <div x-show="!isLoading" 
              class="bg-gradient-to-b from-[#0F2027] via-[#203A43] to-[#2C5364] rounded-t-[3rem] rounded-b-[2rem] p-6 text-white shadow-xl shadow-slate-200 relative overflow-hidden group border-b-4 border-amber-500"
              style="display: none;">
@@ -91,7 +89,7 @@
             </div>
             
             <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                {{-- Kiri: Informasi Waktu --}}
+                
                 <div class="text-center md:text-left">
                     <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider mb-2 backdrop-blur-sm cursor-pointer hover:bg-amber-500/30 transition-colors"
                          @click="checkLocation()" 
@@ -117,7 +115,7 @@
                     </p>
                 </div>
 
-                {{-- Kanan: Grid Jadwal (Arch Shape) --}}
+                
                 <div class="w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
                     <div class="flex md:grid md:grid-cols-6 gap-3 min-w-max px-2">
                         <template x-for="(time, name) in schedule" :key="name">
@@ -143,16 +141,16 @@
         </div>
     </div>
 
-    {{-- 2. SUMMARY CARD (THEME: KITAB/CALENDAR) --}}
+    
     <div class="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-xl border border-slate-100 relative overflow-hidden">
         
-        {{-- Ornament Corners --}}
+        
         <div class="absolute top-0 left-0 w-24 h-24 border-l-4 border-t-4 border-amber-100 rounded-tl-[2rem]"></div>
         <div class="absolute bottom-0 right-0 w-24 h-24 border-r-4 border-b-4 border-amber-100 rounded-br-[2rem]"></div>
 
         <div class="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-12">
             
-            {{-- VISUAL KALENDER HIJRIYAH (LEFT SIDE) --}}
+            
             <div class="shrink-0 relative group">
                 <!-- Frame Kalender -->
                 <div class="w-40 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform group-hover:rotate-2 transition-transform duration-500">
@@ -165,7 +163,8 @@
                     <!-- Bagian Tengah (Angka Tanggal) -->
                     <div class="h-32 flex flex-col items-center justify-center bg-white relative">
                         <span class="text-7xl font-serif font-black text-slate-800 leading-none tracking-tighter">
-                            {{ $isBeforeRamadan ? '-' : $ramadanDay }}
+                            <?php echo e($isBeforeRamadan ? '-' : $ramadanDay); ?>
+
                         </span>
                         <span class="text-xs font-serif italic text-slate-400 mt-1">1447 Hijriyah</span>
                         
@@ -178,7 +177,8 @@
                     <!-- Bagian Bawah (Tanggal Masehi) -->
                     <div class="bg-slate-50 border-t border-slate-100 py-2 text-center">
                         <span class="text-[10px] font-bold text-slate-500 uppercase">
-                            {{ \Carbon\Carbon::parse($today)->translatedFormat('l, d F Y') }}
+                            <?php echo e(\Carbon\Carbon::parse($today)->translatedFormat('l, d F Y')); ?>
+
                         </span>
                     </div>
                 </div>
@@ -187,11 +187,11 @@
                 <div class="absolute -bottom-4 -right-4 w-40 h-40 bg-black/5 rounded-2xl -z-10 rotate-3"></div>
             </div>
 
-            {{-- TEXT SUMMARY (CENTER) --}}
+            
             <div class="flex-1 text-center md:text-left space-y-4">
                 <div>
                     <h2 class="text-3xl font-serif font-bold text-slate-800 mb-2">
-                        Ahlan Wa Sahlan, <span class="text-emerald-600">{{ $student->name }}</span>
+                        Ahlan Wa Sahlan, <span class="text-emerald-600"><?php echo e($student->name); ?></span>
                     </h2>
                     <p class="text-slate-500 text-sm leading-relaxed max-w-lg font-serif">
                         <i class="ph-fill ph-quotes text-amber-400"></i>
@@ -199,40 +199,40 @@
                     </p>
                 </div>
 
-                {{-- Progress Bar Linear (Lebih Clean) --}}
+                
                 <div class="space-y-2 max-w-md">
                     <div class="flex justify-between text-xs font-bold uppercase tracking-wider text-slate-400">
                         <span>Kelengkapan Ibadah Hari Ini</span>
-                        <span class="{{ $progressColor }}">{{ round($progressPercent) }}%</span>
+                        <span class="<?php echo e($progressColor); ?>"><?php echo e(round($progressPercent)); ?>%</span>
                     </div>
                     <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                        <div class="h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden {{ $barColor }}"
-                             style="width: {{ $progressPercent }}%">
+                        <div class="h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden <?php echo e($barColor); ?>"
+                             style="width: <?php echo e($progressPercent); ?>%">
                              <div class="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="pt-2">
-                    @if(!$todayRamadanLog)
-                        <a href="{{ route('student.ramadan.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-200 hover:-translate-y-0.5">
+                    <?php if(!$todayRamadanLog): ?>
+                        <a href="<?php echo e(route('student.ramadan.index')); ?>" class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-200 hover:-translate-y-0.5">
                             <i class="ph-bold ph-pencil-simple"></i>
                             <span>Isi Jurnal Hari Ini</span>
                         </a>
-                    @else
-                         <a href="{{ route('student.ramadan.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-600 hover:text-emerald-600 hover:border-emerald-200 rounded-xl font-bold transition-all">
+                    <?php else: ?>
+                         <a href="<?php echo e(route('student.ramadan.index')); ?>" class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-600 hover:text-emerald-600 hover:border-emerald-200 rounded-xl font-bold transition-all">
                             <i class="ph-bold ph-check-circle text-emerald-500"></i>
                             <span>Sudah Diisi (Edit)</span>
                         </a>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- 3. THE GRID (STATUS IBADAH - WITH COMPLETE LOGIC) --}}
+    
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        @php
+        <?php
             $log = $todayRamadanLog;
 
             // Helper untuk status UI agar konsisten
@@ -327,28 +327,29 @@
                 ]
             ];
 
-        @endphp
+        ?>
 
-        @foreach($gridItems as $item)
-            <div class="p-4 rounded-2xl border flex flex-col items-center text-center justify-center gap-2 transition-all hover:shadow-md relative {{ $item['ui']['class'] }}">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center {{ $item['ui']['icon_bg'] }}">
-                    <i class="ph-fill ph-{{ $item['icon'] }} text-xl"></i>
+        <?php $__currentLoopData = $gridItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <div class="p-4 rounded-2xl border flex flex-col items-center text-center justify-center gap-2 transition-all hover:shadow-md relative <?php echo e($item['ui']['class']); ?>">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center <?php echo e($item['ui']['icon_bg']); ?>">
+                    <i class="ph-fill ph-<?php echo e($item['icon']); ?> text-xl"></i>
                 </div>
                 <div>
-                    <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-500">{{ $item['label'] }}</h4>
-                    <p class="text-xs font-bold {{ $item['ui']['text'] }}">
-                        {{ $item['sub'] }}
+                    <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-500"><?php echo e($item['label']); ?></h4>
+                    <p class="text-xs font-bold <?php echo e($item['ui']['text']); ?>">
+                        <?php echo e($item['sub']); ?>
+
                     </p>
                 </div>
-                @if($item['ui']['check'])
+                <?php if($item['ui']['check']): ?>
                     <div class="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full shadow-sm"></div>
-                @endif
+                <?php endif; ?>
             </div>
-        @endforeach
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </div>
 
-    {{-- 4. FEEDBACK GURU --}}
-    @if(isset($lastVerifiedLog) && $lastVerifiedLog && $lastVerifiedLog->teacher_verified_at)
+    
+    <?php if(isset($lastVerifiedLog) && $lastVerifiedLog && $lastVerifiedLog->teacher_verified_at): ?>
     <div class="bg-amber-50 rounded-2xl border border-amber-100 p-6 flex gap-4 items-start">
         <div class="shrink-0">
             <div class="w-12 h-12 bg-white rounded-full border-2 border-amber-200 flex items-center justify-center text-amber-500 text-2xl shadow-sm">
@@ -358,26 +359,27 @@
         <div>
             <div class="flex items-center gap-2 mb-1">
                 <h3 class="font-bold text-slate-800">Catatan Guru</h3>
-                <span class="px-2 py-0.5 bg-amber-200 text-amber-800 text-[10px] font-bold rounded">Nilai: {{ $lastVerifiedLog->teacher_score }}</span>
+                <span class="px-2 py-0.5 bg-amber-200 text-amber-800 text-[10px] font-bold rounded">Nilai: <?php echo e($lastVerifiedLog->teacher_score); ?></span>
             </div>
-            <p class="text-sm text-slate-600 italic font-serif">"{{ $lastVerifiedLog->teacher_note }}"</p>
+            <p class="text-sm text-slate-600 italic font-serif">"<?php echo e($lastVerifiedLog->teacher_note); ?>"</p>
             <div class="mt-2 text-[10px] text-slate-400 uppercase font-bold tracking-wide">
-                Diverifikasi: {{ \Carbon\Carbon::parse($lastVerifiedLog->teacher_verified_at)->diffForHumans() }}
+                Diverifikasi: <?php echo e(\Carbon\Carbon::parse($lastVerifiedLog->teacher_verified_at)->diffForHumans()); ?>
+
             </div>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 </div>
 
-{{-- SCRIPT WIDGET JADWAL SHALAT & SWEETALERT --}}
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         // Notifikasi SweetAlert2 jika ada session success
-        @if(session('success'))
+        <?php if(session('success')): ?>
             Swal.fire({
                 title: 'Alhamdulillah!',
-                text: "{!! session('success') !!}",
+                text: "<?php echo session('success'); ?>",
                 icon: 'success',
                 confirmButtonText: 'Lanjut Ibadah',
                 confirmButtonColor: '#10b981', // emerald-500
@@ -389,7 +391,7 @@
                     title: 'font-serif text-2xl font-bold'
                 }
             });
-        @endif
+        <?php endif; ?>
     });
 
     function portalPrayerWidget() {
@@ -437,7 +439,7 @@
             useFallbackCity() {
                 this.usingGeolocation = false;
                 // Menggunakan PHP untuk fallback value
-                this.city = '{{ $student->city ?? "Jakarta" }}'; 
+                this.city = '<?php echo e($student->city ?? "Jakarta"); ?>'; 
                 this.locationName = this.city;
                 console.log("Menggunakan Fallback City:", this.city);
                 this.fetchTimesByCity();
@@ -533,4 +535,4 @@
             }
         }
     }
-</script>
+</script><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/students/portal/partials/tab-ramadan-jurnal.blade.php ENDPATH**/ ?>
