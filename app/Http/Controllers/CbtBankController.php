@@ -6,8 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\CbtQuestionBank;
 use App\Models\CbtQuestion;
 use App\Models\CbtExam;
+use App\Models\Subject; // PENTING: Import Model Subject
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Str;
+use Illuminate\Support\Str; // PERBAIKAN: Gunakan Support Class langsung
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB; 
 
@@ -18,11 +19,16 @@ class CbtBankController extends Controller
      */
     public function index()
     {
+        // Ambil data Bank Soal
         $banks = CbtQuestionBank::withCount('questions')
             ->orderBy('created_at', 'desc')
             ->get();
+        
+        // TAMBAHAN: Ambil data Mata Pelajaran dari database untuk dropdown di modal create
+        // Pastikan tabel 'subjects' sudah ada (sesuai SubjectController Anda)
+        $subjects = Subject::orderBy('order', 'asc')->get();
             
-        return view('cbt.bank.index', compact('banks'));
+        return view('cbt.bank.index', compact('banks', 'subjects'));
     }
 
     /**
@@ -284,8 +290,7 @@ class CbtBankController extends Controller
         }
     }
 
-    /**    
-     * Mengcopy semua soal DARI Bank Soal KE Ujian
+    /** * Mengcopy semua soal DARI Bank Soal KE Ujian
      */
     public function importToExam(Request $request, $exam_id)
     {
