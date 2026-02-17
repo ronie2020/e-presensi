@@ -12,7 +12,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\QuestionsImport;
 use App\Exports\CbtScoreExport; 
 use App\Models\LmsAssignment;
-use App\Models\LmsGrade;
+use App\Models\LmsGrade;       // Kita biarkan, tapi utamanya kita pakai LmsSubmission
+use App\Models\LmsSubmission;  // <--- TAMBAHKAN INI (PENTING)
 use App\Models\Subject;
 use App\Models\SchoolClass;
 use Illuminate\Support\Str; 
@@ -39,10 +40,13 @@ class CbtController extends Controller
 
     /**
      * Halaman Buat Jadwal Ujian
+     * [UPDATED] Mengirim data subjects untuk dropdown
      */
     public function create()
     {
-        return view('cbt.create');
+        // Ambil data mapel untuk dropdown agar tidak perlu ketik manual
+        $subjects = Subject::orderBy('name')->get();
+        return view('cbt.create', compact('subjects'));
     }
 
     /**
@@ -74,11 +78,13 @@ class CbtController extends Controller
 
     /**
      * Halaman Edit Jadwal Ujian
+     * [UPDATED] Mengirim data subjects untuk dropdown
      */
     public function edit($id)
     {
         $exam = CbtExam::findOrFail($id);
-        return view('cbt.edit', compact('exam'));
+        $subjects = Subject::orderBy('name')->get(); // Tambahkan ini
+        return view('cbt.edit', compact('exam', 'subjects'));
     }
 
     /**
@@ -706,6 +712,8 @@ class CbtController extends Controller
         DB::beginTransaction();
         try {
             foreach ($targetClasses as $class) {
+                // [FIX] Menambahkan teacher_id pada saat Create assignment baru
+                // [FIX 2] Mengganti due_date menjadi deadline sesuai struktur tabel
                 $assignment = LmsAssignment::firstOrCreate(
                     [
                         'class_id' => $class->id,
@@ -713,11 +721,13 @@ class CbtController extends Controller
                         'title' => 'NILAI UJIAN: ' . $exam->title, 
                     ],
                     [
+                        'teacher_id' => Auth::id(), 
                         'assignment_type' => 'exam', 
                         'description' => 'Nilai import otomatis dari CBT.',
-                        'due_date' => $exam->end_time,
+                        'deadline' => $exam->end_time, // PERBAIKAN: Gunakan 'deadline' bukan 'due_date'
                     ]
                 );
+                
                 $studentResults = DB::table('cbt_student_exams')
                     ->join('students', 'cbt_student_exams.student_id', '=', 'students.id')
                     ->where('cbt_student_exams.cbt_exam_id', $exam->id)
@@ -725,18 +735,26 @@ class CbtController extends Controller
                     ->where('students.class_id', $class->id)
                     ->select('students.id as student_id', 'cbt_student_exams.total_score')
                     ->get();
+
                 foreach ($studentResults as $res) {
-                    LmsGrade::updateOrCreate(
+                    
+                    // [PERBAIKAN UTAMA] Simpan ke tabel LmsSubmission agar muncul di Rekap Nilai
+                    LmsSubmission::updateOrCreate(
                         [
-                            'lms_assignment_id' => $assignment->id,
+                            'assignment_id' => $assignment->id,
                             'student_id' => $res->student_id
                         ],
                         [
-                            'score' => $res->total_score,
+                            'grade' => $res->total_score,
                             'status' => 'graded',
-                            'graded_at' => now(),
+                            'submitted_at' => now(),
+                            'teacher_feedback' => 'Sinkronisasi Otomatis dari CBT',
                         ]
                     );
+
+                    // Optional: Simpan juga ke LmsGrade jika sistem backup memerlukannya
+                    // LmsGrade::updateOrCreate(...)
+                    
                     $countSynced++;
                 }
             }

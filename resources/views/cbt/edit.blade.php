@@ -71,13 +71,22 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Mapel -->
+                            <!-- Mapel (SEKARANG DROPDOWN) -->
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Mata Pelajaran <span class="text-rose-500">*</span></label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-book-bookmark"></i></div>
-                                    <input type="text" name="subject_name" value="{{ old('subject_name', $exam->subject_name) }}" required 
-                                           class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700 py-3.5 px-5 transition-all @error('subject_name') border-rose-500 @enderror" placeholder="Nama Mapel">
+                                    
+                                    {{-- CHANGE: Select Option --}}
+                                    <select name="subject_name" required class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700 py-3.5 px-5 appearance-none cursor-pointer transition-all @error('subject_name') border-rose-500 @enderror">
+                                        <option value="" disabled>-- Pilih Mapel --</option>
+                                        @foreach($subjects as $subject)
+                                            <option value="{{ $subject->name }}" {{ old('subject_name', $exam->subject_name) == $subject->name ? 'selected' : '' }}>
+                                                {{ $subject->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
                                 </div>
                                 @error('subject_name') <p class="text-xs text-rose-500 mt-1 font-bold">{{ $message }}</p> @enderror
                             </div>
