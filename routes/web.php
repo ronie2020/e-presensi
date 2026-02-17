@@ -357,7 +357,10 @@ Route::middleware('auth')->group(function () {
         // 7. FOTO PENGAWASAN (PROCTORING)
         Route::get('/monitoring/{exam}/{student}/photos', [CbtController::class, 'getStudentPhotos'])->name('monitoring.photos');
 
-        // 8. INTEGRASI BANK SOAL (TARIK & SIMPAN)        
+        // 8. ROUTE UNTUK MENILAI ESSAI MANUAL
+        Route::post('/grade-essay', [CbtController::class, 'gradeEssay'])->name('grade_essay');
+
+        // 9. INTEGRASI BANK SOAL (TARIK & SIMPAN)        
         Route::post('/exam/{exam}/pull-from-bank', [CbtBankController::class, 'importToExam'])->name('import_from_bank');
         Route::post('/exam/{exam}/export-to-bank', [CbtBankController::class, 'storeFromExam'])->name('export_to_bank');
     });

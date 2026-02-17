@@ -46,7 +46,7 @@
                             <tr>
                                 <th class="px-6 py-4 w-12 text-center">No</th>
                                 <th class="px-6 py-4 w-1/3">Cuplikan Soal</th>
-                                <th class="px-6 py-4 text-center">Kunci</th>
+                                <th class="px-6 py-4 text-center">Tipe & Kunci</th>
                                 <th class="px-6 py-4 text-center">Tingkat Kesukaran</th>
                                 <th class="px-6 py-4 w-1/3">Distribusi Jawaban Siswa</th>
                             </tr>
@@ -60,11 +60,24 @@
                                         <p class="font-medium text-slate-700 line-clamp-2" title="<?php echo e($item->text); ?>"><?php echo e($item->text); ?></p>
                                     </td>
                                     
+                                    
                                     <td class="px-6 py-4 text-center">
-                                        <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 font-black flex items-center justify-center mx-auto border border-slate-200">
-                                            <?php echo e($item->correct_key); ?>
+                                        <?php if(in_array($item->type, ['choice', 'true_false'])): ?>
+                                            <span class="inline-block mb-1 text-[9px] font-bold text-slate-400 uppercase">PG / B-S</span><br>
+                                            <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 font-black flex items-center justify-center mx-auto border border-slate-200">
+                                                <?php echo e($item->correct_key); ?>
 
-                                        </span>
+                                            </span>
+                                        <?php elseif($item->type == 'essay'): ?>
+                                            <span class="inline-block mb-1 text-[9px] font-bold text-indigo-400 uppercase">ESSAI</span><br>
+                                            <button onclick="Swal.fire({title: 'Kunci Jawaban', text: '<?php echo e(addslashes($item->correct_key)); ?>', confirmButtonColor: '#4f46e5'})" 
+                                                    class="text-xs font-bold text-indigo-600 hover:underline cursor-pointer">
+                                                Lihat Kunci
+                                            </button>
+                                        <?php elseif($item->type == 'matching'): ?>
+                                            <span class="inline-block mb-1 text-[9px] font-bold text-orange-400 uppercase">MATCHING</span><br>
+                                            <span class="text-xs text-slate-400">-</span>
+                                        <?php endif; ?>
                                     </td>
 
                                     <td class="px-6 py-4 text-center">
@@ -82,27 +95,45 @@
                                     </td>
 
                                     <td class="px-6 py-4">
-                                        <div class="flex items-end gap-2 h-16 w-full pb-1 border-b border-slate-200">
-                                            <?php $__currentLoopData = ['A','B','C','D']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <?php 
-                                                    $count = $item->options[$opt] ?? 0;
-                                                    $percent = $totalStudents > 0 ? ($count / $totalStudents) * 100 : 0;
-                                                    $isKey = $opt == $item->correct_key;
-                                                    $color = $isKey ? 'bg-emerald-400' : 'bg-slate-300';
-                                                    if(!$isKey && $percent > 20) $color = 'bg-amber-400'; // Distractor kuat
-                                                ?>
-                                                <div class="flex-1 flex flex-col justify-end items-center group relative">
-                                                    
-                                                    <div class="absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 transition text-[10px] font-bold bg-slate-800 text-white px-2 py-1 rounded">
-                                                        <?php echo e($count); ?> Siswa
+                                        
+                                        <?php if(in_array($item->type, ['choice', 'true_false'])): ?>
+                                            <div class="flex items-end gap-2 h-16 w-full pb-1 border-b border-slate-200">
+                                                <?php $__currentLoopData = ['A','B','C','D']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <?php 
+                                                        $count = $item->options[$opt] ?? 0;
+                                                        $percent = $totalStudents > 0 ? ($count / $totalStudents) * 100 : 0;
+                                                        $isKey = $opt == $item->correct_key;
+                                                        $color = $isKey ? 'bg-emerald-400' : 'bg-slate-300';
+                                                        if(!$isKey && $percent > 20) $color = 'bg-amber-400'; // Distractor kuat
+                                                    ?>
+                                                    <div class="flex-1 flex flex-col justify-end items-center group relative">
+                                                        
+                                                        <div class="absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 transition text-[10px] font-bold bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap z-10">
+                                                            <?php echo e($count); ?> Siswa (<?php echo e(round($percent)); ?>%)
+                                                        </div>
+                                                        
+                                                        <div class="w-full rounded-t-sm transition-all duration-500 <?php echo e($color); ?>" 
+                                                             style="height: <?php echo e($percent > 0 ? $percent : 2); ?>%"></div>
+                                                        <span class="text-[10px] font-bold <?php echo e($isKey ? 'text-emerald-600' : 'text-slate-400'); ?> mt-1"><?php echo e($opt); ?></span>
                                                     </div>
-                                                    
-                                                    <div class="w-full rounded-t-sm transition-all duration-500 <?php echo e($color); ?>" 
-                                                         style="height: <?php echo e($percent > 0 ? $percent : 2); ?>%"></div>
-                                                    <span class="text-[10px] font-bold <?php echo e($isKey ? 'text-emerald-600' : 'text-slate-400'); ?> mt-1"><?php echo e($opt); ?></span>
-                                                </div>
-                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                        </div>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            </div>
+                                        
+                                        
+                                        <?php elseif($item->type == 'essay'): ?>
+                                            <div class="h-16 w-full flex items-center justify-center bg-slate-50 rounded-lg border border-dashed border-slate-200 text-center px-4">
+                                                <p class="text-xs text-slate-400 italic">
+                                                    Analisis distribusi jawaban tidak tersedia untuk soal Essai.
+                                                    <br><span class="font-bold text-indigo-500">Cek menu koreksi manual.</span>
+                                                </p>
+                                            </div>
+
+                                        
+                                        <?php else: ?>
+                                            <div class="h-16 w-full flex items-center justify-center">
+                                                <p class="text-xs text-slate-400">-</p>
+                                            </div>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
@@ -116,6 +147,9 @@
             </div>
         </div>
     </div>
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>

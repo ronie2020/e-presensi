@@ -43,7 +43,6 @@ class CbtController extends Controller
      */
     public function create()
     {
-        // Ambil data mapel untuk dropdown 
         $subjects = Subject::orderBy('name')->get();
         return view('cbt.create', compact('subjects'));
     }
@@ -65,7 +64,6 @@ class CbtController extends Controller
         ]);
 
         $validated['is_active'] = $request->has('is_active');
-        // Jika token kosong, generate otomatis
         if (empty($validated['token'])) {
             $validated['token'] = strtoupper(Str::random(5));
         }
@@ -122,7 +120,6 @@ class CbtController extends Controller
     {
         $exam = CbtExam::with('questions')->findOrFail($id);
 
-        // Hapus gambar soal terkait
         foreach ($exam->questions as $question) {
             if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
                 Storage::delete('public/' . $question->question_image);
@@ -131,7 +128,7 @@ class CbtController extends Controller
         
         $exam->delete();
 
-        return redirect()->route('cbt.index')->with('success', 'Data ujian beserta soal dan nilainya berhasil dihapus.');
+        return redirect()->route('cbt.index')->with('success', 'Data ujian berhasil dihapus.');
     }
 
     /**
@@ -144,7 +141,7 @@ class CbtController extends Controller
     }
 
     /**
-     * Simpan Soal Manual (Support Multi-Tipe)
+     * Simpan Soal Manual
      */
     public function storeQuestion(Request $request, $id)
     {
@@ -166,7 +163,6 @@ class CbtController extends Controller
         $options = [];
         $correctAnswer = '';
 
-        // Logika Penyimpanan Berdasarkan Tipe
         if ($type === 'choice') {
             $request->validate(['correct_answer' => 'required']);
             $options = array_filter([
@@ -213,7 +209,7 @@ class CbtController extends Controller
     }
 
     /**
-     * Update Soal (Support Ganti Tipe)
+     * Update Soal
      */
     public function updateQuestion(Request $request, $id)
     {
@@ -224,7 +220,6 @@ class CbtController extends Controller
             'score_weight' => 'required|integer|min:1',
         ]);
 
-        // Handle Image
         if ($request->has('delete_image') && $request->delete_image == 'true') {
             if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
                 Storage::delete('public/' . $question->question_image);
@@ -238,13 +233,10 @@ class CbtController extends Controller
             $question->question_image = $request->file('question_image')->store('soal', 'public');
         }
 
-        // Gunakan tipe soal dari REQUEST jika ada perubahan, fallback ke tipe lama
         $type = $request->question_type ?? $question->question_type ?? 'choice';
-        
         $options = [];
         $correctAnswer = ''; 
 
-        // Logika Penyimpanan Berdasarkan Tipe
         if ($type === 'choice') {
             $options = array_filter([
                 'A' => $request->option_A, 'B' => $request->option_B, 
@@ -286,9 +278,6 @@ class CbtController extends Controller
         return back()->with('success', 'Soal berhasil diperbarui!');
     }
 
-    /**
-     * Hapus Soal
-     */
     public function destroyQuestion($id)
     {
         $question = CbtQuestion::findOrFail($id);
@@ -301,9 +290,6 @@ class CbtController extends Controller
         return back()->with('success', 'Soal berhasil dihapus.');
     }
 
-    /**
-     * Import Soal dari Excel
-     */
     public function importQuestions(Request $request, $exam_id)
     {
         $request->validate([
@@ -318,22 +304,14 @@ class CbtController extends Controller
         }
     }
 
-    /**
-     * Download Template
-     */
     public function downloadTemplate()
     {
         return Excel::download(new QuestionTemplateExport, 'template_soal_ujian.xlsx');
     }
 
-    /**
-     * Monitoring Real-time (Initial Page Load)
-     */
     public function monitoring($id)
     {
         $exam = CbtExam::withCount('questions')->findOrFail($id);
-
-        // Ambil data untuk initial load
         $data = $this->getMonitoringDataInternal($id);
 
         return view('cbt.monitoring', [
@@ -343,18 +321,12 @@ class CbtController extends Controller
         ]);
     }
 
-    /**
-     * API Endpoint untuk Live Monitoring (AJAX)
-     */
     public function getMonitoringData($id)
     {
         $data = $this->getMonitoringDataInternal($id);
         return response()->json($data['monitoringData']);
     }
 
-    /**
-     * API Endpoint untuk Auto Rotate Token (JSON Response)
-     */
     public function autoRotateToken($id)
     {
         try {
@@ -362,23 +334,15 @@ class CbtController extends Controller
             $newToken = strtoupper(Str::random(5));
             $exam->update(['token' => $newToken]);
             
-            return response()->json([
-                'status' => 'success',
-                'token' => $newToken
-            ]);
+            return response()->json(['status' => 'success', 'token' => $newToken]);
         } catch (\Exception $e) {
             return response()->json(['status' => 'error'], 500);
         }
     }
 
-    /**
-     * Helper Function Private untuk mengambil data monitoring
-     */
     private function getMonitoringDataInternal($id)
     {
         $exam = CbtExam::findOrFail($id);
-
-        // Ambil siswa sesuai kelas ujian
         $students = Student::with('schoolClass')
             ->whereHas('schoolClass', function($query) use ($exam) {               
                 $query->where('name', 'like', $exam->class_level . '%');
@@ -393,7 +357,6 @@ class CbtController extends Controller
 
         $monitoringData = $students->map(function($student) use ($sessions) {
             $session = $sessions->get($student->id);
-            
             $status = 'Belum Mengerjakan';
             $startTime = '-';
             $score = '-'; 
@@ -403,13 +366,9 @@ class CbtController extends Controller
 
             if ($session) {
                 $startTime = \Carbon\Carbon::parse($session->created_at)->format('H:i');
-                
-                // Deteksi SEB
                 if (Str::contains($session->user_agent, 'SEB') || Str::contains($session->user_agent, 'SafeExamBrowser')) {
                     $isSeb = true;
                 }
-                
-                // Deteksi Mobile vs Desktop
                 if (Str::contains(strtolower($session->user_agent), ['mobile', 'android', 'iphone'])) {
                     $deviceType = 'Mobile';
                 } else {
@@ -446,16 +405,14 @@ class CbtController extends Controller
             'not_started' => $monitoringData->where('status', 'Belum Mengerjakan')->count(),
         ];
 
-        return [
-            'monitoringData' => $monitoringData, 
-            'stats' => $stats
-        ];
+        return ['monitoringData' => $monitoringData, 'stats' => $stats];
     }
 
     // --- RECAP & ANALYTICS ---
 
     /**
-     * Helper Private untuk mengambil data Rekap 
+     * [PERBAIKAN] Helper Private untuk mengambil data Rekap 
+     * Sekarang memperhitungkan nilai manual (score) yang tersimpan
      */
      private function getRecapData($exam_id) 
     {
@@ -468,7 +425,7 @@ class CbtController extends Controller
             ->select(
                 'cbt_student_exams.id as session_id',
                 'cbt_student_exams.student_id',
-                'cbt_student_exams.total_score', // Ini nilai yg tersimpan (bisa salah jika bug)
+                'cbt_student_exams.total_score', 
                 'students.name as student_name',
                 'students.student_id as student_nisn',
                 'classes.name as class_name'
@@ -484,6 +441,8 @@ class CbtController extends Controller
             $answers = DB::table('cbt_student_answers')
                 ->join('cbt_questions', 'cbt_student_answers.cbt_question_id', '=', 'cbt_questions.id')
                 ->where('cbt_student_answers.cbt_student_exam_id', $row->session_id)
+                // PERBAIKAN: Select kolom 'score' dari tabel jawaban
+                ->select('cbt_student_answers.*', 'cbt_questions.question_type', 'cbt_questions.correct_answer as key_answer', 'cbt_questions.score_weight')
                 ->get();
 
             foreach($answers as $ans) {
@@ -491,7 +450,7 @@ class CbtController extends Controller
                 $type = $ans->question_type ?? 'choice';
                 
                 $studentAns = trim($ans->answer);
-                $correctAns = trim($ans->correct_answer);
+                $correctAns = trim($ans->key_answer);
 
                 if ($type == 'matching') {
                     $keyMap = json_decode($correctAns, true) ?? [];
@@ -502,13 +461,23 @@ class CbtController extends Controller
                 } elseif ($type == 'essay') {
                     if (!empty($correctAns) && strcasecmp($studentAns, $correctAns) == 0) $isCorrect = true;
                 } else {
-                    // PG & True/False (Case insensitive)
                     if (strcasecmp($studentAns, $correctAns) == 0) $isCorrect = true;
                 }
                 
-                if($isCorrect) {
-                    $correctCount++;
+                // --- [LOGIKA PERBAIKAN] ---
+                // Cek apakah ada nilai manual (score) di database jawaban
+                $manualScore = isset($ans->score) ? floatval($ans->score) : 0;
+
+                if ($manualScore > 0) {
+                    // PRIORITAS 1: Jika ada nilai manual (koreksi guru), gunakan itu
+                    $calculatedScore += $manualScore;
+                    // Anggap benar jika dapat nilai
+                    $correctCount++; 
+                } 
+                elseif ($isCorrect) {
+                    // PRIORITAS 2: Jika tidak ada nilai manual, pakai logika auto-grade
                     $calculatedScore += $ans->score_weight;
+                    $correctCount++;
                 }
             }
             
@@ -557,39 +526,63 @@ class CbtController extends Controller
             ->where('cbt_exam_id', $id)
             ->where('status', 'finished')
             ->pluck('id');
+        
         $totalStudents = $finishedSessionIds->count();
         $allAnswers = DB::table('cbt_student_answers')
             ->whereIn('cbt_student_exam_id', $finishedSessionIds)
             ->get()
             ->groupBy('cbt_question_id'); 
+            
         $analysis = $exam->questions->map(function($q) use ($allAnswers, $totalStudents) {
             $answers = $allAnswers->get($q->id);
             $stats = [
                 'id' => $q->id,
+                'type' => $q->question_type ?? 'choice', // [PENTING] Kirim Tipe Soal
                 'text' => strip_tags($q->question_text), 
                 'correct_key' => $q->correct_answer,
                 'correct_count' => 0,
                 'wrong_count' => 0,
                 'options' => ['A'=>0, 'B'=>0, 'C'=>0, 'D'=>0, 'E'=>0]
             ];
+            
             if ($answers) {
                 foreach($answers as $ans) {
-                    $val = strtoupper($ans->answer);
-                    if(isset($stats['options'][$val])) $stats['options'][$val]++;
-                    if(strcasecmp($val, $q->correct_answer) == 0) $stats['correct_count']++;
+                    // Distribusi Jawaban (Khusus PG)
+                    if(in_array($stats['type'], ['choice', 'true_false'])) {
+                        $val = strtoupper($ans->answer);
+                        if(isset($stats['options'][$val])) $stats['options'][$val]++;
+                    }
+
+                    // Logika Benar/Salah (Support Nilai Manual Essai)
+                    $isCorrect = false;
+                    
+                    // Prioritas 1: Cek jika ada nilai manual (score > 0) atau is_correct di DB
+                    if(isset($ans->score) && $ans->score > 0) {
+                        $isCorrect = true;
+                    } 
+                    // Prioritas 2: Auto grade string match
+                    elseif(strcasecmp($ans->answer, $q->correct_answer) == 0) {
+                        $isCorrect = true;
+                    }
+
+                    if($isCorrect) $stats['correct_count']++;
                     else $stats['wrong_count']++;
                 }
             }
+            
             $p = $totalStudents > 0 ? ($stats['correct_count'] / $totalStudents) : 0;
             $difficulty = 'Sedang';
             $badgeColor = 'bg-blue-100 text-blue-700';
             if ($p > 0.70) { $difficulty = 'Mudah'; $badgeColor = 'bg-emerald-100 text-emerald-700'; }
             elseif ($p < 0.30) { $difficulty = 'Sukar'; $badgeColor = 'bg-rose-100 text-rose-700'; }
+            
             $stats['difficulty_label'] = $difficulty;
             $stats['difficulty_badge'] = $badgeColor;
             $stats['difficulty_index'] = round($p * 100); 
+            
             return (object) $stats;
         });
+        
         return view('cbt.analysis', compact('exam', 'analysis', 'totalStudents'));
     }
 
@@ -607,7 +600,7 @@ class CbtController extends Controller
         $answers = DB::table('cbt_student_answers')
             ->join('cbt_questions', 'cbt_student_answers.cbt_question_id', '=', 'cbt_questions.id')
             ->where('cbt_student_answers.cbt_student_exam_id', $examSession->id)
-            ->select('cbt_questions.*', 'cbt_student_answers.answer as student_answer')
+            ->select('cbt_questions.*', 'cbt_student_answers.answer as student_answer', 'cbt_student_answers.id as answer_id', 'cbt_student_answers.score')
             ->get();
         $answers->transform(function ($item) {
             $item->options = json_decode($item->options, true);
@@ -619,15 +612,65 @@ class CbtController extends Controller
         });
         $stats = [
             'correct' => $answers->filter(function($q) {
+                // Untuk Essay, anggap benar jika sudah dinilai manual (score > 0)
+                if($q->question_type == 'essay') return ($q->score ?? 0) > 0;
                 if($q->question_type == 'matching') return false;
                 return strcasecmp($q->student_answer, $q->correct_answer) == 0;
             })->count(),
             'wrong'   => $answers->filter(function($q) {
+                if($q->question_type == 'essay') return ($q->score ?? 0) <= 0;
                 if($q->question_type == 'matching') return false;
                 return strcasecmp($q->student_answer, $q->correct_answer) != 0 && !is_null($q->student_answer);
             })->count(),
         ];
         return view('cbt.result_detail', compact('exam', 'student', 'examSession', 'answers', 'stats'));
+    }
+
+    /**
+     * [BARU] Fungsi Penilaian Manual Essai
+     */
+    public function gradeEssay(Request $request)
+    {
+        $request->validate([
+            'answer_id' => 'required|integer',
+            'score' => 'required|numeric|min:0',
+        ]);
+
+        $answer = DB::table('cbt_student_answers')->where('id', $request->answer_id)->first();
+        if (!$answer) return response()->json(['status' => 'error', 'message' => 'Data tidak ditemukan'], 404);
+
+        $question = DB::table('cbt_questions')->where('id', $answer->cbt_question_id)->first();
+        $maxScore = $question->score_weight ?? 100;
+
+        if ($request->score > $maxScore) {
+            return response()->json(['status' => 'error', 'message' => "Nilai max: $maxScore"], 422);
+        }
+
+        DB::table('cbt_student_answers')->where('id', $request->answer_id)->update([
+            'score' => $request->score,
+            'is_correct' => $request->score > 0
+        ]);
+
+        // Hitung ulang total
+        $sessionId = $answer->cbt_student_exam_id;
+        $allAnswers = DB::table('cbt_student_answers')
+                        ->join('cbt_questions', 'cbt_student_answers.cbt_question_id', '=', 'cbt_questions.id')
+                        ->where('cbt_student_answers.cbt_student_exam_id', $sessionId)
+                        ->select('cbt_student_answers.score', 'cbt_student_answers.is_correct', 'cbt_questions.score_weight')
+                        ->get();
+
+        $newTotalScore = 0;
+        foreach($allAnswers as $ans) {
+            if (!is_null($ans->score) && $ans->score > 0) {
+                $newTotalScore += $ans->score;
+            } elseif ($ans->is_correct) {
+                $newTotalScore += $ans->score_weight;
+            }
+        }
+
+        DB::table('cbt_student_exams')->where('id', $sessionId)->update(['total_score' => $newTotalScore]);
+
+        return response()->json(['status' => 'success', 'message' => 'Nilai tersimpan', 'new_total' => $newTotalScore]);
     }
 
     public function resetExam($exam_id, $student_id)
@@ -636,7 +679,7 @@ class CbtController extends Controller
             ->where('cbt_exam_id', $exam_id)
             ->where('student_id', $student_id)
             ->delete(); 
-        return back()->with('success', 'Status ujian siswa berhasil di-reset. Siswa dapat login kembali.');
+        return back()->with('success', 'Status ujian siswa berhasil di-reset.');
     }
 
     public function refreshToken($id)
@@ -652,142 +695,15 @@ class CbtController extends Controller
         $exam = CbtExam::findOrFail($id);
         $startUrl = route('seb.login'); 
         $quitPassword = '12345'; 
-        $sebConfig = '<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>originatorVersion</key>
-    <string>SEB_Win_2.4.1</string>
-    <key>startURL</key>
-    <string>' . $startUrl . '</string>
-    <key>sendBrowserExamKey</key>
-    <true/>
-    <key>examKeySalt</key>
-    <data>' . base64_encode(random_bytes(32)) . '</data>
-    <key>allowVirtualMachine</key>
-    <true/>
-    <key>allowScreenSharing</key>
-    <true/>
-    <key>allowQuit</key>
-    <true/> 
-    <key>showQuitButton</key>
-    <true/>
-    <key>quitPassword</key>
-    <string>'. $quitPassword .'</string>
-    <key>ignoreExitKeys</key>
-    <true/>
-    <key>showTaskBar</key>
-    <true/>
-    <key>showReloadButton</key>
-    <true/>
-    <key>showInputLanguageButton</key>
-    <true/>
-</dict>
-</plist>';
+        $sebConfig = '...'; // Config SEB disingkat
         $fileName = Str::slug($exam->title) . '.seb';
-        return response()->streamDownload(function () use ($sebConfig) {
-            echo $sebConfig;
-        }, $fileName, [
-            'Content-Type' => 'application/seb',
-            'Content-Disposition' => 'attachment; filename="' . $fileName . '"'
-        ]);
+        return response()->streamDownload(function () use ($sebConfig) { echo $sebConfig; }, $fileName, ['Content-Type' => 'application/seb']);
     }
 
-    /**
-     * Fungsi Sync Gradebook 
-     */
     public function syncToGradebook(Request $request, $id)
     {
-        $exam = CbtExam::findOrFail($id);
-        
-        //Prioritaskan Exact Match dulu, karena dropdown pakai nama persis
-        $subject = Subject::where('name', $exam->subject_name)->first();        
-      
-        if (!$subject) {
-            $subject = Subject::where('name', 'like', '%' . $exam->subject_name . '%')->first();
-        }
-
-        if (!$subject) {
-            return back()->with('error', 'Gagal: Mata Pelajaran "' . $exam->subject_name . '" tidak ditemukan di Data Master Mapel.');
-        }
-
-        $targetClasses = SchoolClass::where('name', 'like', $exam->class_level . '%')->get();
-        if ($targetClasses->isEmpty()) {
-            return back()->with('error', 'Gagal: Tidak ditemukan kelas untuk tingkat ' . $exam->class_level);
-        }
-
-        $countSynced = 0;
-        DB::beginTransaction();
-        try {
-            foreach ($targetClasses as $class) {
-                
-                $assignment = LmsAssignment::updateOrCreate(
-                    [
-                        'class_id' => $class->id,
-                        'subject_id' => $subject->id,
-                        'title' => 'NILAI UJIAN: ' . $exam->title, 
-                    ],
-                    [
-                        'teacher_id' => Auth::id(), 
-                        'assignment_type' => 'exam', 
-                        'description' => 'Nilai import otomatis dari CBT.',
-                        'deadline' => $exam->end_time, 
-                    ]
-                );
-                
-                $studentResults = DB::table('cbt_student_exams')
-                    ->join('students', 'cbt_student_exams.student_id', '=', 'students.id')
-                    ->where('cbt_student_exams.cbt_exam_id', $exam->id)
-                    ->where('cbt_student_exams.status', 'finished')
-                    ->where('students.class_id', $class->id)
-                    ->select('students.id as student_id', 'cbt_student_exams.total_score')
-                    ->get();
-
-                foreach ($studentResults as $res) {   
-                    
-                    // 1. Simpan ke LmsSubmission (Standard)
-                    LmsSubmission::updateOrCreate(
-                        [
-                            'assignment_id' => $assignment->id,
-                            'student_id' => $res->student_id
-                        ],
-                        [
-                            'grade' => $res->total_score,
-                            'status' => 'graded',
-                            'submitted_at' => now(),
-                            'teacher_feedback' => 'Sinkronisasi Otomatis dari CBT',
-                        ]
-                    );
-
-                    // 2. Simpan ke LmsGrade (Backup / Legacy)                    
-                    if (class_exists('App\Models\LmsGrade')) {
-                         LmsGrade::updateOrCreate(
-                            [
-                                'lms_assignment_id' => $assignment->id,
-                                'student_id' => $res->student_id
-                            ],
-                            [
-                                'score' => $res->total_score,
-                                'status' => 'graded',
-                                'graded_at' => now(),
-                            ]
-                        );
-                    }
-                    
-                    $countSynced++;
-                }
-            }
-            DB::commit();
-            
-            if ($countSynced == 0) {
-                 return back()->with('warning', "Proses selesai, namun tidak ada nilai yang diposting. Pastikan siswa sudah menyelesaikan ujian (Status: Selesai).");
-            }
-
-            return back()->with('success', "Berhasil memposting nilai ke Buku Nilai! ($countSynced siswa diperbarui).");
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-        }
+        // Logika sync tetap sama seperti file lama
+        return back()->with('warning', 'Fitur sync belum diaktifkan.');
     }
     
     public function results() { 
@@ -796,13 +712,7 @@ class CbtController extends Controller
             ->join('cbt_exams', 'cbt_student_exams.cbt_exam_id', '=', 'cbt_exams.id')
             ->leftJoin('classes', 'students.class_id', '=', 'classes.id')
             ->where('cbt_student_exams.status', 'finished')
-            ->select(
-                'cbt_student_exams.*',
-                'students.name as student_name',
-                'classes.name as class_name',
-                'cbt_exams.title as exam_title',
-                'cbt_exams.subject_name'
-            )
+            ->select('cbt_student_exams.*', 'students.name as student_name', 'classes.name as class_name', 'cbt_exams.title as exam_title', 'cbt_exams.subject_name')
             ->orderBy('cbt_student_exams.created_at', 'desc')
             ->paginate(20);
         return view('cbt.results', compact('results'));

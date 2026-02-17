@@ -20,7 +20,7 @@
                     <p class="text-slate-500 text-sm font-medium">Analisis Kualitas Soal • Sampel: {{ $totalStudents }} Siswa</p>
                 </div>
                 
-                {{-- Legend Tingkat Kesukaran --}}
+                {{-- Legend Tingkat Kesukaran (Hanya relevan untuk PG, tapi disimpan sebagai referensi) --}}
                 <div class="flex gap-3 text-[10px] uppercase font-bold text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
                     <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Mudah (>75%)</div>
                     <div class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Sedang</div>
@@ -36,7 +36,7 @@
                             <tr>
                                 <th class="px-6 py-4 w-12 text-center">No</th>
                                 <th class="px-6 py-4 w-1/3">Cuplikan Soal</th>
-                                <th class="px-6 py-4 text-center">Kunci</th>
+                                <th class="px-6 py-4 text-center">Tipe & Kunci</th>
                                 <th class="px-6 py-4 text-center">Tingkat Kesukaran</th>
                                 <th class="px-6 py-4 w-1/3">Distribusi Jawaban Siswa</th>
                             </tr>
@@ -50,10 +50,23 @@
                                         <p class="font-medium text-slate-700 line-clamp-2" title="{{ $item->text }}">{{ $item->text }}</p>
                                     </td>
                                     
+                                    {{-- Kolom Tipe & Kunci (Handling Essai Panjang) --}}
                                     <td class="px-6 py-4 text-center">
-                                        <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 font-black flex items-center justify-center mx-auto border border-slate-200">
-                                            {{ $item->correct_key }}
-                                        </span>
+                                        @if(in_array($item->type, ['choice', 'true_false']))
+                                            <span class="inline-block mb-1 text-[9px] font-bold text-slate-400 uppercase">PG / B-S</span><br>
+                                            <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 font-black flex items-center justify-center mx-auto border border-slate-200">
+                                                {{ $item->correct_key }}
+                                            </span>
+                                        @elseif($item->type == 'essay')
+                                            <span class="inline-block mb-1 text-[9px] font-bold text-indigo-400 uppercase">ESSAI</span><br>
+                                            <button onclick="Swal.fire({title: 'Kunci Jawaban', text: '{{ addslashes($item->correct_key) }}', confirmButtonColor: '#4f46e5'})" 
+                                                    class="text-xs font-bold text-indigo-600 hover:underline cursor-pointer">
+                                                Lihat Kunci
+                                            </button>
+                                        @elseif($item->type == 'matching')
+                                            <span class="inline-block mb-1 text-[9px] font-bold text-orange-400 uppercase">MATCHING</span><br>
+                                            <span class="text-xs text-slate-400">-</span>
+                                        @endif
                                     </td>
 
                                     <td class="px-6 py-4 text-center">
@@ -70,27 +83,45 @@
                                     </td>
 
                                     <td class="px-6 py-4">
-                                        <div class="flex items-end gap-2 h-16 w-full pb-1 border-b border-slate-200">
-                                            @foreach(['A','B','C','D'] as $opt)
-                                                @php 
-                                                    $count = $item->options[$opt] ?? 0;
-                                                    $percent = $totalStudents > 0 ? ($count / $totalStudents) * 100 : 0;
-                                                    $isKey = $opt == $item->correct_key;
-                                                    $color = $isKey ? 'bg-emerald-400' : 'bg-slate-300';
-                                                    if(!$isKey && $percent > 20) $color = 'bg-amber-400'; // Distractor kuat
-                                                @endphp
-                                                <div class="flex-1 flex flex-col justify-end items-center group relative">
-                                                    {{-- Tooltip --}}
-                                                    <div class="absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 transition text-[10px] font-bold bg-slate-800 text-white px-2 py-1 rounded">
-                                                        {{ $count }} Siswa
+                                        {{-- Jika PG, Tampilkan Grafik Batang --}}
+                                        @if(in_array($item->type, ['choice', 'true_false']))
+                                            <div class="flex items-end gap-2 h-16 w-full pb-1 border-b border-slate-200">
+                                                @foreach(['A','B','C','D'] as $opt)
+                                                    @php 
+                                                        $count = $item->options[$opt] ?? 0;
+                                                        $percent = $totalStudents > 0 ? ($count / $totalStudents) * 100 : 0;
+                                                        $isKey = $opt == $item->correct_key;
+                                                        $color = $isKey ? 'bg-emerald-400' : 'bg-slate-300';
+                                                        if(!$isKey && $percent > 20) $color = 'bg-amber-400'; // Distractor kuat
+                                                    @endphp
+                                                    <div class="flex-1 flex flex-col justify-end items-center group relative">
+                                                        {{-- Tooltip --}}
+                                                        <div class="absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 transition text-[10px] font-bold bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap z-10">
+                                                            {{ $count }} Siswa ({{ round($percent) }}%)
+                                                        </div>
+                                                        
+                                                        <div class="w-full rounded-t-sm transition-all duration-500 {{ $color }}" 
+                                                             style="height: {{ $percent > 0 ? $percent : 2 }}%"></div>
+                                                        <span class="text-[10px] font-bold {{ $isKey ? 'text-emerald-600' : 'text-slate-400' }} mt-1">{{ $opt }}</span>
                                                     </div>
-                                                    
-                                                    <div class="w-full rounded-t-sm transition-all duration-500 {{ $color }}" 
-                                                         style="height: {{ $percent > 0 ? $percent : 2 }}%"></div>
-                                                    <span class="text-[10px] font-bold {{ $isKey ? 'text-emerald-600' : 'text-slate-400' }} mt-1">{{ $opt }}</span>
-                                                </div>
-                                            @endforeach
-                                        </div>
+                                                @endforeach
+                                            </div>
+                                        
+                                        {{-- Jika Essai, Tampilkan Pesan --}}
+                                        @elseif($item->type == 'essay')
+                                            <div class="h-16 w-full flex items-center justify-center bg-slate-50 rounded-lg border border-dashed border-slate-200 text-center px-4">
+                                                <p class="text-xs text-slate-400 italic">
+                                                    Analisis distribusi jawaban tidak tersedia untuk soal Essai.
+                                                    <br><span class="font-bold text-indigo-500">Cek menu koreksi manual.</span>
+                                                </p>
+                                            </div>
+
+                                        {{-- Jika Matching --}}
+                                        @else
+                                            <div class="h-16 w-full flex items-center justify-center">
+                                                <p class="text-xs text-slate-400">-</p>
+                                            </div>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty
@@ -104,4 +135,7 @@
             </div>
         </div>
     </div>
+    
+    {{-- SweetAlert --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </x-app-layout>
