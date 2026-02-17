@@ -12,8 +12,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\QuestionsImport;
 use App\Exports\CbtScoreExport; 
 use App\Models\LmsAssignment;
-use App\Models\LmsGrade;       // Kita biarkan, tapi utamanya kita pakai LmsSubmission
-use App\Models\LmsSubmission;  // <--- TAMBAHKAN INI (PENTING)
+use App\Models\LmsGrade;       
+use App\Models\LmsSubmission;  
 use App\Models\Subject;
 use App\Models\SchoolClass;
 use Illuminate\Support\Str; 
@@ -39,12 +39,11 @@ class CbtController extends Controller
     }
 
     /**
-     * Halaman Buat Jadwal Ujian
-     * [UPDATED] Mengirim data subjects untuk dropdown
+     * Halaman Buat Jadwal Ujian    
      */
     public function create()
     {
-        // Ambil data mapel untuk dropdown agar tidak perlu ketik manual
+        // Ambil data mapel untuk dropdown 
         $subjects = Subject::orderBy('name')->get();
         return view('cbt.create', compact('subjects'));
     }
@@ -77,13 +76,12 @@ class CbtController extends Controller
     }
 
     /**
-     * Halaman Edit Jadwal Ujian
-     * [UPDATED] Mengirim data subjects untuk dropdown
+     * Halaman Edit Jadwal Ujian    
      */
     public function edit($id)
     {
         $exam = CbtExam::findOrFail($id);
-        $subjects = Subject::orderBy('name')->get(); // Tambahkan ini
+        $subjects = Subject::orderBy('name')->get(); 
         return view('cbt.edit', compact('exam', 'subjects'));
     }
 
@@ -215,7 +213,7 @@ class CbtController extends Controller
     }
 
     /**
-     * Update Soal (DIPERBAIKI: Support Ganti Tipe & Fix Null Answer)
+     * Update Soal (Support Ganti Tipe)
      */
     public function updateQuestion(Request $request, $id)
     {
@@ -240,11 +238,11 @@ class CbtController extends Controller
             $question->question_image = $request->file('question_image')->store('soal', 'public');
         }
 
-        // [FIX] Gunakan tipe soal dari REQUEST jika ada perubahan, fallback ke tipe lama
+        // Gunakan tipe soal dari REQUEST jika ada perubahan, fallback ke tipe lama
         $type = $request->question_type ?? $question->question_type ?? 'choice';
         
         $options = [];
-        $correctAnswer = ''; // Default empty string agar tidak error "Column cannot be null"
+        $correctAnswer = ''; 
 
         // Logika Penyimpanan Berdasarkan Tipe
         if ($type === 'choice') {
@@ -273,13 +271,12 @@ class CbtController extends Controller
             $correctAnswer = json_encode($correctMap);
 
         } elseif ($type === 'essay') {
-            $options = []; 
-            // Pastikan tidak null
+            $options = [];          
             $correctAnswer = $request->correct_answer ?? '';
         }
 
         $question->update([
-            'question_type' => $type, // Simpan tipe baru
+            'question_type' => $type, 
             'question_text' => $request->question_text,
             'options' => $options, 
             'correct_answer' => $correctAnswer,
@@ -516,8 +513,7 @@ class CbtController extends Controller
             }
             
             $row->correct_answers = $correctCount; 
-            $row->wrong_answers = $answers->count() - $correctCount;
-            // Gunakan nilai hasil hitung ulang agar akurat jika terjadi bug sebelumnya
+            $row->wrong_answers = $answers->count() - $correctCount;         
             $row->total_score = $calculatedScore; 
         }
 
@@ -697,24 +693,35 @@ class CbtController extends Controller
         ]);
     }
 
+    /**
+     * Fungsi Sync Gradebook 
+     */
     public function syncToGradebook(Request $request, $id)
     {
         $exam = CbtExam::findOrFail($id);
-        $subject = Subject::where('name', 'like', '%' . $exam->subject_name . '%')->first();
+        
+        //Prioritaskan Exact Match dulu, karena dropdown pakai nama persis
+        $subject = Subject::where('name', $exam->subject_name)->first();        
+      
+        if (!$subject) {
+            $subject = Subject::where('name', 'like', '%' . $exam->subject_name . '%')->first();
+        }
+
         if (!$subject) {
             return back()->with('error', 'Gagal: Mata Pelajaran "' . $exam->subject_name . '" tidak ditemukan di Data Master Mapel.');
         }
+
         $targetClasses = SchoolClass::where('name', 'like', $exam->class_level . '%')->get();
         if ($targetClasses->isEmpty()) {
             return back()->with('error', 'Gagal: Tidak ditemukan kelas untuk tingkat ' . $exam->class_level);
         }
+
         $countSynced = 0;
         DB::beginTransaction();
         try {
             foreach ($targetClasses as $class) {
-                // [FIX] Menambahkan teacher_id pada saat Create assignment baru
-                // [FIX 2] Mengganti due_date menjadi deadline sesuai struktur tabel
-                $assignment = LmsAssignment::firstOrCreate(
+                
+                $assignment = LmsAssignment::updateOrCreate(
                     [
                         'class_id' => $class->id,
                         'subject_id' => $subject->id,
@@ -724,7 +731,7 @@ class CbtController extends Controller
                         'teacher_id' => Auth::id(), 
                         'assignment_type' => 'exam', 
                         'description' => 'Nilai import otomatis dari CBT.',
-                        'deadline' => $exam->end_time, // PERBAIKAN: Gunakan 'deadline' bukan 'due_date'
+                        'deadline' => $exam->end_time, 
                     ]
                 );
                 
@@ -736,9 +743,9 @@ class CbtController extends Controller
                     ->select('students.id as student_id', 'cbt_student_exams.total_score')
                     ->get();
 
-                foreach ($studentResults as $res) {
+                foreach ($studentResults as $res) {   
                     
-                    // [PERBAIKAN UTAMA] Simpan ke tabel LmsSubmission agar muncul di Rekap Nilai
+                    // 1. Simpan ke LmsSubmission (Standard)
                     LmsSubmission::updateOrCreate(
                         [
                             'assignment_id' => $assignment->id,
@@ -752,13 +759,30 @@ class CbtController extends Controller
                         ]
                     );
 
-                    // Optional: Simpan juga ke LmsGrade jika sistem backup memerlukannya
-                    // LmsGrade::updateOrCreate(...)
+                    // 2. Simpan ke LmsGrade (Backup / Legacy)                    
+                    if (class_exists('App\Models\LmsGrade')) {
+                         LmsGrade::updateOrCreate(
+                            [
+                                'lms_assignment_id' => $assignment->id,
+                                'student_id' => $res->student_id
+                            ],
+                            [
+                                'score' => $res->total_score,
+                                'status' => 'graded',
+                                'graded_at' => now(),
+                            ]
+                        );
+                    }
                     
                     $countSynced++;
                 }
             }
             DB::commit();
+            
+            if ($countSynced == 0) {
+                 return back()->with('warning', "Proses selesai, namun tidak ada nilai yang diposting. Pastikan siswa sudah menyelesaikan ujian (Status: Selesai).");
+            }
+
             return back()->with('success', "Berhasil memposting nilai ke Buku Nilai! ($countSynced siswa diperbarui).");
         } catch (\Exception $e) {
             DB::rollBack();
