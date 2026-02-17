@@ -381,7 +381,7 @@
                 title: 'Alhamdulillah!',
                 text: "<?php echo session('success'); ?>",
                 icon: 'success',
-                confirmButtonText: 'Lanjut Ibadah',
+                confirmButtonText: 'Lanjutkan untuk mengisi Jurnal',
                 confirmButtonColor: '#10b981', // emerald-500
                 background: '#f0fdf4', // emerald-50
                 color: '#064e3b', // emerald-900
