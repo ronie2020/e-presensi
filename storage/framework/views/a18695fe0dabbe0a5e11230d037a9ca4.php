@@ -1,17 +1,26 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         
-        {{-- HERO SECTION --}}
+        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
             <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
                 
-                {{-- Background Decorations --}}
+                
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 <div class="absolute -top-24 -right-24 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-blue-500/30 transition-all duration-700"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     
-                    {{-- Text Content --}}
+                    
                     <div class="max-w-2xl">
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm">
                             <i class="ph-fill ph-users-three"></i> Akses & Keamanan
@@ -24,14 +33,14 @@
                         </p>
                     </div>
                     
-                    {{-- Stats Cards --}}
+                    
                     <div class="flex gap-4">
                         <div class="bg-white/10 backdrop-blur-md px-6 py-5 rounded-2xl border border-white/10 flex-1 md:flex-none min-w-[140px] text-center md:text-left hover:bg-white/15 transition-colors">
                             <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-blue-300">
                                 <i class="ph-duotone ph-user-circle text-lg"></i>
                                 <span class="text-[10px] font-bold uppercase tracking-wider">Total Akun</span>
                             </div>
-                            <span class="block text-3xl font-black text-white tracking-tight">{{ $users->total() }}</span>
+                            <span class="block text-3xl font-black text-white tracking-tight"><?php echo e($users->total()); ?></span>
                         </div>
                     </div>
 
@@ -41,34 +50,34 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            {{-- 1. ALERT SUKSES --}}
-            @if (session('success'))
+            
+            <?php if(session('success')): ?>
                 <div x-data="{ show: true }" x-show="show" x-transition class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3">
                         <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
                             <i class="ph-bold ph-check-circle text-xl"></i>
                         </div>
-                        <span class="font-bold text-sm">{{ session('success') }}</span>
+                        <span class="font-bold text-sm"><?php echo e(session('success')); ?></span>
                     </div>
                     <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-1 rounded-md hover:bg-emerald-100 transition"><i class="ph-bold ph-x"></i></button>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- 2. ALERT ERROR (SESSION) --}}
-            @if (session('error'))
+            
+            <?php if(session('error')): ?>
                 <div x-data="{ show: true }" x-show="show" x-transition class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3">
                         <div class="p-2 bg-rose-100 rounded-full text-rose-600">
                             <i class="ph-bold ph-warning-circle text-xl"></i>
                         </div>
-                        <span class="font-bold text-sm">{{ session('error') }}</span>
+                        <span class="font-bold text-sm"><?php echo e(session('error')); ?></span>
                     </div>
                     <button @click="show = false" class="text-rose-400 hover:text-rose-600 p-1 rounded-md hover:bg-rose-100 transition"><i class="ph-bold ph-x"></i></button>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- 3. ALERT ERROR VALIDASI --}}
-            @if ($errors->any())
+            
+            <?php if($errors->any()): ?>
                 <div x-data="{ show: true }" x-show="show" class="mb-8 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl flex items-center gap-3 shadow-sm">
                     <div class="p-2 bg-rose-100 rounded-full text-rose-600 shrink-0">
                         <i class="ph-bold ph-warning-circle text-xl"></i>
@@ -76,21 +85,21 @@
                     <div>
                         <p class="font-bold text-sm mb-1">Terdapat kesalahan input:</p>
                         <ul class="list-disc list-inside text-xs font-medium">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
+                            <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><?php echo e($error); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </ul>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 
-                {{-- KOLOM KIRI: FORM TAMBAH USER (QUICK ADD) --}}
+                
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden sticky top-24 relative group hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
                         
-                        {{-- Card Header --}}
+                        
                         <div class="bg-gradient-to-r from-blue-900 to-blue-800 p-8 text-white relative overflow-hidden">
                             <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
                                 <i class="ph-fill ph-user-plus"></i>
@@ -100,29 +109,26 @@
                         </div>
 
                         <div class="p-8 relative z-10">
-                            <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
-                                @csrf
+                            <form action="<?php echo e(route('users.store')); ?>" method="POST" enctype="multipart/form-data" class="space-y-5">
+                                <?php echo csrf_field(); ?>
                                 
-                                {{-- 1. DATA AKUN DASAR --}}
+                                
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Lengkap</label>
-                                    <input type="text" name="name" value="{{ old('name') }}" required placeholder="Contoh: Budi Santoso, S.Pd."
+                                    <input type="text" name="name" value="<?php echo e(old('name')); ?>" required placeholder="Contoh: Budi Santoso, S.Pd."
                                            class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 px-4 transition-colors placeholder:font-normal">
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Email Login</label>
-                                    <input type="email" name="email" value="{{ old('email') }}" required placeholder="email@sekolah.sch.id"
+                                    <input type="email" name="email" value="<?php echo e(old('email')); ?>" required placeholder="email@sekolah.sch.id"
                                            class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 px-4 transition-colors placeholder:font-normal">
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Peran (Role)</label>
                                     <div class="relative">
-                                        {{-- 
-                                            NOTE: Untuk Quick Add, kita gunakan Select Multiple agar konsisten.
-                                            Jika ingin simple, bisa single select, tapi Controller store() mengharapkan array.
-                                        --}}
+                                        
                                         <select name="role[]" required multiple class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 px-4 transition-colors appearance-none cursor-pointer h-32">
                                             <option value="Guru">Guru (Umum)</option>
                                             <option value="Guru Mata Pelajaran">Guru Mata Pelajaran</option>
@@ -138,7 +144,7 @@
                                     </div>
                                 </div>
 
-                                {{-- 2. PASSWORD --}}
+                                
                                 <div class="grid grid-cols-2 gap-4 pt-4 border-t border-dashed border-slate-200">
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Password</label>
@@ -161,28 +167,29 @@
                     </div>
                 </div>
 
-                {{-- KOLOM KANAN: DAFTAR USER (TABLE LENGKAP) --}}
+                
                 <div class="lg:col-span-2" x-data="{ showImport: false }">
                     <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full min-h-[600px] relative">
                         
-                        {{-- Toolbar Table --}}
+                        
                         <div class="p-8 border-b border-slate-50 bg-slate-50/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
                                 <i class="ph-fill ph-list-dashes text-blue-900"></i> Daftar Pengguna
                                 <span class="bg-white border border-slate-200 text-[10px] font-black px-3 py-1.5 rounded-xl text-slate-500 shadow-sm ml-2">
-                                    {{ $users->total() }}
+                                    <?php echo e($users->total()); ?>
+
                                 </span>
                             </h3>
                             
-                            {{-- BUTTON GROUP: EXPORT & IMPORT --}}
+                            
                             <div class="flex items-center gap-2">
-                                {{-- Tombol Export --}}
-                                <a href="{{ route('users.export') }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-100 hover:bg-emerald-100 hover:border-emerald-200 transition-all shadow-sm group">
+                                
+                                <a href="<?php echo e(route('users.export')); ?>" target="_blank" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 text-emerald-600 text-xs font-bold border border-emerald-100 hover:bg-emerald-100 hover:border-emerald-200 transition-all shadow-sm group">
                                     <i class="ph-bold ph-file-xls text-lg group-hover:scale-110 transition-transform"></i>
                                     <span>Export Excel</span>
                                 </a>
 
-                                {{-- Tombol Import --}}
+                                
                                 <button @click="showImport = true" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 text-blue-600 text-xs font-bold border border-blue-100 hover:bg-blue-100 hover:border-blue-200 transition-all shadow-sm group">
                                     <i class="ph-bold ph-upload-simple text-lg group-hover:scale-110 transition-transform"></i>
                                     <span>Import</span>
@@ -190,7 +197,7 @@
                             </div>
                         </div>
 
-                        {{-- MODAL IMPORT (POPUP) --}}
+                        
                         <div x-show="showImport" style="display: none;" 
                              x-transition:enter="transition ease-out duration-300"
                              x-transition:enter-start="opacity-0 backdrop-blur-none"
@@ -209,7 +216,7 @@
                                  x-transition:leave-end="opacity-0 scale-90 translate-y-4"
                                  class="bg-white w-full max-w-md p-8 rounded-[2.5rem] shadow-2xl shadow-blue-900/20 border border-white relative">
                                 
-                                {{-- Close Button --}}
+                                
                                 <button @click="showImport = false" class="absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-500 transition-colors">
                                     <i class="ph-bold ph-x"></i>
                                 </button>
@@ -224,10 +231,10 @@
                                     </p>
                                 </div>
 
-                                <form action="{{ route('users.import') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
-                                    @csrf
+                                <form action="<?php echo e(route('users.import')); ?>" method="POST" enctype="multipart/form-data" class="space-y-6">
+                                    <?php echo csrf_field(); ?>
                                     
-                                    {{-- Custom File Input --}}
+                                    
                                     <div class="relative group cursor-pointer">
                                         <input type="file" name="file" required accept=".xlsx, .xls"
                                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
@@ -247,8 +254,8 @@
                                             <i class="ph-bold ph-upload-simple text-lg"></i> Proses Import
                                         </button>
                                         
-                                        {{-- Link Template --}}
-                                        <a href="{{ asset('template/template_users.xlsx') }}" class="w-full py-4 rounded-2xl bg-white border border-slate-200 text-slate-500 font-bold hover:bg-slate-50 hover:text-slate-700 transition-colors text-center text-sm flex items-center justify-center gap-2">
+                                        
+                                        <a href="<?php echo e(asset('template/template_users.xlsx')); ?>" class="w-full py-4 rounded-2xl bg-white border border-slate-200 text-slate-500 font-bold hover:bg-slate-50 hover:text-slate-700 transition-colors text-center text-sm flex items-center justify-center gap-2">
                                             <i class="ph-bold ph-download-simple"></i> Download Template
                                         </a>
                                     </div>
@@ -266,54 +273,52 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-50">
-                                    @forelse ($users as $user)
+                                    <?php $__empty_1 = true; $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                         <tr class="group hover:bg-blue-50/30 transition-colors">
                                             <td class="px-6 py-5 whitespace-nowrap">
                                                 <div class="flex items-center gap-4">
-                                                    {{-- Avatar --}}
+                                                    
                                                     <div class="relative shrink-0">
-                                                        @if($user->photo_path)
-                                                            <img src="{{ asset('storage/' . $user->photo_path) }}" class="w-10 h-10 rounded-2xl object-cover shadow-sm border border-slate-200">
-                                                        @else
+                                                        <?php if($user->photo_path): ?>
+                                                            <img src="<?php echo e(asset('storage/' . $user->photo_path)); ?>" class="w-10 h-10 rounded-2xl object-cover shadow-sm border border-slate-200">
+                                                        <?php else: ?>
                                                             <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-100 to-slate-100 flex items-center justify-center text-blue-600 font-black text-sm border border-white shadow-sm">
-                                                                {{ substr($user->name, 0, 2) }}
+                                                                <?php echo e(substr($user->name, 0, 2)); ?>
+
                                                             </div>
-                                                        @endif
+                                                        <?php endif; ?>
                                                         
-                                                        {{-- Online/Sosmed Indicator --}}
-                                                        @if($user->instagram || $user->facebook || $user->tiktok)
+                                                        
+                                                        <?php if($user->instagram || $user->facebook || $user->tiktok): ?>
                                                             <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center shadow-sm" title="Data Sosmed Tersedia">
                                                                 <div class="w-2.5 h-2.5 bg-blue-500 rounded-full"></div>
                                                             </div>
-                                                        @endif
+                                                        <?php endif; ?>
                                                     </div>
                                                     <div>
-                                                        <div class="font-bold text-slate-800 text-sm group-hover:text-blue-700 transition-colors">{{ $user->name }}</div>
-                                                        <div class="text-xs text-slate-400 font-medium">{{ $user->email }}</div>
-                                                        {{-- Tampilkan NIP jika ada --}}
-                                                        @if($user->nip)
-                                                            <div class="text-[10px] text-slate-500 font-mono mt-0.5 bg-slate-100 inline-block px-1.5 rounded">NIP. {{ $user->nip }}</div>
-                                                        @endif
+                                                        <div class="font-bold text-slate-800 text-sm group-hover:text-blue-700 transition-colors"><?php echo e($user->name); ?></div>
+                                                        <div class="text-xs text-slate-400 font-medium"><?php echo e($user->email); ?></div>
+                                                        
+                                                        <?php if($user->nip): ?>
+                                                            <div class="text-[10px] text-slate-500 font-mono mt-0.5 bg-slate-100 inline-block px-1.5 rounded">NIP. <?php echo e($user->nip); ?></div>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-5 whitespace-nowrap">
-                                                {{-- 
-                                                    UPDATE PENTING: MENAMPILKAN MULTI-ROLE
-                                                    Membaca JSON role dan mengubahnya menjadi badge satu per satu.
-                                                --}}
-                                                @php
+                                                
+                                                <?php
                                                     $userRoles = is_string($user->role) ? json_decode($user->role, true) : $user->role;
                                                     // Jika gagal decode atau format lama (string tunggal), ubah jadi array
                                                     if (!is_array($userRoles)) {
                                                         $userRoles = is_string($user->role) ? explode(',', $user->role) : [$user->role];
                                                     }
-                                                @endphp
+                                                ?>
 
                                                 <div class="flex flex-col items-start gap-1.5">
                                                     <div class="flex flex-wrap gap-1 max-w-[200px]">
-                                                        @foreach($userRoles as $roleItem)
-                                                            @php
+                                                        <?php $__currentLoopData = $userRoles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $roleItem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                            <?php
                                                                 // Validasi jika json_decode menghasilkan null/error
                                                                 if(empty($roleItem)) continue;
 
@@ -326,40 +331,41 @@
                                                                     'Guru Piket' => 'bg-amber-50 text-amber-600 border-amber-200',
                                                                     default => 'bg-emerald-50 text-emerald-600 border-emerald-200',
                                                                 };
-                                                            @endphp
-                                                            <span class="inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border {{ $badgeClass }}">
-                                                                {{ $roleItem }}
+                                                            ?>
+                                                            <span class="inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border <?php echo e($badgeClass); ?>">
+                                                                <?php echo e($roleItem); ?>
+
                                                             </span>
-                                                        @endforeach
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                     </div>
 
-                                                    {{-- Tampilkan Jabatan & Pangkat jika ada --}}
-                                                    @if($user->position || $user->pangkat)
+                                                    
+                                                    <?php if($user->position || $user->pangkat): ?>
                                                         <div class="text-xs text-slate-500 font-bold flex flex-col gap-0.5 mt-1">
-                                                            @if($user->position)
-                                                                <span class="flex items-center gap-1"><i class="ph-bold ph-briefcase text-slate-300"></i> {{ $user->position }}</span>
-                                                            @endif
-                                                            @if($user->pangkat)
-                                                                <span class="flex items-center gap-1 text-[10px] text-slate-400 bg-slate-50 px-1.5 rounded w-fit border border-slate-100">{{ $user->pangkat }}</span>
-                                                            @endif
+                                                            <?php if($user->position): ?>
+                                                                <span class="flex items-center gap-1"><i class="ph-bold ph-briefcase text-slate-300"></i> <?php echo e($user->position); ?></span>
+                                                            <?php endif; ?>
+                                                            <?php if($user->pangkat): ?>
+                                                                <span class="flex items-center gap-1 text-[10px] text-slate-400 bg-slate-50 px-1.5 rounded w-fit border border-slate-100"><?php echo e($user->pangkat); ?></span>
+                                                            <?php endif; ?>
                                                         </div>
-                                                    @endif
+                                                    <?php endif; ?>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-5 whitespace-nowrap text-right">
                                                 <div class="flex justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
-                                                    @if(Auth::id() != $user->id)
-                                                        <a href="{{ route('users.edit', $user->id) }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm" title="Edit Data Lengkap">
+                                                    <?php if(Auth::id() != $user->id): ?>
+                                                        <a href="<?php echo e(route('users.edit', $user->id)); ?>" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm" title="Edit Data Lengkap">
                                                             <i class="ph-bold ph-pencil-simple text-lg"></i>
                                                         </a>
 
-                                                        {{-- Konfirmasi Hapus --}}
-                                                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline" 
+                                                        
+                                                        <form action="<?php echo e(route('users.destroy', $user->id)); ?>" method="POST" class="inline" 
                                                               onsubmit="event.preventDefault(); 
                                                                         const form = this;
                                                                         Swal.fire({
                                                                             title: 'Hapus Pengguna?',
-                                                                            text: 'Apakah Anda yakin ingin menghapus pengguna {{ $user->name }}? Data yang dihapus tidak dapat dikembalikan.',
+                                                                            text: 'Apakah Anda yakin ingin menghapus pengguna <?php echo e($user->name); ?>? Data yang dihapus tidak dapat dikembalikan.',
                                                                             icon: 'warning',
                                                                             showCancelButton: true,
                                                                             confirmButtonColor: '#e11d48',
@@ -378,24 +384,24 @@
                                                                                 form.submit();
                                                                             }
                                                                         });">
-                                                            @csrf
-                                                            @method('DELETE')
+                                                            <?php echo csrf_field(); ?>
+                                                            <?php echo method_field('DELETE'); ?>
                                                             <button type="submit" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm" title="Hapus User">
                                                                 <i class="ph-bold ph-trash text-lg"></i>
                                                             </button>
                                                         </form>
-                                                    @else
+                                                    <?php else: ?>
                                                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 text-xs font-bold select-none cursor-not-allowed">
                                                             <i class="ph-bold ph-user"></i> Anda
                                                         </span>
-                                                        <a href="{{ route('profile.edit') }}" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-blue-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm" title="Edit Profil Saya">
+                                                        <a href="<?php echo e(route('profile.edit')); ?>" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-blue-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all shadow-sm" title="Edit Profil Saya">
                                                             <i class="ph-bold ph-gear text-lg"></i>
                                                         </a>
-                                                    @endif
+                                                    <?php endif; ?>
                                                 </div>
                                             </td>
                                         </tr>
-                                    @empty
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                         <tr>
                                             <td colspan="3" class="px-6 py-20 text-center">
                                                 <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
@@ -404,14 +410,15 @@
                                                 <p class="text-sm font-bold text-slate-600">Belum ada data pengguna lain.</p>
                                             </td>
                                         </tr>
-                                    @endforelse
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
                         
-                        {{-- Pagination --}}
+                        
                         <div class="p-6 border-t border-slate-50 bg-slate-50/30">
-                            {{ $users->links() }}
+                            <?php echo e($users->links()); ?>
+
                         </div>
                     </div>
                 </div>
@@ -420,6 +427,15 @@
         </div>
     </div>
 
-    {{-- SweetAlert2 Library --}}
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/users/index.blade.php ENDPATH**/ ?>

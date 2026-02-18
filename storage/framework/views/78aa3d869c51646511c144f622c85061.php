@@ -24,7 +24,6 @@
     </button>
     
     <!-- TOMBOL CLOSE (X) - MOBILE ONLY -->
-    <!-- Tambahan: Tombol X agar user mudah menutup sidebar di HP -->
     <button 
         @click="sidebarOpen = false" 
         class="absolute right-4 top-4 z-50 md:hidden text-white/70 hover:text-white transition-colors">
@@ -79,72 +78,115 @@
          :class="sidebarExpanded ? 'px-4' : 'px-2'">
         
         <?php $__currentLoopData = config('sidebar.menus'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $groupTitle => $items): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <div>
-                <!-- Group Title -->
-                <div class="mb-2 transition-all duration-300" 
-                     :class="sidebarExpanded ? 'px-3' : 'px-0 text-center'">
+            
+            
+            <?php
+                $visibleItems = collect($items)->filter(function ($item) {
+                    // 1. Jika menu tidak punya batasan role, tampilkan (PUBLIC)
+                    if (!isset($item['roles'])) return true;
                     
-                    <h3 x-show="sidebarExpanded" 
-                        class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <?php echo e($groupTitle); ?>
+                    // 2. Ambil Role User Saat Ini
+                    $userRoles = Auth::user()->role;
 
-                        <span class="h-px flex-1 bg-white/5"></span>
-                    </h3>
+                    // 3. Normalisasi Role User menjadi Array
+                    // Jika tersimpan sebagai JSON string ["Guru", "Wali Kelas"], decode dulu
+                    // Jika tersimpan sebagai string biasa "Guru", jadikan array ["Guru"]
+                    if (is_string($userRoles)) {
+                        $decoded = json_decode($userRoles, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                            $userRoles = $decoded;
+                        } else {
+                            // Coba explode koma jika formatnya "Guru,Wali Kelas"
+                            $userRoles = explode(',', $userRoles); 
+                        }
+                    } elseif (!is_array($userRoles)) {
+                        $userRoles = [$userRoles];
+                    }
+
+                    // 4. Cek Intersection (Irisan)
+                    // Jika ada SATU SAJA role user yang cocok dengan role menu, IZINKAN.
+                    // Contoh: User punya ["Guru", "Wali Kelas"], Menu butuh ["Admin", "Wali Kelas"] -> COCOK di "Wali Kelas"
+                    $intersection = array_intersect($userRoles, $item['roles']);
                     
-                    <!-- Divider saat kecil -->
-                    <div x-show="!sidebarExpanded" class="h-0.5 w-4 bg-white/10 mx-auto rounded-full group-hover:bg-blue-500 transition-colors"></div>
+                    return count($intersection) > 0;
+                });
+            ?>
+
+            
+            <?php if($visibleItems->isNotEmpty()): ?>
+                <div>
+                    <!-- Group Title -->
+                    <div class="mb-2 transition-all duration-300" 
+                         :class="sidebarExpanded ? 'px-3' : 'px-0 text-center'">
+                        
+                        <h3 x-show="sidebarExpanded" 
+                            class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                            <?php echo e($groupTitle); ?>
+
+                            <span class="h-px flex-1 bg-white/5"></span>
+                        </h3>
+                        
+                        <!-- Divider saat kecil -->
+                        <div x-show="!sidebarExpanded" class="h-0.5 w-4 bg-white/10 mx-auto rounded-full group-hover:bg-blue-500 transition-colors"></div>
+                    </div>
+
+                    <!-- Items (Looping $visibleItems yang sudah disaring) -->
+                    <ul class="space-y-1">
+                        <?php $__currentLoopData = $visibleItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
+                                $isActive = false;
+                                // Cek Active State
+                                $checkRoute = $item['active_check'] ?? $item['route'];
+                                if (is_array($checkRoute)) {
+                                    foreach ($checkRoute as $route) { 
+                                        if (request()->routeIs($route)) { 
+                                            $isActive = true; 
+                                            break; 
+                                        } 
+                                    }
+                                } else {
+                                    $isActive = request()->routeIs($checkRoute);
+                                }
+                            ?>
+
+                            <li class="relative">
+                                <a href="<?php echo e(isset($item['route']) ? route($item['route']) : '#'); ?>" 
+                                   class="group flex items-center py-3 rounded-xl transition-all duration-200 outline-none relative
+                                          <?php echo e($isActive 
+                                             ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-900/50' 
+                                             : 'text-slate-400 hover:text-white hover:bg-white/5'); ?>"
+                                   :class="sidebarExpanded ? 'px-4 justify-start' : 'justify-center px-0 w-full'">
+                                    
+                                    <!-- Active Marker -->
+                                    <?php if($isActive): ?>
+                                        <div x-show="sidebarExpanded" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-yellow-400 rounded-r-full shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div>
+                                    <?php endif; ?>
+
+                                    <!-- Icon -->
+                                    <i class="ph-bold <?php echo e($item['icon'] ?? 'ph-circle'); ?> shrink-0 transition-all duration-200 relative z-10
+                                              <?php echo e($isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-300 group-hover:scale-110'); ?>"
+                                       :class="sidebarExpanded ? 'text-xl mr-3' : 'text-2xl mr-0'"></i>
+                                    
+                                    <!-- Text -->
+                                    <span x-show="sidebarExpanded" 
+                                          class="text-sm font-bold tracking-wide whitespace-nowrap overflow-hidden relative z-10">
+                                        <?php echo e($item['name']); ?>
+
+                                    </span>
+
+                                    <!-- TOOLTIP (Desktop Only) -->
+                                    <div x-show="!sidebarExpanded"
+                                         class="hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2 bg-slate-800 text-white text-xs font-bold rounded-lg shadow-xl border border-slate-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-[100]">
+                                        <?php echo e($item['name']); ?>
+
+                                        <div class="absolute top-1/2 -left-1 -mt-1 w-2 h-2 bg-slate-800 border-l border-b border-slate-600 transform rotate-45"></div>
+                                    </div>
+                                </a>
+                            </li>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </ul>
                 </div>
-
-                <!-- Items -->
-                <ul class="space-y-1">
-                    <?php $__currentLoopData = $items; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <?php
-                            $isActive = false;
-                            $checkRoute = $item['active_check'] ?? $item['route'];
-                            if (is_array($checkRoute)) {
-                                foreach ($checkRoute as $route) { if (request()->routeIs($route)) { $isActive = true; break; } }
-                            } else {
-                                $isActive = request()->routeIs($checkRoute);
-                            }
-                        ?>
-
-                        <li class="relative">
-                            <a href="<?php echo e(isset($item['route']) ? route($item['route']) : '#'); ?>" 
-                               class="group flex items-center py-3 rounded-xl transition-all duration-200 outline-none relative
-                                      <?php echo e($isActive 
-                                         ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-900/50' 
-                                         : 'text-slate-400 hover:text-white hover:bg-white/5'); ?>"
-                               :class="sidebarExpanded ? 'px-4 justify-start' : 'justify-center px-0 w-full'">
-                                
-                                <!-- Active Marker -->
-                                <?php if($isActive): ?>
-                                    <div x-show="sidebarExpanded" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-yellow-400 rounded-r-full shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div>
-                                <?php endif; ?>
-
-                                <!-- Icon -->
-                                <i class="ph-bold <?php echo e($item['icon'] ?? 'ph-circle'); ?> shrink-0 transition-all duration-200 relative z-10
-                                          <?php echo e($isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-300 group-hover:scale-110'); ?>"
-                                   :class="sidebarExpanded ? 'text-xl mr-3' : 'text-2xl mr-0'"></i>
-                                
-                                <!-- Text -->
-                                <span x-show="sidebarExpanded" 
-                                      class="text-sm font-bold tracking-wide whitespace-nowrap overflow-hidden relative z-10">
-                                    <?php echo e($item['name']); ?>
-
-                                </span>
-
-                                <!-- TOOLTIP (Desktop Only) -->
-                                <div x-show="!sidebarExpanded"
-                                     class="hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2 bg-slate-800 text-white text-xs font-bold rounded-lg shadow-xl border border-slate-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-[100]">
-                                    <?php echo e($item['name']); ?>
-
-                                    <div class="absolute top-1/2 -left-1 -mt-1 w-2 h-2 bg-slate-800 border-l border-b border-slate-600 transform rotate-45"></div>
-                                </div>
-                            </a>
-                        </li>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                </ul>
-            </div>
+            <?php endif; ?>
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         
         <div class="h-20"></div>

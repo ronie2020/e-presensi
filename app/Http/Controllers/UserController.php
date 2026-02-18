@@ -17,6 +17,19 @@ use App\Imports\UsersImport;
 
 class UserController extends Controller
 {
+    /**
+     * Daftar Role yang tersedia dalam sistem sesuai fungsi.
+     */
+    protected $availableRoles = [
+        'Admin',                
+        'Kepala Sekolah',       
+        'TU',                   
+        'Wali Kelas',           
+        'Guru Mata Pelajaran',  
+        'Guru Piket',           
+        'Guru'                  
+    ];
+
     public function index()
     {
         $users = User::latest()->paginate(10);
@@ -30,15 +43,16 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        // Ubah validasi role menjadi array
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['required', 'string', 'in:Admin,Kepala Sekolah,Wali Kelas,Guru Piket,Guru'],
+            'role' => ['required', 'array'], // Input harus Array
+            'role.*' => ['string', 'in:' . implode(',', $this->availableRoles)], // Tiap item harus valid
             
-            // Validasi Data Profil & Kontak
             'position' => ['nullable', 'string', 'max:50'],
-            'pangkat' => ['nullable', 'string', 'max:50'], // [PENTING] Validasi Pangkat
+            'pangkat' => ['nullable', 'string', 'max:50'],
             'bio' => ['nullable', 'string', 'max:255'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'nip' => ['nullable', 'string', 'max:20'],
@@ -52,18 +66,19 @@ class UserController extends Controller
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('teachers', 'public');
         }
+       
+        $rolesJson = json_encode($request->role);
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
+            'role' => $rolesJson, // Simpan JSON
             'position' => $request->position,
-            'pangkat' => $request->pangkat, // [PENTING] Simpan Pangkat
+            'pangkat' => $request->pangkat,
             'bio' => $request->bio,
             'photo_path' => $photoPath,
             'nip' => $request->nip,
-            // Simpan Kontak
             'phone' => $request->phone,
             'instagram' => $request->instagram,
             'tiktok' => $request->tiktok,
@@ -83,29 +98,34 @@ class UserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'role' => ['required', 'string', 'in:Admin,Kepala Sekolah,Wali Kelas,Guru Piket,Guru'],
+            'role' => ['required', 'array'], // Input harus Array
+            'role.*' => ['string', 'in:' . implode(',', $this->availableRoles)],
             'position' => ['nullable', 'string', 'max:50'],
-            'pangkat' => ['nullable', 'string', 'max:50'], // [PENTING] Validasi Pangkat
+            'pangkat' => ['nullable', 'string', 'max:50'],
             'bio' => ['nullable', 'string', 'max:255'],
             'photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
             'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
             'nip' => ['nullable', 'string', 'max:20'],
-            // Validasi Kontak Baru
             'phone' => ['nullable', 'string', 'max:20'],
             'instagram' => ['nullable', 'string', 'max:50'],
             'tiktok' => ['nullable', 'string', 'max:50'],
             'facebook' => ['nullable', 'string', 'max:50'],
         ]);
+        
+        if (Auth::user()->role !== 'Admin' && in_array('Admin', $request->role)) {
+             return redirect()->back()->with('error', 'Anda tidak memiliki hak akses untuk menjadikan user sebagai Admin.');
+        }
+
+        $rolesJson = json_encode($request->role);
 
         $data = [
             'name' => $request->name,
             'email' => $request->email,
-            'role' => $request->role,
+            'role' => $rolesJson, // Simpan JSON
             'position' => $request->position,
-            'pangkat' => $request->pangkat, // [PENTING] Update Pangkat
+            'pangkat' => $request->pangkat,
             'bio' => $request->bio,
             'nip' => $request->nip,
-            // Update Data Kontak
             'phone' => $request->phone,
             'instagram' => $request->instagram,
             'tiktok' => $request->tiktok,
@@ -133,6 +153,22 @@ class UserController extends Controller
         if (Auth::id() == $user->id) {
             return redirect()->route('users.index')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
         }
+     
+        $targetUserRoles = is_string($user->role) ? json_decode($user->role, true) : $user->role;
+        if (!is_array($targetUserRoles)) $targetUserRoles = [$user->role];
+
+        $currentUserRoles = Auth::user()->role;
+        if (is_string($currentUserRoles)) $currentUserRoles = json_decode($currentUserRoles, true);
+        
+        $amIAdmin = in_array('Admin', is_array($currentUserRoles) ? $currentUserRoles : []);
+
+        // Jika bukan admin
+        if (!$amIAdmin) {
+            // Cek apakah target punya role Admin
+            if (in_array('Admin', $targetUserRoles)) {
+                return redirect()->route('users.index')->with('error', 'Anda tidak memiliki wewenang menghapus Administrator.');
+            }
+        }
 
         if ($user->photo_path) {
             Storage::disk('public')->delete($user->photo_path);
@@ -143,10 +179,7 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'Pengguna berhasil dihapus.');
     }
 
-    // ===========================================================
-    // FITUR EXPORT & IMPORT EXCEL
-    // ===========================================================
-
+    // Export Import tetap sama...
     public function export()
     {
         return Excel::download(new UsersExport, 'data-pengguna.xlsx');
