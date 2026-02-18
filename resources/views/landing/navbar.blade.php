@@ -12,7 +12,7 @@
                 <div class="flex flex-col leading-tight">
                     <span class="font-bold text-white text-lg tracking-tight group-hover:text-blue-200 transition-colors">SMPN 3 LAKBOK</span>
                     <span class="font-bold text-slate-400 uppercase tracking-widest group-hover:text-yellow-400 transition-colors">Berjaya </span>
-                    <span class="text-[8px] font-bold text-slate-200 uppercase tracking-widest group-hover:text-yellow-200 transition-colors">Unggul dan Berkarakter </span>
+                    <span class="text-[8px] font-bold text-slate-200 uppercase tracking-widest group-hover:text-yellow-200 transition-colors">Unggul & Berkarakter </span>
                 </div>
             </a>
 

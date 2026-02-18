@@ -26,7 +26,7 @@
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-300">Cerdas & Berkarakter</span>
                 </h1>
                 <p class="text-slate-300 text-lg mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
-                    Platform digital terintegrasi SMPN 3 Lakbok untuk pemantauan akademik, absensi kehadiran, dan pengembangan karakter siswa secara real-time.
+                    SIMADU : Platform digital terintegrasi SMPN 3 Lakbok untuk pemantauan akademik, absensi kehadiran, dan pengembangan karakter siswa secara real-time.
                 </p>
                 
                 <!-- Buttons -->
