@@ -18,8 +18,12 @@ class SchoolClassController extends Controller
             ->orderBy('name', 'asc')
             ->get();
         
-        // Ambil guru untuk dropdown tambah kelas
-        $teachers = User::where('role', 'Wali Kelas')->orderBy('name', 'asc')->get();
+        // PERBAIKAN: Gunakan LIKE agar support Multi-Role (JSON Array)
+        // Mencari user yang memiliki kata "Wali Kelas" di dalam daftar role-nya
+        // Contoh: Data ["Guru", "Wali Kelas"] akan tetap ditemukan.
+        $teachers = User::where('role', 'LIKE', '%Wali Kelas%')
+                        ->orderBy('name', 'asc')
+                        ->get();
 
         return view('classes.index', [
             'classes' => $classes,
@@ -71,10 +75,13 @@ class SchoolClassController extends Controller
      */
     public function edit($id)
     {
-        // Gunakan findOrFail agar jika ID salah langsung 404
+        // Gunakan findOrFail
         $class = SchoolClass::findOrFail($id);
         
-        $teachers = User::where('role', 'Wali Kelas')->orderBy('name', 'asc')->get();
+        // PERBAIKAN: Gunakan LIKE juga di sini
+        $teachers = User::where('role', 'LIKE', '%Wali Kelas%')
+                        ->orderBy('name', 'asc')
+                        ->get();
 
         return view('classes.edit', [
             'class' => $class,
@@ -87,7 +94,6 @@ class SchoolClassController extends Controller
      */
      public function update(Request $request, $id)
     {
-        // FIX: Cari manual berdasarkan ID
         $class = SchoolClass::findOrFail($id);
 
         $request->validate([
@@ -113,7 +119,6 @@ class SchoolClassController extends Controller
      */
     public function destroy($id)
     {
-        // PERBAIKAN UTAMA DI SINI
         try {
             $class = SchoolClass::findOrFail($id);
             $class->delete();
