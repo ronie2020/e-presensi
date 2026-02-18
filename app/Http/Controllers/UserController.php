@@ -30,6 +30,26 @@ class UserController extends Controller
         'Guru'                  
     ];
 
+    /**
+     * Helper: Cek apakah user yang login memiliki role Admin
+     */
+    private function checkIsAdmin()
+    {
+        $currentRoles = Auth::user()->role;
+        // Decode JSON jika string, atau wrap array jika single string
+        if (is_string($currentRoles)) {
+            $decoded = json_decode($currentRoles, true);
+            // Jika gagal decode (berarti string biasa "Admin"), jadikan array
+            $currentRoles = (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) 
+                            ? $decoded 
+                            : [$currentRoles];
+        } elseif (!is_array($currentRoles)) {
+            $currentRoles = [$currentRoles];
+        }
+
+        return in_array('Admin', $currentRoles);
+    }
+
     public function index()
     {
         $users = User::latest()->paginate(10);
@@ -43,13 +63,12 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        // Ubah validasi role menjadi array
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['required', 'array'], // Input harus Array
-            'role.*' => ['string', 'in:' . implode(',', $this->availableRoles)], // Tiap item harus valid
+            'role' => ['required', 'array'], 
+            'role.*' => ['string', 'in:' . implode(',', $this->availableRoles)],
             
             'position' => ['nullable', 'string', 'max:50'],
             'pangkat' => ['nullable', 'string', 'max:50'],
@@ -62,6 +81,11 @@ class UserController extends Controller
             'facebook' => ['nullable', 'string', 'max:50'],
         ]);
 
+        // KEAMANAN: Hanya Admin yang boleh membuat user dengan role Admin
+        if (in_array('Admin', $request->role) && !$this->checkIsAdmin()) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki hak akses untuk membuat user Admin.');
+        }
+
         $photoPath = null;
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('teachers', 'public');
@@ -73,7 +97,7 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $rolesJson, // Simpan JSON
+            'role' => $rolesJson,
             'position' => $request->position,
             'pangkat' => $request->pangkat,
             'bio' => $request->bio,
@@ -98,7 +122,7 @@ class UserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'role' => ['required', 'array'], // Input harus Array
+            'role' => ['required', 'array'],
             'role.*' => ['string', 'in:' . implode(',', $this->availableRoles)],
             'position' => ['nullable', 'string', 'max:50'],
             'pangkat' => ['nullable', 'string', 'max:50'],
@@ -111,9 +135,19 @@ class UserController extends Controller
             'tiktok' => ['nullable', 'string', 'max:50'],
             'facebook' => ['nullable', 'string', 'max:50'],
         ]);
-        
-        if (Auth::user()->role !== 'Admin' && in_array('Admin', $request->role)) {
+
+        // [FIXED] LOGIKA KEAMANAN UPDATE
+        // Cek apakah user yang login adalah Admin (menggunakan helper baru yang support array)
+        $imAdmin = $this->checkIsAdmin();
+
+        // Jika SAYA bukan admin, DAN saya mencoba menambahkan role 'Admin' ke target -> TOLAK
+        if (!$imAdmin && in_array('Admin', $request->role)) {
              return redirect()->back()->with('error', 'Anda tidak memiliki hak akses untuk menjadikan user sebagai Admin.');
+        }
+
+        // Opsional: Cegah Admin menghapus role Admin-nya sendiri (Anti Lockout)
+        if (Auth::id() == $user->id && !in_array('Admin', $request->role)) {
+             return redirect()->back()->with('error', 'Anda tidak boleh menghapus role Admin dari akun Anda sendiri.');
         }
 
         $rolesJson = json_encode($request->role);
@@ -121,7 +155,7 @@ class UserController extends Controller
         $data = [
             'name' => $request->name,
             'email' => $request->email,
-            'role' => $rolesJson, // Simpan JSON
+            'role' => $rolesJson, 
             'position' => $request->position,
             'pangkat' => $request->pangkat,
             'bio' => $request->bio,
@@ -153,14 +187,16 @@ class UserController extends Controller
         if (Auth::id() == $user->id) {
             return redirect()->route('users.index')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
         }
-     
-        $targetUserRoles = is_string($user->role) ? json_decode($user->role, true) : $user->role;
-        if (!is_array($targetUserRoles)) $targetUserRoles = [$user->role];
 
-        $currentUserRoles = Auth::user()->role;
-        if (is_string($currentUserRoles)) $currentUserRoles = json_decode($currentUserRoles, true);
-        
-        $amIAdmin = in_array('Admin', is_array($currentUserRoles) ? $currentUserRoles : []);
+        // Logic Penghapusan perlu disesuaikan sedikit karena Role sekarang array/json
+        $targetUserRoles = is_string($user->role) ? json_decode($user->role, true) : $user->role;
+        // Handle jika decode gagal atau format lama
+        if (!is_array($targetUserRoles)) {
+            $targetUserRoles = is_string($user->role) ? [$user->role] : [];
+        }
+
+        // Gunakan helper checkIsAdmin
+        $amIAdmin = $this->checkIsAdmin();
 
         // Jika bukan admin
         if (!$amIAdmin) {
