@@ -1,9 +1,18 @@
 
 <?php
     $date = \Carbon\Carbon::now();
-    $hijriDateFull = 'Tanggal Hijriyah';
-    $hijriDay = $date->format('d');
-    $hijriMonthYear = $date->format('F Y');
+    
+    // --- PENGATURAN MANUAL TANGGAL HIJRIYAH ---
+    // Ubah angka ini jika tanggal Hijriyah selisih dengan ketetapan pemerintah.
+    // Contoh: 
+    // 0  = Sesuai algoritma komputer
+    // 1  = Ditambah 1 hari (Maju)
+    // -1 = Dikurang 1 hari (Mundur)
+    $hijriOffset = 1; 
+
+    // Default Fallback
+    $hijriString = 'Tanggal Hijriyah';
+    $hijriDateFull = '-';
 
     // Cek apakah server mendukung Intl Calendar Islamic
     if(extension_loaded('intl')) {
@@ -15,22 +24,19 @@
                 'Asia/Jakarta', 
                 IntlDateFormatter::TRADITIONAL
             );
-            $hijriString = $fmt->format($date->getTimestamp());
+            
+            // Terapkan Offset pada timestamp untuk Hijriyah saja
+            // Kita copy object date agar tanggal Masehi utama tidak ikut berubah
+            $hijriTimestamp = $date->copy()->addDays($hijriOffset)->getTimestamp();
+            
+            $hijriString = $fmt->format($hijriTimestamp);
             // Hasil biasanya: "Selasa, 1 Ramadan 1447 AH"
             
-            // Bersihkan suffix 'AH' atau 'H' jika ada
+            // Bersihkan format string
             $hijriString = str_replace([' AH', ' H'], '', $hijriString);
-            
-            // Ambil bagian tanggal saja
             $parts = explode(',', $hijriString);
-            $hijriDateFull = trim(end($parts)); // "1 Ramadan 1447"
+            $hijriDateFull = trim(end($parts)); // Ambil bagian "1 Ramadan 1447"
             
-            // Pecah untuk tampilan Kalender Sobek
-            $dateParts = explode(' ', $hijriDateFull);
-            if(count($dateParts) >= 3) {
-                $hijriDay = $dateParts[0];
-                $hijriMonthYear = $dateParts[1] . ' ' . $dateParts[2];
-            }
         } catch (\Exception $e) {
             // Fallback jika error
         }
@@ -111,25 +117,40 @@
     <?php if(!$isAlumni): ?>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-         
+        
         <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col h-full relative overflow-hidden group hover:border-emerald-100 transition-colors">
             
             <div class="flex flex-col sm:flex-row gap-6 h-full">
                 
                 <div class="shrink-0 flex flex-col items-center sm:w-36">
                     
+                    
                     <div class="w-full bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden transform group-hover:rotate-1 transition-transform duration-500 mb-3">
                         <div class="bg-emerald-700 h-7 flex items-center justify-center relative">
                             <div class="absolute top-[-6px] w-2 h-2 rounded-full bg-slate-800 border border-white z-20"></div> 
-                            <span class="text-amber-50 font-black uppercase tracking-wider text-[8px] mt-1">TO DAY</span>
+                            <span class="text-amber-50 font-black uppercase tracking-wider text-[8px] mt-1">KALENDER</span>
                         </div>
+                        
                         <div class="h-16 flex flex-col items-center justify-center bg-white relative">
-                            <span class="text-3xl font-serif font-black text-slate-800 leading-none tracking-tighter"><?php echo e($hijriDay); ?></span>
-                            <span class="text-[8px] font-serif italic text-slate-400 mt-0.5 text-center px-1 leading-tight line-clamp-1"><?php echo e($hijriMonthYear); ?></span>
+                            <span class="text-4xl font-serif font-black text-slate-800 leading-none tracking-tighter">
+                                <?php echo e($date->format('d')); ?>
+
+                            </span>
+                            <span class="text-[9px] font-serif italic text-slate-400 mt-0.5 text-center px-1 leading-tight line-clamp-1 uppercase">
+                                <?php echo e($date->translatedFormat('F Y')); ?>
+
+                            </span>
                         </div>
-                        <div class="bg-slate-50 border-t border-slate-100 py-1.5 text-center">
-                            <span class="text-[8px] font-bold text-slate-500 uppercase block"><?php echo e($date->translatedFormat('l')); ?></span>
-                            <span class="text-[8px] font-bold text-slate-400 block"><?php echo e($date->translatedFormat('d M Y')); ?></span>
+                        
+                        <div class="bg-slate-50 border-t border-slate-100 py-1.5 text-center px-1">
+                            <span class="text-[9px] font-bold text-emerald-600 uppercase block mb-0.5">
+                                <?php echo e($date->translatedFormat('l')); ?>
+
+                            </span>
+                            <span class="text-[8px] font-bold text-slate-400 block border-t border-slate-200 pt-0.5 mt-0.5">
+                                <i class="ph-bold ph-moon-stars text-amber-500 mr-0.5"></i> <?php echo e($hijriDateFull); ?>
+
+                            </span>
                         </div>
                     </div>
                     
@@ -146,7 +167,7 @@
                         <button @click="updateTab('ramadan_jurnal')" 
                                 class="w-full py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-[10px] font-bold shadow-md transition-all flex items-center justify-center gap-1.5 group/btn border border-emerald-500/50 hover:-translate-y-0.5">
                             <i class="ph-fill ph-moon-stars text-xs text-amber-300"></i>
-                            <span><?php echo e(isset($todayRamadanLog) && $todayRamadanLog ? 'Lihat Ramadhan' : 'Jurnal Ramadhan'); ?></span>
+                            <span><?php echo e(isset($todayRamadanLog) && $todayRamadanLog ? 'Lihat Ramadhan' : 'Isi Ramadhan'); ?></span>
                         </button>
 
                         
@@ -231,6 +252,7 @@
                 </div>
             </div>
         </div>
+
         
         <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col h-full relative overflow-hidden group hover:border-orange-100 transition-colors">
             <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
