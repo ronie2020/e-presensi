@@ -7,60 +7,68 @@
 
         <title><?php echo e(config('app.name', 'Netila E-Presensi')); ?></title>
 
-        <!-- Fonts: Plus Jakarta Sans (Konsisten dengan Welcome Page) -->
+        <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
         <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
-        
-        <!-- Script Ikon Phosphor -->
         <script src="https://unpkg.com/@phosphor-icons/web"></script>
         
         <style>
-            /* Global Font Setting */
             body { font-family: 'Plus Jakarta Sans', sans-serif; }
-            
-            /* Kustomisasi Scrollbar Halus */
+            [x-cloak] { display: none !important; }
+            /* Custom Scrollbar */
             ::-webkit-scrollbar { width: 6px; height: 6px; }
             ::-webkit-scrollbar-track { background: transparent; }
             ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
             ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
             
-            /* Utility Helper */
-            .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-            .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
+            .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+            .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
         </style>
         
         <?php echo $__env->yieldPushContent('styles'); ?>
     </head>
-    <body class="font-sans antialiased bg-slate-50 selection:bg-yellow-300 selection:text-blue-900 text-slate-800">
+    <body class="font-sans antialiased bg-slate-50 text-slate-800">
         
-        <div x-data="{ sidebarOpen: false }" class="h-screen flex overflow-hidden bg-slate-900">
+        <!-- INITIALIZE STATE HERE -->
+        <!-- sidebarExpanded: Ambil dari localStorage agar browser 'ingat' posisi terakhir -->
+        <div x-data="{ 
+                sidebarOpen: false, 
+                sidebarExpanded: localStorage.getItem('sidebarExpanded') === null ? true : localStorage.getItem('sidebarExpanded') === 'true',
+                toggleSidebar() {
+                    this.sidebarExpanded = !this.sidebarExpanded;
+                    localStorage.setItem('sidebarExpanded', this.sidebarExpanded);
+                }
+            }" 
+            class="h-screen flex overflow-hidden bg-slate-50">
             
             <!-- ====== SIDEBAR NAVIGASI ====== -->
+            <!-- Navigasi ini sekarang akan merespon variabel sidebarExpanded -->
             <?php echo $__env->make('layouts.navigation', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
             <!-- Overlay Mobile -->
             <div x-show="sidebarOpen" 
-                 x-transition:enter="transition-opacity ease-linear duration-300" 
-                 x-transition:enter-start="opacity-0" 
-                 x-transition:enter-end="opacity-100" 
-                 x-transition:leave="transition-opacity ease-linear duration-300" 
-                 x-transition:leave-start="opacity-100" 
-                 x-transition:leave-end="opacity-0" 
+                 x-transition:enter="transition-opacity ease-linear duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="transition-opacity ease-linear duration-300"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
                  class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-40 md:hidden" 
                  @click="sidebarOpen = false">
             </div>
 
             <!-- ====== KONTEN UTAMA ====== -->
-            <div class="flex-1 flex flex-col h-screen relative z-10 transition-all duration-300 bg-slate-50 md:rounded-l-[2.5rem] overflow-hidden">
+            <!-- Flex-1 memastikan konten ini mengisi sisa ruang di sebelah sidebar -->
+            <div class="flex-1 flex flex-col h-screen relative z-10 overflow-hidden transition-all duration-300">
                 
                 <!-- Header -->
                 <header class="bg-white/90 backdrop-blur-md sticky top-0 z-30 border-b border-slate-100 px-6 py-4 flex justify-between items-center shadow-sm">
                     
-                    <!-- Tombol Hamburger & Judul -->
                     <div class="flex items-center gap-4">
+                        <!-- Tombol Hamburger Mobile -->
                         <button @click="sidebarOpen = true" class="md:hidden text-slate-500 hover:text-blue-600 focus:outline-none transition-colors p-1 rounded-lg hover:bg-blue-50">
                             <i class="ph-bold ph-list text-2xl"></i>
                         </button>
@@ -73,13 +81,14 @@
                         <?php endif; ?>
                     </div>
 
-                    <!-- User Dropdown & Info -->
+                    <!-- User Info -->
                     <div class="flex items-center gap-6">
                         <div class="hidden md:block text-right border-r border-slate-100 pr-6">
                             <p class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Tanggal</p>
                             <p class="text-sm font-bold text-slate-700"><?php echo e(\Carbon\Carbon::now()->translatedFormat('d M Y')); ?></p>
                         </div>
 
+                        <!-- Dropdown User -->
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="flex items-center gap-3 focus:outline-none group">
                                 <div class="text-right hidden sm:block">
