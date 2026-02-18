@@ -10,7 +10,7 @@
     // 0  = Sesuai algoritma komputer
     // 1  = Ditambah 1 hari (Maju)
     // -1 = Dikurang 1 hari (Mundur)
-    $hijriOffset = 1; 
+    $hijriOffset = -1; 
 
     // Default Fallback
     $hijriString = 'Tanggal Hijriyah';
