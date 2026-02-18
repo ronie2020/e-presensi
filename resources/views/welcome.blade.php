@@ -23,7 +23,7 @@
             //'image' => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1000&auto=format&fit=crop',
             
             // Opsi 2 (File Lokal di folder public/img):
-            'image' => asset('images/ramadhan_netila.png'),
+            'image' => asset('images/ramadhan2.png'),
             
             'title' => 'PUASA RAMADHAN 2026',
             'message' => 'SMP Negeri 3 Lakbok Mengucapkan " Selamat Melaksanakan Ibadah Puasa Ramadhan tahun 1447 H 2026". Mohon Maaf lahir bathin, ',
