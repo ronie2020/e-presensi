@@ -171,14 +171,14 @@
                         <button @click="updateTab('ramadan_jurnal')" 
                                 class="w-full py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-[10px] font-bold shadow-md transition-all flex items-center justify-center gap-1.5 group/btn border border-emerald-500/50 hover:-translate-y-0.5">
                             <i class="ph-fill ph-moon-stars text-xs text-amber-300"></i>
-                            <span>{{ isset($todayRamadanLog) && $todayRamadanLog ? 'Lihat Ramadhan' : 'Isi Ramadhan' }}</span>
+                            <span>{{ isset($todayRamadanLog) && $todayRamadanLog ? 'Lihat Ramadhan' : 'Jurnal Ramadhan' }}</span>
                         </button>
 
                         {{-- 2. Jurnal 7 Kebiasaan --}}
                         <button @click="updateTab('kebiasaan')" 
                                 class="w-full py-2 rounded-xl bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-slate-600 hover:text-blue-700 text-[10px] font-bold shadow-sm transition-all flex items-center justify-center gap-1.5 hover:-translate-y-0.5">
                             <i class="ph-fill ph-sun-horizon text-xs {{ isset($todayEntry) && $todayEntry ? 'text-blue-500' : 'text-slate-400' }}"></i>
-                            <span>{{ isset($todayEntry) && $todayEntry ? 'Lihat Kebiasaan' : 'Isi Kebiasaan' }}</span>
+                            <span>{{ isset($todayEntry) && $todayEntry ? 'Lihat Kebiasaan' : 'Isi 7 Kebiasaan' }}</span>
                         </button>
 
                         {{-- 3. Jurnal Literasi --}}
