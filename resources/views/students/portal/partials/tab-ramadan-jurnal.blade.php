@@ -5,7 +5,7 @@
     {{-- 1. LOGIKA & KONFIGURASI PHP --}}
     @php
         // Menggunakan Config atau Default
-        $ramadanStartStr = config('school.ramadan_start', '2026-02-18');
+        $ramadanStartStr = config('school.ramadan_start', '2026-02-19');
         $startRamadan = \Carbon\Carbon::parse($ramadanStartStr); 
         $currentDate = \Carbon\Carbon::parse($today); 
         
