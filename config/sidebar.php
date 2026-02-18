@@ -364,7 +364,7 @@ return [
                 'name' => 'Data Pengguna',
                 'route' => 'users.index',
                 'icon' => 'ph-users',
-                'roles' => ['Admin', 'TU'] // Sangat Penting: Hanya Admin yang boleh akses ini
+                'roles' => ['Admin', 'TU', 'Kepala Sekolah', 'Guru'] // Sangat Penting: Hanya Admin yang boleh akses ini
             ],
             [
                 'name' => 'Jenis Pelanggaran',
