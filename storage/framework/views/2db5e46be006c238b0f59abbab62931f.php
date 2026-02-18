@@ -13,7 +13,7 @@
     <?php
         $infoPopup = [
             'active' => true, // Set false untuk mematikan popup
-            'id' => 'promo_ppdb_2026', // Ganti ID ini setiap ganti materi baru (agar muncul lagi di user yang sudah close)
+            'id' => 'Ramadhan_2026', // Ganti ID ini setiap ganti materi baru (agar muncul lagi di user yang sudah close)
             
             // --- CARA GANTI GAMBAR ---
             // Opsi 1 (Link Luar):
@@ -22,11 +22,11 @@
             // Opsi 2 (File Lokal di folder public/img):
             'image' => asset('images/netila.jpg'),
             
-            'title' => 'Penerimaan Peserta Didik Baru (PPDB) 2026',
-            'message' => 'Gelombang 1 telah dibuka! Segera daftarkan putra-putri Anda dan jadilah bagian dari keluarga besar SMP Negeri 3 Lakbok yang berprestasi dan berkarakter.',
-            'cta_text' => 'Daftar Sekarang',
-            'cta_link' => 'https://e-presensi.smpn3lakbok.sch.id/ppdb/register', // Bisa link ke section atau URL luar (google form)
-            'color' => 'blue' // Pilihan warna: blue, emerald, amber, rose
+            'title' => 'PUASA RAMADHAN 2026',
+            'message' => 'SMP Negeri 3 Lakbok Mengucapkan " Selamat Melaksanakan Ibadah Puasa Ramadhan tahun 1447 H 2026". Mohon Maaf lahir bathin, ',
+            'cta_text' => 'info jurnal siswa',
+            'cta_link' => 'https://e-presensi.smpn3lakbok.sch.id/portal', // Bisa link ke section atau URL luar (google form)
+            'color' => 'amber' // Pilihan warna: blue, emerald, amber, rose
         ];
     ?>
 </head>
