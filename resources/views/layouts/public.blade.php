@@ -10,6 +10,15 @@
     <!-- Meta Description (Optional via stack) -->
     @stack('meta')
 
+     <!-- PWA Meta Tags -->
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Netila">
+    <link rel="apple-touch-icon" href="{{ asset('images/icons/icon-192x192.png') }}">
+
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -21,7 +30,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>   
     
     <!-- Global Styles -->
     <style>
@@ -247,6 +256,21 @@
             duration: 800,
             easing: 'ease-out-cubic',
         });
+    </script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('PWA ServiceWorker terdaftar sukses dengan scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('PWA ServiceWorker gagal terdaftar: ', err);
+                    });
+            });
+        }
     </script>
     
     @stack('scripts')
