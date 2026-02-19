@@ -93,7 +93,47 @@
                             <button @click="open = !open" class="flex items-center gap-3 focus:outline-none group">
                                 <div class="text-right hidden sm:block">
                                     <p class="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors"><?php echo e(Auth::user()->name); ?></p>
-                                    <p class="text-xs text-slate-500 font-medium"><?php echo e(Auth::user()->role ?? 'Administrator'); ?></p>
+                                    
+                                    
+                                    <?php
+                                        $rawRole = Auth::user()->role;
+                                        $displayRoles = [];
+                                        
+                                        // 1. Cek tipe data role (bisa string JSON, string biasa, atau array)
+                                        if (is_string($rawRole)) {
+                                            $decoded = json_decode($rawRole, true);
+                                            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                                $displayRoles = $decoded; // Format baru JSON ["Guru", "Admin"]
+                                            } else {
+                                                $displayRoles = explode(',', $rawRole); // Format lama string "Guru,Admin"
+                                            }
+                                        } elseif (is_array($rawRole)) {
+                                            $displayRoles = $rawRole;
+                                        } else {
+                                            $displayRoles = [$rawRole ?? 'User'];
+                                        }
+
+                                        // 2. Bersihkan nilai kosong
+                                        $displayRoles = array_filter($displayRoles);
+
+                                        // 3. Ambil role utama (pertama) dan hitung sisanya
+                                        $mainRole = $displayRoles[0] ?? '-';
+                                        $extraRolesCount = count($displayRoles) - 1;
+                                    ?>
+
+                                    <div class="flex items-center justify-end gap-1 mt-0.5">
+                                        <p class="text-xs text-slate-500 font-medium"><?php echo e($mainRole); ?></p>
+                                        
+                                        <?php if($extraRolesCount > 0): ?>
+                                            <span class="inline-flex items-center justify-center bg-blue-100 text-blue-600 text-[9px] font-bold px-1.5 py-0.5 rounded leading-none" 
+                                                  title="<?php echo e(implode(', ', array_slice($displayRoles, 1))); ?>">
+                                                +<?php echo e($extraRolesCount); ?>
+
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+
                                 </div>
                                 <div class="h-10 w-10 rounded-full bg-blue-50 border-2 border-white shadow-md flex items-center justify-center text-blue-600 font-bold text-lg overflow-hidden shrink-0 ring-2 ring-transparent group-hover:ring-blue-100 transition-all">
                                     <?php if(Auth::user()->photo_path): ?>

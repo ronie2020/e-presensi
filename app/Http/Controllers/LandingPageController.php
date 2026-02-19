@@ -19,7 +19,7 @@ use App\Models\LmsMaterial;
 use App\Models\LmsAssignment;
 use App\Models\AlumniProfile; 
 use App\Models\StudentHabit; 
-use App\Models\Book; // Pastikan Model Book di-import
+use App\Models\Book; 
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -146,13 +146,21 @@ class LandingPageController extends Controller
         ];
 
         // --- 5. CACHE STATISTIK ---
-        $schoolStats = Cache::remember('school_profile_stats_v2', 60 * 60, function () {
+        $schoolStats = Cache::remember('school_profile_stats_v3', 60 * 60, function () {
             $materiCount = class_exists('App\Models\LmsMaterial') ? \App\Models\LmsMaterial::count() : 0;
             $tugasCount = class_exists('App\Models\LmsAssignment') ? \App\Models\LmsAssignment::count() : 0;
             
+            // [FIXED] Menghitung Guru dengan support format JSON
+            $guruCount = User::where(function($query) {
+                $roles = ['Guru', 'Kepala Sekolah'];
+                foreach ($roles as $role) {
+                    $query->orWhere('role', 'LIKE', '%' . $role . '%');
+                }
+            })->count();
+
             return [
                 'siswa' => Student::where('status', '!=', 'graduated')->count(),
-                'guru'  => User::whereIn('role', ['Guru', 'Kepala Sekolah'])->count(),
+                'guru'  => $guruCount,
                 'rombel'=> SchoolClass::count(),
                 'materi'=> $materiCount,
                 'tugas' => $tugasCount,
@@ -160,11 +168,21 @@ class LandingPageController extends Controller
         });
 
         // --- 6. DATA LAINNYA ---
+        // [FIXED] Mengambil guru untuk highlight di homepage dengan support JSON
+        $teachers = User::where(function($query) {
+                $roles = ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'];
+                foreach ($roles as $role) {
+                    $query->orWhere('role', 'LIKE', '%' . $role . '%');
+                }
+            })
+            ->latest()
+            ->take(8)
+            ->get();
+
         $announcements = Announcement::orderBy('created_at', 'desc')->limit(3)->get();
         $achievements = Achievement::with('student')->orderBy('date', 'desc')->limit(6)->get();
         $activities = SchoolActivity::latest()->take(3)->get();
         $agendas = Agenda::where('event_date', '>=', now()->subDays(1))->orderBy('event_date', 'asc')->limit(4)->get();
-        $teachers = User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'])->latest()->take(8)->get();
         
         $guestbooks = GuestBook::latest()->take(3)->get();
         $allGuestbooks = GuestBook::latest()->take(50)->get();
@@ -192,7 +210,6 @@ class LandingPageController extends Controller
         $latestBooks = collect([]);
         if (class_exists(Book::class)) {
             try {
-                // Ambil 4 buku terbaru yang memiliki file ebook
                 $latestBooks = Book::whereNotNull('ebook_path')
                                 ->latest()
                                 ->take(4)
@@ -238,11 +255,23 @@ class LandingPageController extends Controller
     public function teachers(Request $request)
     {
         $search = $request->input('q');
-        $query = User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket']);
+        
+        // [FIXED] Menggunakan Group Where & LIKE untuk mengakomodir format JSON ["Guru"] maupun String biasa "Guru"
+        $query = User::where(function($q) {
+            $roles = ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'];
+            foreach ($roles as $role) {
+                // LIKE '%Guru%' akan cocok dengan "Guru" maupun "[\"Guru\", \"Admin\"]"
+                $q->orWhere('role', 'LIKE', '%' . $role . '%');
+            }
+        });
+
         if ($search) {
-            $query->where('name', 'like', "%{$search}%")
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
                   ->orWhere('position', 'like', "%{$search}%");
+            });
         }
+
         $teachers = $query->orderBy('name', 'asc')->paginate(12);
         return view('teachers', compact('teachers'));
     }
