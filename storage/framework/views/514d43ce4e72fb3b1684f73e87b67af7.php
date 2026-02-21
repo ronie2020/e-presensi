@@ -58,7 +58,8 @@
             questions: <?php echo json_encode($questions, 15, 512) ?>, 
             timeLeft: <?php echo e($timeLeft ?? 0); ?>, 
             sessionId: <?php echo e($sessionId); ?>, 
-            examId: <?php echo e($exam->id); ?> 
+            examId: <?php echo e($exam->id); ?>,
+            totalDuration: <?php echo e(($exam->duration_minutes ?? 0) * 60); ?> // PENGEMBANGAN: Tambahkan total durasi dlm detik
         };
 
         window.examApp = function() {
@@ -66,6 +67,7 @@
                 // --- STATE VARIABLES ---
                 questions: window.examData.questions || [],
                 timeLeft: window.examData.timeLeft,
+                totalDuration: window.examData.totalDuration, // PENGEMBANGAN: Daftarkan ke state
                 sessionId: window.examData.sessionId,
                 examId: window.examData.examId,
                 currentQuestion: 0,
@@ -341,6 +343,25 @@
                 },
 
                 finishExam() {
+                    // PENGEMBANGAN: Pengecekan Waktu Minimal (Setengah Waktu)
+                    const halfTime = this.totalDuration / 2;
+                    if (this.timeLeft > halfTime) {
+                        const waitSec = Math.floor(this.timeLeft - halfTime);
+                        const m = Math.floor(waitSec / 60);
+                        const s = waitSec % 60;
+                        let waitText = (m > 0 ? m + " menit " : "") + s + " detik";
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Waktu Minimal Belum Tercapai!',
+                            html: `Sistem mengunci pengumpulan jawaban karena Anda belum mengerjakan soal selama minimal setengah dari durasi ujian.<br><br>Anda baru bisa mengumpulkan jawaban dalam <b class='text-rose-600'>${waitText}</b> lagi. Silakan periksa kembali jawaban Anda!`,
+                            confirmButtonText: '<i class="ph-bold ph-arrow-u-up-left"></i> Kembali Mengerjakan',
+                            confirmButtonColor: '#0f172a',
+                            customClass: { popup: 'rounded-[2rem]' }
+                        });
+                        return; // Hentikan fungsi di sini, jangan tampilkan konfirmasi kumpulkan
+                    }
+
                     const remaining = this.totalQuestions - this.answeredCount;
                     
                     let htmlContent = remaining > 0 ? `Masih ada <b class='text-rose-600'>${remaining}</b> soal kosong.` : "Pastikan semua jawaban sudah benar.";
@@ -719,9 +740,12 @@
                             <span class="hidden sm:inline">Selanjutnya</span> <i class="ph-bold ph-arrow-right"></i>
                         </button>
                         
+                        
                         <button @click="finishExam" x-show="currentQuestion === totalQuestions - 1" 
-                                class="px-6 py-3 rounded-xl font-bold bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/30 flex items-center gap-2 transition-all active:scale-95">
-                            <span>Kumpulkan</span> <i class="ph-bold ph-check-circle"></i>
+                                class="px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2 transition-all active:scale-95"
+                                :class="timeLeft > (totalDuration / 2) ? 'bg-slate-200 text-slate-400 hover:bg-slate-300' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-900/30'">
+                            <span>Kumpulkan</span> 
+                            <i class="ph-bold" :class="timeLeft > (totalDuration / 2) ? 'ph-lock' : 'ph-check-circle'"></i>
                         </button>
                     </div>
                 </div>
@@ -779,8 +803,13 @@
                     <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-400"></span> Ragu</div>
                     <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full border-2 border-slate-900"></span> Aktif</div>
                 </div>
-                <button @click="finishExam()" class="w-full py-3.5 rounded-xl bg-slate-900 text-white font-bold shadow-lg hover:shadow-xl hover:bg-slate-800 transition-all active:scale-95 flex items-center justify-center gap-2">
-                    <i class="ph-bold ph-paper-plane-right"></i> Kumpulkan Jawaban
+                
+                
+                <button @click="finishExam()" 
+                        class="w-full py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+                        :class="timeLeft > (totalDuration / 2) ? 'bg-slate-200 text-slate-400 hover:bg-slate-300' : 'bg-slate-900 text-white hover:shadow-xl hover:bg-slate-800'">
+                    <i class="ph-bold" :class="timeLeft > (totalDuration / 2) ? 'ph-lock' : 'ph-paper-plane-right'"></i> 
+                    <span x-text="timeLeft > (totalDuration / 2) ? 'Terkunci (Waktu Minimal)' : 'Kumpulkan Jawaban'"></span>
                 </button>
             </div>
         </aside>
