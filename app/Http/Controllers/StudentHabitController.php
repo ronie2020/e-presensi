@@ -208,8 +208,18 @@ class StudentHabitController extends Controller
                 ]
             );
 
-            // 2. SINKRONISASI KE RAMADAN (Jika sedang bulan Ramadan)
+           // 2. SINKRONISASI KE RAMADAN (Jika sedang bulan Ramadan)
             $ramadanLog = RamadanLog::where('student_id', $studentId)->whereDate('date', $today)->first();
+            
+            // Format tilawah/tadarus dari input ODOA Kebiasaan
+            $tadarusText = null;
+            if ($request->odoa_surah) {
+                $tadarusText = $request->odoa_surah;
+                if ($request->odoa_ayat) {
+                    $tadarusText .= ' Ayat ' . $request->odoa_ayat;
+                }
+            }
+
             RamadanLog::updateOrCreate(
                 ['student_id' => $studentId, 'date' => $today],
                 [                    
@@ -223,7 +233,8 @@ class StudentHabitController extends Controller
                     ],                    
                     'sunnah_deeds' => array_merge($ramadanLog->sunnah_deeds ?? [], [
                         'dhuha' => $valDhuha
-                    ])
+                    ]),
+                    'tadarus_surah' => $tadarusText ?: ($ramadanLog->tadarus_surah ?? null)
                 ]
             );
 

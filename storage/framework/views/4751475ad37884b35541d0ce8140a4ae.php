@@ -66,18 +66,31 @@
                         return $s->id == Auth::guard('student')->id();
                     });
                     $myScore = $topRamadanStudents->where('id', Auth::guard('student')->id())->first()->ramadan_points ?? 0;
+                    
+                    // Ambil kembali Poin Kebiasaan Lama (Jika $totalPoints tidak ada di compact, hitung dari jumlah habit)
+                    $regularPoints = isset($totalPoints) ? $totalPoints : ($habits->count() * 100);
                 ?>
-                <div class="bg-white/10 backdrop-blur-md border border-white/10 p-5 rounded-2xl min-w-[160px] text-center">
-                    <p class="text-xs font-bold text-emerald-200 uppercase tracking-wider mb-1">Poin Saya</p>
-                    <div class="text-4xl font-black text-white mb-1"><?php echo e(number_format($myScore)); ?></div>
-                    <?php if($myRank !== false): ?>
-                        <div class="inline-block px-2 py-0.5 rounded bg-emerald-500 text-white text-[10px] font-bold">
-                            Peringkat #<?php echo e($myRank + 1); ?>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    
+                    <div class="bg-white/10 backdrop-blur-md border border-white/10 p-4 rounded-2xl min-w-[130px] text-center">
+                        <p class="text-[10px] font-bold text-amber-300 uppercase tracking-wider mb-1">Poin Ramadhan</p>
+                        <div class="text-3xl font-black text-white mb-1"><?php echo e(number_format($myScore)); ?></div>
+                        <?php if($myRank !== false): ?>
+                            <div class="inline-block px-2 py-0.5 rounded bg-amber-500 text-amber-900 text-[10px] font-bold">
+                                Peringkat #<?php echo e($myRank + 1); ?>
 
-                        </div>
-                    <?php else: ?>
-                        <div class="text-[10px] text-white/60">Belum masuk Top 10</div>
-                    <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="text-[10px] text-white/60">Belum masuk Top 10</div>
+                        <?php endif; ?>
+                    </div>
+
+                    
+                    <div class="bg-black/20 backdrop-blur-md border border-white/5 p-4 rounded-2xl min-w-[130px] text-center">
+                        <p class="text-[10px] font-bold text-emerald-200 uppercase tracking-wider mb-1">Total Kebaikan</p>
+                        <div class="text-3xl font-black text-white mb-1"><?php echo e(number_format($regularPoints)); ?></div>
+                        <div class="text-[10px] text-emerald-100/70 mt-1">Akumulasi Selamanya</div>
+                    </div>
                 </div>
             </div>
         </div>
