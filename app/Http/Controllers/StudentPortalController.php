@@ -156,10 +156,10 @@ class StudentPortalController extends Controller
                             ->orderBy('date', 'desc')
                             ->first();
 
-        // LEADERBOARD LOGIC (SUPER CEPAT)
+        // LEADERBOARD LOGIC (SUPER CEPAT) - FILTER DIHAPUS AGAR SEMUA MUNCUL
         $topRamadanStudents = Student::with('schoolClass')
             ->whereHas('schoolClass')
-            ->where('ramadan_points', '>', 0)
+            // ->where('ramadan_points', '>', 0) // <--- DIHAPUS
             ->orderByDesc('ramadan_points')
             ->take(10)
             ->get();
