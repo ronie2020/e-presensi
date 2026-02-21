@@ -14,6 +14,9 @@
     {{-- FIX SEB: Async scripts agar tidak memblokir render --}}
     <script src="https://unpkg.com/@phosphor-icons/web" async></script>
     
+    {{-- PENGEMBANGAN: Tambahkan SweetAlert2 untuk Alert Fungsional --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     {{-- 
         FIX HOSTING:
         Pastikan folder 'public/build' sudah ada di hosting (via git pull atau upload manual).
@@ -46,10 +49,10 @@
                         @endif
                     </div>
 
-                    <!-- Tombol Logout -->
-                    <form method="POST" action="{{ route('student.logout') }}">
+                    <!-- Tombol Logout (Diubah menggunakan fungsi JS konfirmasi) -->
+                    <form id="logoutForm" method="POST" action="{{ route('student.logout') }}">
                         @csrf
-                        <button type="submit" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-lg shadow-rose-900/20">
+                        <button type="button" onclick="confirmLogout()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-lg shadow-rose-900/20 active:scale-95">
                             <i class="ph-bold ph-sign-out text-lg"></i>
                             <span class="hidden sm:inline">Keluar</span>
                         </button>
@@ -79,5 +82,80 @@
         </main>
     </div>
 
+    {{-- SCRIPTS UNTUK ALERT FUNGSIONAL --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // 1. Setup SweetAlert Toast untuk Notifikasi Global (Mirip Notifikasi HP)
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true,
+                customClass: {
+                    popup: 'rounded-2xl shadow-xl border border-slate-100 mt-20' // mt-20 agar tidak tertutup navbar fixed
+                },
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            // Tangkap Session Flash dari Laravel Controller lalu ubah jadi Toast Interaktif
+            @if(session('success'))
+                Toast.fire({ icon: 'success', title: '{!! session('success') !!}' });
+            @endif
+
+            @if(session('error'))
+                Toast.fire({ icon: 'error', title: '{!! session('error') !!}' });
+            @endif
+            
+            @if(session('warning'))
+                Toast.fire({ icon: 'warning', title: '{!! session('warning') !!}' });
+            @endif
+            
+            @if(session('info'))
+                Toast.fire({ icon: 'info', title: '{!! session('info') !!}' });
+            @endif
+        });
+
+        // 2. Fungsi Konfirmasi Logout Fungsional
+        function confirmLogout() {
+            Swal.fire({
+                title: 'Akhiri Sesi?',
+                text: "Anda akan keluar dari portal ujian. Pastikan semua ujian Anda telah selesai dikumpulkan.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48', // Warna Rose/Merah
+                cancelButtonColor: '#64748b', // Warna Slate/Abu-abu
+                confirmButtonText: 'Ya, Keluar',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    popup: 'rounded-[2rem]',
+                    confirmButton: 'rounded-xl font-bold px-6 py-3',
+                    cancelButton: 'rounded-xl font-bold px-6 py-3'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Tampilkan loading kecil saat memproses logout
+                    Swal.fire({
+                        title: 'Memproses...',
+                        text: 'Sedang mengeluarkan akun Anda',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading()
+                        },
+                        customClass: {
+                            popup: 'rounded-[2rem]'
+                        }
+                    });
+                    
+                    // Submit form logout
+                    document.getElementById('logoutForm').submit();
+                }
+            });
+        }
+    </script>
 </body>
 </html>

@@ -31,10 +31,11 @@
         }
     </style>
 
-    <div class="min-h-screen flex items-center justify-center p-4 bg-slate-50 bg-pattern" x-data="{ isSeb: navigator.userAgent.includes('SEB') }">
+    
+    <div class="min-h-screen flex items-center justify-center p-4 bg-slate-50 bg-pattern" x-data="{ isSeb: navigator.userAgent.includes('SEB'), isSubmitting: false, formToken: '' }">
         
         
-        <div class="max-w-xl w-full bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200 border border-white overflow-hidden relative transform transition-all">
+        <div class="max-w-xl w-full bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200 border border-white overflow-hidden relative transform transition-all my-8">
             
             
             <div class="bg-slate-900 p-10 text-center relative overflow-hidden group">
@@ -56,12 +57,9 @@
 
                 
                 <div class="absolute top-6 right-6 z-20">
-                    
-                    <span x-show="isSeb" class="bg-emerald-500/20 text-emerald-300 text-[10px] font-black px-3 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1 uppercase tracking-wide backdrop-blur-md shadow-sm ring-animate text-emerald-400">
+                    <span x-show="isSeb" class="bg-emerald-500/20 text-emerald-300 text-[10px] font-black px-3 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1 uppercase tracking-wide backdrop-blur-md shadow-sm ring-animate text-emerald-400" x-cloak>
                         <i class="ph-fill ph-shield-check"></i> Terproteksi SEB
                     </span>
-
-                    
                     <span x-show="!isSeb" class="bg-amber-500/20 text-amber-300 text-[10px] font-black px-3 py-1 rounded-full border border-amber-500/30 flex items-center gap-1 uppercase tracking-wide backdrop-blur-md shadow-sm" title="Akses via Browser Biasa">
                         <i class="ph-fill ph-warning-circle"></i> Browser Biasa
                     </span>
@@ -71,7 +69,7 @@
             <div class="p-8 md:p-10">
                 
                 
-                <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="grid grid-cols-2 gap-4 mb-6">
                     <div class="p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100 text-center hover:bg-slate-100 transition-colors">
                         <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto mb-2 text-rose-500 text-xl border border-slate-100">
                             <i class="ph-fill ph-timer"></i>
@@ -89,7 +87,22 @@
                 </div>
 
                 
-                <div x-show="!isSeb" class="bg-rose-50 border border-rose-100 rounded-2xl p-5 mb-6 flex gap-4 items-start animate-pulse">
+                <div class="bg-blue-50/50 border border-blue-100 rounded-[1.5rem] p-5 mb-8">
+                    <h4 class="font-black text-blue-900 text-sm mb-3 flex items-center gap-2"><i class="ph-fill ph-info text-blue-500"></i> Tata Tertib Sistem</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-3">
+                            <i class="ph-fill ph-webcam text-blue-500 mt-0.5"></i>
+                            <p class="text-xs text-blue-800 font-medium leading-relaxed"><b>Kamera Aktif:</b> Sistem akan memantau dan mengambil foto secara berkala selama ujian berlangsung.</p>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="ph-fill ph-tabs text-rose-500 mt-0.5"></i>
+                            <p class="text-xs text-rose-800 font-medium leading-relaxed"><b>Anti-Kecurangan:</b> Dilarang keras berpindah tab browser, minimize layar, atau membuka aplikasi lain. Pelanggaran akan menghentikan ujian otomatis.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                
+                <div x-show="!isSeb" class="bg-rose-50 border border-rose-100 rounded-2xl p-5 mb-6 flex gap-4 items-start" x-cloak>
                     <div class="shrink-0 mt-0.5 bg-rose-100 text-rose-600 rounded-lg w-8 h-8 flex items-center justify-center">
                         <i class="ph-bold ph-warning"></i>
                     </div>
@@ -102,15 +115,19 @@
                 </div>
 
                 
-                <form action="<?php echo e(route('student.exam.start', $exam->id)); ?>" method="POST">
+                <form action="<?php echo e(route('student.exam.start', $exam->id)); ?>" method="POST" 
+                      @submit="isSubmitting = true; try { document.documentElement.requestFullscreen() } catch(e) {}">
                     <?php echo csrf_field(); ?>
                     
                     <?php if($exam->token): ?>
                         <div class="mb-8">
                             <label class="block text-center text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Masukkan Token Ujian</label>
                             <div class="relative max-w-[200px] mx-auto group">
+                                
                                 <input type="text" name="token" required 
-                                    class="w-full rounded-2xl border-2 border-slate-200 shadow-sm focus:ring-4 focus:ring-rose-100 focus:border-rose-500 text-center text-3xl font-black tracking-[0.2em] p-4 text-slate-800 placeholder-slate-200 uppercase transition-all outline-none" 
+                                    x-model="formToken"
+                                    @input="formToken = $event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')"
+                                    class="w-full rounded-2xl border-2 border-slate-200 shadow-sm focus:ring-4 focus:ring-rose-100 focus:border-rose-500 text-center text-3xl font-black tracking-[0.2em] p-4 text-slate-800 placeholder-slate-200 transition-all outline-none" 
                                     placeholder="TOKEN" autocomplete="off" maxlength="6">
                                 
                                 <?php if($errors->has('token')): ?>
@@ -123,7 +140,7 @@
                                 <?php endif; ?>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-4 text-center font-bold bg-slate-50 inline-block px-3 py-1 rounded-lg border border-slate-100 mx-auto block w-fit">
-                                <i class="ph-fill ph-key"></i> Token dari Pengawas
+                                <i class="ph-fill ph-key"></i> Dapatkan Token dari Pengawas
                             </p>
                         </div>
                     <?php else: ?>
@@ -136,13 +153,23 @@
                     <?php endif; ?>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-slate-100">
-                        <a href="<?php echo e(route('student.exam.index')); ?>" class="py-3.5 px-6 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold text-sm transition-colors text-center order-2 sm:order-1">
-                            Batal
+                        <a href="<?php echo e(route('student.exam.index')); ?>" :class="{ 'opacity-50 pointer-events-none': isSubmitting }" class="py-3.5 px-6 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold text-sm transition-colors text-center order-2 sm:order-1">
+                            Kembali
                         </a>
 
-                        <button type="submit" class="py-3.5 px-6 bg-slate-900 text-white rounded-xl font-bold hover:bg-rose-600 shadow-lg shadow-slate-900/20 hover:shadow-rose-600/30 transition-all transform active:scale-95 flex items-center justify-center gap-2 order-1 sm:order-2">
-                            <span>Mulai Mengerjakan</span> 
-                            <i class="ph-bold ph-arrow-right"></i>
+                        <button type="submit" :disabled="isSubmitting" :class="{ 'opacity-70 cursor-not-allowed': isSubmitting }" class="py-3.5 px-6 bg-slate-900 text-white rounded-xl font-bold hover:bg-rose-600 shadow-lg shadow-slate-900/20 hover:shadow-rose-600/30 transition-all transform active:scale-95 flex items-center justify-center gap-2 order-1 sm:order-2">
+                            <template x-if="!isSubmitting">
+                                <div class="flex items-center gap-2">
+                                    <span>Mulai Ujian</span> 
+                                    <i class="ph-bold ph-arrow-right"></i>
+                                </div>
+                            </template>
+                            <template x-if="isSubmitting">
+                                <div class="flex items-center gap-2">
+                                    <i class="ph-bold ph-spinner animate-spin"></i>
+                                    <span>Memproses...</span>
+                                </div>
+                            </template>
                         </button>
                     </div>
                 </form>

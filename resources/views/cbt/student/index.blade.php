@@ -6,7 +6,8 @@
     .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 </style>
 
-<div class="min-h-screen bg-slate-50/50 pb-20">
+{{-- PENGEMBANGAN: Tambahkan x-data AlpineJS di container utama untuk state Pencarian & Filter --}}
+<div class="min-h-screen bg-slate-50/50 pb-20" x-data="{ searchQuery: '', activeFilter: 'all' }">
     
     <!-- HEADER SECTION -->
     <div class="animate-enter relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 pb-24 pt-12 px-4 sm:px-6 lg:px-8 overflow-hidden rounded-b-[3rem] shadow-2xl shadow-slate-900/20">
@@ -29,18 +30,16 @@
                     </p>
                 </div>
                 
-                <!-- Statistik Real (Diperbaiki) -->
+                <!-- Statistik Real -->
                 <div class="flex gap-4">
                     <div class="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-2xl text-center min-w-[110px] shadow-lg">
                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Tersedia</p>
-                        {{-- Hitung yang statusnya 'open' atau 'ongoing' --}}
                         <p class="text-3xl font-black text-yellow-400">
                             {{ isset($exams) ? $exams->filter(fn($e) => in_array($e->student_status, ['open', 'ongoing']))->count() : 0 }}
                         </p>
                     </div>
                     <div class="bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-2xl text-center min-w-[110px] shadow-lg">
                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Selesai</p>
-                        {{-- Hitung yang statusnya 'finished' --}}
                         <p class="text-3xl font-black text-white">
                             {{ isset($exams) ? $exams->where('student_status', 'finished')->count() : 0 }}
                         </p>
@@ -68,6 +67,26 @@
             </div>
         @endif
 
+        @if(isset($exams) && $exams->isNotEmpty())
+            <!-- PENGEMBANGAN: TOOLBAR SEARCH & FILTER -->
+            <div class="animate-enter bg-white p-4 rounded-[2rem] shadow-lg shadow-slate-200/50 border border-slate-100 mb-8 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                <!-- Tabs Filter -->
+                <div class="flex p-1 bg-slate-100 rounded-xl gap-1 w-full sm:w-auto overflow-x-auto">
+                    <button @click="activeFilter = 'all'" :class="activeFilter === 'all' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">Semua</button>
+                    <button @click="activeFilter = 'active'" :class="activeFilter === 'active' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">Tersedia</button>
+                    <button @click="activeFilter = 'finished'" :class="activeFilter === 'finished' ? 'bg-white shadow-sm text-emerald-600' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">Selesai</button>
+                </div>
+
+                <!-- Search Input -->
+                <div class="relative w-full sm:w-72 group">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                        <i class="ph-bold ph-magnifying-glass"></i>
+                    </div>
+                    <input x-model="searchQuery" type="text" class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-slate-50 text-sm focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-medium placeholder-slate-400" placeholder="Cari pelajaran atau ujian...">
+                </div>
+            </div>
+        @endif
+
         @if(!isset($exams) || $exams->isEmpty())
             <!-- STATE KOSONG -->
             <div class="animate-enter bg-white rounded-[2.5rem] p-12 text-center border border-slate-200 shadow-xl shadow-slate-200/50" style="animation-delay: 100ms">
@@ -82,12 +101,10 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 @foreach($exams as $index => $examItem)
                     @php
-                        // Logika Status Real dari Controller
-                        $status = $examItem->student_status; // values: upcoming, open, ongoing, finished
-                        
-                        // Mapping Tampilan
+                        $status = $examItem->student_status;
                         $statusLabel = 'Tersedia';
                         $statusClass = 'bg-blue-50 text-blue-600 border-blue-100';
+                        $filterCategory = in_array($status, ['open', 'ongoing']) ? 'active' : $status;
                         
                         if($status == 'finished') {
                             $statusLabel = 'Selesai';
@@ -98,14 +115,19 @@
                         } elseif($status == 'upcoming') {
                             $statusLabel = 'Belum Mulai';
                             $statusClass = 'bg-slate-100 text-slate-500 border-slate-200';
+                            $filterCategory = 'upcoming';
                         }
                     @endphp
 
-                    <div class="animate-enter group bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 hover:border-blue-200 transition-all duration-300 overflow-hidden flex flex-col h-full hover:-translate-y-1" style="animation-delay: {{ ($index + 1) * 100 }}ms">
+                    <!-- PENGEMBANGAN: Implementasi x-show AlpineJS untuk filter dan pencarian -->
+                    <div x-show="(activeFilter === 'all' || activeFilter === '{{ $filterCategory }}') && 
+                                 ('{{ strtolower(addslashes($examItem->title)) }}'.includes(searchQuery.toLowerCase()) || 
+                                  '{{ strtolower(addslashes($examItem->subject_name)) }}'.includes(searchQuery.toLowerCase()))"
+                         x-transition.duration.300ms
+                         class="animate-enter group bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 hover:border-blue-200 transition-all duration-300 overflow-hidden flex flex-col h-full hover:-translate-y-1" style="animation-delay: {{ ($index + 1) * 100 }}ms">
                         
                         <!-- Header Card -->
                         <div class="p-6 md:p-7 relative overflow-hidden">
-                            <!-- Background Decoration -->
                             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-bl-[3rem] -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
                             
                             <div class="relative z-10 flex justify-between items-start mb-5">
@@ -151,7 +173,6 @@
                                     </p>
                                 </div>
                                 
-                                {{-- Jika selesai, tampilkan nilai (Opsional, jika ingin ditampilkan) --}}
                                 @if($status == 'finished')
                                 <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
                                     <p class="text-[10px] uppercase font-bold text-emerald-600 mb-1">Nilai Anda</p>
@@ -172,8 +193,8 @@
                             </div>
                         </div>
 
-                        <!-- Footer Action -->
-                        <div class="p-4 bg-slate-50 border-t border-slate-100">
+                        <!-- Footer Action (Ditambahkan AlpineJS state onClick loading effect) -->
+                        <div class="p-4 bg-slate-50 border-t border-slate-100" x-data="{ isNavigating: false }">
                             @if($status == 'finished')
                                 <button disabled class="w-full py-3.5 rounded-xl bg-slate-200 text-slate-400 font-bold text-sm cursor-not-allowed flex items-center justify-center gap-2">
                                     <i class="ph-fill ph-check-circle"></i> Sudah Dikerjakan
@@ -183,15 +204,35 @@
                                     <i class="ph-bold ph-lock-key"></i> Belum Dibuka
                                 </button>
                             @elseif($status == 'ongoing')
-                                <a href="{{ route('student.exam.run', $examItem->id) }}" class="w-full py-3.5 rounded-xl bg-amber-500 text-white font-bold text-sm shadow-lg shadow-amber-500/20 hover:bg-amber-600 hover:shadow-amber-600/30 transition-all flex items-center justify-center gap-2 group/btn relative overflow-hidden">
-                                    <span class="relative z-10">Lanjutkan Mengerjakan</span>
-                                    <i class="ph-bold ph-arrow-right relative z-10 group-hover/btn:translate-x-1 transition-transform"></i>
+                                <a href="{{ route('student.exam.run', $examItem->id) }}" @click="isNavigating = true" class="w-full py-3.5 rounded-xl bg-amber-500 text-white font-bold text-sm shadow-lg shadow-amber-500/20 hover:bg-amber-600 transition-all flex items-center justify-center gap-2 group/btn relative overflow-hidden">
+                                    <template x-if="!isNavigating">
+                                        <div class="flex items-center gap-2">
+                                            <span>Lanjutkan Mengerjakan</span>
+                                            <i class="ph-bold ph-arrow-right group-hover/btn:translate-x-1 transition-transform"></i>
+                                        </div>
+                                    </template>
+                                    <template x-if="isNavigating">
+                                        <div class="flex items-center gap-2">
+                                            <i class="ph-bold ph-spinner animate-spin"></i>
+                                            <span>Memuat Ujian...</span>
+                                        </div>
+                                    </template>
                                 </a>
                             @else
                                 {{-- Status: Open --}}
-                                <a href="{{ route('student.exam.show', $examItem->id) }}" class="w-full py-3.5 rounded-xl bg-slate-900 text-white font-bold text-sm shadow-lg shadow-slate-900/20 hover:bg-blue-600 hover:shadow-blue-600/30 transition-all flex items-center justify-center gap-2 group/btn relative overflow-hidden">
-                                    <span class="relative z-10">Masuk Ruang Ujian</span>
-                                    <i class="ph-bold ph-arrow-right relative z-10 group-hover/btn:translate-x-1 transition-transform"></i>
+                                <a href="{{ route('student.exam.show', $examItem->id) }}" @click="isNavigating = true" class="w-full py-3.5 rounded-xl bg-slate-900 text-white font-bold text-sm shadow-lg shadow-slate-900/20 hover:bg-blue-600 transition-all flex items-center justify-center gap-2 group/btn relative overflow-hidden">
+                                    <template x-if="!isNavigating">
+                                        <div class="flex items-center gap-2 relative z-10">
+                                            <span>Masuk Ruang Ujian</span>
+                                            <i class="ph-bold ph-arrow-right group-hover/btn:translate-x-1 transition-transform"></i>
+                                        </div>
+                                    </template>
+                                    <template x-if="isNavigating">
+                                        <div class="flex items-center gap-2 relative z-10">
+                                            <i class="ph-bold ph-spinner animate-spin"></i>
+                                            <span>Menyiapkan Ruangan...</span>
+                                        </div>
+                                    </template>
                                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover/btn:animate-[shimmer_1.5s_infinite]"></div>
                                 </a>
                             @endif
@@ -199,6 +240,15 @@
 
                     </div>
                 @endforeach
+            </div>
+            
+            <!-- State Kosong jika hasil pencarian tidak ditemukan -->
+            <div x-show="!document.querySelectorAll('[x-show]:not([style*=\'display: none\'])').length" x-cloak class="animate-enter bg-white rounded-[2.5rem] p-12 text-center border border-slate-200 mt-6 shadow-sm">
+                <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+                    <i class="ph-duotone ph-magnifying-glass text-4xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800">Ujian Tidak Ditemukan</h3>
+                <p class="text-slate-500 text-sm mt-1">Coba gunakan kata kunci pencarian yang lain.</p>
             </div>
         @endif
     </div>

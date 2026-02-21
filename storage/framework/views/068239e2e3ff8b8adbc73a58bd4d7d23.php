@@ -15,7 +15,8 @@
         </h2>
      <?php $__env->endSlot(); ?>
 
-    <div class="py-8 sm:py-10 font-sans text-slate-800">
+    
+    <div class="py-8 sm:py-10 font-sans text-slate-800" x-data="{ search: '', filter: 'all' }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             
@@ -73,17 +74,36 @@
             </div>
 
             
-            <div class="flex items-center justify-between mb-6 px-2">
-                <h3 class="font-bold text-slate-800 text-xl flex items-center gap-2">
+            <div class="flex flex-col md:flex-row items-center justify-between mb-6 px-2 gap-4">
+                <h3 class="font-bold text-slate-800 text-xl flex items-center gap-2 shrink-0">
                     <div class="w-1.5 h-6 bg-blue-600 rounded-full"></div>
                     Daftar Ujian CBT
                 </h3>
+
+                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                    
+                    <div class="flex p-1 bg-white border border-slate-200 rounded-xl gap-1 shadow-sm overflow-x-auto">
+                        <button @click="filter = 'all'" :class="filter === 'all' ? 'bg-slate-100 text-blue-600' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">Semua</button>
+                        <button @click="filter = 'active'" :class="filter === 'active' ? 'bg-emerald-50 text-emerald-600' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">Aktif</button>
+                        <button @click="filter = 'inactive'" :class="filter === 'inactive' ? 'bg-slate-100 text-slate-600' : 'text-slate-500 hover:text-slate-700'" class="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap">Non-Aktif</button>
+                    </div>
+
+                    
+                    <div class="relative w-full sm:w-64 group">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
+                            <i class="ph-bold ph-magnifying-glass"></i>
+                        </div>
+                        <input x-model="search" type="text" class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-white text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-medium placeholder-slate-400 shadow-sm" placeholder="Cari jadwal ujian...">
+                    </div>
+                </div>
             </div>
 
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <?php $__empty_1 = true; $__currentLoopData = $exams; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $exam): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                    <div class="bg-white border border-slate-100 rounded-[2rem] p-6 hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-200 transition-all duration-300 group relative flex flex-col h-full">
+                    <div x-show="(filter === 'all' || (filter === 'active' && <?php echo e($exam->is_active ? 'true' : 'false'); ?>) || (filter === 'inactive' && <?php echo e(!$exam->is_active ? 'true' : 'false'); ?>)) && ('<?php echo e(strtolower(addslashes($exam->title))); ?>'.includes(search.toLowerCase()) || '<?php echo e(strtolower(addslashes($exam->subject_name))); ?>'.includes(search.toLowerCase()))"
+                         x-transition.duration.300ms
+                         class="bg-white border border-slate-100 rounded-[2rem] p-6 hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-200 transition-all duration-300 group relative flex flex-col h-full">
                         
                         <!-- Status Badge Overlay -->
                         <div class="absolute top-6 right-6">
@@ -145,7 +165,7 @@
                                 <i class="ph-bold ph-chart-bar text-lg mr-2"></i> Rekapitulasi & Export
                             </a>
 
-                            <!-- TOMBOL BARU: Test Config & Edit (Full Width) -->
+                            <!-- Tombol Test Config & Edit -->
                             <a href="<?php echo e(route('cbt.download_seb', $exam->id)); ?>" class="col-span-1 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 hover:text-blue-600 transition-all" title="Download Config SEB untuk Test">
                                 <i class="ph-bold ph-file-lock text-lg mr-2"></i> Test SEB
                             </a>
@@ -153,7 +173,7 @@
                                 <i class="ph-bold ph-pencil-simple text-lg mr-2 group-hover/edit:text-blue-600"></i> Edit
                             </a>
 
-                            <!-- Tombol Hapus (Full Width) -->
+                            <!-- Tombol Hapus -->
                             <button onclick="confirmDelete('<?php echo e($exam->id); ?>')" class="col-span-2 flex items-center justify-center p-2.5 bg-white border border-rose-100 text-rose-500 rounded-xl text-xs font-bold hover:bg-rose-500 hover:text-white hover:border-rose-500 transition-all mt-1">
                                 <i class="ph-bold ph-trash text-lg mr-2"></i> Hapus Jadwal
                             </button>
@@ -175,6 +195,15 @@
                         </a>
                     </div>
                 <?php endif; ?>
+
+                
+                <div x-show="document.querySelectorAll('[x-show]:not([style*=\'display: none\'])').length === 0" x-cloak class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12 bg-white rounded-[2rem] border border-slate-100 shadow-sm mt-4">
+                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+                        <i class="ph-duotone ph-magnifying-glass text-4xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">Ujian Tidak Ditemukan</h3>
+                    <p class="text-slate-500 text-sm mt-1">Coba gunakan kata kunci pencarian yang lain.</p>
+                </div>
             </div>
         </div>
     </div>

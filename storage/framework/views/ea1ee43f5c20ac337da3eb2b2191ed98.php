@@ -86,7 +86,9 @@
                                 <p class="text-xs text-amber-700 mb-3 leading-relaxed">
                                     Gunakan mode darurat via Chrome. Sistem akan mengawasi layar Anda. Jika berpindah tab/keluar, <b>ujian otomatis terkunci</b>.
                                 </p>
-                                <a href="<?php echo e($emergencyLink); ?>" onclick="return confirm('PERINGATAN KERAS:\n\nSistem pengawasan ketat akan aktif.\nJika Anda mencoba membuka WA, Google, atau Notifikasi, ujian akan langsung DIHENTIKAN.\n\nApakah Anda yakin ingin lanjut?')" 
+                                
+                                
+                                <a href="<?php echo e($emergencyLink); ?>" onclick="event.preventDefault(); confirmEmergencyMode('<?php echo e($emergencyLink); ?>')" 
                                    class="block w-full py-2.5 bg-white border border-amber-300 hover:bg-amber-100 text-amber-700 font-bold rounded-lg text-sm text-center transition shadow-sm">
                                     Masuk Mode Darurat (Tanpa Aplikasi)
                                 </a>
@@ -152,6 +154,43 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
+    // Fungsi SweetAlert untuk Konfirmasi Mode Darurat
+    function confirmEmergencyMode(url) {
+        Swal.fire({
+            title: 'PERINGATAN KERAS!',
+            html: '<div class="text-left text-sm mt-2 space-y-2"><p>Sistem pengawasan ketat akan aktif.</p><p>Jika Anda mencoba membuka <b class="text-rose-600">WA, Google, atau Notifikasi</b>, ujian akan langsung <b class="text-rose-600">DIHENTIKAN</b>.</p></div>',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e11d48', // Warna merah (rose-600) untuk aksi kritis
+            cancelButtonColor: '#64748b', // Warna abu-abu (slate-500) untuk batal
+            confirmButtonText: '<i class="ph-bold ph-check-circle"></i> Ya, Saya Paham',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'rounded-[2rem]',
+                confirmButton: 'rounded-xl font-bold px-6 py-3',
+                cancelButton: 'rounded-xl font-bold px-6 py-3'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Tampilkan loading kecil saat mengarahkan halaman
+                Swal.fire({
+                    title: 'Memproses...',
+                    text: 'Membuka Mode Darurat',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    },
+                    customClass: {
+                        popup: 'rounded-[2rem]'
+                    }
+                });
+                // Arahkan ke link darurat jika user menekan 'Ya'
+                window.location.href = url;
+            }
+        });
+    }
+
+    // Skrip QR Code
     document.addEventListener('DOMContentLoaded', function() {
         var deepLinkUrl = "<?php echo e($deepLink); ?>";
         var qrContainer = document.getElementById("qrcode");

@@ -585,6 +585,71 @@ class CbtController extends Controller
         
         return view('cbt.analysis', compact('exam', 'analysis', 'totalStudents'));
     }
+    
+    // print analisis
+    public function printAnalysis($id)
+    {
+        $exam = CbtExam::with('questions')->findOrFail($id);
+        $finishedSessionIds = DB::table('cbt_student_exams')
+            ->where('cbt_exam_id', $id)
+            ->where('status', 'finished')
+            ->pluck('id');
+        
+        $totalStudents = $finishedSessionIds->count();
+        $allAnswers = DB::table('cbt_student_answers')
+            ->whereIn('cbt_student_exam_id', $finishedSessionIds)
+            ->get()
+            ->groupBy('cbt_question_id'); 
+            
+        $analysis = $exam->questions->map(function($q) use ($allAnswers, $totalStudents) {
+            $answers = $allAnswers->get($q->id);
+            $stats = [
+                'id' => $q->id,
+                'type' => $q->question_type ?? 'choice', 
+                'text' => strip_tags($q->question_text), 
+                'correct_key' => $q->correct_answer,
+                'correct_count' => 0,
+                'wrong_count' => 0,
+                'options' => ['A'=>0, 'B'=>0, 'C'=>0, 'D'=>0, 'E'=>0]
+            ];
+            
+            if ($answers) {
+                foreach($answers as $ans) {
+                    if(in_array($stats['type'], ['choice', 'true_false'])) {
+                        $val = strtoupper($ans->answer);
+                        if(isset($stats['options'][$val])) $stats['options'][$val]++;
+                    }
+
+                    $isCorrect = false;
+                    
+                    if(isset($ans->score) && $ans->score > 0) {
+                        $isCorrect = true;
+                    } 
+                    elseif(strcasecmp($ans->answer, $q->correct_answer) == 0) {
+                        $isCorrect = true;
+                    }
+
+                    if($isCorrect) $stats['correct_count']++;
+                    else $stats['wrong_count']++;
+                }
+            }
+            
+            $p = $totalStudents > 0 ? ($stats['correct_count'] / $totalStudents) : 0;
+            $difficulty = 'Sedang';
+            $badgeColor = 'bg-blue-100 text-blue-700';
+            if ($p > 0.70) { $difficulty = 'Mudah'; $badgeColor = 'bg-emerald-100 text-emerald-700'; }
+            elseif ($p < 0.30) { $difficulty = 'Sukar'; $badgeColor = 'bg-rose-100 text-rose-700'; }
+            
+            $stats['difficulty_label'] = $difficulty;
+            $stats['difficulty_badge'] = $badgeColor;
+            $stats['difficulty_index'] = round($p * 100); 
+            
+            return (object) $stats;
+        });
+        
+        // Arahkan ke file view khusus print yang sudah kita buat
+        return view('cbt.analysis_pdf', compact('exam', 'analysis', 'totalStudents'));
+    }
 
     public function resultDetail($exam_id, $student_id)
     {

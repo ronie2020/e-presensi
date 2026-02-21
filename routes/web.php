@@ -335,6 +335,7 @@ Route::middleware('auth')->group(function () {
         // 4. REKAP & ANALISIS
         Route::get('/recap/{id}', [CbtController::class, 'recap'])->name('recap');
         Route::get('/analysis/{id}', [CbtController::class, 'analysis'])->name('analysis');
+        Route::get('/analysis/{id}/print', [CbtController::class, 'printAnalysis'])->name('analysis.print');
         Route::get('/recap/{exam}/{student}/detail', [CbtController::class, 'resultDetail'])->name('result.detail');
         Route::post('/recap/{id}/sync', [CbtController::class, 'syncToGradebook'])->name('sync_grades');
         Route::get('/export/{id}/{type}', [CbtController::class, 'export'])->name('export');
