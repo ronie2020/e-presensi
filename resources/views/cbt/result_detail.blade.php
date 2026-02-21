@@ -19,7 +19,7 @@
             <h2 class="font-semibold text-xl text-slate-800 leading-tight">
                 {{ __('Detail Hasil Ujian') }}
             </h2>
-            <button onclick="window.print()" class="text-sm font-bold text-slate-500 hover:text-blue-600 flex items-center gap-2 transition">
+            <button onclick="window.print()" class="text-sm font-bold text-slate-500 hover:text-blue-600 flex items-center gap-2 transition bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
                 <i class="ph-bold ph-printer text-lg"></i> Cetak Hasil
             </button>
         </div>
@@ -85,29 +85,38 @@
                     @php
                         // Deteksi Tipe & Data
                         $qType = $item->question_type ?? 'choice';
-                        $studentAns = $item->student_answer;
-                        $correctAns = $item->correct_answer;
-                        
-                        // Nilai tersimpan di database (dari query controller baru)
-                        $currentScore = $item->score ?? 0;
+                        $studentAns = trim($item->student_answer ?? '');
+                        $correctAns = trim($item->correct_answer ?? '');
                         
                         $isSkipped = is_null($studentAns) || $studentAns === '';
                         $isCorrect = false;
 
+                        // 1. Evaluasi Kebenaran Jawaban
                         if ($qType == 'choice' || $qType == 'true_false') {
-                            $isCorrect = strtoupper($studentAns) == strtoupper($correctAns);
+                            $isCorrect = strtoupper($studentAns) === strtoupper($correctAns);
                         } elseif ($qType == 'matching') {
-                            $isCorrect = $studentAns == $correctAns;
-                        } elseif ($qType == 'essay') {
-                            // Untuk Essai, status "Benar" secara visual jika skor > 0
-                            $isCorrect = $currentScore > 0;
+                            $keyMap = json_decode($correctAns, true) ?? [];
+                            $studentMap = json_decode($studentAns, true) ?? [];
+                            if (is_array($keyMap)) ksort($keyMap);
+                            if (is_array($studentMap)) ksort($studentMap);
+                            $isCorrect = (!empty($keyMap) && $keyMap == $studentMap);
+                        }
+
+                        // 2. Kalkulasi Skor Per Soal (PERBAIKAN BUG)
+                        if ($qType == 'essay') {
+                            // Essai: Ambil dari skor manual guru di DB
+                            $currentScore = $item->score ?? 0;
+                            $isCorrect = $currentScore > 0; // Tampilkan visual hijau jika dapat nilai
+                        } else {
+                            // Pilihan Ganda / True-False / Matching: Dapatkan skor otomatis dari bobot jika benar
+                            $currentScore = $isCorrect ? ($item->score_weight ?? 0) : 0;
                         }
                     @endphp
 
                     {{-- Card Soal --}}
                     <div class="bg-white rounded-[2rem] border {{ $isCorrect ? 'border-emerald-100' : ($isSkipped ? 'border-slate-200' : ($qType == 'essay' ? 'border-indigo-100' : 'border-rose-100')) }} p-6 shadow-sm relative overflow-hidden print-break print:border-black print:rounded-none"
                          x-data="{ 
-                            manualScore: {{ $currentScore }}, 
+                            manualScore: {{ $item->score ?? 0 }}, 
                             maxScore: {{ $item->score_weight }},
                             isSaving: false 
                          }">
@@ -133,7 +142,7 @@
                             
                             {{-- Nilai Perolehan (Pojok Kanan) --}}
                             <div class="text-right">
-                                <span class="block text-2xl font-black {{ $currentScore > 0 ? 'text-emerald-600' : 'text-slate-300' }}">
+                                <span class="block text-2xl font-black {{ $currentScore > 0 ? 'text-emerald-600' : 'text-slate-300' }} transition-colors">
                                     {{ floatval($currentScore) }}
                                 </span>
                                 <span class="text-[10px] font-bold text-slate-400 uppercase">Nilai Diperoleh</span>
@@ -196,7 +205,7 @@
                                         <p class="font-medium text-slate-700 whitespace-pre-wrap text-sm">{{ $item->correct_answer ?: '-' }}</p>
                                     </div>
 
-                                    {{-- INPUT KOREKSI MANUAL DENGAN EVENT ENTER --}}
+                                    {{-- INPUT KOREKSI MANUAL --}}
                                     <div class="flex items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm print:hidden">
                                         <div class="flex-1">
                                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Berikan Nilai Manual:</label>
@@ -289,7 +298,7 @@
                     if(displayTotal) {
                         displayTotal.innerText = data.new_total;
                         
-                        // Opsional: Update warna lingkaran jika melewati KKM secara Live
+                        // Update warna lingkaran jika melewati KKM secara Live
                         const kkm = {{ $exam->passing_grade ?? 0 }};
                         const circleContainer = displayTotal.closest('.border-8');
                         if (data.new_total >= kkm) {
@@ -302,6 +311,9 @@
                             circleContainer.classList.replace('bg-emerald-50', 'bg-rose-50');
                         }
                     }
+                    
+                    // Note: Kami tidak me-reload seluruh halaman agar pengalaman mengoreksi essai guru lebih mulus. 
+                    // Warna card 'benar/salah' pada essai juga tidak perlu berubah real-time karena guru hanya fokus pada box input nilai.
                 } else {
                     Swal.fire('Gagal', data.message || 'Terjadi kesalahan.', 'error');
                 }

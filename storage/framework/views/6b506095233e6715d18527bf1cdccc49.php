@@ -29,7 +29,7 @@
                 <?php echo e(__('Detail Hasil Ujian')); ?>
 
             </h2>
-            <button onclick="window.print()" class="text-sm font-bold text-slate-500 hover:text-blue-600 flex items-center gap-2 transition">
+            <button onclick="window.print()" class="text-sm font-bold text-slate-500 hover:text-blue-600 flex items-center gap-2 transition bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
                 <i class="ph-bold ph-printer text-lg"></i> Cetak Hasil
             </button>
         </div>
@@ -96,29 +96,38 @@
                     <?php
                         // Deteksi Tipe & Data
                         $qType = $item->question_type ?? 'choice';
-                        $studentAns = $item->student_answer;
-                        $correctAns = $item->correct_answer;
-                        
-                        // Nilai tersimpan di database (dari query controller baru)
-                        $currentScore = $item->score ?? 0;
+                        $studentAns = trim($item->student_answer ?? '');
+                        $correctAns = trim($item->correct_answer ?? '');
                         
                         $isSkipped = is_null($studentAns) || $studentAns === '';
                         $isCorrect = false;
 
+                        // 1. Evaluasi Kebenaran Jawaban
                         if ($qType == 'choice' || $qType == 'true_false') {
-                            $isCorrect = strtoupper($studentAns) == strtoupper($correctAns);
+                            $isCorrect = strtoupper($studentAns) === strtoupper($correctAns);
                         } elseif ($qType == 'matching') {
-                            $isCorrect = $studentAns == $correctAns;
-                        } elseif ($qType == 'essay') {
-                            // Untuk Essai, status "Benar" secara visual jika skor > 0
-                            $isCorrect = $currentScore > 0;
+                            $keyMap = json_decode($correctAns, true) ?? [];
+                            $studentMap = json_decode($studentAns, true) ?? [];
+                            if (is_array($keyMap)) ksort($keyMap);
+                            if (is_array($studentMap)) ksort($studentMap);
+                            $isCorrect = (!empty($keyMap) && $keyMap == $studentMap);
+                        }
+
+                        // 2. Kalkulasi Skor Per Soal (PERBAIKAN BUG)
+                        if ($qType == 'essay') {
+                            // Essai: Ambil dari skor manual guru di DB
+                            $currentScore = $item->score ?? 0;
+                            $isCorrect = $currentScore > 0; // Tampilkan visual hijau jika dapat nilai
+                        } else {
+                            // Pilihan Ganda / True-False / Matching: Dapatkan skor otomatis dari bobot jika benar
+                            $currentScore = $isCorrect ? ($item->score_weight ?? 0) : 0;
                         }
                     ?>
 
                     
                     <div class="bg-white rounded-[2rem] border <?php echo e($isCorrect ? 'border-emerald-100' : ($isSkipped ? 'border-slate-200' : ($qType == 'essay' ? 'border-indigo-100' : 'border-rose-100'))); ?> p-6 shadow-sm relative overflow-hidden print-break print:border-black print:rounded-none"
                          x-data="{ 
-                            manualScore: <?php echo e($currentScore); ?>, 
+                            manualScore: <?php echo e($item->score ?? 0); ?>, 
                             maxScore: <?php echo e($item->score_weight); ?>,
                             isSaving: false 
                          }">
@@ -147,7 +156,7 @@
                             
                             
                             <div class="text-right">
-                                <span class="block text-2xl font-black <?php echo e($currentScore > 0 ? 'text-emerald-600' : 'text-slate-300'); ?>">
+                                <span class="block text-2xl font-black <?php echo e($currentScore > 0 ? 'text-emerald-600' : 'text-slate-300'); ?> transition-colors">
                                     <?php echo e(floatval($currentScore)); ?>
 
                                 </span>
@@ -306,7 +315,7 @@
                     if(displayTotal) {
                         displayTotal.innerText = data.new_total;
                         
-                        // Opsional: Update warna lingkaran jika melewati KKM secara Live
+                        // Update warna lingkaran jika melewati KKM secara Live
                         const kkm = <?php echo e($exam->passing_grade ?? 0); ?>;
                         const circleContainer = displayTotal.closest('.border-8');
                         if (data.new_total >= kkm) {
@@ -319,6 +328,9 @@
                             circleContainer.classList.replace('bg-emerald-50', 'bg-rose-50');
                         }
                     }
+                    
+                    // Note: Kami tidak me-reload seluruh halaman agar pengalaman mengoreksi essai guru lebih mulus. 
+                    // Warna card 'benar/salah' pada essai juga tidak perlu berubah real-time karena guru hanya fokus pada box input nilai.
                 } else {
                     Swal.fire('Gagal', data.message || 'Terjadi kesalahan.', 'error');
                 }
