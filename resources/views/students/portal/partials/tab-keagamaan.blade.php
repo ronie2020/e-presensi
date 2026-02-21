@@ -112,18 +112,19 @@
             @endforeach
         </div>
 
-    @else
+     @else
         {{-- HEADER STANDAR (DILUAR RAMADHAN) --}}
         <div class="flex items-center justify-between bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
             <div>
                 <h2 class="text-2xl font-black text-slate-800">Jurnal Kebiasaan Baik</h2>
                 <p class="text-slate-400 text-sm">Bangun karakter positif dengan 7 kebiasaan harian.</p>
             </div>
-            <a href="{{ route('student.habits.create') }}" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition shadow-lg shadow-blue-200">
+            <a href="{{ route('student.habits.index') }}" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition shadow-lg shadow-blue-200">
                 <i class="ph-bold ph-plus-circle"></i> Isi Jurnal
             </a>
         </div>
     @endif
+
 
     {{-- 
         ==================================================

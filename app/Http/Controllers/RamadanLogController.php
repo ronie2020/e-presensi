@@ -22,9 +22,43 @@ class RamadanLogController extends Controller
     {
         $start = Carbon::parse(self::RAMADAN_START_DATE);
         $current = Carbon::parse($date);
-        // Jika sebelum Ramadhan, return 0
         if ($current->lt($start)) return 0;
         return $current->diffInDays($start) + 1;
+    }
+
+    /**
+     * Fungsi helper untuk menghitung ulang total poin 1 siswa dari awal Ramadhan sampai hari ini.
+     * Karena 1 siswa maksimal hanya punya 30 log, query ini sangat ringan dan cepat.
+     */
+    private function syncStudentPoints($studentId)
+    {
+        $logs = RamadanLog::where('student_id', $studentId)->get();
+        $totalPoints = 0;
+
+        foreach($logs as $log) {
+            // 1. Puasa (50 Poin)
+            if ($log->is_fasting) $totalPoints += 50;
+
+            // 2. Shalat Wajib (10 Poin per waktu)                
+            $prayers = is_array($log->prayers) ? array_filter($log->prayers) : [];
+            $totalPoints += (count($prayers) * 10);
+
+            // 3. Sunnah 
+            $sunnahs = is_array($log->sunnah_deeds) ? $log->sunnah_deeds : [];
+            if ($sunnahs['tarawih'] ?? false) $totalPoints += 15;
+            if ($sunnahs['witir'] ?? false) $totalPoints += 5;
+            if ($sunnahs['dhuha'] ?? false) $totalPoints += 5;
+            if ($sunnahs['rawatib'] ?? false) $totalPoints += 5;
+            if ($sunnahs['sedekah'] ?? false) $totalPoints += 5;
+
+            // 4. Tilawah, Jumat, Kultum
+            if (!empty($log->tadarus_surah)) $totalPoints += 20;
+            if (!empty($log->friday_khotib)) $totalPoints += 20;
+            if (!empty($log->kultum_summary)) $totalPoints += 15;
+        }
+
+        // Update total poin permanen ke tabel students
+        Student::where('id', $studentId)->update(['ramadan_points' => $totalPoints]);
     }
 
     public function studentIndex()
@@ -76,45 +110,19 @@ class RamadanLogController extends Controller
 
     public function leaderboard()
     {
-        // Optimasi: Gunakan Eager Loading untuk log agar query tidak berat   
-        $students = Student::whereHas('schoolClass')
-                    ->with(['ramadanLogs', 'schoolClass'])
-                    ->get();
+        // SUPER CEPAT: Langsung ambil 10 besar dari database tanpa looping!
+        $topStudents = Student::with('schoolClass')
+            ->whereHas('schoolClass')
+            ->where('ramadan_points', '>', 0) // Abaikan siswa dengan poin 0
+            ->orderByDesc('ramadan_points')
+            ->take(10)
+            ->get();
 
-        $topStudents = $students->map(function($student) {
-            $totalPoints = 0;
-
-            foreach($student->ramadanLogs as $log) {
-                // 1. Puasa (50 Poin)
-                if ($log->is_fasting) $totalPoints += 50;
-
-                // 2. Shalat Wajib (10 Poin per waktu)                
-                $prayers = is_array($log->prayers) ? array_filter($log->prayers) : [];
-                $totalPoints += (count($prayers) * 10);
-
-                // 3. Sunnah 
-                if ($log->sunnah_deeds['tarawih'] ?? false) $totalPoints += 15;
-                if ($log->sunnah_deeds['witir'] ?? false) $totalPoints += 5;
-                if ($log->sunnah_deeds['dhuha'] ?? false) $totalPoints += 5;
-                if ($log->sunnah_deeds['rawatib'] ?? false) $totalPoints += 5;
-                if ($log->sunnah_deeds['sedekah'] ?? false) $totalPoints += 5;
-
-                // 4. Tilawah (20 Poin)
-                if (!empty($log->tadarus_surah)) $totalPoints += 20;
-
-                // 5. Jumat (20 Poin)
-                if (!empty($log->friday_khotib)) $totalPoints += 20;
-
-                // 6. KULTUM (15 Poin)
-                if (!empty($log->kultum_summary)) $totalPoints += 15;
-            }
-
-            $student->ramadan_points = $totalPoints;
+        // Penyesuaian variabel ke ->points agar tidak perlu ubah file blade
+        $topStudents->map(function($student) {
+            $student->points = $student->ramadan_points;
             return $student;
-        })
-        ->sortByDesc('ramadan_points')
-        ->values()
-        ->take(10); 
+        });
 
         return view('ramadan.leaderboard', compact('topStudents'));
     }
@@ -122,11 +130,7 @@ class RamadanLogController extends Controller
     public function store(Request $request)
     {
         $studentId = Auth::guard('student')->id();
-        
-        // Ambil tanggal hari ini server side untuk keamanan
         $today = Carbon::now('Asia/Jakarta')->toDateString();
-        
-        // Input date dari form (biasanya hidden input)
         $requestDate = $request->input('date', $today);
 
         // KEAMANAN: Pastikan siswa hanya mengisi untuk hari ini
@@ -134,10 +138,10 @@ class RamadanLogController extends Controller
              return redirect()->back()->with('error', 'Anda hanya dapat mengisi jurnal untuk hari ini.');
         }
 
-        // VALIDASI INPUT
+        // VALIDASI INPUT KETAT (Pencegahan Teks Panjang / Spam)
         $request->validate([
             'tadarus_surah' => 'nullable|string|max:100',
-            'tadarus_ayah' => 'nullable|numeric|max:300',
+            'tadarus_ayah' => 'nullable|numeric|max:9999',
             'murojaah_surah' => 'nullable|string|max:100',
             'friday_khotib' => 'nullable|string|max:100',
             'friday_summary' => 'nullable|string|max:1000',
@@ -171,7 +175,6 @@ class RamadanLogController extends Controller
                 'kultum_summary' => $request->kultum_summary,
             ];
 
-            // Tambahkan data Jumat jika ada
             if ($request->has('friday_khotib')) {
                 $logData['friday_khotib'] = $request->friday_khotib;
             }
@@ -180,12 +183,12 @@ class RamadanLogController extends Controller
             }
 
             // Simpan ke RamadanLog
-            $ramadanLog = RamadanLog::updateOrCreate(
+            RamadanLog::updateOrCreate(
                 ['student_id' => $studentId, 'date' => $requestDate],
                 $logData
             );
 
-            // Sinkronisasi ke StudentHabit (Sistem Habit Tracker Sekolah)
+            // Sinkronisasi ke StudentHabit
             StudentHabit::updateOrCreate(
                 [
                     'student_id' => $studentId, 
@@ -202,6 +205,9 @@ class RamadanLogController extends Controller
                     'odoa_ayat'      => $request->tadarus_ayah,
                 ]
             );
+
+            // === OPTIMASI POIN: Kalkulasi dan simpan poin langsung ke tabel student
+            $this->syncStudentPoints($studentId);
 
             DB::commit();
             return redirect()->back()->with('success', 'Alhamdulillah! Jurnal Ramadhan berhasil disimpan.');
@@ -239,7 +245,6 @@ class RamadanLogController extends Controller
 
             $stats['total_students'] = $reports->count();
             
-            // Perbaikan Logika Count menggunakan filter
             $stats['fasting_count'] = $reports->filter(function($s) {
                 return $s->ramadanLogs->first()?->is_fasting;
             })->count();
@@ -257,7 +262,6 @@ class RamadanLogController extends Controller
         } else {  
             $stats['total_students'] = Student::whereHas('schoolClass')->count();
             
-            // Ambil logs hari ini hanya dari siswa yang punya kelas
             $logsToday = RamadanLog::whereHas('student.schoolClass')
                         ->whereDate('date', $date)
                         ->get();
@@ -271,7 +275,6 @@ class RamadanLogController extends Controller
             
             $stats['friday_log_count'] = $logsToday->whereNotNull('friday_khotib')->count();
 
-            // Feed Terbaru
             $latestLogs = RamadanLog::with(['student.schoolClass'])
                 ->whereHas('student.schoolClass') 
                 ->whereDate('date', $date)
@@ -299,7 +302,7 @@ class RamadanLogController extends Controller
     {
         $log = RamadanLog::findOrFail($id);
         
-        $validated = $request->validate([
+        $validated = $request->request->validate([
             'teacher_score' => 'required|numeric|min:0|max:100',
             'teacher_note' => 'nullable|string|max:500',
         ], [

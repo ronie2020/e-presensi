@@ -118,7 +118,8 @@ class Student extends Authenticatable
         'rfid_id', 
         'photo_path', 
         'status', 
-        'score', // <--- DITAMBAHKAN DI SINI
+        'score', 
+        'ramadan_points',
         'join_date', 
         'general_notes'
     ];
@@ -204,8 +205,7 @@ class Student extends Authenticatable
     }
 
     /**
-     * Relasi ke Data Peminjaman Buku (Borrowing)
-     * PERBAIKAN: Menambahkan relasi ini agar controller tidak error
+     * Relasi ke Data Peminjaman Buku (Borrowing)     
      */
     public function borrowings(): HasMany
     {
@@ -213,19 +213,16 @@ class Student extends Authenticatable
     }
     
     /**
-     * [BARU] Helper Static untuk Generate NIS Otomatis
-     * Digunakan oleh AdminPpdbController saat promote siswa
+     * Helper Static untuk Generate NIS Otomatis     
      */
     public static function generateNextNis()
     {
-        $yearShort = date('y'); // Contoh: 24
+        $yearShort = date('y'); // Contoh: 24        
         
-        // Cari siswa terakhir di tahun ini
         $lastStudent = self::where('nis', 'like', $yearShort . '%')
                            ->orderBy('nis', 'desc')
                            ->first();
-        
-        // Ambil sequence terakhir + 1
+             
         $sequence = $lastStudent ? intval(substr($lastStudent->nis, -3)) + 1 : 1;
         
         return [

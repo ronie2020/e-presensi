@@ -156,28 +156,13 @@ class StudentPortalController extends Controller
                             ->orderBy('date', 'desc')
                             ->first();
 
-        // LEADERBOARD LOGIC
-        $topRamadanStudents = Student::with(['ramadanLogs', 'schoolClass'])
-            ->get()
-            ->map(function($s) {
-                $totalPoints = $s->ramadanLogs->sum(function($log) {
-                    $dailyScore = 0;
-                    if ($log->is_fasting) $dailyScore += 50;
-                    $prayers = is_string($log->prayers) ? json_decode($log->prayers, true) : ($log->prayers ?? []);
-                    if(is_array($prayers)) $dailyScore += count(array_filter($prayers)) * 10;
-                    $sunnahs = is_string($log->sunnah_deeds) ? json_decode($log->sunnah_deeds, true) : ($log->sunnah_deeds ?? []);
-                    if(is_array($sunnahs)) $dailyScore += count(array_filter($sunnahs)) * 10;
-                    if (!empty($log->tadarus_surah)) $dailyScore += 20;
-                    if (!empty($log->friday_khotib)) $dailyScore += 30;
-                    if ($log->teacher_score) $dailyScore += round($log->teacher_score / 5); 
-                    return $dailyScore;
-                });
-                $s->ramadan_points = $totalPoints;
-                return $s;
-            })
-            ->sortByDesc('ramadan_points')
+        // LEADERBOARD LOGIC (SUPER CEPAT)
+        $topRamadanStudents = Student::with('schoolClass')
+            ->whereHas('schoolClass')
+            ->where('ramadan_points', '>', 0)
+            ->orderByDesc('ramadan_points')
             ->take(10)
-            ->values();
+            ->get();
 
         // --- DATA PENGHUBUNG (LIAISON) ---
         $liaison_messages = collect([]);
