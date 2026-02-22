@@ -61,7 +61,7 @@
         {{-- HEADER CETAK --}}
         <div class="print-header">
             <h1 class="text-2xl font-bold uppercase tracking-wide">Laporan Monitoring Harian</h1>
-            <p class="text-sm">SMK DIGITAL INDONESIA</p>
+            <p class="text-sm">SMP NEGERI 3 LAKBOK</p>
             <p class="text-xs mt-2">Dicetak pada: {{ now()->format('d F Y H:i') }} oleh {{ Auth::user()->name }}</p>
         </div>
 
