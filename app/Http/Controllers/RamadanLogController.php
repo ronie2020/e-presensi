@@ -302,7 +302,8 @@ class RamadanLogController extends Controller
     {
         $log = RamadanLog::findOrFail($id);
         
-        $validated = $request->request->validate([
+        // PERBAIKAN: Hapus ->request di tengah
+        $validated = $request->validate([
             'teacher_score' => 'required|numeric|min:0|max:100',
             'teacher_note' => 'nullable|string|max:500',
         ], [
