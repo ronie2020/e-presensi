@@ -89,11 +89,19 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 pb-20">
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                 @forelse($teachers as $index => $teacher)
+                    @php
+                        // Logika untuk mendecode Role yang berbentuk JSON string ["Guru", "Admin"]
+                        $displayRole = $teacher->position;
+                        if (empty($displayRole)) {
+                            $decodedRoles = is_string($teacher->role) ? json_decode($teacher->role, true) : $teacher->role;
+                            $displayRole = is_array($decodedRoles) ? implode(', ', $decodedRoles) : $teacher->role;
+                        }
+                    @endphp
                     <div @click="openModal({
                             name: '{{ addslashes($teacher->name) }}',
                             nip: '{{ $teacher->nip ?? '-' }}',
                             pangkat: '{{ $teacher->pangkat ?? '-' }}',
-                            position: '{{ addslashes($teacher->position ?? $teacher->role) }}',
+                            position: '{{ addslashes($displayRole) }}',
                             bio: '{{ addslashes($teacher->bio ?? 'Belum ada pesan & kesan.') }}',
                             phone: '{{ $teacher->phone }}',
                             instagram: '{{ $teacher->instagram }}',
@@ -125,9 +133,9 @@
 
                         <!-- Info Singkat -->
                         <div class="p-5 text-center flex-1 flex flex-col relative bg-white">
-                            <div class="absolute -top-4 left-0 right-0 flex justify-center">
-                                <span class="inline-block px-4 py-1.5 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-lg border-2 border-white transform group-hover:scale-105 transition-transform">
-                                    {{ $teacher->position ?? $teacher->role }}
+                            <div class="absolute -top-4 left-0 right-0 flex justify-center px-4">
+                                <span class="inline-block px-4 py-1.5 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-lg border-2 border-white transform group-hover:scale-105 transition-transform truncate max-w-full" title="{{ $displayRole }}">
+                                    {{ $displayRole }}
                                 </span>
                             </div>
                             <div class="mt-4 mb-2">
