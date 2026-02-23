@@ -18,9 +18,6 @@ class RamadanLogController extends Controller
     const FILL_START_TIME = '00:00'; 
     const FILL_END_TIME = '23:59';  
 
-    /**
-     * Menghitung hari ke-berapa di bulan Ramadhan berdasarkan tanggal mulai.
-     */
     private function getRamadanDay($date)
     {
         $start = Carbon::parse(self::RAMADAN_START_DATE);
@@ -113,15 +110,15 @@ class RamadanLogController extends Controller
 
     public function leaderboard()
     {
-        // Langsung ambil 10 besar dari database
+        // SUPER CEPAT: Langsung ambil 10 besar dari database tanpa looping!
         $topStudents = Student::with('schoolClass')
             ->whereHas('schoolClass')
-            ->where('ramadan_points', '>', 0) 
+            ->where('ramadan_points', '>', 0) // Abaikan siswa dengan poin 0
             ->orderByDesc('ramadan_points')
             ->take(10)
             ->get();
 
-        // Mapping ke atribut 'points' agar kompatibel dengan view lama
+        // Penyesuaian variabel ke ->points agar tidak perlu ubah file blade
         $topStudents->map(function($student) {
             $student->points = $student->ramadan_points;
             return $student;
@@ -136,12 +133,12 @@ class RamadanLogController extends Controller
         $today = Carbon::now('Asia/Jakarta')->toDateString();
         $requestDate = $request->input('date', $today);
 
-        // Keamanan: Pastikan siswa hanya mengisi untuk hari ini
+        // KEAMANAN: Pastikan siswa hanya mengisi untuk hari ini
         if ($requestDate !== $today) {
              return redirect()->back()->with('error', 'Anda hanya dapat mengisi jurnal untuk hari ini.');
         }
 
-        // Validasi input
+        // VALIDASI INPUT KETAT (Pencegahan Teks Panjang / Spam)
         $request->validate([
             'tadarus_surah' => 'nullable|string|max:100',
             'tadarus_ayah' => 'nullable|numeric|max:9999',
@@ -191,7 +188,7 @@ class RamadanLogController extends Controller
                 $logData
             );
 
-            // Sinkronisasi ke StudentHabit (Habit harian umum)
+            // Sinkronisasi ke StudentHabit
             StudentHabit::updateOrCreate(
                 [
                     'student_id' => $studentId, 
@@ -209,7 +206,7 @@ class RamadanLogController extends Controller
                 ]
             );
 
-            // Hitung ulang poin siswa
+            // === OPTIMASI POIN: Kalkulasi dan simpan poin langsung ke tabel student
             $this->syncStudentPoints($studentId);
 
             DB::commit();
@@ -305,8 +302,7 @@ class RamadanLogController extends Controller
     {
         $log = RamadanLog::findOrFail($id);
         
-        // Perbaikan: Panggil validate() langsung dari objek $request
-        $validated = $request->validate([
+        $validated = $request->request->validate([
             'teacher_score' => 'required|numeric|min:0|max:100',
             'teacher_note' => 'nullable|string|max:500',
         ], [

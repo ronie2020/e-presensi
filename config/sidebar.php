@@ -20,7 +20,7 @@ return [
                 'name' => 'Scan Aktifitas',
                 'route' => 'scan.show',
                 'icon' => 'ph-scan',
-                'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas', 'Guru Mata Pelajaran', 'TU']
+                'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas', 'Guru Mata Pelajaran', 'Guru', 'TU']
             ],
             [
                 'name' => 'Izin Keluar Siswa', 
@@ -61,7 +61,7 @@ return [
                 'route' => 'admin.ramadan.reports',
                 'active_check' => 'admin.ramadan.reports',
                 'icon' => 'ph-book-open',
-                'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas']
+                'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas', 'Guru Mata Pelajaran']
             ],
         ],
 
@@ -71,7 +71,7 @@ return [
                 'route' => 'admin.ppdb.index',                
                 'active_check' => ['admin.ppdb.index', 'admin.ppdb.show', 'admin.ppdb.edit', 'admin.ppdb.create'],
                 'icon' => 'ph-users-four',
-                'roles' => ['Admin', 'TU', 'Kepala Sekolah']
+                'roles' => ['Admin', 'TU', 'Kepala Sekolah', 'Guru Mata Pelajaran']
             ],
             [
                 'name' => 'Laporan PPDB',

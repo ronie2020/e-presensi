@@ -113,18 +113,17 @@ class ReportController extends Controller
     {
         if (!in_array($status, ['Alfa', 'Alpa', 'Alpha'])) return;
 
-        $violationType = $preloadedViolationType ?: DisciplineType::where('type', 'Pelanggaran')
-            ->where(function($q) {
-                $q->where('name', 'Tidak Masuk Sekolah (Alfa)')
-                  ->orWhere('name', 'Alfa');
-            })->first();
+        // PERBAIKAN: Pisahkan nama pelanggaran dan poin berdasarkan tipe kegiatannya
+        if ($preloadedViolationType) {
+            $violationType = $preloadedViolationType;
+        } else {
+            $violationName = ($typeContext == 'Keagamaan') ? 'Tidak Ikut Kegiatan Keagamaan' : 'Tidak Masuk Sekolah (Alfa)';
+            $violationPoints = ($typeContext == 'Keagamaan') ? 5 : 10;
 
-        if (!$violationType) {
-            $violationType = DisciplineType::create([
-                'name' => 'Tidak Masuk Sekolah (Alfa)',
-                'type' => 'Pelanggaran',
-                'point_value' => 10
-            ]);
+            $violationType = DisciplineType::firstOrCreate(
+                ['name' => $violationName],
+                ['type' => 'Pelanggaran', 'point_value' => $violationPoints]
+            );
         }
 
         $exists = DisciplineRecord::where('student_id', $studentId)
@@ -142,9 +141,8 @@ class ReportController extends Controller
             ]);
         }
     }
-
     // =========================================================================
-    // 1. REKAP ABSENSI HARIAN (LOGIKA LAMA - TETAP UTUH)
+    // 1. REKAP ABSENSI HARIAN 
     // =========================================================================
     
      public function dailyReport(Request $request)
@@ -388,8 +386,7 @@ class ReportController extends Controller
     // 3. FITUR REKAPITULASI KELAS (SUMMARY & MATRIX VIEW)
     // =========================================================================
 
-    /**    
-     * Mengisi variabel $reportData untuk view 'reports.class_attendance'
+    /** * Mengisi variabel $reportData untuk view 'reports.class_attendance'
      */
      public function indexClass(Request $request)
     {
@@ -614,11 +611,15 @@ class ReportController extends Controller
         $type = $request->input('type');
         $activity = $request->input('activity');
 
+        // PERBAIKAN: Pisahkan nama pelanggaran dan poin untuk tombol Alfa Massal
+        $violationName = ($type == 'Keagamaan') ? 'Tidak Ikut Kegiatan Keagamaan' : 'Tidak Masuk Sekolah (Alfa)';
+        $violationPoints = ($type == 'Keagamaan') ? 5 : 10;
+
         $violationType = DisciplineType::firstOrCreate(
-            ['name' => 'Tidak Masuk Sekolah (Alfa)'],
+            ['name' => $violationName],
             [
                 'type' => 'Pelanggaran', 
-                'point_value' => 10
+                'point_value' => $violationPoints
             ]
         );
 
@@ -878,9 +879,13 @@ class ReportController extends Controller
         $type = $request->input('type', 'Keagamaan'); // Ambil tipe dari form
         $activity = $request->activity;
         
+        // PERBAIKAN: Pisahkan nama pelanggaran dan poin untuk input Checklist
+        $violationName = ($type == 'Keagamaan') ? 'Tidak Ikut Kegiatan Keagamaan' : 'Tidak Masuk Sekolah (Alfa)';
+        $violationPoints = ($type == 'Keagamaan') ? 5 : 10;
+
         $violationType = DisciplineType::firstOrCreate(
-            ['name' => 'Tidak Masuk Sekolah (Alfa)'],
-            ['type' => 'Pelanggaran', 'point_value' => 10]
+            ['name' => $violationName],
+            ['type' => 'Pelanggaran', 'point_value' => $violationPoints]
         );
 
         DB::transaction(function () use ($request, $date, $activity, $type, $violationType) {

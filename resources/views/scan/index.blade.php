@@ -15,6 +15,25 @@
         
         @keyframes scanMove { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         
+        /* --- PERBAIKAN KAMERA RESPONSIVE --- */
+        #qr-reader { 
+            width: 100% !important; 
+            border: none !important; 
+            border-radius: 1rem; 
+            overflow: hidden; 
+        }
+        
+        /* Memaksa elemen video agar full width dan proporsional */
+        #qr-reader video { 
+            width: 100% !important; 
+            height: 100% !important; 
+            object-fit: cover !important; 
+            transform: scaleX(-1); /* Efek Cermin untuk kamera depan. Hapus jika pakai kamera belakang */
+        }
+        
+        /* Menyembunyikan background hitam/putih bawaan library */
+        #qr-reader__scan_region { background: transparent !important; }
+        
         /* Scanner Styles */
         .scanner-container { position: relative; overflow: hidden; border-radius: 1.5rem; transform: translateZ(0); }
         .scanner-overlay {
@@ -119,29 +138,32 @@
                                 </span>
                                 Kamera Aktif
                             </h3>
-                            <div id="mode-badge" class="pl-2 pr-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-2 transition-all">
-                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-                                <span id="mode-text">Standby</span>
+                            <div class="flex items-center gap-2">
+                                {{-- GPS Badge Indicator --}}
+                                <div id="gps-badge" class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-amber-50 text-amber-500 border border-amber-200 flex items-center gap-1 transition-all" title="Mencari Lokasi">
+                                    <i class="ph-bold ph-map-pin animate-pulse"></i> <span class="hidden sm:inline">Mencari GPS</span>
+                                </div>
+
+                                <div id="mode-badge" class="pl-2 pr-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-2 transition-all">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                    <span id="mode-text">Standby</span>
+                                </div>
                             </div>
                         </div>
 
                         {{-- SCANNER ELEMENT --}}
-                        <div class="scanner-container relative bg-slate-900 aspect-[4/3] w-full rounded-2xl border-4 border-slate-900 shadow-inner">
+                        <div class="scanner-container relative bg-slate-900 aspect-square sm:aspect-[4/3] w-full rounded-2xl border-4 border-slate-900 shadow-inner overflow-hidden">
                             <div id="qr-reader" class="w-full h-full object-cover rounded-xl overflow-hidden"></div>
                             
                             {{-- Overlay Lines --}}
                             <div id="scanner-overlay-el" class="scanner-overlay">
                                 <div class="scanner-line"></div>
-                                {{-- Corner Markers --}}
-                                <div class="absolute top-4 left-4 w-10 h-10 border-t-4 border-l-4 border-white/30 rounded-tl-2xl"></div>
-                                <div class="absolute top-4 right-4 w-10 h-10 border-t-4 border-r-4 border-white/30 rounded-tr-2xl"></div>
-                                <div class="absolute bottom-4 left-4 w-10 h-10 border-b-4 border-l-4 border-white/30 rounded-bl-2xl"></div>
-                                <div class="absolute bottom-4 right-4 w-10 h-10 border-b-4 border-r-4 border-white/30 rounded-br-2xl"></div>
+                                {{-- Corner Markers Dihapus agar UI lebih lega --}}
                             </div>
 
-                            {{-- Status Text Overlay --}}
-                            <div class="absolute bottom-6 inset-x-0 flex justify-center z-30 pointer-events-none">
-                                <div id="scan-status" class="bg-white/10 backdrop-blur-md text-white text-xs py-2 px-5 rounded-full font-bold border border-white/20 shadow-lg flex items-center gap-2 transition-all">
+                            {{-- Status Text Overlay (Dipindah ke Atas) --}}
+                            <div class="absolute top-4 inset-x-0 flex justify-center z-30 pointer-events-none">
+                                <div id="scan-status" class="bg-black/60 backdrop-blur-md text-white text-xs py-2 px-5 rounded-full font-bold border border-white/20 shadow-lg flex items-center gap-2 transition-all">
                                     <i class="ph-bold ph-circle-notch animate-spin text-indigo-300"></i> Memuat Kamera...
                                 </div>
                             </div>
@@ -150,9 +172,16 @@
                         {{-- Result Feedback --}}
                         <div id="scan-result" class="mt-4 p-4 rounded-2xl font-bold text-sm text-center hidden transition-all duration-300 transform scale-95 opacity-0 border border-transparent shadow-sm"></div>
                         
-                        <button id="btn-reset-auto" class="hidden w-full mt-4 py-3.5 rounded-2xl border-2 border-dashed border-indigo-200 text-indigo-600 font-bold text-xs uppercase tracking-wider hover:bg-indigo-50 hover:border-indigo-300 transition-all flex items-center justify-center gap-2 group/btn" onclick="resetAutoMode()">
-                            <i class="ph-bold ph-arrows-clockwise group-hover/btn:rotate-180 transition-transform duration-500"></i> Kembali ke Mode Otomatis
-                        </button>
+                        {{-- Tombol Aksi Bawah Scanner (Input Manual & Reset Auto) --}}
+                        <div class="mt-4 flex flex-col sm:flex-row gap-3">
+                            <button onclick="showManualInput()" class="flex-1 py-3.5 rounded-2xl border border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-wider hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-2">
+                                <i class="ph-bold ph-keyboard text-lg"></i> Input Manual
+                            </button>
+                            
+                            <button id="btn-reset-auto" class="hidden flex-1 py-3.5 rounded-2xl border-2 border-dashed border-indigo-200 text-indigo-600 font-bold text-xs uppercase tracking-wider hover:bg-indigo-50 hover:border-indigo-300 transition-all flex items-center justify-center gap-2 group/btn" onclick="resetAutoMode()">
+                                <i class="ph-bold ph-arrows-clockwise group-hover/btn:rotate-180 transition-transform duration-500"></i> Auto Mode
+                            </button>
+                        </div>
                     </div>
 
                     {{-- STATISTIK MAKAN --}}
@@ -301,7 +330,7 @@
                                 </table>
                                 
                                 {{-- Empty State --}}
-                                <div id="no-log-entry" class="{{ count($recentScans) > 0 ? 'hidden' : '' }} flex flex-col items-center justify-center py-20 text-center">
+                                <div id="no-log-entry" class="{{ count($recentScans ?? []) > 0 ? 'hidden' : '' }} flex flex-col items-center justify-center py-20 text-center">
                                     <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100 shadow-inner">
                                         <i class="ph-duotone ph-qr-code text-4xl text-slate-300"></i>
                                     </div>
@@ -331,7 +360,11 @@
             isProcessing: false,
             processedQr: new Set(),
             manualOverride: false,
-            audioCtx: null
+            audioCtx: null,
+            // Variabel GPS
+            lat: null,
+            long: null,
+            gpsActive: false
         };
 
         function initAudio() {
@@ -385,8 +418,35 @@
                 btnReset: document.getElementById('btn-reset-auto'),
                 statTaken: document.getElementById('stat-taken'),
                 statRemaining: document.getElementById('stat-remaining'),
-                makanPanel: document.getElementById('makan-stats-panel')
+                makanPanel: document.getElementById('makan-stats-panel'),
+                gpsBadge: document.getElementById('gps-badge')
             };
+
+            // 0. Inisialisasi Pencarian Lokasi (GPS) Realtime
+            if ("geolocation" in navigator) {
+                navigator.geolocation.watchPosition(
+                    (position) => {
+                        state.lat = position.coords.latitude;
+                        state.long = position.coords.longitude;
+                        state.gpsActive = true;
+                        if(dom.gpsBadge) {
+                            dom.gpsBadge.className = "px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center gap-1 transition-all";
+                            dom.gpsBadge.innerHTML = `<i class="ph-fill ph-map-pin"></i> <span class="hidden sm:inline">GPS Aktif</span>`;
+                        }
+                    },
+                    (error) => {
+                        state.gpsActive = false;
+                        if(dom.gpsBadge) {
+                            dom.gpsBadge.className = "px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-rose-50 text-rose-500 border border-rose-200 flex items-center gap-1 transition-all";
+                            dom.gpsBadge.innerHTML = `<i class="ph-bold ph-map-pin-line"></i> <span class="hidden sm:inline">GPS Nonaktif</span>`;
+                        }
+                        console.warn("Kamera GPS Alert:", error.message);
+                    },
+                    { enableHighAccuracy: true, maximumAge: 10000, timeout: 5000 }
+                );
+            } else if (dom.gpsBadge) {
+                dom.gpsBadge.style.display = 'none';
+            }
 
             // 1. Clock & Auto Mode
             setInterval(() => {
@@ -494,10 +554,10 @@
                 document.getElementById('no-log-entry').classList.toggle('hidden', count > 0);
             }
 
-            // 4. Scanner Logic
-            const onScanSuccess = async (decodedText) => {
+            // 4. Scanner & Manual Input Logic (Refactoring)
+            const processAttendanceData = async (studentId) => {
                 if (state.isProcessing) return;
-                if (state.processedQr.has(decodedText)) return; 
+                if (state.processedQr.has(studentId)) return; 
 
                 if (state.mode === 'Ekstrakurikuler' && !state.extraId) {
                     playBeep('warning');
@@ -506,7 +566,7 @@
                 }
 
                 state.isProcessing = true;
-                state.processedQr.add(decodedText);
+                state.processedQr.add(studentId);
                 dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-indigo-300"></i> Memproses...`;
 
                 try {
@@ -520,7 +580,14 @@
                     const res = await fetch(CONFIG.routes.process, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CONFIG.token, 'Accept': 'application/json' },
-                        body: JSON.stringify({ student_id: decodedText, type: finalType, extra_id: state.extraId })
+                        body: JSON.stringify({ 
+                            student_id: studentId, 
+                            type: finalType, 
+                            // PERBAIKAN: Ubah string kosong menjadi null agar validasi Laravel tidak error
+                            extra_id: state.extraId ? state.extraId : null, 
+                            lat: state.lat,   
+                            long: state.long  
+                        })
                     });
 
                     const data = await res.json();
@@ -528,17 +595,62 @@
                     if (res.ok) {
                         handleSuccess(data, finalType);
                     } else {
-                        handleError(data.message || 'Error Server');
+                        // PERBAIKAN: Menangkap pesan error 422 dari validasi Laravel (ValidationException)
+                        let errorMsg = data.message || 'Error Server';
+                        if (data.errors) {
+                            // Jika ada array errors dari Laravel, ambil pesan pertama
+                            errorMsg = Object.values(data.errors)[0][0];
+                        }
+                        handleError(errorMsg);
                     }
                 } catch (e) {
-                    handleError('Koneksi Gagal');
+                    handleError('Koneksi Gagal / Server Error');
                 } finally {
                     setTimeout(() => {
                         state.isProcessing = false;
-                        state.processedQr.delete(decodedText);
+                        state.processedQr.delete(studentId);
                         setMode(state.mode, !state.manualOverride); 
                     }, 2000);
                 }
+            };
+
+            const onScanSuccess = async (decodedText) => {
+                await processAttendanceData(decodedText);
+            };
+
+            // FUNGSI BARU: Menangani Input Manual NISN
+            window.showManualInput = () => {
+                initAudio(); // Aktifkan audio interaksi
+                Swal.fire({
+                    title: 'Input Manual',
+                    html: '<p class="text-sm text-slate-500 mb-4">Masukkan NISN atau ID Siswa</p>',
+                    input: 'text',
+                    inputAttributes: {
+                        autocapitalize: 'off',
+                        autocorrect: 'off',
+                        placeholder: 'Contoh: 0012345678'
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="ph-bold ph-paper-plane-right"></i> Kirim',
+                    cancelButtonText: 'Batal',
+                    showLoaderOnConfirm: true,
+                    customClass: {
+                        popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
+                        confirmButton: 'bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-colors mx-2 shadow-lg shadow-indigo-900/20 flex items-center gap-2',
+                        cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2',
+                        input: 'rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-center text-lg font-mono font-bold w-4/5 mx-auto py-3'
+                    },
+                    buttonsStyling: false,
+                    preConfirm: (inputValue) => {
+                        if (!inputValue) {
+                            Swal.showValidationMessage('ID tidak boleh kosong!');
+                            return false;
+                        }
+                        // Teruskan data ke fungsi proses yang sama dengan scanner QR
+                        return processAttendanceData(inputValue);
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                });
             };
 
             function handleSuccess(data, type) {
@@ -577,6 +689,7 @@
                 setTimeout(() => dom.overlay.className = 'scanner-overlay', 500);
             }
 
+            // --- PERBAIKAN ADD TABLE ROW ---
             function addTableRow(scan) {
                 document.getElementById('no-log-entry').classList.add('hidden');
                 
@@ -584,17 +697,20 @@
                 row.className = 'new-row-entry border-b border-slate-50 last:border-0 hover:bg-white transition-colors group';
                 row.dataset.typeRaw = scan.type_raw;
 
+                // Logika rendering kolom dinamis sesuai dengan jenis scan
                 row.innerHTML = `
                     <td class="px-6 py-4 rounded-l-xl">
                         <div class="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">${scan.student_name}</div>
-                        <div class="text-[10px] text-slate-400 font-mono font-bold">Unknown ID</div>
+                        <div class="text-[10px] text-slate-400 font-mono font-bold">${scan.student_id || '-'}</div>
                     </td>
                     <td class="col-harian px-4 py-4 text-center">
-                        ${scan.time_in ? `<span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm">${scan.time_in}</span>` : '<span class="text-slate-300 font-bold">-</span>'}
+                        ${(scan.type_raw === 'Masuk' || scan.type_raw === 'Harian' || scan.time_in) ? `<span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm">${scan.time_in || '-'}</span>` : '<span class="text-slate-300 font-bold">-</span>'}
                     </td>
-                    <td class="col-harian px-4 py-4 text-center">-</td>
+                    <td class="col-harian px-4 py-4 text-center">
+                        ${(scan.type_raw === 'Pulang' || scan.time_out) ? `<span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm">${scan.time_out || scan.time_in}</span>` : '<span class="text-slate-300 font-bold">-</span>'}
+                    </td>
                     <td class="col-waktu hidden-col px-4 py-4 text-center">
-                         <span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm">${scan.time_in}</span>
+                         <span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm">${scan.time_in || '-'}</span>
                     </td>
                     <td class="col-kegiatan hidden-col px-4 py-4 text-center text-slate-600 font-bold text-xs">${scan.ekskul_name || '-'}</td>
                     <td class="px-6 py-4 text-right rounded-r-xl"><span class="bg-emerald-50 text-emerald-600 border border-emerald-100 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide shadow-sm">${scan.status}</span></td>
@@ -604,10 +720,31 @@
                 filterLogTable(state.mode); 
             }
 
+            // --- PERBAIKAN KONFIGURASI KAMERA RESPONSIVE ---
             const qrScanner = new Html5Qrcode("qr-reader");
-            qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess)
+            
+            const config = { 
+                fps: 10, 
+                // Dinamis: 1.0 (Kotak Penuh) di layar HP, dan 4/3 di Tablet/Laptop
+                aspectRatio: window.innerWidth < 640 ? 1.0 : 4/3, 
+                qrbox: function(viewfinderWidth, viewfinderHeight) {
+                    // Membuat kotak scan yang dinamis: 70% dari ukuran terpendek layar/kamera
+                    let minEdgePercentage = 0.7; 
+                    let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
+                    let qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
+                    return {
+                        width: qrboxSize,
+                        height: qrboxSize
+                    };
+                } 
+            };
+
+            qrScanner.start({ facingMode: "environment" }, config, onScanSuccess)
+                .then(() => {
+                    dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-indigo-300"></i> Siap Scan`;
+                })
                 .catch(err => {
-                    dom.scanStatus.innerHTML = `<span class="text-rose-300">Kamera Error: ${err}</span>`;
+                    dom.scanStatus.innerHTML = `<span class="text-rose-300"><i class="ph-bold ph-warning"></i> Kamera Ditolak / Error</span>`;
                 });
             
             checkAutoMode(new Date());

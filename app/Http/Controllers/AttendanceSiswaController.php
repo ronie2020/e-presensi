@@ -137,36 +137,40 @@ class AttendanceSiswaController extends Controller
                 ->lockForUpdate() 
                 ->first();
 
-            // Init record jika belum ada
-            if (!$attendance) {
-                $attendance = AttendanceSiswa::create([
-                    'student_id'      => $student->id, 
-                    'attendance_date' => $today->toDateString(),
-                    'type'            => 'Harian',
-                    'status'          => 'Alfa',
-                ]);
-            }
-
             $now = Carbon::now();
             $timeString = $now->format('H:i:s');
 
             // --- MASUK ---
             if ($type == 'Masuk') {
-                if ($attendance->time_in && $attendance->time_in != '00:00:00') {
-                    return response()->json(['message' => 'Anda sudah absen masuk hari ini pada ' . substr($attendance->time_in, 0, 5)], 422);
+                if ($attendance && $attendance->time_in && $attendance->time_in != '00:00:00') {
+                    return response()->json(['message' => $student->name . ' sudah absen masuk hari ini pada ' . substr($attendance->time_in, 0, 5)], 422);
                 }
 
                 $limitTime = Carbon::createFromTimeString($scheduleLimit);
                 $isLate = $now->gt($limitTime);
                 $status = $isLate ? 'Terlambat' : 'Hadir';
 
-                $attendance->update([
-                    'time_in' => $timeString,
-                    'status'  => $status,
-                    'lat_in'  => $request->lat,
-                    'long_in' => $request->long,
-                    'notes'   => $isLate ? "Terlambat (Limit: $scheduleLimit)" : null
-                ]);
+                // OPTIMASI: Langsung simpan data yang valid tanpa membuat record Alfa sementara
+                if (!$attendance) {
+                    $attendance = AttendanceSiswa::create([
+                        'student_id'      => $student->id, 
+                        'attendance_date' => $today->toDateString(),
+                        'type'            => 'Harian',
+                        'status'          => $status,
+                        'time_in'         => $timeString,
+                        'lat_in'          => $request->lat,
+                        'long_in'         => $request->long,
+                        'notes'           => $isLate ? "Terlambat (Limit: $scheduleLimit)" : null
+                    ]);
+                } else {
+                    $attendance->update([
+                        'time_in' => $timeString,
+                        'status'  => $status,
+                        'lat_in'  => $request->lat,
+                        'long_in' => $request->long,
+                        'notes'   => $isLate ? "Terlambat (Limit: $scheduleLimit)" : null
+                    ]);
+                }
 
                 if ($isLate) {
                     $this->logActivity($student, 'Violation', 'Terlambat Masuk', "Terlambat hadir (Limit: {$scheduleLimit})", -5);
@@ -174,13 +178,18 @@ class AttendanceSiswaController extends Controller
 
                 SendWaScanNotificationJob::dispatch($attendance)->afterCommit();
 
-                return $this->successResponse($student, $status, $isLate ? "Absen Masuk: Terlambat!" : "Absen Masuk Berhasil", 'Harian', $attendance);
+                return $this->successResponse($student, $status, $isLate ? "{$student->name} Terlambat Masuk!" : "{$student->name} Berhasil Absen Masuk", 'Harian', $attendance);
             }
 
             // --- PULANG ---
             if ($type == 'Pulang') {
-                if (!$attendance->time_in) return response()->json(['message' => 'Anda belum melakukan absen masuk!'], 422);
-                if ($attendance->time_out) return response()->json(['message' => 'Anda sudah absen pulang hari ini!'], 422);
+                // Jika belum masuk tapi mau pulang
+                if (!$attendance || !$attendance->time_in || $attendance->time_in == '00:00:00') {
+                    return response()->json(['message' => $student->name . ' belum melakukan absen masuk!'], 422);
+                }
+                if ($attendance->time_out) {
+                    return response()->json(['message' => $student->name . ' sudah absen pulang hari ini!'], 422);
+                }
 
                 $startOutTime = Carbon::createFromTimeString($scheduleStartOut);
                 $isEarly = $now->lt($startOutTime);
@@ -189,12 +198,12 @@ class AttendanceSiswaController extends Controller
                     'time_out' => $timeString,
                     'lat_out'  => $request->lat,
                     'long_out' => $request->long,
-                    'notes'    => $isEarly ? ($attendance->notes . " | Pulang Cepat") : $attendance->notes
+                    'notes'    => $isEarly ? ($attendance->notes ? $attendance->notes . " | Pulang Cepat" : "Pulang Cepat") : $attendance->notes
                 ]);
 
                 SendWaScanNotificationJob::dispatch($attendance)->afterCommit();
 
-                return $this->successResponse($student, $isEarly ? 'Pulang Cepat' : 'Pulang', "Absen Pulang Berhasil", 'Harian', $attendance);
+                return $this->successResponse($student, $isEarly ? 'Pulang Cepat' : 'Pulang', "{$student->name} Berhasil Absen Pulang", 'Harian', $attendance);
             }
         });
     }
@@ -209,7 +218,7 @@ class AttendanceSiswaController extends Controller
                 ->lockForUpdate()
                 ->exists();
 
-            if ($exists) return response()->json(['message' => "Sudah absen shalat {$type} hari ini!"], 422);
+            if ($exists) return response()->json(['message' => $student->name . " sudah absen shalat {$type} hari ini!"], 422);
 
             $att = AttendanceSiswa::create([
                 'student_id' => $student->id, 'attendance_date' => $today->toDateString(),
@@ -226,7 +235,7 @@ class AttendanceSiswaController extends Controller
                 [$colName => true]
             );
 
-            return $this->successResponse($student, 'Selesai', "Shalat {$type} Tercatat. Poin +5", $type, $att);
+            return $this->successResponse($student, 'Selesai', "Shalat {$type} {$student->name} Tercatat (+5 Poin)", $type, $att);
         });
     }
 
@@ -239,7 +248,7 @@ class AttendanceSiswaController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            if ($existing) return response()->json(['message' => "Siswa ini SUDAH mengambil makan siang!"], 422);
+            if ($existing) return response()->json(['message' => $student->name . " SUDAH mengambil makan siang!"], 422);
 
             $att = AttendanceSiswa::create([
                 'student_id' => $student->id, 'attendance_date' => $today->toDateString(),
@@ -256,7 +265,7 @@ class AttendanceSiswaController extends Controller
 
             $count = AttendanceSiswa::whereDate('attendance_date', $today)->where('type', 'Meal')->count();
 
-            return $this->successResponse($student, 'Ambil Makan', "Scan Makan Berhasil", 'Makan', $att, ['taken' => $count]);
+            return $this->successResponse($student, 'Ambil Makan', "{$student->name} Berhasil Ambil Makan", 'Makan', $att, ['taken' => $count]);
         });
     }
 
@@ -280,17 +289,25 @@ class AttendanceSiswaController extends Controller
                 ['status' => 'Hadir', 'time_in' => now()]
             );
 
-            $msg = "Sudah absen {$extra->name} sebelumnya.";
+            $msg = "{$student->name} sudah absen {$extra->name} sebelumnya.";
             
+            // Logika Evaluasi Poin Ekskul (BUG FIX)
             if ($detailAtt->wasRecentlyCreated) {
-                $this->logActivity($student, 'Extracurricular', $extra->name, "Hadir kegiatan {$extra->name}", 5);
                 
-                // Agar operator tahu apakah siswa ini anggota resmi atau tidak
+                // Cek apakah siswa ini anggota resmi
                 $isMember = ExtracurricularMember::where('student_id', $student->id)
                             ->where('extracurricular_id', $extraId)
                             ->exists();
 
-                $msg = $isMember ? "Absen {$extra->name} Berhasil (+5 Poin)" : "Absen {$extra->name} Berhasil (Tamu)";
+                if ($isMember) {
+                    // Anggota Resmi: Dapat +5 Poin
+                    $this->logActivity($student, 'Extracurricular', $extra->name, "Hadir kegiatan {$extra->name}", 5);
+                    $msg = "{$student->name} Hadir {$extra->name} (+5 Poin)";
+                } else {
+                    // Tamu (Bukan Anggota): Tercatat hadir tapi tidak dapat poin (0 Poin)
+                    $this->logActivity($student, 'Extracurricular', $extra->name, "Hadir kegiatan {$extra->name} (Tamu)", 0);
+                    $msg = "{$student->name} Hadir {$extra->name} (Tamu)";
+                }
             }
 
             // Inject nama ekskul untuk frontend response
