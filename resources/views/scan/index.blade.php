@@ -19,16 +19,16 @@
         #qr-reader { 
             width: 100% !important; 
             border: none !important; 
-            border-radius: 1rem; 
+            border-radius: 1.5rem; 
             overflow: hidden; 
+            background: #000; /* Beri background hitam agar rapi saat loading */
         }
         
-        /* Memaksa elemen video agar full width dan proporsional */
+        /* Membiarkan video menyesuaikan rasio aslinya agar Auto-Focus bekerja optimal */
         #qr-reader video { 
             width: 100% !important; 
-            height: 100% !important; 
-            object-fit: cover !important; 
-            transform: scaleX(-1); /* Efek Cermin untuk kamera depan. Hapus jika pakai kamera belakang */
+            border-radius: 1.5rem;
+            /* HEIGHT, OBJECT-FIT, DAN TRANSFORM TELAH DIHAPUS AGAR TIDAK ZOOM/MIRRORING */
         }
         
         /* Menyembunyikan background hitam/putih bawaan library */
@@ -152,16 +152,15 @@
                         </div>
 
                         {{-- SCANNER ELEMENT --}}
-                        <div class="scanner-container relative bg-slate-900 aspect-square sm:aspect-[4/3] w-full rounded-2xl border-4 border-slate-900 shadow-inner overflow-hidden">
+                        <div class="scanner-container relative bg-slate-900 w-full rounded-2xl border-4 border-slate-900 shadow-inner overflow-hidden">
                             <div id="qr-reader" class="w-full h-full object-cover rounded-xl overflow-hidden"></div>
                             
                             {{-- Overlay Lines --}}
                             <div id="scanner-overlay-el" class="scanner-overlay">
                                 <div class="scanner-line"></div>
-                                {{-- Corner Markers Dihapus agar UI lebih lega --}}
                             </div>
 
-                            {{-- Status Text Overlay (Dipindah ke Atas) --}}
+                            {{-- Status Text Overlay --}}
                             <div class="absolute top-4 inset-x-0 flex justify-center z-30 pointer-events-none">
                                 <div id="scan-status" class="bg-black/60 backdrop-blur-md text-white text-xs py-2 px-5 rounded-full font-bold border border-white/20 shadow-lg flex items-center gap-2 transition-all">
                                     <i class="ph-bold ph-circle-notch animate-spin text-indigo-300"></i> Memuat Kamera...
@@ -172,7 +171,7 @@
                         {{-- Result Feedback --}}
                         <div id="scan-result" class="mt-4 p-4 rounded-2xl font-bold text-sm text-center hidden transition-all duration-300 transform scale-95 opacity-0 border border-transparent shadow-sm"></div>
                         
-                        {{-- Tombol Aksi Bawah Scanner (Input Manual & Reset Auto) --}}
+                        {{-- Tombol Aksi Bawah Scanner --}}
                         <div class="mt-4 flex flex-col sm:flex-row gap-3">
                             <button onclick="showManualInput()" class="flex-1 py-3.5 rounded-2xl border border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-wider hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-2">
                                 <i class="ph-bold ph-keyboard text-lg"></i> Input Manual
@@ -583,7 +582,6 @@
                         body: JSON.stringify({ 
                             student_id: studentId, 
                             type: finalType, 
-                            // PERBAIKAN: Ubah string kosong menjadi null agar validasi Laravel tidak error
                             extra_id: state.extraId ? state.extraId : null, 
                             lat: state.lat,   
                             long: state.long  
@@ -595,10 +593,8 @@
                     if (res.ok) {
                         handleSuccess(data, finalType);
                     } else {
-                        // PERBAIKAN: Menangkap pesan error 422 dari validasi Laravel (ValidationException)
                         let errorMsg = data.message || 'Error Server';
                         if (data.errors) {
-                            // Jika ada array errors dari Laravel, ambil pesan pertama
                             errorMsg = Object.values(data.errors)[0][0];
                         }
                         handleError(errorMsg);
@@ -618,9 +614,8 @@
                 await processAttendanceData(decodedText);
             };
 
-            // FUNGSI BARU: Menangani Input Manual NISN
             window.showManualInput = () => {
-                initAudio(); // Aktifkan audio interaksi
+                initAudio(); 
                 Swal.fire({
                     title: 'Input Manual',
                     html: '<p class="text-sm text-slate-500 mb-4">Masukkan NISN atau ID Siswa</p>',
@@ -646,7 +641,6 @@
                             Swal.showValidationMessage('ID tidak boleh kosong!');
                             return false;
                         }
-                        // Teruskan data ke fungsi proses yang sama dengan scanner QR
                         return processAttendanceData(inputValue);
                     },
                     allowOutsideClick: () => !Swal.isLoading()
@@ -689,7 +683,6 @@
                 setTimeout(() => dom.overlay.className = 'scanner-overlay', 500);
             }
 
-            // --- PERBAIKAN ADD TABLE ROW ---
             function addTableRow(scan) {
                 document.getElementById('no-log-entry').classList.add('hidden');
                 
@@ -697,7 +690,6 @@
                 row.className = 'new-row-entry border-b border-slate-50 last:border-0 hover:bg-white transition-colors group';
                 row.dataset.typeRaw = scan.type_raw;
 
-                // Logika rendering kolom dinamis sesuai dengan jenis scan
                 row.innerHTML = `
                     <td class="px-6 py-4 rounded-l-xl">
                         <div class="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">${scan.student_name}</div>
@@ -720,16 +712,15 @@
                 filterLogTable(state.mode); 
             }
 
-            // --- PERBAIKAN KONFIGURASI KAMERA RESPONSIVE ---
+            // --- PERBAIKAN KONFIGURASI KAMERA RESPONSIVE & FOKUS ---
             const qrScanner = new Html5Qrcode("qr-reader");
             
             const config = { 
-                fps: 10, 
-                // Dinamis: 1.0 (Kotak Penuh) di layar HP, dan 4/3 di Tablet/Laptop
-                aspectRatio: window.innerWidth < 640 ? 1.0 : 4/3, 
+                fps: 15, // Ditingkatkan agar pergerakan kamera lebih mulus
                 qrbox: function(viewfinderWidth, viewfinderHeight) {
-                    // Membuat kotak scan yang dinamis: 70% dari ukuran terpendek layar/kamera
-                    let minEdgePercentage = 0.7; 
+                    // Membuat kotak scan yang dinamis: 60% dari ukuran terpendek
+                    // Diperkecil agar kamera HP lebih mudah memfokuskan lensa ke objek di tengah
+                    let minEdgePercentage = 0.6; 
                     let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
                     let qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
                     return {
@@ -739,7 +730,13 @@
                 } 
             };
 
-            qrScanner.start({ facingMode: "environment" }, config, onScanSuccess)
+            // Memaksa kamera belakang dan meminta fitur Continuous Auto-Focus
+            const cameraConstraints = { 
+                facingMode: "environment",
+                advanced: [{ focusMode: "continuous" }] 
+            };
+
+            qrScanner.start(cameraConstraints, config, onScanSuccess)
                 .then(() => {
                     dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-indigo-300"></i> Siap Scan`;
                 })
