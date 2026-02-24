@@ -1,4 +1,4 @@
- <!-- GURU SECTION -->
+<!-- GURU SECTION -->
     <div id="guru" class="py-24 bg-slate-50 relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16" data-aos="fade-up">
@@ -9,6 +9,14 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 <?php $__empty_1 = true; $__currentLoopData = $teachers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $teacher): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
+                        // Logika untuk mendecode Role yang berbentuk JSON
+                        $displayRole = $teacher->position;
+                        if (empty($displayRole)) {
+                            $decodedRoles = is_string($teacher->role) ? json_decode($teacher->role, true) : $teacher->role;
+                            $displayRole = is_array($decodedRoles) ? implode(', ', $decodedRoles) : $teacher->role;
+                        }
+                    ?>
                     <div class="group relative bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 h-full flex flex-col" data-aos="fade-up" data-aos-delay="<?php echo e($loop->index * 100); ?>">
                         <div class="aspect-[3/4] w-full relative overflow-hidden bg-slate-100">
                             <?php if($teacher->photo_path): ?>
@@ -24,8 +32,12 @@
                             <div class="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                         </div>
                         <div class="p-5 text-center relative bg-white flex-1 flex flex-col justify-end">
-                            <div class="absolute -top-4 left-0 right-0 flex justify-center">
-                                <span class="bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-3 rounded-full shadow-lg border-2 border-white"><?php echo e($teacher->position ?? $teacher->role); ?></span>
+                            <div class="absolute -top-4 left-0 right-0 flex justify-center px-4">
+                                
+                                <span class="bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-3 rounded-full shadow-lg border-2 border-white truncate max-w-full" title="<?php echo e($displayRole); ?>">
+                                    <?php echo e($displayRole); ?>
+
+                                </span>
                             </div>
                             <h3 class="mt-4 text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1"><?php echo e($teacher->name); ?></h3>
                             <?php if(!empty($teacher->nip)): ?>

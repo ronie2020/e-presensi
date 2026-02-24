@@ -36,6 +36,7 @@ use App\Http\Controllers\PpdbController;
 use App\Http\Controllers\AlumniController;
 use App\Http\Controllers\StudentPermitController; 
 use App\Http\Controllers\ClassReportController;
+use App\Http\Controllers\PromotionController;
 
 // LMS (Learning Management System)
 use App\Http\Controllers\LmsMaterialController;
@@ -297,6 +298,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/students/{student}/card', [StudentController::class, 'card'])->name('students.card');
     Route::resource('students', StudentController::class); 
     Route::resource('classes', SchoolClassController::class);
+
+      // ROUTE MUTASI & KENAIKAN KELAS DI SINI ---
+    Route::prefix('promotions')->name('promotions.')->group(function () {
+        Route::get('/', [PromotionController::class, 'index'])->name('index');
+        Route::post('/process', [PromotionController::class, 'process'])->name('process');
+    });
     
     // --- MANAJEMEN USER (GURU & STAFF) ---
     Route::get('users/export', [UserController::class, 'export'])->name('users.export');

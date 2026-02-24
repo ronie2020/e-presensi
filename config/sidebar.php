@@ -181,9 +181,15 @@ return [
             [
                 'name' => 'Data Siswa Aktif', 
                 'route' => 'students.index',
-                'icon' => 'ph-student',
-                // Semua staff biasanya butuh lihat data siswa, tapi bisa dibatasi
+                'icon' => 'ph-student',               
                 'roles' => ['Admin', 'TU', 'Kepala Sekolah', 'Wali Kelas', 'Guru', 'Guru Mata Pelajaran', 'Guru Piket']
+            ],
+             [
+                'name' => 'Mutasi & Kenaikan', 
+                'route' => 'promotions.index',
+                'active_check' => 'promotions.*',
+                'icon' => 'ph-arrows-left-right',
+                'roles' => ['Admin', 'TU', 'Kepala Sekolah'] 
             ],
             [
                 'name' => 'Prestasi',
