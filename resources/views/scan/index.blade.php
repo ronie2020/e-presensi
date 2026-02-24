@@ -15,24 +15,30 @@
         
         @keyframes scanMove { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         
-        /* --- PERBAIKAN KAMERA RESPONSIVE --- */
+        /* --- PERBAIKAN KAMERA RESPONSIVE & ANTI GEPENG --- */
         #qr-reader { 
             width: 100% !important; 
+            min-height: 300px !important; /* Garansi tinggi minimal agar tidak jadi garis hitam jika telat loading */
             border: none !important; 
             border-radius: 1.5rem; 
             overflow: hidden; 
-            background: #000; /* Beri background hitam agar rapi saat loading */
+            background: #0f172a; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        /* Membiarkan video menyesuaikan rasio aslinya agar Auto-Focus bekerja optimal */
+        /* Membiarkan video menyesuaikan tinggi aslinya (proporsional sensor HP) */
         #qr-reader video { 
             width: 100% !important; 
+            height: auto !important; 
+            display: block !important;
             border-radius: 1.5rem;
-            /* HEIGHT, OBJECT-FIT, DAN TRANSFORM TELAH DIHAPUS AGAR TIDAK ZOOM/MIRRORING */
         }
         
-        /* Menyembunyikan background hitam/putih bawaan library */
-        #qr-reader__scan_region { background: transparent !important; }
+        /* Menyembunyikan elemen bawaan library yang merusak UI */
+        #qr-reader__scan_region { background: transparent !important; width: 100% !important; }
+        #qr-reader__dashboard_section_csr span, #qr-reader__dashboard_section_swaplink { display: none !important; }
         
         /* Scanner Styles */
         .scanner-container { position: relative; overflow: hidden; border-radius: 1.5rem; transform: translateZ(0); }
@@ -152,8 +158,8 @@
                         </div>
 
                         {{-- SCANNER ELEMENT --}}
-                        <div class="scanner-container relative bg-slate-900 w-full rounded-2xl border-4 border-slate-900 shadow-inner overflow-hidden">
-                            <div id="qr-reader" class="w-full h-full object-cover rounded-xl overflow-hidden"></div>
+                        <div class="scanner-container relative bg-slate-900 w-full rounded-[1.5rem] border-4 border-slate-900 shadow-inner overflow-hidden min-h-[300px]">
+                            <div id="qr-reader" class="w-full"></div>
                             
                             {{-- Overlay Lines --}}
                             <div id="scanner-overlay-el" class="scanner-overlay">
@@ -716,24 +722,23 @@
             const qrScanner = new Html5Qrcode("qr-reader");
             
             const config = { 
-                fps: 15, // Ditingkatkan agar pergerakan kamera lebih mulus
+                fps: 15, 
+                // aspectRatio: DIHAPUS. Agar library menggunakan resolusi/proporsi asli kamera HP. 
+                // Ini mencegah gambar terlihat gepeng, miring, dan titik fokus meleset.
                 qrbox: function(viewfinderWidth, viewfinderHeight) {
-                    // Membuat kotak scan yang dinamis: 60% dari ukuran terpendek
-                    // Diperkecil agar kamera HP lebih mudah memfokuskan lensa ke objek di tengah
-                    let minEdgePercentage = 0.6; 
+                    // Kotak scan 65% dari ukuran layar
+                    let minEdgePercentage = 0.65; 
                     let minEdgeSize = Math.min(viewfinderWidth, viewfinderHeight);
                     let qrboxSize = Math.floor(minEdgeSize * minEdgePercentage);
-                    return {
-                        width: qrboxSize,
-                        height: qrboxSize
-                    };
+                    return { width: qrboxSize, height: qrboxSize };
                 } 
             };
 
-            // Memaksa kamera belakang dan meminta fitur Continuous Auto-Focus
+            // Gunakan constraint dasar. 
+            // Jangan menggunakan advanced focusMode karena bisa bikin kamera CRASH (blank) di HP tertentu.
+            // HP modern akan otomatis melakukan auto-focus.
             const cameraConstraints = { 
-                facingMode: "environment",
-                advanced: [{ focusMode: "continuous" }] 
+                facingMode: "environment"
             };
 
             qrScanner.start(cameraConstraints, config, onScanSuccess)
@@ -742,6 +747,7 @@
                 })
                 .catch(err => {
                     dom.scanStatus.innerHTML = `<span class="text-rose-300"><i class="ph-bold ph-warning"></i> Kamera Ditolak / Error</span>`;
+                    console.warn(err);
                 });
             
             checkAutoMode(new Date());
