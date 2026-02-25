@@ -11,6 +11,7 @@
     $canFill = $canFill ?? false;
     $todayRamadanLog = $todayRamadanLog ?? null;
     $calendarLogs = $calendarLogs ?? [];
+    $totalRamadanDays = $totalRamadanDays ?? 30; // Opsional dari controller
     
     // Ambil data user untuk fallback city
     $userCity = Auth::guard('student')->user()->city ?? 'Jakarta';
@@ -30,29 +31,20 @@
             </div>
         </div>
 
-        {{-- 
-            === WIDGET JADWAL SHALAT (THEME: MOSQUE ARCH - GEOLOCATION) === 
-            Konsisten dengan Tab Dashboard
-        --}}
+        {{-- WIDGET JADWAL SHALAT --}}
         <div x-data="prayerWidgetIndex()" x-init="init()" class="relative mb-8">
-            {{-- SKELETON LOADING --}}
             <template x-if="isLoading">
                 <div class="bg-slate-200 rounded-[2.5rem] p-8 shadow-sm animate-pulse h-48 w-full"></div>
             </template>
 
-            {{-- CONTENT --}}
             <div x-show="!isLoading" 
                  class="bg-gradient-to-b from-[#0F2027] via-[#203A43] to-[#2C5364] rounded-[2.5rem] p-6 md:p-8 text-white shadow-xl shadow-slate-300 relative overflow-hidden group border-b-4 border-amber-500"
                  style="display: none;">
-                
-                <!-- Ornament & Silhouette -->
                 <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
                 <div class="absolute bottom-0 left-0 right-0 h-32 bg-repeat-x opacity-20 pointer-events-none" 
-                     style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDQwIDMyMCI+PHBhdGggZmlsbD0iI2ZmZmZmZiIgZmlsbC1vcGFjaXR5PSIxIiBkPSJNMCAyMjR4NDggMjEzLjN4OTYgMjAyLjd4MTQ0IDE5MnMxOTIgMzIgMjQwIDMyIDI0MC0zMiAyNDAtMzJzMTkyIDMyIDI0MCAzMiAyNDAtMzIgMjQwLTMyVjMyMEgwWiIvPjwvc3ZnPg=='); background-position: bottom;">
-                </div>
+                     style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDQwIDMyMCI+PHBhdGggZmlsbD0iI2ZmZmZmZiIgZmlsbC1vcGFjaXR5PSIxIiBkPSJNMCAyMjR4NDggMjEzLjN4OTYgMjAyLjd4MTQ0IDE5MnMxOTIgMzIgMjQwIDMyIDI0MC0zMiAyNDAtMzJzMTkyIDMyIDI0MCAzMiAyNDAtMzIgMjQwLTMyVjMyMEgwWiIvPjwvc3ZnPg=='); background-position: bottom;"></div>
 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    {{-- Kiri: Lokasi & Countdown --}}
                     <div class="text-center md:text-left">
                         <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider mb-2 backdrop-blur-sm cursor-pointer hover:bg-amber-500/30 transition-colors"
                              @click="checkLocation()" title="Refresh Lokasi">
@@ -65,7 +57,6 @@
                         </p>
                     </div>
 
-                    {{-- Kanan: Grid Jadwal (Arch Shape) --}}
                     <div class="w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
                         <div class="flex md:grid md:grid-cols-6 gap-3 min-w-max px-2">
                             <template x-for="(time, name) in schedule" :key="name">
@@ -86,10 +77,8 @@
             </div>
         </div>
 
-        {{-- 1. KALENDER RAMADHAN (ISLAMIC THEME) --}}
+        {{-- 1. KALENDER RAMADHAN --}}
         <div class="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-lg shadow-slate-200/50 border border-slate-100 mb-8 relative overflow-hidden group">
-            
-            {{-- Background Ornament --}}
             <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/arabesque.png')] pointer-events-none"></div>
             <div class="absolute -top-10 -right-10 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
             <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
@@ -109,7 +98,8 @@
                 </div>
 
                 <div class="grid grid-cols-7 sm:grid-cols-8 md:grid-cols-10 gap-2 sm:gap-3">
-                    @for ($i = 0; $i < 30; $i++)
+                    {{-- PERBAIKAN: Looping Kalender Dinamis (30/29 Hari) --}}
+                    @for ($i = 0; $i < $totalRamadanDays; $i++)
                         @php
                             $dateCheck = \Carbon\Carbon::parse($startDate)->addDays($i);
                             $dateString = $dateCheck->format('Y-m-d');
@@ -121,7 +111,6 @@
                             $badge = null;
 
                             if ($isToday) {
-                                // Hari Ini (Highlight Emerald & Gold)
                                 $containerClass = "bg-gradient-to-br from-emerald-500 to-teal-600 border-emerald-500 text-white shadow-lg shadow-emerald-500/30 scale-110 ring-4 ring-white z-10";
                             } elseif ($logExists) {
                                 $containerClass = "bg-emerald-50 border-emerald-200 text-emerald-700";
@@ -175,7 +164,9 @@
                                 <div><h3 class="font-bold text-slate-800">Status Puasa</h3><p class="text-xs text-slate-400">Apakah kamu berpuasa hari ini?</p></div>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" name="is_fasting" class="sr-only peer" {{ ($todayRamadanLog->is_fasting ?? true) ? 'checked' : '' }}>
+                                {{-- PERBAIKAN: Hidden Input Fallback untuk Puasa --}}
+                                <input type="hidden" name="is_fasting" value="0">
+                                <input type="checkbox" name="is_fasting" value="1" class="sr-only peer" {{ ($todayRamadanLog->is_fasting ?? true) ? 'checked' : '' }}>
                                 <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                             </label>
                         </div>
@@ -187,7 +178,10 @@
                                 @foreach(['subuh', 'dzuhur', 'ashar', 'maghrib', 'isya'] as $p)
                                 @php $checked = $todayRamadanLog->prayers[$p] ?? false; @endphp
                                 <label class="cursor-pointer group">
-                                    <input type="checkbox" name="prayer_{{ $p }}" class="hidden peer" {{ $checked ? 'checked' : '' }}>
+                                    {{-- PERBAIKAN: Hidden Input Fallback untuk Shalat --}}
+                                    <input type="hidden" name="prayer_{{ $p }}" value="0">
+                                    <input type="checkbox" name="prayer_{{ $p }}" value="1" class="hidden peer" {{ $checked ? 'checked' : '' }}>
+                                    
                                     <div class="p-3 rounded-2xl border-2 border-slate-50 bg-slate-50 text-slate-400 transition-all peer-checked:bg-emerald-50 peer-checked:border-emerald-200 peer-checked:text-emerald-700 flex flex-col items-center gap-2">
                                         <span class="text-[10px] font-bold uppercase">{{ $p }}</span>
                                         <i class="ph-bold ph-check-circle text-xl"></i>
@@ -266,7 +260,9 @@
                                 @php $checked = $todayRamadanLog->sunnah_deeds[$s] ?? false; @endphp
                                 <label class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-50 cursor-pointer hover:border-emerald-200 transition-all">
                                     <span class="text-sm font-bold text-slate-600 capitalize">{{ $s }}</span>
-                                    <input type="checkbox" name="sunnah_{{ $s }}" class="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500" {{ $checked ? 'checked' : '' }}>
+                                    {{-- PERBAIKAN: Hidden Input Fallback untuk Sunnah --}}
+                                    <input type="hidden" name="sunnah_{{ $s }}" value="0">
+                                    <input type="checkbox" name="sunnah_{{ $s }}" value="1" class="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500" {{ $checked ? 'checked' : '' }}>
                                 </label>
                                 @endforeach
                             </div>
@@ -288,8 +284,10 @@
         </form>
     </div>
 </div>
+@endsection
 
-{{-- SCRIPT WIDGET JADWAL SHALAT (CLIENT SIDE GEOLOCATION) & SWEETALERT --}}
+{{-- PERBAIKAN: Membungkus Script ke dalam Push agar tidak memblokir render HTML --}}
+@push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -349,7 +347,6 @@
 
             useFallbackCity() {
                 this.usingGeolocation = false;
-                // Menggunakan variabel PHP $userCity
                 this.city = '{{ $userCity }}'; 
                 this.locationName = this.city;
                 this.fetchTimesByCity();
@@ -441,4 +438,4 @@
         }
     }
 </script>
-@endsection
+@endpush

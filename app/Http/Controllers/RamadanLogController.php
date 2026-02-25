@@ -68,6 +68,8 @@ class RamadanLogController extends Controller
         $now = Carbon::now('Asia/Jakarta');
         
         $startDate = self::RAMADAN_START_DATE;
+        // Opsional: Atur total hari Ramadhan (29/30) di sini.
+        $totalRamadanDays = 30; 
 
         // Ambil log untuk kalender grid
         $calendarLogs = RamadanLog::where('student_id', $studentId)
@@ -104,7 +106,8 @@ class RamadanLogController extends Controller
             'ramadanDay',
             'isBeforeRamadan',
             'startDate',
-            'calendarLogs'
+            'calendarLogs',
+            'totalRamadanDays'
         ));
     }
 
@@ -152,21 +155,22 @@ class RamadanLogController extends Controller
         try {
             DB::beginTransaction();
 
+            // PERBAIKAN: Menggunakan $request->boolean() agar checkbox update bekerja sempurna dengan hidden input
             $logData = [
-                'is_fasting' => $request->has('is_fasting'),
+                'is_fasting' => $request->boolean('is_fasting'),
                 'prayers' => [
-                    'subuh'   => $request->has('prayer_subuh'),
-                    'dzuhur'  => $request->has('prayer_dzuhur'),
-                    'ashar'   => $request->has('prayer_ashar'),
-                    'maghrib' => $request->has('prayer_maghrib'),
-                    'isya'    => $request->has('prayer_isya'),
+                    'subuh'   => $request->boolean('prayer_subuh'),
+                    'dzuhur'  => $request->boolean('prayer_dzuhur'),
+                    'ashar'   => $request->boolean('prayer_ashar'),
+                    'maghrib' => $request->boolean('prayer_maghrib'),
+                    'isya'    => $request->boolean('prayer_isya'),
                 ],
                 'sunnah_deeds' => [
-                    'tarawih' => $request->has('sunnah_tarawih'),
-                    'witir'   => $request->has('sunnah_witir'),
-                    'dhuha'   => $request->has('sunnah_dhuha'),
-                    'rawatib' => $request->has('sunnah_rawatib'),
-                    'sedekah' => $request->has('sunnah_sedekah'),
+                    'tarawih' => $request->boolean('sunnah_tarawih'),
+                    'witir'   => $request->boolean('sunnah_witir'),
+                    'dhuha'   => $request->boolean('sunnah_dhuha'),
+                    'rawatib' => $request->boolean('sunnah_rawatib'),
+                    'sedekah' => $request->boolean('sunnah_sedekah'),
                 ],
                 'tadarus_surah' => $request->tadarus_surah,
                 'tadarus_ayah' => $request->tadarus_ayah,
@@ -195,12 +199,12 @@ class RamadanLogController extends Controller
                     'report_date' => $requestDate
                 ],
                 [
-                    'prayer_subuh'   => $request->has('prayer_subuh'),
-                    'prayer_dzuhur'  => $request->has('prayer_dzuhur'),
-                    'prayer_ashar'   => $request->has('prayer_ashar'),
-                    'prayer_maghrib' => $request->has('prayer_maghrib'),
-                    'prayer_isya'    => $request->has('prayer_isya'),
-                    'prayer_dhuha'   => $request->has('sunnah_dhuha'),
+                    'prayer_subuh'   => $request->boolean('prayer_subuh'),
+                    'prayer_dzuhur'  => $request->boolean('prayer_dzuhur'),
+                    'prayer_ashar'   => $request->boolean('prayer_ashar'),
+                    'prayer_maghrib' => $request->boolean('prayer_maghrib'),
+                    'prayer_isya'    => $request->boolean('prayer_isya'),
+                    'prayer_dhuha'   => $request->boolean('sunnah_dhuha'),
                     'odoa_surah'     => $request->tadarus_surah,
                     'odoa_ayat'      => $request->tadarus_ayah,
                 ]
@@ -226,7 +230,7 @@ class RamadanLogController extends Controller
         $isFriday = Carbon::parse($date)->isFriday();
 
         $reports = collect();
-        $latestLogs = collect();
+        $latestLogs = collect(); // Bisa array kosong tergantung implementasi pagination
         $stats = [
             'total_students' => 0,
             'fasting_count' => 0,
@@ -275,12 +279,25 @@ class RamadanLogController extends Controller
             
             $stats['friday_log_count'] = $logsToday->whereNotNull('friday_khotib')->count();
 
-            $latestLogs = RamadanLog::with(['student.schoolClass'])
-                ->whereHas('student.schoolClass') 
-                ->whereDate('date', $date)
-                ->orderBy('updated_at', 'desc')
-                ->limit(10)
-                ->get();
+            // PERBAIKAN: Gunakan Query Builder untuk pencarian dan pagination
+            $query = RamadanLog::with(['student.schoolClass'])
+                ->whereHas('student.schoolClass')
+                ->whereDate('date', $date);
+
+            // Filter status: Belum Dinilai / Pending
+            if ($request->status === 'pending') {
+                $query->whereNull('teacher_verified_at');
+            }
+
+            // Filter pencarian nama siswa
+            if ($request->search) {
+                $query->whereHas('student', function($q) use ($request) {
+                    $q->where('name', 'like', '%' . $request->search . '%');
+                });
+            }
+
+            // Pagination dengan QueryString agar navigasi aman
+            $latestLogs = $query->orderBy('updated_at', 'desc')->paginate(12)->withQueryString();
         }
 
         $stats['percentage_fasting'] = $stats['total_students'] > 0 
@@ -302,7 +319,6 @@ class RamadanLogController extends Controller
     {
         $log = RamadanLog::findOrFail($id);
         
-        // PERBAIKAN: Hapus ->request di tengah
         $validated = $request->validate([
             'teacher_score' => 'required|numeric|min:0|max:100',
             'teacher_note' => 'nullable|string|max:500',
