@@ -411,25 +411,32 @@ class CbtController extends Controller
     // --- RECAP & ANALYTICS ---
 
     /**
-     * [PERBAIKAN] Helper Private untuk mengambil data Rekap 
-     * Sekarang memperhitungkan nilai manual (score) yang tersimpan
+     * Helper Private untuk mengambil data Rekap 
+     * Memperhitungkan nilai manual (score) yang tersimpan dan riwayat percobaan
      */
      private function getRecapData($exam_id) 
     {
         // 1. Ambil Data Dasar Siswa & Nilai Akhir
+        $selects = [
+            'cbt_student_exams.id as session_id',
+            'cbt_student_exams.student_id',
+            'cbt_student_exams.total_score', 
+            'students.name as student_name',
+            'students.student_id as student_nisn',
+            'classes.name as class_name'
+        ];
+
+        // Aman: Hanya select attempt_count jika kolomnya ada di database
+        if (\Illuminate\Support\Facades\Schema::hasColumn('cbt_student_exams', 'attempt_count')) {
+            $selects[] = 'cbt_student_exams.attempt_count';
+        }
+
         $results = DB::table('cbt_student_exams')
             ->join('students', 'cbt_student_exams.student_id', '=', 'students.id')
             ->leftJoin('classes', 'students.class_id', '=', 'classes.id')
             ->where('cbt_student_exams.cbt_exam_id', $exam_id)
             ->where('cbt_student_exams.status', 'finished') 
-            ->select(
-                'cbt_student_exams.id as session_id',
-                'cbt_student_exams.student_id',
-                'cbt_student_exams.total_score', 
-                'students.name as student_name',
-                'students.student_id as student_nisn',
-                'classes.name as class_name'
-            )
+            ->select($selects)
             ->orderBy('cbt_student_exams.total_score', 'desc')
             ->get();
 
@@ -441,7 +448,7 @@ class CbtController extends Controller
             $answers = DB::table('cbt_student_answers')
                 ->join('cbt_questions', 'cbt_student_answers.cbt_question_id', '=', 'cbt_questions.id')
                 ->where('cbt_student_answers.cbt_student_exam_id', $row->session_id)
-                // PERBAIKAN: Select kolom 'score' dari tabel jawaban
+                // Select kolom 'score' dari tabel jawaban
                 ->select('cbt_student_answers.*', 'cbt_questions.question_type', 'cbt_questions.correct_answer as key_answer', 'cbt_questions.score_weight')
                 ->get();
 
@@ -464,7 +471,6 @@ class CbtController extends Controller
                     if (strcasecmp($studentAns, $correctAns) == 0) $isCorrect = true;
                 }
                 
-                // --- [LOGIKA PERBAIKAN] ---
                 // Cek apakah ada nilai manual (score) di database jawaban
                 $manualScore = isset($ans->score) ? floatval($ans->score) : 0;
 
@@ -537,7 +543,7 @@ class CbtController extends Controller
             $answers = $allAnswers->get($q->id);
             $stats = [
                 'id' => $q->id,
-                'type' => $q->question_type ?? 'choice', // [PENTING] Kirim Tipe Soal
+                'type' => $q->question_type ?? 'choice', 
                 'text' => strip_tags($q->question_text), 
                 'correct_key' => $q->correct_answer,
                 'correct_count' => 0,
@@ -689,6 +695,44 @@ class CbtController extends Controller
             })->count(),
         ];
         return view('cbt.result_detail', compact('exam', 'student', 'examSession', 'answers', 'stats'));
+    }
+
+    /**
+     * [BARU] Fungsi Mengizinkan Ujian Ulang (Retake)
+     */
+    public function allowRetake($exam_id, $student_id)
+    {
+        $session = DB::table('cbt_student_exams')
+            ->where('cbt_exam_id', $exam_id)
+            ->where('student_id', $student_id)
+            ->first();
+
+        if ($session) {
+            // Hapus jawaban lama dan foto pengawasan agar bisa mengerjakan dari awal
+            DB::table('cbt_student_answers')->where('cbt_student_exam_id', $session->id)->delete();
+            DB::table('cbt_exam_photos')->where('cbt_student_exam_id', $session->id)->delete();
+
+            $updateData = [
+                'status' => 'ongoing',       // Ubah status ke ongoing (ujian dimulai lagi)
+                'total_score' => null,       // Reset skor
+                'created_at' => now(),       // Reset waktu mulai agar timer durasi penuh lagi
+                'updated_at' => now(),
+            ];
+
+            $attempt = 2; // Default jika baru retake pertama kali
+            
+            // Cek jika kolom attempt_count sudah ditambahkan di database
+            if (\Illuminate\Support\Facades\Schema::hasColumn('cbt_student_exams', 'attempt_count')) {
+                $attempt = isset($session->attempt_count) ? $session->attempt_count + 1 : 2;
+                $updateData['attempt_count'] = $attempt;
+            }
+
+            DB::table('cbt_student_exams')->where('id', $session->id)->update($updateData);
+
+            return back()->with('success', 'Siswa diizinkan untuk mengerjakan ulang. Ujian ini menjadi percobaan ke-' . $attempt . '.');
+        }
+
+        return back()->with('error', 'Data ujian siswa tidak ditemukan.');
     }
 
     /**
