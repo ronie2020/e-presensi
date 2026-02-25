@@ -211,6 +211,15 @@ class Student extends Authenticatable
     {
         return $this->hasMany(Borrowing::class, 'student_id');
     }
+
+     /**
+     * Relasi ke Riwayat Akademik / Kenaikan Kelas
+     */
+    public function classHistories(): HasMany
+    {
+        // Mengurutkan riwayat dari yang paling baru
+        return $this->hasMany(StudentClassHistory::class, 'student_id')->latest('created_at');
+    }
     
     /**
      * Helper Static untuk Generate NIS Otomatis     

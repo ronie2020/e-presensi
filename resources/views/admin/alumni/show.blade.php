@@ -58,6 +58,55 @@
                             </div>
                         </div>
                     </div>
+
+                    {{-- RIWAYAT AKADEMIK TIMELINE --}}
+                    <div class="bg-white rounded-[2.5rem] p-8 shadow-sm border border-slate-200 mt-6 relative overflow-hidden">
+                        <div class="absolute -right-4 -top-4 opacity-5">
+                            <i class="ph-fill ph-clock-counter-clockwise text-8xl text-slate-800"></i>
+                        </div>
+                        
+                        <h3 class="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+                            <i class="ph-fill ph-clock-counter-clockwise text-blue-600"></i> Riwayat Akademik
+                        </h3>
+
+                        @if($student->classHistories && $student->classHistories->count() > 0)
+                            <div class="relative border-l-2 border-slate-100 ml-3 space-y-6">
+                                @foreach($student->classHistories as $history)
+                                    <div class="relative pl-6 group">
+                                        {{-- Timeline Dot --}}
+                                        <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-white border-[3px] border-blue-200 group-hover:border-blue-500 transition-colors shadow-sm"></div>
+                                        
+                                        {{-- Content --}}
+                                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 group-hover:bg-blue-50/50 group-hover:border-blue-100 transition-all">
+                                            <div class="flex justify-between items-start mb-1">
+                                                <h4 class="text-sm font-bold text-slate-800 group-hover:text-blue-700">
+                                                    {{ $history->schoolClass->name ?? 'Kelas Dihapus' }}
+                                                </h4>
+                                                <span class="text-[10px] font-bold text-slate-400 bg-white px-2 py-0.5 rounded shadow-sm border border-slate-100">
+                                                    {{ $history->academic_year }}
+                                                </span>
+                                            </div>
+                                            <p class="text-xs text-slate-500 font-medium">Kenaikan / Mutasi Kelas</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                                
+                                {{-- Pintu Masuk / Awal Masuk --}}
+                                <div class="relative pl-6 opacity-70">
+                                    <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-slate-200 border-2 border-white shadow-sm"></div>
+                                    <h4 class="text-sm font-bold text-slate-600">Siswa Masuk / Terdaftar</h4>
+                                    <p class="text-xs text-slate-400 font-medium">Awal mula pendataan</p>
+                                </div>
+                            </div>
+                        @else
+                            <div class="text-center py-6">
+                                <div class="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-300">
+                                    <i class="ph-duotone ph-ghost text-2xl"></i>
+                                </div>
+                                <p class="text-xs text-slate-400 font-medium">Belum ada catatan riwayat mutasi/kenaikan kelas.</p>
+                            </div>
+                        @endif
+                    </div>
                 </div>
 
                 {{-- KOLOM KANAN: TRACER STUDY --}}

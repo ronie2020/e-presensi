@@ -70,7 +70,7 @@ class AdminAlumniController extends Controller
     /**
      * Halaman Rekap Testimoni Alumni 
      */
-    public function testimonials()
+     public function testimonials()
     {
         // Ambil data profil alumni 
         $testimonials = AlumniProfile::with('student')
@@ -87,9 +87,11 @@ class AdminAlumniController extends Controller
      */
     public function show($id)
     {
-        $student = Student::with(['alumniProfile', 'graduation', 'achievements'])->findOrFail($id);
+        // Menambahkan eager loading 'classHistories.schoolClass'
+        $student = Student::with(['alumniProfile', 'graduation', 'achievements', 'classHistories.schoolClass'])->findOrFail($id);
         return view('admin.alumni.show', compact('student'));
     }
+
 
     /**
      * Export PDF Laporan

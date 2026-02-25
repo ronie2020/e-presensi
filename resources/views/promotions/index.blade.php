@@ -77,6 +77,13 @@
                             {{-- BAR AKSI TARGET --}}
                             <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100 mb-6 flex flex-col md:flex-row items-end gap-4 relative overflow-hidden">
                                 
+                                {{-- INPUT TAHUN AJARAN --}}
+                                <div class="w-full md:w-48 relative z-10 shrink-0">
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tahun Ajaran</label>
+                                    <input type="text" name="academic_year" x-model="academicYear" placeholder="Cth: 2024/2025" required 
+                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-sm text-slate-700 focus:ring-blue-500 h-12 transition-all">
+                                </div>
+
                                 {{-- Target Action Dropdown --}}
                                 <div class="flex-1 w-full relative z-10">
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tujuan Pemindahan</label>
@@ -91,6 +98,10 @@
                                                         <option value="{{ $class->id }}">Pindahkan ke {{ $class->name }}</option>
                                                     @endif
                                                 @endforeach
+                                            </optgroup>
+
+                                            <optgroup label="Kelulusan">
+                                                <option value="alumni">Luluskan Siswa (Jadikan Alumni)</option>
                                             </optgroup>
                                         </select>
                                     </div>
@@ -147,9 +158,21 @@
                                                     {{ $student->nisn ?? $student->student_id }}
                                                 </td>
                                                 <td class="px-6 py-4">
-                                                    <span class="inline-flex px-2 py-1 rounded-lg text-[10px] font-bold {{ $student->gender == 'L' ? 'bg-blue-50 text-blue-600' : 'bg-rose-50 text-rose-600' }}">
-                                                        {{ $student->gender == 'L' ? 'Laki-laki' : 'Perempuan' }}
-                                                    </span>
+                                                    {{-- PENGECEKAN GENDER FINAL (SESUAI ENUM MIGRATION) --}}
+                                                    @if($student->gender === 'L')
+                                                        <span class="inline-flex px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-600">
+                                                            Laki-laki
+                                                        </span>
+                                                    @elseif($student->gender === 'P')
+                                                        <span class="inline-flex px-2 py-1 rounded-lg text-[10px] font-bold bg-rose-50 text-rose-600">
+                                                            Perempuan
+                                                        </span>
+                                                    @else
+                                                        {{-- Jika kosong (NULL) atau datanya aneh --}}
+                                                        <span class="inline-flex px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-500">
+                                                            Belum Diisi
+                                                        </span>
+                                                    @endif
                                                 </td>
                                             </tr>
                                             @endforeach
@@ -191,9 +214,9 @@
             Alpine.data('promotionApp', () => ({
                 checkAll: true,
                 targetAction: '',
+                academicYear: '',
                 
                 init() {
-                    // Otomatis centang semua saat halaman diload
                     this.toggleAll();
                 },
                 
@@ -217,13 +240,23 @@
                 },
 
                 confirmProcess() {
-                    // Validasi lokal sebelum submit
                     const checkboxes = document.querySelectorAll('.student-checkbox:checked');
                     if (checkboxes.length === 0) {
                         Swal.fire({
                             icon: 'warning',
                             title: 'Pilih Siswa',
                             text: 'Silakan centang minimal satu siswa untuk diproses.',
+                            confirmButtonColor: '#3b82f6',
+                            customClass: { popup: 'rounded-3xl' }
+                        });
+                        return;
+                    }
+
+                    if (this.academicYear.trim() === '') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Tahun Ajaran Kosong',
+                            text: 'Silakan isi Tahun Ajaran terlebih dahulu (Contoh: 2024/2025).',
                             confirmButtonColor: '#3b82f6',
                             customClass: { popup: 'rounded-3xl' }
                         });
@@ -243,18 +276,17 @@
 
                     Swal.fire({
                         title: 'Konfirmasi Pemindahan',
-                        html: `Anda akan memindahkan <b>${checkboxes.length} siswa</b> ke kelas baru. Yakin ingin melanjutkan?`,
+                        html: `Anda akan memproses <b>${checkboxes.length} siswa</b> untuk Tahun Ajaran <b>${this.academicYear}</b>. Yakin ingin melanjutkan?`,
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonColor: '#3b82f6',
                         cancelButtonColor: '#94a3b8',
-                        confirmButtonText: 'Ya, Pindahkan',
+                        confirmButtonText: 'Ya, Lanjutkan',
                         cancelButtonText: 'Batal',
                         reverseButtons: true,
                         customClass: { popup: 'rounded-3xl' }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            // Tampilkan loading
                             Swal.fire({
                                 title: 'Memproses Data...',
                                 text: 'Mohon tunggu sebentar',
@@ -262,7 +294,6 @@
                                 didOpen: () => { Swal.showLoading(); },
                                 customClass: { popup: 'rounded-3xl' }
                             });
-                            // Submit Form
                             document.getElementById('promotionForm').submit();
                         }
                     });
@@ -270,7 +301,6 @@
             }));
         });
 
-        // Flash Message SweetAlert
         document.addEventListener('DOMContentLoaded', function() {
             @if(session('success'))
                 Swal.fire({

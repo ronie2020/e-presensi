@@ -88,6 +88,13 @@
                             <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100 mb-6 flex flex-col md:flex-row items-end gap-4 relative overflow-hidden">
                                 
                                 
+                                <div class="w-full md:w-48 relative z-10 shrink-0">
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tahun Ajaran</label>
+                                    <input type="text" name="academic_year" x-model="academicYear" placeholder="Cth: 2024/2025" required 
+                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-sm text-slate-700 focus:ring-blue-500 h-12 transition-all">
+                                </div>
+
+                                
                                 <div class="flex-1 w-full relative z-10">
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tujuan Pemindahan</label>
                                     <div class="flex gap-3">
@@ -101,6 +108,10 @@
                                                         <option value="<?php echo e($class->id); ?>">Pindahkan ke <?php echo e($class->name); ?></option>
                                                     <?php endif; ?>
                                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            </optgroup>
+
+                                            <optgroup label="Kelulusan">
+                                                <option value="alumni">Luluskan Siswa (Jadikan Alumni)</option>
                                             </optgroup>
                                         </select>
                                     </div>
@@ -159,10 +170,21 @@
 
                                                 </td>
                                                 <td class="px-6 py-4">
-                                                    <span class="inline-flex px-2 py-1 rounded-lg text-[10px] font-bold <?php echo e($student->gender == 'L' ? 'bg-blue-50 text-blue-600' : 'bg-rose-50 text-rose-600'); ?>">
-                                                        <?php echo e($student->gender == 'L' ? 'Laki-laki' : 'Perempuan'); ?>
-
-                                                    </span>
+                                                    
+                                                    <?php if($student->gender === 'L'): ?>
+                                                        <span class="inline-flex px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-600">
+                                                            Laki-laki
+                                                        </span>
+                                                    <?php elseif($student->gender === 'P'): ?>
+                                                        <span class="inline-flex px-2 py-1 rounded-lg text-[10px] font-bold bg-rose-50 text-rose-600">
+                                                            Perempuan
+                                                        </span>
+                                                    <?php else: ?>
+                                                        
+                                                        <span class="inline-flex px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-500">
+                                                            Belum Diisi
+                                                        </span>
+                                                    <?php endif; ?>
                                                 </td>
                                             </tr>
                                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -204,9 +226,9 @@
             Alpine.data('promotionApp', () => ({
                 checkAll: true,
                 targetAction: '',
+                academicYear: '',
                 
                 init() {
-                    // Otomatis centang semua saat halaman diload
                     this.toggleAll();
                 },
                 
@@ -230,13 +252,23 @@
                 },
 
                 confirmProcess() {
-                    // Validasi lokal sebelum submit
                     const checkboxes = document.querySelectorAll('.student-checkbox:checked');
                     if (checkboxes.length === 0) {
                         Swal.fire({
                             icon: 'warning',
                             title: 'Pilih Siswa',
                             text: 'Silakan centang minimal satu siswa untuk diproses.',
+                            confirmButtonColor: '#3b82f6',
+                            customClass: { popup: 'rounded-3xl' }
+                        });
+                        return;
+                    }
+
+                    if (this.academicYear.trim() === '') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Tahun Ajaran Kosong',
+                            text: 'Silakan isi Tahun Ajaran terlebih dahulu (Contoh: 2024/2025).',
                             confirmButtonColor: '#3b82f6',
                             customClass: { popup: 'rounded-3xl' }
                         });
@@ -256,18 +288,17 @@
 
                     Swal.fire({
                         title: 'Konfirmasi Pemindahan',
-                        html: `Anda akan memindahkan <b>${checkboxes.length} siswa</b> ke kelas baru. Yakin ingin melanjutkan?`,
+                        html: `Anda akan memproses <b>${checkboxes.length} siswa</b> untuk Tahun Ajaran <b>${this.academicYear}</b>. Yakin ingin melanjutkan?`,
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonColor: '#3b82f6',
                         cancelButtonColor: '#94a3b8',
-                        confirmButtonText: 'Ya, Pindahkan',
+                        confirmButtonText: 'Ya, Lanjutkan',
                         cancelButtonText: 'Batal',
                         reverseButtons: true,
                         customClass: { popup: 'rounded-3xl' }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            // Tampilkan loading
                             Swal.fire({
                                 title: 'Memproses Data...',
                                 text: 'Mohon tunggu sebentar',
@@ -275,7 +306,6 @@
                                 didOpen: () => { Swal.showLoading(); },
                                 customClass: { popup: 'rounded-3xl' }
                             });
-                            // Submit Form
                             document.getElementById('promotionForm').submit();
                         }
                     });
@@ -283,7 +313,6 @@
             }));
         });
 
-        // Flash Message SweetAlert
         document.addEventListener('DOMContentLoaded', function() {
             <?php if(session('success')): ?>
                 Swal.fire({
