@@ -114,15 +114,34 @@ class CbtController extends Controller
     }
 
     /**
-     * Hapus Data Ujian
+     * Hapus Data Ujian (Dan Seluruh Soalnya beserta Gambarnya)
      */
     public function destroy($id)
     {
         $exam = CbtExam::with('questions')->findOrFail($id);
 
         foreach ($exam->questions as $question) {
+            // Hapus gambar utama
             if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
                 Storage::delete('public/' . $question->question_image);
+            }
+            
+            // Hapus gambar opsi & menjodohkan
+            $opts = is_string($question->options) ? json_decode($question->options, true) : ($question->options ?? []);
+            foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
+                if(isset($opts["image_$opt"]) && Storage::exists('public/' . $opts["image_$opt"])) {
+                    Storage::delete('public/' . $opts["image_$opt"]);
+                }
+            }
+            if(isset($opts['pairs'])) {
+                foreach($opts['pairs'] as $pair) {
+                    if(isset($pair['left_image']) && Storage::exists('public/' . $pair['left_image'])) {
+                        Storage::delete('public/' . $pair['left_image']);
+                    }
+                    if(isset($pair['right_image']) && Storage::exists('public/' . $pair['right_image'])) {
+                        Storage::delete('public/' . $pair['right_image']);
+                    }
+                }
             }
         }
         
@@ -165,10 +184,20 @@ class CbtController extends Controller
 
         if ($type === 'choice') {
             $request->validate(['correct_answer' => 'required']);
-            $options = array_filter([
+            
+            $options = [
                 'A' => $request->option_A, 'B' => $request->option_B, 
                 'C' => $request->option_C, 'D' => $request->option_D, 'E' => $request->option_E
-            ], fn($v) => !is_null($v) && $v !== '');
+            ];
+            
+            // Upload gambar opsi jika ada
+            foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
+                if ($request->hasFile("image_$opt")) {
+                    $options["image_$opt"] = $request->file("image_$opt")->store('soal', 'public');
+                }
+            }
+            
+            $options = array_filter($options, fn($v) => !is_null($v) && $v !== '');
             $correctAnswer = $request->correct_answer;
 
         } elseif ($type === 'true_false') {
@@ -180,10 +209,30 @@ class CbtController extends Controller
             $pairs = [];
             $correctMap = [];
             if($request->has('matches')) {
-                foreach($request->matches as $match) {
-                    if(!empty($match['left']) && !empty($match['right'])) {
-                        $pairs[] = ['left' => $match['left'], 'right' => $match['right']];
-                        $correctMap[$match['left']] = $match['right'];
+                foreach($request->matches as $index => $match) {
+                    $leftText = $match['left'] ?? '';
+                    $rightText = $match['right'] ?? '';
+                    
+                    $leftImgPath = null;
+                    $rightImgPath = null;
+
+                    if ($request->hasFile("matches.$index.left_image")) {
+                        $leftImgPath = $request->file("matches.$index.left_image")->store('soal', 'public');
+                    }
+                    if ($request->hasFile("matches.$index.right_image")) {
+                        $rightImgPath = $request->file("matches.$index.right_image")->store('soal', 'public');
+                    }
+
+                    // Hanya masukkan pasangan jika ada teks ATAU gambar yang diinput
+                    if(!empty($leftText) || !empty($rightText) || $leftImgPath || $rightImgPath) {
+                        $pairs[] = [
+                            'left' => $leftText, 'right' => $rightText,
+                            'left_image' => $leftImgPath, 'right_image' => $rightImgPath
+                        ];
+                        
+                        $keyLeft = !empty($leftText) ? $leftText : 'IMG_LEFT_'.$index;
+                        $keyRight = !empty($rightText) ? $rightText : 'IMG_RIGHT_'.$index;
+                        $correctMap[$keyLeft] = $keyRight;
                     }
                 }
             }
@@ -238,10 +287,38 @@ class CbtController extends Controller
         $correctAnswer = ''; 
 
         if ($type === 'choice') {
-            $options = array_filter([
+            $options = [
                 'A' => $request->option_A, 'B' => $request->option_B, 
                 'C' => $request->option_C, 'D' => $request->option_D, 'E' => $request->option_E
-            ], fn($v) => !is_null($v) && $v !== '');
+            ];
+
+            // Ambil opsi lama untuk mempertahankan gambar yang sudah ada
+            $oldOptions = is_string($question->options) ? json_decode($question->options, true) : ($question->options ?? []);
+
+            foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
+                $imgKey = "image_$opt";
+                $deleteKey = "delete_image_$opt";
+
+                // Pertahankan gambar lama dulu
+                if (isset($oldOptions[$imgKey])) {
+                    $options[$imgKey] = $oldOptions[$imgKey];
+                }
+
+                // Jika user mencentang hapus ATAU mengupload file baru, hapus file fisik lama
+                if (($request->has($deleteKey) && $request->$deleteKey == 'true') || $request->hasFile($imgKey)) {
+                    if (isset($oldOptions[$imgKey]) && Storage::exists('public/' . $oldOptions[$imgKey])) {
+                        Storage::delete('public/' . $oldOptions[$imgKey]);
+                    }
+                    unset($options[$imgKey]); 
+                }
+
+                // Jika ada file baru diupload, simpan ke storage
+                if ($request->hasFile($imgKey)) {
+                    $options[$imgKey] = $request->file($imgKey)->store('soal', 'public');
+                }
+            }
+
+            $options = array_filter($options, fn($v) => !is_null($v) && $v !== '');
             $correctAnswer = $request->correct_answer;
 
         } elseif ($type === 'true_false') {
@@ -251,11 +328,51 @@ class CbtController extends Controller
         } elseif ($type === 'matching') {
             $pairs = [];
             $correctMap = [];
+            
+            $oldOptions = is_string($question->options) ? json_decode($question->options, true) : ($question->options ?? []);
+            $oldPairs = $oldOptions['pairs'] ?? [];
+
             if($request->has('matches')) {
-                foreach($request->matches as $match) {
-                    if(!empty($match['left']) && !empty($match['right'])) {
-                        $pairs[] = ['left' => $match['left'], 'right' => $match['right']];
-                        $correctMap[$match['left']] = $match['right'];
+                foreach($request->matches as $index => $match) {
+                    $leftText = $match['left'] ?? '';
+                    $rightText = $match['right'] ?? '';
+                    
+                    $leftImgPath = null;
+                    $rightImgPath = null;
+
+                    // Lakukan logika replace/delete pada Gambar Kiri
+                    if (isset($oldPairs[$index]['left_image'])) {
+                        $leftImgPath = $oldPairs[$index]['left_image']; 
+                    }
+                    if ((isset($match['delete_left_image']) && $match['delete_left_image'] == 'true') || $request->hasFile("matches.$index.left_image")) {
+                        if ($leftImgPath && Storage::exists('public/' . $leftImgPath)) Storage::delete('public/' . $leftImgPath);
+                        $leftImgPath = null;
+                    }
+                    if ($request->hasFile("matches.$index.left_image")) {
+                        $leftImgPath = $request->file("matches.$index.left_image")->store('soal', 'public');
+                    }
+
+                    // Lakukan logika replace/delete pada Gambar Kanan
+                    if (isset($oldPairs[$index]['right_image'])) {
+                        $rightImgPath = $oldPairs[$index]['right_image'];
+                    }
+                    if ((isset($match['delete_right_image']) && $match['delete_right_image'] == 'true') || $request->hasFile("matches.$index.right_image")) {
+                        if ($rightImgPath && Storage::exists('public/' . $rightImgPath)) Storage::delete('public/' . $rightImgPath);
+                        $rightImgPath = null;
+                    }
+                    if ($request->hasFile("matches.$index.right_image")) {
+                        $rightImgPath = $request->file("matches.$index.right_image")->store('soal', 'public');
+                    }
+
+                    if(!empty($leftText) || !empty($rightText) || $leftImgPath || $rightImgPath) {
+                        $pairs[] = [
+                            'left' => $leftText, 'right' => $rightText,
+                            'left_image' => $leftImgPath, 'right_image' => $rightImgPath
+                        ];
+                        
+                        $keyLeft = !empty($leftText) ? $leftText : 'IMG_LEFT_'.$index;
+                        $keyRight = !empty($rightText) ? $rightText : 'IMG_RIGHT_'.$index;
+                        $correctMap[$keyLeft] = $keyRight;
                     }
                 }
             }
@@ -284,6 +401,26 @@ class CbtController extends Controller
         
         if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
             Storage::delete('public/' . $question->question_image);
+        }
+
+        $opts = is_string($question->options) ? json_decode($question->options, true) : ($question->options ?? []);
+        
+        // Hapus Gambar Pilihan Ganda
+        foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
+            if(isset($opts["image_$opt"]) && Storage::exists('public/' . $opts["image_$opt"])) {
+                Storage::delete('public/' . $opts["image_$opt"]);
+            }
+        }
+        // Hapus Gambar Menjodohkan
+        if(isset($opts['pairs'])) {
+            foreach($opts['pairs'] as $pair) {
+                if(isset($pair['left_image']) && Storage::exists('public/' . $pair['left_image'])) {
+                    Storage::delete('public/' . $pair['left_image']);
+                }
+                if(isset($pair['right_image']) && Storage::exists('public/' . $pair['right_image'])) {
+                    Storage::delete('public/' . $pair['right_image']);
+                }
+            }
         }
         
         $question->delete();

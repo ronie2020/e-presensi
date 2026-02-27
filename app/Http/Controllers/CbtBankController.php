@@ -6,9 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\CbtQuestionBank;
 use App\Models\CbtQuestion;
 use App\Models\CbtExam;
-use App\Models\Subject; // PENTING: Import Model Subject
+use App\Models\Subject;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str; // PERBAIKAN: Gunakan Support Class langsung
+use Illuminate\Support\Str; 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB; 
 
@@ -19,13 +19,10 @@ class CbtBankController extends Controller
      */
     public function index()
     {
-        // Ambil data Bank Soal
         $banks = CbtQuestionBank::withCount('questions')
             ->orderBy('created_at', 'desc')
             ->get();
         
-        // TAMBAHAN: Ambil data Mata Pelajaran dari database untuk dropdown di modal create
-        // Pastikan tabel 'subjects' sudah ada (sesuai SubjectController Anda)
         $subjects = Subject::orderBy('order', 'asc')->get();
             
         return view('cbt.bank.index', compact('banks', 'subjects'));
@@ -63,11 +60,10 @@ class CbtBankController extends Controller
     }
 
     /**
-     * [UPDATE] Simpan Soal Baru ke Bank Soal (Support Multi-Tipe)
+     * Simpan Soal Baru ke Bank Soal (Support Multi-Tipe & Gambar Opsi)
      */
     public function storeQuestion(Request $request, $bank_id)
     {
-        // 1. Validasi Umum
         $request->validate([
             'question_type' => 'required|in:choice,essay,true_false,matching',
             'question_text' => 'required',
@@ -75,7 +71,6 @@ class CbtBankController extends Controller
             'question_image' => 'nullable|image|max:2048'
         ]);
 
-        // 2. Handle Upload Gambar
         $imagePath = null;
         if ($request->hasFile('question_image')) {
             $imagePath = $request->file('question_image')->store('soal', 'public');
@@ -85,14 +80,21 @@ class CbtBankController extends Controller
         $options = [];
         $correctAnswer = '';
 
-        // 3. Logika Data Berdasarkan Tipe Soal
         if ($type === 'choice') {
             $request->validate(['correct_answer' => 'required']);
-            // Filter opsi kosong
-            $options = array_filter([
+            
+            $options = [
                 'A' => $request->option_A, 'B' => $request->option_B, 
                 'C' => $request->option_C, 'D' => $request->option_D, 'E' => $request->option_E
-            ], fn($v) => !is_null($v) && $v !== '');
+            ];
+            
+            foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
+                if ($request->hasFile("image_$opt")) {
+                    $options["image_$opt"] = $request->file("image_$opt")->store('soal', 'public');
+                }
+            }
+            
+            $options = array_filter($options, fn($v) => !is_null($v) && $v !== '');
             $correctAnswer = $request->correct_answer;
 
         } elseif ($type === 'true_false') {
@@ -101,14 +103,32 @@ class CbtBankController extends Controller
             $correctAnswer = $request->correct_answer;
 
         } elseif ($type === 'matching') {
-            // Format JSON untuk Menjodohkan
             $pairs = [];
             $correctMap = [];
             if($request->has('matches')) {
-                foreach($request->matches as $match) {
-                    if(!empty($match['left']) && !empty($match['right'])) {
-                        $pairs[] = ['left' => $match['left'], 'right' => $match['right']];
-                        $correctMap[$match['left']] = $match['right'];
+                foreach($request->matches as $index => $match) {
+                    $leftText = $match['left'] ?? '';
+                    $rightText = $match['right'] ?? '';
+                    
+                    $leftImgPath = null;
+                    $rightImgPath = null;
+
+                    if ($request->hasFile("matches.$index.left_image")) {
+                        $leftImgPath = $request->file("matches.$index.left_image")->store('soal', 'public');
+                    }
+                    if ($request->hasFile("matches.$index.right_image")) {
+                        $rightImgPath = $request->file("matches.$index.right_image")->store('soal', 'public');
+                    }
+
+                    if(!empty($leftText) || !empty($rightText) || $leftImgPath || $rightImgPath) {
+                        $pairs[] = [
+                            'left' => $leftText, 'right' => $rightText,
+                            'left_image' => $leftImgPath, 'right_image' => $rightImgPath
+                        ];
+                        
+                        $keyLeft = !empty($leftText) ? $leftText : 'IMG_LEFT_'.$index;
+                        $keyRight = !empty($rightText) ? $rightText : 'IMG_RIGHT_'.$index;
+                        $correctMap[$keyLeft] = $keyRight;
                     }
                 }
             }
@@ -120,14 +140,13 @@ class CbtBankController extends Controller
             $correctAnswer = $request->correct_answer ?? ''; 
         }
 
-        // 4. Simpan ke Database
         CbtQuestion::create([
             'cbt_question_bank_id' => $bank_id,
-            'cbt_exam_id' => null, // Masuk ke Bank, bukan Ujian langsung
+            'cbt_exam_id' => null, 
             'question_type' => $type,
             'question_text' => $request->question_text,
             'question_image' => $imagePath,
-            'options' => $options, // Otomatis jadi JSON via Casts di Model
+            'options' => $options, 
             'correct_answer' => $correctAnswer,
             'score_weight' => $request->score_weight
         ]);
@@ -136,7 +155,7 @@ class CbtBankController extends Controller
     }
 
      /**
-     * [BARU] Update Soal (Untuk mengatasi error Route update)
+     * Update Soal (Support Hapus/Ganti Gambar Opsi)
      */
     public function updateQuestion(Request $request, $id)
     {
@@ -147,7 +166,6 @@ class CbtBankController extends Controller
             'score_weight' => 'required|integer|min:1',
         ]);
 
-        // Handle Image Update
         if ($request->has('delete_image') && $request->delete_image == 'true') {
             if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
                 Storage::delete('public/' . $question->question_image);
@@ -161,17 +179,39 @@ class CbtBankController extends Controller
             $question->question_image = $request->file('question_image')->store('soal', 'public');
         }
 
-        // Gunakan tipe baru jika ada, atau tetap tipe lama
         $type = $request->question_type ?? $question->question_type;
         $options = [];
         $correctAnswer = '';
 
-        // Logika Update Berdasarkan Tipe
         if ($type === 'choice') {
-            $options = array_filter([
+            $options = [
                 'A' => $request->option_A, 'B' => $request->option_B, 
                 'C' => $request->option_C, 'D' => $request->option_D, 'E' => $request->option_E
-            ], fn($v) => !is_null($v) && $v !== '');
+            ];
+
+            $oldOptions = is_string($question->options) ? json_decode($question->options, true) : ($question->options ?? []);
+
+            foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
+                $imgKey = "image_$opt";
+                $deleteKey = "delete_image_$opt";
+
+                if (isset($oldOptions[$imgKey])) {
+                    $options[$imgKey] = $oldOptions[$imgKey];
+                }
+
+                if (($request->has($deleteKey) && $request->$deleteKey == 'true') || $request->hasFile($imgKey)) {
+                    if (isset($oldOptions[$imgKey]) && Storage::exists('public/' . $oldOptions[$imgKey])) {
+                        Storage::delete('public/' . $oldOptions[$imgKey]);
+                    }
+                    unset($options[$imgKey]); 
+                }
+
+                if ($request->hasFile($imgKey)) {
+                    $options[$imgKey] = $request->file($imgKey)->store('soal', 'public');
+                }
+            }
+
+            $options = array_filter($options, fn($v) => !is_null($v) && $v !== '');
             $correctAnswer = $request->correct_answer;
 
         } elseif ($type === 'true_false') {
@@ -181,11 +221,51 @@ class CbtBankController extends Controller
         } elseif ($type === 'matching') {
             $pairs = [];
             $correctMap = [];
+            
+            $oldOptions = is_string($question->options) ? json_decode($question->options, true) : ($question->options ?? []);
+            $oldPairs = $oldOptions['pairs'] ?? [];
+
             if($request->has('matches')) {
-                foreach($request->matches as $match) {
-                    if(!empty($match['left']) && !empty($match['right'])) {
-                        $pairs[] = ['left' => $match['left'], 'right' => $match['right']];
-                        $correctMap[$match['left']] = $match['right'];
+                foreach($request->matches as $index => $match) {
+                    $leftText = $match['left'] ?? '';
+                    $rightText = $match['right'] ?? '';
+                    
+                    $leftImgPath = null;
+                    $rightImgPath = null;
+
+                    // Logika replace/hapus Gambar Kiri
+                    if (isset($oldPairs[$index]['left_image'])) {
+                        $leftImgPath = $oldPairs[$index]['left_image']; 
+                    }
+                    if ((isset($match['delete_left_image']) && $match['delete_left_image'] == 'true') || $request->hasFile("matches.$index.left_image")) {
+                        if ($leftImgPath && Storage::exists('public/' . $leftImgPath)) Storage::delete('public/' . $leftImgPath);
+                        $leftImgPath = null;
+                    }
+                    if ($request->hasFile("matches.$index.left_image")) {
+                        $leftImgPath = $request->file("matches.$index.left_image")->store('soal', 'public');
+                    }
+
+                    // Logika replace/hapus Gambar Kanan
+                    if (isset($oldPairs[$index]['right_image'])) {
+                        $rightImgPath = $oldPairs[$index]['right_image'];
+                    }
+                    if ((isset($match['delete_right_image']) && $match['delete_right_image'] == 'true') || $request->hasFile("matches.$index.right_image")) {
+                        if ($rightImgPath && Storage::exists('public/' . $rightImgPath)) Storage::delete('public/' . $rightImgPath);
+                        $rightImgPath = null;
+                    }
+                    if ($request->hasFile("matches.$index.right_image")) {
+                        $rightImgPath = $request->file("matches.$index.right_image")->store('soal', 'public');
+                    }
+
+                    if(!empty($leftText) || !empty($rightText) || $leftImgPath || $rightImgPath) {
+                        $pairs[] = [
+                            'left' => $leftText, 'right' => $rightText,
+                            'left_image' => $leftImgPath, 'right_image' => $rightImgPath
+                        ];
+                        
+                        $keyLeft = !empty($leftText) ? $leftText : 'IMG_LEFT_'.$index;
+                        $keyRight = !empty($rightText) ? $rightText : 'IMG_RIGHT_'.$index;
+                        $correctMap[$keyLeft] = $keyRight;
                     }
                 }
             }
@@ -200,7 +280,7 @@ class CbtBankController extends Controller
         $question->update([
             'question_type' => $type,
             'question_text' => $request->question_text,
-            'question_image' => $question->question_image, // Pastikan tersimpan
+            'question_image' => $question->question_image, 
             'options' => $options,
             'correct_answer' => $correctAnswer,
             'score_weight' => $request->score_weight
@@ -214,9 +294,33 @@ class CbtBankController extends Controller
      */
     public function destroy($id)
     {
-        $bank = CbtQuestionBank::findOrFail($id);
+        $bank = CbtQuestionBank::with('questions')->findOrFail($id);
+        
+        // Bersihkan storage gambar saat Bank Soal dihapus
+        foreach ($bank->questions as $question) {
+            if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
+                Storage::delete('public/' . $question->question_image);
+            }
+            $opts = is_string($question->options) ? json_decode($question->options, true) : ($question->options ?? []);
+            foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
+                if(isset($opts["image_$opt"]) && Storage::exists('public/' . $opts["image_$opt"])) {
+                    Storage::delete('public/' . $opts["image_$opt"]);
+                }
+            }
+            if(isset($opts['pairs'])) {
+                foreach($opts['pairs'] as $pair) {
+                    if(isset($pair['left_image']) && Storage::exists('public/' . $pair['left_image'])) {
+                        Storage::delete('public/' . $pair['left_image']);
+                    }
+                    if(isset($pair['right_image']) && Storage::exists('public/' . $pair['right_image'])) {
+                        Storage::delete('public/' . $pair['right_image']);
+                    }
+                }
+            }
+        }
+
         $bank->delete();
-        return back()->with('success', 'Bank soal berhasil dihapus.');
+        return back()->with('success', 'Bank soal beserta seluruh soal di dalamnya berhasil dihapus.');
     }
 
     /**
@@ -226,19 +330,33 @@ class CbtBankController extends Controller
     {
         $q = CbtQuestion::findOrFail($id);
         if($q->cbt_question_bank_id) {
-            // Hapus gambar jika ada
+            
             if ($q->question_image && Storage::exists('public/' . $q->question_image)) {
                 Storage::delete('public/' . $q->question_image);
             }
+            
+            $opts = is_string($q->options) ? json_decode($q->options, true) : ($q->options ?? []);
+            foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
+                if(isset($opts["image_$opt"]) && Storage::exists('public/' . $opts["image_$opt"])) {
+                    Storage::delete('public/' . $opts["image_$opt"]);
+                }
+            }
+            if(isset($opts['pairs'])) {
+                foreach($opts['pairs'] as $pair) {
+                    if(isset($pair['left_image']) && Storage::exists('public/' . $pair['left_image'])) {
+                        Storage::delete('public/' . $pair['left_image']);
+                    }
+                    if(isset($pair['right_image']) && Storage::exists('public/' . $pair['right_image'])) {
+                        Storage::delete('public/' . $pair['right_image']);
+                    }
+                }
+            }
+
             $q->delete();
             return back()->with('success', 'Soal dihapus dari bank.');
         }
         return back()->with('error', 'Soal tidak valid.');
     }
-
-    // =================================================================
-    //  FITUR INTEGRASI UJIAN <-> BANK SOAL
-    // =================================================================
     
     public function storeFromExam(Request $request, $exam_id)
     {
@@ -251,8 +369,6 @@ class CbtBankController extends Controller
         DB::beginTransaction();
         try {
             $targetBankId = null;
-
-            // Opsi 1: Buat Bank Baru
             if ($request->mode === 'new') {
                 $request->validate(['new_title' => 'required']);
                 
@@ -265,13 +381,11 @@ class CbtBankController extends Controller
                 ]);
                 $targetBankId = $newBank->id;
             } 
-            // Opsi 2: Gabung ke Bank Lama
             else {
                 $request->validate(['bank_id' => 'required']);
                 $targetBankId = $request->bank_id;
             }
 
-            // Proses Duplikasi Soal
             $count = 0;
             foreach ($exam->questions as $q) {               
                 $newQ = $q->replicate();
@@ -290,8 +404,6 @@ class CbtBankController extends Controller
         }
     }
 
-    /** * Mengcopy semua soal DARI Bank Soal KE Ujian
-     */
     public function importToExam(Request $request, $exam_id)
     {
         $request->validate(['bank_id' => 'required']);
@@ -308,8 +420,6 @@ class CbtBankController extends Controller
             $count = 0;
             foreach ($bank->questions as $q) {
                 $newQ = $q->replicate();
-                
-                // Ubah relasi: Dari Bank -> Ke Ujian
                 $newQ->cbt_question_bank_id = null;
                 $newQ->cbt_exam_id = $exam->id;
                 
