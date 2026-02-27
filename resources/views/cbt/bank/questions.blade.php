@@ -520,6 +520,12 @@
                                 </template>
                             </div>
 
+                            {{-- Bobot Nilai (EDIT) - INI YANG SEBELUMNYA HILANG --}}
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Bobot Nilai</label>
+                                <input type="number" name="score_weight" x-model="editState.score_weight" required class="w-full rounded-xl border-slate-200 bg-white text-sm font-bold text-center h-11 focus:ring-indigo-500">
+                            </div>
+
                             <div class="grid grid-cols-2 gap-4">
                                 {{-- Tombol Simpan --}}
                                 <div class="col-span-2 flex justify-end gap-3 mt-4">
@@ -552,6 +558,24 @@
             });
             @if(session('success'))
                 Swal.fire({ icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}", toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, customClass: { popup: 'rounded-xl' } });
+            @endif
+
+            {{-- TAMBAHAN: Tampilkan Pesan Error Validasi Backend --}}
+            @if($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Menyimpan!',
+                    html: `
+                        <div class="text-sm text-rose-500 font-medium text-left mt-2">
+                            <ul class="list-disc list-inside">
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    `,
+                    customClass: { popup: 'rounded-[2rem]' }
+                });
             @endif
         });
         function viewImage(url) {
