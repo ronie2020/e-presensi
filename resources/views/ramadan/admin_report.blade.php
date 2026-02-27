@@ -89,7 +89,7 @@
         setScore(value) { this.currentScore = value; }
     }" class="page-container p-4 md:p-8 space-y-8 min-h-screen bg-slate-50 font-jakarta print-container">
         
-        {{-- HERO SECTION --}}
+       {{-- HERO SECTION --}}
         <div class="animate-enter relative rounded-[3rem] bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900 p-8 md:p-12 text-white shadow-2xl shadow-emerald-900/30 overflow-hidden group border border-white/10 no-print">
             <div class="absolute top-0 right-0 -mt-20 -mr-20 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[100px] group-hover:opacity-40 transition-opacity duration-1000 hero-decoration"></div>
             <div class="absolute bottom-0 left-0 -mb-20 -ml-20 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-[80px] hero-decoration"></div>
@@ -152,11 +152,23 @@
                         </div>
                     </form>
                     
+                    {{-- TOMBOL HANYA MUNCUL JIKA KELAS DIPILIH --}}
                     @if($selectedClass)
-                        <button onclick="window.print()" class="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-[1.5rem] font-bold shadow-lg flex items-center justify-center gap-3 transition-all active:scale-95 border border-white/10">
-                            <i class="ph-bold ph-printer text-lg"></i>
-                            <span class="uppercase tracking-wider text-xs">Cetak Laporan Kelas</span>
-                        </button>
+                        <div class="grid grid-cols-2 gap-3 mt-2">
+                            {{-- Tombol Cetak Harian --}}
+                            <button onclick="window.print()" class="w-full py-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 border border-white/10">
+                                <i class="ph-bold ph-printer text-lg"></i>
+                                <span class="uppercase tracking-wider text-[10px]">Cetak Harian</span>
+                            </button>
+
+                            {{-- Tombol Cetak Rekap Sebulan (Membuka Tab Baru ke template KOP Surat) --}}
+                            <a href="{{ route('admin.ramadan.exportPdf', ['class_id' => $selectedClass, 'month' => \Carbon\Carbon::parse($date)->format('Y-m')]) }}" 
+                               target="_blank"
+                               class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 border border-white/10">
+                                <i class="ph-bold ph-calendar-check text-lg"></i>
+                                <span class="uppercase tracking-wider text-[10px]">Rekap Sebulan</span>
+                            </a>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -215,7 +227,6 @@
             <h2 class="text-xl font-bold uppercase">Laporan Harian Mutabaah Ramadhan</h2>
             <p class="text-sm">{{ $classes->find($selectedClass)->name ?? 'Semua Kelas' }} &bull; {{ \Carbon\Carbon::parse($date)->isoFormat('dddd, D MMMM Y') }}</p>
         </div>
-
         {{-- KONTEN UTAMA --}}
         @if($selectedClass)
             {{-- === TAMPILAN TABEL KELAS (JIKA KELAS DIPILIH) === --}}

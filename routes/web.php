@@ -85,6 +85,7 @@ use App\Http\Controllers\BkTeacherController;
 
 // CONTROLLER RAMADAN LOG
 use App\Http\Controllers\RamadanLogController;
+use App\Http\Controllers\RamadanReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -596,9 +597,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/teacher/habits/feedback/{id}', [TeacherHabitController::class, 'feedback'])->name('teacher.habits.feedback');
 
   // RAMADHAN ADMIN (Rekap Guru)
-    Route::prefix('admin/ramadan')->name('admin.ramadan.')->group(function() {
+   Route::prefix('admin/ramadan')->name('admin.ramadan.')->group(function() {
         Route::get('/reports', [RamadanLogController::class, 'adminReport'])->name('reports');
-        Route::post('/verify/{id}', [RamadanLogController::class, 'verifyFriday'])->name('verify');
+        Route::post('/verify/{id}', [RamadanLogController::class, 'verifyFriday'])->name('verify');       
+        Route::get('/export-pdf', [RamadanReportController::class, 'exportPdf'])->name('exportPdf');
     });
 });
 
