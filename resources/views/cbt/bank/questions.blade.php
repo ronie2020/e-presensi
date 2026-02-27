@@ -387,7 +387,7 @@
                         @endforelse
                         
                         {{-- Pesan jika pencarian tidak ditemukan --}}
-                        <div x-show="questionSearch !== '' && document.querySelectorAll('[data-search]:not([style*='display: none'])').length === 0" class="text-center py-10" style="display: none;">
+                        <div x-show="questionSearch !== '' && document.querySelectorAll('[data-search]:not([style*=\'display: none\'])').length === 0" class="text-center py-10" style="display: none;">
                             <p class="text-slate-400 font-bold">Tidak ada soal yang cocok dengan kata kunci tersebut.</p>
                         </div>
                     </div>
