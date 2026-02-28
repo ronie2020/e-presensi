@@ -60,7 +60,7 @@ class StudentsExport implements FromCollection, WithHeadings, WithMapping, Shoul
             $student->schoolClass ? $student->schoolClass->name : '-',
             $student->gender,
             $student->pob,
-            $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d-m-Y') : '-',
+            $student->dob ? $student->dob->format('d-m-Y') : '-',
             $student->religion,
             $student->address,
             $student->father_name,

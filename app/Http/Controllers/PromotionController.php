@@ -39,22 +39,24 @@ class PromotionController extends Controller
      */
     public function process(Request $request)
     {
-        // 1. Validasi Input (Ditambahkan academic_year dan perbaikan validasi target)
+        // 1. Validasi Input (Regex ditambahkan kembali untuk proteksi format tahun ajaran)
         $request->validate([
             'from_class_id' => 'required|exists:classes,id',
             'student_ids' => 'required|array',
             'student_ids.*' => 'exists:students,id',
             'target_action' => 'required',
-            'academic_year' => 'required|string'
+            'academic_year' => ['required', 'string', 'regex:/^\d{4}\/\d{4}$/'] // Format harus YYYY/YYYY
         ], [
             'student_ids.required' => 'Pilih minimal satu siswa yang akan diproses.',
             'target_action.required' => 'Pilih kelas tujuan atau kelulusan.',
-            'academic_year.required' => 'Tahun ajaran wajib diisi.'
+            'academic_year.required' => 'Tahun ajaran wajib diisi.',
+            'academic_year.regex' => 'Format Tahun Ajaran tidak valid (Gunakan format: 2024/2025).'
         ]);
 
         $studentIds = $request->student_ids;
         $count = count($studentIds);
 
+        // Menggunakan Database Transaction (Sangat Bagus!)
         DB::beginTransaction();
         try {
             if ($request->target_action === 'alumni') {
@@ -63,7 +65,8 @@ class PromotionController extends Controller
                 // ==========================================
                 Student::whereIn('id', $studentIds)->update([
                     'status' => 'graduated',
-                    'class_id' => null
+                    'class_id' => null,
+                    'graduated_date' => now() // Tambahkan tanggal lulus otomatis
                 ]);
                 
                 $message = "Berhasil! {$count} Siswa telah diluluskan dan menjadi alumni.";
@@ -80,18 +83,20 @@ class PromotionController extends Controller
 
                 // 1. Update kelas saat ini di tabel Students
                 Student::whereIn('id', $studentIds)->update([
-                    'class_id' => $targetClass->id
+                    'class_id' => $targetClass->id,
+                    'status' => 'active' // Pastikan statusnya aktif (berjaga-jaga)
                 ]);
 
                 // 2. Rekam ke tabel Riwayat (Bulk Insert)
                 $historyData = [];
+                $now = now()->toDateTimeString(); // Format aman untuk bulk insert semua jenis database
                 foreach ($studentIds as $id) {
                     $historyData[] = [
                         'student_id' => $id,
                         'class_id' => $targetClass->id,
                         'academic_year' => $request->academic_year,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ];
                 }
                 \App\Models\StudentClassHistory::insert($historyData);

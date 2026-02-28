@@ -125,6 +125,24 @@ class Student extends Authenticatable
     ];
 
     /**
+     * ELOQUENT CASTS (PENTING!)
+     * Ini wajib agar di Blade kita bisa langsung pakai $student->dob->format()
+     */
+    protected $casts = [
+        'dob' => 'date',
+        'birth_date' => 'date',
+        'accepted_date' => 'date',
+        'prev_exam_date' => 'date',
+        'father_birth_year' => 'date',
+        'mother_birth_year' => 'date',
+        'guardian_dob' => 'date',
+        'graduated_date' => 'date',
+        'leaving_date' => 'date',
+        'dropout_date' => 'date',
+        'join_date' => 'date',
+    ];
+
+    /**
      * Password untuk login siswa (default menggunakan NIS/Student ID)
      */
     public function getAuthPassword()
@@ -216,8 +234,7 @@ class Student extends Authenticatable
      * Relasi ke Riwayat Akademik / Kenaikan Kelas
      */
     public function classHistories(): HasMany
-    {
-        // Mengurutkan riwayat dari yang paling baru
+    {       
         return $this->hasMany(StudentClassHistory::class, 'student_id')->latest('created_at');
     }
     

@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 
-        <title>Login - {{ config('app.name', 'SMP Negeri 3 Lakbok') }}</title>
+        <title>Login - <?php echo e(config('app.name', 'SMP Negeri 3 Lakbok')); ?></title>
         
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
         
         <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
         
         <!-- 
              OPTIMASI 1: Tambahkan 'defer'
@@ -78,7 +78,7 @@
                         <!-- Logo Section -->
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-900/50 border border-white/20 shrink-0">
-                                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-6 h-6 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                                <img src="<?php echo e(asset('images/logo.png')); ?>" alt="Logo" class="w-6 h-6 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
                                 <!-- Fallback Icon jika gambar gagal load -->
                                 <i class="ph-bold ph-buildings text-xl hidden"></i>
                             </div>
@@ -110,7 +110,7 @@
                         
                         <!-- Copyright Desktop Only -->
                         <div class="hidden md:flex mt-auto pt-6 border-t border-white/10 w-full items-center justify-between text-[10px] text-blue-300/60 font-medium">
-                            <span>&copy; {{ date('Y') }} Netila.</span>
+                            <span>&copy; <?php echo e(date('Y')); ?> Netila.</span>
                             <a href="/" class="hover:text-white transition-colors flex items-center gap-1 group">
                                 <i class="ph-bold ph-globe"></i> Website
                             </a>
@@ -137,7 +137,8 @@
 
                         <!-- Slot Form Login -->
                         <div class="relative z-10">
-                            {{ $slot }}
+                            <?php echo e($slot); ?>
+
                         </div>
 
                         <!-- Footer Links (Mobile & Desktop) -->
@@ -149,7 +150,7 @@
                             
                             <!-- Copyright Mobile Only -->
                             <p class="md:hidden text-[10px] text-slate-300 font-medium">
-                                &copy; {{ date('Y') }} SMP Negeri 3 Lakbok.
+                                &copy; <?php echo e(date('Y')); ?> SMP Negeri 3 Lakbok.
                             </p>
                         </div>
                     </div>
@@ -158,4 +159,4 @@
             </div>
         </div>
     </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/layouts/guest.blade.php ENDPATH**/ ?>

@@ -219,6 +219,42 @@ class StudentController extends Controller
         return Excel::download(new StudentsExport, 'data_siswa_buku_induk.xlsx');
     }
 
+    /**
+     * =========================================================
+     * FUNGSI BARU: Cetak Kartu OSIS Massal berdasarkan Kelas
+     * =========================================================
+     */
+    public function printBatch(Request $request)
+    {
+        $request->validate([
+            'class_id' => 'required|exists:classes,id'
+        ]);
+
+        $class = SchoolClass::find($request->class_id);
+        
+        // Panggil siswa sesuai kelas yang berstatus aktif
+        $students = Student::with('schoolClass')
+            ->where('class_id', $request->class_id)
+            ->where(function($q) {
+                $q->where('status', '!=', 'graduated')
+                  ->orWhereNull('status');
+            })
+            ->orderBy('name', 'asc')
+            ->get();
+
+        if ($students->isEmpty()) {
+            return back()->with('error', 'Tidak ada siswa aktif di kelas ini yang bisa dicetak.');
+        }
+
+        return view('students.osis_card_batch', [
+            'students' => $students,
+            'className' => $class->name
+        ]);
+    }
+
+    /**
+     * Cetak Kartu OSIS Satuan (Individu)
+     */
     public function card(Student $student)
     {
         return view('students.osis_card', compact('student')); 

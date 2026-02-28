@@ -293,14 +293,20 @@ Route::middleware('auth')->group(function () {
         Route::post('/close/{id}', [TeachingController::class, 'close'])->name('close');
     });
 
-    // Manajemen Master Data
+    // =========================================================================
+    // Manajemen Master Data (SISWA & KELAS)
+    // =========================================================================
     Route::post('/students/import', [StudentController::class, 'import'])->name('students.import');
     Route::get('/students/export', [StudentController::class, 'export'])->name('students.export'); 
+    
+    // --> ROUTE BARU: CETAK MASSAL KARTU OSIS DITAMBAHKAN DI SINI <--
+    Route::get('/students/print-batch', [StudentController::class, 'printBatch'])->name('students.printBatch');
+    
     Route::get('/students/{student}/card', [StudentController::class, 'card'])->name('students.card');
     Route::resource('students', StudentController::class); 
     Route::resource('classes', SchoolClassController::class);
 
-      // ROUTE MUTASI & KENAIKAN KELAS DI SINI ---
+    // ROUTE MUTASI & KENAIKAN KELAS DI SINI ---
     Route::prefix('promotions')->name('promotions.')->group(function () {
         Route::get('/', [PromotionController::class, 'index'])->name('index');
         Route::post('/process', [PromotionController::class, 'process'])->name('process');
