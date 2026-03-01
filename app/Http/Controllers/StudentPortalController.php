@@ -80,34 +80,27 @@ class StudentPortalController extends Controller
         // ==========================================
         
         // A. PRIORITY EXAMS (CBT) - UPDATED TO LIST
-        $priorityExams = collect([]); // Default collection kosong
+        $priorityExams = collect([]);
         
-        if (class_exists(\App\Models\CbtExam::class)) {
-            // Asumsi level kelas diambil dari kolom level atau nama kelas
+        if (class_exists(\App\Models\CbtExam::class)) {           
             $studentLevel = $student->schoolClass->level ?? filter_var($student->schoolClass->name, FILTER_SANITIZE_NUMBER_INT) ?? null;
-            
-            // Ambil ujian yang AKTIF SAAT INI
+                       
             $activeExams = \App\Models\CbtExam::where('is_active', true)
                 ->where('start_time', '<=', Carbon::now())
                 ->where('end_time', '>=', Carbon::now())
                 ->get();
-
-            // Filter manual: Cari yang BELUM selesai dikerjakan & Sesuai Kelas
-            $priorityExams = $activeExams->filter(function($exam) use ($student, $studentLevel) {
-                // Cek Level (Jika ada kolom class_level di tabel cbt_exams)
+            
+            $priorityExams = $activeExams->filter(function($exam) use ($student, $studentLevel) {                
                 if(isset($exam->class_level) && $studentLevel && $exam->class_level != $studentLevel) {
                     return false; 
                 }
-
-                // Cek apakah siswa sudah mengerjakan dan statusnya 'finished'
+                
                 $attempt = \App\Models\CbtStudentExam::where('cbt_exam_id', $exam->id)
                             ->where('student_id', $student->id)
                             ->first();
-                
-                // Tampilkan jika belum pernah ambil ATAU statusnya masih ongoing
+                                
                 return !$attempt || $attempt->status !== 'finished';
-            });
-            // HAPUS ->first() AGAR MENGEMBALIKAN SEMUA
+            });                        
         }
 
         // B. JADWAL HARI INI
@@ -130,13 +123,12 @@ class StudentPortalController extends Controller
                 ->where(function($q) {
                     $q->where('deadline', '>=', Carbon::now())
                       ->orWhere('allow_late_submission', true);
-                })
-                // Belum dikumpulkan
+                })                
                 ->whereDoesntHave('submissions', function($q) use ($id) {
                     $q->where('student_id', $id);
                 })
-                ->orderBy('deadline', 'asc') // Urutkan deadline terdekat
-                ->take(3) // Ambil 3 saja
+                ->orderBy('deadline', 'asc') 
+                ->take(3) 
                 ->get();
         }
 
@@ -155,11 +147,9 @@ class StudentPortalController extends Controller
                             ->whereNotNull('teacher_verified_at')
                             ->orderBy('date', 'desc')
                             ->first();
-
-        // LEADERBOARD LOGIC (SUPER CEPAT) - FILTER DIHAPUS AGAR SEMUA MUNCUL
+        
         $topRamadanStudents = Student::with('schoolClass')
-            ->whereHas('schoolClass')
-            // ->where('ramadan_points', '>', 0) // <--- DIHAPUS
+            ->whereHas('schoolClass')            
             ->orderByDesc('ramadan_points')
             ->take(10)
             ->get();
@@ -345,9 +335,12 @@ class StudentPortalController extends Controller
 
         // --- JURNAL 7 KEBIASAAN ---
         $todayEntry = null; $habits = collect([]); 
+        $totalPoints = 0; // [PERBAIKAN] Inisialisasi variabel totalPoints
         if (class_exists(StudentHabit::class)) {
             $todayEntry = StudentHabit::where('student_id', $id)->whereDate('report_date', Carbon::today())->first();
             $habits = StudentHabit::where('student_id', $id)->orderBy('report_date', 'desc')->get();
+            // Kalkulasi sederhana: 100 poin per hari jika mengisi jurnal
+            $totalPoints = $habits->count() * 100; 
         }
 
         // --- DATA LMS (FULL) ---
@@ -467,11 +460,11 @@ class StudentPortalController extends Controller
             $literacy_stats = ['total_books' => $total_entries, 'total_pages' => $total_pages, 'points' => $points, 'level' => $level, 'progress' => round($progress), 'next_target' => $next_target];
         }
 
-        // --- 14. COMPACT DATA ---
+         // --- 14. COMPACT DATA ---
         $data = compact(
             'student', 'isAlumni', 'tabs', 'attendancePercentage',
             'liaison_messages', 'complaints', 
-            'todayEntry', 'habits',
+            'todayEntry', 'habits', 'totalPoints', // [PERBAIKAN] Tambahkan totalPoints ke compact
             'hadir', 'terlambat', 'sakit', 'izin', 'alpa', 
             'attendance_history', 'attendanceChart',
             'lms_assignments_grouped', 'lms_grades', 
@@ -490,7 +483,7 @@ class StudentPortalController extends Controller
             'topRamadanStudents',
             'literacy_journals', 
             'literacy_stats',
-            'priorityExams', // UPDATED: Variabel Plural (Collection)
+            'priorityExams', 
             'todaysSchedule',
             'pendingTasks'
         );
