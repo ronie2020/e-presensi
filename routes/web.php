@@ -87,6 +87,7 @@ use App\Http\Controllers\BkTeacherController;
 use App\Http\Controllers\RamadanLogController;
 use App\Http\Controllers\RamadanReportController;
 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -607,6 +608,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports', [RamadanLogController::class, 'adminReport'])->name('reports');
         Route::post('/verify/{id}', [RamadanLogController::class, 'verifyFriday'])->name('verify');       
         Route::get('/export-pdf', [RamadanReportController::class, 'exportPdf'])->name('exportPdf');
+        Route::get('/admin/ramadan/export-excel', [\App\Http\Controllers\RamadanReportController::class, 'exportExcel'])->name('exportExcel');
     });
 });
 
