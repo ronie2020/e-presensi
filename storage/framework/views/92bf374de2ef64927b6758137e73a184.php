@@ -6,28 +6,52 @@
 ?>
 
 <style>
+    /* Menyembunyikan scrollbar tapi tetap bisa discroll */
     .custom-scrollbar::-webkit-scrollbar { height: 0px; background: transparent; }
     .custom-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     [x-cloak] { display: none !important; }
     .ph-fill, .ph-duotone, .ph-bold { vertical-align: middle; }
+    
+    /* Animasi transisi yang lebih halus untuk tab */
+    .tab-content-enter {
+        animation: slideFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes slideFadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 </style>
 
 <!-- X-DATA: Main Controller -->
-<div class="w-full max-w-6xl mx-auto pb-20 px-4 sm:px-6"
+<div class="w-full max-w-6xl mx-auto pb-20 px-4 sm:px-6 min-h-screen"
      x-data="{ 
         activeTab: new URLSearchParams(window.location.search).get('tab') || 'ringkasan',
+        isTransitioning: false,
+        
         updateTab(val) {
+            // Cegah double click saat transisi
+            if(this.activeTab === val || this.isTransitioning) return;
+            
+            this.isTransitioning = true;
             this.activeTab = val;
+            
+            // Update URL tanpa reload
             const url = new URL(window.location);
             url.searchParams.set('tab', val);
             window.history.pushState({}, '', url);
             
-            // Trigger resize untuk Chart.js saat tab berubah
-            if(val === 'akademik' || val === 'kehadiran') {
-                setTimeout(() => { 
-                    window.dispatchEvent(new Event('resize')); 
-                }, 100);
-            }
+            // UX IMPROVEMENT 1: Auto scroll ke atas dengan mulus
+            window.scrollTo({ 
+                top: 0, 
+                behavior: 'smooth' 
+            });
+            
+            // UX IMPROVEMENT 2: Trigger resize global untuk me-refresh Chart.js/Map
+            // Delay diperpanjang sedikit untuk memastikan DOM sudah dirender oleh Alpine
+            setTimeout(() => { 
+                window.dispatchEvent(new Event('resize'));
+                this.isTransitioning = false;
+            }, 300);
         }
      }">
     
@@ -38,95 +62,146 @@
     <?php echo $__env->make('students.portal.partials.tabs-nav', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     
-    <div class="min-h-[400px]">
+    <div class="min-h-[400px] relative">
         
         <!-- Tab Ringkasan -->
-        <div x-show="activeTab === 'ringkasan'" x-transition:enter="transition ease-out duration-300">
+        <div x-show="activeTab === 'ringkasan'" x-cloak
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             class="tab-content-enter">
             <?php echo $__env->make('students.portal.partials.tab-ringkasan', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
         </div>
 
         <?php if(!$isAlumni): ?>
             <!-- Tab 7 Kebiasaan -->
-            <div x-show="activeTab === 'kebiasaan'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div x-show="activeTab === 'kebiasaan'" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 <?php echo $__env->make('students.portal.partials.tab-kebiasaan', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
 
-            <!-- [BARU] TAB JURNAL LITERASI MANDIRI -->
-            <!-- Pastikan file tab-literasi-mandiri.blade.php ada di folder students/portal/partials -->
-            <div x-show="activeTab === 'literasi_mandiri'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <!-- Tab Jurnal Literasi Mandiri -->
+            <div x-show="activeTab === 'literasi_mandiri'" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 <?php echo $__env->make('students.portal.partials.tab-literasi-mandiri', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
-            <!-- ============================== -->
 
             <!-- Tab Buku Penghubung -->
-            <div x-show="activeTab === 'penghubung'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div x-show="activeTab === 'penghubung'" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 <?php echo $__env->make('students.portal.partials.tab-penghubung', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
             
             <!-- Tab E-COUNSELING (BK) -->
-            <div x-show="activeTab === 'bk'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div x-show="activeTab === 'bk'" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 <?php echo $__env->make('students.portal.partials.tab-bk', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
 
             <!-- Tab Pengaduan -->
-            <div x-show="activeTab === 'pengaduan'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div x-show="activeTab === 'pengaduan'" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 <?php echo $__env->make('students.portal.partials.tab-pengaduan', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
 
             <!-- Tab Jadwal -->
-            <div x-show="activeTab === 'jadwal'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div x-show="activeTab === 'jadwal'" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 <?php echo $__env->make('students.portal.partials.tab-jadwal', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
 
             <!-- Tab LMS (Tugas) -->
-            <div x-show="activeTab === 'lms'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div x-show="activeTab === 'lms'" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 <?php echo $__env->make('students.portal.partials.tab-lms', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
 
             <!-- Tab Jurnal KBM -->
-            <div x-show="activeTab === 'kbm'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div x-show="activeTab === 'kbm'" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 <?php echo $__env->make('students.portal.partials.tab-kbm', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
 
             <!-- Tab Akademik (Nilai) -->
-            <div x-show="activeTab === 'akademik'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div x-show="activeTab === 'akademik'" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 <?php echo $__env->make('students.portal.partials.tab-akademik', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
 
             <!-- Tab Kehadiran -->
-            <div x-show="activeTab === 'kehadiran'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div x-show="activeTab === 'kehadiran'" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 <?php echo $__env->make('students.portal.partials.tab-kehadiran', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
 
             <!-- Tab Disiplin -->
-            <div x-show="activeTab === 'disiplin'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div x-show="activeTab === 'disiplin'" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 <?php echo $__env->make('students.portal.partials.tab-disiplin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
 
-            <!-- Tab Keagamaan (New/Separate) -->
-            <div x-show="activeTab === 'keagamaan'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <!-- Tab Keagamaan -->
+            <div x-show="activeTab === 'keagamaan'" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 <?php echo $__env->make('students.portal.partials.tab-keagamaan', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
+            
             <!-- Tab Ramadan Jurnal -->   
-            <div x-show="activeTab === 'ramadan_jurnal'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div x-show="activeTab === 'ramadan_jurnal'" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 <?php echo $__env->make('students.portal.partials.tab-ramadan-jurnal', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
+            
             <!-- Tab Leaderboard Ramadhan -->
-            <div x-show="activeTab === 'ramadan_rank'" x-cloak x-transition:enter="transition ease-out duration-300">
+            <div x-show="activeTab === 'ramadan_rank'" x-cloak 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
+                 x-transition:enter-end="opacity-100 translate-y-0">
                 <?php echo $__env->make('students.portal.partials.tab-ramadan-leaderboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
         <?php endif; ?>
         
         <!-- Tab Prestasi (Alumni & Siswa) -->
-        <div x-show="activeTab === 'prestasi'" x-cloak x-transition:enter="transition ease-out duration-300">
+        <div x-show="activeTab === 'prestasi'" x-cloak 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4"
+             x-transition:enter-end="opacity-100 translate-y-0">
             <?php echo $__env->make('students.portal.partials.tab-prestasi', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
         </div>
 
         <!-- Tab Perpustakaan (Alumni & Siswa) -->
-        <div x-show="activeTab === 'perpustakaan'" x-cloak x-transition:enter="transition ease-out duration-300">
+        <div x-show="activeTab === 'perpustakaan'" x-cloak 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4"
+             x-transition:enter-end="opacity-100 translate-y-0">
             <?php echo $__env->make('students.portal.partials.tab-perpustakaan', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
         </div>
-
 
     </div>
 </div>
