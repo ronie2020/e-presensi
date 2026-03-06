@@ -304,11 +304,19 @@ class RamadanLogController extends Controller
             ? round(($stats['fasting_count'] / $stats['total_students']) * 100) 
             : 0;
         
-        // LEADERBOARD SISWA PALING RAJIN (TOP 3) 
+       // --- TAMBAHAN BARU: QUERY UNTUK LEADERBOARD SISWA PALING RAJIN (TOP 3) ---
+        $startDate = self::RAMADAN_START_DATE; // Mengambil dari konstanta '2026-02-19'
+        $todayDate = Carbon::now('Asia/Jakarta')->toDateString();
+
         $topStudentsQuery = Student::with('schoolClass')
             ->whereHas('schoolClass')
-            ->withCount('ramadanLogs'); 
-        
+            ->withCount(['ramadanLogs' => function ($query) use ($startDate, $todayDate) {
+                // HANYA hitung log mutabaah antara awal Ramadhan sampai hari ini
+                // Ini mencegah data "testing" sebelum Ramadhan atau data tahun lalu ikut terhitung
+                $query->whereBetween('date', [$startDate, $todayDate]);
+            }]);
+
+        // Jika Admin sedang memfilter kelas tertentu, tampilkan top 3 khusus di kelas tersebut
         if ($selectedClass) {
             $topStudentsQuery->where('class_id', $selectedClass);
         }
@@ -316,10 +324,12 @@ class RamadanLogController extends Controller
         $topStudents = $topStudentsQuery->orderByDesc('ramadan_logs_count')
             ->take(3)
             ->get()
-            ->map(function($student) {               
+            ->map(function($student) {
+                // Menyesuaikan properti output agar langsung terbaca oleh view (admin_report.blade.php)
                 $student->total_logs_count = $student->ramadan_logs_count;
                 return $student;
             });
+        // ------------------------------------------------------------------------
 
         return view('ramadan.admin_report', compact(
             'classes', 
@@ -329,10 +339,9 @@ class RamadanLogController extends Controller
             'isFriday', 
             'stats', 
             'latestLogs',
-            'topStudents'
+            'topStudents' // <- Jangan lupa tambahkan variabel ini ke compact()
         ));
     }
-
     public function verifyFriday(Request $request, $id)
     {
         $log = RamadanLog::findOrFail($id);
