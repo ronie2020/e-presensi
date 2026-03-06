@@ -304,19 +304,17 @@ class RamadanLogController extends Controller
             ? round(($stats['fasting_count'] / $stats['total_students']) * 100) 
             : 0;
         
-       // --- TAMBAHAN BARU: QUERY UNTUK LEADERBOARD SISWA PALING RAJIN (TOP 3) ---
-        $startDate = self::RAMADAN_START_DATE; // Mengambil dari konstanta '2026-02-19'
+       // --- QUERY UNTUK LEADERBOARD SISWA PALING RAJIN (TOP 3) ---
+        $startDate = self::RAMADAN_START_DATE; 
         $todayDate = Carbon::now('Asia/Jakarta')->toDateString();
 
         $topStudentsQuery = Student::with('schoolClass')
             ->whereHas('schoolClass')
             ->withCount(['ramadanLogs' => function ($query) use ($startDate, $todayDate) {
-                // HANYA hitung log mutabaah antara awal Ramadhan sampai hari ini
-                // Ini mencegah data "testing" sebelum Ramadhan atau data tahun lalu ikut terhitung
+                
                 $query->whereBetween('date', [$startDate, $todayDate]);
             }]);
-
-        // Jika Admin sedang memfilter kelas tertentu, tampilkan top 3 khusus di kelas tersebut
+       
         if ($selectedClass) {
             $topStudentsQuery->where('class_id', $selectedClass);
         }
@@ -339,7 +337,7 @@ class RamadanLogController extends Controller
             'isFriday', 
             'stats', 
             'latestLogs',
-            'topStudents' // <- Jangan lupa tambahkan variabel ini ke compact()
+            'topStudents' 
         ));
     }
     public function verifyFriday(Request $request, $id)
