@@ -303,6 +303,23 @@ class RamadanLogController extends Controller
         $stats['percentage_fasting'] = $stats['total_students'] > 0 
             ? round(($stats['fasting_count'] / $stats['total_students']) * 100) 
             : 0;
+        
+        // LEADERBOARD SISWA PALING RAJIN (TOP 3) 
+        $topStudentsQuery = Student::with('schoolClass')
+            ->whereHas('schoolClass')
+            ->withCount('ramadanLogs'); 
+        
+        if ($selectedClass) {
+            $topStudentsQuery->where('class_id', $selectedClass);
+        }
+
+        $topStudents = $topStudentsQuery->orderByDesc('ramadan_logs_count')
+            ->take(3)
+            ->get()
+            ->map(function($student) {               
+                $student->total_logs_count = $student->ramadan_logs_count;
+                return $student;
+            });
 
         return view('ramadan.admin_report', compact(
             'classes', 
@@ -311,7 +328,8 @@ class RamadanLogController extends Controller
             'date', 
             'isFriday', 
             'stats', 
-            'latestLogs'
+            'latestLogs',
+            'topStudents'
         ));
     }
 
