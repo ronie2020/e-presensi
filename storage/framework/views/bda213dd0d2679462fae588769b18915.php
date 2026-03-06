@@ -193,10 +193,14 @@
             </div>
             
             <div class="glass-card p-6 rounded-[2rem] flex items-center gap-4 group">
-                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="ph-fill ph-bowl-food"></i></div>
-                <div>
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform shrink-0"><i class="ph-fill ph-bowl-food"></i></div>
+                <div class="flex-1 w-full">
                     <div class="text-2xl font-black text-slate-800 tracking-tight"><?php echo e($stats['fasting_count']); ?> <span class="text-xs text-emerald-500 font-bold">(<?php echo e($stats['percentage_fasting']); ?>%)</span></div>
-                    <div class="text-[9px] uppercase font-black text-slate-400 tracking-widest">Berpuasa</div>
+                    <div class="text-[9px] uppercase font-black text-slate-400 tracking-widest mb-1">Berpuasa</div>
+                    
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-1000" style="width: <?php echo e($stats['percentage_fasting']); ?>%"></div>
+                    </div>
                 </div>
             </div>
             
@@ -242,10 +246,14 @@
                         Berdasarkan konsistensi pengisian mutabaah terbanyak selama bulan Ramadhan ini.
                     </p>
                 </div>
-                <div class="shrink-0">
-                    <span class="px-4 py-1.5 rounded-xl bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-wider border border-amber-100">
+                <div class="shrink-0 flex items-center gap-2">
+                    <span class="px-4 py-1.5 rounded-xl bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-wider border border-amber-100 hidden sm:inline-block">
                         Top <?php echo e($topStudents->count()); ?> Leaderboard
                     </span>
+                    
+                    <a href="<?php echo e(route('admin.ramadan.leaderboard')); ?>" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black uppercase tracking-wider transition-colors shadow-md flex items-center gap-1">
+                        Lihat Semua <i class="ph-bold ph-arrow-right"></i>
+                    </a>
                 </div>
             </div>
 
@@ -257,9 +265,9 @@
                                   ($index == 1 ? 'bg-gradient-to-br from-slate-50 to-gray-100 border-slate-200' : 
                                                  'bg-gradient-to-br from-orange-50 to-rose-50 border-orange-200');
                                                  
-                        $avatarClass = $index == 0 ? 'bg-amber-400 text-white shadow-amber-500/30' : 
-                                      ($index == 1 ? 'bg-slate-400 text-white shadow-slate-500/30' : 
-                                                     'bg-orange-400 text-white shadow-orange-500/30');
+                        $avatarClass = $index == 0 ? 'border-amber-300 shadow-amber-500/30' : 
+                                      ($index == 1 ? 'border-slate-300 shadow-slate-500/30' : 
+                                                     'border-orange-300 shadow-orange-500/30');
                                                      
                         $badgeClass = $index == 0 ? 'bg-amber-500 text-white' : 
                                      ($index == 1 ? 'bg-slate-500 text-white' : 
@@ -272,9 +280,12 @@
                         
                         
                         <div class="relative shrink-0">
-                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-lg <?php echo e($avatarClass); ?>">
-                                <?php echo e(strtoupper(substr($topStudent->name, 0, 1))); ?>
-
+                            
+                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-lg border-2 overflow-hidden bg-white <?php echo e($avatarClass); ?>">
+                                <?php
+                                    $avatarBg = $index == 0 ? 'f59e0b' : ($index == 1 ? '64748b' : 'f97316');
+                                ?>
+                                <img src="https://ui-avatars.com/api/?name=<?php echo e(urlencode($topStudent->name)); ?>&background=<?php echo e($avatarBg); ?>&color=fff&bold=true" alt="Avatar" class="w-full h-full object-cover">
                             </div>
                             <div class="absolute -top-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black border-2 border-white shadow-sm <?php echo e($badgeClass); ?>">
                                 #<?php echo e($index + 1); ?>
@@ -330,9 +341,11 @@
                     </span>
                 </div>
 
-                <div class="overflow-x-auto custom-scrollbar">
+                
+                <div class="overflow-x-auto overflow-y-auto custom-scrollbar max-h-[600px] relative">
                     <table class="w-full text-left print-table">
-                        <thead class="bg-slate-50/50 text-slate-400 uppercase text-[9px] font-black tracking-[0.2em] border-b border-slate-100">
+                        
+                        <thead class="bg-slate-50/90 backdrop-blur-md text-slate-400 uppercase text-[9px] font-black tracking-[0.2em] border-b border-slate-200 sticky top-0 z-20 shadow-sm">
                             <tr>
                                 <th class="px-8 py-6 text-center w-16">No</th>
                                 <th class="px-6 py-6">Profil Siswa</th>

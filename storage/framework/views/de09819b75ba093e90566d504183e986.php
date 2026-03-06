@@ -85,7 +85,7 @@
                     <p class="text-[9px] font-bold text-slate-400"><?php echo e(number_format($topRamadanStudents[2]->ramadan_points)); ?> Pts</p>
                 </div>
                 <?php endif; ?>
-            </div>
+            </div>                   
         </div>
     </div>
     <?php else: ?>
@@ -105,6 +105,10 @@
         <div class="flex items-center gap-3 mb-4 px-2">
             <div class="h-8 w-1 bg-emerald-500 rounded-full"></div>
             <h3 class="font-bold text-slate-700 text-lg">Top 10 Pejuang</h3>
+            
+            <a href="<?php echo e(route('ramadan.leaderboard')); ?>" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black uppercase tracking-wider transition-colors shadow-md flex items-center gap-1">
+                Lihat Semua <i class="ph-bold ph-arrow-right"></i>
+            </a>
         </div>
 
         <div class="space-y-3">
