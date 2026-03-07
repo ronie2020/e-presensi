@@ -222,33 +222,42 @@ class StudentController extends Controller
     /**
      * =========================================================
      * FUNGSI BARU: Cetak Kartu OSIS Massal berdasarkan Kelas
+     * Atau Spesifik berdasarkan ID yang dipilih via Checkbox
      * =========================================================
      */
     public function printBatch(Request $request)
     {
         $request->validate([
-            'class_id' => 'required|exists:classes,id'
+            'class_id' => 'required_without:ids|exists:classes,id',
+            'ids' => 'required_without:class_id|string'
         ]);
 
-        $class = SchoolClass::find($request->class_id);
-        
-        // Panggil siswa sesuai kelas yang berstatus aktif
-        $students = Student::with('schoolClass')
-            ->where('class_id', $request->class_id)
+        $query = Student::with('schoolClass')
             ->where(function($q) {
                 $q->where('status', '!=', 'graduated')
                   ->orWhereNull('status');
-            })
-            ->orderBy('name', 'asc')
-            ->get();
+            });
+
+        // 1. Jika URL memiliki parameter 'ids' (Cetak Terpilih via Checkbox)
+        if ($request->has('ids')) {
+            $ids = explode(',', $request->ids);
+            $students = $query->whereIn('id', $ids)->orderBy('name', 'asc')->get();
+            $className = 'Siswa Terpilih (' . count($students) . ' Orang)';
+        } 
+        // 2. Jika URL memiliki parameter 'class_id' (Cetak 1 Kelas Penuh)
+        else {
+            $class = SchoolClass::find($request->class_id);
+            $students = $query->where('class_id', $request->class_id)->orderBy('name', 'asc')->get();
+            $className = $class ? $class->name : 'Semua Kelas';
+        }
 
         if ($students->isEmpty()) {
-            return back()->with('error', 'Tidak ada siswa aktif di kelas ini yang bisa dicetak.');
+            return back()->with('error', 'Tidak ada siswa aktif yang dipilih untuk dicetak.');
         }
 
         return view('students.osis_card_batch', [
             'students' => $students,
-            'className' => $class->name
+            'className' => $className
         ]);
     }
 

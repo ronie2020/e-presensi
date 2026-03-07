@@ -232,6 +232,11 @@
                                         <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> Export
                                     </a>
                                     
+                                    
+                                    <button type="button" id="btn-print-selected" onclick="printSelectedCards()" class="hidden flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-purple-50 border border-purple-100 text-purple-700 rounded-xl hover:bg-purple-100 transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap">
+                                        <i class="ph-bold ph-check-square-offset text-lg"></i> Cetak Terpilih (<span id="print-selected-count">0</span>)
+                                    </button>
+                                    
                                     <button type="button" onclick="printBatchCards()" class="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-blue-50 border border-blue-100 text-blue-700 rounded-xl hover:bg-blue-100 transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap">
                                         <i class="ph-bold ph-printer text-lg"></i> Cetak Kartu Kelas
                                     </button>
@@ -244,6 +249,10 @@
                             <table class="w-full text-left border-collapse">
                                 <thead class="bg-blue-900 text-blue-100 border-b border-blue-800">
                                     <tr>
+                                        
+                                        <th class="px-6 py-4 text-center w-10">
+                                            <input type="checkbox" id="selectAll" class="rounded border-blue-700 bg-blue-800 text-blue-500 focus:ring-blue-500 cursor-pointer">
+                                        </th>
                                         <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider w-1/3">Identitas Siswa</th>
                                         <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider w-1/6">Kelas</th>
                                         <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider w-1/6 text-center">Status Data</th>
@@ -253,6 +262,10 @@
                                 <tbody class="divide-y divide-slate-50">
                                     <?php $__empty_1 = true; $__currentLoopData = $students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                         <tr class="hover:bg-blue-50/50 transition-colors group">
+                                            
+                                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                                <input type="checkbox" value="<?php echo e($student->id); ?>" class="student-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer">
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center gap-4">
                                                     <div class="relative shrink-0">
@@ -343,7 +356,7 @@
                                         </tr>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                         <tr>
-                                            <td colspan="4" class="px-6 py-20 text-center">
+                                            <td colspan="5" class="px-6 py-20 text-center">
                                                 <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
                                                     <i class="ph-duotone ph-users-three text-4xl"></i>
                                                 </div>
@@ -383,7 +396,6 @@
 
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Tanggal</label>
-                    
                     <input type="text" name="date" value="<?php echo e(date('Y-m-d')); ?>" class="datepicker w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-blue-600 focus:border-blue-600 font-bold text-slate-700" placeholder="dd/mm/yyyy">
                 </div>
 
@@ -535,9 +547,40 @@
                 if (event.target == absenModal) absenModal.classList.add('hidden');
                 if (event.target == qrModal) qrModal.classList.add('hidden');
             }
+
+            // 4. LOGIKA CHECKBOX CETAK TERPILIH
+            const masterCheckbox = document.getElementById('selectAll');
+            if (masterCheckbox) {
+                masterCheckbox.addEventListener('change', function() {
+                    const checkboxes = document.querySelectorAll('.student-checkbox');
+                    checkboxes.forEach(cb => cb.checked = this.checked);
+                    togglePrintSelectedButton();
+                });
+            }
+
+            // Dengarkan perubahan pada setiap checkbox siswa
+            document.querySelectorAll('.student-checkbox').forEach(cb => {
+                cb.addEventListener('change', togglePrintSelectedButton);
+            });
+
+            // Tampilkan/Sembunyikan tombol 'Cetak Terpilih'
+            function togglePrintSelectedButton() {
+                const checkedCount = document.querySelectorAll('.student-checkbox:checked').length;
+                const btn = document.getElementById('btn-print-selected');
+                const badge = document.getElementById('print-selected-count');
+                
+                if (checkedCount > 0) {
+                    btn.classList.remove('hidden');
+                    badge.innerText = checkedCount;
+                } else {
+                    btn.classList.add('hidden');
+                    // Jika ada yang uncheck, master checkbox juga di uncheck
+                    if (masterCheckbox) masterCheckbox.checked = false; 
+                }
+            }
         });
 
-        // TAMBAHAN: FUNGSI JS CETAK KARTU MASSAL
+        // FUNGSI JS CETAK KARTU MASSAL BERDASARKAN KELAS
         function printBatchCards() {
             const classSelect = document.querySelector('select[name="filter_class_id"]');
             const classId = classSelect ? classSelect.value : '';
@@ -556,8 +599,19 @@
             // Buka tab baru menuju route cetak
             window.open(`/students/print-batch?class_id=${classId}`, '_blank');
         }
-    </script>
 
+        // FUNGSI JS CETAK KARTU TERPILIH (Via Checkbox)
+        function printSelectedCards() {
+            const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+            if (checkboxes.length === 0) return;
+
+            // Kumpulkan semua ID yang dicentang menjadi string (contoh: "1,5,12")
+            const selectedIds = Array.from(checkboxes).map(cb => cb.value).join(',');
+            
+            // Buka tab baru dengan membawa parameter ids
+            window.open(`/students/print-batch?ids=${selectedIds}`, '_blank');
+        }
+    </script>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
