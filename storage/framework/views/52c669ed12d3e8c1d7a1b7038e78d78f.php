@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Kartu Massal - {{ $className ?? 'Semua Kelas' }}</title>
+    <title>Cetak Kartu Massal - <?php echo e($className ?? 'Semua Kelas'); ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
@@ -85,7 +85,7 @@
     <div class="no-print sticky top-0 z-50 w-full bg-white border-b border-slate-200 px-6 py-4 shadow-sm flex justify-between items-center mb-6">
         <div>
             <h1 class="font-black text-slate-800 text-lg">Cetak Kartu Massal</h1>
-            <p class="text-xs text-slate-500 font-medium">Dicetak berdasarkan: <span class="text-blue-600 font-bold">{{ $className ?? 'Semua Kelas' }}</span> ({{ $students->count() }} Siswa)</p>
+            <p class="text-xs text-slate-500 font-medium">Dicetak berdasarkan: <span class="text-blue-600 font-bold"><?php echo e($className ?? 'Semua Kelas'); ?></span> (<?php echo e($students->count()); ?> Siswa)</p>
         </div>
         <div class="flex gap-3 items-center">
             <p class="text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg">
@@ -100,13 +100,11 @@
     </div>
 
     <!-- RENDERING KARTU -->
-    @foreach($students->chunk(10) as $chunkIndex => $chunk)
+    <?php $__currentLoopData = $students->chunk(10); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $chunkIndex => $chunk): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         
-        {{-- ==============================
-             HALAMAN GANJIL: BAGIAN DEPAN
-             ============================== --}}
+        
         <div class="a4-page">
-            @foreach($chunk as $student)
+            <?php $__currentLoopData = $chunk; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="id-card">
                     <!-- Gelombang Header -->
                     <div class="header-wave-accent"></div>
@@ -114,13 +112,13 @@
 
                     <!-- Logo Kiri Atas -->
                     <div class="logo-left-group">
-                         <img src="{{ asset('images/tut_wuri.png') }}" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/b/b3/Logo_Tut_Wuri_Handayani.svg'" class="h-6 w-auto drop-shadow-sm filter brightness-110">
-                         <img src="{{ asset('images/ciamis.png') }}" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Coat_of_arms_of_Ciamis_Regency.svg/1200px-Coat_of_arms_of_Ciamis_Regency.svg.png'" class="h-6 w-auto drop-shadow-sm">
+                         <img src="<?php echo e(asset('images/tut_wuri.png')); ?>" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/b/b3/Logo_Tut_Wuri_Handayani.svg'" class="h-6 w-auto drop-shadow-sm filter brightness-110">
+                         <img src="<?php echo e(asset('images/ciamis.png')); ?>" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Coat_of_arms_of_Ciamis_Regency.svg/1200px-Coat_of_arms_of_Ciamis_Regency.svg.png'" class="h-6 w-auto drop-shadow-sm">
                     </div>
 
                     <!-- Logo Sekolah Tengah -->
                     <div class="school-logo-center">
-                        <img src="{{ asset('images/logo.png') }}" onerror="this.src='https://via.placeholder.com/100?text=LOGO'" class="h-9 w-9 object-contain">
+                        <img src="<?php echo e(asset('images/logo.png')); ?>" onerror="this.src='https://via.placeholder.com/100?text=LOGO'" class="h-9 w-9 object-contain">
                     </div>
 
                     <!-- Judul Kartu -->
@@ -132,11 +130,11 @@
                     <!-- Foto Siswa -->
                     <div class="w-full flex justify-center mb-1">
                         <div class="student-photo-frame">
-                            @if($student->photo_path)
-                                <img src="{{ asset('storage/' . $student->photo_path) }}" class="w-full h-full object-cover">
-                            @else
-                                <img src="https://ui-avatars.com/api/?name={{ urlencode($student->name) }}&background=10b981&color=fff&size=200" class="w-full h-full object-cover">
-                            @endif
+                            <?php if($student->photo_path): ?>
+                                <img src="<?php echo e(asset('storage/' . $student->photo_path)); ?>" class="w-full h-full object-cover">
+                            <?php else: ?>
+                                <img src="https://ui-avatars.com/api/?name=<?php echo e(urlencode($student->name)); ?>&background=10b981&color=fff&size=200" class="w-full h-full object-cover">
+                            <?php endif; ?>
                         </div>
                     </div>
 
@@ -145,7 +143,8 @@
                         <div class="text-center w-full mb-1">
                             <div class="inline-block border-b-2 border-slate-900 pb-0.5">
                                 <h3 class="text-[10px] font-black text-slate-900 uppercase leading-none">
-                                    {{ \Illuminate\Support\Str::limit($student->name, 22) }}
+                                    <?php echo e(\Illuminate\Support\Str::limit($student->name, 22)); ?>
+
                                 </h3>
                             </div>
                             <p class="text-[8px] font-bold text-slate-600 uppercase tracking-widest mt-0.5">SISWA</p>
@@ -156,13 +155,14 @@
                                 <tr>
                                     <td class="data-label">NISN</td>
                                     <td class="data-separator">:</td>
-                                    <td class="font-bold font-mono">{{ $student->student_id }}</td>
+                                    <td class="font-bold font-mono"><?php echo e($student->student_id); ?></td>
                                 </tr>
                                 <tr>
                                     <td class="data-label">TTL</td>
                                     <td class="data-separator">:</td>
                                     <td class="font-bold leading-tight">
-                                        {{ $student->pob }}, {{ $student->dob ? $student->dob->translatedFormat('d M Y') : '-' }}
+                                        <?php echo e($student->pob); ?>, <?php echo e($student->dob ? $student->dob->translatedFormat('d M Y') : '-'); ?>
+
                                     </td>
                                 </tr>                               
                             </table>
@@ -176,13 +176,11 @@
                         <div class="social-item"><div class="social-icon"><svg class="w-2 h-2 text-green-700" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></div><span>smpnegeri3lakbok</span></div>
                     </div>
                 </div>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
 
-        {{-- ==============================
-             HALAMAN GENAP: BAGIAN BELAKANG (MIRRORED UNTUK DUPLEX)
-             ============================== --}}
-        @php
+        
+        <?php
             $backs = collect();
             $chunkArray = $chunk->values()->all(); // Reset index jadi 0-9
             
@@ -194,11 +192,11 @@
             for($i=9; $i>=5; $i--) {
                 $backs->push(isset($chunkArray[$i]) ? $chunkArray[$i] : null);
             }
-        @endphp
+        ?>
 
         <div class="a4-page">
-            @foreach($backs as $student)
-                @if($student)
+            <?php $__currentLoopData = $backs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php if($student): ?>
                     <div class="id-card items-center justify-center">
                         <!-- Gelombang Belakang -->
                         <div class="wave-decoration-back absolute top-[-20px] left-[-20px] w-[100px] h-[60px] bg-green-400 rounded-br-[100%] transform -rotate-12 z-0"></div>
@@ -208,13 +206,14 @@
                         <div class="z-10 flex flex-col items-center w-full px-6 flex-1 justify-center mt-6">
                             <!-- QR Code Box -->
                             <div class="bg-white p-1 rounded-lg border border-slate-200 mb-2 shadow-sm">
-                                {!! QrCode::size(100)->margin(0)->generate($student->student_id) !!}
+                                <?php echo QrCode::size(100)->margin(0)->generate($student->student_id); ?>
+
                             </div>
                             
                             <!-- Nama & NISN (Mencegah Kartu Tertukar) -->
                             <div class="text-center mb-3 w-full px-1">
-                                <p class="text-[8px] font-black text-slate-900 uppercase leading-tight">{{ \Illuminate\Support\Str::limit($student->name, 22) }}</p>
-                                <p class="text-[6px] font-bold text-slate-600 font-mono tracking-wide mt-0.5">{{ $student->student_id }}</p>
+                                <p class="text-[8px] font-black text-slate-900 uppercase leading-tight"><?php echo e(\Illuminate\Support\Str::limit($student->name, 22)); ?></p>
+                                <p class="text-[6px] font-bold text-slate-600 font-mono tracking-wide mt-0.5"><?php echo e($student->student_id); ?></p>
                             </div>
 
                             <!-- Tata Tertib -->
@@ -233,14 +232,14 @@
                             <span class="text-[7px] font-bold text-white opacity-90 tracking-wider">MENCERDASKAN KEHIDUPAN BANGSA</span>
                         </div>
                     </div>
-                @else
-                    {{-- Kotak Kosong (Jika jumlah siswa tidak pas kelipatan 10) --}}
+                <?php else: ?>
+                    
                     <div class="id-card" style="visibility: hidden;"></div>
-                @endif
-            @endforeach
+                <?php endif; ?>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
 
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/students/osis_card_batch.blade.php ENDPATH**/ ?>
