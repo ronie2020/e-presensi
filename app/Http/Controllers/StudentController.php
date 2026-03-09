@@ -7,7 +7,7 @@ use App\Models\SchoolClass;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash; // WAJIB DI-IMPORT
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\StudentsImport;
@@ -23,8 +23,12 @@ class StudentController extends Controller
     {
         $user = Auth::user();
         $classes = SchoolClass::orderBy('name', 'asc')->get();
+        
+        // --- PERBAIKAN DI SINI ---
         $search = $request->get('search');
         $filter_class_id = $request->get('filter_class_id');
+        $filter_status = $request->get('filter_status'); // Variabel ini sebelumnya belum didefinisikan
+        // -------------------------
 
         $query = Student::with('schoolClass')
             ->join('classes', 'students.class_id', '=', 'classes.id')
@@ -51,6 +55,23 @@ class StudentController extends Controller
             return $q->where('students.class_id', $filter_class_id);
         });
         
+        // Filter Status Kelengkapan Data
+        $query->when($filter_status, function ($q) use ($filter_status) {
+            if ($filter_status == 'lengkap') {
+                return $q->whereNotNull('pob')
+                         ->whereNotNull('dob')
+                         ->whereNotNull('address')
+                         ->whereNotNull('father_name');
+            } elseif ($filter_status == 'belum_lengkap') {
+                return $q->where(function($query) {
+                    $query->whereNull('pob')
+                          ->orWhereNull('dob')
+                          ->orWhereNull('address')
+                          ->orWhereNull('father_name');
+                });
+            }
+        });
+
         $students = $query->orderBy('classes.name', 'asc') 
                          ->orderBy('students.name', 'asc')
                          ->paginate(10)
@@ -151,11 +172,6 @@ class StudentController extends Controller
         // Ambil data input
         $data = $request->except(['_token', '_method', 'photo', 'password']); // Jangan update password sembarangan
 
-        // Opsional: Jika ada input password baru (Logic Reset Password Manual)
-        // if ($request->filled('password')) {
-        //     $data['password'] = Hash::make($request->password);
-        // }
-
         // 2. Proses Upload Foto
         if ($request->hasFile('photo')) {
             // Hapus foto lama jika ada
@@ -185,6 +201,24 @@ class StudentController extends Controller
 
         $student->delete();
         return redirect()->route('students.index')->with('success', 'Siswa berhasil dihapus.');
+    }
+
+    /**
+     * Menghapus data siswa secara massal.
+     */
+    public function destroyBatch(Request $request)
+    {
+        $ids = explode(',', $request->ids);
+        // Hapus foto jika ada
+        $students = Student::whereIn('id', $ids)->get();
+        foreach($students as $student) {
+            if ($student->photo_path && \Storage::disk('public')->exists($student->photo_path)) {
+                \Storage::disk('public')->delete($student->photo_path);
+            }
+        }
+        
+        Student::whereIn('id', $ids)->delete();
+        return back()->with('success', count($ids) . ' Data siswa berhasil dihapus.');
     }
 
     /**

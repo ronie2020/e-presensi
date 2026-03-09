@@ -306,6 +306,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/students/{student}/card', [StudentController::class, 'card'])->name('students.card');
     Route::resource('students', StudentController::class); 
     Route::resource('classes', SchoolClassController::class);
+    Route::delete('/students/destroy-batch', [StudentController::class, 'destroyBatch'])->name('students.destroyBatch');
 
     // ROUTE MUTASI & KENAIKAN KELAS DI SINI ---
     Route::prefix('promotions')->name('promotions.')->group(function () {

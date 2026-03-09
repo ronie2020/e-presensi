@@ -1,8 +1,9 @@
 <x-app-layout>
-    {{-- Tambahkan CDN SweetAlert2 & Flatpickr --}}
+    {{-- Tambahkan CDN SweetAlert2, Flatpickr, dan QRious (Untuk QR Code Lokal) --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -63,7 +64,8 @@
                                     </div>
                                 </div>
 
-                                <form action="{{ route('students.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5" x-data="{ photoPreview: null }">
+                                {{-- TAMBAHAN: id="quick-register-form" untuk prevent double submit --}}
+                                <form id="quick-register-form" action="{{ route('students.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5" x-data="{ photoPreview: null }">
                                     @csrf
                                     
                                     <div>
@@ -155,7 +157,7 @@
 
                                     <button type="submit" class="w-full py-3.5 bg-blue-900 text-white font-bold rounded-2xl hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2 transform active:scale-95 mt-4 group">
                                         <i class="ph-bold ph-floppy-disk text-lg group-hover:scale-110 transition-transform"></i>
-                                        Simpan Data
+                                        <span>Simpan Data</span>
                                     </button>
                                 </form>
                             </div>
@@ -168,7 +170,8 @@
                                 </h3>
                                 <p class="text-[10px] text-emerald-700/70 mb-4 font-bold">Gunakan file Excel untuk input banyak data sekaligus.</p>
                                 
-                                <form action="{{ route('students.import') }}" method="POST" enctype="multipart/form-data" class="flex gap-2 items-center">
+                                {{-- TAMBAHAN: id="import-form" untuk prevent double submit --}}
+                                <form id="import-form" action="{{ route('students.import') }}" method="POST" enctype="multipart/form-data" class="flex gap-2 items-center">
                                     @csrf
                                     <label class="flex-1 cursor-pointer">
                                         <div class="bg-white border border-dashed border-emerald-300 rounded-xl py-3 px-4 text-center transition-all hover:border-emerald-500 hover:bg-emerald-50/50 truncate">
@@ -176,10 +179,10 @@
                                                 <i class="ph-bold ph-upload-simple"></i> Pilih File...
                                             </span>
                                         </div>
-                                        <input type="file" name="file" id="file" required class="hidden">
+                                        <input type="file" name="file" id="file" required class="hidden" onchange="this.previousElementSibling.querySelector('span').innerHTML = '<i class=\'ph-bold ph-check\'></i> File Dipilih'">
                                     </label>
-                                    <button type="submit" class="py-3 px-5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors text-xs shadow-md shadow-emerald-500/20">
-                                        Upload
+                                    <button type="submit" class="py-3 px-5 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-colors text-xs shadow-md shadow-emerald-500/20 flex items-center gap-2">
+                                        <span>Upload</span>
                                     </button>
                                 </form>
                             </div>
@@ -214,6 +217,13 @@
                                             </option>
                                         @endforeach
                                     </select>
+
+                                    {{-- TAMBAHAN: Filter Status Data --}}
+                                    <select name="filter_status" onchange="this.form.submit()" class="rounded-xl border-slate-200 bg-white focus:border-blue-600 focus:ring-blue-600 text-xs font-bold text-slate-700 py-2.5 px-3 shadow-sm cursor-pointer w-full sm:w-36">
+                                        <option value="">Semua Status</option>
+                                        <option value="lengkap" {{ request('filter_status') == 'lengkap' ? 'selected' : '' }}>Sudah Lengkap</option>
+                                        <option value="belum_lengkap" {{ request('filter_status') == 'belum_lengkap' ? 'selected' : '' }}>Belum Lengkap</option>
+                                    </select>
                                 </form>
 
                                 <div class="flex flex-wrap justify-end gap-2 w-full sm:w-auto mt-2 sm:mt-0">
@@ -221,22 +231,28 @@
                                         <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> Export
                                     </a>
                                     
+                                    {{-- TOMBOL BARU: HAPUS TERPILIH (Hidden by default) --}}
+                                    <button type="button" id="btn-delete-selected" onclick="deleteSelected()" class="hidden flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-rose-50 border border-rose-100 text-rose-700 rounded-xl hover:bg-rose-100 transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap">
+                                        <i class="ph-bold ph-trash text-lg"></i> Hapus (<span id="delete-selected-count">0</span>)
+                                    </button>
+
                                     {{-- TOMBOL BARU: CETAK TERPILIH (Hidden by default) --}}
                                     <button type="button" id="btn-print-selected" onclick="printSelectedCards()" class="hidden flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-purple-50 border border-purple-100 text-purple-700 rounded-xl hover:bg-purple-100 transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap">
-                                        <i class="ph-bold ph-check-square-offset text-lg"></i> Cetak Terpilih (<span id="print-selected-count">0</span>)
+                                        <i class="ph-bold ph-check-square-offset text-lg"></i> Cetak (<span id="print-selected-count">0</span>)
                                     </button>
                                     
                                     <button type="button" onclick="printBatchCards()" class="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-blue-50 border border-blue-100 text-blue-700 rounded-xl hover:bg-blue-100 transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap">
-                                        <i class="ph-bold ph-printer text-lg"></i> Cetak Kartu Kelas
+                                        <i class="ph-bold ph-printer text-lg"></i> Cetak Kelas
                                     </button>
                                 </div>
                             </div>
                         </div>
                         
                         {{-- Table --}}
-                        <div class="flex-1 overflow-x-auto custom-scrollbar">
+                        <div class="flex-1 overflow-x-auto custom-scrollbar relative">
                             <table class="w-full text-left border-collapse">
-                                <thead class="bg-blue-900 text-blue-100 border-b border-blue-800">
+                                {{-- TAMBAHAN: class "sticky top-0 z-20" agar header melayang --}}
+                                <thead class="bg-blue-900 text-blue-100 border-b border-blue-800 sticky top-0 z-20">
                                     <tr>
                                         {{-- HEADER CHECKBOX MASTER --}}
                                         <th class="px-6 py-4 text-center w-10">
@@ -260,7 +276,8 @@
                                                     <div class="relative shrink-0">
                                                         <div class="w-12 h-12 rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-white flex items-center justify-center group-hover:border-blue-200 transition-colors">
                                                             @if($student->photo_path)
-                                                                <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
+                                                                {{-- TAMBAHAN: loading="lazy" --}}
+                                                                <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover" loading="lazy">
                                                             @else
                                                                 <div class="font-black text-sm {{ $student->gender == 'L' ? 'text-blue-600' : 'text-pink-500' }}">{{ substr($student->name, 0, 2) }}</div>
                                                             @endif
@@ -304,7 +321,11 @@
                                                         <i class="ph-bold ph-printer text-lg"></i>
                                                     </a>
 
-                                                    {{--  BAGIAN Edit siswa --}}
+                                                    {{-- TOMBOL CETAK KARTU OSIS SATUAN (Dikeluarkan dari dropdown) --}}
+                                                    <a href="{{ route('students.card', $student->id) }}" target="_blank" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-purple-600 hover:border-purple-200 hover:bg-purple-50 flex items-center justify-center transition-all shadow-sm" title="Cetak Kartu OSIS">
+                                                        <i class="ph-bold ph-identification-card text-lg"></i>
+                                                    </a>
+
                                                     <a href="{{ route('students.edit', array_merge(['student' => $student->id], request()->query())) }}" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 flex items-center justify-center transition-all shadow-sm" title="Edit Data">
                                                         <i class="ph-bold ph-pencil-simple text-lg"></i>
                                                     </a>
@@ -324,10 +345,6 @@
                                                                 data-student-id="{{ $student->student_id }}" data-student-name="{{ $student->name }}">
                                                                 <i class="ph-bold ph-qr-code text-base"></i> Lihat QR Code
                                                             </button>
-                                                            
-                                                            <a href="{{ route('students.card', $student->id) }}" target="_blank" class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-purple-600 flex items-center gap-2 transition-colors">
-                                                                <i class="ph-bold ph-identification-card text-base"></i> Cetak Kartu
-                                                            </a>
                                                             
                                                             <div class="border-t border-slate-100 my-1"></div>
                                                             
@@ -365,7 +382,7 @@
         </div>
     </div>
 
-    {{-- MODAL ABSEN & QR CODE --}}
+    {{-- MODAL ABSEN --}}
     <div id="absen-manual-modal" class="fixed inset-0 bg-blue-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-opacity">
         <div class="relative top-20 mx-auto p-0 border-0 w-full max-w-md shadow-2xl rounded-[2rem] bg-white overflow-hidden">
             <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
@@ -419,15 +436,17 @@
         </div>
     </div>
 
+    {{-- MODAL QR CODE LOKAL --}}
     <div id="qr-code-modal" class="fixed inset-0 bg-blue-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-opacity">
         <div class="relative top-20 mx-auto p-0 border-0 w-full max-w-sm shadow-2xl rounded-[2rem] bg-white overflow-hidden text-center p-8">
             <h3 class="text-lg font-black text-slate-800 mb-1" id="qr-modal-student-name">QR Code</h3>
             <p class="text-xs text-slate-400 font-bold uppercase mb-6">Identitas Digital Siswa</p>
             <div class="bg-white p-4 border-2 border-dashed border-blue-200 rounded-2xl inline-block mb-6 relative group">
-                <div class="absolute inset-0 bg-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl">
+                <div class="absolute inset-0 bg-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl pointer-events-none">
                     <i class="ph-bold ph-download-simple text-blue-600 text-2xl"></i>
                 </div>
-                <img id="qr-modal-image" src="" alt="QR Code" class="w-48 h-48 object-contain">
+                {{-- TAMBAHAN: Diganti jadi canvas untuk generate offline --}}
+                <canvas id="qr-modal-canvas" class="mx-auto"></canvas>
             </div>
             <div class="flex gap-3 justify-center">
                 <button type="button" id="qr-modal-close" class="px-6 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 text-sm transition-colors">Tutup</button>
@@ -438,10 +457,12 @@
         </div>
     </div>
 
-    {{-- SCRIPT SWEETALERT2 & Flatpickr --}}
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {{-- FORM HIDDEN UNTUK HAPUS MASSAL --}}
+    <form id="form-delete-batch" action="{{ route('students.destroyBatch') ?? '#' }}" method="POST" class="hidden">
+        @csrf
+        @method('DELETE')
+        <input type="hidden" name="ids" id="delete-batch-ids">
+    </form>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -460,7 +481,7 @@
                     icon: 'success',
                     title: 'Berhasil!',
                     text: '{{ session('success') }}',
-                    confirmButtonColor: '#1e3a8a', // Blue 900
+                    confirmButtonColor: '#1e3a8a',
                     timer: 3000,
                     timerProgressBar: true
                 });
@@ -471,11 +492,36 @@
                     icon: 'error',
                     title: 'Gagal!',
                     text: '{{ session('error') }}',
-                    confirmButtonColor: '#e11d48', // Rose 600
+                    confirmButtonColor: '#e11d48',
                 });
             @endif
 
-            // 2. KONFIRMASI HAPUS SISWA
+            // 2. PREVENT DOUBLE SUBMIT LOADING STATE
+            function disableSubmit(formId, btnText) {
+                const form = document.getElementById(formId);
+                if(form) {
+                    form.addEventListener('submit', function() {
+                        const btn = this.querySelector('button[type="submit"]');
+                        if(btn) {
+                            btn.disabled = true;
+                            // Mengubah isi button menjadi spinner
+                            const icon = btn.querySelector('i');
+                            if(icon) {
+                                icon.className = 'ph-bold ph-spinner animate-spin text-lg';
+                            }
+                            const span = btn.querySelector('span');
+                            if(span) {
+                                span.innerText = btnText;
+                            }
+                            btn.classList.add('opacity-75', 'cursor-not-allowed');
+                        }
+                    });
+                }
+            }
+            disableSubmit('quick-register-form', 'Menyimpan...');
+            disableSubmit('import-form', 'Mengupload...');
+
+            // 3. KONFIRMASI HAPUS SISWA SATUAN
             document.body.addEventListener('click', function(e) {
                 if(e.target.closest('.btn-delete-confirm')) {
                     e.preventDefault();
@@ -501,12 +547,12 @@
                 }
             });
 
-            // 3. LOGIKA MODAL LAINNYA (ABSEN & QR)
+            // 4. LOGIKA MODAL (ABSEN & QR CODE LOKAL)
             const absenModal = document.getElementById('absen-manual-modal');
             const qrModal = document.getElementById('qr-code-modal');
 
-            // Handle Open Absen
             document.addEventListener('click', function(e) {
+                // Handle Open Absen
                 if (e.target.closest('.open-absen-modal')) {
                     const btn = e.target.closest('.open-absen-modal');
                     document.getElementById('absen-modal-student-name').innerText = btn.dataset.studentName;
@@ -514,15 +560,29 @@
                     absenModal.classList.remove('hidden');
                 }
                 
-                // Handle Open QR
+                // Handle Open QR (Lokal Menggunakan QRious)
                 if (e.target.closest('.open-qr-modal')) {
                     const btn = e.target.closest('.open-qr-modal');
                     const id = btn.dataset.studentId;
                     const name = btn.dataset.studentName;
-                    const url = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(id)}`;
+                    
                     document.getElementById('qr-modal-student-name').innerText = name;
-                    document.getElementById('qr-modal-image').src = url;
-                    document.getElementById('qr-modal-download').href = url;
+                    
+                    // Generate QR Code secara lokal langsung di browser!
+                    const qr = new QRious({
+                        element: document.getElementById('qr-modal-canvas'),
+                        value: id,
+                        size: 200,
+                        background: 'white',
+                        foreground: '#1e3a8a', // Warna Blue-900
+                        level: 'H' // High Error Correction
+                    });
+
+                    // Set URL Download dari Canvas
+                    const downloadBtn = document.getElementById('qr-modal-download');
+                    downloadBtn.href = qr.toDataURL('image/png');
+                    downloadBtn.download = `QRCode_${name.replace(/\s+/g, '_')}.png`;
+
                     qrModal.classList.remove('hidden');
                 }
             });
@@ -536,33 +596,37 @@
                 if (event.target == qrModal) qrModal.classList.add('hidden');
             }
 
-            // 4. LOGIKA CHECKBOX CETAK TERPILIH
+            // 5. LOGIKA CHECKBOX UNTUK CETAK & HAPUS MASSAL
             const masterCheckbox = document.getElementById('selectAll');
             if (masterCheckbox) {
                 masterCheckbox.addEventListener('change', function() {
                     const checkboxes = document.querySelectorAll('.student-checkbox');
                     checkboxes.forEach(cb => cb.checked = this.checked);
-                    togglePrintSelectedButton();
+                    toggleBatchButtons();
                 });
             }
 
             // Dengarkan perubahan pada setiap checkbox siswa
             document.querySelectorAll('.student-checkbox').forEach(cb => {
-                cb.addEventListener('change', togglePrintSelectedButton);
+                cb.addEventListener('change', toggleBatchButtons);
             });
 
-            // Tampilkan/Sembunyikan tombol 'Cetak Terpilih'
-            function togglePrintSelectedButton() {
+            // Tampilkan/Sembunyikan tombol 'Cetak' & 'Hapus'
+            function toggleBatchButtons() {
                 const checkedCount = document.querySelectorAll('.student-checkbox:checked').length;
-                const btn = document.getElementById('btn-print-selected');
-                const badge = document.getElementById('print-selected-count');
+                const btnPrint = document.getElementById('btn-print-selected');
+                const badgePrint = document.getElementById('print-selected-count');
+                const btnDelete = document.getElementById('btn-delete-selected');
+                const badgeDelete = document.getElementById('delete-selected-count');
                 
                 if (checkedCount > 0) {
-                    btn.classList.remove('hidden');
-                    badge.innerText = checkedCount;
+                    btnPrint.classList.remove('hidden');
+                    btnDelete.classList.remove('hidden');
+                    badgePrint.innerText = checkedCount;
+                    badgeDelete.innerText = checkedCount;
                 } else {
-                    btn.classList.add('hidden');
-                    // Jika ada yang uncheck, master checkbox juga di uncheck
+                    btnPrint.classList.add('hidden');
+                    btnDelete.classList.add('hidden');
                     if (masterCheckbox) masterCheckbox.checked = false; 
                 }
             }
@@ -583,21 +647,41 @@
                 });
                 return;
             }
-            
-            // Buka tab baru menuju route cetak
             window.open(`/students/print-batch?class_id=${classId}`, '_blank');
         }
 
-        // FUNGSI JS CETAK KARTU TERPILIH (Via Checkbox)
+        // FUNGSI JS CETAK KARTU TERPILIH
         function printSelectedCards() {
             const checkboxes = document.querySelectorAll('.student-checkbox:checked');
             if (checkboxes.length === 0) return;
-
-            // Kumpulkan semua ID yang dicentang menjadi string (contoh: "1,5,12")
             const selectedIds = Array.from(checkboxes).map(cb => cb.value).join(',');
-            
-            // Buka tab baru dengan membawa parameter ids
             window.open(`/students/print-batch?ids=${selectedIds}`, '_blank');
+        }
+
+        // FUNGSI JS HAPUS TERPILIH (MASSAL)
+        function deleteSelected() {
+            const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+            if (checkboxes.length === 0) return;
+
+            const selectedIds = Array.from(checkboxes).map(cb => cb.value).join(',');
+            const count = checkboxes.length;
+
+            Swal.fire({
+                title: 'Hapus Massal?',
+                text: `Anda yakin ingin menghapus ${count} data siswa yang dipilih?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Hapus Semua!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-batch-ids').value = selectedIds;
+                    document.getElementById('form-delete-batch').submit();
+                }
+            });
         }
     </script>
 </x-app-layout>
