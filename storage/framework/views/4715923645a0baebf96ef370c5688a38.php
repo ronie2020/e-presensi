@@ -316,7 +316,8 @@
                                                         <i class="ph-bold ph-printer text-lg"></i>
                                                     </a>
 
-                                                    <a href="<?php echo e(route('students.edit', $student->id)); ?>" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 flex items-center justify-center transition-all shadow-sm" title="Edit Data">
+                                                    
+                                                    <a href="<?php echo e(route('students.edit', array_merge(['student' => $student->id], request()->query()))); ?>" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 flex items-center justify-center transition-all shadow-sm" title="Edit Data">
                                                         <i class="ph-bold ph-pencil-simple text-lg"></i>
                                                     </a>
                                                     

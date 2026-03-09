@@ -169,8 +169,8 @@ class StudentController extends Controller
 
         // 3. Update Database
         $student->update($data);
-
-        return redirect()->route('students.index')->with('success', 'Data Buku Induk siswa berhasil diperbarui.');
+        
+        return redirect()->route('students.index', request()->query())->with('success', 'Data Buku Induk siswa berhasil diperbarui.');
     }
 
     /**

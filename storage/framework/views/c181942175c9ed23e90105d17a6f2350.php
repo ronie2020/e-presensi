@@ -23,7 +23,7 @@
                     <p class="text-slate-500 text-sm mt-1">Lengkapi data detail siswa: <span class="font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded"><?php echo e($student->name); ?></span></p>
                 </div>
                 
-                <a href="<?php echo e(route('students.index')); ?>" class="btn-back-confirm px-4 py-2 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-900 hover:border-blue-200 transition-all shadow-sm flex items-center gap-2 group">
+                <a href="<?php echo e(route('students.index', request()->query())); ?>" class="btn-back-confirm px-4 py-2 bg-white border border-slate-300 rounded-xl text-sm font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-900 hover:border-blue-200 transition-all shadow-sm flex items-center gap-2 group">
                     <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali
                 </a>
             </div>
@@ -62,7 +62,7 @@
                 </div>
 
                 
-                <form id="edit-student-form" action="<?php echo e(route('students.update', $student->id)); ?>" method="POST" enctype="multipart/form-data" class="p-8">
+                <form id="edit-student-form" action="<?php echo e(route('students.update', array_merge(['student' => $student->id], request()->query()))); ?>" method="POST" enctype="multipart/form-data" class="p-8">
                     <?php echo csrf_field(); ?>
                     <?php echo method_field('PUT'); ?>
                     
@@ -93,44 +93,43 @@
                             <div class="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Nama Lengkap *</label>
-                                    <input type="text" name="name" value="<?php echo e(old('name', $student->name)); ?>" required class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-bold text-slate-800">
+                                    <input type="text" name="name" value="<?php echo e(old('name', $student->name)); ?>" required class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-bold text-slate-800 tracking-wide input-watch">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Nama Panggilan</label>
-                                    <input type="text" name="nickname" value="<?php echo e(old('nickname', $student->nickname)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <input type="text" name="nickname" value="<?php echo e(old('nickname', $student->nickname)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                 </div>
                                 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">NIS (Sekolah)</label>
-                                    <input type="text" name="nis" value="<?php echo e(old('nis', $student->nis)); ?>" placeholder="Nomor Induk Sekolah" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-mono">
+                                    <input type="text" name="nis" value="<?php echo e(old('nis', $student->nis)); ?>" placeholder="Nomor Induk Sekolah" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-mono input-watch">
                                 </div>
                                 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">NISN (Nasional) *</label>
-                                    <input type="text" name="student_id" value="<?php echo e(old('student_id', $student->student_id)); ?>" required class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-mono bg-blue-50/30 text-blue-900 font-bold">
+                                    <input type="text" name="student_id" value="<?php echo e(old('student_id', $student->student_id)); ?>" required class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-mono bg-blue-50/30 text-blue-900 font-bold input-watch">
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tempat, Tanggal Lahir</label>
                                     <div class="flex gap-2">
-                                        <input type="text" name="pob" value="<?php echo e(old('pob', $student->pob)); ?>" placeholder="Kota" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
-                                        
+                                        <input type="text" name="pob" value="<?php echo e(old('pob', $student->pob)); ?>" placeholder="Kota" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                         <div class="relative w-1/2">
-                                            <input type="text" name="dob" value="<?php echo e(old('dob', $student->dob)); ?>" placeholder="dd/mm/yyyy" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 bg-white">
+                                            <input type="text" name="dob" value="<?php echo e(old('dob', $student->dob ? \Carbon\Carbon::parse($student->dob)->format('Y-m-d') : '')); ?>" placeholder="dd/mm/yyyy" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 bg-white input-watch">
                                             <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-calendar-blank"></i></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Jenis Kelamin</label>
-                                    <select name="gender" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <select name="gender" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                         <option value="L" <?php echo e(old('gender', $student->gender) == 'L' ? 'selected' : ''); ?>>Laki-laki</option>
                                         <option value="P" <?php echo e(old('gender', $student->gender) == 'P' ? 'selected' : ''); ?>>Perempuan</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Agama</label>
-                                    <select name="religion" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <select name="religion" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                         <option value="Islam" <?php echo e(old('religion', $student->religion) == 'Islam' ? 'selected' : ''); ?>>Islam</option>
                                         <option value="Kristen" <?php echo e(old('religion', $student->religion) == 'Kristen' ? 'selected' : ''); ?>>Kristen</option>
                                         <option value="Katolik" <?php echo e(old('religion', $student->religion) == 'Katolik' ? 'selected' : ''); ?>>Katolik</option>
@@ -141,16 +140,16 @@
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Kewarganegaraan</label>
-                                    <input type="text" name="citizenship" value="<?php echo e(old('citizenship', $student->citizenship ?? 'WNI')); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <input type="text" name="citizenship" value="<?php echo e(old('citizenship', $student->citizenship ?? 'WNI')); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Anak ke-</label>
-                                    <input type="number" name="birth_order" value="<?php echo e(old('birth_order', $student->birth_order)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <input type="number" name="birth_order" value="<?php echo e(old('birth_order', $student->birth_order)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Status Yatim</label>
-                                    <select name="orphan_status" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <select name="orphan_status" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                         <option value="Lengkap" <?php echo e(old('orphan_status', $student->orphan_status) == 'Lengkap' ? 'selected' : ''); ?>>Lengkap</option>
                                         <option value="Yatim" <?php echo e(old('orphan_status', $student->orphan_status) == 'Yatim' ? 'selected' : ''); ?>>Yatim</option>
                                         <option value="Piatu" <?php echo e(old('orphan_status', $student->orphan_status) == 'Piatu' ? 'selected' : ''); ?>>Piatu</option>
@@ -161,21 +160,21 @@
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Jumlah Saudara</label>
                                     <div class="flex gap-2 text-sm items-center">
-                                        <input type="number" name="siblings_count" value="<?php echo e(old('siblings_count', $student->siblings_count)); ?>" placeholder="Kandung" class="w-1/3 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 text-center" title="Kandung">
-                                        <input type="number" name="step_siblings_count" value="<?php echo e(old('step_siblings_count', $student->step_siblings_count)); ?>" placeholder="Tiri" class="w-1/3 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 text-center" title="Tiri">
-                                        <input type="number" name="adoptive_siblings_count" value="<?php echo e(old('adoptive_siblings_count', $student->adoptive_siblings_count)); ?>" placeholder="Angkat" class="w-1/3 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 text-center" title="Angkat">
+                                        <input type="number" name="siblings_count" value="<?php echo e(old('siblings_count', $student->siblings_count)); ?>" placeholder="Kandung" class="w-1/3 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 text-center input-watch" title="Kandung">
+                                        <input type="number" name="step_siblings_count" value="<?php echo e(old('step_siblings_count', $student->step_siblings_count)); ?>" placeholder="Tiri" class="w-1/3 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 text-center input-watch" title="Tiri">
+                                        <input type="number" name="adoptive_siblings_count" value="<?php echo e(old('adoptive_siblings_count', $student->adoptive_siblings_count)); ?>" placeholder="Angkat" class="w-1/3 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 text-center input-watch" title="Angkat">
                                     </div>
                                     <p class="text-[10px] text-slate-400 mt-1 ml-1">Urutan: Kandung / Tiri / Angkat</p>
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Bahasa Sehari-hari</label>
-                                    <input type="text" name="daily_language" value="<?php echo e(old('daily_language', $student->daily_language)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <input type="text" name="daily_language" value="<?php echo e(old('daily_language', $student->daily_language)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Kelas Saat Ini *</label>
-                                    <select name="class_id" required class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <select name="class_id" required class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                         <option value="">-- Pilih Kelas --</option>
                                         <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <option value="<?php echo e($c->id); ?>" <?php echo e(old('class_id', $student->class_id) == $c->id ? 'selected' : ''); ?>><?php echo e($c->name); ?></option>
@@ -185,28 +184,27 @@
                                 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">RFID ID (Kartu)</label>
-                                    <input type="text" name="rfid_id" value="<?php echo e(old('rfid_id', $student->rfid_id)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-mono bg-slate-50">
+                                    <input type="text" name="rfid_id" value="<?php echo e(old('rfid_id', $student->rfid_id)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 font-mono bg-slate-50 input-watch">
                                 </div>
                             </div>
                         </div>
                     </div>
-
 
                     
                     <div x-show="tab === 'tempat_tinggal'" class="space-y-6" style="display: none;">
                         <h3 class="text-lg font-bold text-blue-900 border-b border-slate-100 pb-2 mb-4">Keterangan Tempat Tinggal</h3>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Alamat Lengkap</label>
-                            <textarea name="address" rows="3" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900"><?php echo e(old('address', $student->address)); ?></textarea>
+                            <textarea name="address" rows="3" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch"><?php echo e(old('address', $student->address)); ?></textarea>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Nomor Telepon/HP (Siswa)</label>
-                                <input type="text" name="phone" value="<?php echo e(old('phone', $student->phone)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                <input type="text" name="phone" value="<?php echo e(old('phone', $student->phone)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tinggal Bersama</label>
-                                <select name="living_with" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                <select name="living_with" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                     <option value="Orang Tua" <?php echo e(old('living_with', $student->living_with) == 'Orang Tua' ? 'selected' : ''); ?>>Orang Tua</option>
                                     <option value="Wali" <?php echo e(old('living_with', $student->living_with) == 'Wali' ? 'selected' : ''); ?>>Wali</option>
                                     <option value="Asrama" <?php echo e(old('living_with', $student->living_with) == 'Asrama' ? 'selected' : ''); ?>>Asrama</option>
@@ -215,11 +213,11 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Jarak ke Sekolah</label>
-                                <input type="text" name="distance_to_school" value="<?php echo e(old('distance_to_school', $student->distance_to_school)); ?>" placeholder="Contoh: 1 km" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                <input type="text" name="distance_to_school" value="<?php echo e(old('distance_to_school', $student->distance_to_school)); ?>" placeholder="Contoh: 1 km" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Transportasi</label>
-                                <input type="text" name="transport_mode" value="<?php echo e(old('transport_mode', $student->transport_mode)); ?>" placeholder="Jalan Kaki/Motor/Angkot" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                <input type="text" name="transport_mode" value="<?php echo e(old('transport_mode', $student->transport_mode)); ?>" placeholder="Jalan Kaki/Motor/Angkot" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                             </div>
                         </div>
                     </div>
@@ -230,28 +228,29 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Golongan Darah</label>
-                                <select name="blood_type" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
-                                    <?php $__currentLoopData = ['-', 'A', 'B', 'AB', 'O']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $b): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <select name="blood_type" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
+                                    <option value="">-</option>
+                                    <?php $__currentLoopData = ['A', 'B', 'AB', 'O']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $b): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <option value="<?php echo e($b); ?>" <?php echo e(old('blood_type', $student->blood_type) == $b ? 'selected' : ''); ?>><?php echo e($b); ?></option>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Berat Badan (kg)</label>
-                                <input type="number" name="weight" value="<?php echo e(old('weight', $student->weight)); ?>" step="0.1" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                <input type="number" name="weight" value="<?php echo e(old('weight', $student->weight)); ?>" step="0.1" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tinggi Badan (cm)</label>
-                                <input type="number" name="height" value="<?php echo e(old('height', $student->height)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                <input type="number" name="height" value="<?php echo e(old('height', $student->height)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                             </div>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Riwayat Penyakit</label>
-                            <input type="text" name="history_disease" value="<?php echo e(old('history_disease', $student->history_disease)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                            <input type="text" name="history_disease" value="<?php echo e(old('history_disease', $student->history_disease)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Kelainan Jasmani</label>
-                            <input type="text" name="physical_abnormalities" value="<?php echo e(old('physical_abnormalities', $student->physical_abnormalities)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                            <input type="text" name="physical_abnormalities" value="<?php echo e(old('physical_abnormalities', $student->physical_abnormalities)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                         </div>
                     </div>
 
@@ -261,30 +260,30 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Asal Sekolah Dasar (SD)</label>
-                                <input type="text" name="school_origin" value="<?php echo e(old('school_origin', $student->school_origin)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                <input type="text" name="school_origin" value="<?php echo e(old('school_origin', $student->school_origin)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">No. Ijazah</label>
-                                <input type="text" name="prev_diploma_no" value="<?php echo e(old('prev_diploma_no', $student->prev_diploma_no)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                <input type="text" name="prev_diploma_no" value="<?php echo e(old('prev_diploma_no', $student->prev_diploma_no)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tanggal Ijazah</label>
                                 <div class="relative">
-                                    <input type="text" name="prev_exam_date" value="<?php echo e(old('prev_exam_date', $student->prev_exam_date)); ?>" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900" placeholder="dd/mm/yyyy">
+                                    <input type="text" name="prev_exam_date" value="<?php echo e(old('prev_exam_date', $student->prev_exam_date ? \Carbon\Carbon::parse($student->prev_exam_date)->format('Y-m-d') : '')); ?>" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch" placeholder="dd/mm/yyyy">
                                     <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-calendar-blank"></i></div>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tanggal Diterima di Sekolah Ini</label>
                                 <div class="relative">
-                                    <input type="text" name="accepted_date" value="<?php echo e(old('accepted_date', $student->accepted_date)); ?>" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900" placeholder="dd/mm/yyyy">
+                                    <input type="text" name="accepted_date" value="<?php echo e(old('accepted_date', $student->accepted_date ? \Carbon\Carbon::parse($student->accepted_date)->format('Y-m-d') : '')); ?>" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch" placeholder="dd/mm/yyyy">
                                     <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-calendar-blank"></i></div>
                                 </div>
                             </div>
                             
                             <div class="md:col-span-2">
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Pindahan Dari Sekolah (Jika Pindahan)</label>
-                                <input type="text" name="transfer_from_school" value="<?php echo e(old('transfer_from_school', $student->transfer_from_school)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                <input type="text" name="transfer_from_school" value="<?php echo e(old('transfer_from_school', $student->transfer_from_school)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                             </div>
                         </div>
                     </div>
@@ -296,52 +295,50 @@
                                 <h4 class="font-bold text-blue-900 border-b border-blue-100 pb-2">Data Ayah Kandung</h4>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Nama Ayah</label>
-                                    <input type="text" name="father_name" value="<?php echo e(old('father_name', $student->father_name)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <input type="text" name="father_name" value="<?php echo e(old('father_name', $student->father_name)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tempat, Tanggal Lahir</label>
                                     <div class="flex gap-2">
-                                        <input type="text" name="father_pob" value="<?php echo e(old('father_pob', $student->father_pob)); ?>" placeholder="Kota" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
-                                        
+                                        <input type="text" name="father_pob" value="<?php echo e(old('father_pob', $student->father_pob)); ?>" placeholder="Kota" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                         <div class="relative w-1/2">
-                                            <input type="text" name="father_birth_year" value="<?php echo e(old('father_birth_year', $student->father_birth_year)); ?>" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900" placeholder="dd/mm/yyyy">
+                                            <input type="text" name="father_birth_year" value="<?php echo e(old('father_birth_year', $student->father_birth_year ? \Carbon\Carbon::parse($student->father_birth_year)->format('Y-m-d') : '')); ?>" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch" placeholder="dd/mm/yyyy">
                                             <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-calendar-blank"></i></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Pekerjaan</label>
-                                    <input type="text" name="father_job" value="<?php echo e(old('father_job', $student->father_job)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <input type="text" name="father_job" value="<?php echo e(old('father_job', $student->father_job)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Penghasilan / Bulan</label>
-                                    <input type="text" name="father_income" value="<?php echo e(old('father_income', $student->father_income)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <input type="text" name="father_income" value="<?php echo e(old('father_income', $student->father_income)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                 </div>
                             </div>
                             <div class="space-y-4">
                                 <h4 class="font-bold text-pink-600 border-b border-pink-100 pb-2">Data Ibu Kandung</h4>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Nama Ibu</label>
-                                    <input type="text" name="mother_name" value="<?php echo e(old('mother_name', $student->mother_name)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <input type="text" name="mother_name" value="<?php echo e(old('mother_name', $student->mother_name)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tempat, Tanggal Lahir</label>
                                     <div class="flex gap-2">
-                                        <input type="text" name="mother_pob" value="<?php echo e(old('mother_pob', $student->mother_pob)); ?>" placeholder="Kota" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
-                                        
+                                        <input type="text" name="mother_pob" value="<?php echo e(old('mother_pob', $student->mother_pob)); ?>" placeholder="Kota" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                         <div class="relative w-1/2">
-                                            <input type="text" name="mother_birth_year" value="<?php echo e(old('mother_birth_year', $student->mother_birth_year)); ?>" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900" placeholder="dd/mm/yyyy">
+                                            <input type="text" name="mother_birth_year" value="<?php echo e(old('mother_birth_year', $student->mother_birth_year ? \Carbon\Carbon::parse($student->mother_birth_year)->format('Y-m-d') : '')); ?>" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch" placeholder="dd/mm/yyyy">
                                             <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-calendar-blank"></i></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Pekerjaan</label>
-                                    <input type="text" name="mother_job" value="<?php echo e(old('mother_job', $student->mother_job)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <input type="text" name="mother_job" value="<?php echo e(old('mother_job', $student->mother_job)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Penghasilan / Bulan</label>
-                                    <input type="text" name="mother_income" value="<?php echo e(old('mother_income', $student->mother_income)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <input type="text" name="mother_income" value="<?php echo e(old('mother_income', $student->mother_income)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                 </div>
                             </div>
                         </div>
@@ -351,38 +348,37 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Nama Wali</label>
-                                    <input type="text" name="guardian_name" value="<?php echo e(old('guardian_name', $student->guardian_name)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <input type="text" name="guardian_name" value="<?php echo e(old('guardian_name', $student->guardian_name)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Tempat, Tanggal Lahir</label>
                                     <div class="flex gap-2">
-                                        <input type="text" name="guardian_pob" value="<?php echo e(old('guardian_pob', $student->guardian_pob)); ?>" placeholder="Kota" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
-                                        
+                                        <input type="text" name="guardian_pob" value="<?php echo e(old('guardian_pob', $student->guardian_pob)); ?>" placeholder="Kota" class="w-1/2 rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                         <div class="relative w-1/2">
-                                            <input type="text" name="guardian_dob" value="<?php echo e(old('guardian_dob', $student->guardian_dob)); ?>" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900" placeholder="dd/mm/yyyy">
+                                            <input type="text" name="guardian_dob" value="<?php echo e(old('guardian_dob', $student->guardian_dob ? \Carbon\Carbon::parse($student->guardian_dob)->format('Y-m-d') : '')); ?>" class="datepicker w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch" placeholder="dd/mm/yyyy">
                                             <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-calendar-blank"></i></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Kewarganegaraan</label>
-                                    <input type="text" name="guardian_citizenship" value="<?php echo e(old('guardian_citizenship', $student->guardian_citizenship)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900" placeholder="WNI">
+                                    <input type="text" name="guardian_citizenship" value="<?php echo e(old('guardian_citizenship', $student->guardian_citizenship)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch" placeholder="WNI">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Pekerjaan</label>
-                                    <input type="text" name="guardian_job" value="<?php echo e(old('guardian_job', $student->guardian_job)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <input type="text" name="guardian_job" value="<?php echo e(old('guardian_job', $student->guardian_job)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Penghasilan / Bulan</label>
-                                    <input type="text" name="guardian_income" value="<?php echo e(old('guardian_income', $student->guardian_income)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <input type="text" name="guardian_income" value="<?php echo e(old('guardian_income', $student->guardian_income)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Alamat Wali</label>
-                                    <input type="text" name="guardian_address" value="<?php echo e(old('guardian_address', $student->guardian_address)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900">
+                                    <input type="text" name="guardian_address" value="<?php echo e(old('guardian_address', $student->guardian_address)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase mb-1 ml-1">Hubungan Keluarga</label>
-                                    <input type="text" name="guardian_relationship" value="<?php echo e(old('guardian_relationship', $student->guardian_relationship)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900" placeholder="Paman / Kakek">
+                                    <input type="text" name="guardian_relationship" value="<?php echo e(old('guardian_relationship', $student->guardian_relationship)); ?>" class="w-full rounded-xl border-slate-300 focus:border-blue-900 focus:ring-blue-900 input-watch" placeholder="Paman / Kakek">
                                 </div>
                             </div>
                         </div>
@@ -398,21 +394,21 @@
                                 <div>
                                     <label class="block text-xs font-bold text-emerald-600 uppercase mb-1 ml-1">Tanggal Tamat</label>
                                     <div class="relative">
-                                        <input type="text" name="graduated_date" value="<?php echo e(old('graduated_date', $student->graduated_date)); ?>" class="datepicker w-full rounded-xl border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500 bg-white" placeholder="dd/mm/yyyy">
+                                        <input type="text" name="graduated_date" value="<?php echo e(old('graduated_date', $student->graduated_date ? \Carbon\Carbon::parse($student->graduated_date)->format('Y-m-d') : '')); ?>" class="datepicker w-full rounded-xl border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500 bg-white input-watch" placeholder="dd/mm/yyyy">
                                         <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-emerald-400"><i class="ph-bold ph-calendar-blank"></i></div>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-emerald-600 uppercase mb-1 ml-1">No. Ijazah</label>
-                                    <input type="text" name="graduated_diploma_no" value="<?php echo e(old('graduated_diploma_no', $student->graduated_diploma_no)); ?>" class="w-full rounded-xl border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500">
+                                    <input type="text" name="graduated_diploma_no" value="<?php echo e(old('graduated_diploma_no', $student->graduated_diploma_no)); ?>" class="w-full rounded-xl border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500 input-watch">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-emerald-600 uppercase mb-1 ml-1">Melanjutkan Ke</label>
-                                    <input type="text" name="continuing_to_school" value="<?php echo e(old('continuing_to_school', $student->continuing_to_school)); ?>" placeholder="Nama SMA/SMK" class="w-full rounded-xl border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500">
+                                    <input type="text" name="continuing_to_school" value="<?php echo e(old('continuing_to_school', $student->continuing_to_school)); ?>" placeholder="Nama SMA/SMK" class="w-full rounded-xl border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500 input-watch">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-emerald-600 uppercase mb-1 ml-1">Alamat Sekolah Lanjutan</label>
-                                    <input type="text" name="continuing_school_address" value="<?php echo e(old('continuing_school_address', $student->continuing_school_address)); ?>" class="w-full rounded-xl border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500">
+                                    <input type="text" name="continuing_school_address" value="<?php echo e(old('continuing_school_address', $student->continuing_school_address)); ?>" class="w-full rounded-xl border-emerald-200 focus:border-emerald-500 focus:ring-emerald-500 input-watch">
                                 </div>
                             </div>
                         </div>
@@ -424,21 +420,21 @@
                                 <div>
                                     <label class="block text-xs font-bold text-amber-600 uppercase mb-1 ml-1">Tanggal Pindah</label>
                                     <div class="relative">
-                                        <input type="text" name="leaving_date" value="<?php echo e(old('leaving_date', $student->leaving_date)); ?>" class="datepicker w-full rounded-xl border-amber-200 focus:border-amber-500 focus:ring-amber-500 bg-white" placeholder="dd/mm/yyyy">
+                                        <input type="text" name="leaving_date" value="<?php echo e(old('leaving_date', $student->leaving_date ? \Carbon\Carbon::parse($student->leaving_date)->format('Y-m-d') : '')); ?>" class="datepicker w-full rounded-xl border-amber-200 focus:border-amber-500 focus:ring-amber-500 bg-white input-watch" placeholder="dd/mm/yyyy">
                                         <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-amber-400"><i class="ph-bold ph-calendar-blank"></i></div>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-amber-600 uppercase mb-1 ml-1">Dari Kelas</label>
-                                    <input type="text" name="leaving_class" value="<?php echo e(old('leaving_class', $student->leaving_class)); ?>" class="w-full rounded-xl border-amber-200 focus:border-amber-500 focus:ring-amber-500">
+                                    <input type="text" name="leaving_class" value="<?php echo e(old('leaving_class', $student->leaving_class)); ?>" class="w-full rounded-xl border-amber-200 focus:border-amber-500 focus:ring-amber-500 input-watch">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-amber-600 uppercase mb-1 ml-1">Pindah Ke Sekolah</label>
-                                    <input type="text" name="leaving_to_school" value="<?php echo e(old('leaving_to_school', $student->leaving_to_school)); ?>" class="w-full rounded-xl border-amber-200 focus:border-amber-500 focus:ring-amber-500">
+                                    <input type="text" name="leaving_to_school" value="<?php echo e(old('leaving_to_school', $student->leaving_to_school)); ?>" class="w-full rounded-xl border-amber-200 focus:border-amber-500 focus:ring-amber-500 input-watch">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-amber-600 uppercase mb-1 ml-1">Alasan Pindah</label>
-                                    <input type="text" name="leaving_reason" value="<?php echo e(old('leaving_reason', $student->leaving_reason)); ?>" class="w-full rounded-xl border-amber-200 focus:border-amber-500 focus:ring-amber-500">
+                                    <input type="text" name="leaving_reason" value="<?php echo e(old('leaving_reason', $student->leaving_reason)); ?>" class="w-full rounded-xl border-amber-200 focus:border-amber-500 focus:ring-amber-500 input-watch">
                                 </div>
                             </div>
                         </div>
@@ -449,13 +445,13 @@
                                 <div>
                                     <label class="block text-xs font-bold text-rose-600 uppercase mb-1 ml-1">Tanggal Putus</label>
                                     <div class="relative">
-                                        <input type="text" name="dropout_date" value="<?php echo e(old('dropout_date', $student->dropout_date)); ?>" class="datepicker w-full rounded-xl border-rose-200 focus:border-rose-500 focus:ring-rose-500 bg-white" placeholder="dd/mm/yyyy">
+                                        <input type="text" name="dropout_date" value="<?php echo e(old('dropout_date', $student->dropout_date ? \Carbon\Carbon::parse($student->dropout_date)->format('Y-m-d') : '')); ?>" class="datepicker w-full rounded-xl border-rose-200 focus:border-rose-500 focus:ring-rose-500 bg-white input-watch" placeholder="dd/mm/yyyy">
                                         <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-rose-400"><i class="ph-bold ph-calendar-blank"></i></div>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-rose-600 uppercase mb-1 ml-1">Alasan</label>
-                                    <input type="text" name="dropout_reason" value="<?php echo e(old('dropout_reason', $student->dropout_reason)); ?>" class="w-full rounded-xl border-rose-200 focus:border-rose-500 focus:ring-rose-500">
+                                    <input type="text" name="dropout_reason" value="<?php echo e(old('dropout_reason', $student->dropout_reason)); ?>" class="w-full rounded-xl border-rose-200 focus:border-rose-500 focus:ring-rose-500 input-watch">
                                 </div>
                             </div>
                         </div>
@@ -465,11 +461,11 @@
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Beasiswa (Tahun / Kelas / Sumber)</label>
-                                    <textarea name="scholarship_info" rows="2" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:border-blue-900 focus:ring-blue-900"><?php echo e(old('scholarship_info', $student->scholarship_info)); ?></textarea>
+                                    <textarea name="scholarship_info" rows="2" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:border-blue-900 focus:ring-blue-900 input-watch"><?php echo e(old('scholarship_info', $student->scholarship_info)); ?></textarea>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1 ml-1">Catatan Penting Selama Siswa Belajar</label>
-                                    <textarea name="general_notes" rows="3" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:border-blue-900 focus:ring-blue-900"><?php echo e(old('general_notes', $student->general_notes)); ?></textarea>
+                                    <textarea name="general_notes" rows="3" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:border-blue-900 focus:ring-blue-900 input-watch"><?php echo e(old('general_notes', $student->general_notes)); ?></textarea>
                                 </div>
                             </div>
                         </div>
@@ -502,10 +498,10 @@
             // 1. INISIALISASI DATEPICKER (Flatpickr)
             flatpickr(".datepicker", {
                 altInput: true,
-                altFormat: "d/m/Y", // Tampilan di Form: 31/12/2025
-                dateFormat: "Y-m-d", // Data dikirim ke Server: 2025-12-31
-                locale: "id", // Bahasa Indonesia
-                disableMobile: "true" // Memaksa pakai tema Flatpickr di HP juga (supaya format tetap konsisten)
+                altFormat: "d/m/Y",
+                dateFormat: "Y-m-d",
+                locale: "id",
+                disableMobile: "true"
             });
 
             // 2. PREVIEW FOTO
@@ -517,21 +513,48 @@
                         const reader = new FileReader();
                         reader.onload = function(e) {
                             document.getElementById('photo-preview').src = e.target.result;
+                            formIsDirty = true; // Tandai form berubah jika ganti foto
                         }
                         reader.readAsDataURL(file);
                     }
                 });
             }
 
-            // 3. KONFIRMASI KEMBALI JIKA BELUM SIMPAN
-            // Cek jika form berubah (opsional, sederhana saja dulu: konfirmasi langsung saat klik kembali)
+            // 3. LOGIKA PROTEKSI KEMBALI (DIRTY CHECKING)
+            let formIsDirty = false;
+            // Pantau semua input yang punya class 'input-watch'
+            const watchElements = document.querySelectorAll('.input-watch');
+            watchElements.forEach(el => {
+                el.addEventListener('change', () => { formIsDirty = true; });
+                el.addEventListener('input', () => { formIsDirty = true; });
+            });
+
             const btnBack = document.querySelector('.btn-back-confirm');
             if(btnBack) {
                 btnBack.addEventListener('click', function(e) {
-                    // Hanya contoh proteksi sederhana
-                    // e.preventDefault();
-                    // Swal.fire(...) 
-                    // (Aktifkan jika ingin memproteksi tombol kembali)
+                    if (formIsDirty) {
+                        e.preventDefault();
+                        const targetUrl = this.getAttribute('href');
+                        
+                        Swal.fire({
+                            title: 'Belum Disimpan!',
+                            text: 'Ada perubahan data yang belum disimpan. Yakin ingin kembali?',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#e11d48', // Merah (Rose 600)
+                            cancelButtonColor: '#64748b', // Abu-abu (Slate 500)
+                            confirmButtonText: 'Ya, Buang Perubahan',
+                            cancelButtonText: 'Batal',
+                            reverseButtons: true,
+                            customClass: {
+                                popup: 'rounded-[2rem]'
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = targetUrl;
+                            }
+                        });
+                    }
                 });
             }
 
@@ -539,6 +562,7 @@
             const form = document.getElementById('edit-student-form');
             if(form) {
                 form.addEventListener('submit', function() {
+                    formIsDirty = false; // Bypass peringatan saat submit murni
                     Swal.fire({
                         title: 'Menyimpan Data...',
                         allowOutsideClick: false,
