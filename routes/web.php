@@ -299,14 +299,12 @@ Route::middleware('auth')->group(function () {
     // =========================================================================
     Route::post('/students/import', [StudentController::class, 'import'])->name('students.import');
     Route::get('/students/export', [StudentController::class, 'export'])->name('students.export'); 
-    
-    // --> ROUTE BARU: CETAK MASSAL KARTU OSIS DITAMBAHKAN DI SINI <--
     Route::get('/students/print-batch', [StudentController::class, 'printBatch'])->name('students.printBatch');
-    
-    Route::get('/students/{student}/card', [StudentController::class, 'card'])->name('students.card');
+    Route::delete('/students/destroy-batch', [StudentController::class, 'destroyBatch'])->name('students.destroyBatch');
+    Route::get('/students/{student}/card', [StudentController::class, 'card'])->name('students.card');   
     Route::resource('students', StudentController::class); 
     Route::resource('classes', SchoolClassController::class);
-    Route::delete('/students/destroy-batch', [StudentController::class, 'destroyBatch'])->name('students.destroyBatch');
+
 
     // ROUTE MUTASI & KENAIKAN KELAS DI SINI ---
     Route::prefix('promotions')->name('promotions.')->group(function () {

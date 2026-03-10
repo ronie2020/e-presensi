@@ -654,6 +654,30 @@
             window.open(`/students/print-batch?ids=${selectedIds}`, '_blank');
         }
 
+        
+        // FUNGSI JS HAPUS SATUAN (BARU)
+        function confirmDelete(button) {
+            const id = button.getAttribute('data-id');
+            const name = button.getAttribute('data-name');
+            
+            Swal.fire({
+                title: 'Hapus Siswa?',
+                text: `Data siswa "${name}" beserta riwayat absen akan dihapus permanen.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Cari form berdasarkan ID dan submit langsung
+                    document.getElementById('form-delete-' + id).submit();
+                }
+            });
+        }
+        
         // FUNGSI JS HAPUS TERPILIH (MASSAL)
         function deleteSelected() {
             const checkboxes = document.querySelectorAll('.student-checkbox:checked');
