@@ -641,6 +641,7 @@
             }
         });
 
+      
         // FUNGSI JS CETAK KARTU MASSAL BERDASARKAN KELAS
         function printBatchCards() {
             const classSelect = document.querySelector('select[name="filter_class_id"]');
@@ -667,7 +668,6 @@
             window.open(`/students/print-batch?ids=${selectedIds}`, '_blank');
         }
 
-        
         // FUNGSI JS HAPUS SATUAN (BARU)
         function confirmDelete(button) {
             const id = button.getAttribute('data-id');
@@ -690,7 +690,7 @@
                 }
             });
         }
-        
+
         // FUNGSI JS HAPUS TERPILIH (MASSAL)
         function deleteSelected() {
             const checkboxes = document.querySelectorAll('.student-checkbox:checked');
@@ -700,7 +700,7 @@
             const count = checkboxes.length;
 
             Swal.fire({
-                title: 'Hapus Massal?',
+                title: 'Hapus Siswa Terpilih?',
                 text: `Anda yakin ingin menghapus ${count} data siswa yang dipilih?`,
                 icon: 'warning',
                 showCancelButton: true,
