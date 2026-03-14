@@ -265,7 +265,7 @@ class LandingPageController extends Controller
             }
         });
 
-        if ($search) {
+       if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('position', 'like', "%{$search}%");
@@ -274,6 +274,34 @@ class LandingPageController extends Controller
 
         $teachers = $query->orderBy('name', 'asc')->paginate(12);
         return view('teachers', compact('teachers'));
+    }
+
+    // ==============================================================
+    // FUNGSI BARU UNTUK MENANGANI DETAIL/PORTOFOLIO GURU
+    // ==============================================================
+    public function teacherDetail($id)
+    {
+        // Tarik data guru beserta seluruh relasi portofolio-nya
+        $teacher = User::with([
+            'experiences' => function($q) { $q->orderBy('year', 'desc'); },
+            'materials' => function($q) { $q->latest(); },
+            'portfolios' => function($q) { $q->orderBy('year', 'desc'); },
+            'articles' => function($q) { $q->latest(); }
+        ])->findOrFail($id);
+
+        $experiences = $teacher->experiences;
+        $materials   = $teacher->materials;
+        $portfolios  = $teacher->portfolios;
+        $articles    = $teacher->articles;
+
+        // Diarahkan ke view 'teacher-detail' (di folder resources/views/)
+        return view('teacher-detail', compact(
+            'teacher', 
+            'experiences', 
+            'materials', 
+            'portfolios', 
+            'articles'
+        ));
     }
 
     public function testimonials()

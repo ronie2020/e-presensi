@@ -58,4 +58,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(StudentPermit::class, 'pic_teacher_id');
     }
+    public function experiences() {
+        return $this->hasMany(\App\Models\TeacherExperience::class);
+    }
+    public function materials() {
+        return $this->hasMany(\App\Models\TeacherMaterial::class);
+    }
+    public function portfolios() {
+        return $this->hasMany(\App\Models\TeacherPortfolio::class);
+    }
+    public function articles() {
+        return $this->hasMany(\App\Models\TeacherArticle::class);
+    }
 }

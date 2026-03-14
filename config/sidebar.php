@@ -16,6 +16,14 @@ return [
                 'icon' => 'ph-squares-four',
                 // Tidak ada key 'roles' berarti bisa diakses semua user yang login
             ],
+            // MENU BARU: KELOLA PORTOFOLIO GURU
+            [
+                'name' => 'Kelola Portofolio',
+                'route' => 'portfolio.index', // Pastikan nama ini sama dengan di web.php
+                'active_check' => 'portfolio.*',
+                'icon' => 'ph-medal',
+                'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas', 'Guru Mata Pelajaran', 'Guru', 'Guru Piket']
+            ],
             [
                 'name' => 'Scan Aktifitas',
                 'route' => 'scan.show',

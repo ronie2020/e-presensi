@@ -98,12 +98,13 @@ use App\Http\Controllers\RamadanReportController;
 //  1. HALAMAN PUBLIK & KIOSK (Tanpa Login)
 // =========================================================================
 
-Route::get('/', [LandingPageController::class, 'index'])->name('landing');
-Route::get('/kegiatan', [LandingPageController::class, 'activities'])->name('public.activities');
-Route::get('/prestasi', [LandingPageController::class, 'achievements'])->name('public.achievements');
-Route::get('/testimoni', [LandingPageController::class, 'testimonials'])->name('public.testimonials'); 
-Route::get('/guru', [LandingPageController::class, 'teachers'])->name('teachers.index');
-Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
+    Route::get('/', [LandingPageController::class, 'index'])->name('landing');
+    Route::get('/kegiatan', [LandingPageController::class, 'activities'])->name('public.activities');
+    Route::get('/prestasi', [LandingPageController::class, 'achievements'])->name('public.achievements');
+    Route::get('/testimoni', [LandingPageController::class, 'testimonials'])->name('public.testimonials'); 
+    Route::get('/guru', [LandingPageController::class, 'teachers'])->name('teachers.index');
+    Route::get('/guru/{id}', [LandingPageController::class, 'teacherDetail'])->name('teachers.show');
+    Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
 
 // --- ROUTE PPDB PUBLIK ---
 Route::prefix('ppdb')->name('ppdb.')->group(function () {    
@@ -254,8 +255,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
     // =========================================================================
-    //  PERBAIKAN: ROUTE REKAPITULASI KELAS (SUMMARY)
-    //  Menggunakan ReportController::indexClass karena logic perhitungan ada di sana
+    //  PERBAIKAN: ROUTE REKAPITULASI KELAS (SUMMARY)    
     // =========================================================================
     Route::get('/reports/classes', [ReportController::class, 'indexClass'])->name('reports.class');
     
@@ -409,22 +409,22 @@ Route::middleware('auth')->group(function () {
         Route::post('/store', [StudentPermitController::class, 'store'])->name('store');    
     });
 
-    Route::resource('discipline', DisciplineController::class)->only(['index', 'store', 'destroy']);
-    Route::resource('discipline-types', DisciplineTypeController::class);
+        Route::resource('discipline', DisciplineController::class)->only(['index', 'store', 'destroy']);
+        Route::resource('discipline-types', DisciplineTypeController::class);
     
     // E-RAPOR & PENILAIAN
-    Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
-    Route::get('/grades/input', [GradeController::class, 'create'])->name('grades.create');
-    Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');
-    Route::get('/grades/template', [GradeController::class, 'downloadTemplate'])->name('grades.template');
-    Route::get('/grades/template-student', [GradeController::class, 'downloadStudentTemplate'])->name('grades.template_student');
-    Route::post('/grades/import', [GradeController::class, 'importGrades'])->name('grades.import');
-    Route::post('/grades/import-student', [GradeController::class, 'importStudentGrades'])->name('grades.import_student');
-    Route::get('/grades/students/{class_id}', [GradeController::class, 'getStudentsByClass'])->name('grades.get_students');
-    Route::get('/grades/input-student', [GradeController::class, 'createByStudent'])->name('grades.create_by_student');
-    Route::post('/grades/store-student', [GradeController::class, 'storeByStudent'])->name('grades.store_by_student');
-    Route::get('/grades/list', [GradeController::class, 'listStudents'])->name('grades.list');
-    Route::get('/report-card/{student_id}', [GradeController::class, 'reportCard'])->name('grades.report');
+        Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
+        Route::get('/grades/input', [GradeController::class, 'create'])->name('grades.create');
+        Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');
+        Route::get('/grades/template', [GradeController::class, 'downloadTemplate'])->name('grades.template');
+        Route::get('/grades/template-student', [GradeController::class, 'downloadStudentTemplate'])->name('grades.template_student');
+        Route::post('/grades/import', [GradeController::class, 'importGrades'])->name('grades.import');
+        Route::post('/grades/import-student', [GradeController::class, 'importStudentGrades'])->name('grades.import_student');
+        Route::get('/grades/students/{class_id}', [GradeController::class, 'getStudentsByClass'])->name('grades.get_students');
+        Route::get('/grades/input-student', [GradeController::class, 'createByStudent'])->name('grades.create_by_student');
+        Route::post('/grades/store-student', [GradeController::class, 'storeByStudent'])->name('grades.store_by_student');
+        Route::get('/grades/list', [GradeController::class, 'listStudents'])->name('grades.list');
+        Route::get('/report-card/{student_id}', [GradeController::class, 'reportCard'])->name('grades.report');
 
       // Perpustakaan
     Route::prefix('library')->name('library.')->group(function () {
@@ -610,6 +610,25 @@ Route::middleware('auth')->group(function () {
         Route::get('/export-pdf', [RamadanReportController::class, 'exportPdf'])->name('exportPdf');
         Route::get('/export-excel', [\App\Http\Controllers\RamadanReportController::class, 'exportExcel'])->name('exportExcel'); // (Bonus fix: saya hapus /admin/ramadan/ yang ganda)
     });
+
+     // CRUD Portofolio Guru (Hanya untuk guru yang login mengelola miliknya sendiri)
+    Route::prefix('my-portfolio')->name('portfolio.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\TeacherPortfolioController::class, 'index'])->name('index');
+        
+        Route::post('/experience', [\App\Http\Controllers\TeacherPortfolioController::class, 'storeExperience'])->name('exp.store');
+        Route::delete('/experience/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyExperience'])->name('exp.destroy');
+        
+        Route::post('/material', [\App\Http\Controllers\TeacherPortfolioController::class, 'storeMaterial'])->name('mat.store');
+        Route::delete('/material/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyMaterial'])->name('mat.destroy');
+        
+        Route::post('/portfolio', [\App\Http\Controllers\TeacherPortfolioController::class, 'storePortfolio'])->name('port.store');
+        Route::delete('/portfolio/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyPortfolio'])->name('port.destroy');
+        
+        Route::post('/article', [\App\Http\Controllers\TeacherPortfolioController::class, 'storeArticle'])->name('art.store');
+        Route::delete('/article/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyArticle'])->name('art.destroy');
+    });
+
 });
+
 
 require __DIR__.'/auth.php';
