@@ -1,8 +1,6 @@
-@extends('layouts.public')
+<?php $__env->startSection('title', 'Direktori Pengajar - ' . config('app.name', 'SMP Negeri 3 Lakbok')); ?>
 
-@section('title', 'Direktori Pengajar - ' . config('app.name', 'SMP Negeri 3 Lakbok'))
-
-@push('styles')
+<?php $__env->startPush('styles'); ?>
     <style>
         /* Animasi Custom Khusus Halaman Ini */
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -21,10 +19,10 @@
         .modal-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
         .modal-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
-    {{-- Wrapper x-data: Memindahkan logika dari body ke sini agar tetap jalan di dalam layout --}}
+<?php $__env->startSection('content'); ?>
+    
     <div x-data="{ 
           modalOpen: false, 
           teacher: {},
@@ -48,8 +46,8 @@
       }">
 
         <!-- HEADER SECTION -->
-        {{-- Gunakan -mt-24 agar background naik ke belakang navbar fixed --}}
-        {{-- Ubah pt-20 menjadi pt-32 untuk kompensasi naiknya background --}}
+        
+        
         <div class="bg-slate-900 pt-32 pb-32 relative overflow-hidden -mt-24">
             <div class="absolute inset-0 bg-blue-600/10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
             <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-900"></div>
@@ -68,18 +66,18 @@
                 </p>
 
                 <!-- FORM PENCARIAN -->
-                <form action="{{ route('teachers.index') }}" method="GET" class="max-w-lg mx-auto relative group">
+                <form action="<?php echo e(route('teachers.index')); ?>" method="GET" class="max-w-lg mx-auto relative group">
                     <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                     <div class="relative">
-                        <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama atau jabatan guru..." class="w-full pl-14 pr-14 py-4 rounded-full border-0 focus:ring-0 shadow-2xl text-sm font-bold placeholder-slate-400 bg-white/95 backdrop-blur-xl text-slate-800 transition-transform focus:scale-[1.02]">
+                        <input type="text" name="q" value="<?php echo e(request('q')); ?>" placeholder="Cari nama atau jabatan guru..." class="w-full pl-14 pr-14 py-4 rounded-full border-0 focus:ring-0 shadow-2xl text-sm font-bold placeholder-slate-400 bg-white/95 backdrop-blur-xl text-slate-800 transition-transform focus:scale-[1.02]">
                         <div class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400">
                             <i class="ph-bold ph-magnifying-glass text-xl"></i>
                         </div>
-                        @if(request('q'))
-                            <a href="{{ route('teachers.index') }}" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-100 hover:text-red-600 transition-colors" title="Hapus Pencarian"><i class="ph-bold ph-x"></i></a>
-                        @else
+                        <?php if(request('q')): ?>
+                            <a href="<?php echo e(route('teachers.index')); ?>" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-100 hover:text-red-600 transition-colors" title="Hapus Pencarian"><i class="ph-bold ph-x"></i></a>
+                        <?php else: ?>
                             <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 hover:scale-110 active:scale-95"><i class="ph-bold ph-arrow-right"></i></button>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </form>
             </div>
@@ -88,43 +86,43 @@
         <!-- MAIN CONTENT -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 pb-20">
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                @forelse($teachers as $index => $teacher)
-                    @php
+                <?php $__empty_1 = true; $__currentLoopData = $teachers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $teacher): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
                         // Logika untuk mendecode Role yang berbentuk JSON string ["Guru", "Admin"]
                         $displayRole = $teacher->position;
                         if (empty($displayRole)) {
                             $decodedRoles = is_string($teacher->role) ? json_decode($teacher->role, true) : $teacher->role;
                             $displayRole = is_array($decodedRoles) ? implode(', ', $decodedRoles) : $teacher->role;
                         }
-                    @endphp
+                    ?>
                     <div @click="openModal({
-                            name: '{{ addslashes($teacher->name) }}',
-                            nip: '{{ $teacher->nip ?? '-' }}',
-                            pangkat: '{{ $teacher->pangkat ?? '-' }}',
-                            position: '{{ addslashes($displayRole) }}',
-                            bio: '{{ addslashes($teacher->bio ?? 'Belum ada pesan & kesan.') }}',
-                            phone: '{{ $teacher->phone }}',
-                            instagram: '{{ $teacher->instagram }}',
-                            tiktok: '{{ $teacher->tiktok }}',
-                            facebook: '{{ $teacher->facebook }}',
-                            photo_url: '{{ $teacher->photo_path ? asset('storage/' . $teacher->photo_path) : '' }}',
-                            profile_url: '{{ route('teachers.show', $teacher->id) }}' 
+                            name: '<?php echo e(addslashes($teacher->name)); ?>',
+                            nip: '<?php echo e($teacher->nip ?? '-'); ?>',
+                            pangkat: '<?php echo e($teacher->pangkat ?? '-'); ?>',
+                            position: '<?php echo e(addslashes($displayRole)); ?>',
+                            bio: '<?php echo e(addslashes($teacher->bio ?? 'Belum ada pesan & kesan.')); ?>',
+                            phone: '<?php echo e($teacher->phone); ?>',
+                            instagram: '<?php echo e($teacher->instagram); ?>',
+                            tiktok: '<?php echo e($teacher->tiktok); ?>',
+                            facebook: '<?php echo e($teacher->facebook); ?>',
+                            photo_url: '<?php echo e($teacher->photo_path ? asset('storage/' . $teacher->photo_path) : ''); ?>',
+                            profile_url: '<?php echo e(route('teachers.show', $teacher->id)); ?>' 
                          })"
                          class="animate-enter group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-2 transition-all duration-500 border border-slate-100 flex flex-col h-full relative cursor-pointer"
-                         style="animation-delay: {{ ($index % 4) * 100 }}ms">
+                         style="animation-delay: <?php echo e(($index % 4) * 100); ?>ms">
                         
                         <!-- Foto Guru -->
                         <div class="aspect-[4/5] sm:aspect-square bg-slate-200 relative overflow-hidden">
-                            @if($teacher->photo_path)
-                                <img src="{{ asset('storage/' . $teacher->photo_path) }}" alt="{{ $teacher->name }}" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter grayscale group-hover:grayscale-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <?php if($teacher->photo_path): ?>
+                                <img src="<?php echo e(asset('storage/' . $teacher->photo_path)); ?>" alt="<?php echo e($teacher->name); ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter grayscale group-hover:grayscale-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                 <div class="hidden w-full h-full flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-slate-200 text-slate-400">
-                                    <span class="text-4xl font-bold opacity-30">{{ substr($teacher->name, 0, 2) }}</span>
+                                    <span class="text-4xl font-bold opacity-30"><?php echo e(substr($teacher->name, 0, 2)); ?></span>
                                 </div>
-                            @else
+                            <?php else: ?>
                                 <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100 text-blue-300">
-                                    <span class="text-6xl sm:text-7xl font-black opacity-30 select-none uppercase group-hover:scale-110 transition-transform duration-500">{{ substr($teacher->name, 0, 1) }}</span>
+                                    <span class="text-6xl sm:text-7xl font-black opacity-30 select-none uppercase group-hover:scale-110 transition-transform duration-500"><?php echo e(substr($teacher->name, 0, 1)); ?></span>
                                 </div>
-                            @endif
+                            <?php endif; ?>
                             
                             <!-- Overlay Text (Call to Action) -->
                             <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -135,30 +133,31 @@
                         <!-- Info Singkat -->
                         <div class="p-5 text-center flex-1 flex flex-col relative bg-white">
                             <div class="absolute -top-4 left-0 right-0 flex justify-center px-4">
-                                <span class="inline-block px-4 py-1.5 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-lg border-2 border-white transform group-hover:scale-105 transition-transform truncate max-w-full" title="{{ $displayRole }}">
-                                    {{ $displayRole }}
+                                <span class="inline-block px-4 py-1.5 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-lg border-2 border-white transform group-hover:scale-105 transition-transform truncate max-w-full" title="<?php echo e($displayRole); ?>">
+                                    <?php echo e($displayRole); ?>
+
                                 </span>
                             </div>
                             <div class="mt-4 mb-2">
-                                <h3 class="text-base sm:text-lg font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors line-clamp-1">{{ $teacher->name }}</h3>
-                                @if($teacher->nip)
-                                    <p class="text-[10px] sm:text-xs text-slate-400 font-mono mt-1 font-medium bg-slate-50 inline-block px-2 py-0.5 rounded">{{ $teacher->nip }}</p>
-                                @endif
+                                <h3 class="text-base sm:text-lg font-bold text-slate-800 leading-tight group-hover:text-blue-600 transition-colors line-clamp-1"><?php echo e($teacher->name); ?></h3>
+                                <?php if($teacher->nip): ?>
+                                    <p class="text-[10px] sm:text-xs text-slate-400 font-mono mt-1 font-medium bg-slate-50 inline-block px-2 py-0.5 rounded"><?php echo e($teacher->nip); ?></p>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="col-span-2 lg:col-span-4 py-24 text-center animate-enter">
                         <div class="inline-flex bg-slate-100 p-6 rounded-full mb-6 text-slate-300 ring-8 ring-slate-50"><i class="ph-duotone ph-magnifying-glass text-5xl"></i></div>
                         <h3 class="text-xl font-bold text-slate-800 mb-2">Data Tidak Ditemukan</h3>
                         <p class="text-slate-500 text-sm max-w-md mx-auto mb-6">Maaf, kami tidak dapat menemukan data guru dengan kata kunci tersebut.</p>
-                        @if(request('q'))
-                            <a href="{{ route('teachers.index') }}" class="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-full hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 gap-2"><i class="ph-bold ph-arrow-counter-clockwise"></i> Reset Pencarian</a>
-                        @endif
+                        <?php if(request('q')): ?>
+                            <a href="<?php echo e(route('teachers.index')); ?>" class="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-full hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 gap-2"><i class="ph-bold ph-arrow-counter-clockwise"></i> Reset Pencarian</a>
+                        <?php endif; ?>
                     </div>
-                @endforelse
+                <?php endif; ?>
             </div>
-            <div class="mt-16 px-4 animate-enter">{{ $teachers->withQueryString()->links() }}</div>
+            <div class="mt-16 px-4 animate-enter"><?php echo e($teachers->withQueryString()->links()); ?></div>
         </div>
 
         <!-- MODAL DETAIL GURU (POPUP) -->
@@ -265,23 +264,23 @@
 
                            <!-- Sosial Media -->
                     <div class="flex items-center justify-center md:justify-start gap-3">
-                        @if($teacher->instagram)
-                        <a href="{{ $teacher->instagram }}" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-pink-500 hover:text-white flex items-center justify-center text-slate-300 transition-all"><i class="ph-logo ph-instagram-logo text-xl"></i></a>
-                        @endif
-                        @if($teacher->facebook)
-                        <a href="{{ $teacher->facebook }}" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-blue-600 hover:text-white flex items-center justify-center text-slate-300 transition-all"><i class="ph-logo ph-facebook-logo text-xl"></i></a>
-                        @endif
-                        @if($teacher->tiktok)
-                        <a href="{{ $teacher->tiktok }}" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-slate-800 hover:text-white flex items-center justify-center text-slate-300 transition-all"><i class="ph-logo ph-tiktok-logo text-xl"></i></a>
-                        @endif
-                        @if($teacher->phone)
-                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $teacher->phone) }}" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-emerald-500 hover:text-white flex items-center justify-center text-slate-300 transition-all"><i class="ph-logo ph-whatsapp-logo text-xl"></i></a>
-                        @endif
+                        <?php if($teacher->instagram): ?>
+                        <a href="<?php echo e($teacher->instagram); ?>" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-pink-500 hover:text-white flex items-center justify-center text-slate-300 transition-all"><i class="ph-logo ph-instagram-logo text-xl"></i></a>
+                        <?php endif; ?>
+                        <?php if($teacher->facebook): ?>
+                        <a href="<?php echo e($teacher->facebook); ?>" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-blue-600 hover:text-white flex items-center justify-center text-slate-300 transition-all"><i class="ph-logo ph-facebook-logo text-xl"></i></a>
+                        <?php endif; ?>
+                        <?php if($teacher->tiktok): ?>
+                        <a href="<?php echo e($teacher->tiktok); ?>" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-slate-800 hover:text-white flex items-center justify-center text-slate-300 transition-all"><i class="ph-logo ph-tiktok-logo text-xl"></i></a>
+                        <?php endif; ?>
+                        <?php if($teacher->phone): ?>
+                        <a href="https://wa.me/<?php echo e(preg_replace('/[^0-9]/', '', $teacher->phone)); ?>" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-emerald-500 hover:text-white flex items-center justify-center text-slate-300 transition-all"><i class="ph-logo ph-whatsapp-logo text-xl"></i></a>
+                        <?php endif; ?>
                     </div>
                     
                     <!-- Tombol Download CV -->
                     <div class="mt-8 flex justify-center md:justify-start animate-enter" style="animation-delay: 300ms;">
-                        <a href="{{ route('teachers.cv', $teacher->id) }}" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold rounded-full shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-1">
+                        <a href="<?php echo e(route('teachers.cv', $teacher->id)); ?>" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold rounded-full shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-1">
                             <i class="ph-bold ph-download-simple text-xl"></i> Unduh CV (PDF)
                         </a>
                     </div>
@@ -292,4 +291,5 @@
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.public', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/teachers.blade.php ENDPATH**/ ?>

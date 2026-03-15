@@ -265,7 +265,7 @@ class LandingPageController extends Controller
             }
         });
 
-       if ($search) {
+        if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('position', 'like', "%{$search}%");
@@ -302,6 +302,31 @@ class LandingPageController extends Controller
             'portfolios', 
             'articles'
         ));
+    }
+
+    // ==============================================================
+    // FUNGSI UNTUK DOWNLOAD CV GURU (PDF)
+    // ==============================================================
+    public function downloadCv($id)
+    {
+        // 1. Ambil data lengkap guru seperti di halaman detail
+        $teacher = User::with([
+            'experiences' => function($q) { $q->orderBy('year', 'desc'); },
+            'portfolios' => function($q) { $q->orderBy('year', 'desc'); },
+            'articles' => function($q) { $q->latest(); }
+        ])->findOrFail($id);
+
+        // 2. Render view HTML khusus PDF menjadi object PDF
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.teacher-cv', compact('teacher'));
+        
+        // 3. Set ukuran kertas ke A4 (Portrait)
+        $pdf->setPaper('A4', 'portrait');
+
+        // 4. Bersihkan nama file agar aman dari karakter aneh
+        $fileName = 'CV_' . preg_replace('/[^A-Za-z0-9\-]/', '_', $teacher->name) . '.pdf';
+
+        // 5. Lempar sebagai file unduhan
+        return $pdf->download($fileName);
     }
 
     public function testimonials()

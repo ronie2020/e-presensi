@@ -99,12 +99,14 @@ use App\Http\Controllers\RamadanReportController;
 // =========================================================================
 
     Route::get('/', [LandingPageController::class, 'index'])->name('landing');
-    Route::get('/kegiatan', [LandingPageController::class, 'activities'])->name('public.activities');
-    Route::get('/prestasi', [LandingPageController::class, 'achievements'])->name('public.achievements');
-    Route::get('/testimoni', [LandingPageController::class, 'testimonials'])->name('public.testimonials'); 
-    Route::get('/guru', [LandingPageController::class, 'teachers'])->name('teachers.index');
-    Route::get('/guru/{id}', [LandingPageController::class, 'teacherDetail'])->name('teachers.show');
-    Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
+Route::get('/kegiatan', [LandingPageController::class, 'activities'])->name('public.activities');
+Route::get('/prestasi', [LandingPageController::class, 'achievements'])->name('public.achievements');
+Route::get('/testimoni', [LandingPageController::class, 'testimonials'])->name('public.testimonials'); 
+Route::get('/guru', [LandingPageController::class, 'teachers'])->name('teachers.index');
+Route::get('/guru/{id}', [LandingPageController::class, 'teacherDetail'])->name('teachers.show');
+Route::get('/guru/{id}/cv', [LandingPageController::class, 'downloadCv'])->name('teachers.cv');
+Route::post('/guestbook', [GuestBookController::class, 'store'])->name('guestbook.store');
+
 
 // --- ROUTE PPDB PUBLIK ---
 Route::prefix('ppdb')->name('ppdb.')->group(function () {    
