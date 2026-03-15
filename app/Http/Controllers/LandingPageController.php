@@ -317,7 +317,7 @@ class LandingPageController extends Controller
         ])->findOrFail($id);
 
         // 2. Render view HTML khusus PDF menjadi object PDF
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.teacher-cv', compact('teacher'));
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('teacher-cv', compact('teacher'));
         
         // 3. Set ukuran kertas ke A4 (Portrait)
         $pdf->setPaper('A4', 'portrait');
