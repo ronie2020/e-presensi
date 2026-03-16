@@ -19,6 +19,8 @@ use App\Imports\GradesImport;
 use App\Imports\StudentGradesImport;  
 use App\Exports\TemplateMapelExport;   
 use App\Exports\TemplateStudentExport; 
+use App\Exports\LegerExport;
+use App\Imports\LegerImport;
 
 class GradeController extends Controller
 {
@@ -312,7 +314,7 @@ class GradeController extends Controller
     /**
      * Proses Import Excel PER SISWA
      */
-    public function importStudentGrades(Request $request)
+     public function importStudentGrades(Request $request)
     {
         $request->validate([
             'file' => 'required|mimes:xlsx,xls',
@@ -332,6 +334,45 @@ class GradeController extends Controller
             ), $request->file('file'));
 
             return redirect()->route('grades.index')->with('success', 'Nilai Siswa berhasil diimport!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download Template Excel LEGER KELAS (Sesuai Foto)
+     */
+    public function downloadTemplateLeger(Request $request)
+    {
+        $request->validate([
+            'class_id' => 'required'
+        ]);
+
+        $class = SchoolClass::findOrFail($request->class_id);
+        
+        // Memanggil LegerExport dengan mengirimkan ID Kelas
+        return Excel::download(new LegerExport($class->id), 'Template_Leger_Kelas_' . str_replace(' ', '_', $class->name) . '.xlsx');
+    }
+
+    /**
+     * Proses Import Excel LEGER KELAS (Semua Mapel, Semua Siswa)
+     */
+    public function importLeger(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls',
+            'academic_year' => 'required',
+            'semester' => 'required',
+        ]);
+
+        try {
+            // Kita tidak memerlukan class_id di sini jika LegerImport mencari siswa berdasarkan NISN dari file Excel
+            Excel::import(new LegerImport(
+                $request->academic_year,
+                $request->semester
+            ), $request->file('file'));
+
+            return redirect()->route('grades.index')->with('success', 'Data Leger Kelas berhasil diimport secara massal!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal import: ' . $e->getMessage());
         }

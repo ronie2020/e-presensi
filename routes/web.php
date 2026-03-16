@@ -414,14 +414,16 @@ Route::middleware('auth')->group(function () {
         Route::resource('discipline', DisciplineController::class)->only(['index', 'store', 'destroy']);
         Route::resource('discipline-types', DisciplineTypeController::class);
     
-    // E-RAPOR & PENILAIAN
+     // E-RAPOR & PENILAIAN
         Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
         Route::get('/grades/input', [GradeController::class, 'create'])->name('grades.create');
         Route::post('/grades', [GradeController::class, 'store'])->name('grades.store');
         Route::get('/grades/template', [GradeController::class, 'downloadTemplate'])->name('grades.template');
         Route::get('/grades/template-student', [GradeController::class, 'downloadStudentTemplate'])->name('grades.template_student');
+        Route::get('/grades/template-leger', [GradeController::class, 'downloadTemplateLeger'])->name('grades.template_leger');
         Route::post('/grades/import', [GradeController::class, 'importGrades'])->name('grades.import');
         Route::post('/grades/import-student', [GradeController::class, 'importStudentGrades'])->name('grades.import_student');
+        Route::post('/grades/import-leger', [GradeController::class, 'importLeger'])->name('grades.import_leger');
         Route::get('/grades/students/{class_id}', [GradeController::class, 'getStudentsByClass'])->name('grades.get_students');
         Route::get('/grades/input-student', [GradeController::class, 'createByStudent'])->name('grades.create_by_student');
         Route::post('/grades/store-student', [GradeController::class, 'storeByStudent'])->name('grades.store_by_student');
