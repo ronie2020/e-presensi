@@ -24,7 +24,7 @@
                     
                     <div class="flex flex-col items-center md:items-end gap-2">
                         <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10 text-center shadow-lg">
-                            <span class="block text-2xl font-black text-white">{{ count($students) }}</span>
+                            <span class="block text-2xl font-black text-white">{{ $students->count() }}</span>
                             <span class="text-[9px] uppercase font-bold text-blue-300 tracking-wider">Total Siswa</span>
                         </div>
                     </div>
@@ -35,7 +35,7 @@
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
                 
                 {{-- TOOLBAR --}}
-                <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between gap-4">
+               <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between gap-4">
                     <div class="relative w-full sm:w-96">
                         <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
                         <input type="text" 
@@ -45,16 +45,14 @@
                     </div>
                     
                     <div class="flex gap-2">
-                        {{-- Tombol Cetak Leger --}}
-                        <button class="px-5 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 hover:text-blue-600 transition shadow-sm text-sm flex items-center gap-2 whitespace-nowrap">
+                        <a href="{{ route('grades.template_leger', ['class_id' => $class->id]) }}" class="px-5 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 hover:text-blue-600 transition shadow-sm text-sm flex items-center gap-2 whitespace-nowrap">
                             <i class="ph-bold ph-file-csv text-lg"></i>
                             <span>Leger Nilai</span>
-                        </button>
-                        {{-- [NEW] Tombol Cetak Semua --}}
-                        <button onclick="alert('Fitur Cetak Batch akan membuka semua rapor siswa dalam satu PDF.')" class="px-5 py-3 bg-blue-600 border border-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/20 text-sm flex items-center gap-2 whitespace-nowrap">
+                        </a>
+                        <a href="{{ route('grades.print_all', ['class_id' => $class->id, 'year' => $academic_year, 'semester' => $semester]) }}" target="_blank" class="px-5 py-3 bg-blue-600 border border-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/20 text-sm flex items-center gap-2 whitespace-nowrap">
                             <i class="ph-bold ph-printer text-lg"></i>
                             <span>Cetak Semua</span>
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -73,17 +71,18 @@
                             @forelse($students as $index => $student)
                                 @php 
                                     $completedSubjects = $progress[$student->id] ?? 0; 
-                                    // Asumsi total mapel, idealnya dikirim dari controller: $totalSubjects
-                                    $totalSubjects = 12; 
-                                    $percentage = min(100, round(($completedSubjects / $totalSubjects) * 100));
+                                    // PERBAIKAN: Sebaiknya $totalSubjects dikirim dari controller.
+                                    // Jika tidak ada, fallback ke 12.
+                                    $maxSubjects = $totalSubjects ?? 12; 
+                                    $percentage = $maxSubjects > 0 ? min(100, round(($completedSubjects / $maxSubjects) * 100)) : 0;
                                     
-                                    // Warna Progress Bar
                                     $barColor = $percentage == 100 ? 'bg-emerald-500' : ($percentage > 50 ? 'bg-blue-500' : 'bg-amber-500');
                                     $textColor = $percentage == 100 ? 'text-emerald-600' : 'text-slate-500';
                                 @endphp
                                 
+                                {{-- PERBAIKAN: Menggunakan @js() agar nama dengan tanda kutip (misal: Jum'at) tidak merusak script --}}
                                 <tr class="hover:bg-blue-50/20 transition-colors group"
-                                    x-show="searchQuery === '' || '{{ strtolower($student->name) }}'.includes(searchQuery.toLowerCase()) || '{{ $student->student_id }}'.includes(searchQuery)"
+                                    x-show="searchQuery === '' || String(@js(strtolower($student->name))).includes(searchQuery.toLowerCase()) || String(@js($student->student_id)).includes(searchQuery)"
                                     x-transition.opacity>
                                     
                                     <td class="px-6 py-4 text-center text-slate-400 font-bold text-sm">{{ $index + 1 }}</td>
@@ -99,12 +98,11 @@
                                         </div>
                                     </td>
                                     
-                                    {{-- PROGRESS BAR VISUAL --}}
                                     <td class="px-6 py-4">
                                         <div class="w-full">
                                             <div class="flex justify-between items-end mb-1">
                                                 <span class="text-xs font-bold {{ $textColor }}">
-                                                    {{ $completedSubjects }} / {{ $totalSubjects }} Mapel
+                                                    {{ $completedSubjects }} / {{ $maxSubjects }} Mapel
                                                 </span>
                                                 <span class="text-[10px] font-black text-slate-400">{{ $percentage }}%</span>
                                             </div>
@@ -131,12 +129,11 @@
                         </tbody>
                     </table>
                     
-                    {{-- Empty State untuk Pencarian --}}
                     <div class="p-16 text-center" x-show="searchQuery !== '' && $el.previousElementSibling.querySelectorAll('tr[x-show]:not([style*=\'display: none\'])').length === 0" style="display: none;">
                         <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
                             <i class="ph-duotone ph-magnifying-glass text-4xl"></i>
                         </div>
-                        <p class="text-slate-500 font-bold">Tidak ditemukan siswa dengan nama tersebut.</p>
+                        <p class="text-slate-500 font-bold">Tidak ditemukan siswa dengan pencarian tersebut.</p>
                     </div>
                 </div>
             </div>

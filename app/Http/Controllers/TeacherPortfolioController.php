@@ -42,8 +42,45 @@ class TeacherPortfolioController extends Controller
         $materials = $targetUser->materials()->latest()->get();
         $portfolios = $targetUser->portfolios()->orderBy('year', 'desc')->get();
         $articles = $targetUser->articles()->latest()->get();
+        
+        // MENGAKTIFKAN PENGAMBILAN DATA PENDIDIKAN
+        // Diurutkan berdasarkan start_year dari yang terbaru
+        $educations = $targetUser->educations()->orderBy('start_year', 'desc')->get();
 
-        return view('portfolio.index', compact('experiences', 'materials', 'portfolios', 'articles', 'targetUser'));
+        // MENAMBAHKAN 'educations' KE DALAM COMPACT
+        return view('portfolio.index', compact('experiences', 'materials', 'portfolios', 'articles', 'educations', 'targetUser'));
+    }
+
+    // ==========================================
+    // CRUD PENDIDIKAN (EDUCATION) -> TAMBAHAN BARU
+    // ==========================================
+    public function storeEducation(Request $request)
+    {
+        // Menyesuaikan dengan kolom start_year dan end_year dari file migrasi
+        $request->validate([
+            'institution' => 'required|string|max:255',
+            'degree' => 'required|string|max:255',
+            'start_year' => 'nullable|string|max:4',
+            'end_year' => 'nullable|string|max:4',
+        ]);
+
+        $targetUser = $this->getTargetUser($request);
+        
+        // Simpan data
+        $targetUser->educations()->create($request->only('institution', 'degree', 'start_year', 'end_year'));
+        
+        return back()->with('success', 'Riwayat Pendidikan berhasil ditambahkan.');
+    }
+
+    public function destroyEducation(Request $request, $id)
+    {
+        $targetUser = $this->getTargetUser($request);
+        
+        // Cari data pendidikan berdasarkan ID dan hapus
+        $edu = $targetUser->educations()->findOrFail($id);
+        $edu->delete();
+        
+        return back()->with('success', 'Riwayat Pendidikan berhasil dihapus.');
     }
 
     // ==========================================

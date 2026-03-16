@@ -65,19 +65,57 @@
                         <a href="https://wa.me/<?php echo e(preg_replace('/[^0-9]/', '', $teacher->phone)); ?>" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-emerald-500 hover:text-white flex items-center justify-center text-slate-300 transition-all"><i class="ph-logo ph-whatsapp-logo text-xl"></i></a>
                         <?php endif; ?>
                     </div>
+
+                    <!-- Keahlian & Hobi (BARU) -->
+                    <?php if(!empty($teacher->keahlian) || !empty($teacher->hobi)): ?>
+                        <div class="mt-8 flex flex-col md:flex-row gap-6 border-t border-white/10 pt-6 text-left">
+                            <?php if(!empty($teacher->keahlian)): ?>
+                            <div class="flex-1">
+                                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center md:justify-start gap-2">
+                                    <i class="ph-bold ph-star text-amber-400"></i> Keahlian Utama
+                                </h3>
+                                <div class="flex flex-wrap justify-center md:justify-start gap-2">
+                                    <?php $__currentLoopData = array_map('trim', explode(',', $teacher->keahlian)); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $keahlian): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php if(!empty($keahlian)): ?>
+                                        <span class="px-3 py-1 bg-white/5 text-slate-300 border border-white/10 rounded-lg text-xs font-medium"><?php echo e($keahlian); ?></span>
+                                        <?php endif; ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+
+                            <?php if(!empty($teacher->hobi)): ?>
+                            <div class="flex-1">
+                                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center md:justify-start gap-2">
+                                    <i class="ph-bold ph-heart text-rose-400"></i> Minat & Hobi
+                                </h3>
+                                <div class="flex flex-wrap justify-center md:justify-start gap-2">
+                                    <?php $__currentLoopData = array_map('trim', explode(',', $teacher->hobi)); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $hobi): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php if(!empty($hobi)): ?>
+                                        <span class="px-3 py-1 bg-white/5 text-slate-300 border border-white/10 rounded-lg text-xs font-medium"><?php echo e($hobi); ?></span>
+                                        <?php endif; ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- MAIN CONTENT DENGAN TABS (ALPINE.JS) -->
-    <div x-data="{ activeTab: 'pengalaman' }" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20 pb-20">
+    <div x-data="{ activeTab: 'pendidikan' }" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20 pb-20">
         
         <div class="flex flex-col lg:flex-row gap-8">
             <!-- SIDEBAR NAVIGASI TABS -->
             <div class="lg:w-1/4">
                 <div class="bg-white rounded-3xl p-4 shadow-xl shadow-slate-200/50 sticky top-24 border border-slate-100 animate-enter" style="animation-delay: 100ms;">
                     <nav class="flex flex-row lg:flex-col gap-2 overflow-x-auto custom-scroll pb-2 lg:pb-0">
+                        <button @click="activeTab = 'pendidikan'" :class="activeTab === 'pendidikan' ? 'bg-cyan-50 text-cyan-600 font-bold border-cyan-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent'" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all text-sm whitespace-nowrap lg:whitespace-normal text-left">
+                            <i class="ph-duotone ph-graduation-cap text-xl" :class="activeTab === 'pendidikan' ? 'text-cyan-500' : ''"></i> Pendidikan Formal
+                        </button>
                         <button @click="activeTab = 'pengalaman'" :class="activeTab === 'pengalaman' ? 'bg-blue-50 text-blue-600 font-bold border-blue-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent'" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all text-sm whitespace-nowrap lg:whitespace-normal text-left">
                             <i class="ph-duotone ph-student text-xl" :class="activeTab === 'pengalaman' ? 'text-blue-500' : ''"></i> Pengalaman & Pelatihan
                         </button>
@@ -103,8 +141,31 @@
             <!-- AREA KONTEN -->
             <div class="lg:w-3/4 animate-enter" style="animation-delay: 200ms;">
                 
+                <!-- TAB PENDIDIKAN -->
+                <div x-show="activeTab === 'pendidikan'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 min-h-[400px]">
+                    <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3">
+                        <span class="p-2 bg-cyan-100 text-cyan-600 rounded-lg"><i class="ph-bold ph-graduation-cap"></i></span> Riwayat Pendidikan Formal
+                    </h2>
+                    
+                    <div class="relative border-l-2 border-slate-100 ml-4 space-y-8 pb-4">
+                        <?php $__empty_1 = true; $__currentLoopData = $teacher->educations ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $edu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <div class="relative pl-6">
+                                <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-cyan-500 border-4 border-white shadow"></div>
+                                <span class="text-xs font-bold text-cyan-500 mb-1 block"><?php echo e($edu->start_year ?? '-'); ?> - <?php echo e($edu->end_year ?? 'Sekarang'); ?></span>
+                                <h3 class="text-lg font-bold text-slate-800"><?php echo e($edu->institution); ?></h3>
+                                <p class="text-slate-500 text-sm mt-1"><?php echo e($edu->degree); ?></p>
+                            </div>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                            <div class="py-10 text-center text-slate-400">
+                                <i class="ph-duotone ph-graduation-cap text-5xl mb-3 opacity-50"></i>
+                                <p>Belum ada data pendidikan yang ditambahkan.</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
                 <!-- TAB 1: PENGALAMAN & PELATIHAN -->
-                <div x-show="activeTab === 'pengalaman'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 min-h-[400px]">
+                <div x-show="activeTab === 'pengalaman'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 min-h-[400px]">
                     <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3">
                         <span class="p-2 bg-blue-100 text-blue-600 rounded-lg"><i class="ph-bold ph-student"></i></span> Riwayat Pelatihan & Sertifikasi
                     </h2>

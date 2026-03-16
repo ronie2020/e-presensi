@@ -27,13 +27,11 @@ class LegerImport implements ToCollection
     {
         $subjects = Subject::orderBy('order')->get();
 
-        foreach ($rows as $index => $row) {
-            // SKIP BARIS 0 dan 1 KARENA ITU HEADER EXCEL (Judul Kolom)
+        foreach ($rows as $index => $row) {            
             if ($index < 2) {
                 continue;
             }
-
-            // Jika baris kosong (kolom NISN kosong), abaikan
+                       
             if (empty($row[2])) {
                 continue;
             }
@@ -56,8 +54,7 @@ class LegerImport implements ToCollection
                     ]
                 );
 
-                // 2. Loop Mapel yang diisi di excel. 
-                // Kolom nilai mapel dimulai dari Index ke-4 (Kolom E)
+                // 2. Loop Mapel yang diisi di excel (Mulai Kolom E / Index 4)
                 $colIndex = 4;
                 
                 foreach ($subjects as $subject) {
@@ -72,12 +69,25 @@ class LegerImport implements ToCollection
                             ],
                             [
                                 'score' => $score,
-                                'predicate' => $this->calculatePredicate($score)
+                                'predicate' => $this->calculatePredicate($score),
+                                'description' => $this->generateDescription($score, $subject->name)
                             ]
                         );
                     }
-                    $colIndex++; // Geser ke kolom mapel berikutnya (F, G, H, dst)
+                    $colIndex++; 
                 }
+
+                // 3. SIMPAN DATA KETIDAKHADIRAN (Sakit, Izin, Alpa)               
+                $sakit = $row[$colIndex + 2] ?? 0;
+                $izin  = $row[$colIndex + 3] ?? 0;
+                $alpa  = $row[$colIndex + 4] ?? 0;
+
+                // Update record Rapor dengan data absensi                
+                $record->update([
+                    'sick' => $sakit !== '' ? $sakit : 0,
+                    'permission' => $izin !== '' ? $izin : 0,
+                    'absent' => $alpa !== '' ? $alpa : 0,
+                ]);
             }
         }
     }
@@ -89,5 +99,20 @@ class LegerImport implements ToCollection
         if ($score >= 83) return 'B';
         if ($score >= 75) return 'C';
         return 'D';
+    }
+
+    private function generateDescription($score, $subjectName)
+    {
+        $score = (int) $score;
+        
+        if ($score >= 92) {
+            return "Menunjukkan penguasaan yang Sangat Baik dalam memahami dan menerapkan materi {$subjectName}.";
+        } elseif ($score >= 83) {
+            return "Menunjukkan penguasaan yang Baik dalam memahami kompetensi dasar materi {$subjectName}.";
+        } elseif ($score >= 75) {
+            return "Menunjukkan penguasaan yang Cukup dalam materi {$subjectName}, namun perlu sedikit pemantapan pada beberapa konsep.";
+        } else {
+            return "Masih memerlukan bimbingan dan pendampingan lebih lanjut untuk menguasai kompetensi materi {$subjectName}.";
+        }
     }
 }

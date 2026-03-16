@@ -48,8 +48,6 @@
       }">
 
         <!-- HEADER SECTION -->
-        {{-- Gunakan -mt-24 agar background naik ke belakang navbar fixed --}}
-        {{-- Ubah pt-20 menjadi pt-32 untuk kompensasi naiknya background --}}
         <div class="bg-slate-900 pt-32 pb-32 relative overflow-hidden -mt-24">
             <div class="absolute inset-0 bg-blue-600/10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
             <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-900"></div>
@@ -103,12 +101,15 @@
                             pangkat: '{{ $teacher->pangkat ?? '-' }}',
                             position: '{{ addslashes($displayRole) }}',
                             bio: '{{ addslashes($teacher->bio ?? 'Belum ada pesan & kesan.') }}',
+                            keahlian: '{{ addslashes($teacher->keahlian ?? '') }}',
+                            hobi: '{{ addslashes($teacher->hobi ?? '') }}',
                             phone: '{{ $teacher->phone }}',
                             instagram: '{{ $teacher->instagram }}',
                             tiktok: '{{ $teacher->tiktok }}',
                             facebook: '{{ $teacher->facebook }}',
                             photo_url: '{{ $teacher->photo_path ? asset('storage/' . $teacher->photo_path) : '' }}',
-                            profile_url: '{{ route('teachers.show', $teacher->id) }}' 
+                            profile_url: '{{ route('teachers.show', $teacher->id) }}',
+                            cv_url: '{{ route('teachers.cv', $teacher->id) }}'
                          })"
                          class="animate-enter group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-2 transition-all duration-500 border border-slate-100 flex flex-col h-full relative cursor-pointer"
                          style="animation-delay: {{ ($index % 4) * 100 }}ms">
@@ -200,7 +201,7 @@
                                 </span>
                             </div>
                             
-                             <!-- Tombol Portofolio (Baru) -->
+                             <!-- Tombol Portofolio -->
                             <a :href="teacher.profile_url" class="w-full mb-3 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 group hover:-translate-y-1">
                                 <i class="ph-bold ph-user-circle text-xl group-hover:scale-110 transition-transform"></i>
                                 Lihat Portofolio & Karya
@@ -245,7 +246,6 @@
                                         <div>
                                             <p class="text-xs text-slate-500 font-bold uppercase mb-0.5">NIP & Pangkat</p>
                                             <p class="font-mono font-bold text-slate-800 text-sm" x-text="teacher.nip || '-'"></p>
-                                            <!-- Menampilkan Pangkat -->
                                             <span class="inline-block mt-1 px-2 py-0.5 bg-slate-200 text-slate-600 text-[10px] font-bold rounded" x-show="teacher.pangkat" x-text="teacher.pangkat"></span>
                                         </div>
                                     </div>
@@ -263,28 +263,48 @@
                                 </div>
                             </div>
 
-                           <!-- Sosial Media -->
-                    <div class="flex items-center justify-center md:justify-start gap-3">
-                        @if($teacher->instagram)
-                        <a href="{{ $teacher->instagram }}" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-pink-500 hover:text-white flex items-center justify-center text-slate-300 transition-all"><i class="ph-logo ph-instagram-logo text-xl"></i></a>
-                        @endif
-                        @if($teacher->facebook)
-                        <a href="{{ $teacher->facebook }}" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-blue-600 hover:text-white flex items-center justify-center text-slate-300 transition-all"><i class="ph-logo ph-facebook-logo text-xl"></i></a>
-                        @endif
-                        @if($teacher->tiktok)
-                        <a href="{{ $teacher->tiktok }}" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-slate-800 hover:text-white flex items-center justify-center text-slate-300 transition-all"><i class="ph-logo ph-tiktok-logo text-xl"></i></a>
-                        @endif
-                        @if($teacher->phone)
-                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $teacher->phone) }}" target="_blank" class="w-10 h-10 rounded-full bg-white/5 hover:bg-emerald-500 hover:text-white flex items-center justify-center text-slate-300 transition-all"><i class="ph-logo ph-whatsapp-logo text-xl"></i></a>
-                        @endif
-                    </div>
-                    
-                    <!-- Tombol Download CV -->
-                    <div class="mt-8 flex justify-center md:justify-start animate-enter" style="animation-delay: 300ms;">
-                        <a href="{{ route('teachers.cv', $teacher->id) }}" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold rounded-full shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-1">
-                            <i class="ph-bold ph-download-simple text-xl"></i> Unduh CV (PDF)
-                        </a>
-                    </div>
+                            <!-- Keahlian & Hobi (BARU) -->
+                            <div class="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-6" x-show="teacher.keahlian || teacher.hobi">
+                                <div x-show="teacher.keahlian">
+                                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                        <i class="ph-bold ph-star text-amber-500"></i> Keahlian
+                                    </h3>
+                                    <div class="flex flex-wrap gap-2">
+                                        <template x-for="item in (teacher.keahlian || '').split(',')" :key="item">
+                                            <span class="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[10px] font-bold uppercase tracking-wider" x-text="item.trim()" x-show="item.trim() !== ''"></span>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div x-show="teacher.hobi">
+                                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                        <i class="ph-bold ph-heart text-rose-500"></i> Hobi
+                                    </h3>
+                                    <div class="flex flex-wrap gap-2">
+                                        <template x-for="item in (teacher.hobi || '').split(',')" :key="item">
+                                            <span class="px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-[10px] font-bold uppercase tracking-wider" x-text="item.trim()" x-show="item.trim() !== ''"></span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sosial Media & Unduh CV -->
+                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-slate-100">
+                                <div class="flex items-center gap-3">
+                                    <template x-if="teacher.instagram">
+                                        <a :href="teacher.instagram" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-pink-500 hover:text-white flex items-center justify-center text-slate-500 transition-all"><i class="ph-logo ph-instagram-logo text-xl"></i></a>
+                                    </template>
+                                    <template x-if="teacher.facebook">
+                                        <a :href="teacher.facebook" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-blue-600 hover:text-white flex items-center justify-center text-slate-500 transition-all"><i class="ph-logo ph-facebook-logo text-xl"></i></a>
+                                    </template>
+                                    <template x-if="teacher.tiktok">
+                                        <a :href="teacher.tiktok" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-800 hover:text-white flex items-center justify-center text-slate-500 transition-all"><i class="ph-logo ph-tiktok-logo text-xl"></i></a>
+                                    </template>
+                                </div>
+
+                                <a :href="teacher.cv_url" class="inline-flex items-center gap-2 px-6 py-2.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-bold rounded-full transition-all">
+                                    <i class="ph-bold ph-download-simple text-lg"></i> Unduh CV (PDF)
+                                </a>
+                            </div>
 
                         </div>
                     </div>

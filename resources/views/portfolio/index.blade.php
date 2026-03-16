@@ -32,6 +32,9 @@
                 {{-- SIDEBAR TABS --}}
                 <div class="md:w-64 bg-slate-50 border-r border-slate-100 p-6 shrink-0">
                     <nav class="flex md:flex-col gap-2 overflow-x-auto custom-scrollbar pb-2 md:pb-0">
+                        <button @click="activeTab = 'pendidikan'" :class="activeTab === 'pendidikan' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-700'" class="w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap">
+                            <i class="ph-bold ph-graduation-cap text-lg"></i> Pendidikan
+                        </button>
                         <button @click="activeTab = 'pengalaman'" :class="activeTab === 'pengalaman' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-700'" class="w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap">
                             <i class="ph-bold ph-student text-lg"></i> Pengalaman
                         </button>
@@ -287,6 +290,61 @@
                             @empty
                                 <div class="text-center py-10 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
                                     <p class="text-slate-500 text-sm font-medium">Belum ada tulisan artikel.</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                    {{-- 5. TAB PENDIDIKAN --}}
+                    <div x-show="activeTab === 'pendidikan'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                        <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
+                            <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center"><i class="ph-bold ph-graduation-cap"></i></div>
+                            <h3 class="text-lg font-black text-slate-800">Riwayat Pendidikan Formal</h3>
+                        </div>
+                        
+                        <form action="{{ route('portfolio.edu.store') }}" method="POST" class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+                            @csrf
+                            @if(request('user_id')) <input type="hidden" name="user_id" value="{{ request('user_id') }}"> @endif
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Institusi / Universitas</label>
+                                <input type="text" name="institution" placeholder="Cth: Universitas Pendidikan..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700" required>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Gelar / Jurusan</label>
+                                <input type="text" name="degree" placeholder="Cth: S1 Pendidikan Matematika" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tahun Masuk</label>
+                                <input type="number" name="start_year" placeholder="Cth: 2010" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tahun Lulus</label>
+                                <input type="number" name="end_year" placeholder="Cth: 2014" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
+                            </div>
+                            <div class="md:col-span-2 flex items-end justify-end">
+                                <button type="submit" class="px-8 py-3 bg-cyan-600 text-white font-bold rounded-2xl hover:bg-cyan-700 shadow-lg shadow-cyan-500/20 transition-all flex items-center gap-2">
+                                    <i class="ph-bold ph-plus"></i> Tambah Riwayat
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="space-y-3">
+                            @forelse($educations ?? [] as $edu)
+                                <div class="flex items-center justify-between p-4 border border-slate-200 rounded-2xl hover:bg-cyan-50/50 transition-colors group">
+                                    <div class="flex items-start gap-4">
+                                        <div class="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-lg text-xs font-black mt-1">{{ $edu->start_year ?? '-' }} - {{ $edu->end_year ?? 'Skrg' }}</div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-800">{{ $edu->institution }}</h4>
+                                            <p class="text-sm text-slate-500 mt-0.5">{{ $edu->degree }}</p>
+                                        </div>
+                                    </div>
+                                    <form action="{{ route('portfolio.edu.destroy', ['id' => $edu->id, 'user_id' => request('user_id')]) }}" method="POST" onsubmit="return confirm('Hapus riwayat ini?');">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"><i class="ph-bold ph-trash"></i></button>
+                                    </form>
+                                </div>
+                            @empty
+                                <div class="text-center py-10 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                                    <p class="text-slate-500 text-sm font-medium">Belum ada riwayat pendidikan ditambahkan.</p>
                                 </div>
                             @endforelse
                         </div>

@@ -204,7 +204,7 @@ class GradeController extends Controller
             'student_id' => 'required',
             'academic_year' => 'required',
             'semester' => 'required',
-            'grades' => 'array', // [subject_id => score]
+            'grades' => 'array', 
         ]);
 
         DB::transaction(function () use ($request) {
@@ -348,9 +348,7 @@ class GradeController extends Controller
             'class_id' => 'required'
         ]);
 
-        $class = SchoolClass::findOrFail($request->class_id);
-        
-        // Memanggil LegerExport dengan mengirimkan ID Kelas
+        $class = SchoolClass::findOrFail($request->class_id);  
         return Excel::download(new LegerExport($class->id), 'Template_Leger_Kelas_' . str_replace(' ', '_', $class->name) . '.xlsx');
     }
 
@@ -365,8 +363,7 @@ class GradeController extends Controller
             'semester' => 'required',
         ]);
 
-        try {
-            // Kita tidak memerlukan class_id di sini jika LegerImport mencari siswa berdasarkan NISN dari file Excel
+        try {            
             Excel::import(new LegerImport(
                 $request->academic_year,
                 $request->semester
@@ -494,6 +491,55 @@ class GradeController extends Controller
             'semester' => $semester,
             'prevStudentId' => $prevStudentId, 
             'nextStudentId' => $nextStudentId  
+        ]);
+    }
+
+     /**
+     * Cetak Semua Rapor (Batch Print)
+     */
+    public function printAll(Request $request, $class_id)
+    {
+        $academic_year = $request->year ?? '2024/2025';
+        $semester = $request->semester ?? '1';
+
+        $class = SchoolClass::findOrFail($class_id);
+        $students = Student::where('class_id', $class->id)->orderBy('name')->get();
+
+        $reportData = [];
+        $allSubjects = Subject::orderBy('order')->get();
+
+        foreach($students as $student) {
+            $record = GradeRecord::with('extracurriculars')
+                        ->where('student_id', $student->id)
+                        ->where('academic_year', $academic_year)
+                        ->where('semester', $semester)
+                        ->first();
+
+            // Kloning subjects agar nilainya tidak saling menimpa antar siswa
+            $studentSubjects = $allSubjects->map(function($subject) use ($record) {
+                $grade = null;
+                if ($record) {
+                    $grade = GradeItem::where('grade_record_id', $record->id)
+                                ->where('subject_id', $subject->id)
+                                ->first();
+                }
+                $clonedSubject = clone $subject;
+                $clonedSubject->grade = $grade;
+                return $clonedSubject;
+            });
+
+            $reportData[] = [
+                'student' => $student,
+                'record' => $record,
+                'subjects' => $studentSubjects
+            ];
+        }
+
+        return view('grades.print-all', [
+            'class' => $class,
+            'academic_year' => $academic_year,
+            'semester' => $semester,
+            'reportData' => $reportData
         ]);
     }
 }

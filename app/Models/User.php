@@ -19,18 +19,25 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'password',
-        // Tambahkan kolom baru ini agar bisa disimpan:
+        'password',        
         'role',
         'position',
-        'pangkat',    // <--- PENTING: Agar pangkat tersimpan
-        'nip',        // <--- Agar NIP tersimpan
+        'pangkat',    
+        'nip',        
         'bio',
         'photo_path',
-        'phone',      // <--- Kontak & Sosmed
+        'phone',      
         'instagram',
         'tiktok',
-        'facebook',
+        'facebook',        
+        'tempat_lahir',
+        'tanggal_lahir',
+        'alamat',
+        'jenis_kelamin',
+        'agama',
+        'status_pernikahan',
+        'keahlian',
+        'hobi',
     ];
 
     /**
@@ -70,4 +77,9 @@ class User extends Authenticatable
     public function articles() {
         return $this->hasMany(\App\Models\TeacherArticle::class);
     }
+    public function educations()
+    {
+        return $this->hasMany(TeacherEducation::class);
+    }
+    
 }

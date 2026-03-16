@@ -428,6 +428,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/grades/input-student', [GradeController::class, 'createByStudent'])->name('grades.create_by_student');
         Route::post('/grades/store-student', [GradeController::class, 'storeByStudent'])->name('grades.store_by_student');
         Route::get('/grades/list', [GradeController::class, 'listStudents'])->name('grades.list');
+        Route::get('/grades/print-all/{class_id}', [GradeController::class, 'printAll'])->name('grades.print_all');
         Route::get('/report-card/{student_id}', [GradeController::class, 'reportCard'])->name('grades.report');
 
       // Perpustakaan
@@ -630,6 +631,9 @@ Route::middleware('auth')->group(function () {
         
         Route::post('/article', [\App\Http\Controllers\TeacherPortfolioController::class, 'storeArticle'])->name('art.store');
         Route::delete('/article/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyArticle'])->name('art.destroy');
+
+        Route::post('/education', [\App\Http\Controllers\TeacherPortfolioController::class, 'storeEducation'])->name('edu.store');
+        Route::delete('/education/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyEducation'])->name('edu.destroy');
     });
 
 });

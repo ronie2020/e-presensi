@@ -117,7 +117,7 @@ class UserController extends Controller
         return view('users.edit', compact('user'));
     }
 
-    public function update(Request $request, User $user)
+     public function update(Request $request, User $user)
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -134,10 +134,17 @@ class UserController extends Controller
             'instagram' => ['nullable', 'string', 'max:50'],
             'tiktok' => ['nullable', 'string', 'max:50'],
             'facebook' => ['nullable', 'string', 'max:50'],
+            // [BARU] Validasi Data CV
+            'tempat_lahir' => ['nullable', 'string', 'max:100'],
+            'tanggal_lahir' => ['nullable', 'date'],
+            'jenis_kelamin' => ['nullable', 'string', 'in:Laki-laki,Perempuan'],
+            'agama' => ['nullable', 'string', 'max:50'],
+            'status_pernikahan' => ['nullable', 'string', 'max:50'],
+            'alamat' => ['nullable', 'string'],
+            'keahlian' => ['nullable', 'string'],
+            'hobi' => ['nullable', 'string'],
         ]);
-
-        // [FIXED] LOGIKA KEAMANAN UPDATE
-        // Cek apakah user yang login adalah Admin (menggunakan helper baru yang support array)
+        
         $imAdmin = $this->checkIsAdmin();
 
         // Jika SAYA bukan admin, DAN saya mencoba menambahkan role 'Admin' ke target -> TOLAK
@@ -152,7 +159,7 @@ class UserController extends Controller
 
         $rolesJson = json_encode($request->role);
 
-        $data = [
+         $data = [
             'name' => $request->name,
             'email' => $request->email,
             'role' => $rolesJson, 
@@ -164,8 +171,16 @@ class UserController extends Controller
             'instagram' => $request->instagram,
             'tiktok' => $request->tiktok,
             'facebook' => $request->facebook,
+            // [BARU] Simpan Data CV
+            'tempat_lahir' => $request->tempat_lahir,
+            'tanggal_lahir' => $request->tanggal_lahir,
+            'jenis_kelamin' => $request->jenis_kelamin,
+            'agama' => $request->agama,
+            'status_pernikahan' => $request->status_pernikahan,
+            'alamat' => $request->alamat,
+            'keahlian' => $request->keahlian,
+            'hobi' => $request->hobi,
         ];
-
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }

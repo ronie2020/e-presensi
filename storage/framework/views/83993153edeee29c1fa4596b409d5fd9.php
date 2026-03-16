@@ -171,6 +171,7 @@ unset($__errorArgs, $__bag); ?>
                         </div>
 
                         <!-- 2. DATA PROFIL GURU -->
+                        <!-- PERBAIKAN: x-data ini sekarang mencakup bagian 2.5 -->
                         <div x-data="{ isTeacher: <?php echo e(in_array('Guru', $currentRoles ?? []) || in_array('Wali Kelas', $currentRoles ?? []) || in_array('Guru Mata Pelajaran', $currentRoles ?? []) ? 'true' : 'false'); ?> }">
                             <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 mt-6">
                                 <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
@@ -201,7 +202,55 @@ unset($__errorArgs, $__bag); ?>
                                     <input type="file" name="photo" class="block w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:bg-emerald-50 file:text-emerald-700 file:font-bold">
                                 </div>
                             </div>
-                        </div>
+                        
+                            <!-- 2.5 DATA PRIBADI & CV (BARU) -->
+                            <div x-show="isTeacher">
+                                <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 mt-6">
+                                    <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
+                                        <i class="ph-bold ph-address-book"></i>
+                                    </div>
+                                    <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">Data Pribadi (Untuk CV)</h4>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tempat Lahir</label>
+                                        <input type="text" name="tempat_lahir" value="<?php echo e(old('tempat_lahir', $user->tempat_lahir)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tanggal Lahir</label>
+                                        <input type="date" name="tanggal_lahir" value="<?php echo e(old('tanggal_lahir', $user->tanggal_lahir)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Jenis Kelamin</label>
+                                        <select name="jenis_kelamin" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500">
+                                            <option value="">Pilih...</option>
+                                            <option value="Laki-laki" <?php echo e(old('jenis_kelamin', $user->jenis_kelamin) == 'Laki-laki' ? 'selected' : ''); ?>>Laki-laki</option>
+                                            <option value="Perempuan" <?php echo e(old('jenis_kelamin', $user->jenis_kelamin) == 'Perempuan' ? 'selected' : ''); ?>>Perempuan</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Agama</label>
+                                        <input type="text" name="agama" value="<?php echo e(old('agama', $user->agama)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Status Pernikahan</label>
+                                        <input type="text" name="status_pernikahan" value="<?php echo e(old('status_pernikahan', $user->status_pernikahan)); ?>" placeholder="Belum Menikah / Menikah" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500">
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Alamat Lengkap</label>
+                                        <textarea name="alamat" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-medium text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500"><?php echo e(old('alamat', $user->alamat)); ?></textarea>
+                                    </div>
+                                    <div class="md:col-span-2 bg-amber-50/50 p-4 rounded-2xl border border-amber-100">
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Keahlian (Pisahkan dengan koma)</label>
+                                        <input type="text" name="keahlian" value="<?php echo e(old('keahlian', $user->keahlian)); ?>" placeholder="Cth: Desain Grafis, Microsoft Office, Mengajar Matematika" class="w-full rounded-2xl border-slate-200 bg-white font-bold text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500 mb-4">
+                                        
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Hobi (Pisahkan dengan koma)</label>
+                                        <input type="text" name="hobi" value="<?php echo e(old('hobi', $user->hobi)); ?>" placeholder="Cth: Membaca Buku, Traveling, Menulis" class="w-full rounded-2xl border-slate-200 bg-white font-bold text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500">
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!-- PERBAIKAN: Penutup div x-data dipindah ke sini -->
 
                         <!-- 3. KONTAK -->
                         <div>
