@@ -132,7 +132,6 @@
         </div>
 
         {{-- === BAGIAN 1: STATISTIK CARD (SELALU MUNCUL) === --}}
-        {{-- Keterangan: Jika belum pilih kelas, ini menampilkan Global Statistik --}}
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-enter" style="animation-delay: 100ms">
             {{-- Sudah Lapor Card --}}
@@ -178,7 +177,7 @@
         </div>
 
 
-        {{-- === BAGIAN 2: KONTEN UTAMA (TABEL ATAU FEED) === --}}
+        {{-- === BAGIAN 2: KONTEN UTAMA === --}}
         
         @if($classId)
             {{-- === JIKA KELAS DIPILIH: TAMPILKAN TABEL DAFTAR SISWA === --}}
@@ -188,18 +187,25 @@
                         <i class="ph-bold ph-list-checks text-blue-600"></i> 
                         Status Monitoring Harian
                     </h2>
-                    <div class="flex items-center gap-2">
-                         <span class="px-4 py-1.5 rounded-xl bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider">
-                            Kelas: {{ $classes->find($classId)->name ?? '-' }}
-                         </span>
-                         <span class="px-4 py-1.5 rounded-xl bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-wider">
-                            {{ \Carbon\Carbon::parse($date)->translatedFormat('d F Y') }}
-                         </span>
+                    
+                    <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+                        {{-- FITUR BARU: Kolom Pencarian Cepat --}}
+                        <div class="relative w-full md:w-64">
+                            <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Cari nama siswa..." 
+                                class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-slate-400">
+                        </div>
+
+                         <div class="flex gap-2 w-full md:w-auto">
+                             <span class="px-4 py-2 rounded-xl bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider flex-1 text-center whitespace-nowrap">
+                                Kelas: {{ $classes->find($classId)->name ?? '-' }}
+                             </span>
+                         </div>
                     </div>
                 </div>
 
                 <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full text-left">
+                    <table class="w-full text-left" id="studentsTable">
                         <thead class="bg-slate-50/50 text-slate-400 uppercase text-[9px] font-black tracking-[0.2em] border-b border-slate-100">
                             <tr>
                                 <th class="px-10 py-6">Profil Siswa</th>
@@ -211,14 +217,14 @@
                         </thead>
                         <tbody class="divide-y divide-slate-50">
                             @forelse($students as $student)
-                                <tr class="hover:bg-blue-50/30 transition-all group">
+                                <tr class="hover:bg-blue-50/30 transition-all group student-row">
                                     <td class="px-10 py-5">
                                         <div class="flex items-center gap-5">
                                             <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-600 font-black text-sm border border-slate-200 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-500 transition-all duration-300">
                                                 {{ substr($student->name, 0, 1) }}
                                             </div>
                                             <div>
-                                                <div class="font-black text-slate-800 group-hover:text-blue-600 transition-colors uppercase tracking-tight text-sm">{{ $student->name }}</div>
+                                                <div class="student-name font-black text-slate-800 group-hover:text-blue-600 transition-colors uppercase tracking-tight text-sm">{{ $student->name }}</div>
                                                 <div class="text-[9px] text-slate-400 font-bold tracking-widest uppercase mt-0.5">{{ $student->student_id }}</div>
                                             </div>
                                         </div>
@@ -276,6 +282,11 @@
                                     </td>
                                 </tr>
                             @endforelse
+                            <tr id="noResultsRow" class="hidden">
+                                <td colspan="5" class="px-8 py-16 text-center text-slate-400 text-sm italic">
+                                    Siswa yang dicari tidak ditemukan.
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -460,7 +471,11 @@ Terima kasih. 🙏
     </textarea>
     @endif
 
+    {{-- SWEETALERT --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
+        // 1. FUNGSI FILTER & MODAL DASAR
         function submitFilter() {
             document.getElementById('formLoading').classList.remove('hidden');
             document.getElementById('filterForm').submit();
@@ -481,18 +496,114 @@ Terima kasih. 🙏
                 .catch(err => { content.innerHTML = `<div class="text-center py-24"><div class="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner"><i class="ph-bold ph-warning-circle text-4xl"></i></div><h3 class="text-xl font-black text-slate-800">Gagal Memuat Jurnal</h3><p class="text-slate-500 text-sm mb-10 font-medium">Koneksi bermasalah.</p><button onclick="openDetail(${id})" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest active:scale-95">Muat Ulang</button></div>`; });
         }
 
-        function closeDetail() { document.getElementById('detailModal').classList.add('hidden'); document.body.style.overflow = 'auto'; }
+        function closeDetail() { 
+            document.getElementById('detailModal').classList.add('hidden'); 
+            document.body.style.overflow = 'auto'; 
+            
+            // Hentikan pemutaran audio jika modal ditutup (Mencegah bug suara)
+            const content = document.getElementById('modalContent');
+            if(content) {
+                const audios = content.getElementsByTagName('audio');
+                for(let i=0; i<audios.length; i++) {
+                    audios[i].pause();
+                }
+            }
+        }
+
         function printReport() {
             const date = document.getElementById('filterDate').value;
             const classId = document.getElementById('filterClass').value;
             if (!classId) { alert('Silakan pilih kelas terlebih dahulu.'); return; }
             window.open(`{{ route('teacher.habits.print') }}?date=${date}&class_id=${classId}`, '_blank');
         }
+
         function openRecap() { document.getElementById('recapModal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
         function closeRecap() { document.getElementById('recapModal').classList.add('hidden'); document.body.style.overflow = 'auto'; }
+        
         function copyRecap() {
             const text = document.getElementById('recapText').value;
             navigator.clipboard.writeText(text).then(() => { alert('Rekap berhasil disalin ke Clipboard!'); }).catch(err => { console.error(err); alert('Gagal menyalin.'); });
+        }
+
+        // 2. FITUR BARU: PENCARIAN CEPAT DI TABEL
+        function searchTable() {
+            const input = document.getElementById("searchInput").value.toLowerCase();
+            const rows = document.querySelectorAll(".student-row");
+            let hasResults = false;
+
+            rows.forEach(row => {
+                const nameText = row.querySelector(".student-name").innerText.toLowerCase();
+                if (nameText.includes(input)) {
+                    row.style.display = "";
+                    hasResults = true;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            // Tampilkan pesan "Tidak Ditemukan" jika pencarian kosong
+            const noResultsRow = document.getElementById("noResultsRow");
+            if(noResultsRow) {
+                noResultsRow.style.display = hasResults ? "none" : "";
+            }
+        }
+
+        // 3. FITUR BARU: AJAX SUBMIT FEEDBACK (Dipanggil dari dalam modal)
+        function submitFeedbackAjax(event, formElement) {
+            event.preventDefault(); // Mencegah reload halaman
+            
+            const url = formElement.action;
+            const formData = new FormData(formElement);
+            const btnSubmit = formElement.querySelector('#btn-submit-feedback');
+            const originalText = btnSubmit.innerHTML;
+            
+            // Ubah status tombol loading
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...';
+            btnSubmit.classList.add('opacity-70');
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    // Token CSRF sudah ada di dalam FormData
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json(); 
+            })
+            .then(data => {
+                // Tampilkan SweetAlert
+                Swal.fire({
+                    icon: 'success', 
+                    title: 'Berhasil!', 
+                    text: 'Feedback/Apresiasi berhasil tersimpan.',
+                    toast: true, 
+                    position: 'top-end', 
+                    showConfirmButton: false, 
+                    timer: 3000,
+                    customClass: { popup: 'rounded-xl shadow-lg border border-emerald-100 bg-white' }
+                });
+
+                // Update teks tombol
+                btnSubmit.innerHTML = '<i class="ph-bold ph-check"></i> Perbarui Feedback';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error', 
+                    title: 'Oops...', 
+                    text: 'Terjadi kesalahan saat menyimpan feedback.',
+                });
+                btnSubmit.innerHTML = originalText;
+            })
+            .finally(() => {
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('opacity-70');
+            });
         }
     </script>
 </x-app-layout>

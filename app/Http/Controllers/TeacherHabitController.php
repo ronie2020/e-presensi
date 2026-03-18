@@ -109,9 +109,17 @@ class TeacherHabitController extends Controller
             'validated_at' => now()
         ]);
 
+        // === TAMBAHAN FIX UNTUK AJAX ===
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Feedback berhasil disimpan!'
+            ], 200);
+        }
+
+        // Fallback jika tidak menggunakan AJAX
         return back()->with('success', 'Feedback berhasil dikirim.');
     }
-
     /**
      * Cetak Laporan PDF/Print
      */
