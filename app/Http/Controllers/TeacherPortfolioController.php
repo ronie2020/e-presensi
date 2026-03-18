@@ -82,6 +82,22 @@ class TeacherPortfolioController extends Controller
         
         return back()->with('success', 'Riwayat Pendidikan berhasil dihapus.');
     }
+     public function updateEducation(Request $request, $id)
+    {
+        $request->validate([
+            'institution' => 'required|string|max:255',
+            'degree' => 'required|string|max:255',
+            'start_year' => 'nullable|string|max:4',
+            'end_year' => 'nullable|string|max:4',
+        ]);
+
+        $targetUser = $this->getTargetUser($request);
+        $edu = $targetUser->educations()->findOrFail($id);
+        
+        $edu->update($request->only('institution', 'degree', 'start_year', 'end_year'));
+        
+        return back()->with('success', 'Riwayat Pendidikan berhasil diperbarui.');
+    }
 
     // ==========================================
     // CRUD PENGALAMAN & PELATIHAN
@@ -107,6 +123,22 @@ class TeacherPortfolioController extends Controller
         $exp->delete();
         
         return back()->with('success', 'Data berhasil dihapus.');
+    }
+
+    public function updateExperience(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'year' => 'nullable|string|max:10',
+            'organizer' => 'nullable|string|max:255',
+        ]);
+
+        $targetUser = $this->getTargetUser($request);
+        $exp = $targetUser->experiences()->findOrFail($id);
+        
+        $exp->update($request->only('title', 'year', 'organizer'));
+        
+        return back()->with('success', 'Pengalaman/Pelatihan berhasil diperbarui.');
     }
 
     // ==========================================
@@ -151,6 +183,41 @@ class TeacherPortfolioController extends Controller
         return back()->with('success', 'Materi berhasil dihapus.');
     }
 
+     public function updateMaterial(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'type' => 'nullable|string|max:100',
+            'file' => 'nullable|file|mimes:pdf,ppt,pptx,doc,docx,zip|max:5120',
+            'file_url' => 'nullable|url',
+        ]);
+
+        $targetUser = $this->getTargetUser($request);
+        $mat = $targetUser->materials()->findOrFail($id);
+
+        $data = $request->only('title', 'type', 'file_url');
+        
+        // Update Icon berdasarkan tipe
+        $type = strtolower($request->type ?? '');
+        if (str_contains($type, 'pdf')) $data['icon'] = 'ph-file-pdf text-red-500';
+        elseif (str_contains($type, 'ppt') || str_contains($type, 'slide')) $data['icon'] = 'ph-file-slides text-orange-500';
+        elseif (str_contains($type, 'video')) $data['icon'] = 'ph-file-video text-blue-500';
+        else $data['icon'] = 'ph-file-text text-slate-500';
+
+        // Jika ada file baru yang diunggah
+        if ($request->hasFile('file')) {
+            // Hapus file lama jika ada
+            if ($mat->file_path) Storage::disk('public')->delete($mat->file_path);
+            
+            $data['file_path'] = $request->file('file')->store('teacher_materials', 'public');
+            $data['file_url'] = asset('storage/' . $data['file_path']);
+        }
+
+        $mat->update($data);
+        
+        return back()->with('success', 'Materi/Media berhasil diperbarui.');
+    }
+
     // ==========================================
     // CRUD PORTOFOLIO GURU
     // ==========================================
@@ -182,6 +249,31 @@ class TeacherPortfolioController extends Controller
         return back()->with('success', 'Portofolio berhasil dihapus.');
     }
 
+    public function updatePortfolio(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'year' => 'nullable|string|max:10',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Boleh kosong saat update
+        ]);
+
+        $targetUser = $this->getTargetUser($request);
+        $port = $targetUser->portfolios()->findOrFail($id);
+
+        $data = $request->only('title', 'year');
+        
+        if ($request->hasFile('image')) {
+            // Hapus foto lama sebelum menyimpan yang baru
+            if ($port->image_path) Storage::disk('public')->delete($port->image_path);
+            $data['image_path'] = $request->file('image')->store('teacher_portfolios', 'public');
+        }
+
+        $port->update($data);
+        
+        return back()->with('success', 'Portofolio/Pencapaian berhasil diperbarui.');
+    }
+
+
     // ==========================================
     // CRUD ARTIKEL TERPUBLIKASI
     // ==========================================
@@ -207,7 +299,7 @@ class TeacherPortfolioController extends Controller
         return back()->with('success', 'Artikel berhasil ditambahkan.');
     }
 
-    public function destroyArticle(Request $request, $id)
+     public function destroyArticle(Request $request, $id)
     {
         $targetUser = $this->getTargetUser($request);
         $art = $targetUser->articles()->findOrFail($id);
@@ -216,5 +308,32 @@ class TeacherPortfolioController extends Controller
         $art->delete();
         
         return back()->with('success', 'Artikel berhasil dihapus.');
+    }
+
+    public function updateArticle(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'nullable|string|max:100',
+            'excerpt' => 'nullable|string|max:500',
+            'url' => 'nullable|url',
+            'published_at' => 'nullable|date',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Boleh kosong saat update
+        ]);
+
+        $targetUser = $this->getTargetUser($request);
+        $art = $targetUser->articles()->findOrFail($id);
+
+        $data = $request->only('title', 'category', 'excerpt', 'url', 'published_at');
+        
+        if ($request->hasFile('image')) {
+            // Hapus thumbnail lama jika ada unggahan baru
+            if ($art->image_path) Storage::disk('public')->delete($art->image_path);
+            $data['image_path'] = $request->file('image')->store('teacher_articles', 'public');
+        }
+
+        $art->update($data);
+        
+        return back()->with('success', 'Artikel berhasil diperbarui.');
     }
 }

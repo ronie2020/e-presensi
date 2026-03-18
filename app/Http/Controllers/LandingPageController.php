@@ -20,6 +20,7 @@ use App\Models\LmsAssignment;
 use App\Models\AlumniProfile; 
 use App\Models\StudentHabit; 
 use App\Models\Book; 
+use App\Models\TeacherArticle;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -56,7 +57,7 @@ class LandingPageController extends Controller
             'tidak_hadir' => $tidakHadir
         ];
 
-        // --- 2. [BARU] LOGIKA 7 KEBIASAAN ANAK ---
+        // --- 2. LOGIKA 7 KEBIASAAN ANAK ---
         $totalStudentsActive = Student::where('status', '!=', 'graduated')->count();
         $habitsToday = StudentHabit::whereDate('report_date', $today)->count();
         $habitPercentage = $totalStudentsActive > 0 ? round(($habitsToday / $totalStudentsActive) * 100) : 0;
@@ -149,8 +150,7 @@ class LandingPageController extends Controller
         $schoolStats = Cache::remember('school_profile_stats_v3', 60 * 60, function () {
             $materiCount = class_exists('App\Models\LmsMaterial') ? \App\Models\LmsMaterial::count() : 0;
             $tugasCount = class_exists('App\Models\LmsAssignment') ? \App\Models\LmsAssignment::count() : 0;
-            
-            // [FIXED] Menghitung Guru dengan support format JSON
+                   
             $guruCount = User::where(function($query) {
                 $roles = ['Guru', 'Kepala Sekolah'];
                 foreach ($roles as $role) {
@@ -167,8 +167,7 @@ class LandingPageController extends Controller
             ];
         });
 
-        // --- 6. DATA LAINNYA ---
-        // [FIXED] Mengambil guru untuk highlight di homepage dengan support JSON
+        // --- 6. DATA LAINNYA ---      
         $teachers = User::where(function($query) {
                 $roles = ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'];
                 foreach ($roles as $role) {
@@ -206,7 +205,7 @@ class LandingPageController extends Controller
             ->take(6) 
             ->get();
 
-        // --- 8. KATALOG E-BOOK (TAMBAHAN FITUR BARU) ---
+        // --- 8. KATALOG E-BOOK ---
         $latestBooks = collect([]);
         if (class_exists(Book::class)) {
             try {
@@ -215,7 +214,20 @@ class LandingPageController extends Controller
                                 ->take(4)
                                 ->get();
             } catch (\Exception $e) {
-                // Biarkan array kosong jika error agar halaman tidak crash
+                // Biarkan array kosong jika error
+            }
+        }
+
+        // --- 9. ARTIKEL GURU TERBARU ---
+        $latestArticles = collect([]);
+        if (class_exists(TeacherArticle::class)) {
+            try {
+                $latestArticles = TeacherArticle::with('user') 
+                                ->latest('published_at') 
+                                ->take(3) 
+                                ->get();
+            } catch (\Exception $e) {
+                // Biarkan kosong jika tabel belum ada / error
             }
         }
 
@@ -224,7 +236,7 @@ class LandingPageController extends Controller
             'announcements', 'achievements', 'activities', 'teachers',
             'guestbooks', 'allGuestbooks', 'extracurriculars', 'agendas', 'schoolStats',
             'alumniStats', 'alumniTestimonials', 'habitLabels', 'habitData', 'habitStats',
-            'latestBooks' 
+            'latestBooks', 'latestArticles' 
         ));
     }
 
@@ -255,12 +267,10 @@ class LandingPageController extends Controller
     public function teachers(Request $request)
     {
         $search = $request->input('q');
-        
-        // [FIXED] Menggunakan Group Where & LIKE untuk mengakomodir format JSON ["Guru"] maupun String biasa "Guru"
+                
         $query = User::where(function($q) {
             $roles = ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'];
-            foreach ($roles as $role) {
-                // LIKE '%Guru%' akan cocok dengan "Guru" maupun "[\"Guru\", \"Admin\"]"
+            foreach ($roles as $role) {               
                 $q->orWhere('role', 'LIKE', '%' . $role . '%');
             }
         });

@@ -616,25 +616,31 @@ Route::middleware('auth')->group(function () {
         Route::get('/export-excel', [\App\Http\Controllers\RamadanReportController::class, 'exportExcel'])->name('exportExcel'); // (Bonus fix: saya hapus /admin/ramadan/ yang ganda)
     });
 
-     // CRUD Portofolio Guru (Hanya untuk guru yang login mengelola miliknya sendiri)
+      // CRUD Portofolio Guru (Hanya untuk guru yang login mengelola miliknya sendiri)
     Route::prefix('my-portfolio')->name('portfolio.')->group(function () {
         Route::get('/', [\App\Http\Controllers\TeacherPortfolioController::class, 'index'])->name('index');
         
         Route::post('/experience', [\App\Http\Controllers\TeacherPortfolioController::class, 'storeExperience'])->name('exp.store');
+        Route::put('/experience/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'updateExperience'])->name('exp.update');
         Route::delete('/experience/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyExperience'])->name('exp.destroy');
         
         Route::post('/material', [\App\Http\Controllers\TeacherPortfolioController::class, 'storeMaterial'])->name('mat.store');
+        Route::put('/material/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'updateMaterial'])->name('mat.update');
         Route::delete('/material/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyMaterial'])->name('mat.destroy');
         
         Route::post('/portfolio', [\App\Http\Controllers\TeacherPortfolioController::class, 'storePortfolio'])->name('port.store');
+        Route::put('/portfolio/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'updatePortfolio'])->name('port.update');
         Route::delete('/portfolio/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyPortfolio'])->name('port.destroy');
         
         Route::post('/article', [\App\Http\Controllers\TeacherPortfolioController::class, 'storeArticle'])->name('art.store');
+        Route::put('/article/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'updateArticle'])->name('art.update');
         Route::delete('/article/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyArticle'])->name('art.destroy');
 
         Route::post('/education', [\App\Http\Controllers\TeacherPortfolioController::class, 'storeEducation'])->name('edu.store');
+        Route::put('/education/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'updateEducation'])->name('edu.update');
         Route::delete('/education/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyEducation'])->name('edu.destroy');
     });
+
 
 });
 

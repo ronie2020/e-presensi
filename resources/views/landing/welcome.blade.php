@@ -95,6 +95,9 @@
     <!-- KEGIATAN -->
     @include('landing.activities')
 
+    <!-- ARTIKEL --> 
+     @include('landing.articles')
+
     <!-- PRESTASI -->
     @include('landing.achievements')
 
