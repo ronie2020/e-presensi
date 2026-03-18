@@ -1,8 +1,8 @@
 <!-- ARTIKEL & OPINI GURU -->
-<section id="artikel" class="py-20 relative bg-white">
+<section id="artikel" class="py-20 relative bg-blue-50">
     <!-- Dekorasi Background -->
-    <div class="absolute top-0 right-0 w-64 h-64 bg-orange-50 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
-    <div class="absolute bottom-0 left-0 w-80 h-80 bg-blue-50 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2"></div>
+    <div class="absolute top-0 right-0 w-64 h-64 bg-orange-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
+    <div class="absolute bottom-0 left-0 w-80 h-80 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <!-- Section Header -->
@@ -70,8 +70,8 @@
                     </div>
                 </div>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                <div class="col-span-1 md:col-span-3 text-center py-16 px-4 bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200" data-aos="fade-up">
-                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-100 text-slate-300 mb-4">
+                <div class="col-span-1 md:col-span-3 text-center py-16 px-4 bg-white rounded-[3rem] border-2 border-dashed border-slate-200 shadow-sm" data-aos="fade-up">
+                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-50 text-slate-300 mb-4">
                         <i class="ph-duotone ph-pen-nib text-4xl"></i>
                     </div>
                     <h3 class="text-lg font-bold text-slate-700 mb-1">Belum Ada Artikel</h3>
@@ -83,7 +83,7 @@
         <?php if(isset($latestArticles) && count($latestArticles) > 0): ?>
         <!-- Tombol Lihat Semua (Opsional, jika nanti punya halaman khusus blog) -->
         <div class="text-center mt-12" data-aos="fade-up">
-            <a href="#" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-full transition-colors">
+            <a href="#" class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold rounded-full transition-colors shadow-sm">
                 <i class="ph-bold ph-books"></i> Lihat Semua Tulisan
             </a>
         </div>

@@ -113,6 +113,33 @@
                 </script>
             <?php endif; ?>
 
+            
+            <?php if($errors->any()): ?>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal Menyimpan!',
+                            html: `
+                                <div class="text-left text-sm mt-2">
+                                    <p class="text-slate-600 mb-2">Mohon perbaiki kesalahan berikut:</p>
+                                    <ul class="list-disc pl-5 space-y-1">
+                                        <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <li class="text-rose-500 font-medium"><?php echo e($error); ?></li>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    </ul>
+                                </div>
+                            `,
+                            confirmButtonColor: '#3b82f6',
+                            confirmButtonText: 'Tutup & Perbaiki',
+                            customClass: {
+                                popup: 'rounded-3xl'
+                            }
+                        });
+                    });
+                </script>
+            <?php endif; ?>
+
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col md:flex-row min-h-[600px] relative">
                 
                 

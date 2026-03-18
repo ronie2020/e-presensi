@@ -6,7 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class TeacherArticle extends Model
 {
-    protected $fillable = ['user_id', 'title', 'category', 'excerpt', 'url', 'image_path', 'published_at'];
+   protected $fillable = [
+        'user_id', 
+        'title', 
+        'category', 
+        'excerpt', 
+        'url', 
+        'published_at', 
+        'image_path'
+    ];
 
     public function user()
     {
