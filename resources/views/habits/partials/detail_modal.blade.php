@@ -86,7 +86,6 @@
                         </div>
                     @else
                         <div class="grid grid-cols-2 gap-y-3 gap-x-2">
-                            {{-- [PERBAIKAN] Definisi Array Shalat yang Benar --}}
                             @php
                                 $prayers = [
                                     ['Subuh', $habit->prayer_subuh],
@@ -131,7 +130,8 @@
                                 {{-- PLAYER AUDIO --}}
                                 @if($habit->odoa_audio_path)
                                     <div class="mt-2">
-                                        <audio controls class="w-full h-8 rounded-lg">
+                                        <!-- Ditambah controlsList="nodownload" -->
+                                        <audio controls controlsList="nodownload" class="w-full h-8 rounded-lg">
                                             <source src="{{ asset('storage/'.$habit->odoa_audio_path) }}">
                                             Browser Anda tidak mendukung pemutar audio.
                                         </audio>
@@ -219,15 +219,30 @@
         </div>
     </div>
 
-    {{-- Feedback Form --}}
+    {{-- Feedback Form (Dikonversi menggunakan onsubmit AJAX) --}}
     <div class="pt-4 border-t border-slate-100">
-        <form action="{{ route('teacher.habits.feedback', $habit->id) }}" method="POST" class="bg-slate-900 p-6 rounded-[2rem] shadow-xl relative overflow-hidden">
+        <form action="{{ route('teacher.habits.feedback', $habit->id) }}" method="POST" id="form-feedback-{{ $habit->id }}" onsubmit="submitFeedbackAjax(event, this)" class="bg-slate-900 p-6 rounded-[2rem] shadow-xl relative overflow-hidden">
             @csrf
             <div class="absolute top-0 right-0 p-4 opacity-10"><i class="ph-fill ph-chat-centered-text text-6xl text-white"></i></div>
-            <label class="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-3 block">Berikan Apresiasi / Catatan</label>
+            
+            <div class="flex items-center justify-between mb-3">
+                <label class="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] block">
+                    Berikan Apresiasi / Catatan
+                </label>
+                {{-- Indikator jika sudah ada feedback --}}
+                @if($habit->teacher_feedback)
+                    <span class="text-[9px] bg-white/10 text-emerald-300 px-2 py-0.5 rounded border border-white/5"><i class="ph-bold ph-check"></i> Sudah dinilai</span>
+                @endif
+            </div>
+
             <textarea name="feedback" rows="3" class="w-full bg-slate-800 border-slate-700 rounded-2xl text-white text-sm focus:ring-emerald-500 focus:border-emerald-500 placeholder-slate-500" placeholder="Tulis pesan motivasi...">{{ $habit->teacher_feedback }}</textarea>
+            
             <div class="flex justify-end mt-4">
-                <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black text-xs uppercase tracking-widest px-8 py-3 rounded-xl transition-all shadow-lg active:scale-95">Kirim Feedback</button>
+                {{-- Tombol berubah tergantung apakah feedback sudah ada atau belum --}}
+                <button type="submit" id="btn-submit-feedback" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black text-xs uppercase tracking-widest px-8 py-3 rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2">
+                    <i class="ph-bold ph-paper-plane-right"></i> 
+                    {{ $habit->teacher_feedback ? 'Perbarui Feedback' : 'Kirim Feedback' }}
+                </button>
             </div>
         </form>
     </div>

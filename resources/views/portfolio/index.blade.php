@@ -4,14 +4,21 @@
 
     <div class="py-8 sm:py-10 font-sans text-slate-800" 
          x-data="{ 
-            activeTab: 'pengalaman',
+            // 1. TAB PERSISTENCE: Mengambil tab terakhir dari SessionStorage, default ke 'pendidikan'
+            activeTab: sessionStorage.getItem('portfolioActiveTab') || 'pendidikan',
             
-            // State untuk Edit Modal
             editModalOpen: false,
             editType: '', 
             editData: {},
             editFormAction: '',
             
+            init() {
+                // Pantau perubahan activeTab, lalu simpan ke SessionStorage
+                this.$watch('activeTab', value => {
+                    sessionStorage.setItem('portfolioActiveTab', value);
+                });
+            },
+
             openEditModal(type, item, url) {
                 this.editType = type;
                 this.editData = JSON.parse(JSON.stringify(item)); 
@@ -35,18 +42,17 @@
                 }, 300);
             },
 
-            // Fungsi SweetAlert2 untuk Konfirmasi Hapus
             confirmDelete(event, message) {
                 Swal.fire({
                     title: 'Apakah Anda yakin?',
                     text: message,
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#ef4444', // Merah (Rose-500)
-                    cancelButtonColor: '#94a3b8',  // Abu-abu (Slate-400)
+                    confirmButtonColor: '#ef4444', 
+                    cancelButtonColor: '#94a3b8', 
                     confirmButtonText: '<i class=\'ph-bold ph-trash\'></i> Ya, Hapus!',
                     cancelButtonText: 'Batal',
-                    reverseButtons: true, // Tombol batal di kiri
+                    reverseButtons: true, 
                     customClass: {
                         popup: 'rounded-3xl',
                         confirmButton: 'px-5 py-2.5 rounded-xl font-bold flex items-center gap-2',
@@ -54,7 +60,7 @@
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        event.target.submit(); // Submit form jika user klik 'Ya'
+                        event.target.submit(); 
                     }
                 })
             }
@@ -76,40 +82,25 @@
                 </a>
             </div>
 
-            {{-- Script Notifikasi Success Otomatis (Toast SweetAlert2) --}}
+            {{-- Toast Success --}}
             @if(session('success'))
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
-                        const Toast = Swal.mixin({
-                            toast: true,
-                            position: 'top-end',
-                            showConfirmButton: false,
-                            timer: 3000,
-                            timerProgressBar: true,
-                            customClass: {
-                                popup: 'rounded-2xl border border-emerald-100 shadow-lg'
-                            },
-                            didOpen: (toast) => {
-                                toast.addEventListener('mouseenter', Swal.stopTimer)
-                                toast.addEventListener('mouseleave', Swal.resumeTimer)
-                            }
-                        })
-
-                        Toast.fire({
-                            icon: 'success',
-                            title: '{{ session('success') }}'
-                        })
+                        Swal.mixin({
+                            toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, timerProgressBar: true,
+                            customClass: { popup: 'rounded-2xl border border-emerald-100 shadow-lg' },
+                            didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); }
+                        }).fire({ icon: 'success', title: '{{ session('success') }}' });
                     });
                 </script>
             @endif
 
-            {{-- === TAMBAHAN BARU: SCRIPT DETEKSI ERROR VALIDASI === --}}
+            {{-- Pop-up Error Validasi --}}
             @if($errors->any())
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
                         Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal Menyimpan!',
+                            icon: 'error', title: 'Gagal Menyimpan!',
                             html: `
                                 <div class="text-left text-sm mt-2">
                                     <p class="text-slate-600 mb-2">Mohon perbaiki kesalahan berikut:</p>
@@ -120,11 +111,7 @@
                                     </ul>
                                 </div>
                             `,
-                            confirmButtonColor: '#3b82f6',
-                            confirmButtonText: 'Tutup & Perbaiki',
-                            customClass: {
-                                popup: 'rounded-3xl'
-                            }
+                            confirmButtonColor: '#3b82f6', confirmButtonText: 'Tutup & Perbaiki', customClass: { popup: 'rounded-3xl' }
                         });
                     });
                 </script>
@@ -163,7 +150,8 @@
                             <h3 class="text-lg font-black text-slate-800">Riwayat Pelatihan & Sertifikasi</h3>
                         </div>
                         
-                        <form action="{{ route('portfolio.exp.store') }}" method="POST" class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        {{-- 3. STATE LOADING PADA FORM --}}
+                        <form action="{{ route('portfolio.exp.store') }}" method="POST" x-data="{ isSubmitting: false }" @submit="isSubmitting = true" class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
                             @csrf
                             @if(request('user_id')) <input type="hidden" name="user_id" value="{{ request('user_id') }}"> @endif
                             <div>
@@ -179,8 +167,9 @@
                                 <input type="text" name="organizer" value="{{ old('organizer') }}" placeholder="Cth: Kemdikbud..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700">
                             </div>
                             <div class="flex items-end">
-                                <button type="submit" class="w-full py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all flex justify-center items-center gap-2">
-                                    <i class="ph-bold ph-plus"></i> Tambah
+                                <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="w-full py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all flex justify-center items-center gap-2">
+                                    <span x-show="!isSubmitting"><i class="ph-bold ph-plus"></i> Tambah</span>
+                                    <span x-show="isSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Loading...</span>
                                 </button>
                             </div>
                         </form>
@@ -196,11 +185,9 @@
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        {{-- Tombol Edit --}}
                                         <button type="button" @click="openEditModal('exp', @js($exp), '{{ route('portfolio.exp.update', ['id' => $exp->id, 'user_id' => request('user_id')]) }}')" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-xl transition-all" title="Edit">
                                             <i class="ph-bold ph-pencil-simple"></i>
                                         </button>
-                                        {{-- Tombol Hapus (Menggunakan SweetAlert2 via Alpine) --}}
                                         <form action="{{ route('portfolio.exp.destroy', ['id' => $exp->id, 'user_id' => request('user_id')]) }}" method="POST" @submit.prevent="confirmDelete($event, 'Menghapus riwayat pelatihan tidak dapat dibatalkan.')">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all" title="Hapus"><i class="ph-bold ph-trash"></i></button>
@@ -223,7 +210,7 @@
                             <h3 class="text-lg font-black text-slate-800">Materi & Media Pembelajaran</h3>
                         </div>
                         
-                        <form action="{{ route('portfolio.mat.store') }}" method="POST" enctype="multipart/form-data" class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8 grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <form action="{{ route('portfolio.mat.store') }}" method="POST" enctype="multipart/form-data" x-data="{ isSubmitting: false, fileName: '' }" @submit="isSubmitting = true" class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8 grid grid-cols-1 md:grid-cols-2 gap-5">
                             @csrf
                             @if(request('user_id')) <input type="hidden" name="user_id" value="{{ request('user_id') }}"> @endif
                             <div class="md:col-span-2">
@@ -240,11 +227,14 @@
                             </div>
                             <div class="md:col-span-2 p-4 bg-white border-2 border-dashed border-slate-200 rounded-2xl">
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Atau Upload File Langsung (Opsional)</label>
-                                <input type="file" name="file" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                                <div class="flex items-center gap-3">
+                                    <input type="file" name="file" @change="fileName = $event.target.files[0].name" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                                </div>
                             </div>
                             <div class="md:col-span-2 flex justify-end">
-                                <button type="submit" class="px-8 py-3 bg-purple-600 text-white font-bold rounded-2xl hover:bg-purple-700 shadow-lg shadow-purple-500/20 transition-all flex items-center gap-2">
-                                    <i class="ph-bold ph-upload-simple"></i> Simpan Materi
+                                <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="px-8 py-3 bg-purple-600 text-white font-bold rounded-2xl hover:bg-purple-700 shadow-lg shadow-purple-500/20 transition-all flex items-center gap-2">
+                                    <span x-show="!isSubmitting"><i class="ph-bold ph-upload-simple"></i> Simpan Materi</span>
+                                    <span x-show="isSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Mengunggah...</span>
                                 </button>
                             </div>
                         </form>
@@ -287,7 +277,8 @@
                             <h3 class="text-lg font-black text-slate-800">Galeri Portofolio & Pencapaian</h3>
                         </div>
                         
-                        <form action="{{ route('portfolio.port.store') }}" method="POST" enctype="multipart/form-data" class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8">
+                        {{-- 2. LIVE IMAGE PREVIEW --}}
+                        <form action="{{ route('portfolio.port.store') }}" method="POST" enctype="multipart/form-data" x-data="{ isSubmitting: false, imagePreview: null }" @submit="isSubmitting = true" class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8">
                             @csrf
                             @if(request('user_id')) <input type="hidden" name="user_id" value="{{ request('user_id') }}"> @endif
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
@@ -302,10 +293,19 @@
                                 <div class="md:col-span-3 p-4 bg-white border-2 border-dashed border-slate-200 rounded-2xl flex flex-col md:flex-row gap-4 items-center justify-between">
                                     <div class="flex-1 w-full">
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Upload Foto Dokumentasi</label>
-                                        <input type="file" name="image" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-emerald-50 file:text-emerald-700" required>
+                                        <input type="file" name="image" accept="image/*" @change="imagePreview = URL.createObjectURL($event.target.files[0])" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-emerald-50 file:text-emerald-700" required>
                                     </div>
-                                    <button type="submit" class="px-8 py-3 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all shrink-0 w-full md:w-auto">
-                                        <i class="ph-bold ph-upload-simple"></i> Upload Foto
+                                    
+                                    {{-- Area Preview --}}
+                                    <template x-if="imagePreview">
+                                        <div class="w-24 h-24 rounded-xl overflow-hidden border border-slate-200 shrink-0 shadow-sm">
+                                            <img :src="imagePreview" class="w-full h-full object-cover">
+                                        </div>
+                                    </template>
+
+                                    <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="px-8 py-3 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all shrink-0 w-full md:w-auto flex justify-center items-center gap-2">
+                                        <span x-show="!isSubmitting"><i class="ph-bold ph-upload-simple"></i> Simpan</span>
+                                        <span x-show="isSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Uploading...</span>
                                     </button>
                                 </div>
                             </div>
@@ -346,7 +346,7 @@
                             <h3 class="text-lg font-black text-slate-800">Artikel & Tulisan Terpublikasi</h3>
                         </div>
                         
-                        <form action="{{ route('portfolio.art.store') }}" method="POST" enctype="multipart/form-data" class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8 grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <form action="{{ route('portfolio.art.store') }}" method="POST" enctype="multipart/form-data" x-data="{ isSubmitting: false, imagePreview: null }" @submit="isSubmitting = true" class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8 grid grid-cols-1 md:grid-cols-2 gap-5">
                             @csrf
                             @if(request('user_id')) <input type="hidden" name="user_id" value="{{ request('user_id') }}"> @endif
                             <div class="md:col-span-2">
@@ -369,13 +369,21 @@
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Link URL Artikel Asli (Opsional)</label>
                                 <input type="url" name="url" value="{{ old('url') }}" placeholder="https://..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-orange-500 focus:ring-orange-500 font-bold text-slate-700">
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Thumbnail Cover (Opsional)</label>
-                                <input type="file" name="image" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-orange-50 file:text-orange-600 bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                            
+                            <div class="flex items-center gap-4">
+                                <div class="flex-1">
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Thumbnail Cover (Opsional)</label>
+                                    <input type="file" name="image" accept="image/*" @change="imagePreview = URL.createObjectURL($event.target.files[0])" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-orange-50 file:text-orange-600 bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                                </div>
+                                <template x-if="imagePreview">
+                                    <img :src="imagePreview" class="w-12 h-12 rounded-xl object-cover border border-slate-200 mt-5 shadow-sm">
+                                </template>
                             </div>
+
                             <div class="md:col-span-2 flex justify-end mt-2">
-                                <button type="submit" class="px-8 py-3 bg-orange-500 text-white font-bold rounded-2xl hover:bg-orange-600 shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2">
-                                    <i class="ph-bold ph-floppy-disk"></i> Simpan Artikel
+                                <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="px-8 py-3 bg-orange-500 text-white font-bold rounded-2xl hover:bg-orange-600 shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2">
+                                    <span x-show="!isSubmitting"><i class="ph-bold ph-floppy-disk"></i> Simpan Artikel</span>
+                                    <span x-show="isSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...</span>
                                 </button>
                             </div>
                         </form>
@@ -419,7 +427,7 @@
                             <h3 class="text-lg font-black text-slate-800">Riwayat Pendidikan Formal</h3>
                         </div>
                         
-                        <form action="{{ route('portfolio.edu.store') }}" method="POST" class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <form action="{{ route('portfolio.edu.store') }}" method="POST" x-data="{ isSubmitting: false }" @submit="isSubmitting = true" class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
                             @csrf
                             @if(request('user_id')) <input type="hidden" name="user_id" value="{{ request('user_id') }}"> @endif
                             <div class="md:col-span-2">
@@ -439,8 +447,9 @@
                                 <input type="number" name="end_year" value="{{ old('end_year') }}" placeholder="Cth: 2014" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
                             </div>
                             <div class="md:col-span-2 flex items-end justify-end">
-                                <button type="submit" class="px-8 py-3 bg-cyan-600 text-white font-bold rounded-2xl hover:bg-cyan-700 shadow-lg shadow-cyan-500/20 transition-all flex items-center gap-2">
-                                    <i class="ph-bold ph-plus"></i> Tambah Riwayat
+                                <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="px-8 py-3 bg-cyan-600 text-white font-bold rounded-2xl hover:bg-cyan-700 shadow-lg shadow-cyan-500/20 transition-all flex items-center gap-2">
+                                    <span x-show="!isSubmitting"><i class="ph-bold ph-plus"></i> Tambah Riwayat</span>
+                                    <span x-show="isSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...</span>
                                 </button>
                             </div>
                         </form>
@@ -502,7 +511,7 @@
                     </div>
 
                     <!-- Modal Body / Form -->
-                    <form :action="editFormAction" method="POST" enctype="multipart/form-data" class="p-6">
+                    <form :action="editFormAction" method="POST" enctype="multipart/form-data" class="p-6" x-data="{ isModalSubmitting: false, editImagePreview: null }" @submit="isModalSubmitting = true">
                         @csrf
                         @method('PUT')
                         @if(request('user_id')) <input type="hidden" name="user_id" value="{{ request('user_id') }}"> @endif
@@ -559,10 +568,15 @@
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tahun</label>
                                     <input type="text" name="year" x-model="editData.year" class="w-full rounded-2xl border-slate-200 bg-white focus:border-emerald-500 focus:ring-emerald-500 font-bold text-slate-700">
                                 </div>
-                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ganti Foto (Opsional)</label>
-                                    <p class="text-xs text-slate-500 mb-2">Biarkan kosong jika tidak ingin mengubah foto.</p>
-                                    <input type="file" name="image" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-emerald-100 file:text-emerald-700">
+                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-4">
+                                    <div class="flex-1">
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ganti Foto (Opsional)</label>
+                                        <p class="text-xs text-slate-500 mb-2">Biarkan kosong jika tidak ingin mengubah foto.</p>
+                                        <input type="file" name="image" accept="image/*" @change="editImagePreview = URL.createObjectURL($event.target.files[0])" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-emerald-100 file:text-emerald-700">
+                                    </div>
+                                    <template x-if="editImagePreview">
+                                        <img :src="editImagePreview" class="w-16 h-16 rounded-lg object-cover border border-slate-200">
+                                    </template>
                                 </div>
                             </div>
                         </template>
@@ -592,10 +606,15 @@
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Link URL Artikel</label>
                                     <input type="url" name="url" x-model="editData.url" class="w-full rounded-2xl border-slate-200 bg-white focus:border-orange-500 focus:ring-orange-500 font-bold text-slate-700">
                                 </div>
-                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ganti Thumbnail (Opsional)</label>
-                                    <p class="text-xs text-slate-500 mb-2">Biarkan kosong jika tidak ingin mengubah thumbnail.</p>
-                                    <input type="file" name="image" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-orange-100 file:text-orange-700">
+                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-4">
+                                    <div class="flex-1">
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ganti Thumbnail (Opsional)</label>
+                                        <p class="text-xs text-slate-500 mb-2">Biarkan kosong jika tidak ingin mengubah thumbnail.</p>
+                                        <input type="file" name="image" accept="image/*" @change="editImagePreview = URL.createObjectURL($event.target.files[0])" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-orange-100 file:text-orange-700">
+                                    </div>
+                                    <template x-if="editImagePreview">
+                                        <img :src="editImagePreview" class="w-16 h-16 rounded-lg object-cover border border-slate-200">
+                                    </template>
                                 </div>
                             </div>
                         </template>
@@ -627,8 +646,9 @@
                         <!-- Submit Button -->
                         <div class="mt-8 pt-4 border-t border-slate-100 flex justify-end gap-3">
                             <button type="button" @click="closeEditModal()" class="px-6 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors">Batal</button>
-                            <button type="submit" class="px-6 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2">
-                                <i class="ph-bold ph-check"></i> Simpan Perubahan
+                            <button type="submit" :disabled="isModalSubmitting" :class="{'opacity-70 cursor-wait': isModalSubmitting}" class="px-6 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2">
+                                <span x-show="!isModalSubmitting"><i class="ph-bold ph-check"></i> Simpan Perubahan</span>
+                                <span x-show="isModalSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...</span>
                             </button>
                         </div>
                     </form>
