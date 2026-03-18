@@ -148,7 +148,7 @@
                                         <div>
                                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Cover Buku</label>
                                             @if($book->cover_path)
-                                                <div class="flex items-center gap-4 mb-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
+                                                <div class="flex items-center gap-4 mb-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm" id="currentCoverContainer">
                                                     <div class="w-12 h-16 rounded overflow-hidden bg-slate-100 flex-shrink-0">
                                                         <img src="{{ asset('storage/' . $book->cover_path) }}" class="w-full h-full object-cover">
                                                     </div>
@@ -159,8 +159,9 @@
                                                 </div>
                                             @endif
                                             <div class="relative group">
-                                                <input type="file" name="cover" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200 border border-dashed border-slate-300 rounded-2xl py-3 px-4 hover:border-indigo-400 transition-all cursor-pointer bg-white shadow-sm"/>
+                                                <input type="file" name="cover" id="coverInput" onchange="previewCover(event)" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200 border border-dashed border-slate-300 rounded-2xl py-3 px-4 hover:border-indigo-400 transition-all cursor-pointer bg-white shadow-sm"/>
                                             </div>
+                                            <img id="coverPreview" class="hidden mt-3 rounded-xl border border-slate-200 object-cover" style="max-height: 160px;" alt="Cover Preview" />
                                         </div>
 
                                         {{-- INPUT E-BOOK (VALIDASI) --}}
@@ -203,7 +204,7 @@
                         </div>
 
                         {{-- BUTTON --}}
-                        <div class="pt-4 flex justify-end gap-4 border-t border-slate-100">
+                       <div class="pt-4 flex justify-end gap-4 border-t border-slate-100">
                             <a href="{{ route('library.books.index') }}" class="px-6 py-3.5 rounded-2xl text-slate-500 font-bold text-sm hover:bg-slate-50 hover:text-slate-700 transition-colors">Batal</a>
                             <button type="submit" class="px-8 py-3.5 bg-indigo-900 text-white font-bold rounded-2xl hover:bg-indigo-800 shadow-lg shadow-indigo-900/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
                                 <i class="ph-bold ph-check-circle text-lg"></i>
@@ -217,8 +218,45 @@
         </div>
     </div>
 
+     {{-- MODAL SCANNER BARCODE --}}
+    <div id="scannerModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm" onclick="stopScanner()"></div>
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden relative z-10 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-black text-slate-800">Scan Barcode Buku</h3>
+                <button onclick="stopScanner()" class="text-slate-400 hover:text-rose-500 transition-colors">
+                    <i class="ph-bold ph-x text-xl"></i>
+                </button>
+            </div>
+            <div id="reader" class="w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200"></div>
+            <p class="text-xs text-slate-500 text-center mt-4">Arahkan kamera ke barcode buku.</p>
+        </div>
+    </div>
+    
+
     {{-- SCRIPT SAMA SEPERTI CREATE --}}
     <script>
+         // --- LOGIKA PREVIEW GAMBAR ---
+        function previewCover(event) {
+            const input = event.target;
+            const preview = document.getElementById('coverPreview');
+            const currentCover = document.getElementById('currentCoverContainer');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    if(currentCover) currentCover.classList.add('hidden'); // Sembunyikan cover lama saat preview
+                }
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.src = '';
+                preview.classList.add('hidden');
+                if(currentCover) currentCover.classList.remove('hidden'); // Munculkan cover lama jika batal
+            }
+        }
+        
         // Copy Paste script yang sama dari create.blade.php
         async function addNewCategory() {
              const { value: newCategory } = await Swal.fire({
