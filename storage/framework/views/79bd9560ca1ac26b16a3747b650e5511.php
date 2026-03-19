@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ $title }}</title>
+    <title><?php echo e($title); ?></title>
     <style>
         body { font-family: sans-serif; font-size: 12px; }
         .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
@@ -40,11 +40,11 @@
     <div class="header">
         <h1>SMP NEGERI 3 LAKBOK</h1>
         <p>Laporan Perpustakaan Digital</p>
-        <p><strong>{{ $title }}</strong></p>
+        <p><strong><?php echo e($title); ?></strong></p>
     </div>
 
-    @if($type == 'monthly')
-        {{-- TABEL LAPORAN SIRKULASI BULANAN --}}
+    <?php if($type == 'monthly'): ?>
+        
         <table class="table-data">
             <thead>
                 <tr>
@@ -57,48 +57,49 @@
                 </tr>
             </thead>
             <tbody>
-                @php $totalDenda = 0; @endphp
-                @forelse($data as $index => $loan)
-                    @php $totalDenda += $loan->fine; @endphp
+                <?php $totalDenda = 0; ?>
+                <?php $__empty_1 = true; $__currentLoopData = $data; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $loan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php $totalDenda += $loan->fine; ?>
                     <tr>
-                        <td style="text-align: center;">{{ $index + 1 }}</td>
-                        <td>{{ \Carbon\Carbon::parse($loan->loan_date)->format('d/m/Y') }}</td>
-                        <td>{{ $loan->student->name ?? '-' }}</td>
-                        <td>{{ $loan->book->title ?? '-' }}</td>
+                        <td style="text-align: center;"><?php echo e($index + 1); ?></td>
+                        <td><?php echo e(\Carbon\Carbon::parse($loan->loan_date)->format('d/m/Y')); ?></td>
+                        <td><?php echo e($loan->student->name ?? '-'); ?></td>
+                        <td><?php echo e($loan->book->title ?? '-'); ?></td>
                         <td style="text-align: center;">
-                            @if($loan->return_date)
+                            <?php if($loan->return_date): ?>
                                 <span class="badge bg-green">Kembali</span>
-                            @else
+                            <?php else: ?>
                                 <span class="badge bg-blue">Dipinjam</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                         <td style="text-align: right;">
-                            @if($loan->fine > 0)
-                                Rp {{ number_format($loan->fine, 0, ',', '.') }}
-                            @else
+                            <?php if($loan->fine > 0): ?>
+                                Rp <?php echo e(number_format($loan->fine, 0, ',', '.')); ?>
+
+                            <?php else: ?>
                                 -
-                            @endif
+                            <?php endif; ?>
                         </td>
                     </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="6" style="text-align: center; padding: 20px;">Tidak ada data peminjaman pada periode ini.</td>
                     </tr>
-                @endforelse
+                <?php endif; ?>
             </tbody>
-            {{-- PERBAIKAN: Menampilkan Total Denda --}}
-            @if($totalDenda > 0)
+            
+            <?php if($totalDenda > 0): ?>
             <tfoot>
                 <tr>
                     <th colspan="5" style="text-align: right; text-transform: uppercase;">Total Denda Terkumpul:</th>
-                    <th style="text-align: right; font-weight: bold;">Rp {{ number_format($totalDenda, 0, ',', '.') }}</th>
+                    <th style="text-align: right; font-weight: bold;">Rp <?php echo e(number_format($totalDenda, 0, ',', '.')); ?></th>
                 </tr>
             </tfoot>
-            @endif
+            <?php endif; ?>
         </table>
 
-    @elseif($type == 'top_books')
-        {{-- TABEL LAPORAN BUKU TERPOPULER --}}
+    <?php elseif($type == 'top_books'): ?>
+        
         <table class="table-data">
             <thead>
                 <tr>
@@ -110,24 +111,24 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($data as $index => $book)
+                <?php $__empty_1 = true; $__currentLoopData = $data; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr>
-                        <td style="text-align: center; font-weight: bold;">{{ $index + 1 }}</td>
-                        <td>{{ $book->book_code }}</td>
-                        <td>{{ $book->title }}</td>
-                        <td>{{ $book->author }}</td>
-                        <td style="text-align: center;">{{ $book->loans_count }}x</td>
+                        <td style="text-align: center; font-weight: bold;"><?php echo e($index + 1); ?></td>
+                        <td><?php echo e($book->book_code); ?></td>
+                        <td><?php echo e($book->title); ?></td>
+                        <td><?php echo e($book->author); ?></td>
+                        <td style="text-align: center;"><?php echo e($book->loans_count); ?>x</td>
                     </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="5" style="text-align: center;">Belum ada data peminjaman.</td>
                     </tr>
-                @endforelse
+                <?php endif; ?>
             </tbody>
         </table>
-    @endif
+    <?php endif; ?>
 
-    {{-- PERBAIKAN: Menambahkan Area Tanda Tangan Resmi --}}
+    
     <table class="table-signature">
         <tr>
             <td>
@@ -138,7 +139,7 @@
                 <p>NIP. 1980xxxx xxxx x xxxx</p>
             </td>
             <td>
-                <p>Lakbok, {{ date('d F Y') }}</p>
+                <p>Lakbok, <?php echo e(date('d F Y')); ?></p>
                 <p><strong>Kepala Perpustakaan</strong></p>
                 <br><br><br><br>
                 <p style="font-weight: bold; text-decoration: underline;">Nama Pustakawan, S.I.P.</p>
@@ -148,8 +149,9 @@
     </table>
 
     <div class="footer">
-        Dicetak dari Sistem Perpustakaan Digital pada {{ date('d/m/Y H:i:s') }}
+        Dicetak dari Sistem Perpustakaan Digital pada <?php echo e(date('d/m/Y H:i:s')); ?>
+
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/library/reports/pdf-template.blade.php ENDPATH**/ ?>
