@@ -356,6 +356,13 @@ return [
                 'roles' => ['Admin', 'TU', 'Kepala Sekolah']
             ],
             [
+                'name' => 'Kalender Pendidikan',
+                'route' => 'admin.academic-calendar.index',
+                'active_check' => 'admin.academic-calendar.*',
+                'icon' => 'ph-calendar-star',
+                'roles' => ['Admin', 'TU', 'Kepala Sekolah']
+            ],
+            [
                 'name' => 'Mata Pelajaran',
                 'route' => 'subjects.index',
                 'active_check' => 'subjects.*',

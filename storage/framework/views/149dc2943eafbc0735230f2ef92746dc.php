@@ -11,17 +11,17 @@
             newMessage: '',
             loading: false,
             fetchMessages() {
-                const url = "{{ route('student.liaison.chat.messages') }}?student_id={{ $student->id }}";
+                const url = "<?php echo e(route('student.liaison.chat.messages')); ?>?student_id=<?php echo e($student->id); ?>";
                 fetch(url).then(res => res.json()).then(data => { this.messages = data; this.scrollToBottom(); });
             },
             sendMessage() {
                 if (!this.newMessage.trim()) return;
-                const payload = { message: this.newMessage, student_id: "{{ $student->id }}" };
+                const payload = { message: this.newMessage, student_id: "<?php echo e($student->id); ?>" };
                 this.messages.push({ message: this.newMessage, sender_type: 'student' });
                 this.newMessage = '';
-                fetch("{{ route('student.liaison.chat.send') }}", {
+                fetch("<?php echo e(route('student.liaison.chat.send')); ?>", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+                    headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "<?php echo e(csrf_token()); ?>" },
                     body: JSON.stringify(payload)
                 });
             },
@@ -49,7 +49,7 @@
                     list: 'Agenda'
                 },
                 // Data dikirim dari Controller
-                events: @json($calendarEvents ?? []),
+                events: <?php echo json_encode($calendarEvents ?? [], 15, 512) ?>,
                 eventClick: function(info) {
                     // Logika sederhana saat agenda diklik
                     console.log('Event: ' + info.event.title);
@@ -76,7 +76,7 @@
 
         // --- 3. CHART AKADEMIK (Original) ---
         const academicCanvas = document.getElementById('academicChart');
-        const academicData = @json($chartData ?? null);
+        const academicData = <?php echo json_encode($chartData ?? null, 15, 512) ?>;
         
         if (academicCanvas && academicData && academicData.labels) {
             new Chart(academicCanvas, {
@@ -104,7 +104,7 @@
 
         // --- 4. CHART KEHADIRAN (Placeholder Implementasi) ---
         const attendanceCanvas = document.getElementById('attendanceChart');
-        const attData = @json($attendanceChart ?? null);
+        const attData = <?php echo json_encode($attendanceChart ?? null, 15, 512) ?>;
         
         if (attendanceCanvas && attData) {
             new Chart(attendanceCanvas, {
@@ -128,4 +128,4 @@
             });
         }
     });
-</script>
+</script><?php /**PATH E:\drive aplikasi\aplikasi terpadu\sistem_absensi_sekolah versi 3.00\resources\views/students/portal/partials/scripts.blade.php ENDPATH**/ ?>

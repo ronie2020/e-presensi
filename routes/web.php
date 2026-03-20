@@ -73,6 +73,7 @@ use App\Http\Controllers\SppdController;
 use App\Http\Middleware\CheckSebMode;
 
 use App\Http\Controllers\AdminAlumniController;
+use App\Http\Controllers\AcademicCalendarController; 
 
 // Buku Penghubung, Pengaduan & Kebiasaan Guru
 use App\Http\Controllers\LiaisonBookController;
@@ -98,7 +99,7 @@ use App\Http\Controllers\RamadanReportController;
 //  1. HALAMAN PUBLIK & KIOSK (Tanpa Login)
 // =========================================================================
 
-    Route::get('/', [LandingPageController::class, 'index'])->name('landing');
+Route::get('/', [LandingPageController::class, 'index'])->name('landing');
 Route::get('/kegiatan', [LandingPageController::class, 'activities'])->name('public.activities');
 Route::get('/prestasi', [LandingPageController::class, 'achievements'])->name('public.achievements');
 Route::get('/testimoni', [LandingPageController::class, 'testimonials'])->name('public.testimonials'); 
@@ -501,7 +502,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports/export', [ExtracurricularController::class, 'exportReports'])->name('reports.export');
     });
 
-    // Pengumuman & Pengaturan
+    // Pengumuman & Pengaturan (TERMASUK KALENDER PENDIDIKAN DI SINI)
     Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
     Route::post('/announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
     Route::delete('/announcements/{id}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
@@ -509,6 +510,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/agendas', [AnnouncementController::class, 'agendas'])->name('agendas.index'); 
     Route::post('/agendas', [AnnouncementController::class, 'storeAgenda'])->name('agendas.store');
     Route::delete('/agendas/{id}', [AnnouncementController::class, 'destroyAgenda'])->name('agendas.destroy');
+    
+    // --- ROUTE KALENDER PENDIDIKAN ---
+    Route::prefix('admin/academic-calendar')->name('admin.academic-calendar.')->group(function() {
+        Route::get('/', [AcademicCalendarController::class, 'index'])->name('index');
+        Route::post('/', [AcademicCalendarController::class, 'store'])->name('store');
+        Route::put('/{id}', [AcademicCalendarController::class, 'update'])->name('update');
+        Route::delete('/{id}', [AcademicCalendarController::class, 'destroy'])->name('destroy');
+    });
+
     Route::resource('activities', SchoolActivityController::class)->except(['show']);
     Route::get('/settings/academic', [AcademicYearController::class, 'index'])->name('settings.academic.index');
     Route::post('/settings/academic', [AcademicYearController::class, 'store'])->name('settings.academic.store');

@@ -30,6 +30,7 @@ use App\Models\LiteracyJournal;
 use App\Models\Schedule; 
 use App\Models\CbtExam; 
 use App\Models\CbtStudentExam; 
+use App\Models\AcademicCalendar;
 use Illuminate\Support\Facades\Storage;
 
 class StudentPortalController extends Controller
@@ -70,16 +71,22 @@ class StudentPortalController extends Controller
         }
 
         Carbon::setLocale('id');
-        $student = Student::with(['schoolClass', 'alumniProfile'])->findOrFail($id);
-        $isAlumni = $student->status === 'graduated';
         
+        // --- PERBAIKAN 1: Eager Loading Jadwal untuk mencegah N+1 Query ---
+        $student = Student::with([
+            'schoolClass.schedules.subject', 
+            'schoolClass.schedules.teacher', 
+            'alumniProfile'
+        ])->findOrFail($id);
+        
+        $isAlumni = $student->status === 'graduated';
         $classId = $student->class_id ?? $student->school_class_id ?? optional($student->schoolClass)->id;
 
         // ==========================================
         //  1. LOGIKA DASHBOARD OPERASIONAL (PRIORITY)
         // ==========================================
         
-        // A. PRIORITY EXAMS (CBT) - [OPTIMASI N+1 QUERY]
+        // A. PRIORITY EXAMS (CBT)
         $priorityExams = collect([]);
         
         if (class_exists(\App\Models\CbtExam::class)) {           
@@ -90,16 +97,14 @@ class StudentPortalController extends Controller
                 ->where('end_time', '>=', Carbon::now())
                 ->get();
             
-            // Ambil semua percobaan siswa HANYA DALAM 1 QUERY
             $examAttempts = \App\Models\CbtStudentExam::where('student_id', $student->id)
                 ->whereIn('cbt_exam_id', $activeExams->pluck('id'))
-                ->pluck('status', 'cbt_exam_id'); // Format: [exam_id => 'status']
+                ->pluck('status', 'cbt_exam_id'); 
             
             $priorityExams = $activeExams->filter(function($exam) use ($studentLevel, $examAttempts) {                
                 if(isset($exam->class_level) && $studentLevel && $exam->class_level != $studentLevel) {
                     return false; 
                 }
-                // Cek status dari array, tidak perlu query ke database berulang kali
                 $status = $examAttempts[$exam->id] ?? null;
                 return !$status || $status !== 'finished';
             });                        
@@ -139,48 +144,26 @@ class StudentPortalController extends Controller
 
          // --- DATA RAMADHAN ---
         $today = Carbon::now('Asia/Jakarta')->toDateString();
-        
-        $todayRamadanLog = RamadanLog::where('student_id', $student->id)
-                            ->whereDate('date', $today)
-                            ->first();
-
-        $lastVerifiedLog = RamadanLog::where('student_id', $student->id)
-                            ->whereNotNull('teacher_verified_at')
-                            ->orderBy('date', 'desc')
-                            ->first();
-        
-        $topRamadanStudents = Student::with('schoolClass')
-            ->whereHas('schoolClass')            
-            ->orderByDesc('ramadan_points')
-            ->take(10)
-            ->get();
+        $todayRamadanLog = RamadanLog::where('student_id', $student->id)->whereDate('date', $today)->first();
+        $lastVerifiedLog = RamadanLog::where('student_id', $student->id)->whereNotNull('teacher_verified_at')->orderBy('date', 'desc')->first();
+        $topRamadanStudents = Student::with('schoolClass')->whereHas('schoolClass')->orderByDesc('ramadan_points')->take(10)->get();
 
         // --- DATA PENGHUBUNG (LIAISON) ---
         $liaison_messages = collect([]);
         if (class_exists(LiaisonBook::class)) { 
-            try {
-                $liaison_messages = LiaisonBook::with('teacher')
-                    ->where('student_id', $student->id)
-                    ->latest()
-                    ->take(10) 
-                    ->get();
-            } catch (\Exception $e) {}
+            try { $liaison_messages = LiaisonBook::with('teacher')->where('student_id', $student->id)->latest()->take(10)->get(); } catch (\Exception $e) {}
         }
 
-        // --- DATA KEHADIRAN & ABSENSI --- [OPTIMASI QUERY]
+        // --- DATA KEHADIRAN & ABSENSI --- 
         $hadir = 0; $terlambat = 0; $sakit = 0; $izin = 0; $alpa = 0;
         $attendance_history = collect([]);
         $rawAttendanceRecords = collect([]); 
         
         if (class_exists(AttendanceSiswa::class)) {
             $currentYearStart = Carbon::now()->startOfYear(); 
-            
-            // Lakukan 1x Query untuk data tahun ini
             $rawAttendanceRecords = AttendanceSiswa::where('student_id', $id)
                                     ->whereDate('attendance_date', '>=', $currentYearStart)
-                                    ->orderBy('attendance_date', 'desc')
-                                    ->get();
-
+                                    ->orderBy('attendance_date', 'desc')->get();
             $attendance_history = $rawAttendanceRecords->take(10);            
           
             $allTimeAttendance = AttendanceSiswa::where('student_id', $id)->get(); 
@@ -457,7 +440,57 @@ class StudentPortalController extends Controller
             $literacy_stats = ['total_books' => $total_entries, 'total_pages' => $total_pages, 'points' => $points, 'level' => $level, 'progress' => round($progress), 'next_target' => $next_target];
         }
 
-         // --- 14. COMPACT DATA ---
+        // ==========================================
+        //  3. LOGIKA KALENDER AKADEMIK (NEW INTEGRATION)
+        // ==========================================
+        $calendarEvents = collect([]);
+        $upcomingAgendas = collect([]); // Variabel baru untuk Dashboard
+
+        // A. Ambil Data Ujian (CBT) sebagai Event
+        if (class_exists(\App\Models\CbtExam::class)) {
+            $exams = \App\Models\CbtExam::where('is_active', true)
+                ->where('start_time', '>=', Carbon::now()->subMonths(3))
+                ->get();
+
+            foreach ($exams as $exam) {
+                $calendarEvents->push([
+                    'title'     => 'Ujian: ' . $exam->title,
+                    'start'     => $exam->start_time->toIso8601String(),
+                    'end'       => $exam->end_time->toIso8601String(),
+                    'className' => 'event-ujian', 
+                    'extendedProps' => [
+                        'type' => 'Ujian',
+                        'desc' => 'Pelaksanaan ujian berbasis komputer.'
+                    ]
+                ]);
+            }
+        }
+
+        // B. Ambil Data dari Tabel Kalender Pendidikan
+        if (class_exists(\App\Models\AcademicCalendar::class)) {
+            // HAPUS FILTER TANGGAL: Ambil semua data untuk rendering FullCalendar
+            $academicEvents = \App\Models\AcademicCalendar::all();
+
+            foreach ($academicEvents as $event) {
+                $calendarEvents->push($event->toCalendarEvent());
+            }
+
+            // UNTUK WIDGET TAB RINGKASAN: Ambil 3 agenda terdekat (Sedang berlangsung atau akan datang)
+            $upcomingAgendas = \App\Models\AcademicCalendar::where(function($q) {
+                    $q->whereDate('end_date', '>=', Carbon::today())
+                      ->orWhere(function($q2) {
+                          $q2->whereNull('end_date')
+                             ->whereDate('start_date', '>=', Carbon::today());
+                      });
+                })
+                ->orderBy('start_date', 'asc')
+                ->take(3)
+                ->get();
+        }
+
+        // ==========================================
+        //  14. COMPACT DATA 
+        // ==========================================
         $data = compact(
             'student', 'isAlumni', 'tabs', 'attendancePercentage',
             'liaison_messages', 'complaints', 
@@ -482,7 +515,9 @@ class StudentPortalController extends Controller
             'literacy_stats',
             'priorityExams', 
             'todaysSchedule',
-            'pendingTasks'
+            'pendingTasks',
+            'calendarEvents',
+            'upcomingAgendas' // <-- TAMBAHKAN INI KE COMPACT
         );
 
         if (view()->exists('students.portal.show')) {
