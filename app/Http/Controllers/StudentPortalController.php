@@ -72,7 +72,6 @@ class StudentPortalController extends Controller
 
         Carbon::setLocale('id');
         
-        // --- PERBAIKAN 1: Eager Loading Jadwal untuk mencegah N+1 Query ---
         $student = Student::with([
             'schoolClass.schedules.subject', 
             'schoolClass.schedules.teacher', 
@@ -144,6 +143,10 @@ class StudentPortalController extends Controller
 
          // --- DATA RAMADHAN ---
         $today = Carbon::now('Asia/Jakarta')->toDateString();
+        $ramadanStartStr = \App\Http\Controllers\RamadanLogController::RAMADAN_START_DATE ?? config('school.ramadan_start', '2026-02-19');
+        $ramadanDay = Carbon::parse($ramadanStartStr)->diffInDays(Carbon::parse($today)) + 1;
+        $isRamadanEnded = $ramadanDay > 30; // Boolean selesai
+        
         $todayRamadanLog = RamadanLog::where('student_id', $student->id)->whereDate('date', $today)->first();
         $lastVerifiedLog = RamadanLog::where('student_id', $student->id)->whereNotNull('teacher_verified_at')->orderBy('date', 'desc')->first();
         $topRamadanStudents = Student::with('schoolClass')->whereHas('schoolClass')->orderByDesc('ramadan_points')->take(10)->get();
@@ -324,7 +327,11 @@ class StudentPortalController extends Controller
         }
 
         // --- DATA LMS (FULL) ---
-        $lms_assignments_grouped = []; $lms_materials_grouped = []; $lms_grades = [];
+        // PERBAIKAN: Gunakan collect([]) agar count() di view tidak error
+        $lms_assignments_grouped = collect([]); 
+        $lms_materials_grouped = collect([]); 
+        $lms_grades = [];
+        
         if ($classId) {
             if (class_exists(LmsAssignment::class)) {
                 $assignments = LmsAssignment::with('subject')->where('class_id', $classId)->latest()->get();
@@ -368,7 +375,8 @@ class StudentPortalController extends Controller
         }
 
         // --- JURNAL KBM ---
-        $teaching_journals = [];
+        // PERBAIKAN UTAMA: Harus berupa collect() bukan array biasa
+        $teaching_journals = collect([]); 
         if (class_exists(TeachingSession::class) && $classId) {
              $teaching_journals = TeachingSession::with(['schedule.subject', 'schedule.teacher', 'attendances'])
                 ->whereHas('schedule', fn($q) => $q->where('school_class_id', $classId))
@@ -394,7 +402,7 @@ class StudentPortalController extends Controller
             $tabs = array_merge($tabs, [
                 'kebiasaan' => ['icon' => 'sun-horizon', 'label' => '7 Kebiasaan', 'badge' => !$todayEntry ? 1 : 0],
                 'literasi_mandiri' => ['icon' => 'pencil-circle', 'label' => 'Jurnal Literasi'],
-                'ramadan_jurnal' => ['icon' => 'moon-stars', 'label' => 'Jurnal Ramadhan', 'badge' => !$todayRamadanLog ? 1 : 0], 
+                'ramadan_jurnal' => ['icon' => 'moon-stars', 'label' => 'Mutabaah Ramadhan', 'badge' => (!$isRamadanEnded && !$todayRamadanLog) ? 1 : 0], 
                 'ramadan_rank'   => ['icon' => 'trophy', 'label' => 'Peringkat Kebaikan'], 
                 'bk' => ['icon' => 'heart-beat', 'label' => 'Konseling BK'],
                 'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
@@ -444,7 +452,7 @@ class StudentPortalController extends Controller
         //  3. LOGIKA KALENDER AKADEMIK (NEW INTEGRATION)
         // ==========================================
         $calendarEvents = collect([]);
-        $upcomingAgendas = collect([]); // Variabel baru untuk Dashboard
+        $upcomingAgendas = collect([]); 
 
         // A. Ambil Data Ujian (CBT) sebagai Event
         if (class_exists(\App\Models\CbtExam::class)) {
@@ -468,14 +476,12 @@ class StudentPortalController extends Controller
 
         // B. Ambil Data dari Tabel Kalender Pendidikan
         if (class_exists(\App\Models\AcademicCalendar::class)) {
-            // HAPUS FILTER TANGGAL: Ambil semua data untuk rendering FullCalendar
             $academicEvents = \App\Models\AcademicCalendar::all();
 
             foreach ($academicEvents as $event) {
                 $calendarEvents->push($event->toCalendarEvent());
             }
 
-            // UNTUK WIDGET TAB RINGKASAN: Ambil 3 agenda terdekat (Sedang berlangsung atau akan datang)
             $upcomingAgendas = \App\Models\AcademicCalendar::where(function($q) {
                     $q->whereDate('end_date', '>=', Carbon::today())
                       ->orWhere(function($q2) {
@@ -511,13 +517,14 @@ class StudentPortalController extends Controller
             'todayRamadanLog', 
             'lastVerifiedLog',
             'topRamadanStudents',
+            'isRamadanEnded',
             'literacy_journals', 
             'literacy_stats',
             'priorityExams', 
             'todaysSchedule',
             'pendingTasks',
             'calendarEvents',
-            'upcomingAgendas' // <-- TAMBAHKAN INI KE COMPACT
+            'upcomingAgendas' 
         );
 
         if (view()->exists('students.portal.show')) {

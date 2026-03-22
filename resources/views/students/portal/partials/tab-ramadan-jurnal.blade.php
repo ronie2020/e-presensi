@@ -13,6 +13,9 @@
         $ramadanDay = intval($startRamadan->diffInDays($currentDate)) + 1;
         $isBeforeRamadan = $currentDate->lt($startRamadan);
         
+        // Menggunakan var dari controller
+        $isRamadanEnded = $isRamadanEnded ?? false;
+        
         // --- LOGIKA PROGRESS HARIAN (ASLI) ---
         $totalTarget = 13; 
         $currentScore = 0;
@@ -60,6 +63,7 @@
         elseif($progressPercent < 70) { $progressColor = 'text-amber-500'; $barColor = 'bg-amber-500'; }
     @endphp
 
+    @if(!$isRamadanEnded)
     {{-- 
         === WIDGET JADWAL SHALAT (THEME: MOSQUE ARCH) === 
     --}}
@@ -142,6 +146,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     {{-- 2. SUMMARY CARD (THEME: KITAB/CALENDAR) --}}
     <div class="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-xl border border-slate-100 relative overflow-hidden">
@@ -165,9 +170,11 @@
                     <!-- Bagian Tengah (Angka Tanggal) -->
                     <div class="h-32 flex flex-col items-center justify-center bg-white relative">
                         <span class="text-7xl font-serif font-black text-slate-800 leading-none tracking-tighter">
-                            {{ $isBeforeRamadan ? '-' : $ramadanDay }}
+                            {{ $isBeforeRamadan ? '-' : ($isRamadanEnded ? '✓' : $ramadanDay) }}
                         </span>
-                        <span class="text-xs font-serif italic text-slate-400 mt-1">1447 Hijriyah</span>
+                        <span class="text-xs font-serif italic text-slate-400 mt-1">
+                            {{ $isRamadanEnded ? 'Telah Usai' : '1447 Hijriyah' }}
+                        </span>
                         
                         <!-- Watermark -->
                         <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
@@ -189,47 +196,92 @@
 
             {{-- TEXT SUMMARY (CENTER) --}}
             <div class="flex-1 text-center md:text-left space-y-4">
-                <div>
-                    <h2 class="text-3xl font-serif font-bold text-slate-800 mb-2">
-                        Ahlan Wa Sahlan, <span class="text-emerald-600">{{ $student->name }}</span>
-                    </h2>
-                    <p class="text-slate-500 text-sm leading-relaxed max-w-lg font-serif">
-                        <i class="ph-fill ph-quotes text-amber-400"></i>
-                        Semoga Ramadhan ini menjadi ladang pahala. Jangan lupa isi jurnal ibadahmu hari ini untuk mencatat setiap kebaikan.
-                    </p>
-                </div>
-
-                {{-- Progress Bar Linear (Lebih Clean) --}}
-                <div class="space-y-2 max-w-md">
-                    <div class="flex justify-between text-xs font-bold uppercase tracking-wider text-slate-400">
-                        <span>Kelengkapan Ibadah Hari Ini</span>
-                        <span class="{{ $progressColor }}">{{ round($progressPercent) }}%</span>
+                @if($isRamadanEnded)
+                    <div>
+                        <h2 class="text-3xl font-serif font-bold text-slate-800 mb-2">
+                            Sampai Jumpa, <span class="text-emerald-600">{{ $student->name }}</span>
+                        </h2>
+                        <p class="text-slate-500 text-sm leading-relaxed max-w-lg font-serif">
+                            <i class="ph-fill ph-check-circle text-emerald-400"></i>
+                            Bulan suci Ramadhan telah berlalu. Terima kasih telah mengisi jurnal mutabaah dengan tekun. Semoga istiqomah selalu.
+                        </p>
                     </div>
-                    <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                        <div class="h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden {{ $barColor }}"
-                             style="width: {{ $progressPercent }}%">
-                             <div class="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]"></div>
+                    
+                    {{-- TAMBAHAN: MINI LEADERBOARD DI DALAM CARD --}}
+                    @if(isset($topRamadanStudents) && $topRamadanStudents->isNotEmpty())
+                    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 max-w-lg mt-4 shadow-inner">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <i class="ph-fill ph-medal text-amber-500 text-lg"></i> Top 3 Pahlawan Kebaikan
+                        </h4>
+                        <div class="space-y-2">
+                            @foreach($topRamadanStudents->take(3) as $index => $topStudent)
+                                <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm transition hover:-translate-y-0.5">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs
+                                            {{ $index == 0 ? 'bg-amber-100 text-amber-600' : ($index == 1 ? 'bg-slate-200 text-slate-600' : 'bg-orange-100 text-orange-600') }}">
+                                            #{{ $index + 1 }}
+                                        </div>
+                                        <div class="text-sm font-bold text-slate-700 capitalize">{{ strtolower($topStudent->name) }}</div>
+                                    </div>
+                                    <div class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100/50">
+                                        {{ number_format($topStudent->ramadan_points ?? 0) }} Pts
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
-                </div>
-
-                <div class="pt-2">
-                    @if(!$todayRamadanLog)
-                        <a href="{{ route('student.ramadan.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-200 hover:-translate-y-0.5">
-                            <i class="ph-bold ph-pencil-simple"></i>
-                            <span>Isi Jurnal Hari Ini</span>
-                        </a>
-                    @else
-                         <a href="{{ route('student.ramadan.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-600 hover:text-emerald-600 hover:border-emerald-200 rounded-xl font-bold transition-all">
-                            <i class="ph-bold ph-check-circle text-emerald-500"></i>
-                            <span>Sudah Diisi (Edit)</span>
-                        </a>
                     @endif
-                </div>
+
+                    <div class="pt-4">
+                        <a href="{{ route('portal.show', Auth::guard('student')->id() ?? $student->id) }}?tab=ramadan_rank" class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-200 hover:-translate-y-0.5">
+                            <i class="ph-bold ph-trophy"></i>
+                            <span>Lihat Papan Peringkat Lengkap</span>
+                        </a>
+                    </div>
+                @else
+                    <div>
+                        <h2 class="text-3xl font-serif font-bold text-slate-800 mb-2">
+                            Ahlan Wa Sahlan, <span class="text-emerald-600">{{ $student->name }}</span>
+                        </h2>
+                        <p class="text-slate-500 text-sm leading-relaxed max-w-lg font-serif">
+                            <i class="ph-fill ph-quotes text-amber-400"></i>
+                            Semoga Ramadhan ini menjadi ladang pahala. Jangan lupa isi jurnal ibadahmu hari ini untuk mencatat setiap kebaikan.
+                        </p>
+                    </div>
+
+                    {{-- Progress Bar Linear (Lebih Clean) --}}
+                    <div class="space-y-2 max-w-md">
+                        <div class="flex justify-between text-xs font-bold uppercase tracking-wider text-slate-400">
+                            <span>Kelengkapan Ibadah Hari Ini</span>
+                            <span class="{{ $progressColor }}">{{ round($progressPercent) }}%</span>
+                        </div>
+                        <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                            <div class="h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden {{ $barColor }}"
+                                 style="width: {{ $progressPercent }}%">
+                                 <div class="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        @if(!$todayRamadanLog)
+                            <a href="{{ route('student.ramadan.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-200 hover:-translate-y-0.5">
+                                <i class="ph-bold ph-pencil-simple"></i>
+                                <span>Isi Jurnal Hari Ini</span>
+                            </a>
+                        @else
+                             <a href="{{ route('student.ramadan.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-600 hover:text-emerald-600 hover:border-emerald-200 rounded-xl font-bold transition-all">
+                                <i class="ph-bold ph-check-circle text-emerald-500"></i>
+                                <span>Sudah Diisi (Edit)</span>
+                            </a>
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
     </div>
 
+    @if(!$isRamadanEnded)
     {{-- 3. THE GRID (STATUS IBADAH - WITH COMPLETE LOGIC) --}}
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         @php
@@ -367,6 +419,7 @@
         </div>
     </div>
     @endif
+    @endif
 </div>
 
 {{-- SCRIPT WIDGET JADWAL SHALAT & SWEETALERT --}}
@@ -379,7 +432,7 @@
                 title: 'Alhamdulillah!',
                 text: "{!! session('success') !!}",
                 icon: 'success',
-                confirmButtonText: 'Lanjutkan untuk mengisi Jurnal',
+                confirmButtonText: 'Lanjutkan untuk melihat Peringkat',
                 confirmButtonColor: '#10b981', // emerald-500
                 background: '#f0fdf4', // emerald-50
                 color: '#064e3b', // emerald-900
