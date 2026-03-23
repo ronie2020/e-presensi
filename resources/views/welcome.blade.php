@@ -3,11 +3,25 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    {{-- PENGEMBANGAN: Optimasi SEO & Open Graph untuk WhatsApp/Sosmed --}}
     <meta name="description" content="Website Resmi SMP Negeri 3 Lakbok. Informasi akademik, kesiswaan, dan prestasi sekolah terkini.">
+    <meta property="og:title" content="{{ config('app.name', 'SMP Negeri 3 Lakbok') }}">
+    <meta property="og:description" content="Website Resmi SMP Negeri 3 Lakbok. Informasi akademik, kesiswaan, dan prestasi sekolah terkini.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    {{-- Pastikan Anda memiliki gambar default untuk preview link --}}
+    <meta property="og:image" content="{{ asset('images/netila.jpg') }}"> 
+    
     <title>{{ config('app.name', 'SMP Negeri 3 Lakbok') }}</title>
     
     {{-- CSS & Meta Tags --}}
     @include('landing.styles')
+
+    {{-- PENGEMBANGAN: Style x-cloak wajib ada untuk mencegah flicker pada Alpine.js --}}
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
 
     {{-- 
         === KONFIGURASI POP-UP INFO SEKOLAH === 
@@ -15,22 +29,35 @@
     --}}
     @php
         $infoPopup = [
-            'active' => true, // Set false untuk mematikan popup
-            'id' => 'Idul_Fitri_2026', // Ganti ID ini setiap ganti materi baru (agar muncul lagi di user yang sudah close)
-            
-            // --- CARA GANTI GAMBAR ---
-            // Opsi 1 (Link Luar):
-            //'image' => 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1000&auto=format&fit=crop',
-            
-            // Opsi 2 (File Lokal di folder public/img):
+            'active' => true, 
+            'id' => 'Idul_Fitri_2026', 
             'image' => asset('images/netila.jpg'),
-            
             'title' => 'Idul Fitri 1447 H 2026',
             'message' => 'SMP Negeri 3 Lakbok Mengucapkan " Selamat Hari Raya Idul Fitri 1 Syawal 1447 H 2026". Mohon Maaf lahir bathin, ',
             'cta_text' => 'info jurnal siswa',
-            'cta_link' => 'https://e-presensi.smpn3lakbok.sch.id/portal', // Bisa link ke section atau URL luar (google form)
-            'color' => 'emerald' // Pilihan warna: blue, emerald, amber, rose
+            'cta_link' => 'https://e-presensi.smpn3lakbok.sch.id/portal', 
+            'color' => 'emerald' 
         ];
+
+        // Mapping warna agar Tailwind JIT/Purge bisa membaca class secara utuh
+        $colorTheme = match($infoPopup['color']) {
+            'blue' => [
+                'badge_bg' => 'bg-blue-50', 'badge_text' => 'text-blue-700', 'badge_ring' => 'ring-blue-600/20',
+                'btn_bg' => 'bg-blue-600', 'btn_hover' => 'hover:bg-blue-500', 'btn_ring' => 'focus-visible:outline-blue-600'
+            ],
+            'amber' => [
+                'badge_bg' => 'bg-amber-50', 'badge_text' => 'text-amber-700', 'badge_ring' => 'ring-amber-600/20',
+                'btn_bg' => 'bg-amber-600', 'btn_hover' => 'hover:bg-amber-500', 'btn_ring' => 'focus-visible:outline-amber-600'
+            ],
+            'rose' => [
+                'badge_bg' => 'bg-rose-50', 'badge_text' => 'text-rose-700', 'badge_ring' => 'ring-rose-600/20',
+                'btn_bg' => 'bg-rose-600', 'btn_hover' => 'hover:bg-rose-500', 'btn_ring' => 'focus-visible:outline-rose-600'
+            ],
+            default => [ 
+                'badge_bg' => 'bg-emerald-50', 'badge_text' => 'text-emerald-700', 'badge_ring' => 'ring-emerald-600/20',
+                'btn_bg' => 'bg-emerald-600', 'btn_hover' => 'hover:bg-emerald-500', 'btn_ring' => 'focus-visible:outline-emerald-600'
+            ],
+        };
     @endphp
 </head>
 <body class="antialiased text-slate-800 bg-slate-50 overflow-x-hidden selection:bg-blue-500 selection:text-white" 
@@ -40,39 +67,32 @@
         guestBookModalOpen: false,
         guestListModalOpen: false,
         
-        // --- STATE POPUP INFO ---
         infoPopupOpen: false,
         
-        // --- LOGIC POPUP ---
         initPopup() {
-            // Cek apakah fitur aktif
             const isActive = {{ $infoPopup['active'] ? 'true' : 'false' }};
             const popupId = '{{ $infoPopup['id'] }}';
             
             if (isActive) {
-                // Cek apakah user sudah pernah menutup popup ini sebelumnya
                 const hasSeen = localStorage.getItem('seen_' + popupId);
                 
                 if (!hasSeen) {
-                    // Tampilkan popup setelah 2 detik (agar loading selesai dulu)
-                    setTimeout(() => {
-                        this.infoPopupOpen = true;
-                        document.body.style.overflow = 'hidden'; // Matikan scroll
-                    }, 2000);
+                    // PERBAIKAN: setTimeout 2 detik dihapus agar pop-up langsung tampil
+                    this.infoPopupOpen = true;
+                    document.body.style.overflow = 'hidden'; 
                 }
             }
         },
 
         closeInfoPopup(dontShowAgain) {
             this.infoPopupOpen = false;
-            document.body.style.overflow = 'auto'; // Hidupkan scroll
+            // PERBAIKAN: Gunakan string kosong ('') agar class 'overflow-x-hidden' pada body bekerja kembali
+            document.body.style.overflow = ''; 
             
             if (dontShowAgain) {
-                // Simpan di browser user agar tidak muncul lagi
                 localStorage.setItem('seen_{{ $infoPopup['id'] }}', 'true');
             }
         },
-        // -------------------------
 
         activeAnnouncement: null,
         scrolled: false,
@@ -90,17 +110,17 @@
         closeAnnouncement() {
             this.modalOpen = false;
             setTimeout(() => { this.activeAnnouncement = null }, 300);
-            document.body.style.overflow = 'auto';
+            // PERBAIKAN: Gunakan string kosong ('') juga di sini
+            document.body.style.overflow = '';
         },
 
         init() {
             window.addEventListener('load', () => {
-                setTimeout(() => {
-                    const preloader = document.getElementById('preloader');
-                    if(preloader) preloader.classList.add('hide-preloader');
-                }, 800);
+                // PENGEMBANGAN: Preloader dihapus langsung tanpa paksaan menunggu 800ms
+                // Jika koneksi internet cepat, pengunjung tidak perlu menunggu lama
+                const preloader = document.getElementById('preloader');
+                if(preloader) preloader.classList.add('hide-preloader');
                 
-                // Jalankan Logic Popup
                 this.initPopup();
             });
         }
@@ -127,12 +147,13 @@
 
     <!-- 
         === INFO POPUP MODAL (DYNAMIC) === 
-        Muncul sesuai konfigurasi PHP di atas
+        PENGEMBANGAN: Ditambahkan x-cloak dan @keydown.escape.window
     -->
-    <div x-show="infoPopupOpen" 
-         class="fixed inset-0 z-[100] flex items-center justify-center p-4 px-4 py-6 sm:px-0" 
-         style="display: none;"
-         role="dialog" aria-modal="true">
+    <div x-cloak 
+         x-show="infoPopupOpen" 
+         @keydown.escape.window="if(infoPopupOpen) closeInfoPopup(false)"
+         class="fixed inset-0 z-[100] overflow-y-auto" 
+         role="dialog" aria-modal="true" aria-labelledby="modal-title">
         
         {{-- Backdrop --}}
         <div x-show="infoPopupOpen" 
@@ -145,120 +166,139 @@
              class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" 
              @click="closeInfoPopup(false)"></div>
 
-        {{-- Modal Panel --}}
-        <div x-show="infoPopupOpen" 
-             x-transition:enter="ease-out duration-300"
-             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave="ease-in duration-200"
-             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-white/20">
-            
-            <div class="flex flex-col md:flex-row">
-                {{-- Image Side (Mobile: Top, Desktop: Left) --}}
-                <div class="md:w-5/12 h-48 md:h-auto relative bg-slate-200">
-                    <img src="{{ $infoPopup['image'] }}" alt="Info Sekolah" class="absolute inset-0 w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-black/10"></div>
-                </div>
+        {{-- PERBAIKAN FINAL: Gunakan flex biasa (tanpa items-center) --}}
+        <div class="flex min-h-full p-4 sm:p-6">
 
-                {{-- Content Side --}}
-                <div class="md:w-7/12 p-6 md:p-8 flex flex-col justify-center bg-white relative">
-                    <!-- Close Button -->
-                    <button @click="closeInfoPopup(false)" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors bg-slate-100 rounded-full p-1">
-                        <i class="ph-bold ph-x text-xl"></i>
-                    </button>
+            {{-- Modal Panel --}}
+            <!-- SOLUSI: Menggunakan class 'm-auto' untuk memusatkan secara otomatis. 
+                 Jika konten lebih panjang dari layar, scroll luar akan bekerja secara alami 
+                 tanpa memotong bagian atas atau bawah pop-up. -->
+            <div x-show="infoPopupOpen" 
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="m-auto relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all w-full sm:max-w-2xl border border-white/20">
+                
+                <!-- Tombol Close -->
+                <button @click="closeInfoPopup(false)" class="absolute top-3 right-3 z-20 text-slate-500 hover:text-slate-800 transition-colors bg-white/90 backdrop-blur shadow-sm rounded-full p-1.5" aria-label="Tutup Pop-up">
+                    <i class="ph-bold ph-x text-xl"></i>
+                </button>
 
-                    <div class="mb-4">
-                        <span class="inline-flex items-center rounded-md bg-{{ $infoPopup['color'] }}-50 px-2 py-1 text-xs font-medium text-{{ $infoPopup['color'] }}-700 ring-1 ring-inset ring-{{ $infoPopup['color'] }}-600/20 mb-3">
-                            Informasi Terbaru
-                        </span>
-                        <h3 class="text-xl font-black text-slate-900 leading-tight">
-                            {{ $infoPopup['title'] }}
-                        </h3>
-                    </div>
-                    
-                    <div class="prose prose-sm text-slate-500 mb-6 leading-relaxed">
-                        <p>{{ $infoPopup['message'] }}</p>
+                <!-- Container Utama Pop-up -->
+                <div class="flex flex-col md:flex-row w-full">
+                    {{-- Image Side --}}
+                    <div class="md:w-5/12 h-48 sm:h-56 md:h-auto shrink-0 relative bg-slate-200">
+                        <img src="{{ $infoPopup['image'] }}" alt="Info Sekolah" class="absolute inset-0 w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-black/10"></div>
                     </div>
 
-                    <div class="flex flex-col sm:flex-row gap-3 items-center">
-                        <a href="{{ $infoPopup['cta_link'] }}" @click="closeInfoPopup(false)" class="w-full sm:w-auto text-center inline-flex justify-center items-center gap-2 rounded-xl bg-{{ $infoPopup['color'] }}-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-{{ $infoPopup['color'] }}-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-{{ $infoPopup['color'] }}-600 transition-all">
-                            {{ $infoPopup['cta_text'] }}
-                            <i class="ph-bold ph-arrow-right"></i>
-                        </a>
+                    {{-- Content Side --}}
+                    <!-- Diberikan padding yang lega agar konten tidak bertabrakan -->
+                    <div class="md:w-7/12 p-6 md:p-8 flex flex-col justify-center bg-white relative">
+                        <div class="mb-4">
+                            <span class="inline-flex items-center rounded-md {{ $colorTheme['badge_bg'] }} px-2 py-1 text-xs font-medium {{ $colorTheme['badge_text'] }} ring-1 ring-inset {{ $colorTheme['badge_ring'] }} mb-3">
+                                Informasi Terbaru
+                            </span>
+                            <h3 id="modal-title" class="text-xl font-black text-slate-900 leading-tight">
+                                {{ $infoPopup['title'] }}
+                            </h3>
+                        </div>
                         
-                        <button @click="closeInfoPopup(true)" class="text-xs font-semibold text-slate-400 hover:text-slate-600 underline decoration-slate-300 underline-offset-4 transition-colors">
-                            Jangan tampilkan lagi
-                        </button>
+                        <div class="prose prose-sm text-slate-500 mb-6 leading-relaxed">
+                            <p>{{ $infoPopup['message'] }}</p>
+                        </div>
+
+                        <!-- mt-auto dihapus, diganti mt-6 agar alur padding natural -->
+                        <div class="flex flex-col sm:flex-row gap-3 items-center mt-6">
+                            <a href="{{ $infoPopup['cta_link'] }}" @click="closeInfoPopup(false)" class="w-full sm:w-auto text-center inline-flex justify-center items-center gap-2 rounded-xl {{ $colorTheme['btn_bg'] }} px-5 py-2.5 text-sm font-semibold text-white shadow-sm {{ $colorTheme['btn_hover'] }} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 {{ $colorTheme['btn_ring'] }} transition-all">
+                                {{ $infoPopup['cta_text'] }}
+                                <i class="ph-bold ph-arrow-right"></i>
+                            </a>
+                            
+                            <button @click="closeInfoPopup(true)" class="text-xs font-semibold text-slate-400 hover:text-slate-600 underline decoration-slate-300 underline-offset-4 transition-colors">
+                                Jangan tampilkan lagi
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
     <!-- NAVBAR -->
     @include('landing.navbar')
 
-    <!-- HERO SECTION -->
-    @include('landing.hero')
+    <!-- SOLUSI: Bungkus semua konten dengan div anti-bocor (overflow-x-hidden) -->
+    <div class="w-full overflow-x-hidden relative">
 
-    <!-- PPDB TRACKS -->
-    @include('landing.ppdb')
+        <!-- HERO SECTION -->
+        @include('landing.hero')
 
-    <!-- 7 HABITS (KARAKTER) -->
-    @include('landing.character')
+        <!-- PPDB TRACKS -->
+        @include('landing.ppdb')
 
-    <!-- QUICK ACCESS MENU -->
-    @include('landing.quick-access')
+        <!-- 7 HABITS (KARAKTER) -->
+        @include('landing.character')
 
-    <!-- DOWNLOAD AREA -->
-    @include('landing.downloads')
+        <!-- QUICK ACCESS MENU -->
+        @include('landing.quick-access')
 
-    <!-- KEPALA SEKOLAH -->
-    @include('landing.headmaster')
+        <!-- DOWNLOAD AREA -->
+        @include('landing.downloads')
 
-    <!-- PROFIL SEKOLAH -->
-    @include('landing.profile')
+        <!-- KEPALA SEKOLAH -->
+        @include('landing.headmaster')
 
-    <!-- VIDEO PROFIL -->
-    @include('landing.video')
+        <!-- PROFIL SEKOLAH -->
+        @include('landing.profile')
 
-    <!-- GURU & STAFF -->
-    @include('landing.teachers')
+        <!-- VIDEO PROFIL -->
+        @include('landing.video')
 
-    <!-- KEGIATAN -->
-    @include('landing.activities')
+        <!-- GURU & STAFF -->
+        @include('landing.teachers')
 
-    <!-- ARTIKEL --> 
-     @include('landing.articles')
+        <!-- KEGIATAN -->
+        @include('landing.activities')
 
-    <!-- PRESTASI -->
-    @include('landing.achievements')
+        <!-- ARTIKEL --> 
+        @include('landing.articles')
 
-    <!-- EKSTRAKURIKULER -->
-    @include('landing.extracurricular')
+        <!-- PRESTASI -->
+        @include('landing.achievements')
 
-    <!-- ALUMNI -->
-    @include('landing.alumni')
+        <!-- EKSTRAKURIKULER -->
+        @include('landing.extracurricular')
 
-    <!-- KATA MEREKA / GUESTBOOK -->
-    @include('landing.guestbook')
+        <!-- ALUMNI -->
+        @include('landing.alumni')
 
-    <!-- LIBRARY -->
-    @include('landing.library')
+        <!-- KATA MEREKA / GUESTBOOK -->
+        @include('landing.guestbook')
 
-    <!-- E-BOOKS -->
-    @include('landing.ebooks')
+        <!-- LIBRARY -->
+        @include('landing.library')
 
-    <!-- ANNOUNCEMENTS, AGENDA & FOOTER -->
-    @include('landing.footer')
+        <!-- E-BOOKS -->
+        @include('landing.ebooks')
+
+        <!-- ANNOUNCEMENTS, AGENDA & FOOTER -->
+        @include('landing.footer')
+
+    </div>
+    <!-- Penutup Solusi -->
 
     <!-- MODALS -->
     @include('landing.modals')
 
     <!-- BACK TO TOP -->
+    {{-- PENGEMBANGAN: Ditambahkan x-cloak dan aria-label --}}
     <button 
+        x-cloak
         x-show="showBackToTop" 
         x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-y-10"
@@ -267,6 +307,7 @@
         x-transition:leave-start="opacity-100 translate-y-0"
         x-transition:leave-end="opacity-0 translate-y-10"
         @click="window.scrollTo({top: 0, behavior: 'smooth'})"
+        aria-label="Kembali ke atas"
         class="fixed bottom-6 right-6 z-40 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 hover:-translate-y-1 transition-all duration-300 focus:outline-none"
     >
         <i class="ph-bold ph-arrow-up text-xl"></i>
