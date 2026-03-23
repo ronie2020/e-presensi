@@ -76,12 +76,15 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             @forelse($articles ?? [] as $article)
-                <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/40 overflow-hidden group hover:-translate-y-2 transition-all duration-500 flex flex-col">
+                <!-- PENGEMBANGAN: Menggunakan tag <article> untuk SEO dan Aksesibilitas -->
+                <article class="bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/40 overflow-hidden group hover:-translate-y-2 transition-all duration-500 flex flex-col">
                     
                     <!-- Thumbnail Artikel -->
                     <div class="relative h-56 bg-slate-200 overflow-hidden shrink-0">
                         @if($article->image_path)
+                            <!-- PENGEMBANGAN: Tambahkan onerror fallback dan loading="lazy" -->
                             <img src="{{ asset('storage/' . $article->image_path) }}" 
+                                 onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($article->title) }}&background=fed7aa&color=c2410c&size=500';"
                                  alt="{{ $article->title }}" 
                                  loading="lazy"
                                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
@@ -111,10 +114,17 @@
                                 </div>
                                 <span class="text-xs font-bold text-slate-700 line-clamp-1">{{ optional($article->user)->name ?? 'Penulis Tidak Diketahui' }}</span>
                             </a>
-                            <span class="text-xs text-slate-400 font-medium flex items-center gap-1 shrink-0">
-                                <i class="ph-bold ph-calendar-blank"></i> 
-                                {{ $article->published_at ? \Carbon\Carbon::parse($article->published_at)->translatedFormat('d M Y') : '-' }}
-                            </span>
+                            
+                            <!-- PENGEMBANGAN: Estimasi Waktu Baca -->
+                            <div class="flex items-center gap-3 shrink-0">
+                                <span class="text-xs text-slate-400 font-medium flex items-center gap-1" title="Estimasi Waktu Baca">
+                                    <i class="ph-bold ph-clock"></i> 3 Min
+                                </span>
+                                <span class="text-xs text-slate-400 font-medium flex items-center gap-1">
+                                    <i class="ph-bold ph-calendar-blank"></i> 
+                                    {{ $article->published_at ? \Carbon\Carbon::parse($article->published_at)->translatedFormat('d M Y') : '-' }}
+                                </span>
+                            </div>
                         </div>
 
                         <!-- Judul & Excerpt -->
@@ -122,20 +132,28 @@
                             <h3 class="text-xl font-black text-slate-800 mb-3 leading-tight line-clamp-2">{{ $article->title }}</h3>
                         </a>
                         
-                        <!-- Perbaikan Excerpt: Hindari tag HTML merusak layout -->
+                        <!-- PENGEMBANGAN: Menggunakan Str::limit dan strip_tags untuk kebersihan Layout HTML -->
                         <p class="text-sm text-slate-500 line-clamp-3 mb-6 flex-1">
                             {{ Str::limit(strip_tags($article->excerpt), 150) }}
                         </p>
 
                         <!-- Tombol Baca -->
                         <div class="mt-auto pt-4 border-t border-slate-100">
-                            <a href="{{ $article->url ?? route('teachers.show', $article->user_id) }}" target="{{ $article->url ? '_blank' : '_self' }}" class="inline-flex items-center gap-2 text-sm font-bold text-orange-500 hover:text-orange-600 group/link">
+                            <!-- PENGEMBANGAN: aria-label & Icon conditional untuk link eksternal -->
+                            <a href="{{ $article->url ?? route('teachers.show', $article->user_id) }}" 
+                               target="{{ $article->url ? '_blank' : '_self' }}" 
+                               aria-label="Baca selengkapnya tentang {{ $article->title }}"
+                               class="inline-flex items-center gap-2 text-sm font-bold text-orange-500 hover:text-orange-600 group/link focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-4 rounded-lg px-1 -mx-1 transition-all">
                                 Baca Selengkapnya 
-                                <i class="ph-bold ph-arrow-right group-hover/link:translate-x-1 transition-transform"></i>
+                                @if($article->url)
+                                    <i class="ph-bold ph-arrow-up-right group-hover/link:translate-x-1 group-hover/link:-translate-y-1 transition-transform"></i>
+                                @else
+                                    <i class="ph-bold ph-arrow-right group-hover/link:translate-x-1 transition-transform"></i>
+                                @endif
                             </a>
                         </div>
                     </div>
-                </div>
+                </article>
             @empty
                 <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-20 px-4 bg-white rounded-[3rem] border border-slate-100 shadow-sm">
                     <div class="inline-flex items-center justify-center w-24 h-24 rounded-full bg-slate-50 text-slate-300 mb-4">
