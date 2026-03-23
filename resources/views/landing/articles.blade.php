@@ -23,7 +23,7 @@
                     <!-- Thumbnail Artikel -->
                     <div class="relative h-56 bg-slate-200 overflow-hidden shrink-0">
                         @if($article->image_path)
-                            <img src="{{ asset('storage/' . $article->image_path) }}" alt="{{ $article->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                            <img src="{{ asset('storage/' . $article->image_path) }}" alt="{{ $article->title }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                         @else
                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-100 to-amber-100">
                                 <i class="ph-duotone ph-article text-6xl text-orange-300"></i>
@@ -43,7 +43,7 @@
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-2">
                                 <div class="w-8 h-8 rounded-full bg-slate-100 overflow-hidden border border-slate-200 shrink-0">
-                                    <img src="{{ $article->user->photo_path ? asset('storage/' . $article->user->photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($article->user->name).'&background=random' }}" alt="Penulis" class="w-full h-full object-cover">
+                                    <img src="{{ $article->user->photo_path ? asset('storage/' . $article->user->photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($article->user->name).'&background=random' }}" alt="Penulis" loading="lazy" class="w-full h-full object-cover">
                                 </div>
                                 <span class="text-xs font-bold text-slate-700 line-clamp-1">{{ $article->user->name }}</span>
                             </div>
@@ -56,7 +56,7 @@
                         <a href="{{ $article->url ?? '#' }}" target="_blank" class="block group-hover:text-orange-600 transition-colors">
                             <h3 class="text-xl font-black text-slate-800 mb-3 leading-tight line-clamp-2">{{ $article->title }}</h3>
                         </a>
-                        <p class="text-sm text-slate-500 line-clamp-3 mb-6 flex-1">{{ $article->excerpt }}</p>
+                        <p class="text-sm text-slate-500 line-clamp-3 mb-6 flex-1">{{ Str::limit(strip_tags($article->excerpt), 150) }}</p>
 
                         <!-- Tombol Baca -->
                         <div class="mt-auto pt-4 border-t border-slate-100">
@@ -78,10 +78,10 @@
             @endforelse
         </div>
 
-        @if(isset($latestArticles) && count($latestArticles) > 0)
-        <!-- Tombol Lihat Semua (Opsional, jika nanti punya halaman khusus blog) -->
+         @if(isset($latestArticles) && count($latestArticles) > 0)
+        <!-- Tombol Lihat Semua -->
         <div class="text-center mt-12" data-aos="fade-up">
-            <a href="#" class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold rounded-full transition-colors shadow-sm">
+            <a href="{{ route('articles.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold rounded-full transition-colors shadow-sm">
                 <i class="ph-bold ph-books"></i> Lihat Semua Tulisan
             </a>
         </div>

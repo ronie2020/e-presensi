@@ -223,6 +223,7 @@ class LandingPageController extends Controller
         if (class_exists(TeacherArticle::class)) {
             try {
                 $latestArticles = TeacherArticle::with('user') 
+                                ->whereNotNull('published_at') // Mencegah artikel draft/belum rilis tampil
                                 ->latest('published_at') 
                                 ->take(3) 
                                 ->get();
@@ -348,5 +349,40 @@ class LandingPageController extends Controller
             ->paginate(12);
 
         return view('testimonials', compact('testimonials'));
+    }
+
+    // ==============================================================
+    // FUNGSI UNTUK HALAMAN SEMUA ARTIKEL (INDEX ARTIKEL)
+    // ==============================================================
+    public function articles(Request $request)
+    {
+        // Pastikan model TeacherArticle tersedia
+        if (!class_exists(TeacherArticle::class)) {
+            abort(404, 'Fitur Artikel belum tersedia.');
+        }
+
+        // Mulai query dengan relasi user dan pastikan artikel sudah dipublikasi
+        $query = TeacherArticle::with('user')->whereNotNull('published_at');
+
+        // Filter Pencarian (Judul Artikel atau Nama Penulis)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($qUser) use ($search) {
+                      $qUser->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filter berdasarkan Kategori
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        // Urutkan dari yang terbaru dan paginate (9 item per halaman)
+        $articles = $query->latest('published_at')->paginate(9);
+
+        return view('articles.index', compact('articles'));
     }
 }
