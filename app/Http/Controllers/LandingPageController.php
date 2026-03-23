@@ -40,117 +40,132 @@ class LandingPageController extends Controller
         $statusAlpa      = ['Alpa', 'alpa', 'Alpha', 'Absent'];
 
         // --- 1. STATISTIK HARIAN ---
-        $dailyQuery = AttendanceSiswa::whereDate('attendance_date', $today)
-            ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
-            ->whereHas('student', function($q) {
-                $q->where('status', '!=', 'graduated');
-            });
+         $stats = Cache::remember('landing_daily_attendance_' . $today->format('Ymd'), 600, function() use ($today, $statusHadir, $statusTerlambat, $statusSakit, $statusIzin, $statusAlpa) {
+            $dailyQuery = AttendanceSiswa::whereDate('attendance_date', $today)
+                ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
+                ->whereHas('student', function($q) {
+                    $q->where('status', '!=', 'graduated');
+                });
 
-        $hadirTepat = (clone $dailyQuery)->whereIn('status', $statusHadir)->distinct('student_id')->count('student_id');
-        $terlambat  = (clone $dailyQuery)->whereIn('status', $statusTerlambat)->distinct('student_id')->count('student_id');
-        $tidakHadir = (clone $dailyQuery)->whereIn('status', array_merge($statusSakit, $statusIzin, $statusAlpa))->distinct('student_id')->count('student_id');
+            $hadirTepat = (clone $dailyQuery)->whereIn('status', $statusHadir)->distinct('student_id')->count('student_id');
+            $terlambat  = (clone $dailyQuery)->whereIn('status', $statusTerlambat)->distinct('student_id')->count('student_id');
+            $tidakHadir = (clone $dailyQuery)->whereIn('status', array_merge($statusSakit, $statusIzin, $statusAlpa))->distinct('student_id')->count('student_id');
 
-        $stats = [
-            'hadir'       => $hadirTepat + $terlambat,
-            'tepat_waktu' => $hadirTepat,
-            'terlambat'   => $terlambat,
-            'tidak_hadir' => $tidakHadir
-        ];
+            return [
+                'hadir'       => $hadirTepat + $terlambat,
+                'tepat_waktu' => $hadirTepat,
+                'terlambat'   => $terlambat,
+                'tidak_hadir' => $tidakHadir
+            ];
+        });
 
         // --- 2. LOGIKA 7 KEBIASAAN ANAK ---
-        $totalStudentsActive = Student::where('status', '!=', 'graduated')->count();
-        $habitsToday = StudentHabit::whereDate('report_date', $today)->count();
-        $habitPercentage = $totalStudentsActive > 0 ? round(($habitsToday / $totalStudentsActive) * 100) : 0;
-        
-        $habitStats = [
-            'submitted' => $habitsToday,
-            'missing'   => max(0, $totalStudentsActive - $habitsToday),
-            'percentage'=> $habitPercentage
-        ];
+         $habitDataArray = Cache::remember('landing_habit_stats_' . $today->format('Ymd'), 600, function() use ($today) {
+            $totalStudentsActive = Student::where('status', '!=', 'graduated')->count();
+            $habitsToday = StudentHabit::whereDate('report_date', $today)->count();
+            $habitPercentage = $totalStudentsActive > 0 ? round(($habitsToday / $totalStudentsActive) * 100) : 0;
+            
+            $habitStats = [
+                'submitted' => $habitsToday,
+                'missing'   => max(0, $totalStudentsActive - $habitsToday),
+                'percentage'=> $habitPercentage
+            ];
 
-        // Data Grafik Kebiasaan (7 Hari Terakhir)
-        $habitLabels = [];
-        $habitData = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::today()->subDays($i);
-            $habitLabels[] = $date->translatedFormat('D'); // Nama hari singkat
-            $habitData[] = StudentHabit::whereDate('report_date', $date)->count();
-        }
+            $habitLabels = [];
+            $habitData = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $date = Carbon::today()->subDays($i);
+                $habitLabels[] = $date->translatedFormat('D');
+                $habitData[] = StudentHabit::whereDate('report_date', $date)->count();
+            }
+
+            return ['stats' => $habitStats, 'labels' => $habitLabels, 'data' => $habitData];
+        });
+
+        $habitStats = $habitDataArray['stats'];
+        $habitLabels = $habitDataArray['labels'];
+        $habitData = $habitDataArray['data'];
 
         // --- 3. CHART KEHADIRAN MINGGUAN ---
-        $startDate = Carbon::today()->subDays(6);
-        $endDate = Carbon::today();
-        
-        $weeklyData = AttendanceSiswa::whereBetween('attendance_date', [$startDate, $endDate])
-            ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
-            ->whereHas('student', function($q) {
-                $q->where('status', '!=', 'graduated');
-            })
-            ->get();
+        $barChartData = Cache::remember('landing_weekly_attendance_chart', 3600, function() use ($statusHadir, $statusTerlambat, $statusSakit, $statusIzin, $statusAlpa) {
+            $startDate = Carbon::today()->subDays(6);
+            $endDate = Carbon::today();
+            
+            $weeklyData = AttendanceSiswa::whereBetween('attendance_date', [$startDate, $endDate])
+                ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
+                ->whereHas('student', function($q) {
+                    $q->where('status', '!=', 'graduated');
+                })->get();
 
-        $chartLabels = [];
-        $dataHadir = [];
-        $dataTerlambat = [];
-        $dataAbsen = [];
+            $chartLabels = [];
+            $dataHadir = [];
+            $dataTerlambat = [];
+            $dataAbsen = [];
 
-        $period = $startDate->copy();
-        while ($period <= $endDate) {
-            $dateStr = $period->toDateString();
-            $chartLabels[] = $period->format('d/m'); 
+            $period = $startDate->copy();
+            while ($period <= $endDate) {
+                $dateStr = $period->toDateString();
+                $chartLabels[] = $period->format('d/m'); 
 
-            $dailyAtt = $weeklyData->filter(function ($att) use ($dateStr) {
-                $attDate = $att->attendance_date instanceof \Carbon\Carbon 
-                            ? $att->attendance_date->toDateString() 
-                            : substr($att->attendance_date, 0, 10);
-                return $attDate === $dateStr;
-            });
+                $dailyAtt = $weeklyData->filter(function ($att) use ($dateStr) {
+                    $attDate = $att->attendance_date instanceof \Carbon\Carbon 
+                                ? $att->attendance_date->toDateString() 
+                                : substr($att->attendance_date, 0, 10);
+                    return $attDate === $dateStr;
+                });
 
-            $countStatus = function($collection, $statuses) {
-                return $collection->filter(function ($item) use ($statuses) {
-                    return in_array($item->status, $statuses) || in_array(ucfirst($item->status), $statuses);
-                })->unique('student_id')->count();
-            };
+                $countStatus = function($collection, $statuses) {
+                    return $collection->filter(function ($item) use ($statuses) {
+                        return in_array($item->status, $statuses) || in_array(ucfirst($item->status), $statuses);
+                    })->unique('student_id')->count();
+                };
 
-            $dataHadir[] = $countStatus($dailyAtt, $statusHadir);
-            $dataTerlambat[] = $countStatus($dailyAtt, $statusTerlambat);
-            $dataAbsen[] = $countStatus($dailyAtt, array_merge($statusSakit, $statusIzin, $statusAlpa));
+                $dataHadir[] = $countStatus($dailyAtt, $statusHadir);
+                $dataTerlambat[] = $countStatus($dailyAtt, $statusTerlambat);
+                $dataAbsen[] = $countStatus($dailyAtt, array_merge($statusSakit, $statusIzin, $statusAlpa));
 
-            $period->addDay();
-        }
+                $period->addDay();
+            }
 
-        $barChartData = [
-            'labels' => $chartLabels,
-            'datasets' => [
-                ['label' => 'Hadir Tepat', 'data' => $dataHadir, 'backgroundColor' => '#10b981', 'borderRadius' => 4],
-                ['label' => 'Terlambat', 'data' => $dataTerlambat, 'backgroundColor' => '#f59e0b', 'borderRadius' => 4],
-                ['label' => 'Tidak Hadir', 'data' => $dataAbsen, 'backgroundColor' => '#f43f5e', 'borderRadius' => 4]
-            ]
-        ];
+            return [
+                'labels' => $chartLabels,
+                'datasets' => [
+                    ['label' => 'Hadir Tepat', 'data' => $dataHadir, 'backgroundColor' => '#10b981', 'borderRadius' => 4],
+                    ['label' => 'Terlambat', 'data' => $dataTerlambat, 'backgroundColor' => '#f59e0b', 'borderRadius' => 4],
+                    ['label' => 'Tidak Hadir', 'data' => $dataAbsen, 'backgroundColor' => '#f43f5e', 'borderRadius' => 4]
+                ]
+            ];
+        });
 
         // --- 4. CHART PERPUSTAKAAN ---
-        $libLabels = [];
-        $libData = [];
-        $periodLib = $startDate->copy();
+        $libraryDataCache = Cache::remember('landing_library_data', 1800, function() use ($today) {
+            $startDate = Carbon::today()->subDays(6);
+            $endDate = Carbon::today();
+            $libLabels = [];
+            $libData = [];
+            $periodLib = $startDate->copy();
 
-        while ($periodLib <= $endDate) {
-            $libLabels[] = $periodLib->format('d/m');
-            $count = LibraryVisit::whereDate('date', $periodLib->toDateString())->count();
-            $libData[] = $count;
-            $periodLib->addDay();
-        }
+            while ($periodLib <= $endDate) {
+                $libLabels[] = $periodLib->format('d/m');
+                $libData[] = LibraryVisit::whereDate('date', $periodLib->toDateString())->count();
+                $periodLib->addDay();
+            }
 
-        $libraryChartData = ['labels' => $libLabels, 'data' => $libData];
-
-        $libraryStats = [
-            'visitors_today' => LibraryVisit::whereDate('date', $today)->count(), 
-            'books_borrowed' => Borrowing::where('status', 'borrowed')->count()
-        ];
+            return [
+                'chart' => ['labels' => $libLabels, 'data' => $libData],
+                'stats' => [
+                    'visitors_today' => LibraryVisit::whereDate('date', $today)->count(), 
+                    'books_borrowed' => Borrowing::where('status', 'borrowed')->count()
+                ]
+            ];
+        });
+        $libraryChartData = $libraryDataCache['chart'];
+        $libraryStats = $libraryDataCache['stats'];
 
         // --- 5. CACHE STATISTIK ---
-        $schoolStats = Cache::remember('school_profile_stats_v3', 60 * 60, function () {
+        $schoolStats = Cache::remember('school_profile_stats_v3', 3600, function () {
             $materiCount = class_exists('App\Models\LmsMaterial') ? \App\Models\LmsMaterial::count() : 0;
             $tugasCount = class_exists('App\Models\LmsAssignment') ? \App\Models\LmsAssignment::count() : 0;
-                   
             $guruCount = User::where(function($query) {
                 $roles = ['Guru', 'Kepala Sekolah'];
                 foreach ($roles as $role) {
@@ -168,69 +183,68 @@ class LandingPageController extends Controller
         });
 
         // --- 6. DATA LAINNYA ---      
-        $teachers = User::where(function($query) {
-                $roles = ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'];
-                foreach ($roles as $role) {
-                    $query->orWhere('role', 'LIKE', '%' . $role . '%');
-                }
-            })
-            ->latest()
-            ->take(8)
-            ->get();
-
-        $announcements = Announcement::orderBy('created_at', 'desc')->limit(3)->get();
-        $achievements = Achievement::with('student')->orderBy('date', 'desc')->limit(6)->get();
-        $activities = SchoolActivity::latest()->take(3)->get();
-        $agendas = Agenda::where('event_date', '>=', now()->subDays(1))->orderBy('event_date', 'asc')->limit(4)->get();
+        $generalData = Cache::remember('landing_general_data', 7200, function() {
+            return [
+                'teachers' => User::where(function($query) {
+                    $roles = ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'];
+                    foreach ($roles as $role) {
+                        $query->orWhere('role', 'LIKE', '%' . $role . '%');
+                    }
+                })->latest()->take(8)->get(),
+                'announcements' => Announcement::orderBy('created_at', 'desc')->limit(3)->get(),
+                'achievements' => Achievement::with('student')->orderBy('date', 'desc')->limit(6)->get(),
+                'activities' => SchoolActivity::latest()->take(3)->get(),
+                'agendas' => Agenda::where('event_date', '>=', now()->subDays(1))->orderBy('event_date', 'asc')->limit(4)->get(),
+                'guestbooks' => GuestBook::latest()->take(3)->get(),
+                'allGuestbooks' => GuestBook::latest()->take(50)->get(),
+                'extracurriculars' => Extracurricular::withCount('members')->with(['attendances' => function($query) { $query->latest('date')->limit(1); }])->get(),
+            ];
+        });
+        extract($generalData); 
         
-        $guestbooks = GuestBook::latest()->take(3)->get();
-        $allGuestbooks = GuestBook::latest()->take(50)->get();
-
-        $extracurriculars = Extracurricular::withCount('members')->with(['attendances' => function($query) { $query->latest('date')->limit(1); }])->get();
-
         // 7. DATA ALUMNI
-        $alumniStats = [
-            'total' => Student::where('status', 'graduated')->count(),
-            'sma' => AlumniProfile::where('activity_status', 'SMA')->count(),
-            'smk' => AlumniProfile::where('activity_status', 'SMK')->count(),
-            'ma' => AlumniProfile::where('activity_status', 'MA')->count(),
-            'pesantren' => AlumniProfile::where('activity_status', 'Pesantren')->count(),
-            'bekerja' => AlumniProfile::whereIn('activity_status', ['Bekerja', 'Wirausaha', 'Lainnya'])->count(),
-        ];
-
-        $alumniTestimonials = AlumniProfile::whereNotNull('testimony')
-            ->where('testimony', '!=', '') 
-            ->with('student') 
-            ->latest()
-            ->take(6) 
-            ->get();
+        $alumniData = Cache::remember('landing_alumni_data', 43200, function() {
+            return [
+                'stats' => [
+                    'total' => Student::where('status', 'graduated')->count(),
+                    'sma' => AlumniProfile::where('activity_status', 'SMA')->count(),
+                    'smk' => AlumniProfile::where('activity_status', 'SMK')->count(),
+                    'ma' => AlumniProfile::where('activity_status', 'MA')->count(),
+                    'pesantren' => AlumniProfile::where('activity_status', 'Pesantren')->count(),
+                    'bekerja' => AlumniProfile::whereIn('activity_status', ['Bekerja', 'Wirausaha', 'Lainnya'])->count(),
+                ],
+                'testimonials' => AlumniProfile::whereNotNull('testimony')
+                    ->where('testimony', '!=', '') 
+                    ->with('student') 
+                    ->latest()
+                    ->take(6) 
+                    ->get()
+            ];
+        });
+        $alumniStats = $alumniData['stats'];
+        $alumniTestimonials = $alumniData['testimonials'];
 
         // --- 8. KATALOG E-BOOK ---
-        $latestBooks = collect([]);
-        if (class_exists(Book::class)) {
-            try {
-                $latestBooks = Book::whereNotNull('ebook_path')
-                                ->latest()
-                                ->take(4)
-                                ->get();
-            } catch (\Exception $e) {
-                // Biarkan array kosong jika error
+       $literacyData = Cache::remember('landing_literacy_data', 3600, function() {
+            $books = collect([]);
+            if (class_exists(Book::class)) {
+                try {
+                    $books = Book::whereNotNull('ebook_path')->latest()->take(4)->get();
+                } catch (\Exception $e) {}
             }
-        }
 
         // --- 9. ARTIKEL GURU TERBARU ---
-        $latestArticles = collect([]);
-        if (class_exists(TeacherArticle::class)) {
-            try {
-                $latestArticles = TeacherArticle::with('user') 
-                                ->whereNotNull('published_at') // Mencegah artikel draft/belum rilis tampil
-                                ->latest('published_at') 
-                                ->take(3) 
-                                ->get();
-            } catch (\Exception $e) {
-                // Biarkan kosong jika tabel belum ada / error
+        $articles = collect([]);
+            if (class_exists(TeacherArticle::class)) {
+                try {
+                    $articles = TeacherArticle::with('user')->whereNotNull('published_at')->latest('published_at')->take(3)->get();
+                } catch (\Exception $e) {}
             }
-        }
+
+            return ['books' => $books, 'articles' => $articles];
+        });
+        $latestBooks = $literacyData['books'];
+        $latestArticles = $literacyData['articles'];
 
         return view('welcome', compact(
             'stats', 'barChartData', 'libraryStats', 'libraryChartData', 
@@ -292,7 +306,7 @@ class LandingPageController extends Controller
     // ==============================================================
     public function teacherDetail($id)
     {
-        // Tarik data guru beserta seluruh relasi portofolio-nya
+        
         $teacher = User::with([
             'experiences' => function($q) { $q->orderBy('year', 'desc'); },
             'materials' => function($q) { $q->latest(); },
@@ -320,23 +334,17 @@ class LandingPageController extends Controller
     // ==============================================================
     public function downloadCv($id)
     {
-        // 1. Ambil data lengkap guru seperti di halaman detail
+        
         $teacher = User::with([
             'experiences' => function($q) { $q->orderBy('year', 'desc'); },
             'portfolios' => function($q) { $q->orderBy('year', 'desc'); },
             'articles' => function($q) { $q->latest(); }
         ])->findOrFail($id);
-
-        // 2. Render view HTML khusus PDF menjadi object PDF
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('teacher-cv', compact('teacher'));
-        
-        // 3. Set ukuran kertas ke A4 (Portrait)
-        $pdf->setPaper('A4', 'portrait');
-
-        // 4. Bersihkan nama file agar aman dari karakter aneh
+       
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('teacher-cv', compact('teacher'));  
+        $pdf->setPaper('A4', 'portrait');        
         $fileName = 'CV_' . preg_replace('/[^A-Za-z0-9\-]/', '_', $teacher->name) . '.pdf';
-
-        // 5. Lempar sebagai file unduhan
+       
         return $pdf->download($fileName);
     }
 
@@ -355,16 +363,13 @@ class LandingPageController extends Controller
     // FUNGSI UNTUK HALAMAN SEMUA ARTIKEL (INDEX ARTIKEL)
     // ==============================================================
     public function articles(Request $request)
-    {
-        // Pastikan model TeacherArticle tersedia
+    {       
         if (!class_exists(TeacherArticle::class)) {
             abort(404, 'Fitur Artikel belum tersedia.');
         }
-
-        // Mulai query dengan relasi user dan pastikan artikel sudah dipublikasi
+        
         $query = TeacherArticle::with('user')->whereNotNull('published_at');
-
-        // Filter Pencarian (Judul Artikel atau Nama Penulis)
+        
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -374,13 +379,11 @@ class LandingPageController extends Controller
                   });
             });
         }
-
-        // Filter berdasarkan Kategori
+        
         if ($request->filled('category')) {
             $query->where('category', $request->category);
         }
-
-        // Urutkan dari yang terbaru dan paginate (9 item per halaman)
+       
         $articles = $query->latest('published_at')->paginate(9);
 
         return view('articles.index', compact('articles'));
