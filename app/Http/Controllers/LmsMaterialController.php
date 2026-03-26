@@ -16,7 +16,7 @@ class LmsMaterialController extends Controller
     /**
      * Menampilkan daftar materi dengan grouping (agar tidak duplikat per kelas)
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         
@@ -25,11 +25,24 @@ class LmsMaterialController extends Controller
             ->where('teacher_id', $user->id)
             ->groupBy('title', 'subject_id', 'created_at');
 
-        // 2. Ambil Data Lengkap berdasarkan ID tersebut
+         // --- LOGIKA SEARCH & FILTER ---
+        if ($request->filled('search')) {
+            $subQuery->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        if ($request->filled('subject')) {
+            $subQuery->where('subject_id', $request->subject);
+        }        
+
+        $subQuery->groupBy('title', 'subject_id', 'created_at');
+
+       // 2. Ambil Data Lengkap berdasarkan ID tersebut
         $materials = LmsMaterial::whereIn('id', $subQuery)
             ->with(['subject', 'schoolClass', 'attachments']) // Load attachments
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString(); // PENTING: Agar filter tidak hilang saat pindah halaman
+
 
         // 3. Inject Info Tambahan (Bulk Info)
         foreach ($materials as $material) {

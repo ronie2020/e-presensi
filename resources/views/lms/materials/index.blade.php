@@ -44,6 +44,28 @@
                 </div>
             </div>
 
+            {{-- SEARCH & FILTER BAR (Fitur Baru) --}}
+            <div class="animate-enter mb-10 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-4" style="animation-delay: 100ms">
+                <form action="{{ route('lms.materials.index') }}" method="GET" class="flex-1 flex flex-col md:flex-row gap-4 w-full">
+                    <div class="relative flex-1">
+                        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-magnifying-glass text-lg"></i></div>
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul materi..." class="w-full pl-11 pr-4 h-12 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:ring-blue-500 focus:border-blue-500 text-sm font-medium transition-colors">
+                    </div>
+                    <div class="flex gap-2">
+                        <select name="subject" class="h-12 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:ring-blue-500 focus:border-blue-500 text-sm font-medium transition-colors w-full md:w-48">
+                            <option value="">Semua Mapel</option>
+                            {{-- Asumsi kamu mengirim $subjects dari controller ke view index --}}
+                            @if(isset($subjects))
+                                @foreach($subjects as $sub)
+                                    <option value="{{ $sub->id }}" {{ request('subject') == $sub->id ? 'selected' : '' }}>{{ $sub->name }}</option>
+                                @endforeach
+                            @endif
+                        </select>
+                        <button type="submit" class="h-12 px-6 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition text-sm">Filter</button>
+                    </div>
+                </form>
+            </div>
+
             {{-- LIST MATERI --}}
             @if($materials->count() > 0)
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -226,12 +248,12 @@
                     <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mb-6 group-hover:bg-blue-50 group-hover:text-blue-500 transition-all duration-500">
                         <i class="ph-duotone ph-books text-5xl"></i>
                     </div>
-                    <h3 class="font-black text-slate-800 text-xl mb-2">Belum Ada Materi</h3>
+                    <h3 class="font-black text-slate-800 text-xl mb-2">{{ request('search') ? 'Materi Tidak Ditemukan' : 'Belum Ada Materi' }}</h3>
                     <p class="text-slate-500 text-sm max-w-md mx-auto leading-relaxed mb-8">
-                        Anda belum mengunggah materi pelajaran apapun. Mulailah berbagi ilmu dengan mengupload dokumen atau video pertama Anda.
+                        {{ request('search') ? 'Coba ubah kata kunci pencarian atau filter mapel Anda.' : 'Anda belum mengunggah materi pelajaran apapun. Mulailah berbagi ilmu.' }}
                     </p>
                     <a href="{{ route('lms.materials.create') }}" class="px-8 py-3.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-600/30 hover:-translate-y-1 transform flex items-center gap-2 active:scale-95">
-                        <i class="ph-bold ph-plus"></i> Tambah Materi Pertama
+                        <i class="ph-bold ph-plus"></i> {{ request('search') ? 'Upload Materi Baru' : 'Tambah Materi Pertama' }}
                     </a>
                 </div>
             @endif

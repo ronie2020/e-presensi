@@ -39,11 +39,19 @@
                     </div>
                 </div>
             @endif
+
+            {{-- LOGIKA PENGAMAN STATE ALPINE.JS UNTUK LAMPIRAN BARU --}}
+            @php
+                $oldNewAttachments = old('new_attachments', []);
+                foreach($oldNewAttachments as $k => &$att) {
+                    if(!isset($att['id'])) $att['id'] = time() + $k;
+                }
+            @endphp
             
             {{-- FORM CARD --}}
             <div class="bg-white shadow-xl shadow-slate-200/50 rounded-[2rem] border border-slate-100 overflow-hidden">
                 <form action="{{ route('lms.materials.update', $material->id) }}" method="POST" enctype="multipart/form-data" 
-                      x-data="{ attachments: [] }"
+                      x-data="{ attachments: {{ json_encode($oldNewAttachments) }} }"
                       id="updateForm">
                     @csrf
                     @method('PUT')
@@ -69,7 +77,7 @@
                                     <div class="relative">
                                         <select name="subject_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-orange-500 focus:border-orange-500 h-12 px-4 appearance-none">
                                             @foreach($subjects as $subject)
-                                                <option value="{{ $subject->id }}" {{ $material->subject_id == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
+                                                <option value="{{ $subject->id }}" {{ old('subject_id', $material->subject_id) == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
                                             @endforeach
                                         </select>
                                         <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
@@ -81,7 +89,7 @@
                                     <div class="relative">
                                         <select name="class_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-orange-500 focus:border-orange-500 h-12 px-4 appearance-none">
                                             @foreach($classes as $class)
-                                                <option value="{{ $class->id }}" {{ $material->class_id == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
+                                                <option value="{{ $class->id }}" {{ old('class_id', $material->class_id) == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
                                             @endforeach
                                         </select>
                                         <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
@@ -139,7 +147,7 @@
                             <!-- Lampiran Baru -->
                             <div class="flex justify-between items-center mb-4">
                                 <p class="text-xs font-bold text-slate-400 uppercase">Tambah Lampiran Baru:</p>
-                                <button type="button" @click="attachments.push({id: Date.now(), type: 'file'})" 
+                                <button type="button" @click="attachments.push({id: Date.now(), type: 'file', link: '', name: ''})" 
                                         class="text-xs bg-white border border-slate-200 text-blue-700 px-4 py-2 rounded-xl font-bold hover:bg-blue-50 hover:border-blue-200 transition shadow-sm flex items-center gap-2">
                                     <i class="ph-bold ph-plus"></i> Tambah Baris
                                 </button>
@@ -158,10 +166,10 @@
                                             </div>
                                             <div class="md:col-span-5">
                                                 <input x-show="att.type === 'file'" type="file" :name="'new_attachments['+index+'][file]'" class="block w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 h-10 border border-slate-100 rounded-lg bg-white">
-                                                <input x-show="att.type !== 'file'" type="text" :name="'new_attachments['+index+'][link]'" class="w-full text-sm font-medium rounded-lg border-slate-200 h-10 placeholder:text-slate-400" placeholder="https://...">
+                                                <input x-show="att.type !== 'file'" type="text" :name="'new_attachments['+index+'][link]'" x-model="att.link" class="w-full text-sm font-medium rounded-lg border-slate-200 h-10 placeholder:text-slate-400" placeholder="https://...">
                                             </div>
                                             <div class="md:col-span-4">
-                                                <input type="text" :name="'new_attachments['+index+'][name]'" class="w-full text-sm font-medium rounded-lg border-slate-200 h-10 placeholder:text-slate-400" placeholder="Label (Opsional)">
+                                                <input type="text" :name="'new_attachments['+index+'][name]'" x-model="att.name" class="w-full text-sm font-medium rounded-lg border-slate-200 h-10 placeholder:text-slate-400" placeholder="Label (Opsional)">
                                             </div>
                                         </div>
                                         <button type="button" @click="attachments = attachments.filter(i => i.id !== att.id)" class="absolute -top-2 -right-2 md:static md:mt-1 w-8 h-8 flex items-center justify-center rounded-lg bg-rose-50 text-rose-400 hover:bg-rose-500 hover:text-white transition shadow-sm border border-rose-100">
@@ -176,7 +184,7 @@
 
                     <!-- FOOTER ACTIONS -->
                     <div class="bg-slate-50 px-8 py-6 flex flex-col md:flex-row justify-end gap-3 border-t border-slate-100">
-                        <a href="{{ route('lms.materials.index') }}" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition text-center text-sm">Batal</a>
+                        <a href="{{ route('lms.materials.index') }}" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition text-center text-sm btn-cancel-confirm">Batal</a>
                         
                         <button type="submit" class="px-8 py-3 bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-900/20 hover:bg-orange-700 hover:-translate-y-0.5 transition transform flex items-center justify-center gap-2 text-sm">
                             <i class="ph-bold ph-check-circle text-lg"></i>
@@ -193,6 +201,36 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Proteksi Tombol Batal
+            const cancelButtons = document.querySelectorAll('.btn-cancel-confirm');
+            cancelButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+
+                    Swal.fire({
+                        title: 'Batalkan Edit?',
+                        text: "Perubahan tidak akan disimpan.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#64748b', 
+                        cancelButtonColor: '#cbd5e1', 
+                        confirmButtonText: 'Ya, Batalkan',
+                        cancelButtonText: 'Lanjut Mengedit',
+                        customClass: {
+                            popup: 'rounded-[2rem]',
+                            confirmButton: 'rounded-xl px-4 py-2 font-bold',
+                            cancelButton: 'rounded-xl px-4 py-2 font-bold text-slate-600'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = href;
+                        }
+                    });
+                });
+            });
+
             const updateForm = document.getElementById('updateForm');
             if(updateForm) {
                 updateForm.addEventListener('submit', function(e) {

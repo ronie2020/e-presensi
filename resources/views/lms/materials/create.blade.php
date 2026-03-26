@@ -47,11 +47,25 @@
                     </div>
                 </div>
             @endif
+
+            {{-- LOGIKA PENGAMAN STATE ALPINE.JS --}}
+            @php
+                // Menyimpan input lampiran dari percobaan sebelumnya (jika validasi gagal)
+                $oldAttachments = old('attachments', [['id' => time(), 'type' => 'file', 'link' => '', 'name' => '']]);
+                
+                // Pastikan setiap baris punya ID unik agar Alpine loop tidak error
+                foreach($oldAttachments as $k => &$att) {
+                    if(!isset($att['id'])) $att['id'] = time() + $k;
+                }
+            @endphp
             
             {{-- FORM CARD --}}
             <div class="animate-enter bg-white shadow-xl shadow-slate-200/50 rounded-[2rem] border border-slate-100 overflow-hidden" style="animation-delay: 100ms">
                 <form action="{{ route('lms.materials.store') }}" method="POST" enctype="multipart/form-data" 
-                      x-data="{ targetType: 'class', attachments: [{id: 1, type: 'file'}] }"
+                      x-data="{ 
+                          targetType: '{{ old('target_type', 'class') }}', 
+                          attachments: {{ json_encode($oldAttachments) }} 
+                      }"
                       id="uploadForm">
                     @csrf
 
@@ -124,14 +138,14 @@
                                         </div>
 
                                         <!-- SELECT JENJANG (Dinamis Required) -->
-                                        <div x-show="targetType === 'grade'" style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+                                        <div x-cloak x-show="targetType === 'grade'" style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                                             <div class="relative">
                                                 <select name="target_grade" 
                                                         :required="targetType === 'grade'"
                                                         class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-blue-500 h-11 px-3 appearance-none shadow-sm cursor-pointer">
-                                                    <option value="7">Semua Kelas 7</option>
-                                                    <option value="8">Semua Kelas 8</option>
-                                                    <option value="9">Semua Kelas 9</option>
+                                                    <option value="7" {{ old('target_grade') == '7' ? 'selected' : '' }}>Semua Kelas 7</option>
+                                                    <option value="8" {{ old('target_grade') == '8' ? 'selected' : '' }}>Semua Kelas 8</option>
+                                                    <option value="9" {{ old('target_grade') == '9' ? 'selected' : '' }}>Semua Kelas 9</option>
                                                 </select>
                                                 <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
                                             </div>
@@ -150,7 +164,7 @@
                                 Pengantar & Resume Materi
                             </label>
                             <div class="relative">
-                                <textarea name="resume" rows="6" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:ring-blue-500 focus:border-blue-500 shadow-sm p-4 text-slate-700 leading-relaxed font-medium placeholder:font-normal placeholder:text-slate-400 transition-colors focus:bg-white" placeholder="Tuliskan rangkuman materi, tujuan pembelajaran, atau instruksi untuk siswa..."></textarea>
+                                <textarea name="resume" rows="6" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:ring-blue-500 focus:border-blue-500 shadow-sm p-4 text-slate-700 leading-relaxed font-medium placeholder:font-normal placeholder:text-slate-400 transition-colors focus:bg-white" placeholder="Tuliskan rangkuman materi, tujuan pembelajaran, atau instruksi untuk siswa...">{{ old('resume') }}</textarea>
                                 <div class="absolute bottom-3 right-3 text-slate-300 pointer-events-none"><i class="ph-bold ph-text-aa text-xl"></i></div>
                             </div>
                         </div>
@@ -166,7 +180,7 @@
                                     </label>
                                     <p class="text-xs text-slate-400 mt-1">Upload file dokumen atau tautkan video pembelajaran.</p>
                                 </div>
-                                <button type="button" @click="attachments.push({id: Date.now(), type: 'file'})" 
+                                <button type="button" @click="attachments.push({id: Date.now(), type: 'file', link: '', name: ''})" 
                                         class="w-full sm:w-auto text-xs bg-white border border-slate-200 text-blue-700 px-4 py-3 sm:py-2 rounded-xl font-bold hover:bg-blue-50 hover:border-blue-200 transition shadow-sm flex items-center justify-center gap-2 active:scale-95">
                                     <i class="ph-bold ph-plus"></i> Tambah Baris
                                 </button>
@@ -198,12 +212,12 @@
                                                 <input x-show="att.type === 'file'" type="file" :name="'attachments['+index+'][file]'" class="block w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition cursor-pointer h-10 border border-slate-100 rounded-lg bg-white">
                                                 
                                                 <!-- Jika Link/Video -->
-                                                <input x-show="att.type !== 'file'" type="text" :name="'attachments['+index+'][link]'" class="w-full text-sm font-medium rounded-lg border-slate-200 h-10 placeholder:text-slate-400 focus:ring-blue-500" placeholder="https://...">
+                                                <input x-show="att.type !== 'file'" type="text" :name="'attachments['+index+'][link]'" x-model="att.link" class="w-full text-sm font-medium rounded-lg border-slate-200 h-10 placeholder:text-slate-400 focus:ring-blue-500" placeholder="https://...">
                                             </div>
 
                                             <!-- Nama Label (Opsional) -->
                                             <div class="md:col-span-4">
-                                                <input type="text" :name="'attachments['+index+'][name]'" class="w-full text-sm font-medium rounded-lg border-slate-200 h-10 placeholder:text-slate-400 focus:ring-blue-500" placeholder="Label (Opsional)">
+                                                <input type="text" :name="'attachments['+index+'][name]'" x-model="att.name" class="w-full text-sm font-medium rounded-lg border-slate-200 h-10 placeholder:text-slate-400 focus:ring-blue-500" placeholder="Label (Opsional)">
                                             </div>
                                         </div>
 
