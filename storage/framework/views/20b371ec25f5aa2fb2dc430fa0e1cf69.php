@@ -78,7 +78,7 @@
                         <i class="ph-fill ph-list-checks text-blue-600"></i> Daftar Pengumpulan
                     </h3>
                     
-                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center">
                         <?php if($assignment->is_bulk || $allStudents->count() > 30): ?>
                             <div class="relative w-full sm:w-48">
                                 <select id="classFilter" class="w-full pl-10 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:ring-blue-500 focus:border-blue-500 shadow-sm transition-all appearance-none cursor-pointer">
@@ -93,6 +93,12 @@
                         <div class="relative w-full sm:w-64">
                             <input type="text" id="tableSearch" placeholder="Cari nama siswa..." class="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold focus:ring-blue-500 focus:border-blue-500 w-full shadow-sm transition-all">
                         </div>
+
+                        
+                        <button type="button" onclick="saveAllGrades()" class="w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition-all group">
+                            <i class="ph-bold ph-floppy-disk text-lg group-hover:scale-110 transition-transform"></i>
+                            Simpan Semua
+                        </button>
                     </div>
                 </div>
 
@@ -119,7 +125,6 @@
                                     }
                                     $ansCount = $submission ? $submission->answers->count() : 0;
                                     
-                                    // PERBAIKAN: Format data jawaban dipindah ke blok PHP murni agar tidak bentrok dengan Blade compiler
                                     $mappedAnswers = [];
                                     if ($submission && $assignment->assignment_type == 'quiz') {
                                         $mappedAnswers = $submission->answers->map(function($ans) {
@@ -176,7 +181,6 @@
                                         <?php if($submission): ?>
                                             <div class="flex flex-col gap-2">
                                                 <?php if($assignment->assignment_type == 'quiz'): ?>
-                                                    
                                                     <button type="button" 
                                                             @click="openReview('<?php echo e(addslashes($student->name)); ?>', <?php echo e(json_encode($mappedAnswers)); ?>, <?php echo e($submission->id); ?>)"
                                                             class="inline-flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-600 border border-purple-200 hover:bg-purple-100 rounded-xl text-xs font-bold transition-all w-fit shadow-sm group/btn">
@@ -246,13 +250,13 @@
 
                                     <td class="px-6 py-4 text-right">
                                         <?php if($submission): ?>
-                                            <button type="button" onclick="document.getElementById('form-grade-<?php echo e($submission->id); ?>').submit()" class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md hover:bg-blue-700 transition">
+                                            <button type="button" onclick="document.getElementById('form-grade-<?php echo e($submission->id); ?>').submit()" class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md hover:bg-blue-700 transition" title="Simpan Individu">
                                                 <i class="ph-bold ph-floppy-disk text-lg"></i>
                                             </button>
                                             
                                             <form action="<?php echo e(route('lms.submissions.destroy', $submission->id)); ?>" method="POST" class="inline-block ml-1" onsubmit="return confirm('Hapus data jawaban siswa ini? Siswa harus mengerjakan ulang.')">
                                                 <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
-                                                <button type="submit" class="w-9 h-9 rounded-xl bg-rose-50 text-rose-500 border border-rose-200 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors">
+                                                <button type="submit" class="w-9 h-9 rounded-xl bg-rose-50 text-rose-500 border border-rose-200 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-colors" title="Hapus Jawaban">
                                                     <i class="ph-bold ph-trash"></i>
                                                 </button>
                                             </form>
@@ -389,6 +393,101 @@
             }));
         });
         
+        // FUNGSI SIMPAN SEMUA (BULK SAVE dengan AJAX)
+        window.saveAllGrades = async function() {
+            const forms = document.querySelectorAll('.grade-form');
+            if (forms.length === 0) {
+                Swal.fire({ 
+                    icon: 'info', 
+                    title: 'Kosong', 
+                    text: 'Tidak ada data jawaban siswa yang bisa dinilai saat ini.',
+                    customClass: { popup: 'rounded-[1.5rem]' }
+                });
+                return;
+            }
+
+            // 1. Minta konfirmasi
+            const result = await Swal.fire({
+                title: 'Simpan Semua Nilai?',
+                text: `Sistem akan memproses dan menyimpan nilai dari ${forms.length} siswa secara bersamaan.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#059669', // emerald-600
+                cancelButtonColor: '#e11d48', // rose-600
+                confirmButtonText: '<i class="ph-bold ph-check"></i> Ya, Simpan Semua!',
+                cancelButtonText: 'Batal',
+                customClass: { popup: 'rounded-[1.5rem]' }
+            });
+
+            if (!result.isConfirmed) return;
+
+            // 2. Munculkan Loading Bar Progress
+            Swal.fire({
+                title: 'Memproses Data...',
+                html: 'Menyimpan nilai ke server: <b>0</b>%',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                customClass: { popup: 'rounded-[1.5rem]' }
+            });
+
+            let successCount = 0;
+            let errorCount = 0;
+            let total = forms.length;
+            let processed = 0;
+            const swalHtml = Swal.getHtmlContainer().querySelector('b');
+
+            // 3. Eksekusi pengiriman data satu persatu agar tidak overload server
+            for (const form of forms) {
+                try {
+                    const formData = new FormData(form);
+                    
+                    // Ambil input feedback yang posisinya di luar <form> (HTML5 Form Attribute)
+                    const feedbackInput = document.querySelector(`input[name="teacher_feedback"][form="${form.id}"]`);
+                    if (feedbackInput && !formData.has('teacher_feedback')) {
+                        formData.append('teacher_feedback', feedbackInput.value);
+                    }
+
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+                } catch (err) {
+                    console.error('Error saving form:', form.id, err);
+                    errorCount++;
+                }
+                
+                // Update text persentase
+                processed++;
+                if(swalHtml) {
+                    swalHtml.textContent = Math.round((processed / total) * 100);
+                }
+            }
+
+            // 4. Tampilkan Notifikasi Selesai
+            Swal.fire({
+                icon: errorCount === 0 ? 'success' : 'warning',
+                title: 'Selesai!',
+                text: `Berhasil menyimpan ${successCount} nilai. ${errorCount > 0 ? `Gagal: ${errorCount} data.` : ''}`,
+                customClass: { popup: 'rounded-[1.5rem]' }
+            }).then(() => {
+                // Refresh halaman untuk memperbarui session / status
+                if(successCount > 0) window.location.reload();
+            });
+        };
+
+        // Filter Tabel
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('tableSearch');
             const classFilter = document.getElementById('classFilter');
