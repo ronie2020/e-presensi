@@ -1,4 +1,13 @@
-<x-student-exam-layout>
+<?php if (isset($component)) { $__componentOriginal93788767aa19f063c7a0abaf2a8d82c1 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal93788767aa19f063c7a0abaf2a8d82c1 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.student-exam-layout','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('student-exam-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <style>
         @keyframes bounce-slow {
             0%, 100% { transform: translateY(-5%); }
@@ -22,31 +31,31 @@
         }
     </style>
 
-    {{-- PENGEMBANGAN: Tambahkan state isSubmitting dan formToken untuk handling UX --}}
+    
     <div class="min-h-screen flex items-center justify-center p-4 bg-slate-50 bg-pattern" x-data="{ isSeb: navigator.userAgent.includes('SEB'), isSubmitting: false, formToken: '' }">
         
-        {{-- Card Konfirmasi --}}
+        
         <div class="max-w-xl w-full bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200 border border-white overflow-hidden relative transform transition-all my-8">
             
-            {{-- Header Card --}}
+            
             <div class="bg-slate-900 p-10 text-center relative overflow-hidden group">
-                {{-- Decoration --}}
+                
                 <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-rose-900/40"></div>
                 <div class="absolute -top-10 -right-10 w-40 h-40 bg-rose-500/20 rounded-full blur-3xl group-hover:bg-rose-500/30 transition-all duration-1000"></div>
                 <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-all duration-1000"></div>
                 
-                {{-- Icon Gembok Besar --}}
+                
                 <div class="w-24 h-24 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl mx-auto flex items-center justify-center text-white text-5xl shadow-2xl mb-6 relative z-10 animate-bounce-slow">
                     <i class="ph-duotone ph-lock-key-open text-rose-400"></i>
                 </div>
 
-                <h2 class="text-2xl font-black text-white relative z-10 leading-tight">{{ $exam->title }}</h2>
+                <h2 class="text-2xl font-black text-white relative z-10 leading-tight"><?php echo e($exam->title); ?></h2>
                 <div class="inline-flex items-center gap-2 mt-3 px-3 py-1 bg-white/5 border border-white/10 rounded-full relative z-10">
                     <i class="ph-fill ph-book-bookmark text-blue-400 text-xs"></i>
-                    <p class="text-slate-300 font-bold text-xs uppercase tracking-wide">{{ $exam->subject_name }}</p>
+                    <p class="text-slate-300 font-bold text-xs uppercase tracking-wide"><?php echo e($exam->subject_name); ?></p>
                 </div>
 
-                {{-- Badge Status Lingkungan --}}
+                
                 <div class="absolute top-6 right-6 z-20">
                     <span x-show="isSeb" class="bg-emerald-500/20 text-emerald-300 text-[10px] font-black px-3 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1 uppercase tracking-wide backdrop-blur-md shadow-sm ring-animate text-emerald-400" x-cloak>
                         <i class="ph-fill ph-shield-check"></i> Terproteksi SEB
@@ -59,18 +68,18 @@
 
             <div class="p-8 md:p-10">
                 
-                {{-- Info Grid --}}
+                
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div class="p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100 text-center hover:bg-slate-100 transition-colors">
                         <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto mb-2 text-rose-500 text-xl border border-slate-100">
                             <i class="ph-fill ph-timer"></i>
                         </div>
                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Durasi</p>
-                        <p class="text-lg font-black text-slate-800">{{ $exam->duration_minutes }} <span class="text-xs font-bold text-slate-500">Mnt</span></p>
+                        <p class="text-lg font-black text-slate-800"><?php echo e($exam->duration_minutes); ?> <span class="text-xs font-bold text-slate-500">Mnt</span></p>
                     </div>
                     
-                    {{-- PERBAIKAN: Jika Google Form, ubah info Total Soal --}}
-                    @if(isset($exam->exam_type) && $exam->exam_type == 'google_form')
+                    
+                    <?php if(isset($exam->exam_type) && $exam->exam_type == 'google_form'): ?>
                         <div class="p-5 bg-emerald-50 rounded-[1.5rem] border border-emerald-100 text-center hover:bg-emerald-100 transition-colors">
                             <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto mb-2 text-emerald-500 text-xl border border-emerald-100">
                                 <i class="ph-fill ph-google-logo"></i>
@@ -78,18 +87,18 @@
                             <p class="text-[10px] text-emerald-600 font-bold uppercase tracking-wider mb-0.5">Metode</p>
                             <p class="text-lg font-black text-emerald-800">G-Form</p>
                         </div>
-                    @else
+                    <?php else: ?>
                         <div class="p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100 text-center hover:bg-slate-100 transition-colors">
                             <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto mb-2 text-blue-500 text-xl border border-slate-100">
                                 <i class="ph-fill ph-list-numbers"></i>
                             </div>
                             <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Total Soal</p>
-                            <p class="text-lg font-black text-slate-800">{{ $exam->questions()->count() }} <span class="text-xs font-bold text-slate-500">Butir</span></p>
+                            <p class="text-lg font-black text-slate-800"><?php echo e($exam->questions()->count()); ?> <span class="text-xs font-bold text-slate-500">Butir</span></p>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
 
-                {{-- PENGEMBANGAN: Kotak Peringatan Aturan Ujian --}}
+                
                 <div class="bg-blue-50/50 border border-blue-100 rounded-[1.5rem] p-5 mb-8">
                     <h4 class="font-black text-blue-900 text-sm mb-3 flex items-center gap-2"><i class="ph-fill ph-info text-blue-500"></i> Tata Tertib Sistem</h4>
                     <ul class="space-y-3">
@@ -104,7 +113,7 @@
                     </ul>
                 </div>
 
-                {{-- Warning Box (Khusus Non-SEB) --}}
+                
                 <div x-show="!isSeb" class="bg-rose-50 border border-rose-100 rounded-2xl p-5 mb-6 flex gap-4 items-start" x-cloak>
                     <div class="shrink-0 mt-0.5 bg-rose-100 text-rose-600 rounded-lg w-8 h-8 flex items-center justify-center">
                         <i class="ph-bold ph-warning"></i>
@@ -117,12 +126,12 @@
                     </div>
                 </div>
 
-                {{-- Form Token --}}
-                <form action="{{ route('student.exam.start', $exam->id) }}" method="POST" 
+                
+                <form action="<?php echo e(route('student.exam.start', $exam->id)); ?>" method="POST" 
                       @submit="isSubmitting = true; try { document.documentElement.requestFullscreen() } catch(e) {}">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     
-                    @if($exam->token)
+                    <?php if($exam->token): ?>
                         <div class="mb-8">
                             <label class="block text-center text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Masukkan Token Ujian</label>
                             <div class="relative max-w-[200px] mx-auto group">
@@ -132,29 +141,30 @@
                                     class="w-full rounded-2xl border-2 border-slate-200 shadow-sm focus:ring-4 focus:ring-rose-100 focus:border-rose-500 text-center text-3xl font-black tracking-[0.2em] p-4 text-slate-800 placeholder-slate-200 transition-all outline-none" 
                                     placeholder="TOKEN" autocomplete="off" maxlength="6">
                                 
-                                @if($errors->has('token'))
+                                <?php if($errors->has('token')): ?>
                                     <div class="absolute -bottom-8 left-0 right-0 text-center animate-bounce">
                                         <span class="bg-rose-50 text-rose-600 px-3 py-1 rounded-full text-[10px] font-bold border border-rose-100 inline-flex items-center gap-1 shadow-sm">
-                                            <i class="ph-bold ph-x-circle"></i> {{ $errors->first('token') }}
+                                            <i class="ph-bold ph-x-circle"></i> <?php echo e($errors->first('token')); ?>
+
                                         </span>
                                     </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                             <p class="text-[10px] text-slate-400 mt-4 text-center font-bold bg-slate-50 inline-block px-3 py-1 rounded-lg border border-slate-100 mx-auto block w-fit">
                                 <i class="ph-fill ph-key"></i> Dapatkan Token dari Pengawas
                             </p>
                         </div>
-                    @else
+                    <?php else: ?>
                         <div class="bg-blue-50 text-blue-700 p-4 rounded-2xl mb-8 text-sm flex items-center justify-center gap-3 border border-blue-100 font-bold">
                             <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
                                 <i class="ph-fill ph-check"></i>
                             </div>
                             Ujian ini tidak memerlukan token.
                         </div>
-                    @endif
+                    <?php endif; ?>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-slate-100">
-                        <a href="{{ route('student.exam.index') }}" :class="{ 'opacity-50 pointer-events-none': isSubmitting }" class="py-3.5 px-6 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold text-sm transition-colors text-center order-2 sm:order-1">
+                        <a href="<?php echo e(route('student.exam.index')); ?>" :class="{ 'opacity-50 pointer-events-none': isSubmitting }" class="py-3.5 px-6 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-700 font-bold text-sm transition-colors text-center order-2 sm:order-1">
                             Kembali
                         </a>
 
@@ -178,4 +188,13 @@
             </div>
         </div>
     </div>
-</x-student-exam-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal93788767aa19f063c7a0abaf2a8d82c1)): ?>
+<?php $attributes = $__attributesOriginal93788767aa19f063c7a0abaf2a8d82c1; ?>
+<?php unset($__attributesOriginal93788767aa19f063c7a0abaf2a8d82c1); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal93788767aa19f063c7a0abaf2a8d82c1)): ?>
+<?php $component = $__componentOriginal93788767aa19f063c7a0abaf2a8d82c1; ?>
+<?php unset($__componentOriginal93788767aa19f063c7a0abaf2a8d82c1); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/cbt/student/start_confirmation.blade.php ENDPATH**/ ?>

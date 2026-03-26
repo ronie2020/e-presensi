@@ -54,18 +54,25 @@ class CbtController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'exam_type' => 'required|in:cbt,google_form',
+            'google_form_url' => 'required_if:exam_type,google_form|nullable|url',
             'subject_name' => 'required|string',
             'class_level' => 'required',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
             'duration_minutes' => 'required|integer|min:1',
-            'passing_grade' => 'required|integer|min:0|max:100',
+            'passing_grade' => 'nullable|integer|min:0|max:100',
             'token' => 'nullable|string|max:6',
         ]);
 
         $validated['is_active'] = $request->has('is_active');
         if (empty($validated['token'])) {
             $validated['token'] = strtoupper(Str::random(5));
+        }
+
+        // Pastikan nilai KKM 0 jika ujiannya menggunakan Google Form
+        if ($validated['exam_type'] === 'google_form') {
+            $validated['passing_grade'] = 0;
         }
 
         CbtExam::create($validated);
@@ -92,20 +99,30 @@ class CbtController extends Controller
 
         $request->validate([
             'title' => 'required|string|max:255',
+            'exam_type' => 'required|in:cbt,google_form',
+            'google_form_url' => 'required_if:exam_type,google_form|nullable|url',
             'subject_name' => 'required|string',
             'class_level' => 'required',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
             'duration_minutes' => 'required|integer|min:1',
-            'passing_grade' => 'required|integer|min:0|max:100',
+            'passing_grade' => 'nullable|integer|min:0|max:100',
             'token' => 'nullable|string|max:6',
         ]);
 
-        $updateData = $request->only(['title', 'subject_name', 'class_level', 'start_time', 'end_time', 'duration_minutes', 'passing_grade']);
+        $updateData = $request->only(['title', 'exam_type', 'google_form_url', 'subject_name', 'class_level', 'start_time', 'end_time', 'duration_minutes', 'passing_grade']);
         $updateData['is_active'] = $request->has('is_active');
               
         if ($request->filled('token')) {
             $updateData['token'] = strtoupper($request->token);
+        }
+
+        // Reset KKM jika diubah menjadi Google Form
+        if ($updateData['exam_type'] === 'google_form') {
+            $updateData['passing_grade'] = 0;
+        } else {
+            // Jika dikembalikan ke CBT internal tapi url google form masih tersimpan, bisa dibersihkan
+            $updateData['google_form_url'] = null;
         }
 
         $exam->update($updateData);

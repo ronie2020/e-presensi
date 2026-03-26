@@ -9,10 +9,19 @@ class CbtExam extends Model
 {
     use HasFactory;
 
+    // PERBAIKAN: Tambahkan 'exam_type' dan 'google_form_url' agar diizinkan masuk ke database
     protected $fillable = [
-        'title', 'subject_name', 'class_level',
-        'start_time', 'end_time', 'duration_minutes',
-        'passing_grade', 'is_active', 'token'
+        'title', 
+        'subject_name', 
+        'class_level',
+        'start_time', 
+        'end_time', 
+        'duration_minutes',
+        'passing_grade', 
+        'is_active', 
+        'token',
+        'exam_type',        // Kolom baru
+        'google_form_url'   // Kolom baru
     ];
 
     protected $casts = [

@@ -1,5 +1,14 @@
-<x-app-layout>
-    {{-- LOAD TRIX EDITOR RESOURCES --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2.0.8/dist/trix.css">
     <script type="text/javascript" src="https://unpkg.com/trix@2.0.8/dist/trix.umd.min.js"></script>
     
@@ -90,33 +99,33 @@
         }
     }">
         
-        <x-slot name="header">
-            <h2 class="font-semibold text-xl text-slate-800 leading-tight">{{ __('Kelola Soal Ujian') }}</h2>
-        </x-slot>
+         <?php $__env->slot('header', null, []); ?> 
+            <h2 class="font-semibold text-xl text-slate-800 leading-tight"><?php echo e(__('Kelola Soal Ujian')); ?></h2>
+         <?php $__env->endSlot(); ?>
 
         <div class="py-8 sm:py-10 font-sans text-slate-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
                 
-                {{-- HEADER INFO --}}
+                
                 <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
                     <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                         <div>
                             <div class="flex items-center gap-2 mb-2">
-                                <a href="{{ route('cbt.index') }}" class="text-xs font-bold text-blue-300 hover:text-white transition flex items-center gap-1"><i class="ph-bold ph-arrow-left"></i> Dashboard</a>
+                                <a href="<?php echo e(route('cbt.index')); ?>" class="text-xs font-bold text-blue-300 hover:text-white transition flex items-center gap-1"><i class="ph-bold ph-arrow-left"></i> Dashboard</a>
                                 <span class="text-white/30 text-xs">•</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wide bg-white/10 text-white border border-white/10">{{ $exam->subject_name }}</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wide bg-white/10 text-white border border-white/10"><?php echo e($exam->subject_name); ?></span>
                             </div>
-                            <h1 class="text-3xl font-black tracking-tight leading-none text-white mb-1">{{ $exam->title }}</h1>
+                            <h1 class="text-3xl font-black tracking-tight leading-none text-white mb-1"><?php echo e($exam->title); ?></h1>
                         </div>
                         
-                        {{-- Sembunyikan tombol aksi jika ini adalah Google Form --}}
-                        @if(!isset($exam->exam_type) || $exam->exam_type !== 'google_form')
+                        
+                        <?php if(!isset($exam->exam_type) || $exam->exam_type !== 'google_form'): ?>
                         <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                            @if($exam->questions->count() > 0)
+                            <?php if($exam->questions->count() > 0): ?>
                                 <button @click="showExportBankModal = true" class="group px-4 py-2.5 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition flex items-center justify-center gap-2 border border-white/10 text-xs">
                                     <i class="ph-bold ph-upload-simple text-lg"></i> <span>Simpan ke Bank</span>
                                 </button>
-                            @endif
+                            <?php endif; ?>
                             <button @click="showBankModal = true" class="group px-4 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-500 transition flex items-center justify-center gap-2 shadow-lg active:scale-95 border border-indigo-400 text-xs">
                                 <i class="ph-bold ph-download-simple text-lg"></i> <span>Ambil Bank</span>
                             </button>
@@ -124,12 +133,12 @@
                                 <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> <span>Import Excel</span>
                             </button>
                         </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
 
-                {{-- PERBAIKAN: BLOKIR HALAMAN JIKA TIPE UJIAN ADALAH GOOGLE FORM --}}
-                @if(isset($exam->exam_type) && $exam->exam_type == 'google_form')
+                
+                <?php if(isset($exam->exam_type) && $exam->exam_type == 'google_form'): ?>
                     <div class="bg-white rounded-[2.5rem] p-12 text-center border border-emerald-200 shadow-xl shadow-emerald-100/50 relative overflow-hidden">
                         <div class="absolute -top-24 -right-24 w-64 h-64 bg-emerald-50 rounded-full blur-3xl pointer-events-none"></div>
                         <div class="w-24 h-24 bg-emerald-100 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-emerald-500 shadow-inner relative z-10">
@@ -138,15 +147,15 @@
                         <h3 class="text-2xl font-black text-slate-800 mb-2 relative z-10">Ini adalah Ujian Google Form</h3>
                         <p class="text-slate-500 font-medium max-w-lg mx-auto mb-8 relative z-10">Ujian ini menggunakan tautan eksternal Google Formulir. Anda tidak perlu mengelola atau menginput soal di dalam sistem sekolah ini. Pembuatan soal, penilaian, dan rekapitulasi dilakukan langsung di platform Google Workspace Anda.</p>
                         
-                        <a href="{{ $exam->google_form_url }}" target="_blank" class="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-600/30 gap-2 relative z-10 active:scale-95">
+                        <a href="<?php echo e($exam->google_form_url); ?>" target="_blank" class="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-600/30 gap-2 relative z-10 active:scale-95">
                             <i class="ph-bold ph-arrow-square-out text-xl"></i> Buka Google Form Anda
                         </a>
                     </div>
-                @else
-                    {{-- JIKA BUKAN GOOGLE FORM, TAMPILKAN EDITOR CBT SEPERTI BIASA --}}
+                <?php else: ?>
+                    
                     <div class="flex flex-col lg:flex-row gap-8 items-start">
                         
-                        {{-- FORM INPUT SOAL (CREATE) --}}
+                        
                         <div class="w-full lg:w-2/5 order-2 lg:order-1">
                             <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 lg:sticky lg:top-8">
                                 <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-50">
@@ -157,10 +166,10 @@
                                     </div>
                                 </div>
 
-                                <form action="{{ route('cbt.questions.store', $exam->id) }}" method="POST" enctype="multipart/form-data" class="space-y-5" id="createQuestionForm">
-                                    @csrf
+                                <form action="<?php echo e(route('cbt.questions.store', $exam->id)); ?>" method="POST" enctype="multipart/form-data" class="space-y-5" id="createQuestionForm">
+                                    <?php echo csrf_field(); ?>
                                     
-                                    {{-- Pilih Tipe (Create) --}}
+                                    
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tipe Soal</label>
                                         <div class="relative">
@@ -174,14 +183,14 @@
                                         </div>
                                     </div>
 
-                                    {{-- Editor --}}
+                                    
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pertanyaan / Instruksi</label>
                                         <input id="q_input_create" type="hidden" name="question_text">
                                         <trix-editor input="q_input_create" @trix-change="createQuestionText = $event.target.value" placeholder="Tulis soal di sini..." class="prose prose-sm max-w-none"></trix-editor>
                                     </div>
 
-                                    {{-- Upload Gambar --}}
+                                    
                                     <div x-data="{ createPreviewImage: null }">
                                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Gambar (Opsional)</label>
                                         <template x-if="createPreviewImage">
@@ -196,21 +205,21 @@
                                         </label>
                                     </div>
 
-                                    {{-- Input Jawaban Dinamis (Create) --}}
+                                    
                                     <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                                         
                                         <template x-if="createType === 'choice'">
                                             <div class="space-y-4">
                                                 <label class="block text-xs font-bold text-slate-400 uppercase ml-1">Opsi Jawaban & Gambar</label>
-                                                @foreach(['A','B','C','D'] as $opt)
+                                                <?php $__currentLoopData = ['A','B','C','D']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <div class="flex gap-3 items-start group">
-                                                    <span class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-500 flex items-center justify-center font-black text-xs shrink-0 mt-1">{{ $opt }}</span>
+                                                    <span class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-500 flex items-center justify-center font-black text-xs shrink-0 mt-1"><?php echo e($opt); ?></span>
                                                     <div class="flex-1 space-y-2 min-w-0" x-data="{ optPreview: null }">
                                                         <div class="flex gap-2 min-w-0">
-                                                            <input type="text" name="option_{{ $opt }}" class="flex-1 min-w-0 rounded-xl border-slate-200 bg-white text-sm py-2 px-3 focus:ring-blue-500" placeholder="Teks Jawaban {{ $opt }}">
-                                                            <label class="w-10 h-10 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-500 hover:bg-blue-50 cursor-pointer transition" title="Upload Gambar Opsi {{ $opt }}">
+                                                            <input type="text" name="option_<?php echo e($opt); ?>" class="flex-1 min-w-0 rounded-xl border-slate-200 bg-white text-sm py-2 px-3 focus:ring-blue-500" placeholder="Teks Jawaban <?php echo e($opt); ?>">
+                                                            <label class="w-10 h-10 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-500 hover:bg-blue-50 cursor-pointer transition" title="Upload Gambar Opsi <?php echo e($opt); ?>">
                                                                 <i class="ph-bold ph-image text-lg"></i>
-                                                                <input type="file" name="image_{{ $opt }}" accept="image/*" class="hidden" @change="optPreview = URL.createObjectURL($event.target.files[0])">
+                                                                <input type="file" name="image_<?php echo e($opt); ?>" accept="image/*" class="hidden" @change="optPreview = URL.createObjectURL($event.target.files[0])">
                                                             </label>
                                                         </div>
                                                         <template x-if="optPreview">
@@ -221,7 +230,7 @@
                                                         </template>
                                                     </div>
                                                 </div>
-                                                @endforeach
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                 <div class="mt-2">
                                                     <label class="text-xs font-bold text-slate-500">Kunci Jawaban:</label>
                                                     <select name="correct_answer" class="ml-2 rounded-lg border-slate-200 text-xs font-bold py-1 px-3 bg-white">
@@ -324,7 +333,7 @@
                                         </template>
                                     </div>
 
-                                    {{-- Bobot --}}
+                                    
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Bobot Nilai</label>
                                         <input type="number" name="score_weight" value="2" required class="w-20 rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-center h-10 focus:ring-blue-500">
@@ -337,12 +346,12 @@
                             </div>
                         </div>
 
-                        {{-- LIST SOAL (KANAN) --}}
+                        
                         <div class="w-full lg:w-3/5 order-1 lg:order-2 space-y-6">
                             <div class="flex flex-col sm:flex-row justify-between items-center px-2 gap-4">
                                 <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
                                     <i class="ph-fill ph-list-dashes text-blue-500"></i> Daftar Soal
-                                    <span class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">{{ $exam->questions->count() }}</span>
+                                    <span class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm"><?php echo e($exam->questions->count()); ?></span>
                                 </h3>
                                 <div class="relative w-full sm:w-64">
                                     <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -350,146 +359,148 @@
                                 </div>
                             </div>
                             
-                            @forelse($exam->questions as $index => $q)
-                                @php $qType = $q->question_type ?? 'choice'; @endphp
-                                <div x-show="questionSearch === '' || '{{ strtolower(addslashes(strip_tags($q->question_text))) }}'.includes(questionSearch.toLowerCase())"
+                            <?php $__empty_1 = true; $__currentLoopData = $exam->questions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $q): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <?php $qType = $q->question_type ?? 'choice'; ?>
+                                <div x-show="questionSearch === '' || '<?php echo e(strtolower(addslashes(strip_tags($q->question_text)))); ?>'.includes(questionSearch.toLowerCase())"
                                      class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative group hover:border-blue-200 hover:shadow-lg transition-all duration-300">
                                     
-                                    <div class="absolute top-6 left-6 w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center font-black text-slate-500 text-sm group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-inner">{{ $index + 1 }}</div>
+                                    <div class="absolute top-6 left-6 w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center font-black text-slate-500 text-sm group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-inner"><?php echo e($index + 1); ?></div>
                                     
                                     <div class="pl-16">
-                                        {{-- Badge Tipe Soal --}}
+                                        
                                         <div class="mb-2">
-                                            @if($qType == 'choice') <span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-100">PILIHAN GANDA</span>
-                                            @elseif($qType == 'true_false') <span class="text-[10px] font-bold bg-purple-50 text-purple-600 px-2 py-0.5 rounded border border-purple-100">BENAR / SALAH</span>
-                                            @elseif($qType == 'matching') <span class="text-[10px] font-bold bg-orange-50 text-orange-600 px-2 py-0.5 rounded border border-orange-100">MENJODOHKAN</span>
-                                            @elseif($qType == 'essay') <span class="text-[10px] font-bold bg-pink-50 text-pink-600 px-2 py-0.5 rounded border border-pink-100">ESSAI</span>
-                                            @endif
+                                            <?php if($qType == 'choice'): ?> <span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-100">PILIHAN GANDA</span>
+                                            <?php elseif($qType == 'true_false'): ?> <span class="text-[10px] font-bold bg-purple-50 text-purple-600 px-2 py-0.5 rounded border border-purple-100">BENAR / SALAH</span>
+                                            <?php elseif($qType == 'matching'): ?> <span class="text-[10px] font-bold bg-orange-50 text-orange-600 px-2 py-0.5 rounded border border-orange-100">MENJODOHKAN</span>
+                                            <?php elseif($qType == 'essay'): ?> <span class="text-[10px] font-bold bg-pink-50 text-pink-600 px-2 py-0.5 rounded border border-pink-100">ESSAI</span>
+                                            <?php endif; ?>
                                         </div>
 
-                                        @if($q->question_image)
+                                        <?php if($q->question_image): ?>
                                             <div class="mb-4 group/img relative w-fit">
-                                                <img src="{{ asset('storage/' . $q->question_image) }}" class="max-h-48 rounded-2xl border border-slate-100 shadow-sm object-cover cursor-zoom-in hover:opacity-90 transition" onclick="viewImage('{{ asset('storage/' . $q->question_image) }}')">
+                                                <img src="<?php echo e(asset('storage/' . $q->question_image)); ?>" class="max-h-48 rounded-2xl border border-slate-100 shadow-sm object-cover cursor-zoom-in hover:opacity-90 transition" onclick="viewImage('<?php echo e(asset('storage/' . $q->question_image)); ?>')">
                                             </div>
-                                        @endif
-                                        <div class="text-slate-800 font-medium text-lg mb-5 leading-relaxed trix-content prose prose-sm max-w-none">{!! $q->question_text !!}</div>
+                                        <?php endif; ?>
+                                        <div class="text-slate-800 font-medium text-lg mb-5 leading-relaxed trix-content prose prose-sm max-w-none"><?php echo $q->question_text; ?></div>
                                         
-                                        {{-- Preview Jawaban (Read Only) --}}
-                                        @if($qType == 'choice')
+                                        
+                                        <?php if($qType == 'choice'): ?>
                                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                                                @foreach(['A','B','C','D'] as $opt)
-                                                    @php 
+                                                <?php $__currentLoopData = ['A','B','C','D']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <?php 
                                                         $val = isset($q->{'option_'.$opt}) ? $q->{'option_'.$opt} : ($q->options[$opt] ?? '-'); 
                                                         $imgVal = isset($q->{'image_'.$opt}) ? $q->{'image_'.$opt} : ($q->options['image_'.$opt] ?? null);
-                                                    @endphp
-                                                    <div class="flex items-start gap-3 p-2.5 rounded-xl border transition-colors {{ $opt == $q->correct_answer ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50/50 border-transparent' }}">
-                                                        <span class="w-6 h-6 flex items-center justify-center rounded-lg border {{ $opt == $q->correct_answer ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 text-slate-400 bg-white' }} text-[10px] font-black shrink-0 mt-0.5">{{ $opt }}</span>
+                                                    ?>
+                                                    <div class="flex items-start gap-3 p-2.5 rounded-xl border transition-colors <?php echo e($opt == $q->correct_answer ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50/50 border-transparent'); ?>">
+                                                        <span class="w-6 h-6 flex items-center justify-center rounded-lg border <?php echo e($opt == $q->correct_answer ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300 text-slate-400 bg-white'); ?> text-[10px] font-black shrink-0 mt-0.5"><?php echo e($opt); ?></span>
                                                         <div class="flex-1 overflow-hidden">
-                                                            @if($val && $val !== '-')
-                                                                <span class="leading-relaxed block {{ $opt == $q->correct_answer ? 'text-emerald-800 font-bold' : 'text-slate-600 font-medium' }}">{{ $val }}</span>
-                                                            @endif
-                                                            @if($imgVal)
-                                                                <img src="{{ asset('storage/' . $imgVal) }}" class="mt-2 max-h-24 rounded-lg border border-slate-200 object-cover cursor-zoom-in hover:opacity-90 transition" onclick="viewImage('{{ asset('storage/' . $imgVal) }}')">
-                                                            @endif
+                                                            <?php if($val && $val !== '-'): ?>
+                                                                <span class="leading-relaxed block <?php echo e($opt == $q->correct_answer ? 'text-emerald-800 font-bold' : 'text-slate-600 font-medium'); ?>"><?php echo e($val); ?></span>
+                                                            <?php endif; ?>
+                                                            <?php if($imgVal): ?>
+                                                                <img src="<?php echo e(asset('storage/' . $imgVal)); ?>" class="mt-2 max-h-24 rounded-lg border border-slate-200 object-cover cursor-zoom-in hover:opacity-90 transition" onclick="viewImage('<?php echo e(asset('storage/' . $imgVal)); ?>')">
+                                                            <?php endif; ?>
                                                         </div>
                                                     </div>
-                                                @endforeach
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </div>
-                                        @elseif($qType == 'matching')
+                                        <?php elseif($qType == 'matching'): ?>
                                             <div class="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
                                                 <p class="font-bold mb-2">Pasangan:</p>
-                                                @php 
+                                                <?php 
                                                     $pairs = is_string($q->options) ? json_decode($q->options, true)['pairs'] ?? [] : $q->options['pairs'] ?? [];
-                                                @endphp
+                                                ?>
                                                 <div class="space-y-2">
-                                                    @foreach($pairs as $p)
+                                                    <?php $__currentLoopData = $pairs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                         <div class="flex items-center gap-3 bg-white p-2 rounded-lg border border-slate-100 shadow-sm">
                                                             <div class="flex-1 flex flex-col sm:flex-row items-center sm:items-start gap-2 text-center sm:text-left">
-                                                                @if(isset($p['left_image']) && $p['left_image'])
-                                                                    <img src="{{ asset('storage/' . $p['left_image']) }}" class="w-10 h-10 rounded border border-slate-200 object-cover cursor-zoom-in" onclick="viewImage('{{ asset('storage/' . $p['left_image']) }}')">
-                                                                @endif
-                                                                @if(isset($p['left']) && $p['left'] !== '')
-                                                                    <span class="font-medium text-slate-700 mt-1 sm:mt-0">{{ $p['left'] }}</span>
-                                                                @endif
+                                                                <?php if(isset($p['left_image']) && $p['left_image']): ?>
+                                                                    <img src="<?php echo e(asset('storage/' . $p['left_image'])); ?>" class="w-10 h-10 rounded border border-slate-200 object-cover cursor-zoom-in" onclick="viewImage('<?php echo e(asset('storage/' . $p['left_image'])); ?>')">
+                                                                <?php endif; ?>
+                                                                <?php if(isset($p['left']) && $p['left'] !== ''): ?>
+                                                                    <span class="font-medium text-slate-700 mt-1 sm:mt-0"><?php echo e($p['left']); ?></span>
+                                                                <?php endif; ?>
                                                             </div>
                                                             <i class="ph-bold ph-arrows-left-right text-slate-300"></i>
                                                             <div class="flex-1 flex flex-col sm:flex-row items-center sm:items-start gap-2 text-center sm:text-left">
-                                                                @if(isset($p['right_image']) && $p['right_image'])
-                                                                    <img src="{{ asset('storage/' . $p['right_image']) }}" class="w-10 h-10 rounded border border-slate-200 object-cover cursor-zoom-in" onclick="viewImage('{{ asset('storage/' . $p['right_image']) }}')">
-                                                                @endif
-                                                                @if(isset($p['right']) && $p['right'] !== '')
-                                                                    <span class="font-medium text-slate-700 mt-1 sm:mt-0">{{ $p['right'] }}</span>
-                                                                @endif
+                                                                <?php if(isset($p['right_image']) && $p['right_image']): ?>
+                                                                    <img src="<?php echo e(asset('storage/' . $p['right_image'])); ?>" class="w-10 h-10 rounded border border-slate-200 object-cover cursor-zoom-in" onclick="viewImage('<?php echo e(asset('storage/' . $p['right_image'])); ?>')">
+                                                                <?php endif; ?>
+                                                                <?php if(isset($p['right']) && $p['right'] !== ''): ?>
+                                                                    <span class="font-medium text-slate-700 mt-1 sm:mt-0"><?php echo e($p['right']); ?></span>
+                                                                <?php endif; ?>
                                                             </div>
                                                         </div>
-                                                    @endforeach
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                 </div>
                                             </div>
-                                        @elseif($qType == 'essay')
+                                        <?php elseif($qType == 'essay'): ?>
                                             <div class="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                                                <span class="font-bold">Kunci:</span> {{ $q->correct_answer ?: '(Koreksi Manual)' }}
+                                                <span class="font-bold">Kunci:</span> <?php echo e($q->correct_answer ?: '(Koreksi Manual)'); ?>
+
                                             </div>
-                                        @elseif($qType == 'true_false')
+                                        <?php elseif($qType == 'true_false'): ?>
                                             <div class="flex gap-2">
-                                                <span class="px-3 py-1 rounded-lg border text-xs font-bold {{ $q->correct_answer == 'A' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-400' }}">BENAR</span>
-                                                <span class="px-3 py-1 rounded-lg border text-xs font-bold {{ $q->correct_answer == 'B' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-400' }}">SALAH</span>
+                                                <span class="px-3 py-1 rounded-lg border text-xs font-bold <?php echo e($q->correct_answer == 'A' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-400'); ?>">BENAR</span>
+                                                <span class="px-3 py-1 rounded-lg border text-xs font-bold <?php echo e($q->correct_answer == 'B' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-400'); ?>">SALAH</span>
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
 
                                         <div class="mt-5 pt-3 border-t border-slate-50 flex items-center gap-3">
-                                            <span class="text-[10px] font-bold text-slate-400 uppercase bg-slate-50 px-2 py-1 rounded-md border border-slate-100">Bobot: {{ $q->score_weight }} Poin</span>
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase bg-slate-50 px-2 py-1 rounded-md border border-slate-100">Bobot: <?php echo e($q->score_weight); ?> Poin</span>
                                         </div>
                                     </div>
 
-                                    {{-- ACTION BUTTONS --}}
+                                    
                                     <div class="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                         <button type="button" @click="openEdit({
-                                                question_type: '{{ $qType }}',
-                                                question_text: {{ json_encode($q->question_text) }},
-                                                question_image: {{ json_encode($q->question_image) }}, 
-                                                option_A: {{ json_encode($q->option_A ?? ($q->options['A']??'')) }},
-                                                option_B: {{ json_encode($q->option_B ?? ($q->options['B']??'')) }},
-                                                option_C: {{ json_encode($q->option_C ?? ($q->options['C']??'')) }},
-                                                option_D: {{ json_encode($q->option_D ?? ($q->options['D']??'')) }},
-                                                image_A: '{{ $q->image_A ?? ($q->options['image_A'] ?? '') }}',
-                                                image_B: '{{ $q->image_B ?? ($q->options['image_B'] ?? '') }}',
-                                                image_C: '{{ $q->image_C ?? ($q->options['image_C'] ?? '') }}',
-                                                image_D: '{{ $q->image_D ?? ($q->options['image_D'] ?? '') }}',
-                                                options: {{ json_encode($q->options) }}, 
-                                                correct_answer: '{{ $q->correct_answer }}',
-                                                score_weight: {{ $q->score_weight }}
-                                            }, '{{ route('cbt.questions.update', $q->id) }}')"
+                                                question_type: '<?php echo e($qType); ?>',
+                                                question_text: <?php echo e(json_encode($q->question_text)); ?>,
+                                                question_image: <?php echo e(json_encode($q->question_image)); ?>, 
+                                                option_A: <?php echo e(json_encode($q->option_A ?? ($q->options['A']??''))); ?>,
+                                                option_B: <?php echo e(json_encode($q->option_B ?? ($q->options['B']??''))); ?>,
+                                                option_C: <?php echo e(json_encode($q->option_C ?? ($q->options['C']??''))); ?>,
+                                                option_D: <?php echo e(json_encode($q->option_D ?? ($q->options['D']??''))); ?>,
+                                                image_A: '<?php echo e($q->image_A ?? ($q->options['image_A'] ?? '')); ?>',
+                                                image_B: '<?php echo e($q->image_B ?? ($q->options['image_B'] ?? '')); ?>',
+                                                image_C: '<?php echo e($q->image_C ?? ($q->options['image_C'] ?? '')); ?>',
+                                                image_D: '<?php echo e($q->image_D ?? ($q->options['image_D'] ?? '')); ?>',
+                                                options: <?php echo e(json_encode($q->options)); ?>, 
+                                                correct_answer: '<?php echo e($q->correct_answer); ?>',
+                                                score_weight: <?php echo e($q->score_weight); ?>
+
+                                            }, '<?php echo e(route('cbt.questions.update', $q->id)); ?>')"
                                             class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 shadow-sm flex items-center justify-center transition-all hover:scale-105">
                                             <i class="ph-bold ph-pencil-simple text-lg"></i>
                                         </button>
 
-                                        <form action="{{ route('cbt.questions.destroy', $q->id) }}" method="POST" class="delete-form">
-                                            @csrf @method('DELETE')
+                                        <form action="<?php echo e(route('cbt.questions.destroy', $q->id)); ?>" method="POST" class="delete-form">
+                                            <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                                             <button type="button" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 shadow-sm flex items-center justify-center transition-all hover:scale-105 btn-delete"><i class="ph-bold ph-trash text-lg"></i></button>
                                         </form>
                                     </div>
                                 </div>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <div class="text-center py-16 bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200">
                                     <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300 animate-pulse"><i class="ph-duotone ph-clipboard-text text-4xl"></i></div>
                                     <h3 class="text-slate-800 font-black text-xl mb-1">Bank Soal Kosong</h3>
                                     <p class="text-slate-500 text-sm max-w-xs mx-auto font-medium">Mulai tambahkan soal secara manual atau import dari file Excel.</p>
                                 </div>
-                            @endforelse
+                            <?php endif; ?>
                         </div>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
 
-            {{-- === MODAL SECTION (Tetap ada, disembunyikan secara bawaan oleh x-show) === --}}
+            
 
-            {{-- 1. MODAL EDIT SOAL --}}
+            
             <div x-show="showEditModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
                  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showEditModal = false"></div>
                 <div class="flex min-h-screen items-center justify-center p-4">
                     <div class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all sm:w-full sm:max-w-2xl border border-slate-100">
                         <form :action="editState.url" method="POST" enctype="multipart/form-data" id="editQuestionForm">
-                            @csrf @method('PUT')
+                            <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
                             <input type="hidden" name="delete_image" x-model="deleteImage">
 
                             <div class="bg-white px-8 py-6 border-b border-slate-100 flex justify-between items-center">
@@ -499,7 +510,7 @@
 
                             <div class="p-8 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar bg-slate-50/30">
                                 
-                                {{-- GANTI TIPE SOAL (EDIT) --}}
+                                
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tipe Soal</label>
                                     <div class="relative">
@@ -512,14 +523,14 @@
                                     </div>
                                 </div>
 
-                                {{-- Editor --}}
+                                
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pertanyaan</label>
                                     <input id="q_input_edit" type="hidden" name="question_text" x-model="editState.question_text">
                                     <trix-editor id="edit-trix-editor" input="q_input_edit" @trix-change="editState.question_text = $event.target.value" class="prose prose-sm max-w-none bg-white"></trix-editor>
                                 </div>
 
-                                {{-- Gambar --}}
+                                
                                 <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100">
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Gambar Soal</label>
                                     <div class="flex flex-col gap-4">
@@ -543,24 +554,24 @@
                                     </div>
                                 </div>
 
-                                {{-- JAWABAN DINAMIS (EDIT) --}}
+                                
                                 <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                                     <template x-if="editState.question_type === 'choice'">
                                         <div class="space-y-4">
                                             <label class="block text-xs font-bold text-slate-400 uppercase ml-1">Edit Pilihan & Gambar</label>
-                                            @foreach(['A','B','C','D'] as $opt)
+                                            <?php $__currentLoopData = ['A','B','C','D']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <div class="flex gap-3 items-start">
-                                                <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-black text-sm shrink-0 mt-1">{{ $opt }}</span>
+                                                <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-black text-sm shrink-0 mt-1"><?php echo e($opt); ?></span>
                                                 <div class="flex-1 space-y-2 min-w-0" x-data="{ optPreviewEdit: null, deleteOptImage: false }">
                                                     <div class="flex gap-2 min-w-0">
-                                                        <input type="text" name="option_{{ $opt }}" x-model="editState.option_{{ $opt }}" class="flex-1 min-w-0 rounded-xl border-slate-200 text-sm py-2.5 px-4 focus:ring-blue-500 font-medium" placeholder="Teks opsi {{ $opt }}">
-                                                        <label class="w-11 h-11 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-500 hover:bg-blue-50 cursor-pointer transition" title="Ganti Gambar Opsi {{ $opt }}">
+                                                        <input type="text" name="option_<?php echo e($opt); ?>" x-model="editState.option_<?php echo e($opt); ?>" class="flex-1 min-w-0 rounded-xl border-slate-200 text-sm py-2.5 px-4 focus:ring-blue-500 font-medium" placeholder="Teks opsi <?php echo e($opt); ?>">
+                                                        <label class="w-11 h-11 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-500 hover:bg-blue-50 cursor-pointer transition" title="Ganti Gambar Opsi <?php echo e($opt); ?>">
                                                             <i class="ph-bold ph-image text-lg"></i>
-                                                            <input type="file" name="image_{{ $opt }}" accept="image/*" class="hidden" @change="optPreviewEdit = URL.createObjectURL($event.target.files[0]); deleteOptImage = false">
+                                                            <input type="file" name="image_<?php echo e($opt); ?>" accept="image/*" class="hidden" @change="optPreviewEdit = URL.createObjectURL($event.target.files[0]); deleteOptImage = false">
                                                         </label>
                                                     </div>
                                                     
-                                                    <input type="hidden" name="delete_image_{{ $opt }}" x-model="deleteOptImage">
+                                                    <input type="hidden" name="delete_image_<?php echo e($opt); ?>" x-model="deleteOptImage">
     
                                                     <template x-if="optPreviewEdit">
                                                         <div class="relative w-24 mt-2">
@@ -570,16 +581,16 @@
                                                         </div>
                                                     </template>
                                                     
-                                                    <template x-if="!optPreviewEdit && editState.image_{{ $opt }} && !deleteOptImage">
+                                                    <template x-if="!optPreviewEdit && editState.image_<?php echo e($opt); ?> && !deleteOptImage">
                                                         <div class="relative w-24 group/optimg mt-2">
                                                             <p class="text-[10px] font-bold text-slate-400 mb-1">Saat ini:</p>
-                                                            <img :src="'/storage/' + editState.image_{{ $opt }}" class="h-24 w-24 object-cover rounded-xl border border-slate-200 shadow-sm">
+                                                            <img :src="'/storage/' + editState.image_<?php echo e($opt); ?>" class="h-24 w-24 object-cover rounded-xl border border-slate-200 shadow-sm">
                                                             <button type="button" @click="deleteOptImage = true" class="absolute inset-y-0 bottom-0 mt-5 inset-x-0 bg-rose-900/80 text-white flex items-center justify-center opacity-0 group-hover/optimg:opacity-100 transition rounded-xl font-bold text-xs gap-1"><i class="ph-bold ph-trash"></i> Hapus</button>
                                                         </div>
                                                     </template>
                                                 </div>
                                             </div>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             <div class="mt-2">
                                                 <label class="text-xs font-bold text-slate-500">Kunci:</label>
                                                 <select name="correct_answer" x-model="editState.correct_answer" class="ml-2 rounded-lg border-slate-200 text-xs font-bold py-1 px-3 bg-white">
@@ -700,7 +711,7 @@
                                     </template>
                                 </div>
 
-                                {{-- Bobot --}}
+                                
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Bobot</label>
                                     <input type="number" name="score_weight" x-model="editState.score_weight" required class="w-full rounded-xl border-slate-200 text-sm font-bold text-center h-11">
@@ -716,7 +727,7 @@
                 </div>
             </div>
 
-            {{-- 2. MODAL IMPORT EXCEL --}}
+            
             <div x-show="showImportModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
                 <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showImportModal = false"></div>
                 <div class="flex min-h-screen items-center justify-center p-4">
@@ -726,38 +737,38 @@
                             <h3 class="text-xl font-black text-slate-800">Import Soal Excel</h3>
                             <p class="text-sm text-slate-500 mt-1">Upload file .xlsx sesuai template.</p>
                         </div>
-                        <form action="{{ route('cbt.questions.import', $exam->id) }}" method="POST" enctype="multipart/form-data" id="importQuestionForm" onsubmit="event.preventDefault(); confirmSubmit(this, 'Import File Excel?', 'Soal dari excel akan ditambahkan ke ujian ini.', '#059669', 'Memproses Data...');">
-                            @csrf
+                        <form action="<?php echo e(route('cbt.questions.import', $exam->id)); ?>" method="POST" enctype="multipart/form-data" id="importQuestionForm" onsubmit="event.preventDefault(); confirmSubmit(this, 'Import File Excel?', 'Soal dari excel akan ditambahkan ke ujian ini.', '#059669', 'Memproses Data...');">
+                            <?php echo csrf_field(); ?>
                             <input type="file" name="file" required class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer border border-slate-200 rounded-xl bg-slate-50 mb-4">
                             <button type="submit" class="w-full py-3 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 shadow-lg">Upload & Proses</button>
                         </form>
                         <div class="mt-4 text-center">
-                            <a href="{{ route('cbt.questions.template') }}" class="text-xs font-bold text-blue-600 hover:underline">Download Template Excel</a>
+                            <a href="<?php echo e(route('cbt.questions.template')); ?>" class="text-xs font-bold text-blue-600 hover:underline">Download Template Excel</a>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- 3. MODAL AMBIL DARI BANK SOAL --}}
+            
             <div x-show="showBankModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
                 <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showBankModal = false"></div>
                 <div class="flex min-h-screen items-center justify-center p-4">
                     <div class="relative bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full p-8 border border-slate-100">
                         <h3 class="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><i class="ph-fill ph-download-simple text-indigo-600"></i> Ambil dari Bank Soal</h3>
                         
-                        <form action="{{ route('cbt.import_from_bank', $exam->id) }}" method="POST" onsubmit="event.preventDefault(); confirmSubmit(this, 'Salin dari Bank Soal?', 'Semua soal dari bank terpilih akan diduplikasi ke ujian ini.', '#4f46e5', 'Menyalin Soal...');">
-                            @csrf
+                        <form action="<?php echo e(route('cbt.import_from_bank', $exam->id)); ?>" method="POST" onsubmit="event.preventDefault(); confirmSubmit(this, 'Salin dari Bank Soal?', 'Semua soal dari bank terpilih akan diduplikasi ke ujian ini.', '#4f46e5', 'Menyalin Soal...');">
+                            <?php echo csrf_field(); ?>
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pilih Bank Soal</label>
-                                    @php
+                                    <?php
                                         $banks = \App\Models\CbtQuestionBank::where('class_level', $exam->class_level)->orWhere('subject_name', 'like', '%'.$exam->subject_name.'%')->get();
-                                    @endphp
+                                    ?>
                                     <select name="bank_id" required class="w-full rounded-xl border-slate-200 font-bold text-slate-700 py-3 px-4">
                                         <option value="" disabled selected>-- Pilih Bank Soal --</option>
-                                        @foreach($banks as $b)
-                                            <option value="{{ $b->id }}">{{ $b->title }} ({{ $b->questions_count }} Soal)</option>
-                                        @endforeach
+                                        <?php $__currentLoopData = $banks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $b): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($b->id); ?>"><?php echo e($b->title); ?> (<?php echo e($b->questions_count); ?> Soal)</option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </select>
                                 </div>
                                 <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 shadow-lg">Salin Semua Soal</button>
@@ -767,15 +778,15 @@
                 </div>
             </div>
 
-            {{-- 4. MODAL SIMPAN KE BANK SOAL --}}
+            
             <div x-show="showExportBankModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
                 <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showExportBankModal = false"></div>
                 <div class="flex min-h-screen items-center justify-center p-4">
                     <div class="relative bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full p-8 border border-slate-100" x-data="{ mode: 'new' }">
                         <h3 class="text-xl font-black text-slate-800 mb-6 flex items-center gap-2"><i class="ph-fill ph-upload-simple text-blue-600"></i> Simpan ke Bank Soal</h3>
                         
-                        <form action="{{ route('cbt.export_to_bank', $exam->id) }}" method="POST">
-                            @csrf
+                        <form action="<?php echo e(route('cbt.export_to_bank', $exam->id)); ?>" method="POST">
+                            <?php echo csrf_field(); ?>
                             <div class="space-y-4">
                                 <div class="flex gap-4 p-1 bg-slate-100 rounded-xl">
                                     <button type="button" @click="mode = 'new'" class="flex-1 py-2 rounded-lg text-xs font-bold transition" :class="mode === 'new' ? 'bg-white shadow text-blue-600' : 'text-slate-500 hover:text-slate-700'">Buat Bank Baru</button>
@@ -791,9 +802,9 @@
                                 <div x-show="mode === 'existing'">
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pilih Bank Tujuan</label>
                                     <select name="bank_id" class="w-full rounded-xl border-slate-200 font-bold text-slate-700 py-3 px-4">
-                                        @foreach($banks as $b)
-                                            <option value="{{ $b->id }}">{{ $b->title }}</option>
-                                        @endforeach
+                                        <?php $__currentLoopData = $banks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $b): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($b->id); ?>"><?php echo e($b->title); ?></option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </select>
                                 </div>
 
@@ -804,7 +815,7 @@
                 </div>
             </div>
 
-            {{-- SCRIPT SWEETALERT2 --}}
+            
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
             <script>
                 function confirmSubmit(form, title, text, color, loadingText) {
@@ -844,12 +855,12 @@
                     };
                     setupLoading('createQuestionForm'); setupLoading('editQuestionForm', 'Memperbarui Soal...');
                     
-                    @if(session('success'))
-                        Swal.fire({ icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}", toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, customClass: { popup: 'rounded-xl' } });
-                    @endif
-                    @if(session('error'))
-                        Swal.fire({ icon: 'error', title: 'Gagal!', text: "{{ session('error') }}", toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, customClass: { popup: 'rounded-xl' } });
-                    @endif
+                    <?php if(session('success')): ?>
+                        Swal.fire({ icon: 'success', title: 'Berhasil!', text: "<?php echo e(session('success')); ?>", toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, customClass: { popup: 'rounded-xl' } });
+                    <?php endif; ?>
+                    <?php if(session('error')): ?>
+                        Swal.fire({ icon: 'error', title: 'Gagal!', text: "<?php echo e(session('error')); ?>", toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, customClass: { popup: 'rounded-xl' } });
+                    <?php endif; ?>
                 });
                 function viewImage(url) {
                     Swal.fire({ imageUrl: url, imageAlt: 'Gambar Soal', showConfirmButton: false, showCloseButton: true, customClass: { popup: 'rounded-[2rem]', image: 'rounded-2xl' }, width: 'auto' });
@@ -857,4 +868,13 @@
             </script>
         </div>
     </div>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/cbt/manage_questions.blade.php ENDPATH**/ ?>
