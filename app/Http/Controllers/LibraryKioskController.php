@@ -15,7 +15,7 @@ class LibraryKioskController extends Controller
 {
     public function index()
     {
-        // 1. Ambil data kunjungan hari ini (Logika Lama Tetap Ada)
+        // 1. Ambil data kunjungan hari ini
         $recentVisits = LibraryVisit::with('student')
                         ->whereDate('date', Carbon::today())
                         ->latest()
@@ -23,14 +23,15 @@ class LibraryKioskController extends Controller
                         ->get()
                         ->map(function ($visit) {
                             return [
-                                'name' => $visit->student->name,
+                                // PERBAIKAN: Gunakan optional() agar tidak Error 500 jika siswa sudah dihapus
+                                'name' => optional($visit->student)->name ?? 'Siswa (Dihapus)',
                                 'status' => true,
                                 'message' => 'Tercatat',
                                 'time_log' => Carbon::parse($visit->time)->format('H:i') 
                             ];
                         });
 
-        // 2. Rekomendasi Buku (Logika Lama Tetap Ada)
+        // 2. Rekomendasi Buku
         $recommendations = Book::inRandomOrder()
                             ->where('stock', '>', 0)
                             ->take(3)
@@ -66,7 +67,9 @@ class LibraryKioskController extends Controller
                         ->get();
         
         $hasOverdue = $overdueBooks->count() > 0;
-        $overdueTitles = $overdueBooks->map(fn($b) => $b->book->title)->implode(', ');
+        $overdueTitles = $overdueBooks->map(function($b) {
+            return optional($b->book)->title ?? 'Buku Tidak Dikenal';
+        })->implode(', ');
 
         // 3. Cek Ulang Tahun
         $isBirthday = $student->dob ? Carbon::parse($student->dob)->isBirthday() : false;

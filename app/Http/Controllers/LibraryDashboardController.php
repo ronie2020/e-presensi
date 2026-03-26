@@ -153,7 +153,7 @@ class LibraryDashboardController extends Controller
     }
 
     /**
-     * Method AJAX untuk Cek Status Siswa (EXISTING)
+     * Method AJAX untuk Cek Status Siswa (DIPERBAIKI)
      */
     public function checkStudent(Request $request)
     {
@@ -163,9 +163,14 @@ class LibraryDashboardController extends Controller
             return response()->json(['success' => false, 'message' => 'Input kosong']);
         }
 
+        // PERBAIKAN: Memasukkan student_id, rfid_id, dan nis agar seragam dengan fungsi Sirkulasi
+        // Sehingga ketika di-scan pakai Barcode, siswa tetap terbaca
         $student = Student::with('schoolClass') 
-                    ->where('name', 'like', "%{$query}%")
-                    ->orWhere('nisn', 'like', "%{$query}%")
+                    ->where('student_id', $query)
+                    ->orWhere('rfid_id', $query)
+                    ->orWhere('nis', $query)
+                    ->orWhere('nisn', $query)
+                    ->orWhere('name', 'like', "%{$query}%")
                     ->first();
 
         if (!$student) {

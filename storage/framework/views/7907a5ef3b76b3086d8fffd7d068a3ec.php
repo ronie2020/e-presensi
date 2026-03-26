@@ -1,11 +1,20 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION --}}
+            
             <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 mb-10 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -13,7 +22,7 @@
                 <div class="relative z-10 flex items-center justify-between">
                     <div>
                         <div class="flex items-center gap-3 mb-2">
-                            <a href="{{ route('library.dashboard') }}" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-blue-100 transition flex items-center gap-2">
+                            <a href="<?php echo e(route('library.dashboard')); ?>" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold text-blue-100 transition flex items-center gap-2">
                                 <i class="ph-bold ph-arrow-left"></i> Dashboard
                             </a>
                             <span class="text-blue-300 text-xs font-bold uppercase tracking-wider">Modul Transaksi</span>
@@ -38,7 +47,7 @@
                 <!-- PANEL PEMINJAMAN (KIRI) -->
                 <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 h-full flex flex-col relative overflow-hidden group hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
                     
-                    {{-- Header --}}
+                    
                     <div class="p-8 pb-0">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-[1.2rem] flex items-center justify-center text-2xl shadow-sm border border-blue-100">
@@ -61,8 +70,7 @@
                             <div class="flex gap-3">
                                 <div id="member-scan-wrapper" class="flex-1 flex items-center px-5 py-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl focus-within:border-blue-500 focus-within:bg-white focus-within:shadow-lg transition-all group-hover/step:border-slate-300">
                                     <i class="ph-bold ph-identification-card text-slate-400 mr-3 text-xl"></i>
-                                    <!-- PERBAIKAN: Input sekarang menangkap hardware scanner lebih mulus -->
-                                    <input type="text" id="memberInput" class="w-full bg-transparent border-none focus:ring-0 text-slate-800 font-bold placeholder-slate-400 text-sm" placeholder="Scan Kartu / Ketik NISN + Enter" autofocus>
+                                    <input type="text" id="memberInput" class="w-full bg-transparent border-none focus:ring-0 text-slate-800 font-bold placeholder-slate-400 text-sm" placeholder="Scan Kartu / Ketik NISN" autofocus>
                                 </div>
                                 <button type="button" onclick="openScanner('memberInput')" class="p-4 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 rounded-2xl transition-all shadow-sm border border-blue-100 hover:border-blue-600 hover:shadow-lg hover:shadow-blue-500/30" title="Buka Kamera">
                                     <i class="ph-bold ph-qr-code text-2xl"></i>
@@ -81,7 +89,7 @@
                             <div class="flex gap-3">
                                 <div id="book-borrow-scan-wrapper" class="flex-1 flex items-center px-5 py-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl focus-within:border-blue-500 focus-within:bg-white focus-within:shadow-lg transition-all">
                                     <i class="ph-bold ph-book-open text-slate-400 mr-3 text-xl"></i>
-                                    <input type="text" id="bookBorrowInput" class="w-full bg-transparent border-none focus:ring-0 text-slate-800 font-bold placeholder-slate-400 text-sm" placeholder="Scan Barcode Buku + Enter">
+                                    <input type="text" id="bookBorrowInput" class="w-full bg-transparent border-none focus:ring-0 text-slate-800 font-bold placeholder-slate-400 text-sm" placeholder="Scan Barcode Buku">
                                 </div>
                                 <button type="button" onclick="openScanner('bookBorrowInput')" class="p-4 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 rounded-2xl transition-all shadow-sm border border-blue-100 hover:border-blue-600 hover:shadow-lg hover:shadow-blue-500/30">
                                     <i class="ph-bold ph-barcode text-2xl"></i>
@@ -121,7 +129,7 @@
                             <div class="relative max-w-sm mx-auto z-10">
                                 <div id="return-scan-wrapper" class="flex items-center px-5 py-4 bg-white border-2 border-emerald-400 rounded-2xl shadow-lg shadow-emerald-500/10 focus-within:ring-4 focus-within:ring-emerald-100 transition-all">
                                     <i class="ph-bold ph-barcode text-emerald-500 mr-3 text-2xl"></i>
-                                    <input type="text" id="returnInput" class="w-full bg-transparent border-none focus:ring-0 text-slate-800 font-black text-lg placeholder-slate-300" placeholder="Scan Buku + Enter" autofocus>
+                                    <input type="text" id="returnInput" class="w-full bg-transparent border-none focus:ring-0 text-slate-800 font-black text-lg placeholder-slate-300" placeholder="Scan Buku..." autofocus>
                                 </div>
                                 <button onclick="openScanner('returnInput')" class="absolute right-3 top-3 p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors">
                                     <i class="ph-bold ph-camera text-xl"></i>
@@ -138,7 +146,7 @@
 
             </div>
 
-            <!-- TABEL REKAP PEMINJAMAN TERKINI -->
+            <!-- TABEL REKAP PEMINJAMAN TERKINI (BARU DITAMBAHKAN) -->
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
                 <div class="p-8 border-b border-slate-100 flex items-center justify-between">
                     <div class="flex items-center gap-4">
@@ -173,49 +181,53 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            @forelse($recentActiveLoans as $loan)
+                            <?php $__empty_1 = true; $__currentLoopData = $recentActiveLoans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $loan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr class="group hover:bg-slate-50 transition-colors">
                                 <td class="px-8 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-500">
-                                            {{ substr(optional($loan->student)->name ?? '?', 0, 1) }}
+                                            <?php echo e(substr(optional($loan->student)->name ?? '?', 0, 1)); ?>
+
                                         </div>
                                         <div>
-                                            <p class="font-bold text-sm text-slate-700">{{ optional($loan->student)->name ?? 'Siswa Terhapus' }}</p>
-                                            <p class="text-xs text-slate-400 font-mono">{{ optional($loan->student)->student_id ?? '-' }}</p>
+                                            <p class="font-bold text-sm text-slate-700"><?php echo e(optional($loan->student)->name ?? 'Siswa Terhapus'); ?></p>
+                                            <p class="text-xs text-slate-400 font-mono"><?php echo e(optional($loan->student)->student_id ?? '-'); ?></p>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-8 py-4">
                                     <div class="flex items-center gap-2">
                                         <i class="ph-fill ph-book text-slate-300"></i>
-                                        <span class="text-sm font-medium text-slate-600 truncate max-w-[200px] block" title="{{ optional($loan->book)->title }}">
-                                            {{ optional($loan->book)->title ?? 'Buku Terhapus' }}
+                                        <span class="text-sm font-medium text-slate-600 truncate max-w-[200px] block" title="<?php echo e(optional($loan->book)->title); ?>">
+                                            <?php echo e(optional($loan->book)->title ?? 'Buku Terhapus'); ?>
+
                                         </span>
                                     </div>
                                 </td>
                                 <td class="px-8 py-4 text-sm font-bold text-slate-500">
-                                    {{ \Carbon\Carbon::parse($loan->borrow_date)->format('d M Y') }}
+                                    <?php echo e(\Carbon\Carbon::parse($loan->borrow_date)->format('d M Y')); ?>
+
                                 </td>
                                 <td class="px-8 py-4 text-sm font-bold text-slate-500">
-                                    {{ \Carbon\Carbon::parse($loan->due_date)->format('d M Y') }}
+                                    <?php echo e(\Carbon\Carbon::parse($loan->due_date)->format('d M Y')); ?>
+
                                 </td>
                                 <td class="px-8 py-4 text-center">
-                                    @php
+                                    <?php
                                         $isOverdue = \Carbon\Carbon::now()->gt($loan->due_date);
-                                    @endphp
-                                    @if($isOverdue)
+                                    ?>
+                                    <?php if($isOverdue): ?>
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100 uppercase tracking-wide">
                                             Late
                                         </span>
-                                    @else
+                                    <?php else: ?>
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase tracking-wide">
                                             Active
                                         </span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                             </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
                                 <td colspan="5" class="px-8 py-10 text-center text-slate-400">
                                     <div class="flex flex-col items-center justify-center gap-2">
@@ -224,7 +236,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            @endforelse
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -233,7 +245,7 @@
         </div>
     </div>
 
-    {{-- MODAL SCANNER --}}
+    
     <div id="scannerModal" class="fixed inset-0 z-[60] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-md transition-opacity" onclick="stopScanner()"></div>
         <div class="flex min-h-screen items-center justify-center p-4">
@@ -242,7 +254,7 @@
                     <h3 class="text-xl font-black text-slate-800 text-center mb-6">Pindai Kode</h3>
                     <div class="relative bg-black rounded-3xl overflow-hidden aspect-square border-4 border-slate-100 shadow-inner">
                         <div id="reader" class="w-full h-full"></div>
-                        {{-- Overlay Frame Scanner --}}
+                        
                         <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
                             <div class="w-64 h-64 border-2 border-white/30 rounded-2xl relative">
                                 <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl-xl -mt-1 -ml-1"></div>
@@ -258,12 +270,13 @@
         </div>
     </div>
 
-    {{-- Script JavaScript --}}
+    
     <script>
         // --- SETUP AUDIO ---
+        // Menggunakan sound effect ringan untuk feedback cepat
         const audioSuccess = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
         const audioError = new Audio('https://assets.mixkit.co/active_storage/sfx/950/950-preview.mp3');
-        const audioBeep = new Audio('https://assets.mixkit.co/active_storage/sfx/2578/2578-preview.mp3'); 
+        const audioBeep = new Audio('https://assets.mixkit.co/active_storage/sfx/2578/2578-preview.mp3'); // Untuk konfirmasi
 
         let html5QrcodeScanner = null;
         let activeInputId = null;
@@ -301,23 +314,6 @@
             }
         }
 
-        // --- PERBAIKAN: HARDWARE SCANNER COMPATIBILITY ---
-        // Menangkap event "Enter" yang sering dikirim oleh physical barcode scanner
-        function addScannerEnterEvent(elementId) {
-            const el = document.getElementById(elementId);
-            el.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault(); 
-                    this.dispatchEvent(new Event('change')); // Memicu proses pencarian instan
-                }
-            });
-        }
-        
-        addScannerEnterEvent('memberInput');
-        addScannerEnterEvent('bookBorrowInput');
-        addScannerEnterEvent('returnInput');
-        // --------------------------------------------------
-
         // --- 1. LOGIC PENCARIAN ANGGOTA ---
         document.getElementById('memberInput').addEventListener('change', async function(e) {
             const query = e.target.value;
@@ -329,9 +325,9 @@
             try {
                 wrapper.classList.add('opacity-50');
 
-                const res = await fetch('{{ route("library.circulation.searchStudent") }}', {
+                const res = await fetch('<?php echo e(route("library.circulation.searchStudent")); ?>', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ q: query })
                 });
                 
@@ -340,7 +336,7 @@
                 const data = await res.json();
 
                 if(data.success) {
-                    audioSuccess.play(); 
+                    audioSuccess.play(); // Sound Feedback
                     currentMember = data.student;
                     wrapper.classList.add('border-emerald-500', 'bg-emerald-50');
                     wrapper.classList.remove('border-slate-200', 'bg-slate-50', 'border-rose-500', 'bg-rose-50');
@@ -398,7 +394,7 @@
                         Swal.fire({ icon: 'error', title: 'Terblokir', text: 'Siswa memiliki buku yang belum dikembalikan melewati tenggat.', customClass: { popup: 'rounded-[2rem]' }});
                     }
                 } else {
-                    audioError.play(); 
+                    audioError.play(); // Sound Feedback
                     wrapper.classList.add('border-rose-500', 'bg-rose-50');
                     Swal.fire({ icon: 'error', title: 'Gagal', text: 'Siswa tidak ditemukan.', customClass: { popup: 'rounded-[2rem]' }});
                 }
@@ -427,9 +423,9 @@
             try {
                 wrapper.classList.add('opacity-50');
 
-                const res = await fetch('{{ route("library.circulation.searchBook") }}', {
+                const res = await fetch('<?php echo e(route("library.circulation.searchBook")); ?>', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ q: query })
                 });
 
@@ -437,7 +433,7 @@
                 const data = await res.json();
 
                 if(data.success && data.is_available) {
-                    audioBeep.play(); 
+                    audioBeep.play(); // Sound Feedback
                     currentBook = data.book;
                     wrapper.classList.add('border-emerald-500', 'bg-emerald-50');
                     wrapper.classList.remove('border-slate-200', 'bg-slate-50', 'border-rose-500', 'bg-rose-50');
@@ -477,9 +473,9 @@
             if(!currentMember || !currentBook) return;
              
              try {
-                const res = await fetch('{{ route("library.circulation.store") }}', {
+                const res = await fetch('<?php echo e(route("library.circulation.store")); ?>', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ student_id: currentMember.id, book_id: currentBook.id })
                 });
                 
@@ -490,8 +486,6 @@
                     audioSuccess.play();
                     Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Transaksi peminjaman sukses!', customClass: { popup: 'rounded-[2rem]' }}).then(() => {
                         resetBorrow();
-                        // Refresh halaman agar tabel history terbaru muncul (Opsional)
-                        window.location.reload(); 
                     });
                 } else {
                     audioError.play();
@@ -515,16 +509,22 @@
             document.getElementById('memberInput').value = '';
             document.getElementById('bookBorrowInput').value = '';
             
+            // Sembunyikan Info Siswa
             document.getElementById('memberInfo').classList.add('hidden');
             document.getElementById('memberInfo').innerHTML = '';
             
+            // Reset status box input buku
             const bookSection = document.getElementById('bookInputSection');
             bookSection.classList.add('opacity-50', 'pointer-events-none');
             
+            // Reset Warna Wrapper Input
             document.getElementById('member-scan-wrapper').className = "flex-1 flex items-center px-5 py-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl focus-within:border-blue-500 focus-within:bg-white focus-within:shadow-lg transition-all group-hover/step:border-slate-300";
             document.getElementById('book-borrow-scan-wrapper').className = "flex-1 flex items-center px-5 py-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl focus-within:border-blue-500 focus-within:bg-white focus-within:shadow-lg transition-all";
             
+            // Disable tombol
             document.getElementById('btnProcessBorrow').disabled = true;
+
+            // Fokus kembali ke input NISN
             document.getElementById('memberInput').focus();
         }
 
@@ -538,9 +538,9 @@
             infoBox.innerHTML = '<div class="text-center py-8"><div class="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div></div>';
 
             try {
-                const res = await fetch('{{ route("library.circulation.return") }}?check_only=1', {
+                const res = await fetch('<?php echo e(route("library.circulation.return")); ?>?check_only=1', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ book_code: query })
                 });
                 
@@ -562,14 +562,11 @@
                             <h3 class="font-black text-slate-800 text-lg leading-tight mb-1">${data.student_name}</h3>
                             <p class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-6">Mengembalikan Buku</p>
                             ${dendaHtml}
-                            <button onclick="confirmReturn('${query}')" id="btnConfirmReturn" class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition shadow-lg shadow-slate-900/20 transform active:scale-95">
+                            <button onclick="confirmReturn('${query}')" class="w-full py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition shadow-lg shadow-slate-900/20 transform active:scale-95">
                                 Konfirmasi Pengembalian
                             </button>
                         </div>
                     `;
-                    
-                    // Auto-focus ke tombol agar bisa langsung ditekan Space/Enter
-                    document.getElementById('btnConfirmReturn').focus();
                 } else {
                     audioError.play();
                     infoBox.innerHTML = `<div class="p-5 bg-rose-50 text-rose-600 font-bold text-center rounded-[1.5rem] border border-rose-100 mt-6 shadow-sm"><i class="ph-bold ph-warning-circle text-2xl mb-2 block"></i> ${result.message}</div>`;
@@ -591,9 +588,9 @@
         // --- 5. LOGIC KONFIRMASI PENGEMBALIAN ---
         async function confirmReturn(bookCode) {
             try {
-                const res = await fetch('{{ route("library.circulation.return") }}', {
+                const res = await fetch('<?php echo e(route("library.circulation.return")); ?>', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ book_code: bookCode })
                 });
                 
@@ -602,9 +599,7 @@
                 
                 if(data.success) {
                     audioSuccess.play();
-                    Swal.fire({ icon: 'success', title: 'Sukses', text: 'Buku berhasil dikembalikan.', customClass: { popup: 'rounded-[2rem]' }}).then(() => {
-                        window.location.reload(); // Refresh log aktivitas
-                    });
+                    Swal.fire({ icon: 'success', title: 'Sukses', text: 'Buku berhasil dikembalikan.', customClass: { popup: 'rounded-[2rem]' }});
                     document.getElementById('returnInfo').innerHTML = '';
                     document.getElementById('returnInfo').classList.add('hidden');
                 } else {
@@ -623,4 +618,13 @@
             }
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/library/circulation.blade.php ENDPATH**/ ?>
