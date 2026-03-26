@@ -102,6 +102,21 @@
                                         $isLate = true;
                                     }
                                     $ansCount = $submission ? $submission->answers->count() : 0;
+                                    
+                                    // PERBAIKAN: Format data jawaban dipindah ke blok PHP murni agar tidak bentrok dengan Blade compiler
+                                    $mappedAnswers = [];
+                                    if ($submission && $assignment->assignment_type == 'quiz') {
+                                        $mappedAnswers = $submission->answers->map(function($ans) {
+                                            return [
+                                                "question_text" => $ans->question ? $ans->question->question_text : "Soal telah dihapus guru",
+                                                "type" => $ans->question ? $ans->question->question_type : "deleted",
+                                                "student_answer" => $ans->answer_text,
+                                                "points" => $ans->points,
+                                                "max_points" => $ans->question ? $ans->question->points : 0,
+                                                "correct_answer" => $ans->question ? $ans->question->correct_answer : null
+                                            ];
+                                        })->values()->toArray();
+                                    }
                                 @endphp
 
                                 <tr class="group hover:bg-slate-50/80 transition-colors student-row" data-class="{{ $student->schoolClass->name ?? '-' }}">
@@ -142,21 +157,9 @@
                                         @if($submission)
                                             <div class="flex flex-col gap-2">
                                                 @if($assignment->assignment_type == 'quiz')
+                                                    {{-- PERBAIKAN: Pemanggilan fungsi menggunakan double quote pada click untuk menampung hasil json_encode dengan aman tanpa error parse HTML --}}
                                                     <button type="button" 
-                                                            @click="openReview(
-                                                                '{{ addslashes($student->name) }}', 
-                                                                {{ json_encode($submission->answers->map(function($ans){
-                                                                    return [
-                                                                        'question_text' => $ans->question ? $ans->question->question_text : 'Soal telah dihapus guru',
-                                                                        'type' => $ans->question ? $ans->question->question_type : 'deleted',
-                                                                        'student_answer' => $ans->answer_text,
-                                                                        'points' => $ans->points,
-                                                                        'max_points' => $ans->question ? $ans->question->points : 0,
-                                                                        'correct_answer' => $ans->question ? $ans->question->correct_answer : null
-                                                                    ];
-                                                                })) }},
-                                                                {{ $submission->id }}
-                                                            )"
+                                                            @click="openReview('{{ addslashes($student->name) }}', {{ json_encode($mappedAnswers) }}, {{ $submission->id }})"
                                                             class="inline-flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-600 border border-purple-200 hover:bg-purple-100 rounded-xl text-xs font-bold transition-all w-fit shadow-sm group/btn">
                                                         <i class="ph-bold ph-eye text-lg"></i>
                                                         Koreksi
@@ -167,14 +170,12 @@
                                                         @endif
                                                     </button>
                                                 
-                                                {{-- [UPDATE] Tampilkan Tombol Link --}}
                                                 @elseif($submission->link_url)
                                                     <a href="{{ $submission->link_url }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 rounded-xl text-xs font-bold transition-all w-fit shadow-sm group/link">
                                                         <i class="ph-bold ph-link text-lg group-hover/link:text-purple-700"></i>
                                                         Buka Link
                                                     </a>
 
-                                                {{-- [UPDATE] Tampilkan Tombol File --}}
                                                 @elseif($submission->file_path)
                                                     <a href="{{ asset('storage/'.$submission->file_path) }}" target="_blank" class="inline-flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 hover:border-blue-300 hover:text-blue-600 rounded-xl text-xs font-bold transition-all w-fit shadow-sm group/file">
                                                         <i class="ph-bold ph-file-text text-lg text-slate-400 group-hover/file:text-blue-500"></i>
@@ -199,7 +200,7 @@
                                     <!-- Nilai -->
                                     <td class="px-6 py-4 text-center">
                                         @if($submission)
-                                            <form action="{{ route('lms.submissions.grade', $submission->id) }}" method="POST" class="contents grade-form">
+                                            <form action="{{ route('lms.submissions.grade', $submission->id) }}" method="POST" class="contents grade-form" id="form-grade-{{$submission->id}}">
                                                 @csrf
                                                 @if($assignment->assignment_type == 'quiz')
                                                     @php
@@ -220,13 +221,13 @@
 
                                     <td class="px-6 py-4">
                                         @if($submission)
-                                            <input type="text" form="form-grade-{{$submission->id}}" value="{{ $submission->teacher_feedback }}" class="w-full text-xs rounded-xl border-slate-200 h-10 px-3" placeholder="Feedback...">
+                                            <input type="text" form="form-grade-{{$submission->id}}" name="teacher_feedback" value="{{ $submission->teacher_feedback }}" class="w-full text-xs rounded-xl border-slate-200 h-10 px-3" placeholder="Feedback...">
                                         @endif
                                     </td>
 
                                     <td class="px-6 py-4 text-right">
                                         @if($submission)
-                                            <button type="button" onclick="document.querySelector('.grade-form').submit()" class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md">
+                                            <button type="button" onclick="document.getElementById('form-grade-{{$submission->id}}').submit()" class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md hover:bg-blue-700 transition">
                                                 <i class="ph-bold ph-floppy-disk text-lg"></i>
                                             </button>
                                             
@@ -246,10 +247,9 @@
             </div>
         </div>
 
-        {{-- MODAL REVIEW JAWABAN (Include kode JS yang sama dengan sebelumnya) --}}
+        {{-- MODAL REVIEW JAWABAN --}}
         <div x-show="showReviewModal" style="display: none;" 
              class="fixed inset-0 z-[999] overflow-y-auto" role="dialog" aria-modal="true">
-             {{-- ... (Modal review quiz tetap sama, tidak perlu diubah) ... --}}
              <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" @click="showReviewModal = false"></div>
 
@@ -370,17 +370,35 @@
             }));
         });
         
-        // Filter Logic
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('tableSearch');
+            const classFilter = document.getElementById('classFilter');
             const tableRows = document.querySelectorAll('.student-row');
-            if (searchInput) {
-                searchInput.addEventListener('keyup', function() {
-                    const val = this.value.toLowerCase();
-                    tableRows.forEach(row => {
-                        row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
-                    });
+            
+            function applyFilters() {
+                const searchVal = searchInput ? searchInput.value.toLowerCase() : '';
+                const classVal = classFilter ? classFilter.value : '';
+
+                tableRows.forEach(row => {
+                    const textContent = row.textContent.toLowerCase();
+                    const rowClass = row.getAttribute('data-class');
+                    
+                    const matchesSearch = textContent.includes(searchVal);
+                    const matchesClass = classVal === '' || rowClass === classVal;
+
+                    if (matchesSearch && matchesClass) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
                 });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('keyup', applyFilters);
+            }
+            if (classFilter) {
+                classFilter.addEventListener('change', applyFilters);
             }
         });
     </script>

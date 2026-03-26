@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Rekap Nilai - {{ $selectedClass->name }} - {{ $selectedSubject->name }}</title>
+    <title>Rekap Nilai - <?php echo e($selectedClass->name); ?> - <?php echo e($selectedSubject->name); ?></title>
     <style>
         /* Mengatur halaman Landscape agar tabel nilai muat */
         @page { 
@@ -106,7 +106,7 @@
     <!-- KOP SURAT -->
     <div class="header">
         <!-- Pastikan path logo benar -->
-        <img src="{{ public_path('images/logo.png') }}" class="logo" alt="Logo">
+        <img src="<?php echo e(public_path('images/logo.png')); ?>" class="logo" alt="Logo">
         
         <h3>PEMERINTAH KABUPATEN CIAMIS</h3>
         <h2>DINAS PENDIDIKAN</h2>
@@ -119,12 +119,12 @@
     <!-- INFO KELAS -->
     <table class="info-table">
         <tr>
-            <td class="label">Mata Pelajaran</td><td class="colon">:</td><td width="40%">{{ $selectedSubject->name }}</td>
-            <td class="label">Kelas</td><td class="colon">:</td><td>{{ $selectedClass->name }}</td>
+            <td class="label">Mata Pelajaran</td><td class="colon">:</td><td width="40%"><?php echo e($selectedSubject->name); ?></td>
+            <td class="label">Kelas</td><td class="colon">:</td><td><?php echo e($selectedClass->name); ?></td>
         </tr>
         <tr>
-            <td class="label">Guru Pengampu</td><td class="colon">:</td><td>{{ $teacher->name }}</td>
-            <td class="label">Tahun Ajaran</td><td class="colon">:</td><td>{{ date('Y') }}/{{ date('Y')+1 }}</td>
+            <td class="label">Guru Pengampu</td><td class="colon">:</td><td><?php echo e($teacher->name); ?></td>
+            <td class="label">Tahun Ajaran</td><td class="colon">:</td><td><?php echo e(date('Y')); ?>/<?php echo e(date('Y')+1); ?></td>
         </tr>
     </table>
 
@@ -136,21 +136,22 @@
                 <th>Nama Siswa</th>
                 <th width="80">NISN</th>
                 
-                {{-- Loop Header Tugas (Max 10 kolom agar muat di PDF) --}}
-                @foreach($assignments->take(10) as $task)
+                
+                <?php $__currentLoopData = $assignments->take(10); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $task): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <th style="font-size: 8pt;">
-                        {{ \Illuminate\Support\Str::limit($task->title, 15) }}
+                        <?php echo e(\Illuminate\Support\Str::limit($task->title, 15)); ?>
+
                         <br>
-                        <span style="font-weight: normal; font-size: 7pt;">({{ $task->created_at->format('d/m') }})</span>
+                        <span style="font-weight: normal; font-size: 7pt;">(<?php echo e($task->created_at->format('d/m')); ?>)</span>
                     </th>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                 <th width="50">Rata2</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($students as $index => $student)
-                @php
+            <?php $__currentLoopData = $students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php
                     // PERBAIKAN: Hitung total berdasar SELURUH tugas (bukan hanya take(10)) 
                     // agar nilai akhirnya akurat dengan yang di Web dan Excel
                     $actualTotal = 0; 
@@ -162,27 +163,28 @@
                             $actualCount++; 
                         }
                     }
-                @endphp
+                ?>
                 <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td class="left name-col">{{ $student->name }}</td>
-                    {{-- Sinkronisasi pemanggilan ID siswa --}}
-                    <td>{{ $student->nisn ?? $student->student_id ?? '-' }}</td>
+                    <td><?php echo e($index + 1); ?></td>
+                    <td class="left name-col"><?php echo e($student->name); ?></td>
                     
-                    {{-- Loop data kolom (Hanya 10 pertama yang dicetak) --}}
-                    @foreach($assignments->take(10) as $task)
-                        @php
+                    <td><?php echo e($student->nisn ?? $student->student_id ?? '-'); ?></td>
+                    
+                    
+                    <?php $__currentLoopData = $assignments->take(10); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $task): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             $score = $gradeBook[$student->id][$task->id] ?? null;
-                        @endphp
-                        <td>{{ $score ?? '-' }}</td>
-                    @endforeach
+                        ?>
+                        <td><?php echo e($score ?? '-'); ?></td>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                     <td style="font-weight: bold; background-color: #f9f9f9;">
-                        {{-- Format disamakan dengan 1 angka desimal --}}
-                        {{ $actualCount > 0 ? round($actualTotal / $actualCount, 1) : 0 }}
+                        
+                        <?php echo e($actualCount > 0 ? round($actualTotal / $actualCount, 1) : 0); ?>
+
                     </td>
                 </tr>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </tbody>
     </table>
 
@@ -192,8 +194,8 @@
         <div class="sign-box">
             <p>Mengetahui,<br>Kepala Sekolah</p>
             <div class="sign-space"></div>
-            <p class="sign-name">{{ $headmaster ?? 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.' }}</p>
-            <p>NIP. {{ $headmaster_nip ?? '-' }}</p>
+            <p class="sign-name"><?php echo e($headmaster ?? 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.'); ?></p>
+            <p>NIP. <?php echo e($headmaster_nip ?? '-'); ?></p>
         </div>
 
         <!-- Tengah: Kosong (Spasi) -->
@@ -201,15 +203,16 @@
 
         <!-- Kanan: Guru -->
         <div class="sign-box">
-            <p>Lakbok, {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}<br>Guru Mata Pelajaran</p>
+            <p>Lakbok, <?php echo e(\Carbon\Carbon::now()->isoFormat('D MMMM Y')); ?><br>Guru Mata Pelajaran</p>
             <div class="sign-space"></div>
-            <p class="sign-name">{{ $teacher->name }}</p>
-            <p>NIP. {{ $teacher->nip ?? '-' }}</p>
+            <p class="sign-name"><?php echo e($teacher->name); ?></p>
+            <p>NIP. <?php echo e($teacher->nip ?? '-'); ?></p>
         </div>
     </div>
 
     <div class="footer">
-        Dicetak melalui Sistem Informasi Sekolah SMPN 3 Lakbok pada {{ date('d/m/Y H:i') }}
+        Dicetak melalui Sistem Informasi Sekolah SMPN 3 Lakbok pada <?php echo e(date('d/m/Y H:i')); ?>
+
     </div>
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/lms/grades/pdf.blade.php ENDPATH**/ ?>

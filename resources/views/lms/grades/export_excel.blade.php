@@ -5,22 +5,28 @@
     <title>Rekap Nilai</title>
 </head>
 <body>
+    @php
+        // Optimasi: Mendefinisikan variabel colspan agar kode lebih bersih
+        $totalColumns = $assignments->count() + 5;
+        $spasiTengah = $assignments->count() + 1;
+    @endphp
+
     <table>
         <thead>
             {{-- JUDUL LAPORAN --}}
             <tr>
-                <th colspan="{{ $assignments->count() + 5 }}" style="font-size: 16px; font-weight: bold; text-align: center; height: 30px;">
+                <th colspan="{{ $totalColumns }}" style="font-size: 16px; font-weight: bold; text-align: center; height: 30px;">
                     REKAPITULASI NILAI SISWA
                 </th>
             </tr>
             <tr>
-                <th colspan="{{ $assignments->count() + 5 }}" style="font-size: 12px; font-weight: bold; text-align: center;">
+                <th colspan="{{ $totalColumns }}" style="font-size: 12px; font-weight: bold; text-align: center;">
                     Kelas: {{ $selectedClass->name ?? '-' }} | Mata Pelajaran: {{ $selectedSubject->name ?? '-' }}
                 </th>
             </tr>
             <tr>
-                <th colspan="{{ $assignments->count() + 5 }}" style="font-size: 11px; font-style: italic; text-align: center;">
-                    Dicetak pada: {{ date('d F Y') }} oleh {{ Auth::user()->name }}
+                <th colspan="{{ $totalColumns }}" style="font-size: 11px; font-style: italic; text-align: center;">
+                    Dicetak pada: {{ date('d F Y') }} oleh {{ $teacher->name ?? Auth::user()->name ?? '-' }}
                 </th>
             </tr>
             
@@ -50,7 +56,8 @@
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $student->name }}</td>
-                    <td>{{ $student->nisn ?? $student->student_id }}</td>
+                    {{-- Sinkronisasi pemanggilan ID siswa --}}
+                    <td>{{ $student->nisn ?? $student->student_id ?? '-' }}</td>
                     
                     @foreach($assignments as $task)
                         @php
@@ -64,6 +71,7 @@
                     @endforeach
 
                     <td style="font-weight: bold;">{{ $total }}</td>
+                    {{-- Format 1 angka desimal konsisten --}}
                     <td style="font-weight: bold;">{{ $count > 0 ? round($total / $count, 1) : 0 }}</td>
                 </tr>
             @endforeach
@@ -76,8 +84,8 @@
             <tr>
                 <td></td> {{-- Spasi Kiri --}}
                 <td style="text-align: center;">Mengetahui,</td>
-                {{-- Spasi Tengah (sesuaikan colspan dengan jumlah tugas) --}}
-                <td colspan="{{ $assignments->count() + 1 }}"></td> 
+                {{-- Spasi Tengah menggunakan variabel yang sudah disiapkan --}}
+                <td colspan="{{ $spasiTengah }}"></td> 
                 <td colspan="2" style="text-align: center;">
                     {{-- Tanggal Lokal Indonesia --}}
                     Lakbok, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}
@@ -86,7 +94,7 @@
             <tr>
                 <td></td>
                 <td style="text-align: center;">Kepala Sekolah</td>
-                <td colspan="{{ $assignments->count() + 1 }}"></td>
+                <td colspan="{{ $spasiTengah }}"></td>
                 <td colspan="2" style="text-align: center;">Guru Mata Pelajaran</td>
             </tr>
             
@@ -96,19 +104,19 @@
             <tr>
                 <td></td>
                 <td style="text-align: center; font-weight: bold; text-decoration: underline;">
-                    {{-- Ganti nama kepsek sesuai data real --}}
-                    TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.
+                    {{-- Tidak lagi hardcode, dilempar dari controller (dengan fallback sementara) --}}
+                    {{ $headmaster ?? 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.' }}
                 </td>
-                <td colspan="{{ $assignments->count() + 1 }}"></td>
+                <td colspan="{{ $spasiTengah }}"></td>
                 <td colspan="2" style="text-align: center; font-weight: bold; text-decoration: underline;">
-                    {{ Auth::user()->name }}
+                    {{ $teacher->name ?? Auth::user()->name ?? '-' }}
                 </td>
             </tr>
             <tr>
                 <td></td>
-                <td style="text-align: center;">NIP. 197xxxxxxxxxxxxx</td>
-                <td colspan="{{ $assignments->count() + 1 }}"></td>
-                <td colspan="2" style="text-align: center;">NIP. {{ Auth::user()->nip ?? '-' }}</td>
+                <td style="text-align: center;">NIP. {{ $headmaster_nip ?? '197xxxxxxxxxxxxx' }}</td>
+                <td colspan="{{ $spasiTengah }}"></td>
+                <td colspan="2" style="text-align: center;">NIP. {{ $teacher->nip ?? Auth::user()->nip ?? '-' }}</td>
             </tr>
         </tfoot>
     </table>
