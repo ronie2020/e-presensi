@@ -23,10 +23,24 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 -mt-20 relative z-20">
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
                 
+                {{-- [PERBAIKAN] Tampilkan Alert Error Global jika ada error validasi dari Laravel --}}
+                @if ($errors->any())
+                <div class="bg-rose-50 border-l-4 border-rose-500 p-4 m-8 mb-0 rounded-r-2xl">
+                    <div class="flex items-center gap-2 text-rose-700 font-bold mb-1">
+                        <i class="ph-bold ph-warning-circle"></i> Terdapat kesalahan pengisian:
+                    </div>
+                    <ul class="list-disc list-inside text-xs text-rose-600 ml-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
                 <form action="{{ route('alumni.store_tracer') }}" method="POST" 
                       x-data="{ 
-                          status: '{{ $profile?->activity_status ?? 'SMA' }}',
-                          rating: {{ $profile?->rating ?? 5 }}
+                          status: '{{ old('activity_status', $profile?->activity_status ?? 'SMA') }}',
+                          rating: {{ old('rating', $profile?->rating ?? 5) }}
                       }">
                     @csrf
 
@@ -43,16 +57,18 @@
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nomor WhatsApp (Aktif)</label>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nomor WhatsApp (Aktif) <span class="text-rose-500">*</span></label>
                                     <input type="text" name="phone_number" value="{{ old('phone_number', $profile?->phone_number ?? $student->phone) }}" required 
-                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 h-12 px-4 transition-all"
+                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 h-12 px-4 transition-all @error('phone_number') border-rose-300 bg-rose-50 @enderror"
                                            placeholder="Contoh: 08123456789">
+                                    @error('phone_number')<span class="text-[10px] text-rose-500 font-bold mt-1 block">{{ $message }}</span>@enderror
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Email Pribadi</label>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Email Pribadi <span class="text-rose-500">*</span></label>
                                     <input type="email" name="email" value="{{ old('email', $profile?->email ?? '') }}" required 
-                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 h-12 px-4 transition-all"
+                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 h-12 px-4 transition-all @error('email') border-rose-300 bg-rose-50 @enderror"
                                            placeholder="nama@email.com">
+                                    @error('email')<span class="text-[10px] text-rose-500 font-bold mt-1 block">{{ $message }}</span>@enderror
                                 </div>
                             </div>
                         </div>
@@ -70,51 +86,50 @@
                             </div>
 
                             <div class="mb-6">
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 ml-1">Status Aktivitas</label>
-                                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                                    
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 ml-1">Status Aktivitas <span class="text-rose-500">*</span></label>
+                                
+                                {{-- [PERBAIKAN] Penambahan Opsi Gap Year agar lebih akurat --}}
+                                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                                     {{-- Opsi SMA --}}
                                     <label class="cursor-pointer group">
                                         <input type="radio" name="activity_status" value="SMA" x-model="status" class="peer sr-only">
                                         <div class="px-2 py-4 rounded-2xl border-2 border-slate-100 text-center font-bold text-slate-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 peer-checked:shadow-lg peer-checked:shadow-blue-500/30 transition-all hover:border-blue-200 hover:bg-slate-50">
-                                            <i class="ph-bold ph-student text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-blue-500"></i>
-                                            SMA
+                                            <i class="ph-bold ph-student text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-blue-500"></i><span class="text-xs lg:text-sm">SMA</span>
                                         </div>
                                     </label>
-
                                     {{-- Opsi SMK --}}
                                     <label class="cursor-pointer group">
                                         <input type="radio" name="activity_status" value="SMK" x-model="status" class="peer sr-only">
                                         <div class="px-2 py-4 rounded-2xl border-2 border-slate-100 text-center font-bold text-slate-600 peer-checked:bg-orange-600 peer-checked:text-white peer-checked:border-orange-600 peer-checked:shadow-lg peer-checked:shadow-orange-500/30 transition-all hover:border-orange-200 hover:bg-slate-50">
-                                            <i class="ph-bold ph-wrench text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-orange-500"></i>
-                                            SMK
+                                            <i class="ph-bold ph-wrench text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-orange-500"></i><span class="text-xs lg:text-sm">SMK</span>
                                         </div>
                                     </label>
-
                                     {{-- Opsi MA --}}
                                     <label class="cursor-pointer group">
                                         <input type="radio" name="activity_status" value="MA" x-model="status" class="peer sr-only">
                                         <div class="px-2 py-4 rounded-2xl border-2 border-slate-100 text-center font-bold text-slate-600 peer-checked:bg-emerald-600 peer-checked:text-white peer-checked:border-emerald-600 peer-checked:shadow-lg peer-checked:shadow-emerald-500/30 transition-all hover:border-emerald-200 hover:bg-slate-50">
-                                            <i class="ph-bold ph-book-open-text text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-emerald-500"></i>
-                                            MA
+                                            <i class="ph-bold ph-book-open-text text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-emerald-500"></i><span class="text-xs lg:text-sm">MA</span>
                                         </div>
                                     </label>
-
                                     {{-- Opsi Pesantren --}}
                                     <label class="cursor-pointer group">
                                         <input type="radio" name="activity_status" value="Pesantren" x-model="status" class="peer sr-only">
                                         <div class="px-2 py-4 rounded-2xl border-2 border-slate-100 text-center font-bold text-slate-600 peer-checked:bg-teal-600 peer-checked:text-white peer-checked:border-teal-600 peer-checked:shadow-lg peer-checked:shadow-teal-500/30 transition-all hover:border-teal-200 hover:bg-slate-50">
-                                            <i class="ph-bold ph-mosque text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-teal-500"></i>
-                                            Pesantren
+                                            <i class="ph-bold ph-mosque text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-teal-500"></i><span class="text-[11px] lg:text-sm">Pesantren</span>
                                         </div>
                                     </label>
-
-                                    {{-- Opsi Bekerja/Lainnya --}}
+                                    {{-- Opsi Bekerja --}}
                                     <label class="cursor-pointer group">
                                         <input type="radio" name="activity_status" value="Bekerja" x-model="status" class="peer sr-only">
-                                        <div class="px-2 py-4 rounded-2xl border-2 border-slate-100 text-center font-bold text-slate-600 peer-checked:bg-slate-700 peer-checked:text-white peer-checked:border-slate-700 peer-checked:shadow-lg peer-checked:shadow-slate-500/30 transition-all hover:border-slate-300 hover:bg-slate-50">
-                                            <i class="ph-bold ph-briefcase text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-slate-600"></i>
-                                            Bekerja/Lain
+                                        <div class="px-2 py-4 rounded-2xl border-2 border-slate-100 text-center font-bold text-slate-600 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 peer-checked:shadow-lg peer-checked:shadow-indigo-500/30 transition-all hover:border-indigo-300 hover:bg-slate-50">
+                                            <i class="ph-bold ph-briefcase text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-indigo-600"></i><span class="text-xs lg:text-sm">Bekerja</span>
+                                        </div>
+                                    </label>
+                                    {{-- Opsi Gap Year / Belum Bekerja --}}
+                                    <label class="cursor-pointer group">
+                                        <input type="radio" name="activity_status" value="Lainnya" x-model="status" class="peer sr-only">
+                                        <div class="px-2 py-4 rounded-2xl border-2 border-slate-100 text-center font-bold text-slate-600 peer-checked:bg-slate-700 peer-checked:text-white peer-checked:border-slate-700 peer-checked:shadow-lg peer-checked:shadow-slate-500/30 transition-all hover:border-slate-300 hover:bg-slate-50" title="Belum Bekerja / Fokus Tes CPNS dll">
+                                            <i class="ph-bold ph-coffee text-2xl mb-1 block peer-checked:text-white text-slate-400 group-hover:text-slate-600"></i><span class="text-[11px] lg:text-sm">Lainnya</span>
                                         </div>
                                     </label>
                                 </div>
@@ -125,14 +140,15 @@
                                  x-transition:enter="transition ease-out duration-300"
                                  x-transition:enter-start="opacity-0 translate-y-2"
                                  x-transition:enter-end="opacity-100 translate-y-0"
-                                 class="bg-blue-50/50 p-6 rounded-3xl border border-blue-100 mb-4">
+                                 class="bg-blue-50/50 p-6 rounded-3xl border border-blue-100 mb-4" x-cloak>
                                 
                                 <h4 class="text-sm font-bold text-blue-800 mb-4 flex items-center gap-2"><i class="ph-fill ph-buildings"></i> Detail Sekolah Lanjutan</h4>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div class="col-span-2">
-                                        <label class="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1 block">Nama Sekolah / Pesantren</label>
+                                    <div class="col-span-2 md:col-span-2">
+                                        <label class="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1 block">Nama Sekolah / Pesantren <span class="text-rose-500">*</span></label>
                                         <input type="text" name="campus_name" value="{{ old('campus_name', $profile?->campus_name ?? '') }}" placeholder="Contoh: SMAN 1 Lakbok / SMK Taruna"
-                                               class="w-full rounded-xl border-blue-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 text-sm font-bold h-12 bg-white transition-all px-4">
+                                               class="w-full rounded-xl border-blue-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 text-sm font-bold h-12 bg-white transition-all px-4"
+                                               x-bind:required="['SMA', 'SMK', 'MA', 'Pesantren'].includes(status)">
                                     </div>
                                     
                                     <div x-show="status !== 'Pesantren'">
@@ -142,30 +158,39 @@
                                     </div>
 
                                     <div>
-                                        <label class="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1 block">Tahun Masuk</label>
+                                        <label class="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1 block">Tahun Masuk <span class="text-rose-500">*</span></label>
+                                        {{-- [PERBAIKAN] Tambahkan min/max agar angka tahun masuk akal --}}
                                         <input type="number" name="campus_entry_year" value="{{ old('campus_entry_year', $profile?->campus_entry_year ?? date('Y')) }}"
-                                               class="w-full rounded-xl border-blue-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 text-sm font-bold h-12 bg-white transition-all px-4">
+                                               min="2000" max="{{ date('Y') + 1 }}"
+                                               class="w-full rounded-xl border-blue-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 text-sm font-bold h-12 bg-white transition-all px-4"
+                                               x-bind:required="['SMA', 'SMK', 'MA', 'Pesantren'].includes(status)">
                                     </div>
                                 </div>
                             </div>
 
-                            {{-- KONTEN DINAMIS: TIDAK LANJUT --}}
-                            <div x-show="!['SMA', 'SMK', 'MA', 'Pesantren'].includes(status)" 
+                            {{-- KONTEN DINAMIS: BEKERJA / LAINNYA --}}
+                            <div x-show="['Bekerja', 'Lainnya'].includes(status)" 
                                  x-transition:enter="transition ease-out duration-300"
                                  x-transition:enter-start="opacity-0 translate-y-2"
                                  x-transition:enter-end="opacity-100 translate-y-0"
-                                 class="bg-slate-50 p-6 rounded-3xl border border-slate-200 mb-4" style="display: none;">
+                                 class="bg-slate-50 p-6 rounded-3xl border border-slate-200 mb-4" x-cloak>
                                 
-                                <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="ph-fill ph-info"></i> Detail Kegiatan</h4>
+                                <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="ph-fill ph-info"></i> Detail Kegiatan / Pekerjaan</h4>
+                                
+                                <template x-if="status === 'Bekerja'">
+                                    <div class="col-span-2 mb-4">
+                                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Nama Tempat Kerja / Perusahaan <span class="text-rose-500">*</span></label>
+                                        <input type="text" name="company_name" value="{{ old('company_name', $profile?->company_name ?? '') }}" placeholder="Contoh: PT. Maju Mundur / Alfamart"
+                                               class="w-full rounded-xl border-slate-200 focus:border-slate-500 focus:ring-4 focus:ring-slate-100 text-sm font-bold h-12 bg-white transition-all px-4"
+                                               x-bind:required="status === 'Bekerja'">
+                                    </div>
+                                </template>
+
                                 <div class="col-span-2">
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Nama Tempat Kerja / Kegiatan Saat Ini</label>
-                                    <input type="text" name="company_name" value="{{ old('company_name', $profile?->company_name ?? '') }}" placeholder="Contoh: PT. Maju Mundur / Membantu Orang Tua"
-                                           class="w-full rounded-xl border-slate-200 focus:border-slate-500 focus:ring-4 focus:ring-slate-100 text-sm font-bold h-12 bg-white transition-all px-4">
-                                </div>
-                                <div class="col-span-2 mt-4">
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Posisi / Keterangan</label>
-                                    <input type="text" name="position" value="{{ old('position', $profile?->position ?? '') }}" placeholder="Contoh: Staff Admin / Wiraswasta"
-                                           class="w-full rounded-xl border-slate-200 focus:border-slate-500 focus:ring-4 focus:ring-slate-100 text-sm font-bold h-12 bg-white transition-all px-4">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Posisi / Keterangan Kesibukan <span class="text-rose-500">*</span></label>
+                                    <input type="text" name="position" value="{{ old('position', $profile?->position ?? '') }}" 
+                                           x-bind:placeholder="status === 'Bekerja' ? 'Contoh: Staff Gudang / Pramuniaga' : 'Contoh: Membantu Orang Tua / Persiapan Tes Masuk TNI'"
+                                           class="w-full rounded-xl border-slate-200 focus:border-slate-500 focus:ring-4 focus:ring-slate-100 text-sm font-bold h-12 bg-white transition-all px-4" required>
                                 </div>
                             </div>
                         </div>
@@ -195,7 +220,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Testimoni</label>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Testimoni / Pesan (Opsional)</label>
                                 <textarea name="testimony" rows="4" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:ring-4 focus:ring-rose-100 focus:border-rose-500 p-4 font-medium transition-all" placeholder="Ceritakan kenangan terbaikmu di SMPN 3 Lakbok...">{{ old('testimony', $profile?->testimony ?? '') }}</textarea>
                             </div>
                         </div>
