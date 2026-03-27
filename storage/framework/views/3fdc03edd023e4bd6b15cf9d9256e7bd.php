@@ -27,10 +27,12 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             
-            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-r from-violet-900 via-purple-800 to-slate-900 p-6 md:p-10 text-white shadow-2xl shadow-purple-900/20 overflow-hidden group border border-white/10 flex justify-between items-center">
+            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-r from-blue-900 via-slate-800 to-slate-900 p-6 md:p-10 text-white shadow-2xl shadow-purple-900/20 overflow-hidden group border border-white/10 flex justify-between items-center">
                 
-                <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-fuchsia-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 pointer-events-none"></div>
-                
+                <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 no-print"></div>
+                <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 no-print"></div>
+                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none no-print"></div>
+            
                 <div class="relative z-10 flex items-center gap-5">
                     <div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
                         <i class="ph-duotone ph-chart-polar text-4xl text-purple-300"></i>
