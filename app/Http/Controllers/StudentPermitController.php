@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class StudentPermitController extends Controller
 {
@@ -131,7 +132,7 @@ class StudentPermitController extends Controller
     /**
      * Handle Scan QR / Input Manual (Cek Data Siswa)
      */
-    public function scan(Request $request)
+     public function scan(Request $request)
     {
         $request->validate(['identifier' => 'required']);
 
@@ -147,6 +148,11 @@ class StudentPermitController extends Controller
                 'message' => 'Siswa tidak ditemukan!',
             ], 404);
         }
+
+        // Hitung jumlah izin hari ini untuk fitur "Red Zone"
+        $todayPermitCount = StudentPermit::where('student_id', $student->id)
+            ->whereDate('created_at', Carbon::today())
+            ->count();
 
         // Cek apakah siswa sedang di luar (Status OUT)
         $existingPermit = StudentPermit::where('student_id', $student->id)
@@ -178,12 +184,19 @@ class StudentPermitController extends Controller
             ]);
         }
 
-        // SKENARIO 2: SISWA AKAN KELUAR (PRE CHECK-OUT)
+       // SKENARIO 2: SISWA AKAN KELUAR (PRE CHECK-OUT)
         return response()->json([
             'status' => 'success',
             'mode' => 'PRE_CHECK_OUT',
             'message' => "Silakan pilih alasan izin.",
-            'data' => ['student' => $student]
+            'data' => [
+                'student' => [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'school_class' => $student->schoolClass, // Dibutuhkan oleh frontend modal UI
+                    'today_permit_count' => $todayPermitCount // <--- Disisipkan untuk Red Zone
+                ]
+            ]
         ]);
     }
 
@@ -223,5 +236,112 @@ class StudentPermitController extends Controller
                 'reason' => $permit->reason_category
             ]
         ]);
+    }
+
+ /**
+     * Halaman Dashboard Analytics
+     */
+    public function analytics(Request $request)
+    {
+        // Tentukan bulan dan tahun dari request filter (default: bulan ini)
+        $selectedMonth = $request->input('month', Carbon::now()->format('Y-m'));
+        $parsedDate = Carbon::parse($selectedMonth . '-01');
+        $month = $parsedDate->month;
+        $year = $parsedDate->year;
+
+        // ==========================================
+        // 1. DATA UNTUK CHART / GRAFIK
+        // ==========================================
+        
+        // Data Jam Sibuk (Agregasi Bulan Terpilih)
+        $timeStats = StudentPermit::select(DB::raw('HOUR(time_out) as hour'), DB::raw('count(*) as total'))
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->groupBy('hour')
+            ->orderBy('hour')
+            ->pluck('total', 'hour');
+
+        $timeLabels = $timeStats->keys()->map(fn($h) => sprintf('%02d:00', $h))->toArray();
+        $timeData = $timeStats->values()->toArray();
+
+        // Data Alasan (Bulan Terpilih)
+        $reasonStats = StudentPermit::select('reason_category', DB::raw('count(*) as total'))
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->groupBy('reason_category')
+            ->pluck('total', 'reason_category');
+            
+        $reasonLabels = $reasonStats->keys()->toArray();
+        $reasonData = $reasonStats->values()->toArray();
+
+        // Data Kelas Terbanyak Izin (Bulan Terpilih)
+        $classStats = StudentPermit::join('students', 'student_permits.student_id', '=', 'students.id')
+            ->join('classes', 'students.class_id', '=', 'classes.id') 
+            ->select('classes.name', DB::raw('count(student_permits.id) as total'))
+            ->whereMonth('student_permits.created_at', $month)
+            ->whereYear('student_permits.created_at', $year)
+            ->groupBy('classes.name')
+            ->orderByDesc('total')
+            ->limit(10) 
+            ->pluck('total', 'name');
+
+        $classLabels = $classStats->keys()->toArray();
+        $classData = $classStats->values()->toArray();
+
+
+        // ==========================================
+        // 2. DATA UNTUK KPI CARDS (KARTU STATISTIK)
+        // ==========================================
+
+        // KPI 1: Hitung Total Izin (Bulan Terpilih)
+        $kpiTotalMonth = StudentPermit::whereMonth('created_at', $month)->whereYear('created_at', $year)->count();
+
+        // KPI 2: Hitung Rata-rata Durasi (Bulan Terpilih)
+        $kpiAvgDuration = StudentPermit::whereMonth('created_at', $month)->whereYear('created_at', $year)
+                                    ->whereNotNull('duration_minutes')
+                                    ->avg('duration_minutes');
+        $kpiAvgDuration = round($kpiAvgDuration ?? 0); 
+
+        // KPI 3: Hitung Siswa Telat (Bulan Terpilih)
+        $kpiOverdue = StudentPermit::whereMonth('created_at', $month)->whereYear('created_at', $year)
+            ->where(function ($query) {
+                $query->where('duration_minutes', '>', 15)
+                      ->orWhere(function ($q) {
+                          $q->whereNull('time_in')
+                            ->where('time_out', '<=', Carbon::now()->subMinutes(15));
+                      });
+            })->count();
+
+        // KPI 4: Rate Penyelesaian (Berapa % siswa yang sudah kembali kelas)
+        $totalReturnedMonth = StudentPermit::whereMonth('created_at', $month)->whereYear('created_at', $year)
+            ->whereNotNull('time_in')
+            ->count();
+        $kpiCompletionRate = $kpiTotalMonth > 0 ? round(($totalReturnedMonth / $kpiTotalMonth) * 100) : 100;
+
+
+        // ==========================================
+        // 3. DATA UNTUK RED ZONE LEADERBOARD
+        // ==========================================
+
+        // Hitung Top 5 Siswa Paling Sering Izin (Bulan Terpilih)
+        $topStudents = DB::table('student_permits')
+            ->join('students', 'student_permits.student_id', '=', 'students.id')
+            ->join('classes', 'students.class_id', '=', 'classes.id') 
+            ->select('students.name', 'classes.name as class_name', DB::raw('count(student_permits.id) as total_izin'))
+            ->whereMonth('student_permits.created_at', $month)
+            ->whereYear('student_permits.created_at', $year)
+            ->groupBy('students.id', 'students.name', 'classes.name')
+            ->orderByDesc('total_izin')
+            ->limit(5)
+            ->get();
+
+
+        return view('permit.analytics', compact(
+            'timeLabels', 'timeData', 
+            'reasonLabels', 'reasonData', 
+            'classLabels', 'classData',
+            'kpiTotalMonth', 'kpiAvgDuration', 'kpiOverdue', 'kpiCompletionRate',
+            'topStudents', 'selectedMonth', 'parsedDate'
+        ));
     }
 }

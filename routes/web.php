@@ -365,7 +365,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/questions/{id}', [CbtController::class, 'destroyQuestion'])->name('questions.destroy');
         Route::post('/exam/{exam}/import', [CbtController::class, 'importQuestions'])->name('questions.import');
         Route::get('/questions/template', [CbtController::class, 'downloadTemplate'])->name('questions.template');
-        Route::post('/exam/{exam}/refresh-token', [CbtController::class, 'refreshToken'])->name('refresh_token');
+        Route::post('/exam/{exam}/refresh-token', [CbtController::class, 'refresh_token'])->name('refresh_token');
         
         // 6. MONITORING & RESET
         Route::get('/monitoring/{exam_id}', [CbtController::class, 'monitoring'])->name('monitoring');
@@ -400,10 +400,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/scan', [AttendanceSiswaController::class, 'showScanner'])->name('scan.show');
     Route::post('/scan', [AttendanceSiswaController::class, 'processScan'])->name('scan.process');
     
+    // =========================================================================
     // --- SISTEM IZIN KELUAR (GURU PIKET) ---
+    // =========================================================================
     Route::prefix('permit')->name('permit.')->group(function() {
         Route::get('/', [StudentPermitController::class, 'index'])->name('index');
         Route::get('/history', [StudentPermitController::class, 'history'])->name('history');
+        
+        // [PERBAIKAN] Tambahkan Route untuk Analytics di sini!
+        Route::get('/analytics', [StudentPermitController::class, 'analytics'])->name('analytics');
         
         //--- Cetak & Export
         Route::get('/print', [StudentPermitController::class, 'print'])->name('print');
@@ -412,8 +417,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/store', [StudentPermitController::class, 'store'])->name('store');    
     });
 
-        Route::resource('discipline', DisciplineController::class)->only(['index', 'store', 'destroy']);
-        Route::resource('discipline-types', DisciplineTypeController::class);
+    Route::resource('discipline', DisciplineController::class)->only(['index', 'store', 'destroy']);
+    Route::resource('discipline-types', DisciplineTypeController::class);
     
      // E-RAPOR & PENILAIAN
         Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');
@@ -620,10 +625,10 @@ Route::middleware('auth')->group(function () {
   // RAMADHAN ADMIN (Rekap Guru)
    Route::prefix('admin/ramadan')->name('admin.ramadan.')->group(function() {
         Route::get('/reports', [RamadanLogController::class, 'adminReport'])->name('reports');
-        Route::get('/leaderboard', [RamadanLogController::class, 'leaderboard'])->name('leaderboard'); // <- TAMBAHAN ROUTE INI
+        Route::get('/leaderboard', [RamadanLogController::class, 'leaderboard'])->name('leaderboard'); 
         Route::post('/verify/{id}', [RamadanLogController::class, 'verifyFriday'])->name('verify');       
         Route::get('/export-pdf', [RamadanReportController::class, 'exportPdf'])->name('exportPdf');
-        Route::get('/export-excel', [\App\Http\Controllers\RamadanReportController::class, 'exportExcel'])->name('exportExcel'); // (Bonus fix: saya hapus /admin/ramadan/ yang ganda)
+        Route::get('/export-excel', [\App\Http\Controllers\RamadanReportController::class, 'exportExcel'])->name('exportExcel'); 
     });
 
       // CRUD Portofolio Guru (Hanya untuk guru yang login mengelola miliknya sendiri)
@@ -651,8 +656,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/education/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyEducation'])->name('edu.destroy');
     });
 
-
 });
-
 
 require __DIR__.'/auth.php';

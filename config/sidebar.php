@@ -13,13 +13,11 @@ return [
             [
                 'name' => 'Dashboard',
                 'route' => 'dashboard',
-                'icon' => 'ph-squares-four',
-                // Tidak ada key 'roles' berarti bisa diakses semua user yang login
-            ],
-            // MENU BARU: KELOLA PORTOFOLIO GURU
+                'icon' => 'ph-squares-four',                
+            ],   
             [
                 'name' => 'Kelola Portofolio',
-                'route' => 'portfolio.index', // Pastikan nama ini sama dengan di web.php
+                'route' => 'portfolio.index', 
                 'active_check' => 'portfolio.*',
                 'icon' => 'ph-medal',
                 'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas', 'Guru Mata Pelajaran', 'Guru', 'Guru Piket']
@@ -42,6 +40,13 @@ return [
                 'route' => 'permit.history',
                 'active_check' => 'permit.history',
                 'icon' => 'ph-scroll',
+                'roles' => ['Admin', 'Guru Piket', 'Wali Kelas', 'Kepala Sekolah']
+            ],
+            [
+                'name' => 'Analitik Izin', 
+                'route' => 'permit.analytics',
+                'active_check' => 'permit.analytics',
+                'icon' => 'ph-chart-polar',
                 'roles' => ['Admin', 'Guru Piket', 'Wali Kelas', 'Kepala Sekolah']
             ],
             [
