@@ -3,17 +3,17 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Ujian - {{ $exam->title }}</title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title>Ujian - <?php echo e($exam->title); ?></title>
     
-    {{-- CSS & JS Utama --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    {{-- Icons & Alerts --}}
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
+    
+    
     <script src="https://unpkg.com/@phosphor-icons/web" async></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" async></script>
 
-    {{-- KONFIGURASI MATHJAX (Rumus Matematika) --}}
+    
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -61,12 +61,12 @@
 
     <script>
         window.examData = { 
-            questions: @json($questions), 
-            timeLeft: {{ $timeLeft ?? 0 }}, 
-            sessionId: {{ $sessionId }}, 
-            examId: {{ $exam->id }},
-            examType: '{{ $exam->exam_type ?? 'cbt' }}', 
-            totalDuration: {{ ($exam->duration_minutes ?? 0) * 60 }} 
+            questions: <?php echo json_encode($questions, 15, 512) ?>, 
+            timeLeft: <?php echo e($timeLeft ?? 0); ?>, 
+            sessionId: <?php echo e($sessionId); ?>, 
+            examId: <?php echo e($exam->id); ?>,
+            examType: '<?php echo e($exam->exam_type ?? 'cbt'); ?>', 
+            totalDuration: <?php echo e(($exam->duration_minutes ?? 0) * 60); ?> 
         };
 
         window.examApp = function() {
@@ -185,7 +185,7 @@
                     
                     try {
                         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-                        const response = await fetch("{{ route('student.exam.saveAnswer') }}", {
+                        const response = await fetch("<?php echo e(route('student.exam.saveAnswer')); ?>", {
                             method: 'POST', 
                             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
                             body: JSON.stringify({ 
@@ -402,7 +402,7 @@
 
                     const form = document.createElement('form'); 
                     form.method = 'POST'; 
-                    form.action = "{{ route('student.exam.finish', ':id') }}".replace(':id', this.examId);
+                    form.action = "<?php echo e(route('student.exam.finish', ':id')); ?>".replace(':id', this.examId);
                     const t = document.createElement('input'); 
                     t.type = 'hidden'; t.name = '_token'; t.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                     form.appendChild(t); 
@@ -487,7 +487,7 @@
                         const dataUrl = canvas.toDataURL('image/jpeg', 0.3); 
                         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                         
-                        fetch("{{ route('student.exam.photo') }}", { 
+                        fetch("<?php echo e(route('student.exam.photo')); ?>", { 
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token },
                             body: JSON.stringify({ session_id: this.sessionId, photo: dataUrl })
@@ -520,21 +520,21 @@
     @offline.window="isOnline = false"
     @focus.window="syncPendingAnswers()">
 
-    {{-- VIDEO KAMERA HIDDEN --}}
+    
     <video id="webcam-video" autoplay playsinline muted style="position: fixed; top: 0; left: 0; width: 320px; height: 240px; opacity: 0; pointer-events: none; z-index: -100;"></video>
 
-    {{-- LOADING OVERLAY --}}
+    
     <div id="loading-overlay">
         <div class="spinner"></div>
         <span class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2">Memuat Ruangan...</span>
     </div>
     
-    {{-- MODAL ZOOM GAMBAR --}}
+    
     <div x-show="zoomedImage" x-transition.opacity class="fixed inset-0 z-[10000] bg-black/95 flex items-center justify-center p-4 cursor-zoom-out" style="display: none;" @click="zoomedImage = null">
         <img :src="zoomedImage" class="max-w-full max-h-full rounded-lg shadow-2xl scale-100 transition-transform">
     </div>
 
-    {{-- OVERLAY PELANGGARAN --}}
+    
     <div x-show="showSecurityOverlay" x-transition.opacity class="fixed inset-0 bg-slate-900/95 z-[9000] flex items-center justify-center text-center px-6" style="display: none;" x-cloak>
         <div class="max-w-md w-full bg-white rounded-[2rem] p-8 shadow-2xl">
             <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-600 text-3xl"><i class="ph-fill ph-warning-octagon"></i></div>
@@ -544,7 +544,7 @@
         </div>
     </div>
 
-    {{-- NAVBAR ATAS --}}
+    
     <nav class="bg-slate-900 text-white h-16 shrink-0 flex items-center justify-between px-4 lg:px-8 shadow-lg z-50 relative">
         <div class="flex items-center gap-4 min-w-0 flex-1">
             <div class="flex items-center gap-3 shrink-0">
@@ -552,8 +552,8 @@
                     <i class="ph-bold ph-graduation-cap text-xl"></i>
                 </div>
                 <div class="hidden sm:block">
-                    <h1 class="font-bold text-sm lg:text-base truncate max-w-[200px]">{{ $exam->title }}</h1>
-                    <p class="text-[10px] lg:text-xs text-slate-400 font-bold uppercase tracking-wider truncate">{{ $exam->subject_name }}</p>
+                    <h1 class="font-bold text-sm lg:text-base truncate max-w-[200px]"><?php echo e($exam->title); ?></h1>
+                    <p class="text-[10px] lg:text-xs text-slate-400 font-bold uppercase tracking-wider truncate"><?php echo e($exam->subject_name); ?></p>
                 </div>
             </div>
 
@@ -561,21 +561,24 @@
 
             <div class="hidden md:flex items-center gap-3 min-w-0">
                  <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold border border-white/20 shrink-0">
-                     {{ substr($student->name ?? 'S', 0, 1) }}
+                     <?php echo e(substr($student->name ?? 'S', 0, 1)); ?>
+
                  </div>
                  <div class="truncate">
                      <p class="font-bold text-sm text-white truncate max-w-[150px]">
-                         {{ $student->name ?? 'Peserta' }}
+                         <?php echo e($student->name ?? 'Peserta'); ?>
+
                      </p>
                      <p class="text-[10px] text-indigo-300 font-bold truncate">
-                         {{ $student->nis ?? $student->username ?? '' }}
+                         <?php echo e($student->nis ?? $student->username ?? ''); ?>
+
                      </p>
                  </div>
             </div>
         </div>
 
         <div class="flex items-center gap-3 md:gap-4">
-            {{-- Tombol Ukuran Font --}}
+            
             <div x-show="examType !== 'google_form'" class="hidden md:flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg mr-2">
                 <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mr-1">Teks:</span>
                 <button @click="fontSize = 1" class="font-medium hover:text-white transition px-1" :class="fontSize === 1 ? 'text-white font-black' : 'text-slate-400'">A</button>
@@ -583,36 +586,36 @@
                 <button @click="fontSize = 3" class="font-medium text-xl hover:text-white transition px-1" :class="fontSize === 3 ? 'text-white font-black' : 'text-slate-400'">A</button>
             </div>
 
-            {{-- Indikator Offline --}}
+            
             <div x-show="!isOnline" x-cloak class="hidden md:flex items-center gap-2 bg-rose-500/20 text-rose-300 px-3 py-1.5 rounded-lg border border-rose-500/30 text-xs font-bold animate-pulse"><i class="ph-fill ph-wifi-slash"></i> Offline</div>
             
-            {{-- Indikator No Camera --}}
+            
             <div x-show="!cameraActive" x-cloak class="hidden md:flex items-center gap-2 bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold" title="Kamera Tidak Aktif">
                 <i class="ph-fill ph-video-camera-slash"></i>
             </div>
 
-            {{-- Timer --}}
+            
             <div class="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 transition-colors" :class="timeLeft < 300 ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 animate-pulse' : 'text-slate-200'">
                 <i class="ph-bold ph-timer text-lg"></i>
                 <span x-text="formattedTime" class="font-mono font-bold text-lg"></span>
             </div>
             
-            {{-- Tombol Hamburger Map Soal --}}
+            
             <button x-show="examType !== 'google_form'" @click="showMobileMap = !showMobileMap" class="lg:hidden w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-white/20 transition">
                 <i class="ph-bold" :class="showMobileMap ? 'ph-x' : 'ph-squares-four'"></i>
             </button>
         </div>
     </nav>
 
-    {{-- PROGRESS BAR HORIZONTAL --}}
+    
     <div x-show="examType !== 'google_form'" class="h-1.5 w-full bg-slate-200 shrink-0 relative z-40">
         <div class="h-full bg-blue-500 transition-all duration-500 ease-out" :style="`width: ${(answeredCount / totalQuestions) * 100}%`"></div>
     </div>
 
     <div class="flex-1 flex overflow-hidden relative">
         
-        {{-- KONDISI 1: GOOGLE FORM --}}
-        @if(isset($exam->exam_type) && $exam->exam_type == 'google_form')
+        
+        <?php if(isset($exam->exam_type) && $exam->exam_type == 'google_form'): ?>
             <main class="flex-1 flex flex-col h-full bg-slate-100 relative z-0">
                 <div class="bg-blue-50/80 backdrop-blur-sm border-b border-blue-100 p-3 flex items-center justify-center shrink-0 z-10 shadow-sm">
                     <p class="text-xs font-bold text-blue-800 flex items-center gap-2">
@@ -622,7 +625,7 @@
                 </div>
                 
                 <div class="flex-1 w-full h-full relative">
-                    <iframe src="{{ $exam->google_form_url }}" class="absolute inset-0 w-full h-full border-0" allowfullscreen></iframe>
+                    <iframe src="<?php echo e($exam->google_form_url); ?>" class="absolute inset-0 w-full h-full border-0" allowfullscreen></iframe>
                 </div>
                 
                 <div class="p-4 bg-white border-t border-slate-200 flex justify-between items-center relative z-10 shrink-0 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
@@ -637,24 +640,24 @@
                     </button>
                 </div>
             </main>
-        @else
+        <?php else: ?>
 
-        {{-- KONDISI 2: CBT INTERNAL (Engine Asli) --}}
+        
         <main class="flex-1 flex flex-col h-full bg-slate-50 relative z-0 overflow-y-auto custom-scroll">
             <div class="w-full max-w-4xl mx-auto p-4 md:p-6 lg:p-8 flex-1 flex flex-col">
                 <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 flex-1 flex flex-col overflow-hidden relative">
                     
-                    {{-- Header Soal --}}
+                    
                     <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                         <span class="bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">Soal No. <span x-text="currentQuestion + 1"></span></span>
                         
-                        {{-- Status Indikator --}}
+                        
                         <div class="flex items-center gap-4">
                             <span x-show="saveStatus === 'saving'" class="text-[10px] font-bold text-blue-500 uppercase flex items-center gap-1"><i class="ph-bold ph-spinner animate-spin"></i> Menyimpan</span>
                             <span x-show="saveStatus === 'saved'" class="text-[10px] font-bold text-emerald-500 uppercase flex items-center gap-1"><i class="ph-fill ph-cloud-check"></i> Tersimpan</span>
                             <span x-show="saveStatus === 'error'" class="text-[10px] font-bold text-rose-500 uppercase flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Error / Offline</span>
                             
-                            {{-- Checkbox Ragu-Ragu --}}
+                            
                             <label class="flex items-center gap-2 cursor-pointer select-none group">
                                 <div class="relative">
                                     <input type="checkbox" class="peer sr-only" x-model="markedQuestions[questions[currentQuestion]?.id]" @change="saveToLocal()">
@@ -666,11 +669,11 @@
                         </div>
                     </div>
 
-                    {{-- Isi Soal --}}
+                    
                     <div class="flex-1 p-6 md:p-8 overflow-y-auto custom-scroll">
                         <template x-if="questions.length > 0 && questions[currentQuestion]">
                             <div>
-                                {{-- Gambar Soal --}}
+                                
                                 <template x-if="questions[currentQuestion].question_image">
                                     <div class="mb-6 relative group w-fit">
                                         <img :src="'/storage/' + questions[currentQuestion].question_image" 
@@ -683,16 +686,16 @@
                                     </div>
                                 </template>
                                 
-                                {{-- Teks Soal --}}
+                                
                                 <div class="prose prose-slate max-w-none mb-8 select-none trix-content">
                                     <div class="font-medium text-slate-800 leading-relaxed transition-all duration-300" 
                                          :class="{'text-base': fontSize === 1, 'text-xl': fontSize === 2, 'text-2xl': fontSize === 3}"
                                          x-html="questions[currentQuestion].question_text"></div>
                                 </div>
 
-                                {{-- === AREA JAWABAN === --}}
                                 
-                                {{-- TIPE 1: PILIHAN GANDA (Choice) --}}
+                                
+                                
                                 <template x-if="!questions[currentQuestion].question_type || questions[currentQuestion].question_type === 'choice'">
                                     <div class="space-y-3">
                                         <template x-for="(optionText, optionKey) in questions[currentQuestion].options" :key="optionKey">
@@ -719,7 +722,7 @@
                                     </div>
                                 </template>
 
-                                {{-- TIPE 2: BENAR / SALAH --}}
+                                
                                 <template x-if="questions[currentQuestion].question_type === 'true_false'">
                                     <div class="grid grid-cols-2 gap-4">
                                         <label class="relative flex flex-col items-center justify-center gap-3 p-6 rounded-2xl border-2 cursor-pointer transition-all duration-200 active:scale-[0.99]" 
@@ -742,7 +745,7 @@
                                     </div>
                                 </template>
 
-                                {{-- TIPE 3: ESSAY --}}
+                                
                                 <template x-if="questions[currentQuestion].question_type === 'essay'">
                                     <div class="relative">
                                         <textarea x-model="answers[questions[currentQuestion].id]" 
@@ -761,7 +764,7 @@
                                     </div>
                                 </template>
 
-                                {{-- TIPE 4: MENJODOHKAN --}}
+                                
                                 <template x-if="questions[currentQuestion].question_type === 'matching'">
                                     <div class="space-y-4">
                                         <p class="text-sm text-slate-500 font-bold mb-2">Pasangkan pernyataan di kiri dengan jawaban di kanan:</p>
@@ -789,7 +792,7 @@
                         </template>
                     </div>
 
-                    {{-- Tombol Navigasi Bawah --}}
+                    
                     <div class="p-4 md:p-6 bg-white border-t border-slate-100 flex justify-between items-center relative z-10">
                         <button @click="prevQuestion" :disabled="currentQuestion === 0" 
                                 class="px-5 py-3 rounded-xl font-bold flex items-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed text-slate-500 hover:bg-slate-100 hover:text-slate-900">
@@ -812,7 +815,7 @@
             </div>
         </main>
 
-        {{-- SIDEBAR NAVIGASI SOAL --}}
+        
         <aside class="fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-40 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:w-80 lg:shadow-none lg:border-l border-slate-200 flex flex-col" 
                :class="showMobileMap ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'">
             
@@ -828,10 +831,11 @@
             <div class="p-4 bg-indigo-50 border-b border-indigo-100 flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold shadow-md">
-                        {{ substr($student->name ?? 'S', 0, 1) }}
+                        <?php echo e(substr($student->name ?? 'S', 0, 1)); ?>
+
                     </div>
                     <div class="min-w-0">
-                        <p class="text-sm font-bold text-slate-800 truncate">{{ $student->name ?? 'Peserta' }}</p>
+                        <p class="text-sm font-bold text-slate-800 truncate"><?php echo e($student->name ?? 'Peserta'); ?></p>
                         <p class="text-[10px] text-indigo-600 font-bold uppercase tracking-wider">Progress: <span x-text="answeredCount"></span>/<span x-text="totalQuestions"></span></p>
                     </div>
                 </div>
@@ -874,7 +878,7 @@
         
         <div x-show="showMobileMap" @click="showMobileMap = false" x-transition.opacity class="fixed inset-0 bg-slate-900/50 z-30 lg:hidden"></div>
         
-        @endif
+        <?php endif; ?>
     </div>
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/cbt/student/exam_runner.blade.php ENDPATH**/ ?>

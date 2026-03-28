@@ -85,15 +85,22 @@ class StudentPortalController extends Controller
         //  1. LOGIKA DASHBOARD OPERASIONAL (PRIORITY)
         // ==========================================
         
-        // A. PRIORITY EXAMS (CBT)
+       // A. PRIORITY EXAMS (CBT)
         $priorityExams = collect([]);
         
         if (class_exists(\App\Models\CbtExam::class)) {           
             $studentLevel = $student->schoolClass->level ?? filter_var($student->schoolClass->name, FILTER_SANITIZE_NUMBER_INT) ?? null;
-                       
+           
+            $now = Carbon::now('Asia/Jakarta');            
             $activeExams = \App\Models\CbtExam::where('is_active', true)
-                ->where('start_time', '<=', Carbon::now())
-                ->where('end_time', '>=', Carbon::now())
+                ->where(function($query) use ($now) {
+                    $query->whereNull('start_time')
+                          ->orWhere('start_time', '<=', $now);
+                })
+                ->where(function($query) use ($now) {
+                    $query->whereNull('end_time')
+                          ->orWhere('end_time', '>=', $now);
+                })
                 ->get();
             
             $examAttempts = \App\Models\CbtStudentExam::where('student_id', $student->id)
@@ -455,9 +462,14 @@ class StudentPortalController extends Controller
         $upcomingAgendas = collect([]); 
 
         // A. Ambil Data Ujian (CBT) sebagai Event
-        if (class_exists(\App\Models\CbtExam::class)) {
+        if (class_exists(\App\Models\CbtExam::class)) {     
+            $nowCalendar = Carbon::now('Asia/Jakarta')->subMonths(3);
+            
             $exams = \App\Models\CbtExam::where('is_active', true)
-                ->where('start_time', '>=', Carbon::now()->subMonths(3))
+                ->where(function($query) use ($nowCalendar) {
+                    $query->whereNull('start_time')
+                          ->orWhere('start_time', '>=', $nowCalendar);
+                })
                 ->get();
 
             foreach ($exams as $exam) {

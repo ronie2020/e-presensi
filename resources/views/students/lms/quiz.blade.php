@@ -18,14 +18,20 @@
     {{-- CDN SweetAlert2 --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- 
-        TIMER LOGIC WRAPPER 
+   {{-- 
+        TIMER & ANTI-CHEAT LOGIC WRAPPER 
         Mengambil durasi dari controller (dalam menit) dikonversi ke detik
     --}}
-    <div x-data="examTimer({{ $assignment->duration_minutes * 60 }})" x-init="startTimer()" class="relative">
+    <div x-data="examController({{ $assignment->duration_minutes * 60 }}, '{{ $assignment->id }}')" 
+         x-init="startTimer()" 
+         @visibilitychange.document="handleVisibilityChange" 
+         @contextmenu.prevent="preventAction('Klik Kanan')" 
+         @copy.prevent="preventAction('Copy')" 
+         @paste.prevent="preventAction('Paste')"
+         class="relative select-none">
 
         {{-- FLOATING TIMER BADGE (Fixed Position) --}}
-        <div class="fixed top-4 right-4 z-[100] transition-all duration-300 transform"
+        <div class="fixed top-4 right-4 z-[100] transition-all duration-300 transform flex flex-col items-end gap-2"
              :class="timeLeft < 300 ? 'scale-110' : 'scale-100'"> <!-- Membesar jika sisa 5 menit -->
             <div class="flex items-center gap-2 px-5 py-2.5 rounded-full shadow-2xl border-2 backdrop-blur-md transition-colors duration-500"
                  :class="timeLeft < 300 ? 'bg-rose-600 border-rose-400 text-white timer-warning' : 'bg-slate-900/90 border-slate-700 text-white'">
@@ -35,6 +41,13 @@
                     <span class="text-[10px] font-bold opacity-70 uppercase tracking-wider">Sisa Waktu</span>
                     <span class="font-mono text-lg font-black tracking-widest" x-text="formattedTime">00:00:00</span>
                 </div>
+            </div>
+
+            {{-- INDIKATOR AUTOSAVE --}}
+            <div x-show="saveStatus !== ''" x-transition
+                 class="px-3 py-1.5 rounded-full bg-slate-800 border border-slate-700 text-white text-[10px] font-bold shadow-lg flex items-center gap-1.5 backdrop-blur-md" style="display: none;">
+                <i class="ph-bold" :class="saveStatus === 'saving' ? 'ph-spinner animate-spin text-blue-400' : (saveStatus === 'saved' ? 'ph-check-circle text-emerald-400' : 'ph-warning-circle text-rose-400')"></i>
+                <span x-text="saveStatus === 'saving' ? 'Menyimpan...' : (saveStatus === 'saved' ? 'Jawaban Tersimpan' : 'Gagal Menyimpan')"></span>
             </div>
         </div>
 
@@ -92,12 +105,14 @@
                                             @if(isset($q->options[$opt]) && $q->options[$opt])
                                                 <label class="relative flex items-center gap-4 p-4 md:p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 group/opt select-none bg-slate-50/30 hover:bg-blue-50/30 border-slate-100 hover:border-blue-200 active:scale-[0.99]">
                                                     {{-- UPDATE: Menambahkan old() helper agar jawaban tidak hilang saat error validasi --}}
+                                                     
                                                     <input type="radio" 
-                                                           name="answers[{{ $q->id }}]" 
-                                                           value="{{ $opt }}" 
-                                                           class="peer sr-only"
-                                                           {{ old("answers.{$q->id}") == $opt ? 'checked' : '' }}>
-                                                    
+                                                       name="answers[{{ $q->id }}]" 
+                                                       value="{{ $opt }}" 
+                                                       class="peer sr-only"
+                                                       @change="saveAnswer('{{ $q->id }}', $event.target.value)"
+                                                       {{ old("answers.{$q->id}") == $opt ? 'checked' : '' }}>
+                                                
                                                     {{-- Indikator Huruf --}}
                                                     <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0 transition-all border-2
                                                         bg-white border-slate-200 text-slate-500 
@@ -123,10 +138,11 @@
                                         @endforeach
                                     @else
                                         {{-- UPDATE: Menambahkan old() pada textarea --}}
-                                        <div class="relative">
+                                         <div class="relative">
                                             <textarea name="answers[{{ $q->id }}]" rows="5" 
                                                 class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-slate-700 placeholder:text-slate-400 p-4 font-medium transition-all resize-none shadow-inner" 
-                                                placeholder="Ketik jawaban uraian Anda di sini...">{{ old("answers.{$q->id}") }}</textarea>
+                                                placeholder="Ketik jawaban uraian Anda di sini..."
+                                                @input.debounce.1000ms="saveAnswer('{{ $q->id }}', $event.target.value)">{{ old("answers.{$q->id}") }}</textarea>
                                             <div class="absolute bottom-3 right-3 text-slate-300 pointer-events-none"><i class="ph-bold ph-pencil-simple text-xl"></i></div>
                                         </div>
                                     @endif
@@ -156,10 +172,13 @@
     {{-- SCRIPTS --}}
     <script>
         // ALPINE JS LOGIC UNTUK TIMER
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('examTimer', (durationInSeconds) => ({
+       document.addEventListener('alpine:init', () => {
+            Alpine.data('examController', (durationInSeconds, assignmentId) => ({
                 timeLeft: durationInSeconds,
                 formattedTime: '00:00:00',
+                violationCount: 0,
+                saveStatus: '', // 'saving', 'saved', 'error'
+                assignmentId: assignmentId,
                 
                 startTimer() {
                     const interval = setInterval(() => {
@@ -173,6 +192,83 @@
                             this.forceSubmit();
                         }
                     }, 1000);
+                },
+
+                 handleVisibilityChange() {
+                    // Deteksi jika siswa berpindah tab atau meminimalkan browser
+                    if (document.hidden) {
+                        this.violationCount++;
+
+                        if (this.violationCount >= 3) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'PELANGGARAN FATAL!',
+                                text: 'Anda telah meninggalkan halaman ujian sebanyak 3 kali. Sistem akan mengumpulkan ujian Anda secara paksa!',
+                                confirmButtonText: 'Tutup',
+                                confirmButtonColor: '#e11d48',
+                                allowOutsideClick: false,
+                                allowEscapeKey: false
+                            }).then(() => {
+                                document.getElementById('quizForm').submit();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Peringatan Anti-Cheat!',
+                                html: `Anda terdeteksi berpindah tab atau meninggalkan halaman ujian.<br><br><strong class="text-rose-600">Peringatan ke-${this.violationCount} dari 3</strong>`,
+                                confirmButtonText: 'Saya Mengerti',
+                                confirmButtonColor: '#1e3a8a',
+                                allowOutsideClick: false,
+                                backdrop: `rgba(225, 29, 72, 0.4)`
+                            });
+                        }
+                    }
+                },
+
+                preventAction(actionName) {
+                    // Mencegah klik kanan, copy, paste
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: `Tindakan ${actionName} dilarang!`,
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                },
+
+                saveAnswer(questionId, answer) {
+                    this.saveStatus = 'saving';
+                    
+                    // URL Endpoint untuk autosave (Sesuaikan dengan Route Anda)
+                    const url = `/student/learning/assignment/${this.assignmentId}/quiz/autosave`;
+                    
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            question_id: questionId, 
+                            answer: answer 
+                        })
+                    })
+                    .then(response => {
+                        if(response.ok) {
+                            this.saveStatus = 'saved';
+                        } else {
+                            this.saveStatus = 'error';
+                        }
+                        // Sembunyikan notifikasi sukses setelah 2 detik
+                        setTimeout(() => { if(this.saveStatus === 'saved') this.saveStatus = ''; }, 2000);
+                    })
+                    .catch(error => {
+                        console.error('Autosave Error:', error);
+                        this.saveStatus = 'error';
+                    });
                 },
 
                 forceSubmit() {
