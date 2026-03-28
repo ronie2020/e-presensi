@@ -116,7 +116,7 @@
 
     <h3 class="title">REKAPITULASI NILAI SISWA</h3>
 
-    <!-- INFO KELAS -->
+     <!-- INFO KELAS -->
     <table class="info-table">
         <tr>
             <td class="label">Mata Pelajaran</td><td class="colon">:</td><td width="40%">{{ $selectedSubject->name }}</td>
@@ -124,7 +124,12 @@
         </tr>
         <tr>
             <td class="label">Guru Pengampu</td><td class="colon">:</td><td>{{ $teacher->name }}</td>
+            {{-- FITUR BARU: Tambahkan info periode ke Kop Surat PDF --}}
+            <td class="label">Periode Waktu</td><td class="colon">:</td><td>{{ ucfirst($selectedPeriod ?? 'Semester') }}</td>
+        </tr>
+        <tr>
             <td class="label">Tahun Ajaran</td><td class="colon">:</td><td>{{ date('Y') }}/{{ date('Y')+1 }}</td>
+            <td></td><td></td><td></td>
         </tr>
     </table>
 
@@ -145,24 +150,12 @@
                     </th>
                 @endforeach
 
-                <th width="50">Rata2</th>
+                {{-- PERBAIKAN: Judul berubah sesuai periode filter --}}
+                <th width="60">{{ ($selectedPeriod ?? 'semester') == 'semester' ? 'Nilai Rapor' : 'Rata2' }}</th>
             </tr>
         </thead>
         <tbody>
             @foreach($students as $index => $student)
-                @php
-                    // PERBAIKAN: Hitung total berdasar SELURUH tugas (bukan hanya take(10)) 
-                    // agar nilai akhirnya akurat dengan yang di Web dan Excel
-                    $actualTotal = 0; 
-                    $actualCount = 0;
-                    foreach($assignments as $t) {
-                        $s = $gradeBook[$student->id][$t->id] ?? null;
-                        if($s !== null) { 
-                            $actualTotal += $s; 
-                            $actualCount++; 
-                        }
-                    }
-                @endphp
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td class="left name-col">{{ $student->name }}</td>
@@ -177,9 +170,9 @@
                         <td>{{ $score ?? '-' }}</td>
                     @endforeach
 
+                    {{-- PERBAIKAN: Hapus blok foreach perhitungan yang berat, panggil langsung average_score --}}
                     <td style="font-weight: bold; background-color: #f9f9f9;">
-                        {{-- Format disamakan dengan 1 angka desimal --}}
-                        {{ $actualCount > 0 ? round($actualTotal / $actualCount, 1) : 0 }}
+                        {{ $student->average_score ?? 0 }}
                     </td>
                 </tr>
             @endforeach

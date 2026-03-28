@@ -129,6 +129,9 @@ class LmsGradeController extends Controller
              return back()->with('error', 'Data Kelas atau Mapel tidak valid.');
         }
         
+        // PERBAIKAN: Masukkan periode ke data agar bisa dibaca oleh template Excel
+        $data['selectedPeriod'] = $period;
+
         $filename = 'Rekap_Nilai_' . str_replace(' ', '_', $data['selectedClass']->name) . '_' . date('Ymd') . '.xlsx';
 
         return Excel::download(new GradeRecapExport($data), $filename);
@@ -149,6 +152,9 @@ class LmsGradeController extends Controller
         if (!$data['selectedClass']) {
              return back()->with('error', 'Data tidak valid.');
         }
+
+        // PERBAIKAN: Masukkan periode ke data agar bisa dibaca oleh template PDF
+        $data['selectedPeriod'] = $period;
 
         $data['teacher'] = Auth::user();
         

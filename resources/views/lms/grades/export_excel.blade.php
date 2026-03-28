@@ -26,13 +26,13 @@
             </tr>
             <tr>
                 <th colspan="{{ $totalColumns }}" style="font-size: 11px; font-style: italic; text-align: center;">
-                    Dicetak pada: {{ date('d F Y') }} oleh {{ $teacher->name ?? Auth::user()->name ?? '-' }}
+                    Dicetak pada: {{ date('d F Y') }} oleh {{ $teacher->name ?? Auth::user()->name ?? '-' }} | Periode: {{ ucfirst($selectedPeriod ?? 'Semester') }}
                 </th>
             </tr>
             
             <tr></tr> {{-- Spasi Kosong --}}
 
-            {{-- HEADER TABEL (Baris 5) --}}
+           {{-- HEADER TABEL (Baris 5) --}}
             <tr>
                 <th style="width: 5px;">No</th>
                 <th style="width: 35px;">Nama Siswa</th>
@@ -44,15 +44,12 @@
                 @endforeach
 
                 <th style="width: 10px;">Total</th>
-                <th style="width: 10px;">Rata2</th>
+                {{-- PERBAIKAN: Judul Rata2 otomatis berubah jadi Nilai Rapor jika periode semester --}}
+                <th style="width: 15px;">{{ ($selectedPeriod ?? 'semester') == 'semester' ? 'Nilai Rapor' : 'Rata2' }}</th>
             </tr>
         </thead>
         <tbody>
             @foreach($students as $index => $student)
-                @php
-                    $total = 0; 
-                    $count = 0;
-                @endphp
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $student->name }}</td>
@@ -60,19 +57,13 @@
                     <td>{{ $student->nisn ?? $student->student_id ?? '-' }}</td>
                     
                     @foreach($assignments as $task)
-                        @php
-                            $score = $gradeBook[$student->id][$task->id] ?? null;
-                            if($score !== null) { 
-                                $total += $score; 
-                                $count++; 
-                            }
-                        @endphp
+                        @php $score = $gradeBook[$student->id][$task->id] ?? null; @endphp
                         <td>{{ $score ?? '-' }}</td>
                     @endforeach
 
-                    <td style="font-weight: bold;">{{ $total }}</td>
-                    {{-- Format 1 angka desimal konsisten --}}
-                    <td style="font-weight: bold;">{{ $count > 0 ? round($total / $count, 1) : 0 }}</td>
+                    {{-- PERBAIKAN: Kode jauh lebih bersih, langsung panggil hasil hitungan dari Controller --}}
+                    <td style="font-weight: bold;">{{ $student->total_score ?? 0 }}</td>
+                    <td style="font-weight: bold;">{{ $student->average_score ?? 0 }}</td>
                 </tr>
             @endforeach
         </tbody>
