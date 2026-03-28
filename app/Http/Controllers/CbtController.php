@@ -568,7 +568,7 @@ class CbtController extends Controller
      * Helper Private untuk mengambil data Rekap 
      * Memperhitungkan nilai manual (score) yang tersimpan dan riwayat percobaan
      */
-     private function getRecapData($exam_id) 
+      private function getRecapData($exam_id) 
     {
         // 1. Ambil Data Dasar Siswa & Nilai Akhir
         $selects = [
@@ -577,6 +577,7 @@ class CbtController extends Controller
             'cbt_student_exams.total_score', 
             'students.name as student_name',
             'students.student_id as student_nisn',
+            'students.class_id', // <== TAMBAHAN PENTING: Untuk keperluan pengelompokan saat Post Nilai ke LMS
             'classes.name as class_name'
         ];
 
@@ -953,7 +954,7 @@ class CbtController extends Controller
         return back()->with('success', 'Token ujian berhasil diperbarui: ' . $newToken);
     }
 
-    public function download_seb($id)
+     public function download_seb($id)
     {
         $exam = CbtExam::findOrFail($id);
         $startUrl = route('seb.login'); 
@@ -963,10 +964,81 @@ class CbtController extends Controller
         return response()->streamDownload(function () use ($sebConfig) { echo $sebConfig; }, $fileName, ['Content-Type' => 'application/seb']);
     }
 
+    /**
+     * Fungsi Post/Sync Nilai ke Gradebook LMS
+     */
     public function syncToGradebook(Request $request, $id)
     {
-        // Logika sync tetap sama seperti file lama
-        return back()->with('warning', 'Fitur sync belum diaktifkan.');
+        $exam = CbtExam::findOrFail($id);
+        
+        // 1. Cari subject_id berdasarkan nama mata pelajaran di CBT
+        $subject = Subject::where('name', $exam->subject_name)->first();
+        if (!$subject) {
+            return back()->with('error', 'Gagal Post Nilai: Mata Pelajaran "' . $exam->subject_name . '" tidak ditemukan di data Master LMS. Pastikan namanya sama persis.');
+        }
+
+        // 2. Ambil semua hasil siswa yang sudah selesai
+        $results = $this->getRecapData($id);
+        
+        if ($results->isEmpty()) {
+            return back()->with('warning', 'Belum ada siswa yang menyelesaikan ujian ini, tidak ada nilai yang diposting.');
+        }
+
+        $successCount = 0;
+
+        // 3. Kelompokkan nilai berdasarkan Kelas Siswa 
+        // (Karena 1 Ujian CBT (misal Kls 7) bisa dikerjakan kelas 7A, 7B, 7C sekaligus)
+        $groupedByClass = $results->groupBy('class_id');
+
+        // Gunakan Transaction agar jika di tengah jalan error, data tidak setengah-masuk
+        DB::beginTransaction();
+        try {
+            foreach ($groupedByClass as $classId => $studentResults) {
+                if (!$classId) continue; 
+
+                // 4. Buat otomatis (atau gunakan yang sudah ada) "Tugas/Kuis" di LMS untuk kelas ini
+                $assignment = LmsAssignment::firstOrCreate(
+                    [
+                        'class_id' => $classId,
+                        'subject_id' => $subject->id,
+                        'title' => $exam->title, // Samakan judul tugas LMS dengan judul Ujian CBT
+                        'assignment_type' => 'quiz', // Kategori masuk ke Kuis/Ulangan
+                    ],
+                    [
+                        'description' => 'Nilai otomatis diposting dari hasil Ujian CBT.',
+                        'teacher_id' => Auth::id(),
+                        'deadline' => $exam->end_time,
+                    ]
+                );
+
+                // 5. Masukkan/Timpa rekap nilai siswa ke LMS (LmsSubmission)
+                foreach ($studentResults as $res) {
+                    LmsSubmission::updateOrCreate(
+                        [
+                            'assignment_id' => $assignment->id,
+                            'student_id' => $res->student_id,
+                        ],
+                        [
+                            'grade' => $res->total_score,
+                            'status' => 'graded', // Otomatis berstatus "dinilai"
+                            'submitted_at' => now(),
+                        ]
+                    );
+                    $successCount++;
+                }
+            }
+            DB::commit();
+
+            if ($successCount > 0) {
+                return back()->with('success', "Berhasil memposting $successCount nilai siswa ke Rekap Nilai LMS!");
+            }
+            
+            return back()->with('warning', 'Tidak ada data valid yang bisa diposting (Pastikan data siswa memiliki kelas).');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan sistem saat memposting nilai: ' . $e->getMessage());
+        }
     }
     
     public function results() { 
