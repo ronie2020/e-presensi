@@ -222,14 +222,52 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-3 p-4 bg-purple-50 rounded-2xl border border-purple-100">
+                        
+                        {{-- FITUR BARU: PENGATURAN ANTI KECURANGAN --}}
+                        <div class="col-span-2 md:col-span-3 mt-4" x-show="examType === 'cbt'">
+                            <div class="bg-rose-50/50 rounded-2xl p-5 border border-rose-100">
+                                <h4 class="text-sm font-black text-rose-900 flex items-center gap-2 mb-4">
+                                    <i class="ph-fill ph-shield-warning text-rose-500 text-lg"></i> Keamanan & Anti-Kecurangan Lanjutan
+                                </h4>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <!-- Acak Soal -->
+                                    <label class="flex items-start gap-4 p-4 bg-white rounded-xl border border-rose-100 cursor-pointer hover:border-rose-300 transition-colors group">
+                                        <div class="relative flex items-center mt-1">
+                                            <input type="checkbox" name="randomize_questions" value="1" {{ old('randomize_questions', $exam->randomize_questions) ? 'checked' : '' }} class="peer sr-only">
+                                            <div class="w-10 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500"></div>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-slate-800 text-sm group-hover:text-rose-600 transition-colors">Acak Urutan Soal</p>
+                                            <p class="text-xs text-slate-500 font-medium leading-relaxed mt-0.5">Setiap siswa akan mendapatkan urutan nomor soal yang berbeda.</p>
+                                        </div>
+                                    </label>
+
+                                    <!-- Acak Opsi -->
+                                    <label class="flex items-start gap-4 p-4 bg-white rounded-xl border border-rose-100 cursor-pointer hover:border-rose-300 transition-colors group">
+                                        <div class="relative flex items-center mt-1">
+                                            <input type="checkbox" name="randomize_options" value="1" {{ old('randomize_options', $exam->randomize_options) ? 'checked' : '' }} class="peer sr-only">
+                                            <div class="w-10 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500"></div>
+                                        </div>
+                                        <div>
+                                            <p class="font-bold text-slate-800 text-sm group-hover:text-rose-600 transition-colors">Acak Opsi Jawaban (A, B, C, D)</p>
+                                            <p class="text-xs text-slate-500 font-medium leading-relaxed mt-0.5">Posisi opsi akan diacak (Hanya berlaku untuk Pilihan Ganda).</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                          {{-- Aktifkan Ujian --}}
+                        <div class="flex flex-row items-center gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-100">
                             <div class="relative flex items-center">
-                                <input type="checkbox" name="is_active" value="1" {{ old('is_active', $exam->is_active) ? 'checked' : '' }} id="active" class="peer sr-only">
+                                <input type="checkbox" id="active" name="is_active" value="1" {{ old('is_active', $exam->is_active) ? 'checked' : '' }} class="peer sr-only">
                                 <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600 cursor-pointer"></div>
                             </div>
                             <label for="active" class="text-sm font-bold text-slate-700 cursor-pointer select-none">Status Ujian Aktif</label>
                         </div>
 
+                        {{-- Actions --}}
                         <div class="pt-4 border-t border-slate-100 flex flex-col-reverse md:flex-row justify-end gap-3">
                             <a href="{{ route('cbt.index') }}" class="w-full md:w-auto text-center px-6 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-bold hover:bg-slate-50 transition text-sm">Batal</a>
                             <button type="submit" class="w-full md:w-auto px-8 py-3.5 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition shadow-lg shadow-purple-500/30 text-sm flex items-center justify-center gap-2 transform active:scale-95">

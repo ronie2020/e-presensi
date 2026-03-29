@@ -1,18 +1,28 @@
-<x-app-layout>
-    <x-slot name="header">
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+     <?php $__env->slot('header', null, []); ?> 
         <div class="flex items-center justify-between print:hidden">
             <h2 class="font-semibold text-xl text-slate-800 leading-tight">
-                {{ __('Analisis Butir Soal') }}
+                <?php echo e(__('Analisis Butir Soal')); ?>
+
             </h2>
             
-            {{-- cetak dokumen formal --}}
-            <a href="{{ route('cbt.analysis.print', $exam->id) }}" target="_blank" class="text-sm font-bold text-slate-500 hover:text-indigo-600 flex items-center gap-2 transition bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+            
+            <a href="<?php echo e(route('cbt.analysis.print', $exam->id)); ?>" target="_blank" class="text-sm font-bold text-slate-500 hover:text-indigo-600 flex items-center gap-2 transition bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
                 <i class="ph-bold ph-printer text-lg"></i> Cetak Laporan Formal
             </a>
         </div>
-    </x-slot>
+     <?php $__env->endSlot(); ?>
 
-    {{-- Style Khusus Print (Sangat penting untuk mencetak grafik batang) --}}
+    
     <style>
         @media print {
             body { background: white; }
@@ -34,19 +44,19 @@
     <div class="py-8 sm:py-10 font-sans text-slate-800" x-data="{ search: '' }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-            {{-- Header Info --}}
+            
             <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 print-area print:mb-6 print:p-0">
                 <div>
                     <div class="flex items-center gap-2 mb-1 print:hidden">
-                        <a href="{{ route('cbt.recap', $exam->id) }}" class="text-xs font-bold text-slate-400 hover:text-indigo-600 transition flex items-center gap-1">
+                        <a href="<?php echo e(route('cbt.recap', $exam->id)); ?>" class="text-xs font-bold text-slate-400 hover:text-indigo-600 transition flex items-center gap-1">
                             <i class="ph-bold ph-arrow-left"></i> Kembali ke Rekap
                         </a>
                     </div>
-                    <h3 class="text-2xl font-black text-slate-800">{{ $exam->title }}</h3>
-                    <p class="text-slate-500 text-sm font-medium">Analisis Kualitas Soal • Mapel: {{ $exam->subject_name }} • Sampel: <b>{{ $totalStudents ?? 0 }} Siswa</b></p>
+                    <h3 class="text-2xl font-black text-slate-800"><?php echo e($exam->title); ?></h3>
+                    <p class="text-slate-500 text-sm font-medium">Analisis Kualitas Soal • Mapel: <?php echo e($exam->subject_name); ?> • Sampel: <b><?php echo e($totalStudents ?? 0); ?> Siswa</b></p>
                 </div>
                 
-                {{-- Legend Tingkat Kesukaran --}}
+                
                 <div class="flex gap-3 text-[10px] uppercase font-bold text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200 print:bg-transparent print:border-none print:p-0">
                     <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-400"></span> Mudah (>75%)</div>
                     <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-400"></span> Sedang</div>
@@ -54,8 +64,8 @@
                 </div>
             </div>
 
-            {{-- NEW: ANALISIS TAGS / KOMPETENSI DASAR (KD) --}}
-            @if(isset($tagAnalysis) && count($tagAnalysis) > 0)
+            
+            <?php if(isset($tagAnalysis) && count($tagAnalysis) > 0): ?>
             <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden print-area print:rounded-none">
                 <div class="p-6 border-b border-slate-100 bg-indigo-50/50 flex items-center gap-3 print:bg-white print:border-b-2 print:border-black print:px-0">
                     <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl shadow-sm print:hidden"><i class="ph-fill ph-target"></i></div>
@@ -66,33 +76,33 @@
                 </div>
                 <div class="p-8 print:px-0">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 print:gap-4 print:grid-cols-2">
-                        @foreach($tagAnalysis as $tag => $data)
-                            @php
+                        <?php $__currentLoopData = $tagAnalysis; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tag => $data): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
                                 $percent = $data['total'] > 0 ? round(($data['correct'] / $data['total']) * 100) : 0;
                                 $color = $percent >= 75 ? 'bg-emerald-400' : ($percent >= 40 ? 'bg-blue-400' : 'bg-rose-400');
                                 $textColor = $percent >= 75 ? 'text-emerald-600' : ($percent >= 40 ? 'text-blue-600' : 'text-rose-600');
                                 $message = $percent >= 75 ? 'Sangat Dikuasai' : ($percent >= 40 ? 'Cukup Dikuasai' : 'Perlu Evaluasi (Lemah)');
-                            @endphp
+                            ?>
                             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 print:border print:border-slate-300 print:bg-transparent">
                                 <div class="flex justify-between items-end mb-2">
-                                    <h5 class="font-bold text-slate-700 text-sm flex items-center gap-2"><i class="ph-fill ph-tag text-slate-400 print:hidden"></i> {{ $tag }}</h5>
-                                    <span class="font-black text-xl {{ $textColor }} print:text-black">{{ $percent }}%</span>
+                                    <h5 class="font-bold text-slate-700 text-sm flex items-center gap-2"><i class="ph-fill ph-tag text-slate-400 print:hidden"></i> <?php echo e($tag); ?></h5>
+                                    <span class="font-black text-xl <?php echo e($textColor); ?> print:text-black"><?php echo e($percent); ?>%</span>
                                 </div>
                                 <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden mb-2 print:border print:border-slate-300">
-                                    <div class="h-full {{ $color }} rounded-full" style="width: {{ $percent }}%"></div>
+                                    <div class="h-full <?php echo e($color); ?> rounded-full" style="width: <?php echo e($percent); ?>%"></div>
                                 </div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider print:text-black">{{ $message }}</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider print:text-black"><?php echo e($message); ?></p>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- Tabel Analisis --}}
+            
             <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden print-area print:rounded-none">
                 
-                {{-- Toolbar Pencarian --}}
+                
                 <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
                     <h4 class="font-bold text-slate-700 flex items-center gap-2 text-lg">
                         <i class="ph-fill ph-chart-pie-slice text-indigo-500"></i> Detail Analisis per Butir
@@ -115,106 +125,108 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50 print:divide-gray-300">
-                            @forelse($analysis as $index => $item)
-                                <tr x-show="search === '' || '{{ strtolower(addslashes(strip_tags($item->text . ' ' . ($item->tags ?? '')))) }}'.includes(search.toLowerCase())" 
+                            <?php $__empty_1 = true; $__currentLoopData = $analysis; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <tr x-show="search === '' || '<?php echo e(strtolower(addslashes(strip_tags($item->text . ' ' . ($item->tags ?? ''))))); ?>'.includes(search.toLowerCase())" 
                                     class="hover:bg-indigo-50/20 transition group print:hover:bg-transparent">
                                     
-                                    <td class="px-6 py-4 text-center font-black text-slate-400 print:text-black">{{ $index + 1 }}</td>
+                                    <td class="px-6 py-4 text-center font-black text-slate-400 print:text-black"><?php echo e($index + 1); ?></td>
                                     
                                     <td class="px-6 py-4">
-                                        <p class="font-medium text-slate-700 line-clamp-3 print:line-clamp-none mb-2" title="{{ $item->text }}">{{ $item->text }}</p>
-                                        {{-- Menampilkan Tag di Tabel Analisis --}}
-                                        @if(!empty($item->tags))
+                                        <p class="font-medium text-slate-700 line-clamp-3 print:line-clamp-none mb-2" title="<?php echo e($item->text); ?>"><?php echo e($item->text); ?></p>
+                                        
+                                        <?php if(!empty($item->tags)): ?>
                                             <div class="flex flex-wrap gap-1 mt-1 print:mt-0">
-                                                @foreach(explode(',', $item->tags) as $tag)
-                                                    <span class="text-[9px] font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded border border-indigo-100 print:border-slate-300 print:text-slate-600 print:bg-transparent">{{ trim($tag) }}</span>
-                                                @endforeach
+                                                <?php $__currentLoopData = explode(',', $item->tags); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tag): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <span class="text-[9px] font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded border border-indigo-100 print:border-slate-300 print:text-slate-600 print:bg-transparent"><?php echo e(trim($tag)); ?></span>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     
-                                    {{-- Kolom Tipe & Kunci --}}
+                                    
                                     <td class="px-6 py-4 text-center">
-                                        @if(in_array($item->type, ['choice', 'true_false']))
+                                        <?php if(in_array($item->type, ['choice', 'true_false'])): ?>
                                             <span class="inline-block mb-1 text-[9px] font-bold text-slate-400 uppercase">PG / B-S</span><br>
                                             <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 font-black flex items-center justify-center mx-auto border border-slate-200 print:bg-transparent print:border-black">
-                                                {{ $item->correct_key }}
+                                                <?php echo e($item->correct_key); ?>
+
                                             </span>
-                                        @elseif($item->type == 'essay')
+                                        <?php elseif($item->type == 'essay'): ?>
                                             <span class="inline-block mb-1 text-[9px] font-bold text-indigo-400 uppercase">ESSAI</span><br>
-                                            <button onclick="Swal.fire({title: 'Kunci Jawaban', text: '{{ addslashes($item->correct_key) }}', confirmButtonColor: '#4f46e5'})" 
+                                            <button onclick="Swal.fire({title: 'Kunci Jawaban', text: '<?php echo e(addslashes($item->correct_key)); ?>', confirmButtonColor: '#4f46e5'})" 
                                                     class="text-xs font-bold text-indigo-600 hover:underline cursor-pointer print:hidden">
                                                 Lihat Kunci
                                             </button>
-                                            <span class="hidden print:block text-xs text-slate-700">{{ $item->correct_key ?: '-' }}</span>
-                                        @elseif($item->type == 'matching')
+                                            <span class="hidden print:block text-xs text-slate-700"><?php echo e($item->correct_key ?: '-'); ?></span>
+                                        <?php elseif($item->type == 'matching'): ?>
                                             <span class="inline-block mb-1 text-[9px] font-bold text-orange-400 uppercase">MATCHING</span><br>
                                             <span class="text-xs text-slate-400">-</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
 
-                                    {{-- Tingkat Kesukaran --}}
+                                    
                                     <td class="px-6 py-4 text-center">
-                                        <span class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider mb-2 {{ $item->difficulty_badge }} print:border print:border-black print:text-black print:bg-transparent">
-                                            {{ $item->difficulty_label }}
+                                        <span class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider mb-2 <?php echo e($item->difficulty_badge); ?> print:border print:border-black print:text-black print:bg-transparent">
+                                            <?php echo e($item->difficulty_label); ?>
+
                                         </span>
                                         
-                                        {{-- Progress Bar Kesukaran --}}
+                                        
                                         <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex print:h-2 print:border print:border-black">
-                                            <div class="h-full {{ str_contains($item->difficulty_badge, 'emerald') ? 'bg-emerald-400' : (str_contains($item->difficulty_badge, 'rose') ? 'bg-rose-400' : 'bg-blue-400') }}" 
-                                                 style="width: {{ $item->difficulty_index }}%"></div>
+                                            <div class="h-full <?php echo e(str_contains($item->difficulty_badge, 'emerald') ? 'bg-emerald-400' : (str_contains($item->difficulty_badge, 'rose') ? 'bg-rose-400' : 'bg-blue-400')); ?>" 
+                                                 style="width: <?php echo e($item->difficulty_index); ?>%"></div>
                                         </div>
-                                        <p class="text-[10px] font-bold text-slate-400 mt-1 print:text-black">{{ $item->difficulty_index }}% Siswa Benar</p>
+                                        <p class="text-[10px] font-bold text-slate-400 mt-1 print:text-black"><?php echo e($item->difficulty_index); ?>% Siswa Benar</p>
                                     </td>
 
-                                    {{-- Distribusi Jawaban --}}
+                                    
                                     <td class="px-6 py-4">
-                                        {{-- Jika PG / B-S Tampilkan Grafik Batang --}}
-                                        @if(in_array($item->type, ['choice', 'true_false']))
+                                        
+                                        <?php if(in_array($item->type, ['choice', 'true_false'])): ?>
                                             <div class="flex items-end gap-2 h-16 w-full pb-1 border-b border-slate-200">
-                                                @foreach(['A','B','C','D', 'E'] as $opt)
-                                                    @if(isset($item->options[$opt]) || $opt != 'E') {{-- Tampilkan E hanya jika ada datanya --}}
-                                                        @php 
+                                                <?php $__currentLoopData = ['A','B','C','D', 'E']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <?php if(isset($item->options[$opt]) || $opt != 'E'): ?> 
+                                                        <?php 
                                                             $count = $item->options[$opt] ?? 0;
                                                             $percent = $totalStudents > 0 ? ($count / $totalStudents) * 100 : 0;
                                                             $isKey = $opt == $item->correct_key;
                                                             $color = $isKey ? 'bg-emerald-400' : 'bg-slate-300';
                                                             if(!$isKey && $percent > 20) $color = 'bg-amber-400'; // Distractor yang kuat (Kuning)
-                                                        @endphp
+                                                        ?>
                                                         <div class="flex-1 flex flex-col justify-end items-center group relative">
-                                                            {{-- Tooltip (Hover) --}}
+                                                            
                                                             <div class="absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 transition text-[10px] font-bold bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap z-10 print:hidden pointer-events-none">
-                                                                {{ $count }} Siswa ({{ round($percent) }}%)
+                                                                <?php echo e($count); ?> Siswa (<?php echo e(round($percent)); ?>%)
                                                             </div>
                                                             
-                                                            {{-- Bar --}}
-                                                            <div class="w-full rounded-t-sm transition-all duration-500 {{ $color }}" 
-                                                                 style="height: {{ $percent > 0 ? $percent : 2 }}%"></div>
                                                             
-                                                            {{-- Label Bawah --}}
-                                                            <span class="text-[10px] font-bold {{ $isKey ? 'text-emerald-600' : 'text-slate-400' }} mt-1 print:text-black">{{ $opt }}</span>
+                                                            <div class="w-full rounded-t-sm transition-all duration-500 <?php echo e($color); ?>" 
+                                                                 style="height: <?php echo e($percent > 0 ? $percent : 2); ?>%"></div>
+                                                            
+                                                            
+                                                            <span class="text-[10px] font-bold <?php echo e($isKey ? 'text-emerald-600' : 'text-slate-400'); ?> mt-1 print:text-black"><?php echo e($opt); ?></span>
                                                         </div>
-                                                    @endif
-                                                @endforeach
+                                                    <?php endif; ?>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </div>
                                         
-                                        {{-- Jika Essai --}}
-                                        @elseif($item->type == 'essay')
+                                        
+                                        <?php elseif($item->type == 'essay'): ?>
                                             <div class="h-16 w-full flex items-center justify-center bg-slate-50 rounded-lg border border-dashed border-slate-200 text-center px-4 print:bg-transparent print:border-solid">
                                                 <p class="text-[10px] font-bold text-slate-400 uppercase">
                                                     Dikoreksi Manual
                                                 </p>
                                             </div>
 
-                                        {{-- Jika Matching --}}
-                                        @else
+                                        
+                                        <?php else: ?>
                                             <div class="h-16 w-full flex items-center justify-center">
                                                 <p class="text-xs text-slate-400">-</p>
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="5" class="px-6 py-12 text-center text-slate-400">
                                         <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -223,9 +235,9 @@
                                         Belum ada data analisis. Pastikan ujian sudah dikerjakan siswa.
                                     </td>
                                 </tr>
-                            @endforelse
+                            <?php endif; ?>
 
-                            {{-- State Empty Search --}}
+                            
                             <tr x-show="search !== '' && document.querySelectorAll('tbody tr[x-show]:not([style*=\'display: none\'])').length === 0" style="display: none;">
                                 <td colspan="5" class="px-6 py-8 text-center text-slate-500">
                                     <p class="font-medium">Tidak ada data yang cocok dengan pencarian "<span x-text="search" class="font-bold text-slate-800"></span>"</p>
@@ -238,6 +250,15 @@
         </div>
     </div>
     
-    {{-- SweetAlert --}}
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/cbt/analysis.blade.php ENDPATH**/ ?>

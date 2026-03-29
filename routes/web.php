@@ -367,6 +367,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/questions/template', [CbtController::class, 'downloadTemplate'])->name('questions.template');
         Route::post('/exam/{exam}/refresh-token', [CbtController::class, 'refresh_token'])->name('refresh_token');
         
+         // Bulk Actions 
+        Route::delete('/exam/{exam}/questions/bulk-delete', [CbtController::class, 'bulkDelete'])->name('questions.bulk_delete');
+        Route::put('/exam/{exam}/questions/bulk-weight', [CbtController::class, 'bulkWeight'])->name('questions.bulk_weight');
+
         // 6. MONITORING & RESET
         Route::get('/monitoring/{exam_id}', [CbtController::class, 'monitoring'])->name('monitoring');
         Route::post('/reset/{exam}/{student}', [CbtController::class, 'resetExam'])->name('reset');

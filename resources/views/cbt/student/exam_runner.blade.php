@@ -23,7 +23,6 @@
                     MathJax.startup.defaultReady();
                     window.renderMath = () => { 
                         if(window.MathJax) {
-                            // PERBAIKAN: Clear cache sebelum render ulang agar rumus tergambar sempurna
                             MathJax.typesetClear();
                             MathJax.typesetPromise(); 
                         }
@@ -60,19 +59,44 @@
     </style>
 
     <script>
+        // Seeded Random Generator
+        function mulberry32(a) {
+            return function() {
+              var t = a += 0x6D2B79F5;
+              t = Math.imul(t ^ t >>> 15, t | 1);
+              t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+              return ((t ^ t >>> 14) >>> 0) / 4294967296;
+            }
+        }
+
+        // Algoritma Fisher-Yates Shuffle
+        function shuffleArray(array, randFunc) {
+            let curId = array.length;
+            while (0 !== curId) {
+                let randId = Math.floor(randFunc() * curId);
+                curId -= 1;
+                let tmp = array[curId];
+                array[curId] = array[randId];
+                array[randId] = tmp;
+            }
+            return array;
+        }
+
         window.examData = { 
             questions: @json($questions), 
             timeLeft: {{ $timeLeft ?? 0 }}, 
             sessionId: {{ $sessionId }}, 
             examId: {{ $exam->id }},
             examType: '{{ $exam->exam_type ?? 'cbt' }}', 
-            totalDuration: {{ ($exam->duration_minutes ?? 0) * 60 }} 
+            totalDuration: {{ ($exam->duration_minutes ?? 0) * 60 }},
+            randomizeQuestions: {{ $exam->randomize_questions ? 'true' : 'false' }},
+            randomizeOptions: {{ $exam->randomize_options ? 'true' : 'false' }}
         };
 
         window.examApp = function() {
             return {
                 // --- STATE VARIABLES ---
-                questions: window.examData.questions || [],
+                questions: [],
                 timeLeft: window.examData.timeLeft,
                 totalDuration: window.examData.totalDuration,
                 sessionId: window.examData.sessionId,
@@ -104,19 +128,54 @@
                 
                 // Camera State
                 cameraActive: false,
+                backgroundSyncInterval: null,
 
                 // --- INISIALISASI ---
                 initData() {
                     try {
+                        let rand = mulberry32(this.sessionId); 
+
+                        let rawQuestions = JSON.parse(JSON.stringify(window.examData.questions || []));
+
+                        // 1. Acak Urutan Soal (Jika diaktifkan di pengaturan)
+                        if (window.examData.randomizeQuestions) {
+                            rawQuestions = shuffleArray(rawQuestions, rand);
+                        }
+
+                        // 2. Persiapkan Opsi & Acak Pilihan
+                        rawQuestions.forEach(q => {
+                            if (!q.question_type || q.question_type === 'choice') {
+                                try {
+                                    let parsedOpts = typeof q.options === 'string' ? JSON.parse(q.options) : (q.options || {});
+                                    let keys = Object.keys(parsedOpts).filter(k => k.length === 1 && parsedOpts[k] != null && parsedOpts[k] !== '');
+                                    
+                                    if(keys.length === 0) {
+                                        keys = ['A', 'B', 'C', 'D', 'E'].filter(k => parsedOpts['image_'+k] != null);
+                                    }
+
+                                    // Fallback aman jika kosong
+                                    if(keys.length === 0) keys = ['A', 'B', 'C', 'D', 'E'];
+
+                                    // Acak posisi opsi (hanya menyusun ulang referensi kunci datanya)
+                                    if (window.examData.randomizeOptions && keys.length > 0) {
+                                        keys = shuffleArray(keys, rand);
+                                    }
+                                    q.displayKeys = keys; 
+                                } catch (e) {
+                                    q.displayKeys = ['A', 'B', 'C', 'D', 'E']; 
+                                }
+                            }
+                        });
+
+                        this.questions = rawQuestions;
                         this.totalQuestions = this.questions.length;
                         
                         // Set Timer
                         const now = new Date().getTime();
                         this.endTimeTarget = now + (this.timeLeft * 1000);
                         
-                        try { this.loadLocalProgress(); } catch (e) { console.warn("Local storage issue", e); }
+                        try { this.loadLocalProgress(); } catch (e) {}
                         
-                        // Mapping jawaban dari server
                         if (this.examType !== 'google_form') {
                             this.questions.forEach(q => { 
                                 if(q.saved_answer && !this.answers[q.id]) {
@@ -126,6 +185,13 @@
                         }
                         this.updateProgress();
                         this.checkPendingAnswers();
+
+                        // Background Sync
+                        this.backgroundSyncInterval = setInterval(() => {
+                            if(this.isOnline && this.unsavedQuestions.size > 0 && this.saveStatus !== 'saving') {
+                                this.syncPendingAnswers();
+                            }
+                        }, 5000);
 
                         // Render MathJax
                         setTimeout(() => { if(window.renderMath) window.renderMath(); }, 500);
@@ -261,9 +327,19 @@
                     if (this.unsavedQuestions.size === 0) { this.saveStatus = 'saved'; return; }
                     this.saveStatus = 'saving';
                     const pendingIds = Array.from(this.unsavedQuestions);
+                    
+                    let allSuccess = true;
                     for (const qId of pendingIds) { 
-                        if (this.answers[qId]) await this.pushAnswerToServer(qId, this.answers[qId]); 
-                        else this.unsavedQuestions.delete(qId);
+                        if (this.answers[qId]) {
+                            await this.pushAnswerToServer(qId, this.answers[qId]);
+                            if(this.unsavedQuestions.has(qId)) allSuccess = false; 
+                        } else {
+                            this.unsavedQuestions.delete(qId);
+                        }
+                    }
+                    
+                    if(allSuccess) {
+                        Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: 'Data tersinkron!', showConfirmButton: false, timer: 2000, customClass: { popup: 'rounded-xl mb-4' }});
                     }
                 },
 
@@ -391,6 +467,8 @@
 
                 async submitExam(forced = false) {
                     clearInterval(this.timerInterval);
+                    if(this.backgroundSyncInterval) clearInterval(this.backgroundSyncInterval);
+                    
                     Swal.fire({ title: 'Menyelesaikan Sesi...', html: 'Mohon tunggu sesaat.', allowOutsideClick: false, allowEscapeKey: false, didOpen: () => Swal.showLoading(), customClass: { popup: 'rounded-[2rem]' } });
 
                     if(this.examType !== 'google_form' && this.unsavedQuestions.size > 0) {
@@ -410,9 +488,8 @@
                     form.submit();
                 },
 
-                // --- KAMERA PROCTORING (DENGAN FAIL-SAFE LENTUR) ---
+                // --- KAMERA PROCTORING ---
                 async initCamera() {
-                    // Jika perangkat keras kamera tidak terdeteksi sama sekali oleh browser
                     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                         this.handleCameraFailure('Perangkat/Browser Anda tidak mendukung akses kamera.');
                         return;
@@ -422,7 +499,6 @@
                         const video = document.getElementById('webcam-video');
                         if (!video) return;
 
-                        // Mencoba meminta izin akses kamera ke siswa
                         const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
                         video.srcObject = stream;
                         
@@ -447,17 +523,13 @@
                         scheduleNextPhoto();
 
                     } catch (err) {
-                        // Jika akses diblokir atau kamera tidak ditemukan
                         this.handleCameraFailure('Akses kamera ditolak atau tidak ada kamera fisik.');
                     }
                 },
 
-                // PERBAIKAN: Handler untuk mengizinkan ujian jalan meski kamera gagal
                 handleCameraFailure(reason) {
                     this.cameraActive = false;
                     console.warn("Camera Init Info:", reason);
-                    
-                    // Berikan Notifikasi Toast (Tidak Mengganggu Layar Penuh)
                     Swal.fire({
                         toast: true,
                         position: 'top-end',
@@ -517,7 +589,7 @@
     x-data="window.examApp()"
     x-init="initData(); startTimer(); initSecurity();"
     @online.window="isOnline = true; syncPendingAnswers()"
-    @offline.window="isOnline = false"
+    @offline.window="isOnline = false; Swal.fire({toast: true, position: 'bottom-end', icon: 'error', title: 'Koneksi Terputus!', text: 'Jawaban disimpan di browser.', showConfirmButton: false, timer: 4000, customClass: {popup: 'rounded-xl mb-4'} })"
     @focus.window="syncPendingAnswers()">
 
     {{-- VIDEO KAMERA HIDDEN --}}
@@ -690,29 +762,47 @@
                                          x-html="questions[currentQuestion].question_text"></div>
                                 </div>
 
-                                {{-- === AREA JAWABAN === --}}
+                                {{-- === AREA JAWABAN (DENGAN LOGIKA ACAK OPSI) === --}}
                                 
-                                {{-- TIPE 1: PILIHAN GANDA (Choice) --}}
+                                {{-- TIPE 1: PILIHAN GANDA --}}
                                 <template x-if="!questions[currentQuestion].question_type || questions[currentQuestion].question_type === 'choice'">
                                     <div class="space-y-3">
-                                        <template x-for="(optionText, optionKey) in questions[currentQuestion].options" :key="optionKey">
+                                        <template x-for="(optionKey, optIndex) in questions[currentQuestion].displayKeys" :key="optionKey">
+                                            
                                             <label class="relative flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 group active:scale-[0.99]" 
                                                    :class="answers[questions[currentQuestion].id] === optionKey ? 'border-blue-600 bg-blue-50 shadow-md' : 'border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50'">
+                                                
                                                 <input type="radio" :name="'q_' + questions[currentQuestion].id" :value="optionKey" 
                                                        @change="selectAnswer(questions[currentQuestion].id, optionKey)" 
                                                        x-model="answers[questions[currentQuestion].id]" class="peer sr-only">
                                                 
                                                 <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-black text-sm shrink-0 transition-colors shadow-sm relative" 
                                                      :class="answers[questions[currentQuestion].id] === optionKey ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-slate-300 text-slate-500 group-hover:border-blue-400 group-hover:text-blue-500'">
-                                                    <span x-text="optionKey" x-show="savingQuestionId !== questions[currentQuestion].id || answers[questions[currentQuestion].id] !== optionKey"></span>
                                                     
-                                                    <i class="ph-bold ph-spinner animate-spin text-lg" x-show="savingQuestionId === questions[currentQuestion].id && answers[questions[currentQuestion].id] === optionKey" style="display: none;"></i>
+                                                    {{-- SOLUSI: Secara visual huruf akan selalu berurutan A, B, C, D, E berdasarkan index posisinya --}}
+                                                    <span x-text="['A', 'B', 'C', 'D', 'E'][optIndex]" 
+                                                          x-show="savingQuestionId !== questions[currentQuestion].id || answers[questions[currentQuestion].id] !== optionKey"></span>
+                                                    
+                                                    <i class="ph-bold ph-spinner animate-spin text-lg" 
+                                                       x-show="savingQuestionId === questions[currentQuestion].id && answers[questions[currentQuestion].id] === optionKey" style="display: none;"></i>
                                                 </div>
-                                                <div class="flex-1 select-none">
-                                                    <span class="font-medium transition-colors" 
+                                                
+                                                <div class="flex-1 select-none" x-data="{ 
+                                                    get parsedOptions() { 
+                                                        try { return typeof questions[currentQuestion].options === 'string' ? JSON.parse(questions[currentQuestion].options) : (questions[currentQuestion].options || {}); } 
+                                                        catch(e) { return {}; } 
+                                                    } 
+                                                }">
+                                                    <span class="font-medium transition-colors block" 
                                                           :class="{'text-sm md:text-base': fontSize === 1, 'text-base md:text-lg': fontSize === 2, 'text-lg md:text-xl': fontSize === 3, 'text-blue-900': answers[questions[currentQuestion].id] === optionKey, 'text-slate-700': answers[questions[currentQuestion].id] !== optionKey}">
-                                                        <span x-text="optionText"></span>
+                                                        
+                                                        {{-- Teks Jawaban asli yang sudah teracak --}}
+                                                        <span x-text="parsedOptions[optionKey]"></span>
                                                     </span>
+                                                    
+                                                    <template x-if="parsedOptions['image_' + optionKey]">
+                                                        <img :src="'/storage/' + parsedOptions['image_' + optionKey]" class="mt-3 max-h-32 rounded-xl border border-slate-200 shadow-sm object-contain">
+                                                    </template>
                                                 </div>
                                             </label>
                                         </template>

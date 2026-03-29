@@ -8,8 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class LmsAssignment extends Model
 {
     use HasFactory;
-
+    
     protected $guarded = ['id'];
+    
     protected $casts = [
         'deadline' => 'datetime',
     ];
