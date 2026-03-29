@@ -79,9 +79,31 @@
                         <i class="ph-duotone ph-chart-polar text-4xl text-blue-300"></i>
                     </div>
                     <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-blue-200 text-[10px] font-bold uppercase tracking-wider mb-2 backdrop-blur-sm shadow-sm">
-                            <i class="ph-bold ph-trend-up"></i> Portfolio Guru
+                        {{-- PERBAIKAN: Menampilkan Multi Role dan Jabatan secara dinamis di Header Admin Portofolio --}}
+                        @php
+                            $managedUser = $targetUser ?? auth()->user();
+                            
+                            $userRoles = is_string($managedUser->role) ? json_decode($managedUser->role, true) : $managedUser->role;
+                            if (!is_array($userRoles)) {
+                                $userRoles = is_string($managedUser->role) ? explode(',', $managedUser->role) : [$managedUser->role];
+                            }
+                            $userRoles = array_filter(array_map('trim', $userRoles));
+                        @endphp
+
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            @foreach($userRoles as $role)
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-blue-200 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">
+                                    <i class="ph-bold ph-check-circle"></i> {{ $role }}
+                                </span>
+                            @endforeach
+                            
+                            @if(!empty($managedUser->position) && $managedUser->position !== '-')
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-200 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">
+                                    <i class="ph-bold ph-briefcase"></i> {{ $managedUser->position }}
+                                </span>
+                            @endif
                         </div>
+
                         <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-white">
                             <i class="ph-duotone ph-medal text-blue-300"></i> 
                             Kelola Portofolio {{ isset($targetUser) && $targetUser->id !== auth()->id() ? '- ' . $targetUser->name : '' }}
@@ -197,7 +219,6 @@
                                             <p class="text-sm text-slate-500 mt-0.5">{{ $exp->organizer }}</p>
                                         </div>
                                     </div>
-                                    {{-- FIX: opacity-100 on mobile, hover effect only on md/lg screens --}}
                                     <div class="flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity justify-end border-t border-slate-100 sm:border-0 pt-3 sm:pt-0">
                                         <button type="button" @click="openEditModal('exp', @js($exp), '{{ route('portfolio.exp.update', ['id' => $exp->id, 'user_id' => request('user_id')]) }}')" class="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center text-amber-500 bg-amber-50 sm:text-slate-400 sm:bg-transparent sm:hover:text-amber-500 sm:hover:bg-amber-50 rounded-xl transition-all" title="Edit">
                                             <i class="ph-bold ph-pencil-simple text-lg sm:text-base"></i>
@@ -272,7 +293,6 @@
                                             @endif
                                         </div>
                                     </div>
-                                    {{-- FIX: Visible di mobile, hover di desktop, diletakkan di pojok kanan atas untuk desktop, tapi flex row di mobile --}}
                                     <div class="flex flex-row sm:flex-col gap-2 w-full sm:w-auto justify-end sm:absolute sm:top-4 sm:right-4 border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0 mt-2 sm:mt-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                         <button type="button" @click="openEditModal('mat', @js($mat), '{{ route('portfolio.mat.update', ['id' => $mat->id, 'user_id' => request('user_id')]) }}')" class="flex-1 sm:flex-none h-9 sm:w-8 sm:h-8 flex items-center justify-center rounded-xl bg-amber-50 text-amber-500 sm:bg-transparent sm:text-slate-400 sm:hover:bg-amber-50 sm:hover:text-amber-500 transition-colors"><i class="ph-bold ph-pencil-simple"></i></button>
                                         <form action="{{ route('portfolio.mat.destroy', ['id' => $mat->id, 'user_id' => request('user_id')]) }}" method="POST" @submit.prevent="confirmDelete($event, 'File materi yang dihapus tidak dapat dikembalikan.')" class="flex-1 sm:flex-none">
@@ -335,7 +355,6 @@
                                     <div class="aspect-square bg-slate-100">
                                         <img src="{{ asset('storage/' . $port->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                     </div>
-                                    {{-- FIX: Buat gradient background selalu muncul sedikit di mobile agar text dan tombol Edit/Hapus bisa terlihat --}}
                                     <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-black/20 md:to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col justify-between p-4">
                                         <div class="flex justify-end gap-2">
                                             <button type="button" @click="openEditModal('port', @js($port), '{{ route('portfolio.port.update', ['id' => $port->id, 'user_id' => request('user_id')]) }}')" class="w-8 h-8 bg-white/30 backdrop-blur text-white rounded-xl hover:bg-amber-500 transition-colors flex items-center justify-center"><i class="ph-bold ph-pencil-simple"></i></button>
@@ -425,7 +444,6 @@
                                             @endif
                                         </div>
                                     </div>
-                                    {{-- FIX: Visible di mobile (flex-row), hover effect di desktop (flex-col absolute) --}}
                                     <div class="flex flex-row sm:flex-col gap-2 justify-end sm:absolute sm:top-4 sm:right-4 border-t sm:border-t-0 border-slate-100 pt-3 sm:pt-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                         <button type="button" @click="openEditModal('art', @js($art), '{{ route('portfolio.art.update', ['id' => $art->id, 'user_id' => request('user_id')]) }}')" class="flex-1 sm:flex-none h-9 sm:w-8 sm:h-8 flex items-center justify-center rounded-xl bg-amber-50 text-amber-500 sm:bg-transparent sm:text-slate-400 sm:hover:bg-amber-50 sm:hover:text-amber-500 transition-colors"><i class="ph-bold ph-pencil-simple"></i></button>
                                         <form action="{{ route('portfolio.art.destroy', ['id' => $art->id, 'user_id' => request('user_id')]) }}" method="POST" @submit.prevent="confirmDelete($event, 'Menghapus data artikel tidak dapat dibatalkan.')" class="flex-1 sm:flex-none">
@@ -486,7 +504,6 @@
                                             <p class="text-sm text-slate-500 mt-0.5">{{ $edu->degree }}</p>
                                         </div>
                                     </div>
-                                    {{-- FIX: Visible di mobile, hover di desktop --}}
                                     <div class="flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity justify-end border-t border-slate-100 sm:border-0 pt-3 sm:pt-0">
                                         <button type="button" @click="openEditModal('edu', @js($edu), '{{ route('portfolio.edu.update', ['id' => $edu->id, 'user_id' => request('user_id')]) }}')" class="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center text-amber-500 bg-amber-50 sm:text-slate-400 sm:bg-transparent sm:hover:text-amber-500 sm:hover:bg-amber-50 rounded-xl transition-all"><i class="ph-bold ph-pencil-simple text-lg sm:text-base"></i></button>
                                         <form action="{{ route('portfolio.edu.destroy', ['id' => $edu->id, 'user_id' => request('user_id')]) }}" method="POST" @submit.prevent="confirmDelete($event, 'Apakah Anda ingin menghapus riwayat pendidikan ini?')">
@@ -517,7 +534,6 @@
                      class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" @click="closeEditModal()"></div>
 
                 <!-- Modal Panel -->
-                {{-- FIX: Tambahkan max-h-[90vh] dan flex-col agar form di dalamnya bisa di-scroll tanpa modal menjadi kepanjangan --}}
                 <div x-show="editModalOpen" 
                      x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
                      x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -535,7 +551,6 @@
                     </div>
 
                     <!-- Modal Body / Form -->
-                    {{-- FIX: overflow-y-auto memastikan hanya form yang discroll jika layar kecil --}}
                     <form :action="editFormAction" method="POST" enctype="multipart/form-data" class="p-6 overflow-y-auto custom-scrollbar flex-1" x-data="{ isModalSubmitting: false, editImagePreview: null }" @submit="isModalSubmitting = true">
                         @csrf
                         @method('PUT')
