@@ -18,7 +18,8 @@ class CbtQuestion extends Model
         'question_image',
         'options', 
         'correct_answer', 
-        'score_weight'
+        'score_weight',
+        'tags'
     ];
 
     protected $casts = [

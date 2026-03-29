@@ -363,6 +363,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/exam/{exam}/questions', [CbtController::class, 'storeQuestion'])->name('questions.store');
         Route::put('/questions/{question}/update', [CbtController::class, 'updateQuestion'])->name('questions.update');
         Route::delete('/questions/{id}', [CbtController::class, 'destroyQuestion'])->name('questions.destroy');
+
+        Route::get('/exam/{exam}/questions/print', [CbtController::class, 'printQuestions'])->name('questions.print');
+        
         Route::post('/exam/{exam}/import', [CbtController::class, 'importQuestions'])->name('questions.import');
         Route::get('/questions/template', [CbtController::class, 'downloadTemplate'])->name('questions.template');
         Route::post('/exam/{exam}/refresh-token', [CbtController::class, 'refresh_token'])->name('refresh_token');
@@ -395,6 +398,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/manage', [CbtBankController::class, 'manage'])->name('manage');
         Route::put('/{id}', [CbtBankController::class, 'update'])->name('update'); 
         Route::delete('/{id}', [CbtBankController::class, 'destroy'])->name('destroy');
+
+        Route::get('/{id}/questions/print', [CbtBankController::class, 'printQuestions'])->name('questions.print');
         
         // --- ROUTE BULK ACTION ---
         Route::delete('/{id}/questions/bulk-delete', [CbtBankController::class, 'bulkDelete'])->name('questions.bulk_delete');

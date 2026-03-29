@@ -453,6 +453,13 @@
                                     <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
                                         <i class="ph-fill ph-list-dashes text-blue-500"></i> Daftar Soal
                                         <span class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm"><?php echo e($exam->questions->count()); ?></span>
+                                        
+                                        
+                                        <?php if($exam->questions->count() > 0): ?>
+                                        <a href="<?php echo e(route('cbt.questions.print', $exam->id)); ?>" target="_blank" class="ml-2 px-3 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-lg text-xs font-bold hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition shadow-sm flex items-center gap-1.5">
+                                            <i class="ph-bold ph-printer text-base"></i> Cetak PDF
+                                        </a>
+                                        <?php endif; ?>
                                     </h3>
                                     
                                     

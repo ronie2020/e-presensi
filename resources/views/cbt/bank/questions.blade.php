@@ -439,6 +439,13 @@
                             <div class="flex items-center gap-3">
                                 <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
                                     <i class="ph-fill ph-list-dashes text-indigo-500"></i> Isi Bank Soal
+                                    
+                                    {{-- TOMBOL CETAK LAPORAN --}}
+                                    @if($bank->questions->count() > 0)
+                                    <a href="{{ route('bank.questions.print', $bank->id) }}" target="_blank" class="ml-3 px-3 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-lg text-xs font-bold hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 transition shadow-sm flex items-center gap-1.5">
+                                        <i class="ph-bold ph-printer text-base"></i> Cetak PDF
+                                    </a>
+                                    @endif
                                 </h3>
                                 
                                 {{-- CHECKBOX PILIH SEMUA --}}

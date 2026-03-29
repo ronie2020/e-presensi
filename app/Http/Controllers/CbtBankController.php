@@ -148,7 +148,8 @@ class CbtBankController extends Controller
             'question_image' => $imagePath,
             'options' => $options, 
             'correct_answer' => $correctAnswer,
-            'score_weight' => $request->score_weight
+            'score_weight' => $request->score_weight,
+            'tags' => $request->tags // <--- TAMBAHKAN INI
         ]);
 
         return back()->with('success', 'Soal berhasil ditambahkan ke Bank!');
@@ -283,7 +284,8 @@ class CbtBankController extends Controller
             'question_image' => $question->question_image, 
             'options' => $options,
             'correct_answer' => $correctAnswer,
-            'score_weight' => $request->score_weight
+            'score_weight' => $request->score_weight,
+            'tags' => $request->tags // <--- TAMBAHKAN INI
         ]);
         
         return back()->with('success', 'Soal berhasil diperbarui!');
@@ -480,5 +482,17 @@ class CbtBankController extends Controller
             DB::rollBack();
             return back()->with('error', 'Gagal mengambil: ' . $e->getMessage());
         }
+    }
+
+    public function printQuestions($id)
+    {
+        $bank = CbtQuestionBank::with('questions')->findOrFail($id);
+        $title = $bank->title;
+        $subject = $bank->subject_name;
+        $info = "Kelas: " . $bank->class_level . " | Kode Bank: " . $bank->code;
+        $questions = $bank->questions;
+        $type = 'Gudang Bank Soal';
+        
+        return view('cbt.print_questions', compact('title', 'subject', 'info', 'questions', 'type'));
     }
 }

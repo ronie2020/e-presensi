@@ -1090,4 +1090,17 @@ class CbtController extends Controller
             });
         return response()->json($photos);
     }
+
+    public function printQuestions($id)
+    {
+        $exam = CbtExam::with('questions')->findOrFail($id);
+        $title = $exam->title;
+        $subject = $exam->subject_name;
+        $info = "Kelas: " . $exam->class_level;
+        $questions = $exam->questions;
+        $type = 'Ujian CBT';
+        
+        return view('cbt.print_questions', compact('title', 'subject', 'info', 'questions', 'type'));
+    }
+    
 }
