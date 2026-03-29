@@ -167,7 +167,8 @@ class LandingPageController extends Controller
             $materiCount = class_exists('App\Models\LmsMaterial') ? \App\Models\LmsMaterial::count() : 0;
             $tugasCount = class_exists('App\Models\LmsAssignment') ? \App\Models\LmsAssignment::count() : 0;
             $guruCount = User::where(function($query) {
-                $roles = ['Guru', 'Kepala Sekolah'];
+                // SINKRONISASI ROLE ADMIN PANEL
+                $roles = ['Guru', 'Wali Kelas', 'Guru Mata Pelajaran', 'Guru Piket', 'Kepala Sekolah'];
                 foreach ($roles as $role) {
                     $query->orWhere('role', 'LIKE', '%' . $role . '%');
                 }
@@ -186,7 +187,8 @@ class LandingPageController extends Controller
         $generalData = Cache::remember('landing_general_data', 7200, function() {
             return [
                 'teachers' => User::where(function($query) {
-                    $roles = ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'];
+                    // SINKRONISASI ROLE ADMIN PANEL
+                    $roles = ['Guru', 'Wali Kelas', 'Guru Mata Pelajaran', 'Guru Piket', 'Kepala Sekolah'];
                     foreach ($roles as $role) {
                         $query->orWhere('role', 'LIKE', '%' . $role . '%');
                     }
@@ -282,14 +284,38 @@ class LandingPageController extends Controller
     public function teachers(Request $request)
     {
         $search = $request->input('q');
+        $kategori = $request->input('kategori'); // Menangkap input kategori dari dropdown form
                 
-        $query = User::where(function($q) {
-            $roles = ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Piket'];
-            foreach ($roles as $role) {               
-                $q->orWhere('role', 'LIKE', '%' . $role . '%');
-            }
-        });
+        $query = User::query();
 
+        // 1. Logika Filter Berdasarkan Kategori (Telah Disinkronkan dengan Manajemen User)
+        if ($kategori === 'guru') {
+            $query->where(function($q) {
+                // Role untuk kelompok pengajar
+                $roles = ['Guru', 'Wali Kelas', 'Guru Mata Pelajaran', 'Guru Piket', 'Kepala Sekolah'];
+                foreach ($roles as $role) {               
+                    $q->orWhere('role', 'LIKE', '%' . $role . '%');
+                }
+            });
+        } elseif ($kategori === 'staf') {
+            $query->where(function($q) {
+                // Role untuk kelompok staf non-pengajar (Sesuai dengan form Admin Panel)
+                $roles = ['TU', 'Admin'];
+                foreach ($roles as $role) {               
+                    $q->orWhere('role', 'LIKE', '%' . $role . '%');
+                }
+            });
+        } else {
+            // Default (Semua Peran)
+            $query->where(function($q) {
+                $roles = ['Guru', 'Wali Kelas', 'Guru Mata Pelajaran', 'Guru Piket', 'Kepala Sekolah', 'TU', 'Admin'];
+                foreach ($roles as $role) {               
+                    $q->orWhere('role', 'LIKE', '%' . $role . '%');
+                }
+            });
+        }
+
+        // 2. Logika Filter Berdasarkan Pencarian Teks
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")

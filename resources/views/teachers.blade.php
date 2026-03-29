@@ -4,6 +4,9 @@
 
 @push('styles')
     <style>
+        /* Mencegah elemen berkedip saat AlpineJS belum siap */
+        [x-cloak] { display: none !important; }
+
         /* Animasi Custom Khusus Halaman Ini */
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
@@ -28,10 +31,13 @@
     <div x-data="{ 
           modalOpen: false, 
           teacher: {},
+          linkCopied: false,
+          isSearching: false, // <-- IDE PENGEMBANGAN 4: State untuk Skeleton Loading
           
           openModal(data) {
               this.teacher = data;
               this.modalOpen = true;
+              this.linkCopied = false;
               document.body.style.overflow = 'hidden'; // Kunci scroll body saat modal terbuka
           },
           closeModal() {
@@ -44,6 +50,33 @@
               let number = phone.replace(/[^0-9]/g, '');
               if(number.startsWith('0')) number = '62' + number.substr(1);
               return 'https://wa.me/' + number;
+          },
+          // Format Pintar Sosial Media
+          formatSocialUrl(platform, value) {
+              if (!value) return '';
+              value = value.trim();
+              if (value.startsWith('http')) return value;
+              // Hilangkan karakter @ jika user cuma ketik username
+              if (value.startsWith('@')) value = value.substring(1);
+              
+              if (platform === 'ig') return 'https://instagram.com/' + value;
+              if (platform === 'fb') return 'https://facebook.com/' + value;
+              if (platform === 'tiktok') return 'https://tiktok.com/@' + value;
+              return value;
+          },
+          // Fungsi Salin Tautan (Copy to Clipboard)
+          copyProfileLink() {
+              if(!this.teacher.profile_url) return;
+              
+              const el = document.createElement('textarea');
+              el.value = this.teacher.profile_url;
+              document.body.appendChild(el);
+              el.select();
+              document.execCommand('copy');
+              document.body.removeChild(el);
+              
+              this.linkCopied = true;
+              setTimeout(() => { this.linkCopied = false; }, 3000);
           }
       }">
 
@@ -65,19 +98,41 @@
                     Profil profesional guru dan staf pengajar SMP Negeri 3 Lakbok.
                 </p>
 
-                <!-- FORM PENCARIAN -->
-                <form action="{{ route('teachers.index') }}" method="GET" class="max-w-lg mx-auto relative group">
+                <!-- FORM PENCARIAN & FILTER (IDE PENGEMBANGAN 3) -->
+                <form action="{{ route('teachers.index') }}" method="GET" class="max-w-2xl mx-auto relative group" @submit="isSearching = true">
                     <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                    <div class="relative">
-                        <input type="text" name="q" value="{{ request('q') }}" placeholder="Cari nama atau jabatan guru..." class="w-full pl-14 pr-14 py-4 rounded-full border-0 focus:ring-0 shadow-2xl text-sm font-bold placeholder-slate-400 bg-white/95 backdrop-blur-xl text-slate-800 transition-transform focus:scale-[1.02]">
-                        <div class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400">
-                            <i class="ph-bold ph-magnifying-glass text-xl"></i>
+                    
+                    <div class="relative flex flex-col sm:flex-row bg-white/95 backdrop-blur-xl rounded-[2rem] sm:rounded-full shadow-2xl transition-transform focus-within:scale-[1.02] border border-white/20">
+                        
+                        <!-- Dropdown Kategori -->
+                        <div class="relative w-full sm:w-2/5 border-b sm:border-b-0 sm:border-r border-slate-200">
+                            <div class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400">
+                                <i class="ph-bold ph-funnel text-xl"></i>
+                            </div>
+                            <select name="kategori" class="w-full pl-14 pr-10 py-4 bg-transparent border-0 focus:ring-0 text-sm font-bold text-slate-600 cursor-pointer appearance-none rounded-t-[2rem] sm:rounded-l-full sm:rounded-tr-none">
+                                <option value="">Semua Peran</option>
+                                <option value="guru" {{ request('kategori') == 'guru' ? 'selected' : '' }}>Guru / Pendidik</option>
+                                <option value="staf" {{ request('kategori') == 'staf' ? 'selected' : '' }}>Staf Tata Usaha</option>
+                            </select>
+                            <div class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                <i class="ph-bold ph-caret-down text-lg"></i>
+                            </div>
                         </div>
-                        @if(request('q'))
-                            <a href="{{ route('teachers.index') }}" class="absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-100 hover:text-red-600 transition-colors" title="Hapus Pencarian"><i class="ph-bold ph-x"></i></a>
-                        @else
-                            <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 bg-blue-600 rounded-full text-white hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 hover:scale-110 active:scale-95"><i class="ph-bold ph-arrow-right"></i></button>
-                        @endif
+                        
+                        <!-- Input Pencarian -->
+                        <div class="relative w-full sm:w-3/5">
+                            <input type="text" name="q" value="{{ request('q') }}" placeholder="Ketik nama atau mapel..." class="w-full pl-6 pr-24 py-4 bg-transparent border-0 focus:ring-0 text-sm font-bold placeholder-slate-400 text-slate-800 rounded-b-[2rem] sm:rounded-r-full sm:rounded-bl-none">
+                            
+                            <!-- Tombol Reset & Submit -->
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                                @if(request('q') || request('kategori'))
+                                    <a href="{{ route('teachers.index') }}" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-100 hover:text-red-600 transition-colors" title="Reset Filter"><i class="ph-bold ph-x"></i></a>
+                                @endif
+                                <button type="submit" class="w-10 h-10 flex items-center justify-center bg-blue-600 rounded-full text-white hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 hover:scale-110 active:scale-95">
+                                    <i class="ph-bold ph-magnifying-glass text-lg"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -85,7 +140,27 @@
 
         <!-- MAIN CONTENT -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 pb-20">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            
+            <!-- IDE PENGEMBANGAN 4: SKELETON LOADING -->
+            <div x-show="isSearching" x-cloak class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                @for($i = 1; $i <= 8; $i++)
+                    <div class="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-100 flex flex-col h-full relative animate-pulse">
+                        <div class="aspect-[4/5] sm:aspect-square bg-slate-200/60 relative overflow-hidden"></div>
+                        <div class="p-5 text-center flex-1 flex flex-col relative bg-white">
+                            <div class="absolute -top-4 left-0 right-0 flex justify-center px-4">
+                                <div class="w-20 h-6 bg-slate-200 rounded-full shadow-sm border-2 border-white"></div>
+                            </div>
+                            <div class="mt-4 mb-2 flex flex-col items-center gap-2">
+                                <div class="w-3/4 h-5 bg-slate-200 rounded-md"></div>
+                                <div class="w-1/2 h-3 bg-slate-100 rounded-md mt-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                @endfor
+            </div>
+
+            <!-- KONTEN ASLI (Akan disembunyikan saat sedang loading/submit form) -->
+            <div x-show="!isSearching" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                 @forelse($teachers as $index => $teacher)
                     @php
                         // Logika untuk mendecode Role yang berbentuk JSON string ["Guru", "Admin"]
@@ -152,30 +227,29 @@
                     <div class="col-span-2 lg:col-span-4 py-24 text-center animate-enter">
                         <div class="inline-flex bg-slate-100 p-6 rounded-full mb-6 text-slate-300 ring-8 ring-slate-50"><i class="ph-duotone ph-magnifying-glass text-5xl"></i></div>
                         <h3 class="text-xl font-bold text-slate-800 mb-2">Data Tidak Ditemukan</h3>
-                        <p class="text-slate-500 text-sm max-w-md mx-auto mb-6">Maaf, kami tidak dapat menemukan data guru dengan kata kunci tersebut.</p>
-                        @if(request('q'))
-                            <a href="{{ route('teachers.index') }}" class="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-full hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 gap-2"><i class="ph-bold ph-arrow-counter-clockwise"></i> Reset Pencarian</a>
+                        <p class="text-slate-500 text-sm max-w-md mx-auto mb-6">Maaf, kami tidak dapat menemukan data guru dengan kata kunci atau filter tersebut.</p>
+                        @if(request('q') || request('kategori'))
+                            <a href="{{ route('teachers.index') }}" class="inline-flex items-center justify-center px-6 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-full hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 gap-2"><i class="ph-bold ph-arrow-counter-clockwise"></i> Reset Pencarian & Filter</a>
                         @endif
                     </div>
                 @endforelse
             </div>
-            <div class="mt-16 px-4 animate-enter">{{ $teachers->withQueryString()->links() }}</div>
+            
+            <div x-show="!isSearching" class="mt-16 px-4 animate-enter">{{ $teachers->withQueryString()->links() }}</div>
         </div>
 
         <!-- MODAL DETAIL GURU (POPUP) -->
-        <!-- FIX: Ubah items-center jadi items-start & tambahkan pt-24 agar modal turun ke bawah navbar. Tambah z-[99999] agar maksimal menumpuk -->
         <div x-show="modalOpen" x-cloak style="display: none;" class="fixed inset-0 z-[99999] flex items-start justify-center p-4 pt-24 sm:p-6 sm:pt-28 pb-4 sm:pb-8" aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <!-- Backdrop -->
             <div x-show="modalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="absolute inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" @click="closeModal()"></div>
 
-            <!-- Wrapper Modal: Gunakan tinggi dinamis sisa layar calc(100vh - 7rem) agar batas bawah tetap aman -->
+            <!-- Wrapper Modal -->
             <div x-show="modalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative flex flex-col w-full max-w-4xl max-h-[calc(100vh-7rem)] sm:max-h-[calc(100vh-9rem)] bg-white rounded-[2.5rem] text-left shadow-2xl border border-slate-200 overflow-hidden transform transition-all" @click.away="closeModal()">
                 
                 <button @click="closeModal()" class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur p-2.5 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all shadow-sm border border-slate-100"><i class="ph-bold ph-x text-xl"></i></button>
 
                 <!-- Area Konten yang Bisa di-Scroll secara internal -->
                 <div class="flex-1 overflow-y-auto modal-scroll w-full bg-white">
-                    <!-- Row Container -->
                     <div class="flex flex-col md:flex-row min-h-full">
                         
                         <!-- KIRI: FOTO & IDENTITAS UTAMA -->
@@ -187,7 +261,6 @@
                                         <img :src="teacher.photo_url" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" alt="Foto Guru">
                                     </template>
                                     <template x-if="!teacher.photo_url">
-                                        <!-- Perbaikan 1: Avatar default dengan gradasi yang lebih segar -->
                                         <div class="w-full h-full bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 flex items-center justify-center text-blue-500 text-6xl font-black uppercase select-none shadow-inner">
                                             <span x-text="teacher.name ? teacher.name.substring(0,2) : 'GU'"></span>
                                         </div>
@@ -201,7 +274,7 @@
                             <div class="mb-6">
                                 <span class="inline-flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider border border-blue-200">
                                     <i class="ph-fill ph-chalkboard-teacher mr-1.5"></i>
-                                    <span x-text="teacher.position"></span>
+                                    <span x-text="teacher.position || 'Tenaga Pendidik'"></span>
                                 </span>
                             </div>
                             
@@ -250,7 +323,6 @@
                                         <div>
                                             <p class="text-xs text-slate-500 font-bold uppercase mb-0.5">NIP & Pangkat</p>
                                             
-                                            <!-- Perbaikan 2: Logika pengecekan kondisi jika NIP/Pangkat kosong -->
                                             <template x-if="teacher.nip && teacher.nip !== '-'">
                                                 <p class="font-mono font-bold text-slate-800 text-sm" x-text="teacher.nip"></p>
                                             </template>
@@ -259,7 +331,6 @@
                                             </template>
                                             
                                             <template x-if="teacher.pangkat && teacher.pangkat !== '-'">
-                                                <!-- Perbaikan 3: Warna badge disesuaikan menjadi kebiruan -->
                                                 <span class="inline-block mt-1 px-2.5 py-0.5 bg-blue-100 border border-blue-200 text-blue-700 text-[10px] font-bold rounded-lg" x-text="teacher.pangkat"></span>
                                             </template>
                                         </div>
@@ -302,21 +373,29 @@
                                 </div>
                             </div>
 
-                            <!-- Sosial Media & Unduh CV -->
-                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-slate-100">
-                                <div class="flex items-center gap-3">
+                            <!-- Sosial Media, Unduh CV, & Copy Link -->
+                            <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mt-8 pt-6 border-t border-slate-100">
+                                
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <!-- Sosial Media (Menggunakan formatSocialUrl) -->
                                     <template x-if="teacher.instagram">
-                                        <a :href="teacher.instagram" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-pink-500 hover:text-white flex items-center justify-center text-slate-500 transition-all"><i class="ph-logo ph-instagram-logo text-xl"></i></a>
+                                        <a :href="formatSocialUrl('ig', teacher.instagram)" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-pink-500 hover:text-white flex items-center justify-center text-slate-500 transition-all" title="Instagram"><i class="ph-logo ph-instagram-logo text-xl"></i></a>
                                     </template>
                                     <template x-if="teacher.facebook">
-                                        <a :href="teacher.facebook" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-blue-600 hover:text-white flex items-center justify-center text-slate-500 transition-all"><i class="ph-logo ph-facebook-logo text-xl"></i></a>
+                                        <a :href="formatSocialUrl('fb', teacher.facebook)" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-blue-600 hover:text-white flex items-center justify-center text-slate-500 transition-all" title="Facebook"><i class="ph-logo ph-facebook-logo text-xl"></i></a>
                                     </template>
                                     <template x-if="teacher.tiktok">
-                                        <a :href="teacher.tiktok" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-800 hover:text-white flex items-center justify-center text-slate-500 transition-all"><i class="ph-logo ph-tiktok-logo text-xl"></i></a>
+                                        <a :href="formatSocialUrl('tiktok', teacher.tiktok)" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-800 hover:text-white flex items-center justify-center text-slate-500 transition-all" title="TikTok"><i class="ph-logo ph-tiktok-logo text-xl"></i></a>
                                     </template>
+
+                                    <!-- Tombol Bagikan Link Profil -->
+                                    <button @click="copyProfileLink()" class="ml-2 px-3 py-2 rounded-xl border border-slate-200 text-slate-500 font-bold text-xs hover:bg-slate-50 transition-colors flex items-center gap-1.5 focus:outline-none" :class="linkCopied ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : ''">
+                                        <i class="ph-bold text-base" :class="linkCopied ? 'ph-check-circle' : 'ph-link'"></i>
+                                        <span x-text="linkCopied ? 'Disalin!' : 'Bagikan'"></span>
+                                    </button>
                                 </div>
 
-                                <a :href="teacher.cv_url" class="inline-flex items-center gap-2 px-6 py-2.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-bold rounded-full transition-all">
+                                <a :href="teacher.cv_url" class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 font-bold rounded-full transition-all">
                                     <i class="ph-bold ph-download-simple text-lg"></i> Unduh CV (PDF)
                                 </a>
                             </div>
