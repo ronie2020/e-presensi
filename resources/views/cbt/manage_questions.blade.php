@@ -17,6 +17,57 @@
         showEditModal: false,
         questionSearch: '', 
         
+        // --- STATE BULK ACTION ---
+        selectedQuestions: [],
+        
+        toggleSelectAll(e) {
+            if(e.target.checked) {
+                this.selectedQuestions = Array.from(document.querySelectorAll('.question-checkbox')).map(cb => cb.value);
+            } else {
+                this.selectedQuestions = [];
+            }
+        },
+        
+        promptBulkWeight() {
+            Swal.fire({
+                title: 'Ubah Poin Masal',
+                text: 'Masukkan bobot poin baru untuk ' + this.selectedQuestions.length + ' soal terpilih:',
+                input: 'number',
+                inputValue: 2,
+                showCancelButton: true,
+                confirmButtonText: 'Simpan',
+                cancelButtonText: 'Batal',
+                inputValidator: (value) => {
+                    if (!value || value <= 0) return 'Poin harus lebih dari 0!'
+                },
+                customClass: { popup: 'rounded-[2rem]' }
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    document.getElementById('bulkScoreWeightInput').value = result.value;
+                    document.getElementById('bulkWeightForm').submit();
+                }
+            });
+        },
+
+        confirmBulkDelete() {
+            Swal.fire({
+                title: 'Hapus Soal Terpilih?',
+                text: `Anda akan menghapus ${this.selectedQuestions.length} soal secara permanen!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                customClass: { popup: 'rounded-[2rem]' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('bulkDeleteForm').submit();
+                }
+            });
+        },
+        // --- END BULK ACTION ---
+
         // State untuk Input Soal Baru
         createType: 'choice',
         createQuestionText: '',
@@ -376,17 +427,51 @@
 
                         {{-- LIST SOAL (KANAN) --}}
                         <div class="w-full lg:w-3/5 order-1 lg:order-2 space-y-6">
+                            
+                            {{-- FORM BULK ACTIONS (HIDDEN) --}}
+                            <form id="bulkDeleteForm" action="{{ route('cbt.questions.bulk_delete', $exam->id) }}" method="POST" class="hidden">
+                                @csrf @method('DELETE')
+                                <input type="hidden" name="question_ids" :value="selectedQuestions.join(',')">
+                            </form>
+                            <form id="bulkWeightForm" action="{{ route('cbt.questions.bulk_weight', $exam->id) }}" method="POST" class="hidden">
+                                @csrf @method('PUT')
+                                <input type="hidden" name="question_ids" :value="selectedQuestions.join(',')">
+                                <input type="hidden" name="score_weight" id="bulkScoreWeightInput">
+                            </form>
+
                             <div class="flex flex-col sm:flex-row justify-between items-center px-2 gap-4">
-                                <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
-                                    <i class="ph-fill ph-list-dashes text-blue-500"></i> Daftar Soal
-                                    <span class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">{{ $exam->questions->count() }}</span>
-                                </h3>
+                                <div class="flex items-center gap-3">
+                                    <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
+                                        <i class="ph-fill ph-list-dashes text-blue-500"></i> Daftar Soal
+                                        <span class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">{{ $exam->questions->count() }}</span>
+                                    </h3>
+                                    
+                                    {{-- CHECKBOX PILIH SEMUA --}}
+                                    @if($exam->questions->count() > 0)
+                                    <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
+                                        <input type="checkbox" @change="toggleSelectAll($event)" class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                        <span class="text-xs font-bold text-slate-600">Pilih Semua</span>
+                                    </label>
+                                    @endif
+                                </div>
                                 <div class="relative w-full sm:w-64">
                                     <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
                                     <input type="text" x-model="questionSearch" placeholder="Cari isi pertanyaan atau tag..." class="w-full pl-10 pr-4 py-2 text-sm font-bold border-slate-200 rounded-xl focus:ring-blue-500 bg-white shadow-sm transition">
                                 </div>
                             </div>
                             
+                            {{-- ACTION BAR MUNCUL SAAT ADA YANG DIPILIH --}}
+                            <div x-show="selectedQuestions.length > 0" x-transition class="bg-blue-50 border border-blue-200 rounded-[1.5rem] p-4 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm" style="display: none;">
+                                <div class="text-sm font-bold text-blue-800 flex items-center gap-2">
+                                    <i class="ph-fill ph-check-circle text-blue-600 text-lg"></i>
+                                    <span x-text="selectedQuestions.length"></span> Soal Terpilih
+                                </div>
+                                <div class="flex gap-2 w-full sm:w-auto">
+                                    <button type="button" @click="promptBulkWeight()" class="flex-1 sm:flex-none px-4 py-2 bg-white text-blue-600 border border-blue-200 rounded-xl text-xs font-bold hover:bg-blue-600 hover:text-white transition shadow-sm">Ubah Bobot</button>
+                                    <button type="button" @click="confirmBulkDelete()" class="flex-1 sm:flex-none px-4 py-2 bg-white text-rose-600 border border-rose-200 rounded-xl text-xs font-bold hover:bg-rose-600 hover:text-white transition shadow-sm">Hapus</button>
+                                </div>
+                            </div>
+
                             @forelse($exam->questions as $index => $q)
                                 @php $qType = $q->question_type ?? 'choice'; @endphp
                                 <div x-show="questionSearch === '' || '{{ strtolower(addslashes(strip_tags($q->question_text . ' ' . ($q->tags ?? '')))) }}'.includes(questionSearch.toLowerCase())"
@@ -394,7 +479,12 @@
                                     
                                     <div class="absolute top-6 left-6 w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center font-black text-slate-500 text-sm group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-inner">{{ $index + 1 }}</div>
                                     
-                                    <div class="pl-16">
+                                    {{-- CHECKBOX ITEM --}}
+                                    <div class="absolute top-8 left-[4.5rem] z-10">
+                                        <input type="checkbox" value="{{ $q->id }}" x-model="selectedQuestions" class="question-checkbox w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer shadow-sm">
+                                    </div>
+
+                                    <div class="pl-20 sm:pl-24">
                                         {{-- Badge Tipe Soal --}}
                                         <div class="mb-2">
                                             @if($qType == 'choice') <span class="text-[10px] font-bold bg-blue-50 text-blue-600 px-2 py-0.5 rounded border border-blue-100">PILIHAN GANDA</span>

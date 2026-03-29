@@ -388,13 +388,18 @@ Route::middleware('auth')->group(function () {
         Route::post('/exam/{exam}/export-to-bank', [CbtBankController::class, 'storeFromExam'])->name('export_to_bank');
     });
 
-    // === BANK SOAL TERPUSAT (Gudang Soal) ===
+     // === BANK SOAL TERPUSAT (Gudang Soal) ===
     Route::prefix('bank-soal')->name('bank.')->group(function() {
         Route::get('/', [CbtBankController::class, 'index'])->name('index');
         Route::post('/', [CbtBankController::class, 'store'])->name('store');
         Route::get('/{id}/manage', [CbtBankController::class, 'manage'])->name('manage');
         Route::put('/{id}', [CbtBankController::class, 'update'])->name('update'); 
         Route::delete('/{id}', [CbtBankController::class, 'destroy'])->name('destroy');
+        
+        // --- ROUTE BULK ACTION ---
+        Route::delete('/{id}/questions/bulk-delete', [CbtBankController::class, 'bulkDelete'])->name('questions.bulk_delete');
+        Route::put('/{id}/questions/bulk-weight', [CbtBankController::class, 'bulkWeight'])->name('questions.bulk_weight');
+        
         Route::post('/{id}/questions', [CbtBankController::class, 'storeQuestion'])->name('questions.store');       
         Route::put('/questions/{id}', [CbtBankController::class, 'updateQuestion'])->name('questions.update');     
         Route::delete('/questions/{id}', [CbtBankController::class, 'destroyQuestion'])->name('questions.destroy');

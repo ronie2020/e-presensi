@@ -358,6 +358,52 @@ class CbtBankController extends Controller
         return back()->with('error', 'Soal tidak valid.');
     }
     
+     // --- FITUR BARU: BULK DELETE & BULK WEIGHT UNTUK BANK SOAL ---
+    public function bulkDelete(Request $request, $bank_id)
+    {
+        if (!$request->question_ids) return back()->with('error', 'Tidak ada soal yang dipilih.');
+        
+        $ids = explode(',', $request->question_ids);
+        $questions = CbtQuestion::whereIn('id', $ids)->get();
+
+        foreach ($questions as $question) {
+            // Hapus gambar utama soal
+            if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
+                Storage::delete('public/' . $question->question_image);
+            }
+            
+            // Hapus gambar pada opsi & matching
+            $opts = is_string($question->options) ? json_decode($question->options, true) : ($question->options ?? []);
+            foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
+                if(isset($opts["image_$opt"]) && Storage::exists('public/' . $opts["image_$opt"])) {
+                    Storage::delete('public/' . $opts["image_$opt"]);
+                }
+            }
+            if(isset($opts['pairs'])) {
+                foreach($opts['pairs'] as $pair) {
+                    if(isset($pair['left_image']) && Storage::exists('public/' . $pair['left_image'])) Storage::delete('public/' . $pair['left_image']);
+                    if(isset($pair['right_image']) && Storage::exists('public/' . $pair['right_image'])) Storage::delete('public/' . $pair['right_image']);
+                }
+            }
+            
+            // Hapus record database
+            $question->delete();
+        }
+
+        return back()->with('success', count($ids) . ' soal berhasil dihapus dari Bank Soal.');
+    }
+
+    public function bulkWeight(Request $request, $bank_id)
+    {
+        if (!$request->question_ids || !$request->score_weight) return back()->with('error', 'Data tidak lengkap.');
+        
+        $ids = explode(',', $request->question_ids);
+        CbtQuestion::whereIn('id', $ids)->update(['score_weight' => $request->score_weight]);
+        
+        return back()->with('success', 'Bobot ' . count($ids) . ' soal di Bank Soal berhasil diubah.');
+    }
+    // --- END FITUR BARU ---
+
     public function storeFromExam(Request $request, $exam_id)
     {
         $exam = CbtExam::with('questions')->findOrFail($exam_id);
