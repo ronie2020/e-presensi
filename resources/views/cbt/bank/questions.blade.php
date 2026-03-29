@@ -35,6 +35,8 @@
         createType: 'choice',
         createQuestionText: '',
         matchPairs: [{left: '', right: ''}], 
+        createTags: [],
+        newTag: '',
 
         // State Edit
         editState: {
@@ -49,12 +51,27 @@
             score_weight: 2
         },
         editMatchPairs: [], 
+        editTags: [],
+        editNewTag: '',
         newImagePreview: null,
         deleteImage: false,
         
         // Helper Matching (Create)
         addPair() { this.matchPairs.push({left: '', right: ''}); },
         removePair(index) { if(this.matchPairs.length > 1) this.matchPairs.splice(index, 1); },
+
+        // Helper Tags
+        addTag(tag, mode) {
+            let clean = tag.trim();
+            if(clean === '') return;
+            if(mode === 'create') {
+                if(!this.createTags.includes(clean)) this.createTags.push(clean);
+                this.newTag = '';
+            } else {
+                if(!this.editTags.includes(clean)) this.editTags.push(clean);
+                this.editNewTag = '';
+            }
+        },
 
         // Helper Matching (Edit)
         addEditPair() { this.editMatchPairs.push({left: '', right: ''}); },
@@ -72,6 +89,8 @@
                 url: url,
                 question_type: data.question_type || 'choice'
             };
+
+            this.editTags = data.tags ? data.tags.split(',').map(t => t.trim()).filter(t => t) : [];
 
             // Populate data khusus Matching
             if (this.editState.question_type === 'matching') {
@@ -160,6 +179,24 @@
                                         </select>
                                         <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
                                     </div>
+                                </div>
+
+                                {{-- NEW: INPUT TAGS / KD --}}
+                                <div class="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
+                                    <label class="block text-xs font-bold text-indigo-400 uppercase mb-2 ml-1"><i class="ph-fill ph-tag"></i> Materi / KD (Opsional)</label>
+                                    <div class="flex flex-wrap gap-2 mb-2">
+                                        <template x-for="(tag, index) in createTags" :key="index">
+                                            <span class="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold border border-indigo-200">
+                                                <span x-text="tag"></span>
+                                                <button type="button" @click="createTags.splice(index, 1)" class="hover:text-rose-500"><i class="ph-bold ph-x"></i></button>
+                                            </span>
+                                        </template>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <input type="text" x-model="newTag" @keydown.enter.prevent="addTag(newTag, 'create')" placeholder="Ketik lalu Enter..." class="w-full rounded-xl border-slate-200 text-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <button type="button" @click="addTag(newTag, 'create')" class="px-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold text-xs">Tambah</button>
+                                    </div>
+                                    <input type="hidden" name="tags" :value="createTags.join(',')">
                                 </div>
 
                                 {{-- Editor --}}
@@ -341,14 +378,14 @@
                             </h3>
                             <div class="relative w-full sm:w-64">
                                 <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input type="text" x-model="questionSearch" placeholder="Cari isi pertanyaan..." class="w-full pl-10 pr-4 py-2 text-sm font-bold border-slate-200 rounded-xl focus:ring-indigo-500 bg-white shadow-sm transition">
+                                <input type="text" x-model="questionSearch" placeholder="Cari isi pertanyaan atau tag..." class="w-full pl-10 pr-4 py-2 text-sm font-bold border-slate-200 rounded-xl focus:ring-indigo-500 bg-white shadow-sm transition">
                             </div>
                         </div>
                         
                         @forelse($bank->questions as $index => $q)
                             @php 
                                 $qType = $q->question_type ?? 'choice'; 
-                                $searchableText = strtolower(strip_tags($q->question_text) . ' ' . ($q->option_A ?? '') . ' ' . ($q->option_B ?? '') . ' ' . ($q->option_C ?? '') . ' ' . ($q->option_D ?? ''));
+                                $searchableText = strtolower(strip_tags($q->question_text) . ' ' . ($q->option_A ?? '') . ' ' . ($q->option_B ?? '') . ' ' . ($q->option_C ?? '') . ' ' . ($q->option_D ?? '') . ' ' . ($q->tags ?? ''));
                             @endphp
 
                             <div data-search="{{ $searchableText }}"
@@ -366,6 +403,17 @@
                                         @elseif($qType == 'essay') <span class="text-[10px] font-bold bg-pink-50 text-pink-600 px-2 py-0.5 rounded border border-pink-100">ESSAI</span>
                                         @endif
                                     </div>
+
+                                    {{-- Tampilkan TAGS --}}
+                                    @if(!empty($q->tags))
+                                        <div class="mb-3 flex flex-wrap gap-1">
+                                            @foreach(explode(',', $q->tags) as $tag)
+                                                <span class="text-[10px] font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded border border-indigo-100 flex items-center gap-1">
+                                                    <i class="ph-fill ph-tag"></i> {{ trim($tag) }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @endif
 
                                     @if($q->question_image)
                                         <div class="mb-4 group/img relative w-fit">
@@ -459,7 +507,8 @@
                                             image_D: '{{ $q->image_D ?? ($q->options['image_D'] ?? '') }}',
                                             options: {{ json_encode($q->options) }}, 
                                             correct_answer: '{{ $q->correct_answer }}',
-                                            score_weight: {{ $q->score_weight }}
+                                            score_weight: {{ $q->score_weight }},
+                                            tags: '{{ addslashes($q->tags ?? '') }}'
                                         }, '{{ route('bank.questions.update', $q->id) }}')" 
                                         class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 shadow-sm flex items-center justify-center transition-all hover:scale-105">
                                         <i class="ph-bold ph-pencil-simple text-lg"></i>
@@ -482,7 +531,6 @@
                             </div>
                         @endforelse
                         
-                        {{-- PERBAIKAN ERROR ALPINE: Gunakan backtick (`) --}}
                         <div x-show="questionSearch !== '' && document.querySelectorAll(`[data-search]:not([style*='display: none'])`).length === 0" class="text-center py-10" style="display: none;">
                             <p class="text-slate-400 font-bold">Tidak ada soal yang cocok dengan kata kunci tersebut.</p>
                         </div>
@@ -519,6 +567,24 @@
                                     </select>
                                     <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
                                 </div>
+                            </div>
+
+                            {{-- EDIT TAGS / KD --}}
+                            <div class="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100">
+                                <label class="block text-xs font-bold text-indigo-400 uppercase mb-2 ml-1"><i class="ph-fill ph-tag"></i> Materi / KD (Opsional)</label>
+                                <div class="flex flex-wrap gap-2 mb-2">
+                                    <template x-for="(tag, index) in editTags" :key="index">
+                                        <span class="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold border border-indigo-200">
+                                            <span x-text="tag"></span>
+                                            <button type="button" @click="editTags.splice(index, 1)" class="hover:text-rose-500"><i class="ph-bold ph-x"></i></button>
+                                        </span>
+                                    </template>
+                                </div>
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="editNewTag" @keydown.enter.prevent="addTag(editNewTag, 'edit')" placeholder="Ketik lalu Enter..." class="w-full rounded-xl border-slate-200 text-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <button type="button" @click="addTag(editNewTag, 'edit')" class="px-4 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-bold text-xs">Tambah</button>
+                                </div>
+                                <input type="hidden" name="tags" :value="editTags.join(',')">
                             </div>
 
                             {{-- Editor (ID Unik untuk Edit) --}}
