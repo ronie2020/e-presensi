@@ -365,21 +365,13 @@ class ReportController extends Controller
     /**
      * DASHBOARD VIEW KEAGAMAAN
      */
-    public function religiousReport(Request $request)
+   public function religiousReport(Request $request)
     {
         $data = $this->getReligiousData($request);
         
         // Paginate manual untuk view Dashboard agar tidak berat saat load page
-        // Paginasi dengan "Page Name" unik per tab
-        $data['attendancesHadir'] = $this->paginate($data['attendancesHadir'], 20, null, ['pageName' => 'page_hadir'])
-            ->appends(array_merge($request->all(), ['activeTab' => 'hadir']));
-            
-        $data['attendancesUzur'] = $this->paginate($data['attendancesUzur'], 20, null, ['pageName' => 'page_uzur'])
-            ->appends(array_merge($request->all(), ['activeTab' => 'uzur']));
-            
-        // Paginate juga data belum absen untuk konsistensi view
-        $data['belumAbsenList'] = $this->paginate($data['belumAbsenList'], 20, null, ['pageName' => 'page_belum'])
-            ->appends(array_merge($request->all(), ['activeTab' => 'belum']));
+        $data['attendancesHadir'] = $this->paginate($data['attendancesHadir'], 20)->appends($request->all());
+        $data['attendancesUzur'] = $this->paginate($data['attendancesUzur'], 20)->appends($request->all());
         
         return view('reports.religious', $data);
     }
@@ -490,7 +482,8 @@ class ReportController extends Controller
 
             foreach ($students as $student) {
                 $attendanceMap = [];
-                $summary = ['H' => 0, 'S' => 0, 'I' => 0, 'A' => 0];
+                // PERBAIKAN: Tambahkan kunci H_half (Hadir Setengah)
+                $summary = ['H' => 0, 'H_half' => 0, 'S' => 0, 'I' => 0, 'A' => 0];
                 $studentAttendances = $attendances->get($student->id, collect());
 
                 foreach ($dates as $date) {
@@ -501,11 +494,24 @@ class ReportController extends Controller
                     $color = 'text-slate-300';
                     
                     if ($record) {
+                        // LOGIKA BARU: Cek apakah absen pulang (time_out) masih kosong
+                        $isHalfDay = empty($record->time_out) || $record->time_out == '00:00:00';
+
                         switch ($record->status) {
                             case 'Hadir':
-                                $code = 'H'; $color = 'text-black font-bold'; $summary['H']++; break;
+                                if ($isHalfDay) {
+                                    $code = 'H½'; $color = 'text-blue-500 font-bold'; $summary['H_half']++;
+                                } else {
+                                    $code = 'H'; $color = 'text-emerald-600 font-bold'; $summary['H']++;
+                                }
+                                break;
                             case 'Terlambat':
-                                $code = 'T'; $color = 'text-amber-600 font-bold'; $summary['H']++; break; // Dianggap hadir tapi telat
+                                if ($isHalfDay) {
+                                    $code = 'T½'; $color = 'text-orange-500 font-bold'; $summary['H_half']++;
+                                } else {
+                                    $code = 'T'; $color = 'text-amber-600 font-bold'; $summary['H']++;
+                                }
+                                break; 
                             case 'Sakit':
                                 $code = 'S'; $color = 'text-blue-600 font-bold'; $summary['S']++; break;
                             case 'Izin':

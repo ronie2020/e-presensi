@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Rekapitulasi Absensi Kelas' }}</title>
+    <title><?php echo e($title ?? 'Rekapitulasi Absensi Kelas'); ?></title>
     <style>
         @page { size: A4; margin: 1.5cm; }
         body { font-family: 'Times New Roman', serif; color: #000; line-height: 1.4; font-size: 11pt; }
@@ -52,7 +52,7 @@
 
     <button onclick="window.print()" class="btn-print no-print">Cetak / Simpan PDF</button>
 
-    {{-- KOP SURAT --}}
+    
     <table class="header-table">
         <tr>
             <td width="15%" align="center" style="padding-bottom: 10px;">
@@ -72,8 +72,9 @@
     <div class="report-title">
         <h3>REKAPITULASI ABSENSI KELAS</h3>
         <p>
-            <strong>Periode:</strong> {{ isset($startDate) ? \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') : '-' }} 
-            s/d {{ isset($endDate) ? \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') : '-' }}
+            <strong>Periode:</strong> <?php echo e(isset($startDate) ? \Carbon\Carbon::parse($startDate)->translatedFormat('d F Y') : '-'); ?> 
+            s/d <?php echo e(isset($endDate) ? \Carbon\Carbon::parse($endDate)->translatedFormat('d F Y') : '-'); ?>
+
         </p>
     </div>
 
@@ -94,8 +95,8 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($reportData ?? [] as $index => $data)
-            @php
+            <?php $__empty_1 = true; $__currentLoopData = $reportData ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $data): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <?php
                 // Mencegah error "Undefined property" dengan menggunakan data_get
                 // data_get aman karena mengecek property pada object, maupun key pada array.
                 $hadir = data_get($data, 'hadir', 0);
@@ -106,22 +107,22 @@
                 // Kalkulasi manual untuk Rate/Persentase jika propertinya tidak ada
                 $total_logs = $hadir + $telat + $izin_sakit + $alpha;
                 $calculated_rate = $total_logs > 0 ? round(($hadir / $total_logs) * 100, 1) : 0;
-            @endphp
+            ?>
             <tr>
-                <td class="text-center">{{ $loop->iteration }}</td>
-                <td>{{ data_get($data, 'name', 'Kelas Tidak Diketahui') }}</td>
-                <td class="text-center">{{ data_get($data, 'total_students', 0) }}</td>
-                <td class="text-center">{{ $hadir }}</td>
-                <td class="text-center">{{ $telat }}</td>
-                <td class="text-center">{{ $izin_sakit }}</td>
-                <td class="text-center">{{ $alpha }}</td>
-                <td class="text-center font-bold">{{ data_get($data, 'rate', $calculated_rate) }}%</td>
+                <td class="text-center"><?php echo e($loop->iteration); ?></td>
+                <td><?php echo e(data_get($data, 'name', 'Kelas Tidak Diketahui')); ?></td>
+                <td class="text-center"><?php echo e(data_get($data, 'total_students', 0)); ?></td>
+                <td class="text-center"><?php echo e($hadir); ?></td>
+                <td class="text-center"><?php echo e($telat); ?></td>
+                <td class="text-center"><?php echo e($izin_sakit); ?></td>
+                <td class="text-center"><?php echo e($alpha); ?></td>
+                <td class="text-center font-bold"><?php echo e(data_get($data, 'rate', $calculated_rate)); ?>%</td>
             </tr>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <tr>
                 <td colspan="8" class="text-center" style="padding: 20px;">Data tidak ditemukan pada periode ini.</td>
             </tr>
-            @endforelse
+            <?php endif; ?>
         </tbody>
     </table>
 
@@ -137,10 +138,10 @@
                 </td>
                 <td></td>
                 <td>
-                    Lakbok, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}<br>
+                    Lakbok, <?php echo e(\Carbon\Carbon::now()->translatedFormat('d F Y')); ?><br>
                     Waka Kesiswaan / Petugas
                     <br><br><br><br><br>
-                    <strong>{{ Auth::user()->name ?? 'Admin' }}</strong><br>
+                    <strong><?php echo e(Auth::user()->name ?? 'Admin'); ?></strong><br>
                     NIP. .........................
                 </td>
             </tr>
@@ -148,4 +149,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/reports/pdf_class_recap.blade.php ENDPATH**/ ?>
