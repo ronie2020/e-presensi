@@ -213,6 +213,14 @@
                     <p class="text-slate-500 text-sm mt-1">Coba gunakan kata kunci pencarian yang lain.</p>
                 </div>
             </div>
+               {{-- TAMBAHAN: PAGINATION --}}
+            {{-- Ini memastikan jika data sangat banyak, tombol "Next" atau Halaman 2, 3 muncul --}}
+            @if(method_exists($exams, 'links'))
+                <div class="mt-8">
+                    {{ $exams->links() }}
+                </div>
+            @endif
+            
         </div>
     </div>
 

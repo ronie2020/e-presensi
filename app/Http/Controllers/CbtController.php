@@ -30,7 +30,7 @@ class CbtController extends Controller
             'avg_score' => DB::table('cbt_student_exams')->whereNotNull('total_score')->avg('total_score') ?? 0,
         ];
 
-        $exams = CbtExam::latest()->take(10)->get();
+        $exams = CbtExam::latest()->paginate(12);
 
         return view('cbt.index', compact('stats', 'exams'));
     }
