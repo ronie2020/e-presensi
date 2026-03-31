@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Auth;
 
 class CbtController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $stats = [
             'active_exams' => CbtExam::where('is_active', true)->count(),
@@ -30,9 +30,88 @@ class CbtController extends Controller
             'avg_score' => DB::table('cbt_student_exams')->whereNotNull('total_score')->avg('total_score') ?? 0,
         ];
 
-        $exams = CbtExam::latest()->paginate(12);
+         // 1. PENCARIAN & FILTER SERVER-SIDE
+        $query = CbtExam::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('subject_name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('filter') && $request->filter != 'all') {
+            $query->where('is_active', $request->filter == 'active');
+        }
+
+        // withQueryString() memastikan saat pindah halaman (pagination), search & filter tidak hilang
+        $exams = $query->latest()->paginate(12)->withQueryString();
 
         return view('cbt.index', compact('stats', 'exams'));
+    }
+
+     // --- 3. FITUR QUICK TOGGLE STATUS ---
+    public function toggleStatus(Request $request, $id)
+    {
+        $exam = CbtExam::findOrFail($id);
+        $exam->update([
+            'is_active' => !$exam->is_active
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'is_active' => $exam->is_active,
+            'message' => $exam->is_active ? 'Ujian diaktifkan!' : 'Ujian dinonaktifkan!'
+        ]);
+    }
+
+    // --- 5. FITUR DUPLIKASI UJIAN ---
+    public function cloneExam($id)
+    {
+        $exam = CbtExam::with('questions')->findOrFail($id);
+
+        DB::beginTransaction();
+        try {
+            // Duplikasi data ujian utama
+            $newExam = $exam->replicate();
+            $newExam->title = $exam->title . ' (Salinan)';
+            $newExam->token = strtoupper(Str::random(5)); // Token baru
+            $newExam->is_active = false; // Matikan default agar aman
+            $newExam->save();
+
+            // Duplikasi setiap soal yang ada di ujian tersebut
+            foreach ($exam->questions as $q) {
+                $newQ = $q->replicate();
+                $newQ->cbt_exam_id = $newExam->id;
+
+                // Salin file gambar utama soal jika ada
+                if ($q->question_image && Storage::exists('public/' . $q->question_image)) {
+                    $newPath = 'soal/copy_' . time() . '_' . basename($q->question_image);
+                    Storage::copy('public/' . $q->question_image, 'public/' . $newPath);
+                    $newQ->question_image = $newPath;
+                }
+
+                // Salin file gambar pada opsi jawaban (Jika ada)
+                $opts = is_string($q->options) ? json_decode($q->options, true) : ($q->options ?? []);
+                $newOpts = $opts;
+                foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
+                    if(isset($opts["image_$opt"]) && Storage::exists('public/' . $opts["image_$opt"])) {
+                        $newOptPath = 'soal/copy_' . time() . '_' . basename($opts["image_$opt"]);
+                        Storage::copy('public/' . $opts["image_$opt"], 'public/' . $newOptPath);
+                        $newOpts["image_$opt"] = $newOptPath;
+                    }
+                }
+                $newQ->options = $newOpts;
+                $newQ->save();
+            }
+
+            DB::commit();
+            return redirect()->route('cbt.index')->with('success', 'Jadwal ujian beserta soal berhasil diduplikasi!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menduplikasi jadwal: ' . $e->getMessage());
+        }
     }
 
     public function create()

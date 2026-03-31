@@ -389,7 +389,11 @@ Route::middleware('auth')->group(function () {
         // 9. INTEGRASI BANK SOAL (TARIK & SIMPAN)        
         Route::post('/exam/{exam}/pull-from-bank', [CbtBankController::class, 'importToExam'])->name('import_from_bank');
         Route::post('/exam/{exam}/export-to-bank', [CbtBankController::class, 'storeFromExam'])->name('export_to_bank');
+    
+        Route::post('/exams/{id}/toggle-status', [\App\Http\Controllers\CbtController::class, 'toggleStatus'])->name('toggle_status');
+        Route::post('/exams/{id}/clone', [\App\Http\Controllers\CbtController::class, 'cloneExam'])->name('clone');
     });
+
 
      // === BANK SOAL TERPUSAT (Gudang Soal) ===
     Route::prefix('bank-soal')->name('bank.')->group(function() {

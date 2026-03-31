@@ -82,12 +82,14 @@ class ReportController extends Controller
 
     /**
      * Helper function untuk mempaginasi Collection secara manual.
+     * Diperbarui untuk mendukung penamaan query string yang berbeda-beda.
      */
     private function paginate($items, $perPage = 20, $page = null, $options = [])
     {
-        $page = $page ?: (Paginator::resolveCurrentPage() ?: 1);
+        $pageName = $options['pageName'] ?? 'page';
+        $page = $page ?: (Paginator::resolveCurrentPage($pageName) ?: 1);
         $items = $items instanceof Collection ? $items : Collection::make($items);
-        $options = array_merge(['path' => Paginator::resolveCurrentPath()], $options);
+        $options = array_merge(['path' => Paginator::resolveCurrentPath(), 'pageName' => $pageName], $options);
 
         return new LengthAwarePaginator(
             $items->forPage($page, $perPage), 
@@ -150,12 +152,14 @@ class ReportController extends Controller
         $range = $this->getDateRange($request);
         $selectedDate_db = Carbon::parse($range['start']);
 
+        // BUG FIX: Menggunakan get() bukan paginate(50) karena pagination akan di-handle per Tab.
         $attendances = AttendanceSiswa::with(['student.schoolClass'])
             ->whereHas('student', function($q) { $q->where('status', '!=', 'graduated'); })
             ->whereBetween('attendance_date', [$range['start'], $range['end']])
             ->whereIn('type', ['Harian', 'Masuk', 'Pulang'])
             ->orderBy('attendance_date', 'desc')
             ->get();
+
 
         $hadirCount = $attendances->where('status', 'Hadir')->count();
         $terlambatCount = $attendances->where('status', 'Terlambat')->count();
@@ -170,13 +174,19 @@ class ReportController extends Controller
             ->whereNotIn('id', $existingStudentIds)
             ->get();
             
-        $belumAbsenList = $this->sortStudents($belumAbsenListRaw);
-
+        $belumAbsenListAll = $this->sortStudents($belumAbsenListRaw);
         $mappedHadir = $this->sortStudents($attendances->whereIn('status', ['Hadir', 'Terlambat']));
         $mappedLain = $this->sortStudents($attendances->whereIn('status', ['Sakit', 'Izin', 'Alfa']));
 
-        $attendancesHadir = $this->paginate($mappedHadir, 20)->appends($request->all());
-        $attendancesLain = $this->paginate($mappedLain, 20)->appends($request->all());
+        // Paginasi dengan "Page Name" unik per tab, dan mempertahankan Status Tab saat klik nomor halaman
+        $attendancesHadir = $this->paginate($mappedHadir, 20, null, ['pageName' => 'page_hadir'])
+            ->appends(array_merge($request->all(), ['activeTab' => 'hadir']));
+            
+        $attendancesLain = $this->paginate($mappedLain, 20, null, ['pageName' => 'page_lain'])
+            ->appends(array_merge($request->all(), ['activeTab' => 'lain']));
+            
+        $belumAbsenList = $this->paginate($belumAbsenListAll, 20, null, ['pageName' => 'page_belum'])
+            ->appends(array_merge($request->all(), ['activeTab' => 'belum']));
 
         return view('reports.daily', compact(
             'selectedDate_db', 'attendancesHadir', 'attendancesLain', 'belumAbsenList',
@@ -355,13 +365,21 @@ class ReportController extends Controller
     /**
      * DASHBOARD VIEW KEAGAMAAN
      */
-   public function religiousReport(Request $request)
+    public function religiousReport(Request $request)
     {
         $data = $this->getReligiousData($request);
         
         // Paginate manual untuk view Dashboard agar tidak berat saat load page
-        $data['attendancesHadir'] = $this->paginate($data['attendancesHadir'], 20)->appends($request->all());
-        $data['attendancesUzur'] = $this->paginate($data['attendancesUzur'], 20)->appends($request->all());
+        // Paginasi dengan "Page Name" unik per tab
+        $data['attendancesHadir'] = $this->paginate($data['attendancesHadir'], 20, null, ['pageName' => 'page_hadir'])
+            ->appends(array_merge($request->all(), ['activeTab' => 'hadir']));
+            
+        $data['attendancesUzur'] = $this->paginate($data['attendancesUzur'], 20, null, ['pageName' => 'page_uzur'])
+            ->appends(array_merge($request->all(), ['activeTab' => 'uzur']));
+            
+        // Paginate juga data belum absen untuk konsistensi view
+        $data['belumAbsenList'] = $this->paginate($data['belumAbsenList'], 20, null, ['pageName' => 'page_belum'])
+            ->appends(array_merge($request->all(), ['activeTab' => 'belum']));
         
         return view('reports.religious', $data);
     }

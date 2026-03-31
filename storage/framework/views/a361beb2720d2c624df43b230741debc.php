@@ -1,8 +1,17 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- CUSTOM STYLES --}}
+    
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -44,8 +53,8 @@
     </style>
 
     <div class="py-6 md:py-8 font-sans text-slate-800 pb-32" x-data="{ 
-        activeTab: '{{ request('activeTab', 'hadir') }}',
-        reportType: '{{ request('report_type', 'daily') }}',
+        activeTab: '<?php echo e(request('activeTab', 'hadir')); ?>',
+        reportType: '<?php echo e(request('report_type', 'daily')); ?>',
         loading: false, 
         submitFilter() {
             this.loading = true;
@@ -53,7 +62,7 @@
         }
     }">
     
-        {{-- LOADING OVERLAY (TELEPORT KE BODY) --}}
+        
         <template x-teleport="body">
             <div x-show="loading" 
                  x-transition:enter="transition ease-out duration-300"
@@ -77,7 +86,7 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION --}}
+            
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 no-print">
                 <div class="animate-enter bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 rounded-[2rem] p-6 lg:p-8 text-white shadow-xl shadow-blue-900/30 relative overflow-hidden flex flex-col justify-between min-h-[180px] lg:min-h-[200px] border border-white/10 group">
                     <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/30 transition-all duration-700"></div>
@@ -92,7 +101,7 @@
                     <div class="relative z-10 mt-6">
                         <div class="inline-flex items-center gap-2 bg-slate-900/40 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl text-sm font-bold shadow-sm">
                             <i class="ph-bold ph-calendar-blank text-blue-300"></i>
-                            <span>{{ $selectedDate_db->translatedFormat('d F Y') }}</span>
+                            <span><?php echo e($selectedDate_db->translatedFormat('d F Y')); ?></span>
                         </div>
                     </div>
                 </div>
@@ -112,20 +121,20 @@
                             </div>
                         </div>
 
-                        <form action="{{ route('reports.daily') }}" method="GET" class="flex flex-col md:flex-row gap-3 w-full" @submit.prevent="submitFilter">
+                        <form action="<?php echo e(route('reports.daily')); ?>" method="GET" class="flex flex-col md:flex-row gap-3 w-full" @submit.prevent="submitFilter">
                             <input type="hidden" name="report_type" x-model="reportType">
                             <input type="hidden" name="activeTab" x-model="activeTab">
                             <div class="flex-1 w-full">
                                 <div x-show="reportType === 'daily'">
-                                    <input type="date" name="date" value="{{ request('date', $selectedDate_db->format('Y-m-d')) }}" 
+                                    <input type="date" name="date" value="<?php echo e(request('date', $selectedDate_db->format('Y-m-d'))); ?>" 
                                            class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900 shadow-sm">
                                 </div>
                                 <div x-show="reportType === 'weekly'" style="display: none;">
-                                    <input type="week" name="week" value="{{ request('week') }}" 
+                                    <input type="week" name="week" value="<?php echo e(request('week')); ?>" 
                                            class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900 shadow-sm">
                                 </div>
                                 <div x-show="reportType === 'monthly'" style="display: none;">
-                                    <input type="month" name="month" value="{{ request('month') }}" 
+                                    <input type="month" name="month" value="<?php echo e(request('month')); ?>" 
                                            class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold h-11 text-sm px-4 focus:ring-blue-900 focus:border-blue-900 shadow-sm">
                                 </div>
                             </div>
@@ -134,7 +143,7 @@
                                     <i class="ph-bold ph-magnifying-glass"></i> <span class="md:hidden">Tampilkan</span>
                                 </button>
                                 <div class="w-px h-11 bg-slate-200 hidden md:block"></div>
-                                <a href="{{ route('reports.printDaily', request()->all()) }}" target="_blank" class="flex-1 md:flex-none bg-white border border-slate-200 text-slate-600 hover:text-blue-900 hover:border-blue-900 px-5 rounded-xl h-11 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-95">
+                                <a href="<?php echo e(route('reports.printDaily', request()->all())); ?>" target="_blank" class="flex-1 md:flex-none bg-white border border-slate-200 text-slate-600 hover:text-blue-900 hover:border-blue-900 px-5 rounded-xl h-11 font-bold text-sm flex items-center justify-center gap-2 transition-colors active:scale-95">
                                     <i class="ph-bold ph-printer text-lg"></i> <span class="md:hidden">Cetak</span>
                                 </a>
                             </div>
@@ -143,61 +152,61 @@
                 </div>
             </div>
 
-            @if (session('success'))
+            <?php if(session('success')): ?>
                 <div x-data="{ show: true }" x-show="show" x-transition class="animate-enter mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl font-bold text-sm flex justify-between items-center shadow-sm no-print">
-                    <div class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-lg"></i> <span>{{ session('success') }}</span></div>
+                    <div class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-lg"></i> <span><?php echo e(session('success')); ?></span></div>
                     <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-1"><i class="ph-bold ph-x"></i></button>
                 </div>
-            @endif
-            @if (session('error'))
+            <?php endif; ?>
+            <?php if(session('error')): ?>
                 <div x-data="{ show: true }" x-show="show" x-transition class="animate-enter mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl font-bold text-sm flex justify-between items-center shadow-sm no-print">
-                    <div class="flex items-center gap-2"><i class="ph-fill ph-warning-circle text-lg"></i> <span>{{ session('error') }}</span></div>
+                    <div class="flex items-center gap-2"><i class="ph-fill ph-warning-circle text-lg"></i> <span><?php echo e(session('error')); ?></span></div>
                     <button @click="show = false" class="text-rose-400 hover:text-rose-600 p-1"><i class="ph-bold ph-x"></i></button>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- KPI CARDS --}}
+            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-8">
                 <div class="animate-enter bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all" style="animation-delay: 200ms">
                     <div class="min-w-0">
                          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Total Hadir</p>
-                        <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate">{{ $hadirCount }}</h3>
-                        @if($terlambatCount > 0)
+                        <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate"><?php echo e($hadirCount); ?></h3>
+                        <?php if($terlambatCount > 0): ?>
                             <div class="mt-2 inline-block px-2 py-0.5 bg-amber-50 text-amber-700 rounded text-[10px] font-bold border border-amber-100">
-                                {{ $terlambatCount }} Terlambat
+                                <?php echo e($terlambatCount); ?> Terlambat
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                     <div class="w-14 h-14 lg:w-16 lg:h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-check-circle"></i></div>
                 </div>
                 <div class="animate-enter bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all" style="animation-delay: 300ms">
                      <div class="min-w-0">
                          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Izin / Alfa</p>
-                        <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate">{{ $sakitCount + $izinCount + $alfaCount }}</h3>
+                        <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate"><?php echo e($sakitCount + $izinCount + $alfaCount); ?></h3>
                     </div>
                     <div class="w-14 h-14 lg:w-16 lg:h-16 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-warning-circle"></i></div>
                 </div>
                 <div class="animate-enter bg-white p-5 lg:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:shadow-md transition-all" style="animation-delay: 400ms">
                      <div class="min-w-0">
                          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Belum Absen</p>
-                        <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate">{{ $belumAbsenList->total() }}</h3>
+                        <h3 class="text-3xl lg:text-4xl font-black text-slate-800 truncate"><?php echo e($belumAbsenList->total()); ?></h3>
                     </div>
                     <div class="w-14 h-14 lg:w-16 lg:h-16 bg-slate-100 text-slate-500 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl animate-wiggle shrink-0"><i class="ph-fill ph-x-circle"></i></div>
                 </div>
             </div>
 
-            {{-- LIST DATA UTAMA --}}
+            
             <div class="animate-enter bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden min-h-[500px]" style="animation-delay: 500ms">
                 
-                {{-- Tabs Header --}}
+                
                 <div class="flex flex-wrap md:flex-nowrap border-b border-slate-100 bg-slate-50/50 p-2 gap-2 sticky top-0 z-20 no-print">
                     <button @click="activeTab = 'hadir'" :class="activeTab === 'hadir' ? 'bg-white text-blue-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60'" class="flex-1 md:flex-none py-2.5 px-4 md:px-6 rounded-xl text-xs md:text-sm font-bold whitespace-nowrap transition-all">Hadir / Terlambat</button>
                     <button @click="activeTab = 'belum'" :class="activeTab === 'belum' ? 'bg-white text-blue-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60'" class="flex-1 md:flex-none py-2.5 px-4 md:px-6 rounded-xl text-xs md:text-sm font-bold whitespace-nowrap transition-all">
-                        Belum <span class="hidden sm:inline">Absen</span> <span class="ml-1 px-1.5 py-0.5 bg-rose-100 text-rose-600 rounded-md text-[10px]">{{ $belumAbsenList->total() }}</span>
+                        Belum <span class="hidden sm:inline">Absen</span> <span class="ml-1 px-1.5 py-0.5 bg-rose-100 text-rose-600 rounded-md text-[10px]"><?php echo e($belumAbsenList->total()); ?></span>
                     </button>
                     <button @click="activeTab = 'lain'" :class="activeTab === 'lain' ? 'bg-white text-blue-900 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:bg-white/60'" class="flex-1 md:flex-none py-2.5 px-4 md:px-6 rounded-xl text-xs md:text-sm font-bold whitespace-nowrap transition-all">Sakit / Izin / Alfa</button>
 
-                    {{-- TOMBOL BARU: INPUT PER KELAS (CHECKLIST) --}}
+                    
                     <button onclick="openChecklistModal()" class="ml-auto bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs md:text-sm font-bold shadow-md transition-all flex items-center gap-2 active:scale-95 border border-indigo-500 shrink-0">
                         <i class="ph-bold ph-checks"></i> <span class="hidden sm:inline">Input Per Kelas</span>
                     </button>
@@ -205,159 +214,167 @@
 
                 <div class="w-full">
                     
-                    {{-- TAB HADIR --}}
+                    
                     <div x-show="activeTab === 'hadir'" class="w-full">
                         <div class="grid grid-cols-1 gap-0">
-                            @forelse ($attendancesHadir as $index => $att)
+                            <?php $__empty_1 = true; $__currentLoopData = $attendancesHadir; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $att): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <div class="relative p-4 md:p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors group flex items-center justify-between">
-                                    <div class="absolute left-0 top-0 bottom-0 w-1 {{ $att->status == 'Terlambat' ? 'bg-amber-500' : 'bg-emerald-500' }} hidden group-hover:block"></div>
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 <?php echo e($att->status == 'Terlambat' ? 'bg-amber-500' : 'bg-emerald-500'); ?> hidden group-hover:block"></div>
                                     <div class="flex items-center gap-3 md:gap-4 overflow-hidden w-full">
-                                        <div class="w-12 h-12 rounded-2xl {{ $att->status == 'Terlambat' ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600' }} flex items-center justify-center font-bold text-xs shrink-0">
-                                             {{ $attendancesHadir->firstItem() + $index }}
+                                        <div class="w-12 h-12 rounded-2xl <?php echo e($att->status == 'Terlambat' ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600'); ?> flex items-center justify-center font-bold text-xs shrink-0">
+                                             <?php echo e($attendancesHadir->firstItem() + $index); ?>
+
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <h4 class="font-bold text-slate-800 truncate group-hover:text-blue-600 transition-colors">{{ $att->student->name }}</h4>
+                                            <h4 class="font-bold text-slate-800 truncate group-hover:text-blue-600 transition-colors"><?php echo e($att->student->name); ?></h4>
                                             <div class="flex flex-wrap items-center gap-2 md:gap-3 mt-1 text-xs">
-                                                <span class="font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded">{{ $att->student->schoolClass->name ?? '-' }}</span>
+                                                <span class="font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded"><?php echo e($att->student->schoolClass->name ?? '-'); ?></span>
                                                 <span class="flex items-center gap-1 font-bold text-slate-600">
-                                                    <i class="ph-bold ph-arrow-right-circle text-emerald-500"></i> {{ $att->time_in ? \Carbon\Carbon::parse($att->time_in)->format('H:i') : '-' }}
+                                                    <i class="ph-bold ph-arrow-right-circle text-emerald-500"></i> <?php echo e($att->time_in ? \Carbon\Carbon::parse($att->time_in)->format('H:i') : '-'); ?>
+
                                                 </span>
                                                 <span class="flex items-center gap-1 font-bold text-slate-600">
-                                                    <i class="ph-bold ph-arrow-left-circle text-blue-500"></i> {{ $att->time_out ? \Carbon\Carbon::parse($att->time_out)->format('H:i') : '-' }}
+                                                    <i class="ph-bold ph-arrow-left-circle text-blue-500"></i> <?php echo e($att->time_out ? \Carbon\Carbon::parse($att->time_out)->format('H:i') : '-'); ?>
+
                                                 </span>
                                                 
-                                                @if($att->status == 'Terlambat')
+                                                <?php if($att->status == 'Terlambat'): ?>
                                                     <span class="text-amber-600 font-bold uppercase tracking-wider text-[10px] bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
                                                         Terlambat
                                                     </span>
-                                                    @if($att->notes)
+                                                    <?php if($att->notes): ?>
                                                         <span class="text-rose-600 font-bold text-[10px] bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100 animate-pulse">
-                                                            {{ $att->notes }}
+                                                            <?php echo e($att->notes); ?>
+
                                                         </span>
-                                                    @endif
-                                                @endif
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
-                                    <button onclick="openEditModal({{ $att->id }}, '{{ addslashes($att->student->name) }}', '{{ $att->status }}', `{{ addslashes($att->notes ?? '') }}`, '{{ $att->time_in }}', '{{ $att->time_out }}')" 
+                                    <button onclick="openEditModal(<?php echo e($att->id); ?>, '<?php echo e(addslashes($att->student->name)); ?>', '<?php echo e($att->status); ?>', `<?php echo e(addslashes($att->notes ?? '')); ?>`, '<?php echo e($att->time_in); ?>', '<?php echo e($att->time_out); ?>')" 
                                         class="p-2 ml-2 md:ml-4 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all no-print shrink-0 active:scale-95">
                                         <i class="ph-bold ph-pencil-simple text-xl"></i>
                                     </button>
                                 </div>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <div class="text-center py-20">
                                     <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300"><i class="ph-duotone ph-coffee text-4xl"></i></div>
                                     <p class="text-slate-400 font-bold">Belum ada data kehadiran.</p>
                                 </div>
-                            @endforelse
+                            <?php endif; ?>
                         </div>
                         
-                        {{-- PAGINATION TAB HADIR --}}
-                        @if($attendancesHadir->hasPages())
+                        
+                        <?php if($attendancesHadir->hasPages()): ?>
                             <div class="p-4 border-t border-slate-100 bg-slate-50/50">
-                                {{ $attendancesHadir->links() }}
+                                <?php echo e($attendancesHadir->links()); ?>
+
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
-                    {{-- TAB BELUM ABSEN --}}
+                    
                     <div x-show="activeTab === 'belum'" style="display: none;" class="w-full">
-                         @if($belumAbsenList->total() > 0)
+                         <?php if($belumAbsenList->total() > 0): ?>
                             <div class="p-5 bg-rose-50 border-b border-rose-100 flex flex-col md:flex-row items-center justify-between gap-4 no-print">
                                 <div class="flex items-center gap-3 text-rose-700">
                                     <div class="p-2 bg-white rounded-lg shadow-sm shrink-0"><i class="ph-fill ph-warning-octagon text-xl"></i></div>
                                     <div>
                                         <h4 class="font-bold text-sm">Absensi Massal</h4>
-                                        <p class="text-xs opacity-80">{{ $belumAbsenList->total() }} siswa akan ditandai Alfa.</p>
+                                        <p class="text-xs opacity-80"><?php echo e($belumAbsenList->total()); ?> siswa akan ditandai Alfa.</p>
                                     </div>
                                 </div>
-                                <form id="bulk-alpha-form" action="{{ route('reports.bulkAlpha') }}" method="POST" class="w-full md:w-auto">
-                                    @csrf
-                                    <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
+                                <form id="bulk-alpha-form" action="<?php echo e(route('reports.bulkAlpha')); ?>" method="POST" class="w-full md:w-auto">
+                                    <?php echo csrf_field(); ?>
+                                    <input type="hidden" name="date" value="<?php echo e($selectedDate_db->format('Y-m-d')); ?>">
                                     <input type="hidden" name="type" value="Harian">
-                                    <button type="button" onclick="confirmBulkAlpha('{{ $belumAbsenList->total() }}')" 
+                                    <button type="button" onclick="confirmBulkAlpha('<?php echo e($belumAbsenList->total()); ?>')" 
                                         class="w-full bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-5 py-3 rounded-xl shadow-lg shadow-rose-200 transition-all flex items-center justify-center gap-2 active:scale-95">
                                         <i class="ph-bold ph-check-circle"></i> Proses Alfa
                                     </button>
                                 </form>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                         <div class="grid grid-cols-1 gap-0">
-                            @forelse ($belumAbsenList as $student)
+                            <?php $__empty_1 = true; $__currentLoopData = $belumAbsenList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <div class="relative p-4 md:p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors group flex items-center justify-between">
                                     <div class="absolute left-0 top-0 bottom-0 w-1 bg-rose-500 hidden group-hover:block"></div>
                                     <div class="flex items-center gap-4 overflow-hidden">
                                         <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center font-bold text-xs shrink-0">!</div>
                                         <div class="min-w-0">
-                                            <h4 class="font-bold text-slate-800 truncate">{{ $student->name }}</h4>
-                                            <p class="text-xs text-slate-500">{{ $student->schoolClass->name ?? '-' }}</p>
+                                            <h4 class="font-bold text-slate-800 truncate"><?php echo e($student->name); ?></h4>
+                                            <p class="text-xs text-slate-500"><?php echo e($student->schoolClass->name ?? '-'); ?></p>
                                         </div>
                                     </div>
-                                    <button onclick="openManualModalDaily({{ $student->id }}, '{{ addslashes($student->name) }}')" 
+                                    <button onclick="openManualModalDaily(<?php echo e($student->id); ?>, '<?php echo e(addslashes($student->name)); ?>')" 
                                         class="inline-flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-blue-50 hover:text-blue-600 hover:border-blue-100 transition-all shadow-sm no-print shrink-0 active:scale-95">
                                         Input <span class="hidden md:inline">Manual</span>
                                     </button>
                                 </div>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <div class="text-center py-20 text-emerald-600 font-bold">Semua Aman!</div>
-                            @endforelse
+                            <?php endif; ?>
                         </div>
                         
-                        {{-- PAGINATION TAB BELUM ABSEN --}}
-                        @if($belumAbsenList->hasPages())
+                        
+                        <?php if($belumAbsenList->hasPages()): ?>
                             <div class="p-4 border-t border-slate-100 bg-slate-50/50">
-                                {{ $belumAbsenList->links() }}
+                                <?php echo e($belumAbsenList->links()); ?>
+
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
-                    {{-- TAB LAINNYA --}}
+                    
                     <div x-show="activeTab === 'lain'" style="display: none;" class="w-full">
                          <div class="grid grid-cols-1 gap-0">
-                            @forelse ($attendancesLain as $att)
+                            <?php $__empty_1 = true; $__currentLoopData = $attendancesLain; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $att): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <div class="relative p-4 md:p-5 border-b border-slate-50 hover:bg-slate-50 transition-colors group flex items-center justify-between">
-                                    <div class="absolute left-0 top-0 bottom-0 w-1 {{ $att->status == 'Alfa' ? 'bg-rose-500' : 'bg-blue-500' }} hidden group-hover:block"></div>
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 <?php echo e($att->status == 'Alfa' ? 'bg-rose-500' : 'bg-blue-500'); ?> hidden group-hover:block"></div>
                                     <div class="flex items-center gap-4 overflow-hidden">
-                                        <div class="w-10 h-10 rounded-xl {{ $att->status == 'Alfa' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600' }} flex items-center justify-center font-bold text-xs shrink-0">
-                                             {{ substr($att->status, 0, 1) }}
+                                        <div class="w-10 h-10 rounded-xl <?php echo e($att->status == 'Alfa' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600'); ?> flex items-center justify-center font-bold text-xs shrink-0">
+                                             <?php echo e(substr($att->status, 0, 1)); ?>
+
                                         </div>
                                         <div class="min-w-0">
-                                            <h4 class="font-bold text-slate-800 truncate">{{ $att->student->name }}</h4>
+                                            <h4 class="font-bold text-slate-800 truncate"><?php echo e($att->student->name); ?></h4>
                                             <div class="flex items-center gap-2 mt-1">
-                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold {{ $att->status == 'Alfa' ? 'bg-rose-50 text-rose-700' : 'bg-blue-50 text-blue-700' }} uppercase">{{ $att->status }}</span>
-                                                @if($att->notes)
-                                                    <span class="text-xs text-slate-400 italic max-w-[100px] md:max-w-none truncate">"{{ $att->notes }}"</span>
-                                                @endif
+                                                <span class="px-2 py-0.5 rounded text-[10px] font-bold <?php echo e($att->status == 'Alfa' ? 'bg-rose-50 text-rose-700' : 'bg-blue-50 text-blue-700'); ?> uppercase"><?php echo e($att->status); ?></span>
+                                                <?php if($att->notes): ?>
+                                                    <span class="text-xs text-slate-400 italic max-w-[100px] md:max-w-none truncate">"<?php echo e($att->notes); ?>"</span>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </div>
-                                    {{-- PERBAIKAN: Menggunakan atribut murni DB --}}
-                                    <button onclick="openEditModal({{ $att->id }}, '{{ addslashes($att->student->name) }}', '{{ $att->status }}', `{{ addslashes($att->notes ?? '') }}`, '', '')" 
+                                    
+                                    <button onclick="openEditModal(<?php echo e($att->id); ?>, '<?php echo e(addslashes($att->student->name)); ?>', '<?php echo e($att->status); ?>', `<?php echo e(addslashes($att->notes ?? '')); ?>`, '', '')" 
                                         class="p-2 ml-2 md:ml-4 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all no-print shrink-0 active:scale-95">
                                         <i class="ph-bold ph-pencil-simple text-xl"></i>
                                     </button>
                                 </div>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <div class="text-center py-20 text-slate-400 italic">Tidak ada data lain.</div>
-                            @endforelse
+                            <?php endif; ?>
                         </div>
                         
-                        {{-- PAGINATION TAB LAIN --}}
-                        @if($attendancesLain->hasPages())
+                        
+                        <?php if($attendancesLain->hasPages()): ?>
                             <div class="p-4 border-t border-slate-100 bg-slate-50/50">
-                                {{ $attendancesLain->links() }}
+                                <?php echo e($attendancesLain->links()); ?>
+
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     
-    {{-- MODAL & JS --}}
     
-    {{-- Modal Manual Input (DIPINDAHKAN KE BODY) --}}
+    
+    
     <template x-teleport="body">
         <div id="manualModalDaily" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity no-print">
             <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-enter">
@@ -365,10 +382,10 @@
                     <h3 class="font-bold text-white flex items-center gap-2"><i class="ph-bold ph-pencil-line"></i> Input Manual</h3>
                     <button onclick="closeManualModalDaily()" class="text-white/70 hover:text-white transition"><i class="ph-bold ph-x text-xl"></i></button>
                 </div>
-                <form action="{{ route('reports.storeManual') }}" method="POST" class="p-6 space-y-4">
-                    @csrf
+                <form action="<?php echo e(route('reports.storeManual')); ?>" method="POST" class="p-6 space-y-4">
+                    <?php echo csrf_field(); ?>
                     <input type="hidden" name="attendance_type" value="Harian">
-                    <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
+                    <input type="hidden" name="date" value="<?php echo e($selectedDate_db->format('Y-m-d')); ?>">
                     <input type="hidden" name="student_id" id="daily-manual-id">
                     
                     <div class="bg-blue-50 p-3 rounded-2xl border border-blue-100 text-center">
@@ -395,13 +412,13 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        {{-- Wrapper Waktu --}}
+                        
                         <div id="manual-time-wrapper">
                             <label class="text-xs font-bold text-slate-400 uppercase mb-2 block ml-1">Masuk</label>
                             <input type="time" name="time_in" id="daily-manual-time-in" class="w-full border-slate-200 bg-slate-50 rounded-xl font-bold text-slate-700 h-12">
                         </div>
                         
-                        {{-- Wrapper Catatan --}}
+                        
                         <div id="manual-notes-wrapper" class="col-span-1">
                             <label class="text-xs font-bold text-slate-400 uppercase mb-2 block ml-1">Catatan</label>
                             <input type="text" name="notes" placeholder="Opsional" class="w-full border-slate-200 bg-slate-50 rounded-xl h-12">
@@ -414,7 +431,7 @@
         </div>
     </template>
 
-    {{-- Modal Edit (DIPINDAHKAN KE BODY) --}}
+    
     <template x-teleport="body">
         <div id="editAttendanceModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity no-print">
             <div class="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 animate-enter">
@@ -423,7 +440,7 @@
                     <button onclick="closeEditModal()" class="text-white/70 hover:text-white transition"><i class="ph-bold ph-x text-xl"></i></button>
                 </div>
                 <form id="editForm" method="POST" class="p-6 space-y-4">
-                    @csrf @method('PUT')
+                    <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
                     <div class="text-center mb-4">
                         <p class="text-xs font-bold text-slate-400 uppercase mb-1">Mengedit Siswa</p>
                         <p id="modal-student-name" class="text-xl font-black text-slate-800 truncate px-4"></p>
@@ -486,7 +503,8 @@
                             <i class="ph-bold ph-list-checks"></i> Input Massal Per Kelas
                         </h3>
                         <p class="text-indigo-200 text-xs mt-1">
-                            Absensi Harian • {{ $selectedDate_db->translatedFormat('d F Y') }}
+                            Absensi Harian • <?php echo e($selectedDate_db->translatedFormat('d F Y')); ?>
+
                         </p>
                     </div>
                     <button onclick="closeChecklistModal()" class="text-white/70 hover:text-white transition bg-white/10 p-2 rounded-full hover:bg-white/20">
@@ -503,9 +521,9 @@
                             <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">Pilih Kelas</label>
                             <select x-model="selectedClass" @change="fetchStudents()" class="w-full border-slate-200 bg-slate-50 rounded-xl font-bold text-slate-700 h-12 focus:ring-indigo-900">
                                 <option value="">-- Pilih Kelas --</option>
-                                @foreach($allClasses ?? \App\Models\SchoolClass::orderBy('name')->get() as $c)
-                                    <option value="{{ $c->id }}">{{ $c->name }}</option>
-                                @endforeach
+                                <?php $__currentLoopData = $allClasses ?? \App\Models\SchoolClass::orderBy('name')->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($c->id); ?>"><?php echo e($c->name); ?></option>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                         <div class="shrink-0 pt-6" x-show="loading">
@@ -514,11 +532,11 @@
                     </div>
 
                     <!-- Form Tabel Siswa (Scroll di Sini) -->
-                    {{-- FIX: Hapus min-h-0 dan gunakan struktur sederhana agar tabel tidak collapse --}}
-                    <form id="checklistForm" action="{{ route('reports.storeClass') }}" method="POST" @submit.prevent="submitChecklist" x-show="students.length > 0" style="display: none;" class="p-4">
-                        @csrf
+                    
+                    <form id="checklistForm" action="<?php echo e(route('reports.storeClass')); ?>" method="POST" @submit.prevent="submitChecklist" x-show="students.length > 0" style="display: none;" class="p-4">
+                        <?php echo csrf_field(); ?>
                         <input type="hidden" name="class_id" :value="selectedClass">
-                        <input type="hidden" name="date" value="{{ $selectedDate_db->format('Y-m-d') }}">
+                        <input type="hidden" name="date" value="<?php echo e($selectedDate_db->format('Y-m-d')); ?>">
                         <input type="hidden" name="type" value="Harian">
                         
                         <!-- Hidden Submit Button (Triggered by Footer) -->
@@ -684,7 +702,7 @@
         const form = document.getElementById('editForm');
         
         function openEditModal(id, name, status, notes, timeIn, timeOut) {
-            form.action = '{{ route('reports.update', ['attendance' => '__ID__']) }}'.replace('__ID__', id);
+            form.action = '<?php echo e(route('reports.update', ['attendance' => '__ID__'])); ?>'.replace('__ID__', id);
             document.getElementById('modal-student-name').textContent = name;
             
             // Set value dan trigger event manual agar logika checkEditStatus berjalan
@@ -719,7 +737,7 @@
 
                     try {
                         // Tambahkan type=Harian ke parameter
-                        const url = `{{ route('reports.getStudentsByClass') }}?class_id=${this.selectedClass}&date={{ $selectedDate_db->format('Y-m-d') }}&type=Harian`;
+                        const url = `<?php echo e(route('reports.getStudentsByClass')); ?>?class_id=${this.selectedClass}&date=<?php echo e($selectedDate_db->format('Y-m-d')); ?>&type=Harian`;
                         const response = await fetch(url);
                         const data = await response.json();
                         this.students = data;
@@ -763,4 +781,13 @@
             document.getElementById('checklistModal').classList.add('hidden');
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/reports/daily.blade.php ENDPATH**/ ?>
