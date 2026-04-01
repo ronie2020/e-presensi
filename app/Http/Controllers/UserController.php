@@ -32,27 +32,17 @@ class UserController extends Controller
 
     /**
      * Helper: Cek apakah user yang login memiliki role Admin
+     * (Sekarang sangat ringkas menggunakan method bawaan Spatie)
      */
     private function checkIsAdmin()
     {
-        $currentRoles = Auth::user()->role;
-        // Decode JSON jika string, atau wrap array jika single string
-        if (is_string($currentRoles)) {
-            $decoded = json_decode($currentRoles, true);
-            // Jika gagal decode (berarti string biasa "Admin"), jadikan array
-            $currentRoles = (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) 
-                            ? $decoded 
-                            : [$currentRoles];
-        } elseif (!is_array($currentRoles)) {
-            $currentRoles = [$currentRoles];
-        }
-
-        return in_array('Admin', $currentRoles);
+        return Auth::user()->hasRole('Admin');
     }
 
     public function index()
     {
-        $users = User::latest()->paginate(10);
+        // Sebaiknya kita eager load 'roles' milik Spatie agar tidak kena N+1 Query
+        $users = User::with('roles')->latest()->paginate(10);
         return view('users.index', ['users' => $users]);
     }
 
@@ -90,14 +80,12 @@ class UserController extends Controller
         if ($request->hasFile('photo')) {
             $photoPath = $request->file('photo')->store('teachers', 'public');
         }
-       
-        $rolesJson = json_encode($request->role);
 
-        User::create([
+        // Simpan Data User Utama (Hapus 'role' dari sini)
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $rolesJson,
             'position' => $request->position,
             'pangkat' => $request->pangkat,
             'bio' => $request->bio,
@@ -109,15 +97,20 @@ class UserController extends Controller
             'facebook' => $request->facebook,
         ]);
 
+        // Berikan Role ke User menggunakan fitur Spatie
+        $user->assignRole($request->role);
+
         return redirect()->route('users.index')->with('success', 'Pengguna baru berhasil ditambahkan.');
     }
 
     public function edit(User $user)
     {
+        // Load target user beserta roles-nya
+        $user->load('roles');
         return view('users.edit', compact('user'));
     }
 
-     public function update(Request $request, User $user)
+    public function update(Request $request, User $user)
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -152,17 +145,14 @@ class UserController extends Controller
              return redirect()->back()->with('error', 'Anda tidak memiliki hak akses untuk menjadikan user sebagai Admin.');
         }
 
-        // Opsional: Cegah Admin menghapus role Admin-nya sendiri (Anti Lockout)
+        // Cegah Admin menghapus role Admin-nya sendiri (Anti Lockout)
         if (Auth::id() == $user->id && !in_array('Admin', $request->role)) {
              return redirect()->back()->with('error', 'Anda tidak boleh menghapus role Admin dari akun Anda sendiri.');
         }
 
-        $rolesJson = json_encode($request->role);
-
-         $data = [
+        $data = [
             'name' => $request->name,
             'email' => $request->email,
-            'role' => $rolesJson, 
             'position' => $request->position,
             'pangkat' => $request->pangkat,
             'bio' => $request->bio,
@@ -171,7 +161,7 @@ class UserController extends Controller
             'instagram' => $request->instagram,
             'tiktok' => $request->tiktok,
             'facebook' => $request->facebook,
-            // [BARU] Simpan Data CV
+            // Simpan Data CV
             'tempat_lahir' => $request->tempat_lahir,
             'tanggal_lahir' => $request->tanggal_lahir,
             'jenis_kelamin' => $request->jenis_kelamin,
@@ -181,6 +171,7 @@ class UserController extends Controller
             'keahlian' => $request->keahlian,
             'hobi' => $request->hobi,
         ];
+        
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
@@ -192,7 +183,11 @@ class UserController extends Controller
             $data['photo_path'] = $request->file('photo')->store('teachers', 'public');
         }
 
+        // Update basic data (tanpa kolom role JSON lama)
         $user->update($data);
+
+        // SYNC ROLES SPATIE (Otomatis menghapus yang di-uncheck & nambah yang baru)
+        $user->syncRoles($request->role);
 
         return redirect()->route('users.index')->with('success', 'Data pengguna berhasil diperbarui.');
     }
@@ -203,20 +198,12 @@ class UserController extends Controller
             return redirect()->route('users.index')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
         }
 
-        // Logic Penghapusan perlu disesuaikan sedikit karena Role sekarang array/json
-        $targetUserRoles = is_string($user->role) ? json_decode($user->role, true) : $user->role;
-        // Handle jika decode gagal atau format lama
-        if (!is_array($targetUserRoles)) {
-            $targetUserRoles = is_string($user->role) ? [$user->role] : [];
-        }
-
-        // Gunakan helper checkIsAdmin
         $amIAdmin = $this->checkIsAdmin();
 
         // Jika bukan admin
         if (!$amIAdmin) {
-            // Cek apakah target punya role Admin
-            if (in_array('Admin', $targetUserRoles)) {
+            // Cek apakah target punya role Admin menggunakan Spatie
+            if ($user->hasRole('Admin')) {
                 return redirect()->route('users.index')->with('error', 'Anda tidak memiliki wewenang menghapus Administrator.');
             }
         }

@@ -82,33 +82,13 @@
             
             <?php
                 $visibleItems = collect($items)->filter(function ($item) {
-                    // 1. Jika menu tidak punya batasan role, tampilkan (PUBLIC)
-                    if (!isset($item['roles'])) return true;
-                    
-                    // 2. Ambil Role User Saat Ini
-                    $userRoles = Auth::user()->role;
-
-                    // 3. Normalisasi Role User menjadi Array
-                    // Jika tersimpan sebagai JSON string ["Guru", "Wali Kelas"], decode dulu
-                    // Jika tersimpan sebagai string biasa "Guru", jadikan array ["Guru"]
-                    if (is_string($userRoles)) {
-                        $decoded = json_decode($userRoles, true);
-                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                            $userRoles = $decoded;
-                        } else {
-                            // Coba explode koma jika formatnya "Guru,Wali Kelas"
-                            $userRoles = explode(',', $userRoles); 
-                        }
-                    } elseif (!is_array($userRoles)) {
-                        $userRoles = [$userRoles];
+                    // 1. Jika menu tidak punya batasan role atau diatur publik ('*'), tampilkan
+                    if (!isset($item['roles']) || in_array('*', $item['roles'])) {
+                        return true;
                     }
-
-                    // 4. Cek Intersection (Irisan)
-                    // Jika ada SATU SAJA role user yang cocok dengan role menu, IZINKAN.
-                    // Contoh: User punya ["Guru", "Wali Kelas"], Menu butuh ["Admin", "Wali Kelas"] -> COCOK di "Wali Kelas"
-                    $intersection = array_intersect($userRoles, $item['roles']);
                     
-                    return count($intersection) > 0;
+                    // 2. Fungsi bawaan Spatie: Cek apakah user punya SALAH SATU role yang diminta menu
+                    return auth()->user()->hasAnyRole($item['roles']);
                 });
             ?>
 

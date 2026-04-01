@@ -23,7 +23,6 @@ class LibraryKioskController extends Controller
                         ->get()
                         ->map(function ($visit) {
                             return [
-                                // PERBAIKAN: Gunakan optional() agar tidak Error 500 jika siswa sudah dihapus
                                 'name' => optional($visit->student)->name ?? 'Siswa (Dihapus)',
                                 'status' => true,
                                 'message' => 'Tercatat',
@@ -42,107 +41,110 @@ class LibraryKioskController extends Controller
 
     public function process(Request $request)
     {
-        $scanData = $request->scan_data;
-        $mode = $request->mode ?? 'attendance'; 
+        // PERBAIKAN: Pindahkan try-catch ke paling atas agar semua error tertangkap
+        try {
+            $scanData = $request->scan_data;
+            $mode = $request->mode ?? 'attendance'; 
 
-        // 1. Cari Siswa
-        $student = Student::where('rfid_id', $scanData)
-                    ->orWhere('student_id', $scanData)
-                    ->first();
-
-        if (!$student) {
-            return response()->json([
-                'success' => false,
-                'error_type' => 'not_found',
-                'scanned_id' => $scanData,
-                'message' => 'Kartu belum terdaftar.',
-            ]);
-        }
-
-        // 2. Cek Overdue (Tunggakan)
-        $overdueBooks = Borrowing::with('book')
-                        ->where('student_id', $student->id)
-                        ->where('status', 'borrowed')
-                        ->where('due_date', '<', now())
-                        ->get();
-        
-        $hasOverdue = $overdueBooks->count() > 0;
-        $overdueTitles = $overdueBooks->map(function($b) {
-            return optional($b->book)->title ?? 'Buku Tidak Dikenal';
-        })->implode(', ');
-
-        // 3. Cek Ulang Tahun
-        $isBirthday = $student->dob ? Carbon::parse($student->dob)->isBirthday() : false;
-
-        // 4. Hitung Statistik Kunjungan
-        $visitCount = LibraryVisit::where('student_id', $student->id)->count() + 1; // Total Kunjungan
-        
-        // Hitung Kunjungan Minggu Ini
-        $weeklyVisits = LibraryVisit::where('student_id', $student->id)
-                        ->whereBetween('date', [now()->startOfWeek(), now()->endOfWeek()])
-                        ->count() + 1;
-
-        // --- MODE CEK STATUS (Self Check) ---
-        if ($mode === 'check') {
-             $activeLoans = Borrowing::where('student_id', $student->id)
-                            ->where('status', 'borrowed')
-                            ->count();
-            
-            return response()->json([
-                'success' => true,
-                'mode' => 'check',
-                'student_name' => $student->name,
-                'active_loans' => $activeLoans,
-                'has_overdue' => $hasOverdue,
-                'overdue_titles' => $overdueTitles,
-                'message' => 'Cek status berhasil.'
-            ]);
-        }
-
-        // --- MODE ATTENDANCE (Absensi) ---
-        $today = Carbon::today();
-
-        // 5. Cek Spam (5 Menit)
-        $lastVisit = LibraryVisit::where('student_id', $student->id)
-                        ->where('date', $today)
-                        ->latest()
+            // 1. Cari Siswa
+            $student = Student::where('rfid_id', $scanData)
+                        ->orWhere('student_id', $scanData)
                         ->first();
 
-        if ($lastVisit && Carbon::parse($lastVisit->time)->diffInMinutes(now()) < 5) {
-            return response()->json([
-                'success' => false,
-                'error_type' => 'duplicate',
-                'student_name' => $student->name,
-                'message' => 'Anda sudah mengisi buku tamu barusan.',
-            ]);
-        }
+            if (!$student) {
+                return response()->json([
+                    'success' => false,
+                    'error_type' => 'not_found',
+                    'scanned_id' => $scanData,
+                    'message' => 'Kartu belum terdaftar.',
+                ]);
+            }
 
-        try {
+            // 2. Cek Overdue (Tunggakan)
+            $overdueBooks = Borrowing::with('book')
+                            ->where('student_id', $student->id)
+                            ->where('status', 'borrowed')
+                            ->where('due_date', '<', now())
+                            ->get();
+            
+            $hasOverdue = $overdueBooks->count() > 0;
+            $overdueTitles = $overdueBooks->map(function($b) {
+                return optional($b->book)->title ?? 'Buku Tidak Dikenal';
+            })->implode(', ');
+
+            // 3. Cek Ulang Tahun (Tambahkan validasi isValid)
+            $isBirthday = false;
+            if ($student->dob) {
+                try {
+                    $isBirthday = Carbon::parse($student->dob)->isBirthday();
+                } catch (\Exception $e) {
+                    // Abaikan jika format tanggal lahir di DB cacat
+                    $isBirthday = false; 
+                }
+            }
+
+            // 4. Hitung Statistik Kunjungan
+            $visitCount = LibraryVisit::where('student_id', $student->id)->count() + 1;
+            
+            // Hitung Kunjungan Minggu Ini
+            $weeklyVisits = LibraryVisit::where('student_id', $student->id)
+                            ->whereBetween('date', [now()->startOfWeek(), now()->endOfWeek()])
+                            ->count() + 1;
+
+            // --- MODE CEK STATUS (Self Check) ---
+            if ($mode === 'check') {
+                 $activeLoans = Borrowing::where('student_id', $student->id)
+                                ->where('status', 'borrowed')
+                                ->count();
+                
+                return response()->json([
+                    'success' => true,
+                    'mode' => 'check',
+                    'student_name' => $student->name,
+                    'active_loans' => $activeLoans,
+                    'has_overdue' => $hasOverdue,
+                    'overdue_titles' => $overdueTitles,
+                    'message' => 'Cek status berhasil.'
+                ]);
+            }
+
+            // --- MODE ATTENDANCE (Absensi) ---
+            $today = Carbon::today();
+
+            // 5. Cek Spam (5 Menit)
+            $lastVisit = LibraryVisit::where('student_id', $student->id)
+                            ->where('date', $today)
+                            ->latest()
+                            ->first();
+
+            if ($lastVisit && Carbon::parse($lastVisit->time)->diffInMinutes(now()) < 5) {
+                return response()->json([
+                    'success' => false,
+                    'error_type' => 'duplicate',
+                    'student_name' => $student->name,
+                    'message' => 'Anda sudah mengisi buku tamu barusan.',
+                ]);
+            }
+
+            // 6. Simpan Kunjungan
             LibraryVisit::create([
                 'student_id' => $student->id,
                 'date' => $today,
-                'time' => now(),
+                'time' => now()->format('H:i:s'), // Format aman untuk kolom TIME SQL
             ]);
 
             // --- LOGIKA PENENTUAN PESAN (Message Priority) ---
             $firstName = explode(' ', trim($student->name))[0];
-            
-            // Default Message
             $titleMsg = "Selamat Datang!";
             $subMsg = "Kunjungan tercatat.";
 
-            // Priority 1: Ulang Tahun
             if ($isBirthday) {
                 $titleMsg = "Selamat Ulang Tahun, {$firstName}! 🎂";
                 $subMsg = "Semoga panjang umur & rajin membaca!";
-            } 
-            // Priority 2: Milestone Kunjungan (ke-10, 20, 50, 100)
-            elseif ($visitCount % 10 == 0) {
+            } elseif ($visitCount % 10 == 0) {
                 $titleMsg = "Wow! Kunjungan ke-$visitCount 🎉";
                 $subMsg = "Luar biasa! Kamu pengunjung yang rajin.";
-            }
-            // Priority 3: Habit Mingguan (Jika lebih dari 1x minggu ini)
-            elseif ($weeklyVisits > 1) {
+            } elseif ($weeklyVisits > 1) {
                 $titleMsg = "Halo {$firstName}!";
                 $subMsg = "Ini kunjungan ke-{$weeklyVisits} kamu minggu ini. Pertahankan!";
             }
@@ -158,15 +160,18 @@ class LibraryKioskController extends Controller
                 'has_overdue' => $hasOverdue,
                 'overdue_titles' => $overdueTitles
             ]);
+
         } catch (\Exception $e) {
-            Log::error("Kiosk Save Error for {$student->name}: " . $e->getMessage());
+            // JIKA TERJADI ERROR, KEMBALIKAN JSON (Bukan halaman HTML)
+            Log::error("Kiosk Process Error: " . $e->getMessage() . " di baris " . $e->getLine());
 
             return response()->json([
                 'success' => false,
                 'error_type' => 'server_error',
-                'student_name' => $student->name,
-                'message' => 'Gagal menyimpan data.',
-            ]);
+                'student_name' => $request->scan_data ?? 'Sistem',
+                'message' => 'Sistem Sibuk / Error Internal',
+                'debug_msg' => config('app.debug') ? $e->getMessage() : null
+            ], 500); // Set status 500
         }
     }
 }

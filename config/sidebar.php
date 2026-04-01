@@ -13,7 +13,8 @@ return [
             [
                 'name' => 'Dashboard',
                 'route' => 'dashboard',
-                'icon' => 'ph-squares-four',                
+                'icon' => 'ph-squares-four',  
+                'roles' => ['*']              
             ],   
             [
                 'name' => 'Kelola Portofolio',
