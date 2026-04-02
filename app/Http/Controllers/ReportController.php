@@ -370,8 +370,10 @@ class ReportController extends Controller
         $data = $this->getReligiousData($request);
         
         // Paginate manual untuk view Dashboard agar tidak berat saat load page
-        $data['attendancesHadir'] = $this->paginate($data['attendancesHadir'], 20)->appends($request->all());
-        $data['attendancesUzur'] = $this->paginate($data['attendancesUzur'], 20)->appends($request->all());
+        $data['attendancesHadir'] = $this->paginate($data['attendancesHadir'], 20, null, ['pageName' => 'page_hadir'])->appends($request->all());
+        $data['attendancesUzur'] = $this->paginate($data['attendancesUzur'], 20, null, ['pageName' => 'page_uzur'])->appends($request->all());
+                
+        $data['belumAbsenList'] = $this->paginate($data['belumAbsenList'], 20, null, ['pageName' => 'page_belum'])->appends($request->all());
         
         return view('reports.religious', $data);
     }
