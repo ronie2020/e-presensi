@@ -1,11 +1,20 @@
-<x-app-layout>
-    {{-- 1. LIBRARY PENDUKUNG --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    {{-- SCRIPT ALPINE.JS DIHAPUS DARI SINI KARENA SUDAH ADA DI APP.BLADE.PHP --}}
+    
 
-    {{-- 2. CUSTOM STYLES --}}
-    @push('styles')
+    
+    <?php $__env->startPush('styles'); ?>
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
     <style>
         body, .font-sans { font-family: 'Plus Jakarta Sans', sans-serif !important; }
@@ -73,9 +82,9 @@
         .glass-panel { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .scan-type-btn.ring-2 .indicator-dot { transform: scale(1.2); background-color: currentColor; }
     </style>
-    @endpush
+    <?php $__env->stopPush(); ?>
 
-    @php
+    <?php
         $safeSchedule = $scheduleConfig ?? [];
         $scheduleJson = json_encode($safeSchedule);
         $totalTarget = $statsConfig['total_target'] ?? 0;
@@ -93,15 +102,15 @@
                     'class_name' => $s->schoolClass->name ?? '-'
                 ];
             })->toArray();
-    @endphp
+    ?>
 
     <div class="py-6 font-sans text-slate-800 bg-slate-50/50 min-h-screen selection:bg-indigo-100 selection:text-indigo-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             
-            {{-- HERO SECTION --}}
+            
             <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-r from-indigo-900 via-slate-800 to-slate-900 p-6 md:p-8 text-white shadow-2xl shadow-indigo-900/20 overflow-hidden group border border-white/10">
                 
-                {{-- Background Decorations --}}
+                
                 <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 pointer-events-none"></div>
                 <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 pointer-events-none"></div>
                 <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none"></div>
@@ -113,13 +122,14 @@
                         </div>
                         <div>
                             <div class="flex items-center gap-2 mb-1">
-                                @if(isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false))
-                                    <span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-200 border border-rose-500/30 text-[10px] font-bold uppercase tracking-wider">Libur: {{ $scheduleConfig['description'] }}</span>
-                                @else
+                                <?php if(isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false)): ?>
+                                    <span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-200 border border-rose-500/30 text-[10px] font-bold uppercase tracking-wider">Libur: <?php echo e($scheduleConfig['description']); ?></span>
+                                <?php else: ?>
                                     <span class="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-200 border border-blue-500/30 text-[10px] font-bold uppercase tracking-wider">
-                                        {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
+                                        <?php echo e(\Carbon\Carbon::now()->translatedFormat('l, d F Y')); ?>
+
                                     </span>
-                                @endif
+                                <?php endif; ?>
                             </div>
                             <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight leading-none">
                                 Scanner <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">Aktivitas</span>
@@ -128,7 +138,7 @@
                         </div>
                     </div>
                     
-                    {{-- CLOCK WIDGET --}}
+                    
                     <div class="glass-panel px-6 py-3 rounded-2xl flex items-center gap-4 shadow-lg w-full md:w-auto justify-between md:justify-start">
                         <div class="text-right">
                             <p class="text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-0.5">Waktu Server</p>
@@ -143,10 +153,10 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 
-                {{-- KOLOM KIRI: SCANNER & CONTROLS --}}
+                
                 <div class="lg:col-span-5 flex flex-col gap-6 animate-enter delay-100">
                     
-                    {{-- SCANNER CARD --}}
+                    
                     <div class="bg-white rounded-[2.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group">
                         <div class="flex justify-between items-center mb-5 px-1">
                             <h3 class="font-bold text-slate-700 flex items-center gap-2 text-lg">
@@ -157,7 +167,7 @@
                                 Kamera Aktif
                             </h3>
                             <div class="flex items-center gap-2">
-                                {{-- GPS Badge Indicator --}}
+                                
                                 <div id="gps-badge" class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-amber-50 text-amber-500 border border-amber-200 flex items-center gap-1 transition-all" title="Mencari Lokasi">
                                     <i class="ph-bold ph-map-pin animate-pulse"></i> <span class="hidden sm:inline">Mencari GPS</span>
                                 </div>
@@ -169,16 +179,16 @@
                             </div>
                         </div>
 
-                        {{-- SCANNER ELEMENT --}}
+                        
                         <div class="scanner-container relative bg-slate-900 w-full rounded-[1.5rem] border-4 border-slate-900 shadow-inner overflow-hidden min-h-[300px]">
                             <div id="qr-reader" class="w-full"></div>
                             
-                            {{-- Overlay Lines --}}
+                            
                             <div id="scanner-overlay-el" class="scanner-overlay">
                                 <div class="scanner-line"></div>
                             </div>
 
-                            {{-- Status Text Overlay --}}
+                            
                             <div class="absolute top-4 inset-x-0 flex justify-center z-30 pointer-events-none">
                                 <div id="scan-status" class="bg-black/60 backdrop-blur-md text-white text-xs py-2 px-5 rounded-full font-bold border border-white/20 shadow-lg flex items-center gap-2 transition-all">
                                     <i class="ph-bold ph-circle-notch animate-spin text-indigo-300"></i> Memuat Kamera...
@@ -186,10 +196,10 @@
                             </div>
                         </div>
 
-                        {{-- Result Feedback --}}
+                        
                         <div id="scan-result" class="mt-4 p-4 rounded-2xl font-bold text-sm text-center hidden transition-all duration-300 transform scale-95 opacity-0 border border-transparent shadow-sm"></div>
                         
-                        {{-- Tombol Aksi Bawah Scanner --}}
+                        
                         <div class="mt-4 flex flex-wrap gap-2 sm:gap-3">
                             <!-- 1. Tombol Ketik NISN -->
                             <button onclick="showManualInput()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
@@ -219,65 +229,65 @@
                         </div>
                     </div>
 
-                    {{-- STATISTIK MAKAN --}}
+                    
                     <div id="makan-stats-panel" class="hidden grid-cols-2 gap-4">
                         <div class="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-[2rem] text-white shadow-lg shadow-orange-500/20 relative overflow-hidden group">
                             <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                 <i class="ph-fill ph-check-circle text-6xl"></i>
                             </div>
                             <p class="text-[10px] font-bold text-orange-100 uppercase tracking-widest mb-1">Sudah Ambil</p>
-                            <h3 class="text-4xl font-black tracking-tight" id="stat-taken">{{ $currentTaken }}</h3>
+                            <h3 class="text-4xl font-black tracking-tight" id="stat-taken"><?php echo e($currentTaken); ?></h3>
                         </div>
                         <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden group">
                             <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                                 <i class="ph-duotone ph-users text-6xl"></i>
                             </div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Belum Ambil</p>
-                            <h3 class="text-4xl font-black text-slate-800 tracking-tight" id="stat-remaining">{{ $totalTarget - $currentTaken }}</h3>
+                            <h3 class="text-4xl font-black text-slate-800 tracking-tight" id="stat-remaining"><?php echo e($totalTarget - $currentTaken); ?></h3>
                         </div>
                     </div>
 
-                    {{-- MODE SELECTOR GRID --}}
+                    
                     <div>
                         <div class="flex items-center justify-between mb-3 px-2">
                             <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pilih Mode Manual</h4>
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            @foreach([
+                            <?php $__currentLoopData = [
                                 ['id'=>'harian', 'label'=>'Absen Harian', 'sub'=>'Masuk/Pulang', 'icon'=>'calendar-check', 'color'=>'blue', 'type'=>'Harian'],
                                 ['id'=>'makan', 'label'=>'Makan Siang', 'sub'=>'Scan Gizi', 'icon'=>'bowl-food', 'color'=>'orange', 'type'=>'Makan'],
                                 ['id'=>'dhuha', 'label'=>'Sholat Dhuha', 'sub'=>'Ibadah Pagi', 'icon'=>'sun-horizon', 'color'=>'emerald', 'type'=>'Dhuha'],
                                 ['id'=>'dhuhur', 'label'=>'Sholat Dhuhur', 'sub'=>'Ibadah Siang', 'icon'=>'moon-stars', 'color'=>'amber', 'type'=>'Dhuhur'],
                                 ['id'=>'ekskul', 'label'=>'Ekstrakurikuler', 'sub'=>'Kegiatan Sore', 'icon'=>'basketball', 'color'=>'purple', 'type'=>'Ekstrakurikuler']
-                            ] as $mode)
-                            <button id="btn-{{ $mode['id'] }}" data-type="{{ $mode['type'] }}" class="scan-type-btn bg-white p-4 rounded-[1.5rem] shadow-sm border border-slate-100 hover:shadow-lg hover:shadow-{{ $mode['color'] }}-100/50 hover:border-{{ $mode['color'] }}-200 transition-all duration-300 text-left group active:scale-95 relative overflow-hidden">
+                            ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $mode): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <button id="btn-<?php echo e($mode['id']); ?>" data-type="<?php echo e($mode['type']); ?>" class="scan-type-btn bg-white p-4 rounded-[1.5rem] shadow-sm border border-slate-100 hover:shadow-lg hover:shadow-<?php echo e($mode['color']); ?>-100/50 hover:border-<?php echo e($mode['color']); ?>-200 transition-all duration-300 text-left group active:scale-95 relative overflow-hidden">
                                 <div class="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-10 transition-opacity">
-                                    <i class="ph-fill ph-{{ $mode['icon'] }} text-4xl text-{{ $mode['color'] }}-500"></i>
+                                    <i class="ph-fill ph-<?php echo e($mode['icon']); ?> text-4xl text-<?php echo e($mode['color']); ?>-500"></i>
                                 </div>
-                                <div class="w-10 h-10 rounded-xl bg-{{ $mode['color'] }}-50 text-{{ $mode['color'] }}-600 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
-                                    <i class="ph-bold ph-{{ $mode['icon'] }}"></i>
+                                <div class="w-10 h-10 rounded-xl bg-<?php echo e($mode['color']); ?>-50 text-<?php echo e($mode['color']); ?>-600 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
+                                    <i class="ph-bold ph-<?php echo e($mode['icon']); ?>"></i>
                                 </div>
-                                <h3 class="font-bold text-slate-700 text-xs leading-tight mb-1">{{ $mode['label'] }}</h3>
+                                <h3 class="font-bold text-slate-700 text-xs leading-tight mb-1"><?php echo e($mode['label']); ?></h3>
                                 <div class="flex items-center justify-between">
-                                    <p class="text-[10px] text-slate-400 font-medium">{{ $mode['sub'] }}</p>
+                                    <p class="text-[10px] text-slate-400 font-medium"><?php echo e($mode['sub']); ?></p>
                                     <div class="w-1.5 h-1.5 rounded-full border border-slate-300 indicator-dot transition-all"></div>
                                 </div>
                             </button>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                     </div>
 
-                    {{-- EKSKUL DROPDOWN --}}
+                    
                     <div id="extra-selector-container" class="hidden bg-white p-5 rounded-[2rem] border border-slate-100 shadow-lg shadow-purple-100/50">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-2 px-1">Pilih Kegiatan Ekskul</label>
                         <div class="relative">
                             <select id="extra-activity-select" class="w-full rounded-2xl border-slate-200 focus:border-purple-500 focus:ring-0 font-bold text-slate-700 py-3 pl-4 pr-10 text-sm bg-slate-50 cursor-pointer hover:bg-white transition-colors">
                                 <option value="">-- Pilih Ekstrakurikuler --</option>
-                                @if(isset($extracurriculars))
-                                    @foreach($extracurriculars as $ekskul)
-                                        <option value="{{ $ekskul->id }}">{{ $ekskul->name }}</option>
-                                    @endforeach
-                                @endif
+                                <?php if(isset($extracurriculars)): ?>
+                                    <?php $__currentLoopData = $extracurriculars; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ekskul): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($ekskul->id); ?>"><?php echo e($ekskul->name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php endif; ?>
                             </select>
                             <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
                                 <i class="ph-bold ph-caret-down"></i>
@@ -286,11 +296,11 @@
                     </div>
                 </div>
 
-                {{-- KOLOM KANAN: LOG RIWAYAT --}}
+                
                 <div class="lg:col-span-7 flex flex-col h-full animate-enter delay-200">
                     <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col min-h-[600px] overflow-hidden">
                         
-                        {{-- Log Header --}}
+                        
                         <div class="p-6 md:p-8 border-b border-slate-50 bg-white/80 backdrop-blur-md sticky top-0 z-20 flex justify-between items-center">
                             <div>
                                 <h3 class="font-bold text-slate-800 text-xl flex items-center gap-2">
@@ -307,7 +317,7 @@
                             </div>
                         </div>
                         
-                        {{-- Log Table --}}
+                        
                         <div class="flex-1 overflow-hidden relative bg-slate-50/30">
                             <div class="absolute inset-0 overflow-auto custom-scrollbar p-2">
                                 <table class="w-full text-left border-collapse">
@@ -322,50 +332,52 @@
                                         </tr>
                                     </thead>
                                     <tbody id="scan-log" class="text-sm">
-                                        @if(isset($recentScans))
-                                            @foreach($recentScans as $scan)
+                                        <?php if(isset($recentScans)): ?>
+                                            <?php $__currentLoopData = $recentScans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $scan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <tr class="log-entry group hover:bg-white transition-all duration-300 rounded-xl border-b border-slate-50 last:border-0"
-                                                    data-type-raw="{{ $scan['type_raw'] }}">
+                                                    data-type-raw="<?php echo e($scan['type_raw']); ?>">
                                                     
                                                     <td class="px-6 py-4 rounded-l-xl">
-                                                        <div class="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">{{ $scan['student_name'] }}</div>
-                                                        <div class="text-[10px] text-slate-400 font-mono font-bold">{{ $scan['student_id'] }}</div>
+                                                        <div class="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors"><?php echo e($scan['student_name']); ?></div>
+                                                        <div class="text-[10px] text-slate-400 font-mono font-bold"><?php echo e($scan['student_id']); ?></div>
                                                     </td>
                                                     
-                                                    {{-- Kolom Harian --}}
+                                                    
                                                     <td class="col-harian px-4 py-4 text-center">
-                                                        @if($scan['time_in']) <span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm">{{ $scan['time_in'] }}</span>
-                                                        @else <span class="text-slate-300 font-bold">-</span> @endif
+                                                        <?php if($scan['time_in']): ?> <span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm"><?php echo e($scan['time_in']); ?></span>
+                                                        <?php else: ?> <span class="text-slate-300 font-bold">-</span> <?php endif; ?>
                                                     </td>
                                                     <td class="col-harian px-4 py-4 text-center">
-                                                        @if($scan['time_out']) <span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm">{{ $scan['time_out'] }}</span>
-                                                        @else <span class="text-slate-300 font-bold">-</span> @endif
+                                                        <?php if($scan['time_out']): ?> <span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm"><?php echo e($scan['time_out']); ?></span>
+                                                        <?php else: ?> <span class="text-slate-300 font-bold">-</span> <?php endif; ?>
                                                     </td>
 
-                                                    {{-- Kolom Waktu Generic --}}
+                                                    
                                                     <td class="col-waktu hidden-col px-4 py-4 text-center">
-                                                         <span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm">{{ $scan['time_in'] ?? now()->format('H:i') }}</span>
+                                                         <span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm"><?php echo e($scan['time_in'] ?? now()->format('H:i')); ?></span>
                                                     </td>
 
-                                                    {{-- Kolom Nama Kegiatan --}}
+                                                    
                                                     <td class="col-kegiatan hidden-col px-4 py-4 text-center text-slate-600 font-bold text-xs">
-                                                        {{ $scan['ekskul_name'] ?? $scan['type_raw'] }}
+                                                        <?php echo e($scan['ekskul_name'] ?? $scan['type_raw']); ?>
+
                                                     </td>
 
                                                     <td class="px-6 py-4 text-right rounded-r-xl">
                                                         <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border shadow-sm
-                                                            {{ Str::contains($scan['status'], 'Terlambat') ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100' }}">
-                                                            {{ $scan['status'] }}
+                                                            <?php echo e(Str::contains($scan['status'], 'Terlambat') ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'); ?>">
+                                                            <?php echo e($scan['status']); ?>
+
                                                         </span>
                                                     </td>
                                                 </tr>
-                                            @endforeach
-                                        @endif
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        <?php endif; ?>
                                     </tbody>
                                 </table>
                                 
-                                {{-- Empty State --}}
-                                <div id="no-log-entry" class="{{ count($recentScans ?? []) > 0 ? 'hidden' : '' }} flex flex-col items-center justify-center py-20 text-center">
+                                
+                                <div id="no-log-entry" class="<?php echo e(count($recentScans ?? []) > 0 ? 'hidden' : ''); ?> flex flex-col items-center justify-center py-20 text-center">
                                     <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100 shadow-inner">
                                         <i class="ph-duotone ph-qr-code text-4xl text-slate-300"></i>
                                     </div>
@@ -379,9 +391,9 @@
             </div>
         </div>
 
-        {{-- ============================================================= --}}
-        {{-- MODAL PENCARIAN SISWA & INPUT MANUAL (Sakit/Izin/Alfa)        --}}
-        {{-- ============================================================= --}}
+        
+        
+        
         <div id="absen-manual-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-[100] transition-opacity" x-data="manualAbsen">
             <div class="relative top-10 md:top-20 mx-auto p-0 border-0 w-full max-w-md shadow-2xl rounded-[2rem] bg-white overflow-hidden">
                 
@@ -390,11 +402,11 @@
                     <button type="button" @click="closeManualModal()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>
                 </div>
 
-                <form action="{{ route('reports.storeManual') }}" method="POST" class="p-6 space-y-4" @submit="submitForm">
-                    @csrf
+                <form action="<?php echo e(route('reports.storeManual')); ?>" method="POST" class="p-6 space-y-4" @submit="submitForm">
+                    <?php echo csrf_field(); ?>
                     <input type="hidden" name="attendance_type" id="modal-attendance-type" value="Harian">
                     
-                    {{-- 1. PENCARIAN SISWA (AUTOCOMPLETE) --}}
+                    
                     <div class="relative">
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Cari & Pilih Siswa</label>
                         
@@ -443,11 +455,11 @@
                         <input type="hidden" name="student_id" :value="selectedStudent?.id">
                     </div>
 
-                    {{-- 2. FORM TANGGAL & STATUS --}}
+                    
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Tanggal</label>
-                            <input type="date" name="date" required value="{{ date('Y-m-d') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-indigo-600 focus:border-indigo-600 font-bold text-slate-700 text-sm">
+                            <input type="date" name="date" required value="<?php echo e(date('Y-m-d')); ?>" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-indigo-600 focus:border-indigo-600 font-bold text-slate-700 text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Status</label>
@@ -461,11 +473,11 @@
                         </div>
                     </div>
 
-                    {{-- 3. FORM WAKTU & KETERANGAN --}}
+                    
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Masuk</label>
-                            <input type="time" name="time_in" value="{{ now()->format('H:i') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-indigo-600 focus:border-indigo-600 text-center font-mono font-bold text-slate-700">
+                            <input type="time" name="time_in" value="<?php echo e(now()->format('H:i')); ?>" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-indigo-600 focus:border-indigo-600 text-center font-mono font-bold text-slate-700">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Pulang</label>
@@ -487,12 +499,12 @@
 
     </div>
 
-    {{-- 3. JAVASCRIPT LOGIC --}}
+    
     <script>
         const CONFIG = {
-            schedule: {!! $scheduleJson !!},
-            routes: { process: '{{ route('scan.process') }}' },
-            token: '{{ csrf_token() }}'
+            schedule: <?php echo $scheduleJson; ?>,
+            routes: { process: '<?php echo e(route('scan.process')); ?>' },
+            token: '<?php echo e(csrf_token()); ?>'
         };
 
         // State Management
@@ -800,7 +812,7 @@
 
                 if (data.stats) {
                     dom.statTaken.innerText = data.stats.taken;
-                    dom.statRemaining.innerText = {{ $totalTarget }} - data.stats.taken;
+                    dom.statRemaining.innerText = <?php echo e($totalTarget); ?> - data.stats.taken;
                 }
 
                 if (data.scan) addTableRow(data.scan);
@@ -924,7 +936,7 @@
             Alpine.data('manualAbsen', () => ({
                 searchQuery: '',
                 showDropdown: false,
-                students: @json($allStudents),
+                students: <?php echo json_encode($allStudents, 15, 512) ?>,
                 filteredStudents: [],
                 selectedStudent: null,
 
@@ -981,4 +993,13 @@
             }));
         });
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/scan/index.blade.php ENDPATH**/ ?>
