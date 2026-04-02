@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMADU Lakbok - Offline</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            padding: 20px; 
+            background-color: #f8fafc; 
+            color: #334155; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 90vh;
+            margin: 0;
+        }
+        .icon { font-size: 80px; margin-bottom: 20px; filter: grayscale(100%); }
+        h1 { font-size: 1.8em; margin-bottom: 10px; color: #1e3a8a; font-weight: 800; }
+        p { color: #64748b; margin-bottom: 30px; line-height: 1.6; max-width: 400px; }
+        .btn { 
+            padding: 14px 28px; 
+            background: #1e3a8a; 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer; 
+            box-shadow: 0 4px 14px rgba(30, 58, 138, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn:hover { background: #1e40af; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4); }
+    </style>
+</head>
+<body>
+    <div class="icon">📴</div>
+    <h1>Sistem Offline</h1>
+    <p>Sepertinya Bapak/Ibu Guru tidak terhubung ke internet. Mohon periksa kembali koneksi jaringan untuk melanjutkan akses SIMADU.</p>
+    <button class="btn" onclick="window.location.reload()">Coba Muat Ulang</button>
+</body>
+</html>
