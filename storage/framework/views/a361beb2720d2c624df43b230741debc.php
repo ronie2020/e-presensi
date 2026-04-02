@@ -750,7 +750,11 @@
                 },
 
                 async submitChecklist(e) {
-                    const form = e.target;
+                    // Mencegah submit default agar bisa diproses SweetAlert dulu
+                    e.preventDefault(); 
+                    
+                    // Cerdas mencari tag <form> terdekat, meskipun yang diklik adalah tombolnya
+                    const form = e.target.closest('form') || e.target;
                     
                     const alfaCount = this.students.filter(s => s.status === 'Alfa').length;
                     
@@ -765,10 +769,21 @@
                             cancelButtonText: 'Batal'
                         });
 
-                        if (!result.isConfirmed) return;
+                        if (!result.isConfirmed) return; // Berhenti jika klik batal
                     }
 
-                    form.submit();
+                    // Memunculkan efek loading agar guru tahu sistem sedang menyimpan
+                    Swal.fire({
+                        title: 'Menyimpan Data...',
+                        html: 'Mohon tunggu sebentar.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Bypass cerdas untuk memaksa form tersubmit meskipun ada error ID/Name
+                    HTMLFormElement.prototype.submit.call(form);
                 }
             }
         }

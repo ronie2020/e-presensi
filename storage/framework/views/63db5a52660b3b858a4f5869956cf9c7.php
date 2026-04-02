@@ -1,14 +1,12 @@
-@extends('layouts.kiosk-layout')
-
-@section('content')
-@php
+<?php $__env->startSection('content'); ?>
+<?php
     $safeSchedule = isset($scheduleConfig) ? $scheduleConfig : [];
     $scheduleJson = json_encode($safeSchedule);
     
     // Data Ekstrakurikuler untuk Modal/Dropdown
     $extracurriculars = isset($extracurriculars) ? $extracurriculars : [];
     $extraJson = json_encode($extracurriculars);
-@endphp
+?>
 
 <!-- PERBAIKAN 1: Tambahkan @open-ekskul-modal.window -->
 <div class="min-h-screen w-full bg-slate-900 relative overflow-x-hidden font-sans selection:bg-cyan-500 selection:text-white" x-data="kioskData()" @open-ekskul-modal.window="openExtraModal()">
@@ -22,7 +20,7 @@
     </div>
 
     <!-- Tombol Kembali -->
-    <a href="{{ route('landing') }}" class="absolute top-6 left-6 md:top-8 md:left-8 z-50 flex items-center gap-3 px-4 py-2 md:px-5 md:py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full transition-all border border-slate-700 hover:border-slate-500 shadow-xl group backdrop-blur-md">
+    <a href="<?php echo e(route('landing')); ?>" class="absolute top-6 left-6 md:top-8 md:left-8 z-50 flex items-center gap-3 px-4 py-2 md:px-5 md:py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-full transition-all border border-slate-700 hover:border-slate-500 shadow-xl group backdrop-blur-md">
         <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i>
         <span class="font-bold text-[10px] md:text-xs uppercase tracking-wider">Kembali</span>
     </a>
@@ -37,7 +35,26 @@
             <div class="text-center mb-6 w-full flex flex-col items-center shrink-0 animate-fade-in-down">
                 
                 <div ondblclick="toggleFullScreen()" title="Double-click untuk Mode Kiosk (Fullscreen)" class="inline-flex items-center justify-center p-3 mb-4 bg-slate-800/50 rounded-2xl border border-slate-700/50 shadow-2xl backdrop-blur-sm cursor-pointer hover:bg-slate-700 transition-colors">
-                    <x-application-logo class="w-12 h-12 md:w-16 md:h-16 text-white fill-current drop-shadow-lg" />
+                    <?php if (isset($component)) { $__componentOriginal8892e718f3d0d7a916180885c6f012e7 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal8892e718f3d0d7a916180885c6f012e7 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.application-logo','data' => ['class' => 'w-12 h-12 md:w-16 md:h-16 text-white fill-current drop-shadow-lg']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('application-logo'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['class' => 'w-12 h-12 md:w-16 md:h-16 text-white fill-current drop-shadow-lg']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal8892e718f3d0d7a916180885c6f012e7)): ?>
+<?php $attributes = $__attributesOriginal8892e718f3d0d7a916180885c6f012e7; ?>
+<?php unset($__attributesOriginal8892e718f3d0d7a916180885c6f012e7); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal8892e718f3d0d7a916180885c6f012e7)): ?>
+<?php $component = $__componentOriginal8892e718f3d0d7a916180885c6f012e7; ?>
+<?php unset($__componentOriginal8892e718f3d0d7a916180885c6f012e7); ?>
+<?php endif; ?>
                 </div>
                 
                 <h1 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-white tracking-tight uppercase leading-tight drop-shadow-sm text-center">
@@ -154,16 +171,16 @@
         <div class="bg-slate-800 rounded-3xl border border-slate-700 p-6 w-full max-w-md shadow-2xl" @click.away="closeModal()">
             <h3 class="text-xl font-bold text-white mb-4 flex items-center gap-2"><i class="ph-fill ph-trophy text-pink-500"></i> Pilih Kegiatan</h3>
             <div class="grid grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                @forelse($extracurriculars as $ex)
-                    <button type="button" @click="selectExtra('{{ $ex->id }}', '{{ $ex->name }}')" class="p-3 bg-slate-700/50 hover:bg-pink-900/30 border border-slate-600 hover:border-pink-500 rounded-xl text-left transition-all group">
-                        <span class="font-bold text-slate-300 group-hover:text-pink-300 text-sm block">{{ $ex->name }}</span>
+                <?php $__empty_1 = true; $__currentLoopData = $extracurriculars; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ex): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <button type="button" @click="selectExtra('<?php echo e($ex->id); ?>', '<?php echo e($ex->name); ?>')" class="p-3 bg-slate-700/50 hover:bg-pink-900/30 border border-slate-600 hover:border-pink-500 rounded-xl text-left transition-all group">
+                        <span class="font-bold text-slate-300 group-hover:text-pink-300 text-sm block"><?php echo e($ex->name); ?></span>
                     </button>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="col-span-2 text-center py-6">
                         <i class="ph-duotone ph-warning-circle text-4xl text-slate-500 mb-2"></i>
                         <p class="text-slate-400 text-sm font-bold">Data ekstrakurikuler kosong.</p>
                     </div>
-                @endforelse
+                <?php endif; ?>
             </div>
             <button type="button" @click="closeModal()" class="mt-4 w-full py-3 bg-slate-700 hover:bg-slate-600 text-white font-bold rounded-xl transition-colors">Batal</button>
         </div>
@@ -232,7 +249,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const SCHEDULE_DATA = {!! $scheduleJson !!};
+        const SCHEDULE_DATA = <?php echo $scheduleJson; ?>;
         
         let currentScanMode = 'Masuk';
         let manualOverride = false;
@@ -252,8 +269,8 @@
         const emptyLogMsg = document.getElementById('empty-log');
         const ekskulDisplay = document.getElementById('ekskul-name-display');
 
-        const csrfToken = '{{ csrf_token() }}';
-        const processUrl = '{{ route("scan.process") }}'; 
+        const csrfToken = '<?php echo e(csrf_token()); ?>';
+        const processUrl = '<?php echo e(route("scan.process")); ?>'; 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         // KONFIGURASI MODE LENGKAP
@@ -583,4 +600,5 @@
     
     [x-cloak] { display: none !important; }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.kiosk-layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/kiosk/index.blade.php ENDPATH**/ ?>
