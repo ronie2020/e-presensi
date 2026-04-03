@@ -68,6 +68,13 @@
             background-color: #e2e8f0;
             color: #1e293b;
         }
+        .cert-badge {
+            color: #2563eb; /* Blue-600 */
+            font-size: 9px;
+            font-weight: bold;
+            margin-top: 4px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -112,7 +119,13 @@
                     <td class="text-center">
                         <span class="badge">{{ $item->type }}</span>
                     </td>
-                    <td>{{ $item->title }}</td>
+                    <td>
+                        {{ $item->title }}
+                        {{-- TAMBAHAN: Indikator Sertifikat --}}
+                        @if(!empty($item->certificate_path))
+                            <br><span class="cert-badge">[Ada Sertifikat]</span>
+                        @endif
+                    </td>
                     <td class="text-center">{{ $item->level }}</td>
                     <td class="text-center">{{ \Carbon\Carbon::parse($item->date)->format('d/m/Y') }}</td>
                 </tr>

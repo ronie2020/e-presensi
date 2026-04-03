@@ -198,28 +198,35 @@
                             <h3 class="text-lg font-black text-slate-800">Riwayat Pelatihan & Sertifikasi</h3>
                         </div>
                         
-                        <form action="<?php echo e(route('portfolio.exp.store')); ?>" method="POST" x-data="{ isSubmitting: false }" @submit="isSubmitting = true" class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <?php echo csrf_field(); ?>
-                            <?php if(request('user_id')): ?> <input type="hidden" name="user_id" value="<?php echo e(request('user_id')); ?>"> <?php endif; ?>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tahun</label>
-                                <input type="number" name="year" value="<?php echo e(old('year')); ?>" placeholder="2023" class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700" required>
-                            </div>
-                            <div class="md:col-span-3">
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Pelatihan / Sertifikasi</label>
-                                <input type="text" name="title" value="<?php echo e(old('title')); ?>" placeholder="Cth: Diklat Guru Penggerak..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700" required>
-                            </div>
-                            <div class="md:col-span-3">
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Penyelenggara</label>
-                                <input type="text" name="organizer" value="<?php echo e(old('organizer')); ?>" placeholder="Cth: Kemdikbud..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700">
-                            </div>
-                            <div class="flex items-end">
-                                <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="w-full py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all flex justify-center items-center gap-2">
-                                    <span x-show="!isSubmitting"><i class="ph-bold ph-plus"></i> Tambah</span>
-                                    <span x-show="isSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Loading...</span>
-                                </button>
-                            </div>
-                        </form>
+                    <form action="<?php echo e(route('portfolio.exp.store')); ?>" method="POST" enctype="multipart/form-data" x-data="{ isSubmitting: false }" @submit="isSubmitting = true" class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <?php echo csrf_field(); ?>
+                        <?php if(request('user_id')): ?> <input type="hidden" name="user_id" value="<?php echo e(request('user_id')); ?>"> <?php endif; ?>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tahun</label>
+                            <input type="number" name="year" value="<?php echo e(old('year')); ?>" placeholder="2023" class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700" required>
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Pelatihan / Sertifikasi</label>
+                            <input type="text" name="title" value="<?php echo e(old('title')); ?>" placeholder="Cth: Diklat Guru Penggerak..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700" required>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Penyelenggara</label>
+                            <input type="text" name="organizer" value="<?php echo e(old('organizer')); ?>" placeholder="Cth: Kemdikbud..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700">
+                        </div>
+                        
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Upload Sertifikat (PDF/Gambar)</label>
+                            <input type="file" name="certificate" accept=".pdf,image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-blue-50 file:text-blue-700 bg-white rounded-2xl border border-slate-200">
+                        </div>
+
+                        <div class="md:col-span-4 flex justify-end">
+                            <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="w-full md:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all flex justify-center items-center gap-2">
+                                <span x-show="!isSubmitting"><i class="ph-bold ph-plus"></i> Tambah</span>
+                                <span x-show="isSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Loading...</span>
+                            </button>
+                        </div>
+                    </form>
 
                         <div class="space-y-3">
                             <?php $__empty_1 = true; $__currentLoopData = $experiences ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $exp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
@@ -229,6 +236,13 @@
                                         <div>
                                             <h4 class="font-bold text-slate-800"><?php echo e($exp->title); ?></h4>
                                             <p class="text-sm text-slate-500 mt-0.5"><?php echo e($exp->organizer); ?></p>
+                                            
+                                            
+                                            <?php if($exp->certificate_path): ?>
+                                                <a href="<?php echo e(asset('storage/' . $exp->certificate_path)); ?>" target="_blank" class="inline-flex items-center gap-1 mt-2 text-[10px] uppercase tracking-wider font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg hover:bg-blue-100 transition-colors">
+                                                    <i class="ph-bold ph-certificate"></i> Lihat Sertifikat
+                                                </a>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity justify-end border-t border-slate-100 sm:border-0 pt-3 sm:pt-0">
@@ -582,6 +596,19 @@
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Penyelenggara</label>
                                     <input type="text" name="organizer" x-model="editData.organizer" class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700">
+                                </div>
+                                
+                                
+                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ganti Sertifikat (Opsional)</label>
+                                    <p class="text-xs text-slate-500 mb-2">Biarkan kosong jika tidak ingin mengubah sertifikat.</p>
+                                    <input type="file" name="certificate" accept=".pdf,image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-100 file:text-blue-700">
+                                    
+                                    <template x-if="editData.certificate_path">
+                                        <a :href="'<?php echo e(asset('storage')); ?>/' + editData.certificate_path" target="_blank" class="inline-flex items-center gap-1 mt-2 text-xs font-bold text-blue-600 hover:text-blue-800">
+                                            <i class="ph-bold ph-link"></i> Lihat Sertifikat Saat Ini
+                                        </a>
+                                    </template>
                                 </div>
                             </div>
                         </template>

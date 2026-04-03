@@ -10,7 +10,7 @@
             
             <div class="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-700 group cursor-pointer">
                 <?php
-                    $rawVideoUrl = 'https://www.youtube.com/watch?v=cx_Q4pyTNVQ'; 
+                    $rawVideoUrl = 'https://www.youtube.com/watch?v=Ryc_cLLWef4'; 
                     $embedUrl = $rawVideoUrl;
                     if(str_contains($rawVideoUrl, 'watch?v=')) {
                         $embedUrl = str_replace('watch?v=', 'embed/', $rawVideoUrl);

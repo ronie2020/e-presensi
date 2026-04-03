@@ -34,7 +34,7 @@ class AchievementController extends Controller
         return view('achievements.index', compact('students', 'achievements'));
     }
 
-    public function store(Request $request)
+     public function store(Request $request)
     {
         $request->validate([
             'type' => 'required|in:Siswa,Guru,Sekolah',
@@ -43,6 +43,7 @@ class AchievementController extends Controller
             'date' => 'required|date',
             'photo' => 'nullable|image|max:2048', 
             'video_link' => 'nullable|url',
+            'certificate' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048', // Validasi sertifikat
         ]);
 
         $data = $request->except('photo');
@@ -64,6 +65,12 @@ class AchievementController extends Controller
             $data['photo_path'] = $request->file('photo')->store('achievements', 'public');
         }
 
+        // Upload Sertifikat
+        if ($request->hasFile('certificate')) {
+            $data['certificate_path'] = $request->file('certificate')->store('achievement_certificates', 'public');
+        }
+
+
         // 1. Simpan Data Prestasi
         $achievement = Achievement::create($data);
 
@@ -75,10 +82,15 @@ class AchievementController extends Controller
         return redirect()->route('achievements.index')->with('success', 'Prestasi berhasil ditambahkan & Poin Kebaikan dicatat!');
     }
 
-    public function destroy(Achievement $achievement)
+   public function destroy(Achievement $achievement)
     {
         if ($achievement->photo_path && Storage::disk('public')->exists($achievement->photo_path)) {
             Storage::disk('public')->delete($achievement->photo_path);
+        }
+        
+        // Hapus file sertifikat jika ada
+        if ($achievement->certificate_path && Storage::disk('public')->exists($achievement->certificate_path)) {
+            Storage::disk('public')->delete($achievement->certificate_path);
         }
         
         $achievement->delete();

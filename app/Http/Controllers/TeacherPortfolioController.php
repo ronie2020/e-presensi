@@ -10,9 +10,7 @@ use App\Models\User;
 class TeacherPortfolioController extends Controller
 {
     /**
-     * Helper Privasi: Menentukan siapa pemilik portofolio yang sedang dikelola.
-     * Jika Admin mengirim parameter user_id, maka gunakan ID target.
-     * Jika Guru biasa, paksa gunakan ID mereka sendiri (keamanan).
+     * Helper Privasi: Menentukan siapa pemilik portofolio yang sedang dikelola.     
      */
     private function getTargetUser(Request $request)
     {
@@ -43,8 +41,7 @@ class TeacherPortfolioController extends Controller
         $portfolios = $targetUser->portfolios()->orderBy('year', 'desc')->get();
         $articles = $targetUser->articles()->latest()->get();
         
-        // MENGAKTIFKAN PENGAMBILAN DATA PENDIDIKAN
-        // Diurutkan berdasarkan start_year dari yang terbaru
+        // MENGAKTIFKAN PENGAMBILAN DATA PENDIDIKAN       
         $educations = $targetUser->educations()->orderBy('start_year', 'desc')->get();
 
         // MENAMBAHKAN 'educations' KE DALAM COMPACT
@@ -52,7 +49,7 @@ class TeacherPortfolioController extends Controller
     }
 
     // ==========================================
-    // CRUD PENDIDIKAN (EDUCATION) -> TAMBAHAN BARU
+    // CRUD PENDIDIKAN (EDUCATION)
     // ==========================================
     public function storeEducation(Request $request)
     {
@@ -82,7 +79,8 @@ class TeacherPortfolioController extends Controller
         
         return back()->with('success', 'Riwayat Pendidikan berhasil dihapus.');
     }
-     public function updateEducation(Request $request, $id)
+    
+    public function updateEducation(Request $request, $id)
     {
         $request->validate([
             'institution' => 'required|string|max:255',
@@ -100,7 +98,7 @@ class TeacherPortfolioController extends Controller
     }
 
     // ==========================================
-    // CRUD PENGALAMAN & PELATIHAN
+    // CRUD PENGALAMAN & PELATIHAN (UPDATED WITH CERTIFICATE UPLOAD)
     // ==========================================
     public function storeExperience(Request $request)
     {
@@ -108,10 +106,18 @@ class TeacherPortfolioController extends Controller
             'title' => 'required|string|max:255',
             'year' => 'nullable|string|max:10',
             'organizer' => 'nullable|string|max:255',
+            'certificate' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048', // Validasi file sertifikat
         ]);
 
+        $data = $request->only('title', 'year', 'organizer');
+
+        // Jika ada file sertifikat yang diunggah
+        if ($request->hasFile('certificate')) {
+            $data['certificate_path'] = $request->file('certificate')->store('teacher_certificates', 'public');
+        }
+
         $targetUser = $this->getTargetUser($request);
-        $targetUser->experiences()->create($request->only('title', 'year', 'organizer'));
+        $targetUser->experiences()->create($data);
         
         return back()->with('success', 'Pengalaman/Pelatihan berhasil ditambahkan.');
     }
@@ -120,6 +126,12 @@ class TeacherPortfolioController extends Controller
     {
         $targetUser = $this->getTargetUser($request);
         $exp = $targetUser->experiences()->findOrFail($id);
+        
+        // Hapus file sertifikat dari storage jika ada
+        if ($exp->certificate_path) {
+            Storage::disk('public')->delete($exp->certificate_path);
+        }
+        
         $exp->delete();
         
         return back()->with('success', 'Data berhasil dihapus.');
@@ -131,12 +143,24 @@ class TeacherPortfolioController extends Controller
             'title' => 'required|string|max:255',
             'year' => 'nullable|string|max:10',
             'organizer' => 'nullable|string|max:255',
+            'certificate' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048', // Validasi file sertifikat
         ]);
 
         $targetUser = $this->getTargetUser($request);
         $exp = $targetUser->experiences()->findOrFail($id);
         
-        $exp->update($request->only('title', 'year', 'organizer'));
+        $data = $request->only('title', 'year', 'organizer');
+
+        // Jika ada file sertifikat baru yang diunggah
+        if ($request->hasFile('certificate')) {
+            // Hapus file lama jika ada
+            if ($exp->certificate_path) {
+                Storage::disk('public')->delete($exp->certificate_path);
+            }
+            $data['certificate_path'] = $request->file('certificate')->store('teacher_certificates', 'public');
+        }
+
+        $exp->update($data);
         
         return back()->with('success', 'Pengalaman/Pelatihan berhasil diperbarui.');
     }
