@@ -16,4 +16,8 @@ class SchoolActivity extends Model
         'image_path',
         'video_url',
     ];
+
+       protected $casts = [
+        'image_path' => 'array',
+    ];
 }
