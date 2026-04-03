@@ -197,18 +197,28 @@ class GraduationController extends Controller
         }
         $students = $query->get();
 
-        DB::transaction(function () use ($students, $format, &$counter) {
+        // Cari tanggal pengumuman yang sudah ada di database sebagai nilai default (seperti fitur Import)
+        $existingDate = Graduation::whereNotNull('announcement_date')->value('announcement_date');
+        $defaultDate = $existingDate ? Carbon::parse($existingDate)->format('Y-m-d H:i:s') : now()->format('Y-m-d H:i:s');
+
+        DB::transaction(function () use ($students, $format, &$counter, $defaultDate) {
             foreach($students as $student) {
                 // Jika user menggunakan {urut}, ganti dengan angka urutan (misal: 001, 002)
                 $formattedNumber = str_replace('{urut}', str_pad($counter, 3, '0', STR_PAD_LEFT), $format);
                 
-                Graduation::updateOrCreate(
-                    ['student_id' => $student->id], 
-                    [
-                        'skl_number' => $formattedNumber,
-                        'academic_year' => date('Y') . '/' . (date('Y') + 1)
-                    ]
-                );
+                // Gunakan firstOrNew untuk mencegah tertimpanya data lama
+                $graduation = Graduation::firstOrNew(['student_id' => $student->id]);
+                
+                $graduation->skl_number = $formattedNumber;
+                $graduation->academic_year = date('Y') . '/' . (date('Y') + 1);
+                
+                // Jika ini adalah data baru diciptakan, isi announcement_date agar tidak error 1364 di database
+                if (!$graduation->exists) {
+                    $graduation->announcement_date = $defaultDate;
+                    $graduation->status = 'LULUS'; // Opsional: Berikan status default agar tidak kosong
+                }
+                
+                $graduation->save();
                 
                 $counter++; // Naikkan nomor untuk siswa berikutnya
             }
