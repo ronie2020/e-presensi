@@ -6,15 +6,15 @@
                 <span class="text-indigo-600 font-bold tracking-wider text-sm uppercase mb-2 block">Galeri Sekolah</span>
                 <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900">Aktifitas & Kegiatan Siswa</h2>
             </div>
-            <a href="{{ route('public.activities') }}" class="hidden md:inline-flex items-center text-sm font-bold text-indigo-600 hover:text-indigo-800 transition">
+            <a href="<?php echo e(route('public.activities')); ?>" class="hidden md:inline-flex items-center text-sm font-bold text-indigo-600 hover:text-indigo-800 transition">
                 Lihat Semua Galeri <i class="ph-bold ph-arrow-right ml-2"></i>
             </a>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            @forelse($activities as $activity)
-                {{-- PERBAIKAN: Logika Array Gambar Tahan Banting untuk Landing Page --}}
-                @php
+            <?php $__empty_1 = true; $__currentLoopData = $activities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $activity): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                
+                <?php
                     $rawImage = $activity->image_path;
                     $images = [];
 
@@ -28,73 +28,77 @@
                     $images = array_filter($images);
                     $coverImage = !empty($images) ? array_values($images)[0] : null;
                     $totalImages = count($images);
-                @endphp
+                ?>
 
-                <div class="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-slate-100 flex flex-col h-full" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
+                <div class="group bg-white rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-slate-100 flex flex-col h-full" data-aos="fade-up" data-aos-delay="<?php echo e($loop->index * 100); ?>">
                     <div class="relative h-60 overflow-hidden">
-                        {{-- Menggunakan $coverImage bukan $activity->image_path --}}
-                        @if($coverImage)
-                            <img src="{{ asset('storage/' . $coverImage) }}" 
+                        
+                        <?php if($coverImage): ?>
+                            <img src="<?php echo e(asset('storage/' . $coverImage)); ?>" 
                                  loading="lazy"
-                                 alt="{{ $activity->title }}" 
+                                 alt="<?php echo e($activity->title); ?>" 
                                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                             >
                             <div class="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400" style="display: none;">
                                 <i class="ph-duotone ph-image-broken text-4xl"></i>
                             </div>
-                        @else
+                        <?php else: ?>
                             <div class="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400">
                                 <i class="ph-duotone ph-image text-4xl"></i>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-60"></div>
                         
                         <div class="absolute top-4 left-4">
                             <span class="bg-white/90 backdrop-blur text-slate-800 text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                                {{ $activity->created_at->format('d M Y') }}
+                                <?php echo e($activity->created_at->format('d M Y')); ?>
+
                             </span>
                         </div>
 
-                        {{-- Indikator Multi Foto di Halaman Depan --}}
-                        @if($totalImages > 1)
+                        
+                        <?php if($totalImages > 1): ?>
                             <div class="absolute top-4 right-4 z-20">
                                 <span class="bg-white/90 backdrop-blur text-slate-800 text-[10px] font-bold px-2 py-1 rounded-md shadow-sm flex items-center gap-1 border border-white/50">
-                                    <i class="ph-fill ph-images"></i> +{{ $totalImages - 1 }}
+                                    <i class="ph-fill ph-images"></i> +<?php echo e($totalImages - 1); ?>
+
                                 </span>
                             </div>
-                        @elseif($activity->video_url)
+                        <?php elseif($activity->video_url): ?>
                             <div class="absolute top-4 right-4 z-20">
                                 <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-lg flex items-center gap-1 animate-pulse">
                                     <i class="ph-fill ph-play-circle"></i> VIDEO
                                 </span>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
                     <div class="p-6 flex-1 flex flex-col">
                         <h4 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors line-clamp-2">
-                            {{ $activity->title }}
+                            <?php echo e($activity->title); ?>
+
                         </h4>
                         <p class="text-sm text-slate-500 leading-relaxed line-clamp-3 mb-4 flex-1">
-                            {{ $activity->description }}
+                            <?php echo e($activity->description); ?>
+
                         </p>
 
-                        @if($activity->video_url)
+                        <?php if($activity->video_url): ?>
                             <div class="mt-4 pt-4 border-t border-slate-100">
-                                <a href="{{ $activity->video_url }}" target="_blank" class="inline-flex items-center gap-2 text-sm font-bold text-red-600 hover:text-red-700 transition-colors w-full group/video">
+                                <a href="<?php echo e($activity->video_url); ?>" target="_blank" class="inline-flex items-center gap-2 text-sm font-bold text-red-600 hover:text-red-700 transition-colors w-full group/video">
                                     <i class="ph-fill ph-youtube-logo text-xl group-hover/video:scale-110 transition-transform"></i>
                                     <span>Tonton Dokumentasi</span>
                                     <i class="ph-bold ph-arrow-square-out ml-auto opacity-0 group-hover/video:opacity-100 transition-opacity"></i>
                                 </a>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div class="col-span-full py-12 text-center text-slate-400">Belum ada aktivitas.</div>
-            @endforelse
+            <?php endif; ?>
         </div>
     </div>
-</div>
+</div><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/landing/activities.blade.php ENDPATH**/ ?>
