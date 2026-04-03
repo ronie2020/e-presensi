@@ -27,7 +27,7 @@ return [
                 'name' => 'Scan Aktifitas',
                 'route' => 'scan.show',
                 'icon' => 'ph-scan',
-                'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas', 'Guru Mata Pelajaran', 'Guru', 'TU']
+                'roles' => ['*']     
             ],
             [
                 'name' => 'Izin Keluar Siswa', 
@@ -391,7 +391,7 @@ return [
                 'name' => 'Data Pengguna',
                 'route' => 'users.index',
                 'icon' => 'ph-users',
-                'roles' => ['Admin'] // Sangat Penting: Hanya Admin yang boleh akses ini
+                'roles' => ['Admin'] 
             ],
             [
                 'name' => 'Jenis Pelanggaran',
