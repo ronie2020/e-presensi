@@ -6,10 +6,12 @@ use App\Models\Student;
 use App\Models\Graduation;
 use App\Models\SchoolClass;
 use App\Models\AlumniProfile; 
+use App\Models\StudentClassHistory;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class GraduationController extends Controller
 {
@@ -39,12 +41,20 @@ class GraduationController extends Controller
     {
         $student = Student::with('graduation')->findOrFail($id);
         if ($student->graduation->status !== 'LULUS') return back()->with('error', 'SKL hanya untuk siswa LULUS.');
-        $pdf = Pdf::loadView('graduation.pdf_skl', compact('student'))->setPaper('a4', 'portrait');
+        
+        $settings = Storage::disk('local')->exists('graduation_settings.json')
+            ? json_decode(Storage::disk('local')->get('graduation_settings.json'), true)
+            : [
+                'letter_number' => '421.3/     /SMP.03/' . date('Y'),
+                'principal_name' => 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.',
+                'principal_nip' => '197xxxxxx...'
+            ];
+
+        $pdf = Pdf::loadView('graduation.pdf_skl', compact('student', 'settings'))->setPaper('a4', 'portrait');
         return $pdf->stream('SKL_' . $student->student_id . '.pdf');
     }
 
     // --- HALAMAN ADMIN (Manajemen) ---
-
     public function adminIndex(Request $request)
     {
         $classes = SchoolClass::where('name', 'LIKE', '9%')->orderBy('name')->get();
@@ -61,12 +71,32 @@ class GraduationController extends Controller
         }
 
         $students = $query->paginate(20)->withQueryString();
-        return view('admin.graduation.index', compact('students', 'classes'));
+        
+        $settings = Storage::disk('local')->exists('graduation_settings.json')
+            ? json_decode(Storage::disk('local')->get('graduation_settings.json'), true)
+            : [
+                'letter_number' => '421.3/     /SMP.03/' . date('Y'),
+                'principal_name' => 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.',
+                'principal_nip' => '197xxxxxx...'
+            ];
+
+        return view('admin.graduation.index', compact('students', 'classes', 'settings'));
     }
     
+    public function saveSettings(Request $request) 
+    {
+        $data = $request->validate([
+            'letter_number' => 'required|string',
+            'principal_name' => 'required|string',
+            'principal_nip' => 'required|string',
+        ]);
+
+        Storage::disk('local')->put('graduation_settings.json', json_encode($data));
+        return back()->with('success', 'Pengaturan dokumen SKL berhasil disimpan.');
+    }
+
     public function store(Request $request)
     {
-        // Validasi input
         $data = $request->validate([
             'student_id' => 'required|exists:students,id',
             'status' => 'required|in:LULUS,TIDAK LULUS,DITUNDA',
@@ -75,7 +105,6 @@ class GraduationController extends Controller
             'announcement_date' => 'nullable'
         ]);
 
-        // Parsing tanggal agar formatnya benar
         $announcementDate = null;
         if (!empty($data['announcement_date'])) {
             try {
@@ -101,6 +130,93 @@ class GraduationController extends Controller
         return back()->with('success', 'Data kelulusan siswa berhasil disimpan.');
     }
 
+    public function bulkUpdate(Request $request) 
+    {
+        $data = $request->input('students');
+        if ($data && is_array($data)) {
+            DB::transaction(function () use ($data) {
+                foreach ($data as $studentId => $fields) {
+                    if(!isset($fields['status'])) continue;
+                    $date = !empty($fields['announcement_date']) ? Carbon::parse($fields['announcement_date'])->format('Y-m-d H:i:s') : null;
+                    Graduation::updateOrCreate(['student_id' => $studentId], [
+                        'status' => $fields['status'],
+                        'average_score' => $fields['average_score'] ?? 0,
+                        'skl_number' => $fields['skl_number'] ?? null,
+                        'announcement_date' => $date,
+                        'academic_year' => date('Y') . '/' . (date('Y') + 1),
+                    ]);
+                }
+            });
+            return back()->with('success', 'Semua data berhasil diperbarui.');
+        }
+        return back()->with('error', 'Tidak ada data.');
+    }
+
+    public function setGlobalDate(Request $request) 
+    {
+        $request->validate(['global_date' => 'required|date']);
+        $date = Carbon::parse($request->global_date)->format('Y-m-d H:i:s');
+        
+        $query = Student::whereHas('schoolClass', fn($q) => $q->where('name', 'LIKE', '9%'));
+        if($request->class_filter) $query->where('class_id', $request->class_filter);
+        $students = $query->get();
+        
+        DB::transaction(function () use ($students, $date) {
+            foreach($students as $student) {
+                $grad = Graduation::firstOrNew(['student_id' => $student->id]);
+                
+                $grad->announcement_date = $date;
+                $grad->academic_year = date('Y').'/'.(date('Y')+1);
+                
+                if (!$grad->exists || in_array($grad->status, [null, 'DITUNDA'])) {
+                    $grad->status = 'LULUS';
+                }
+                
+                $grad->save();
+            }
+        });
+        
+        return back()->with('success', 'Jadwal berhasil diupdate & Seluruh siswa otomatis diset LULUS secara default.');
+    }
+
+    // ===> FUNGSI BARU: GENERATE NOMOR SKL MASSAL <===
+    public function bulkSetSklNumber(Request $request) 
+    {
+        $request->validate([
+            'skl_format' => 'required|string',
+            'start_number' => 'nullable|integer|min:1'
+        ]);
+
+        $format = $request->skl_format;
+        $counter = $request->start_number ?? 1;
+
+        // Ambil data siswa berdasarkan filter kelas (jika ada), urutkan berdasarkan nama abjad
+        $query = Student::whereHas('schoolClass', fn($q) => $q->where('name', 'LIKE', '9%'))->orderBy('name');
+        if($request->class_filter) {
+            $query->where('class_id', $request->class_filter);
+        }
+        $students = $query->get();
+
+        DB::transaction(function () use ($students, $format, &$counter) {
+            foreach($students as $student) {
+                // Jika user menggunakan {urut}, ganti dengan angka urutan (misal: 001, 002)
+                $formattedNumber = str_replace('{urut}', str_pad($counter, 3, '0', STR_PAD_LEFT), $format);
+                
+                Graduation::updateOrCreate(
+                    ['student_id' => $student->id], 
+                    [
+                        'skl_number' => $formattedNumber,
+                        'academic_year' => date('Y') . '/' . (date('Y') + 1)
+                    ]
+                );
+                
+                $counter++; // Naikkan nomor untuk siswa berikutnya
+            }
+        });
+
+        return back()->with('success', 'Nomor SKL berhasil di-generate secara massal.');
+    }
+
     // --- IMPORT CSV ---
     public function import(Request $request)
     {
@@ -110,7 +226,8 @@ class GraduationController extends Controller
         fgetcsv($handle); 
 
         $count = 0;
-        $defaultDate = Carbon::parse('2025-05-05 10:00:00')->format('Y-m-d H:i:s'); 
+        $existingDate = Graduation::whereNotNull('announcement_date')->value('announcement_date');
+        $defaultDate = $existingDate ? Carbon::parse($existingDate)->format('Y-m-d H:i:s') : now()->format('Y-m-d H:i:s');
 
         DB::transaction(function () use ($handle, &$count, $defaultDate) {
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
@@ -138,51 +255,16 @@ class GraduationController extends Controller
         return back()->with('success', "Import selesai. $count data diperbarui.");
     }
     
-    // --- AUTO GENERATE ---
     public function autoGenerate(Request $request) { 
        return back()->with('success', 'Fitur Auto Generate dipanggil');
     }
     public function downloadTemplate() { /* ... */ }
-    
-    // --- BULK UPDATE ---
-    public function bulkUpdate(Request $request) {
-        $data = $request->input('students');
-        if ($data && is_array($data)) {
-            DB::transaction(function () use ($data) {
-                foreach ($data as $studentId => $fields) {
-                    if(!isset($fields['status'])) continue;
-                    $date = !empty($fields['announcement_date']) ? Carbon::parse($fields['announcement_date'])->format('Y-m-d H:i:s') : null;
-                    Graduation::updateOrCreate(['student_id' => $studentId], [
-                        'status' => $fields['status'],
-                        'average_score' => $fields['average_score'] ?? 0,
-                        'skl_number' => $fields['skl_number'] ?? null,
-                        'announcement_date' => $date,
-                        'academic_year' => date('Y') . '/' . (date('Y') + 1),
-                    ]);
-                }
-            });
-            return back()->with('success', 'Semua data berhasil diperbarui.');
-        }
-        return back()->with('error', 'Tidak ada data.');
-    }
-
-    public function setGlobalDate(Request $request) {
-        $request->validate(['global_date' => 'required|date']);
-        $date = Carbon::parse($request->global_date)->format('Y-m-d H:i:s');
-        $query = Student::whereHas('schoolClass', fn($q) => $q->where('name', 'LIKE', '9%'));
-        if($request->class_filter) $query->where('class_id', $request->class_filter);
-        $students = $query->get();
-        foreach($students as $student) {
-            Graduation::updateOrCreate(['student_id' => $student->id], ['announcement_date' => $date, 'academic_year' => date('Y').'/'.(date('Y')+1)]);
-        }
-        return back()->with('success', 'Jadwal berhasil diupdate.');
-    }
 
     // ===> PINDAHKAN SISWA LULUS KE ALUMNI <===
     public function processAlumni(Request $request)
     {
-        // 1. Cari siswa yang status kelulusannya "LULUS" dan masih "active"
-        $students = Student::whereHas('graduation', function($q) {
+        $students = Student::with('graduation')
+            ->whereHas('graduation', function($q) {
                 $q->where('status', 'LULUS');
             })
             ->where('status', '!=', 'graduated') 
@@ -193,9 +275,13 @@ class GraduationController extends Controller
         }
 
         $count = 0;
-        DB::transaction(function () use ($students, &$count) {
+        $historyData = [];
+        $now = now()->toDateTimeString();
+
+        DB::transaction(function () use ($students, &$count, &$historyData, $now) {
             foreach ($students as $student) {
-                // Update status siswa ALUMNI
+                $oldClassId = $student->class_id;
+
                 $student->update([
                     'status' => 'graduated',
                     'class_id' => null,
@@ -206,7 +292,20 @@ class GraduationController extends Controller
                     AlumniProfile::create(['student_id' => $student->id]);
                 }
 
+                if ($oldClassId) {
+                    $historyData[] = [
+                        'student_id'    => $student->id,
+                        'class_id'      => $oldClassId,
+                        'academic_year' => $student->graduation->academic_year ?? (date('Y') . '/' . (date('Y') + 1)),
+                        'created_at'    => $now,
+                        'updated_at'    => $now,
+                    ];
+                }
                 $count++;
+            }
+
+            if (!empty($historyData)) {
+                StudentClassHistory::insert($historyData);
             }
         });
 

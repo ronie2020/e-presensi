@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Surat Keterangan Lulus - {{ $student->name }}</title>
+    <title>Surat Keterangan Lulus - <?php echo e($student->name); ?></title>
     <style>
         /* PENTING: Mengatur margin halaman agar muat 1 lembar */
         @page { margin: 2cm 2.5cm 1.5cm 2.5cm; }
@@ -89,7 +89,7 @@
     <table class="kop-surat">
         <tr>
             <td width="15%" style="text-align: left;">
-                <img src="{{ public_path('img/logo_ciamis.png') }}" style="width: 75px; height: auto;" alt="Logo Ciamis">
+                <img src="<?php echo e(public_path('img/logo_ciamis.png')); ?>" style="width: 75px; height: auto;" alt="Logo Ciamis">
             </td>
             <td width="70%" class="kop-text">
                 <h3>PEMERINTAH KABUPATEN CIAMIS</h3>
@@ -99,13 +99,13 @@
                 <p>Laman: www.smpn3lakbok.sch.id &nbsp; E-mail: smpn3lakbok@gmail.com</p>
             </td>
             <td width="15%" style="text-align: right;">
-                <img src="{{ public_path('img/logo_sekolah.png') }}" style="width: 80px; height: auto;" alt="Logo Sekolah">
+                <img src="<?php echo e(public_path('img/logo_sekolah.png')); ?>" style="width: 80px; height: auto;" alt="Logo Sekolah">
             </td>
         </tr>
     </table>
 
     <h3 class="title">SURAT KETERANGAN KELULUSAN</h3>
-    <p class="subtitle">Nomor: {{ $student->graduation->skl_number ?? ($settings['letter_number'] ?? '421.3/     /SMP.03/' . date('Y')) }}</p>
+    <p class="subtitle">Nomor: <?php echo e($student->graduation->skl_number ?? ($settings['letter_number'] ?? '421.3/     /SMP.03/' . date('Y'))); ?></p>
 
     <div class="content">
         <p>Yang bertanda tangan di bawah ini, Kepala SMP Negeri 3 Lakbok, Kabupaten Ciamis, menerangkan bahwa:</p>
@@ -114,22 +114,22 @@
             <tr>
                 <td class="label">Nama Peserta Didik</td>
                 <td class="colon">:</td>
-                <td style="font-weight: bold; text-transform: uppercase;">{{ $student->name }}</td>
+                <td style="font-weight: bold; text-transform: uppercase;"><?php echo e($student->name); ?></td>
             </tr>
             <tr>
                 <td class="label">Tempat, Tanggal Lahir</td>
                 <td class="colon">:</td>
-                <td>{{ $student->pob }}, {{ \Carbon\Carbon::parse($student->dob)->isoFormat('D MMMM Y') }}</td>
+                <td><?php echo e($student->pob); ?>, <?php echo e(\Carbon\Carbon::parse($student->dob)->isoFormat('D MMMM Y')); ?></td>
             </tr>
             <tr>
                 <td class="label">Nomor Induk Siswa</td>
                 <td class="colon">:</td>
-                <td>{{ $student->nis ?? '-' }}</td>
+                <td><?php echo e($student->nis ?? '-'); ?></td>
             </tr>
             <tr>
                 <td class="label">NISN</td>
                 <td class="colon">:</td>
-                <td>{{ $student->student_id }}</td>
+                <td><?php echo e($student->student_id); ?></td>
             </tr>
             <tr>
                 <td class="label">Asal Sekolah</td>
@@ -139,7 +139,7 @@
         </table>
 
         <p style="text-align: justify;">
-            Berdasarkan hasil Rapat Pleno Dewan Guru tentang Kelulusan Peserta Didik Tahun Pelajaran {{ $student->graduation->academic_year ?? date('Y').'/'.(date('Y')+1) }} yang dilaksanakan pada tanggal {{ \Carbon\Carbon::parse($student->graduation->announcement_date ?? now())->isoFormat('D MMMM Y') }}, maka peserta didik tersebut dinyatakan:
+            Berdasarkan hasil Rapat Pleno Dewan Guru tentang Kelulusan Peserta Didik Tahun Pelajaran <?php echo e($student->graduation->academic_year ?? date('Y').'/'.(date('Y')+1)); ?> yang dilaksanakan pada tanggal <?php echo e(\Carbon\Carbon::parse($student->graduation->announcement_date ?? now())->isoFormat('D MMMM Y')); ?>, maka peserta didik tersebut dinyatakan:
         </p>
 
         <div class="status-box">
@@ -156,7 +156,7 @@
                 <!-- KIRI: QR Code Verifikasi -->
                 <td style="width: 50%; text-align: left; padding-left: 20px;">
                     
-                    @php
+                    <?php
                         /* =========================================================
                            SOLUSI JITU UNTUK DOMPDF (Ubah gambar luar jadi Base64)
                            ========================================================= */
@@ -179,15 +179,15 @@
                         } catch (\Exception $e) {
                             $qrImageBase64 = ''; // Kosongkan jika gagal
                         }
-                    @endphp
+                    ?>
 
-                    {{-- Render Gambar Base64 ke HTML --}}
-                    @if($qrImageBase64)
-                        <img src="{{ $qrImageBase64 }}" style="width: 85px; height: 85px;" alt="QR Code Verifikasi">
-                    @else
+                    
+                    <?php if($qrImageBase64): ?>
+                        <img src="<?php echo e($qrImageBase64); ?>" style="width: 85px; height: 85px;" alt="QR Code Verifikasi">
+                    <?php else: ?>
                         <!-- Tampil kotak kosong jika saat load tidak ada koneksi internet -->
                         <div style="width: 85px; height: 85px; border: 1px dashed #999; text-align: center; line-height: 85px; font-size: 10px; color: #999;">[QR CODE]</div>
-                    @endif
+                    <?php endif; ?>
                     
                     <div style="margin-top: 5px; font-size: 8pt; color: #444; line-height: 1.2;">
                         <i>* Pindai QR Code untuk memverifikasi<br>keaslian dokumen pada sistem sekolah.</i>
@@ -196,12 +196,12 @@
                 
                 <!-- KANAN: Tanda Tangan Kepala Sekolah -->
                 <td style="width: 50%; text-align: center;">
-                    <p style="margin: 0;">Lakbok, {{ \Carbon\Carbon::now()->isoFormat('D MMMM Y') }}</p>
+                    <p style="margin: 0;">Lakbok, <?php echo e(\Carbon\Carbon::now()->isoFormat('D MMMM Y')); ?></p>
                     <p style="margin: 0;">Kepala Sekolah,</p>
                     <!-- Spasi Tanda Tangan -->
                     <br><br><br><br>
-                    <p style="margin: 0; font-weight: bold; text-decoration: underline;">{{ isset($settings['principal_name']) ? strtoupper($settings['principal_name']) : 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.' }}</p>
-                    <p style="margin: 0;">NIP. {{ $settings['principal_nip'] ?? '197xxxxxx...' }}</p>
+                    <p style="margin: 0; font-weight: bold; text-decoration: underline;"><?php echo e(isset($settings['principal_name']) ? strtoupper($settings['principal_name']) : 'TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.'); ?></p>
+                    <p style="margin: 0;">NIP. <?php echo e($settings['principal_nip'] ?? '197xxxxxx...'); ?></p>
                 </td>
             </tr>
         </table>
@@ -212,4 +212,4 @@
         Dicetak melalui Sistem Informasi Sekolah SMPN 3 Lakbok
     </div>
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/graduation/pdf_skl.blade.php ENDPATH**/ ?>

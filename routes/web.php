@@ -487,7 +487,7 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{id}', [App\Http\Controllers\AdminLiteracyController::class, 'destroy'])->name('destroy');
     });
 
-    // Manajemen Kelulusan
+   // Manajemen Kelulusan
     Route::prefix('admin/graduation')->name('admin.graduation.')->group(function() {
         Route::get('/', [GraduationController::class, 'adminIndex'])->name('index');
         Route::post('/store', [GraduationController::class, 'store'])->name('store'); 
@@ -497,6 +497,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/auto-generate', [GraduationController::class, 'autoGenerate'])->name('auto_generate');
         Route::get('/template', [GraduationController::class, 'downloadTemplate'])->name('template');
         Route::post('/process-alumni', [GraduationController::class, 'processAlumni'])->name('process_alumni');
+        Route::post('/settings', [GraduationController::class, 'saveSettings'])->name('save_settings');
+        Route::post('/bulk-skl', [\App\Http\Controllers\GraduationController::class, 'bulkSetSklNumber'])->name('bulk_skl');
     });    
     
     // Route Admin Alumni
