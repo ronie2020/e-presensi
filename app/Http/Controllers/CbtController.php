@@ -140,11 +140,13 @@ class CbtController extends Controller
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
             'duration_minutes' => $request->duration_minutes,
+            'question_limit' => $request->exam_type === 'google_form' ? 0 : ($request->question_limit ?? 0),
             'passing_grade' => $request->exam_type === 'google_form' ? 0 : ($request->passing_grade ?? 0),
             'token' => $request->filled('token') ? strtoupper($request->token) : strtoupper(Str::random(5)),
             'is_active' => $request->has('is_active'),
             'randomize_questions' => $request->exam_type === 'google_form' ? false : $request->has('randomize_questions'),
             'randomize_options' => $request->exam_type === 'google_form' ? false : $request->has('randomize_options'),
+
         ];
 
         // 3. Simpan ke Database
@@ -180,6 +182,7 @@ class CbtController extends Controller
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
             'duration_minutes' => $request->duration_minutes,
+            'question_limit' => $request->exam_type === 'google_form' ? 0 : ($request->question_limit ?? 0),
             'passing_grade' => $request->exam_type === 'google_form' ? 0 : ($request->passing_grade ?? 0),
             'is_active' => $request->has('is_active'),
             'randomize_questions' => $request->exam_type === 'google_form' ? false : $request->has('randomize_questions'),
@@ -1180,6 +1183,51 @@ class CbtController extends Controller
         $type = 'Ujian CBT';
         
         return view('cbt.print_questions', compact('title', 'subject', 'info', 'questions', 'type'));
+    }
+
+     /**
+     * Export Soal dari Ujian CBT tertentu ke Excel/CSV
+     */
+    public function exportQuestions($id)
+    {
+        $exam = CbtExam::with('questions')->findOrFail($id);
+        $questions = $exam->questions;
+
+        // Header kolom Excel
+        $headers = ['soal', 'opsi_a', 'opsi_b', 'opsi_c', 'opsi_d', 'opsi_e', 'kunci', 'bobot', 'materi_kd'];
+
+        $callback = function() use ($questions, $headers) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $headers);
+
+            foreach ($questions as $q) {
+                // Parsing opsi dari JSON jika perlu
+                $opts = is_string($q->options) ? json_decode($q->options, true) : ($q->options ?? []);
+                
+                fputcsv($file, [
+                    strip_tags($q->question_text), // Bersihkan tag HTML untuk Excel
+                    $q->option_A ?? ($opts['A'] ?? ''),
+                    $q->option_B ?? ($opts['B'] ?? ''),
+                    $q->option_C ?? ($opts['C'] ?? ''),
+                    $q->option_D ?? ($opts['D'] ?? ''),
+                    $q->option_E ?? ($opts['E'] ?? ''),
+                    $q->correct_answer,
+                    $q->score_weight,
+                    $q->tags
+                ]);
+            }
+            fclose($file);
+        };
+
+        $fileName = 'SOAL_' . Str::slug($exam->title) . '_' . date('Ymd_His') . '.csv';
+
+        return response()->stream($callback, 200, [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ]);
     }
     
 }

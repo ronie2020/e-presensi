@@ -371,6 +371,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/questions/{id}', [CbtController::class, 'destroyQuestion'])->name('questions.destroy');
 
         Route::get('/exam/{exam}/questions/print', [CbtController::class, 'printQuestions'])->name('questions.print');
+        Route::get('/exam/{exam}/export-questions', [CbtController::class, 'exportQuestions'])->name('questions.export_excel');
         
         Route::post('/exam/{exam}/import', [CbtController::class, 'importQuestions'])->name('questions.import');
         Route::get('/questions/template', [CbtController::class, 'downloadTemplate'])->name('questions.template');
@@ -410,14 +411,18 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{id}', [CbtBankController::class, 'destroy'])->name('destroy');
 
         Route::get('/{id}/questions/print', [CbtBankController::class, 'printQuestions'])->name('questions.print');
-        
+        Route::post('/{id}/import', [CbtBankController::class, 'importQuestions'])->name('questions.import');
+        Route::get('/questions/template', [CbtBankController::class, 'downloadTemplate'])->name('questions.template');
+        Route::get('/{id}/export', [CbtBankController::class, 'exportQuestions'])->name('questions.export');
+        Route::get('/exam/{id}/export-questions', [CbtController::class, 'exportQuestions'])->name('questions.export_excel');
+       
         // --- ROUTE BULK ACTION ---
         Route::delete('/{id}/questions/bulk-delete', [CbtBankController::class, 'bulkDelete'])->name('questions.bulk_delete');
         Route::put('/{id}/questions/bulk-weight', [CbtBankController::class, 'bulkWeight'])->name('questions.bulk_weight');
         
         Route::post('/{id}/questions', [CbtBankController::class, 'storeQuestion'])->name('questions.store');       
         Route::put('/questions/{id}', [CbtBankController::class, 'updateQuestion'])->name('questions.update');     
-        Route::delete('/questions/{id}', [CbtBankController::class, 'destroyQuestion'])->name('questions.destroy');
+        Route::delete('/questions/{id}', [CbtBankController::class, 'destroyQuestion'])->name('questions.destroy');        
     });
 
     // Kedisiplinan & Penilaian

@@ -100,4 +100,4 @@
         </footer>
     </div>
 </body>
-</html><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/layouts/student.blade.php ENDPATH**/ ?>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/layouts/student.blade.php ENDPATH**/ ?>

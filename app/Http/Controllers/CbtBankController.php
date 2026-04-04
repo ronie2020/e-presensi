@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str; 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB; 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\BankQuestionsImport;
 
 class CbtBankController extends Controller
 {
@@ -495,4 +497,90 @@ class CbtBankController extends Controller
         
         return view('cbt.print_questions', compact('title', 'subject', 'info', 'questions', 'type'));
     }
+
+      /**
+     * Proses Import Soal dari Excel
+     */
+    public function importQuestions(Request $request, $id)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xls,xlsx,csv'
+        ]);
+
+        try {
+            Excel::import(new BankQuestionsImport($id), $request->file('file'));
+            return back()->with('success', 'Soal-soal dari Excel berhasil diimport ke Bank Soal!');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengimport soal: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download Template Import Soal
+     */
+    public function downloadTemplate()
+    {
+        $headers = ['soal', 'opsi_a', 'opsi_b', 'opsi_c', 'opsi_d', 'opsi_e', 'kunci', 'bobot', 'materi_kd'];
+        
+        $callback = function() use ($headers) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $headers);
+            // Contoh baris pengisian
+            fputcsv($file, ['Contoh soal: Siapa penemu lampu?', 'Edison', 'Tesla', 'Newton', 'Einstein', '', 'A', '2', 'IPA']);
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=template_bank_soal.csv",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ]);
+    }
+
+     /**
+     * Export Soal dari Bank Soal ke CSV/Excel
+     */
+    public function exportQuestions($id)
+    {
+        $bank = CbtQuestionBank::with('questions')->findOrFail($id);
+        $questions = $bank->questions;
+
+        $headers = ['soal', 'opsi_a', 'opsi_b', 'opsi_c', 'opsi_d', 'opsi_e', 'kunci', 'bobot', 'materi_kd'];
+
+        $callback = function() use ($questions, $headers) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $headers);
+
+            foreach ($questions as $q) {
+                // Ambil opsi dari json/array
+                $opts = is_string($q->options) ? json_decode($q->options, true) : ($q->options ?? []);
+                
+                fputcsv($file, [
+                    $q->question_text,
+                    $q->option_A ?? ($opts['A'] ?? ''),
+                    $q->option_B ?? ($opts['B'] ?? ''),
+                    $q->option_C ?? ($opts['C'] ?? ''),
+                    $q->option_D ?? ($opts['D'] ?? ''),
+                    $q->option_E ?? ($opts['E'] ?? ''),
+                    $q->correct_answer,
+                    $q->score_weight,
+                    $q->tags
+                ]);
+            }
+            fclose($file);
+        };
+
+        $fileName = 'Export_Bank_' . Str::slug($bank->title) . '_' . date('Ymd_His') . '.csv';
+
+        return response()->stream($callback, 200, [
+            "Content-type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=$fileName",
+            "Pragma"              => "no-cache",
+            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+            "Expires"             => "0"
+        ]);
+    }    
+
 }

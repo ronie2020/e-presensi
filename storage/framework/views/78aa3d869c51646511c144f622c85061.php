@@ -194,4 +194,4 @@
             <i class="ph-bold ph-gear text-slate-400 text-xl group-hover:text-blue-400 group-hover:rotate-90 transition-all duration-500"></i>
         </div>
     </div>
-</nav><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/layouts/navigation.blade.php ENDPATH**/ ?>
+</nav><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/layouts/navigation.blade.php ENDPATH**/ ?>

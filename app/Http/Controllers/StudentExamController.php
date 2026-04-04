@@ -166,10 +166,23 @@ class StudentExamController extends Controller
             
             $q->saved_answer = $saved;
             return $q;
-        });
+        });       
 
         $sessionId = $session->id;
 
+        // Query dasar mengambil soal
+        $query = CbtQuestion::where('cbt_exam_id', $exam_id)
+            ->select('id', 'question_text', 'question_image', 'options', 'question_type') 
+            ->inRandomOrder($session->id); // <--- Kunci utama, acak berdasarkan ID sesi
+
+        // LOGIKA ANDA: Jika guru menyetel limit (misal 40), maka potong soalnya!
+        if (isset($exam->question_limit) && $exam->question_limit > 0) {
+            $query->take($exam->question_limit);
+        }
+
+        // Eksekusi query
+        $questions = $query->get();
+        
         if (view()->exists('cbt.student.exam_runner')) {
              return view('cbt.student.exam_runner', compact('exam', 'questions', 'timeLeft', 'sessionId', 'student'));
         } else {
