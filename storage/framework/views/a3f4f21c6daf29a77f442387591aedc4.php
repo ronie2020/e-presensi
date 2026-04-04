@@ -456,7 +456,17 @@
                                 <div class="flex items-center gap-3">
                                     <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
                                         <i class="ph-fill ph-list-dashes text-blue-500"></i> Daftar Soal
-                                        <span class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm"><?php echo e($exam->questions->count()); ?></span>
+
+                                      
+                                        <span class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm" title="Jumlah Total Soal">
+                                           Soal <?php echo e($exam->questions->count()); ?> 
+                                        </span>
+
+                                        
+                                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5" title="Akumulasi Bobot Nilai">
+                                            <i class="ph-fill ph-chart-bar text-base"></i> Poin <?php echo e($totalPoints ?? 0); ?>
+
+                                        </span>
                                         
                                         
                                         <?php if($exam->questions->count() > 0): ?>
@@ -473,12 +483,13 @@
                                         <span class="text-xs font-bold text-slate-600">Pilih Semua</span>
                                     </label>
                                     <?php endif; ?>
-                                </div>
+                                </div>                                
+                            </div>
+                            
                                 <div class="relative w-full sm:w-64">
                                     <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
                                     <input type="text" x-model="questionSearch" placeholder="Cari isi pertanyaan atau tag..." class="w-full pl-10 pr-4 py-2 text-sm font-bold border-slate-200 rounded-xl focus:ring-blue-500 bg-white shadow-sm transition">
                                 </div>
-                            </div>
                             
                             
                             <div x-show="selectedQuestions.length > 0" x-transition class="bg-blue-50 border border-blue-200 rounded-[1.5rem] p-4 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm" style="display: none;">

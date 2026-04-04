@@ -58,7 +58,9 @@ class CbtBankController extends Controller
     public function manage($id)
     {
         $bank = CbtQuestionBank::with('questions')->findOrFail($id);
-        return view('cbt.bank.questions', compact('bank'));
+        $totalPoints = $bank->questions->sum('score_weight');       
+
+        return view('cbt.bank.questions', compact('bank', 'totalPoints'));
     }
 
     /**

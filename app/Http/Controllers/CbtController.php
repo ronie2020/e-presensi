@@ -232,9 +232,12 @@ class CbtController extends Controller
 
     public function manageQuestions($id)
     {
-        $exam = CbtExam::with('questions')->findOrFail($id);
-        return view('cbt.manage_questions', compact('exam'));
+        $exam = CbtExam::with('questions')->findOrFail($id);   
+        $totalPoints = $exam->questions->sum('score_weight');
+        
+        return view('cbt.manage_questions', compact('exam', 'totalPoints'));
     }
+
 
     public function storeQuestion(Request $request, $id)
     {

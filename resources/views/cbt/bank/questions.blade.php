@@ -444,35 +444,48 @@
                                     {{-- TOMBOL IMPORT --}}
                                     <button @click="showImportModal = true" class="ml-3 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow-sm flex items-center gap-1.5">
                                         <i class="ph-bold ph-file-arrow-up text-base"></i> Import Excel
-                                    </button>
+                                    </button>                                  
 
                                     @if($bank->questions->count() > 0)
                                         {{-- TOMBOL EXPORT EXCEL (BARU) --}}
                                         <a href="{{ route('bank.questions.export', $bank->id) }}" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition shadow-sm flex items-center gap-1.5">
                                             <i class="ph-bold ph-file-xls text-base"></i> Export Excel
-                                        </a>
+                                        </a>                                        
 
                                         {{-- TOMBOL CETAK PDF --}}
                                         <a href="{{ route('bank.questions.print', $bank->id) }}" target="_blank" class="px-3 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-lg text-xs font-bold hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 transition shadow-sm flex items-center gap-1.5">
                                             <i class="ph-bold ph-printer text-base"></i> Cetak PDF
                                         </a>
                                     @endif
-                                </h3>
-                                
-                                {{-- CHECKBOX PILIH SEMUA --}}
-                                @if($bank->questions->count() > 0)
+                                </h3>                                
+                               
+                            </div>                            
+                        </div>
+                        <div class="flex flex-col sm:flex-row justify-between items-center px-2 gap-4">
+
+                            {{-- JUMLAH SOAL --}}
+                            <span class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm" title="Jumlah Total Soal">
+                              Soal {{ $bank->questions->count() }}
+                            </span>
+
+                            {{-- PERBAIKAN: TOTAL POIN SEKARANG AKAN TERLIHAT --}}
+                            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5" title="Akumulasi Bobot Nilai">
+                                <i class="ph-fill ph-chart-bar text-base"></i> Poin {{ $totalPoints ?? 0 }}
+                            </span>
+
+                            {{-- CHECKBOX PILIH SEMUA --}}
+                            @if($bank->questions->count() > 0)
                                 <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
                                     <input type="checkbox" @change="toggleSelectAll($event)" class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
                                     <span class="text-xs font-bold text-slate-600">Pilih Semua</span>
                                 </label>
-                                @endif
-                            </div>                            
-                        </div>
-                         {{-- KOLOM PENCARIAN --}}
+                            @endif
+                            {{-- KOLOM PENCARIAN --}}
                             <div class="relative w-full md:w-80 shrink-0">
                                 <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
                                 <input type="text" x-model="questionSearch" placeholder="Cari pertanyaan atau tag..." class="w-full pl-10 pr-4 py-2 text-sm font-bold border-slate-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm transition">
                             </div>
+                        </div>                      
                         
                         {{-- ACTION BAR MUNCUL SAAT ADA YANG DIPILIH --}}
                         <div x-show="selectedQuestions.length > 0" x-transition class="bg-indigo-50 border border-indigo-200 rounded-[1.5rem] p-4 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm" style="display: none;">
