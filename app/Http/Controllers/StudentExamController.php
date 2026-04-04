@@ -19,20 +19,29 @@ class StudentExamController extends Controller
         return Auth::guard('student')->id();
     }
 
-    public function index()
+    // FUNGSI HELPER BARU: Memastikan "7A" cocok ke "7", tapi "10A" BUKAN "1"
+    private function checkClassMatch($className, $examLevel) {
+        if (empty($examLevel)) return true; // Jika level dikosongkan = Ujian Umum
+        
+        // Regex: Harus diawali (^) level ujian, dan karakter berikutnya BUKAN angka (?![0-9])
+        $pattern = '/^' . preg_quote(trim($examLevel), '/') . '(?![0-9])/i';
+        return (bool) preg_match($pattern, trim($className));
+    }
+
+ public function index()
     {
         $student = Auth::guard('student')->user();
         $className = $student->schoolClass->name ?? '';
-        $classLevel = preg_replace('/[^0-9]/', '', $className); 
 
-        $exams = CbtExam::where('is_active', true)
-            ->where(function($q) use ($classLevel) {
-                if (!empty($classLevel)) {
-                    $q->where('class_level', $classLevel);
-                }
-            })
+        // Mengambil semua ujian yang aktif
+        $allExams = CbtExam::where('is_active', true)
             ->orderBy('created_at', 'desc')
             ->get();
+
+        // FILTERING TEPAT MENGGUNAKAN HELPER
+        $exams = $allExams->filter(function($exam) use ($className) {
+            return $this->checkClassMatch($className, $exam->class_level);
+        });
 
         foreach($exams as $exam) {
             $session = CbtStudentExam::where('student_id', $this->getStudentId())
@@ -50,7 +59,14 @@ class StudentExamController extends Controller
     public function showStart($exam_id)
     {
         $exam = CbtExam::findOrFail($exam_id);
+        $student = Auth::guard('student')->user();
+        $className = $student->schoolClass->name ?? '';
         
+        // PROTEKSI KEAMANAN URL MENGGUNAKAN HELPER
+        if (!$this->checkClassMatch($className, $exam->class_level)) {
+            return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Ujian ini bukan untuk tingkat kelas Anda.');
+        }
+
         $existingSession = CbtStudentExam::where('student_id', $this->getStudentId())
             ->where('cbt_exam_id', $exam_id)
             ->first();
@@ -69,6 +85,13 @@ class StudentExamController extends Controller
     public function start(Request $request, $exam_id)
     {
         $exam = CbtExam::findOrFail($exam_id);
+        $student = Auth::guard('student')->user();
+        $className = $student->schoolClass->name ?? '';
+
+        // PROTEKSI KEAMANAN URL (Double Check) MENGGUNAKAN HELPER
+        if (!$this->checkClassMatch($className, $exam->class_level)) {
+            return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Anda tidak diizinkan memulai ujian ini.');
+        }
 
         if ($exam->token) {
             $request->validate(['token' => 'required|string']);

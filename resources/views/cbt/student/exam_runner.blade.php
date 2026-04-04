@@ -284,8 +284,7 @@
                         this.savingQuestionId = null;
                     }
                 },
-
-                handleSessionExpired() {
+ handleSessionExpired() {
                     this.saveStatus = 'error';
                     Swal.fire({
                         icon: 'warning',
@@ -308,6 +307,7 @@
                         answers: this.answers, 
                         marked: this.markedQuestions, 
                         unsaved: Array.from(this.unsavedQuestions), 
+                        violationCount: this.violationCount, // DITAMBAHKAN: Simpan jumlah pelanggaran
                         timestamp: new Date().getTime()
                     })); 
                 },
@@ -319,6 +319,7 @@
                         this.answers = { ...data.answers, ...this.answers }; 
                         this.markedQuestions = data.marked || {}; 
                         if(data.unsaved) data.unsaved.forEach(id => this.unsavedQuestions.add(id)); 
+                        if(data.violationCount !== undefined) this.violationCount = data.violationCount; // DITAMBAHKAN: Muat ulang jumlah pelanggaran
                         this.updateProgress();
                     }
                 },
@@ -349,7 +350,7 @@
                 },
 
                 // --- KEAMANAN & TIMER ---
-                initSecurity() {
+                 initSecurity() {
                     window.addEventListener('beforeunload', (e) => {
                         if (this.saveStatus !== 'finished') { e.preventDefault(); e.returnValue = ''; }
                     });
@@ -377,9 +378,10 @@
                     });
                 },
 
-                triggerViolation() {
+                 triggerViolation() {
                     if (this.showSecurityOverlay || this.timeLeft <= 0) return; 
                     this.violationCount++; 
+                    try { this.saveToLocal(); } catch(e){} // DITAMBAHKAN: Simpan state langsung saat terjadi pelanggaran
                     this.showSecurityOverlay = true;
                     
                     if(this.violationCount >= this.maxViolations) { 
