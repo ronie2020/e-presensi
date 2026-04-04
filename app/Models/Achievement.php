@@ -10,13 +10,14 @@ class Achievement extends Model
     use HasFactory;
 
     protected $fillable = [
-         'type',
+        'type',
         'student_id',
         'name_manual',
         'title',
         'level',
         'date',
         'description',
+        'status', // TAMBAHAN: Mendaftarkan status
         'photo_path',
         'video_link',
         'certificate_path'

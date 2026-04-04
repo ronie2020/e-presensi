@@ -311,7 +311,9 @@ class StudentPortalController extends Controller
                             'title' => $item->title,
                             'level' => $item->level,
                             'photo' => $item->photo_path,
-                            'recorder' => (object) ['name' => 'Panitia/Sekolah'],
+                            'certificate_path' => $item->certificate_path, // TAMBAHAN CERTIFICATE
+                            'status' => $item->status, // TAMBAHAN STATUS
+                            'recorder' => (object) ['name' => 'Laporan Prestasi'],
                             'disciplineType' => (object) ['name' => 'Kejuaraan / Prestasi', 'point_value' => 0]
                         ];
                     });
@@ -583,7 +585,54 @@ class StudentPortalController extends Controller
             return back()->with('error', 'Gagal menyimpan jurnal. Coba lagi.');
         }
     }
-        
+
+    // --- TAMBAHAN BARU: FUNGSI LAPOR PRESTASI MANDIRI ---
+    public function storeStudentAchievement(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'title' => 'required|string|max:255',
+            'level' => 'required|string',
+            'date' => 'required|date',
+            'description' => 'nullable|string',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // Maks 5MB
+            'certificate' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:5120', // Sertifikat PDF/Gambar Maks 5MB
+        ]);
+
+        // Pastikan hanya siswa yang login yang bisa melapor atas namanya sendiri
+        if (Auth::guard('student')->id() != $request->student_id) {
+            return back()->with('error', 'Akses tidak diizinkan.');
+        }
+
+        try {
+            $data = [
+                'type' => 'Siswa',
+                'student_id' => $request->student_id,
+                'title' => $request->title,
+                'level' => $request->level,
+                'date' => $request->date,
+                'description' => $request->description,
+                'status' => 'pending', // TAMBAHAN: Laporan siswa selalu berstatus pending dulu
+            ];
+
+            // Upload Foto Dokumentasi
+            if ($request->hasFile('photo')) {
+                $data['photo_path'] = $request->file('photo')->store('achievements', 'public');
+            }
+
+            // Upload File Sertifikat
+            if ($request->hasFile('certificate')) {
+                $data['certificate_path'] = $request->file('certificate')->store('achievement_certificates', 'public');
+            }
+
+            Achievement::create($data);
+
+            return back()->with('success', 'Prestasi berhasil dilaporkan! Data telah disimpan dan sedang menunggu verifikasi admin.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal melaporkan prestasi. Silakan coba beberapa saat lagi.');
+        }
+    }
+
     public function printCard($id)
     {
         if (!Auth::guard('student')->check() || Auth::guard('student')->id() != $id) {

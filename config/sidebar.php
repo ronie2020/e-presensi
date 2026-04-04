@@ -318,8 +318,8 @@ return [
             ],
             [
                 'name' => 'Galeri Aktifitas',
-                'route' => 'activities.index',
-                'active_check' => 'activities.*',
+                'route' => 'school-activities.index',
+                'active_check' => 'school-activities.*',
                 'icon' => 'ph-image',
                 'roles' => ['Admin', 'TU']
             ],
@@ -336,7 +336,7 @@ return [
                 'name' => 'Sirkulasi',
                 'route' => 'library.circulation.index',
                 'icon' => 'ph-arrows-left-right',
-                'roles' => ['Admin', 'TU'] // Atau petugas perpus jika ada
+                'roles' => ['Admin', 'TU'] 
             ],
             [
                 'name' => 'Data Buku',

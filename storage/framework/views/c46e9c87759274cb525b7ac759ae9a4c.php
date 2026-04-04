@@ -1,9 +1,18 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         
-        {{-- HERO SECTION --}}
+        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
             <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
@@ -28,7 +37,7 @@
                                 <i class="ph-duotone ph-medal text-lg"></i>
                                 <span class="text-[10px] font-bold uppercase tracking-wider">Total Prestasi</span>
                             </div>
-                            <span class="block text-3xl font-black text-white tracking-tight">{{ $achievements->total() }}</span>
+                            <span class="block text-3xl font-black text-white tracking-tight"><?php echo e($achievements->total()); ?></span>
                         </div>
                     </div>
                 </div>
@@ -36,21 +45,21 @@
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            @if (session('success'))
+            <?php if(session('success')): ?>
                 <div x-data="{ show: true }" x-show="show" x-transition class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3">
                         <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
                             <i class="ph-bold ph-check-circle text-xl"></i>
                         </div>
-                        <span class="font-bold text-sm">{{ session('success') }}</span>
+                        <span class="font-bold text-sm"><?php echo e(session('success')); ?></span>
                     </div>
                     <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-1 rounded-md hover:bg-emerald-100 transition"><i class="ph-bold ph-x"></i></button>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 
-                {{-- KOLOM KIRI (1/3): FORM INPUT --}}
+                
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden sticky top-24 relative group hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
                         <div class="bg-gradient-to-r from-blue-900 to-blue-800 p-8 text-white relative overflow-hidden">
@@ -62,9 +71,9 @@
                         </div>
 
                         <div class="p-8 relative z-10">
-                            <form action="{{ route('achievements.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" 
-                                  x-data="{ type: '{{ old('type', 'Siswa') }}', imgPreview: null }">
-                                @csrf
+                            <form action="<?php echo e(route('achievements.store')); ?>" method="POST" enctype="multipart/form-data" class="space-y-6" 
+                                  x-data="{ type: '<?php echo e(old('type', 'Siswa')); ?>', imgPreview: null }">
+                                <?php echo csrf_field(); ?>
                                 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Pemenang</label>
@@ -82,33 +91,54 @@
                                         <i class="ph-bold ph-student absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                                         <select name="student_id" class="w-full pl-11 pr-10 py-3 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 transition-colors appearance-none cursor-pointer">
                                             <option value="">-- Pilih Siswa --</option>
-                                            @foreach($students as $student)
-                                                <option value="{{ $student->id }}" {{ old('student_id') == $student->id ? 'selected' : '' }}>
-                                                    {{ $student->name }} ({{ $student->schoolClass->name ?? '-' }})
+                                            <?php $__currentLoopData = $students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($student->id); ?>" <?php echo e(old('student_id') == $student->id ? 'selected' : ''); ?>>
+                                                    <?php echo e($student->name); ?> (<?php echo e($student->schoolClass->name ?? '-'); ?>)
                                                 </option>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                         <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                                     </div>
-                                    @error('student_id') <p class="text-xs text-rose-500 mt-1 font-bold">{{ $message }}</p> @enderror
+                                    <?php $__errorArgs = ['student_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <p class="text-xs text-rose-500 mt-1 font-bold"><?php echo e($message); ?></p> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
                                 
                                 <div x-show="type !== 'Siswa'" x-transition style="display: none;">
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Pemenang / Tim</label>
                                     <div class="relative">
                                         <i class="ph-bold ph-users absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                        <input type="text" name="name_manual" value="{{ old('name_manual') }}" placeholder="Contoh: Tim Futsal Guru" class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 transition-colors">
+                                        <input type="text" name="name_manual" value="<?php echo e(old('name_manual')); ?>" placeholder="Contoh: Tim Futsal Guru" class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 transition-colors">
                                     </div>
-                                    @error('name_manual') <p class="text-xs text-rose-500 mt-1 font-bold">{{ $message }}</p> @enderror
+                                    <?php $__errorArgs = ['name_manual'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <p class="text-xs text-rose-500 mt-1 font-bold"><?php echo e($message); ?></p> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
 
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Judul Prestasi</label>
                                     <div class="relative">
                                         <i class="ph-bold ph-medal absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                        <input type="text" name="title" value="{{ old('title') }}" required placeholder="Juara 1 Lomba..." class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 transition-colors">
+                                        <input type="text" name="title" value="<?php echo e(old('title')); ?>" required placeholder="Juara 1 Lomba..." class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 transition-colors">
                                     </div>
-                                    @error('title') <p class="text-xs text-rose-500 mt-1 font-bold">{{ $message }}</p> @enderror
+                                    <?php $__errorArgs = ['title'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <p class="text-xs text-rose-500 mt-1 font-bold"><?php echo e($message); ?></p> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-4">
@@ -116,16 +146,16 @@
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tingkat</label>
                                         <div class="relative">
                                             <select name="level" class="w-full pl-3 pr-8 py-3 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 text-xs appearance-none">
-                                                @foreach(['Sekolah', 'Kecamatan', 'Kabupaten', 'Provinsi', 'Nasional', 'Internasional'] as $lvl)
-                                                    <option value="{{ $lvl }}" {{ old('level') == $lvl ? 'selected' : '' }}>{{ $lvl }}</option>
-                                                @endforeach
+                                                <?php $__currentLoopData = ['Sekolah', 'Kecamatan', 'Kabupaten', 'Provinsi', 'Nasional', 'Internasional']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lvl): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <option value="<?php echo e($lvl); ?>" <?php echo e(old('level') == $lvl ? 'selected' : ''); ?>><?php echo e($lvl); ?></option>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </select>
                                             <i class="ph-bold ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                                         </div>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tanggal</label>
-                                        <input type="date" name="date" value="{{ old('date', date('Y-m-d')) }}" class="w-full px-3 py-3 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 text-xs">
+                                        <input type="date" name="date" value="<?php echo e(old('date', date('Y-m-d'))); ?>" class="w-full px-3 py-3 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 text-xs">
                                     </div>
                                 </div>
 
@@ -150,7 +180,7 @@
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Link Video (Opsional)</label>
                                         <div class="relative">
                                             <i class="ph-bold ph-youtube-logo absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                            <input type="url" name="video_link" value="{{ old('video_link') }}" placeholder="https://..." class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 transition-colors text-xs">
+                                            <input type="url" name="video_link" value="<?php echo e(old('video_link')); ?>" placeholder="https://..." class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 transition-colors text-xs">
                                         </div>
                                     </div>
                                     <div>
@@ -170,7 +200,7 @@
                     </div>
                 </div>
 
-                {{-- KOLOM KANAN (2/3): DAFTAR PRESTASI --}}
+                
                 <div class="lg:col-span-2">
                     <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full min-h-[600px]">
                         
@@ -180,16 +210,16 @@
                                     <i class="ph-fill ph-list-dashes text-blue-900"></i> Riwayat Prestasi
                                 </h2>
                                 <span class="bg-white border border-slate-200 text-[10px] font-black px-3 py-1.5 rounded-xl text-slate-500 shadow-sm">
-                                    {{ $achievements->count() }} Data
+                                    <?php echo e($achievements->count()); ?> Data
                                 </span>
                             </div>
 
                             <div class="flex gap-3 w-full sm:w-auto">
                                 <form method="GET" class="relative flex-1 sm:w-64 group">
                                     <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"></i>
-                                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari prestasi..." class="w-full pl-11 pr-4 py-2.5 rounded-xl border-slate-200 bg-white focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm font-bold transition-colors shadow-sm">
+                                    <input type="text" name="search" value="<?php echo e(request('search')); ?>" placeholder="Cari prestasi..." class="w-full pl-11 pr-4 py-2.5 rounded-xl border-slate-200 bg-white focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm font-bold transition-colors shadow-sm">
                                 </form>
-                                <a href="{{ route('achievements.export', request()->all()) }}" target="_blank" class="px-4 py-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white border border-emerald-200 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-2">
+                                <a href="<?php echo e(route('achievements.export', request()->all())); ?>" target="_blank" class="px-4 py-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white border border-emerald-200 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-2">
                                     <i class="ph-bold ph-microsoft-excel-logo text-lg"></i>
                                     <span class="hidden sm:inline">Export</span>
                                 </a>
@@ -208,83 +238,86 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-50">
-                                    @forelse($achievements as $item)
-                                        <tr class="group hover:bg-blue-50/30 transition-colors duration-200 {{ $item->status === 'pending' ? 'bg-amber-50/20' : ($item->status === 'rejected' ? 'bg-rose-50/20 opacity-70' : '') }}">
+                                    <?php $__empty_1 = true; $__currentLoopData = $achievements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                        <tr class="group hover:bg-blue-50/30 transition-colors duration-200 <?php echo e($item->status === 'pending' ? 'bg-amber-50/20' : ($item->status === 'rejected' ? 'bg-rose-50/20 opacity-70' : '')); ?>">
                                             <td class="px-6 py-5">
                                                 <div class="flex items-center gap-3">
                                                     <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 shadow-sm border border-white
-                                                        {{ $item->type == 'Siswa' ? 'bg-blue-100 text-blue-600' : ($item->type == 'Guru' ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600') }}">
-                                                        @if($item->type == 'Siswa')
-                                                            {{ substr($item->achiever_name, 0, 2) }}
-                                                        @elseif($item->type == 'Guru')
+                                                        <?php echo e($item->type == 'Siswa' ? 'bg-blue-100 text-blue-600' : ($item->type == 'Guru' ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600')); ?>">
+                                                        <?php if($item->type == 'Siswa'): ?>
+                                                            <?php echo e(substr($item->achiever_name, 0, 2)); ?>
+
+                                                        <?php elseif($item->type == 'Guru'): ?>
                                                             <i class="ph-bold ph-chalkboard-teacher text-lg"></i>
-                                                        @else
+                                                        <?php else: ?>
                                                             <i class="ph-bold ph-buildings text-lg"></i>
-                                                        @endif
+                                                        <?php endif; ?>
                                                     </div>
                                                     <div>
-                                                        <div class="font-black text-slate-800 text-sm line-clamp-1 group-hover:text-blue-700 transition-colors">{{ $item->achiever_name }}</div>
+                                                        <div class="font-black text-slate-800 text-sm line-clamp-1 group-hover:text-blue-700 transition-colors"><?php echo e($item->achiever_name); ?></div>
                                                         <span class="inline-flex mt-0.5 px-2 py-0.5 rounded text-[10px] font-bold border
-                                                            {{ $item->type == 'Siswa' ? 'bg-blue-50 text-blue-600 border-blue-100' : ($item->type == 'Guru' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-orange-50 text-orange-600 border-orange-100') }}">
-                                                            {{ strtoupper($item->type) }}
+                                                            <?php echo e($item->type == 'Siswa' ? 'bg-blue-50 text-blue-600 border-blue-100' : ($item->type == 'Guru' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-orange-50 text-orange-600 border-orange-100')); ?>">
+                                                            <?php echo e(strtoupper($item->type)); ?>
+
                                                         </span>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-5">
-                                                <div class="font-bold text-slate-700 text-sm mb-1 line-clamp-2 leading-snug">{{ $item->title }}</div>
-                                                <div class="text-xs font-bold text-slate-400 mb-1.5"><i class="ph-bold ph-calendar-blank"></i> {{ \Carbon\Carbon::parse($item->date)->format('d M Y') }}</div>
+                                                <div class="font-bold text-slate-700 text-sm mb-1 line-clamp-2 leading-snug"><?php echo e($item->title); ?></div>
+                                                <div class="text-xs font-bold text-slate-400 mb-1.5"><i class="ph-bold ph-calendar-blank"></i> <?php echo e(\Carbon\Carbon::parse($item->date)->format('d M Y')); ?></div>
                                                 
                                                 <div class="flex flex-wrap items-center gap-3 mt-1.5">
-                                                    @if($item->photo_path)
-                                                        <a href="{{ asset('storage/' . $item->photo_path) }}" target="_blank" class="flex items-center gap-1 text-[10px] font-bold text-amber-500 hover:text-amber-700 hover:underline transition">
+                                                    <?php if($item->photo_path): ?>
+                                                        <a href="<?php echo e(asset('storage/' . $item->photo_path)); ?>" target="_blank" class="flex items-center gap-1 text-[10px] font-bold text-amber-500 hover:text-amber-700 hover:underline transition">
                                                             <i class="ph-fill ph-image text-sm"></i> Foto
                                                         </a>
-                                                    @endif
-                                                    @if($item->video_link)
-                                                        <a href="{{ $item->video_link }}" target="_blank" class="flex items-center gap-1 text-[10px] font-bold text-rose-500 hover:text-rose-700 hover:underline transition">
+                                                    <?php endif; ?>
+                                                    <?php if($item->video_link): ?>
+                                                        <a href="<?php echo e($item->video_link); ?>" target="_blank" class="flex items-center gap-1 text-[10px] font-bold text-rose-500 hover:text-rose-700 hover:underline transition">
                                                             <i class="ph-fill ph-youtube-logo text-sm"></i> Video
                                                         </a>
-                                                    @endif
-                                                    @if(!empty($item->certificate_path))
-                                                        <a href="{{ asset('storage/' . $item->certificate_path) }}" target="_blank" class="flex items-center gap-1 text-[10px] font-bold text-blue-500 hover:text-blue-700 hover:underline transition">
+                                                    <?php endif; ?>
+                                                    <?php if(!empty($item->certificate_path)): ?>
+                                                        <a href="<?php echo e(asset('storage/' . $item->certificate_path)); ?>" target="_blank" class="flex items-center gap-1 text-[10px] font-bold text-blue-500 hover:text-blue-700 hover:underline transition">
                                                             <i class="ph-fill ph-certificate text-sm"></i> Sertifikat
                                                         </a>
-                                                    @endif
+                                                    <?php endif; ?>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-5">
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black bg-slate-100 text-slate-600 border border-slate-200 uppercase tracking-wide">
-                                                    <i class="ph-fill ph-map-pin text-slate-400"></i> {{ $item->level }}
+                                                    <i class="ph-fill ph-map-pin text-slate-400"></i> <?php echo e($item->level); ?>
+
                                                 </span>
                                             </td>
 
-                                            {{-- KOTAK STATUS --}}
+                                            
                                             <td class="px-6 py-5 text-center">
-                                                @if($item->status === 'pending')
+                                                <?php if($item->status === 'pending'): ?>
                                                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black bg-amber-50 text-amber-600 border border-amber-200 uppercase tracking-wide animate-pulse">
                                                         <i class="ph-fill ph-clock text-amber-500"></i> Pending
                                                     </span>
-                                                @elseif($item->status === 'rejected')
+                                                <?php elseif($item->status === 'rejected'): ?>
                                                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black bg-rose-50 text-rose-600 border border-rose-200 uppercase tracking-wide">
                                                         <i class="ph-fill ph-x-circle text-rose-500"></i> Ditolak
                                                     </span>
-                                                @else
+                                                <?php else: ?>
                                                     <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black bg-emerald-50 text-emerald-600 border border-emerald-200 uppercase tracking-wide">
                                                         <i class="ph-fill ph-check-circle text-emerald-500"></i> Valid
                                                     </span>
-                                                @endif
+                                                <?php endif; ?>
                                             </td>
 
                                             <td class="px-6 py-5 text-right">
-                                                {{-- KOTAK AKSI (VERIFIKASI & HAPUS) --}}
-                                                <div class="flex justify-end gap-2 {{ $item->status === 'pending' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100' }} transition-opacity">
+                                                
+                                                <div class="flex justify-end gap-2 <?php echo e($item->status === 'pending' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'); ?> transition-opacity">
                                                     
-                                                    {{-- TOMBOL VERIFIKASI (MUNCUL JIKA STATUS PENDING) --}}
-                                                    @if($item->status === 'pending')
+                                                    
+                                                    <?php if($item->status === 'pending'): ?>
                                                         <!-- Tombol Setuju -->
-                                                        <form action="{{ route('achievements.verify', $item->id) }}" method="POST">
-                                                            @csrf @method('PATCH')
+                                                        <form action="<?php echo e(route('achievements.verify', $item->id)); ?>" method="POST">
+                                                            <?php echo csrf_field(); ?> <?php echo method_field('PATCH'); ?>
                                                             <input type="hidden" name="status" value="approved">
                                                             <button type="submit" class="w-9 h-9 rounded-xl flex items-center justify-center bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all shadow-sm" title="Terima & Beri Poin Kebaikan">
                                                                 <i class="ph-bold ph-check text-lg"></i>
@@ -292,18 +325,18 @@
                                                         </form>
 
                                                         <!-- Tombol Tolak -->
-                                                        <form action="{{ route('achievements.verify', $item->id) }}" method="POST" onsubmit="return confirm('Tolak laporan prestasi siswa ini?');">
-                                                            @csrf @method('PATCH')
+                                                        <form action="<?php echo e(route('achievements.verify', $item->id)); ?>" method="POST" onsubmit="return confirm('Tolak laporan prestasi siswa ini?');">
+                                                            <?php echo csrf_field(); ?> <?php echo method_field('PATCH'); ?>
                                                             <input type="hidden" name="status" value="rejected">
                                                             <button type="submit" class="w-9 h-9 rounded-xl flex items-center justify-center bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm" title="Tolak Laporan">
                                                                 <i class="ph-bold ph-x text-lg"></i>
                                                             </button>
                                                         </form>
-                                                    @endif
+                                                    <?php endif; ?>
 
                                                     <!-- Tombol Hapus Biasa -->
-                                                    <form action="{{ route('achievements.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus data prestasi ini secara permanen?');">
-                                                        @csrf @method('DELETE')
+                                                    <form action="<?php echo e(route('achievements.destroy', $item->id)); ?>" method="POST" onsubmit="return confirm('Hapus data prestasi ini secara permanen?');">
+                                                        <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                                                         <button type="submit" class="w-9 h-9 rounded-xl flex items-center justify-center bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm" title="Hapus Data">
                                                             <i class="ph-bold ph-trash text-lg"></i>
                                                         </button>
@@ -311,7 +344,7 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                    @empty
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                         <tr>
                                             <td colspan="6" class="py-20 text-center">
                                                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-50 mb-4 shadow-sm border border-slate-100">
@@ -321,17 +354,27 @@
                                                 <p class="text-slate-400 text-sm mt-1">Silakan input prestasi pertama sekolah di formulir sebelah kiri.</p>
                                             </td>
                                         </tr>
-                                    @endforelse
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
                         
                         <div class="px-6 py-4 border-t border-slate-50 bg-slate-50/30">
-                            {{ $achievements->links() }}
+                            <?php echo e($achievements->links()); ?>
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/achievements/index.blade.php ENDPATH**/ ?>

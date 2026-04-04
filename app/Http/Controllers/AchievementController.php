@@ -27,6 +27,8 @@ class AchievementController extends Controller
                 $q->where('title', 'like', '%'.$request->search.'%')
                   ->orWhere('name_manual', 'like', '%'.$request->search.'%');
             })
+            // MENGURUTKAN STATUS PENDING AGAR BERADA PALING ATAS
+            ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected') ASC")
             ->orderBy('date', 'desc')
             ->paginate(10)
             ->withQueryString(); 
@@ -34,7 +36,7 @@ class AchievementController extends Controller
         return view('achievements.index', compact('students', 'achievements'));
     }
 
-     public function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'type' => 'required|in:Siswa,Guru,Sekolah',
@@ -43,7 +45,6 @@ class AchievementController extends Controller
             'date' => 'required|date',
             'photo' => 'nullable|image|max:2048', 
             'video_link' => 'nullable|url',
-            'certificate' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048', // Validasi sertifikat
         ]);
 
         $data = $request->except('photo');
@@ -65,11 +66,8 @@ class AchievementController extends Controller
             $data['photo_path'] = $request->file('photo')->store('achievements', 'public');
         }
 
-        // Upload Sertifikat
-        if ($request->hasFile('certificate')) {
-            $data['certificate_path'] = $request->file('certificate')->store('achievement_certificates', 'public');
-        }
-
+        // Prestasi yang diinput langsung oleh admin otomatis valid
+        $data['status'] = 'approved';
 
         // 1. Simpan Data Prestasi
         $achievement = Achievement::create($data);
@@ -82,15 +80,30 @@ class AchievementController extends Controller
         return redirect()->route('achievements.index')->with('success', 'Prestasi berhasil ditambahkan & Poin Kebaikan dicatat!');
     }
 
-   public function destroy(Achievement $achievement)
+    // FUNGSI VERIFIKASI (TERIMA / TOLAK LAPORAN SISWA)
+    public function verify(Request $request, $id)
+    {
+        $request->validate(['status' => 'required|in:approved,rejected']);
+
+        $achievement = Achievement::findOrFail($id);
+        $achievement->update(['status' => $request->status]);
+
+        // Kalau laporan disetujui (valid), barulah berikan poin prestasi ke siswa
+        if ($request->status === 'approved' && $achievement->type === 'Siswa') {
+            AddAchievementPointJob::dispatch($achievement);
+        }
+
+        $message = $request->status === 'approved' 
+            ? 'Laporan Prestasi disetujui dan poin siswa telah ditambahkan.' 
+            : 'Laporan Prestasi berhasil ditolak.';
+
+        return redirect()->back()->with('success', $message);
+    }
+
+    public function destroy(Achievement $achievement)
     {
         if ($achievement->photo_path && Storage::disk('public')->exists($achievement->photo_path)) {
             Storage::disk('public')->delete($achievement->photo_path);
-        }
-        
-        // Hapus file sertifikat jika ada
-        if ($achievement->certificate_path && Storage::disk('public')->exists($achievement->certificate_path)) {
-            Storage::disk('public')->delete($achievement->certificate_path);
         }
         
         $achievement->delete();
@@ -112,7 +125,8 @@ class AchievementController extends Controller
             });
         }
 
-        $achievements = $query->orderBy('date', 'desc')->get();
+        // Hanya export yang statusnya sudah valid (approved)
+        $achievements = $query->where('status', 'approved')->orderBy('date', 'desc')->get();
         
         // Generate PDF
         $pdf = Pdf::loadView('achievements.pdf_export', compact('achievements'));

@@ -194,7 +194,8 @@ class LandingPageController extends Controller
                     }
                 })->latest()->take(8)->get(),
                 'announcements' => Announcement::orderBy('created_at', 'desc')->limit(3)->get(),
-                'achievements' => Achievement::with('student')->orderBy('date', 'desc')->limit(6)->get(),
+                // PERBAIKAN: Tambahkan where('status', 'approved')
+                'achievements' => Achievement::with('student')->where('status', 'approved')->orderBy('date', 'desc')->limit(6)->get(),
                 'activities' => SchoolActivity::latest()->take(3)->get(),
                 'agendas' => Agenda::where('event_date', '>=', now()->subDays(1))->orderBy('event_date', 'asc')->limit(4)->get(),
                 'guestbooks' => GuestBook::latest()->take(3)->get(),
@@ -263,9 +264,11 @@ class LandingPageController extends Controller
         return view('activities', compact('activities'));
     }
 
+    // PERBAIKAN: Fungsi Achievements 
     public function achievements(Request $request)
     {
-        $query = Achievement::with('student')->orderBy('date', 'desc');
+        // Tambahkan where('status', 'approved') sebagai default filter
+        $query = Achievement::with('student')->where('status', 'approved')->orderBy('date', 'desc');
 
         if ($request->has('level') && $request->level != 'Semua') {
             $query->where('level', $request->level);
@@ -276,7 +279,9 @@ class LandingPageController extends Controller
         }
 
         $achievements = $query->paginate(12);
-        $levels = Achievement::select('level')->distinct()->pluck('level');
+        
+        // Pilihan filter level juga hanya mengambil yang approved
+        $levels = Achievement::where('status', 'approved')->select('level')->distinct()->pluck('level');
 
         return view('achievements', compact('achievements', 'levels'));
     }

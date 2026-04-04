@@ -198,6 +198,9 @@ Route::middleware(['auth:student'])->group(function () {
         Route::post('/', [BkStudentController::class, 'store'])->name('store'); 
         Route::get('/{id}', [BkStudentController::class, 'show'])->name('show'); 
     });
+
+    // --- 8. LAPOR PRESTASI MANDIRI ---
+    Route::post('/student/achievements', [StudentPortalController::class, 'storeStudentAchievement'])->name('student.achievements.store');
 });
 
 // =========================================================================
@@ -320,9 +323,12 @@ Route::middleware('auth')->group(function () {
     Route::post('users/import', [UserController::class, 'import'])->name('users.import');
     Route::resource('users', UserController::class);
     Route::resource('subjects', SubjectController::class)->only(['index', 'store', 'update', 'destroy']);
-    Route::get('/achievements/export', [AchievementController::class, 'export'])->name('achievements.export');
     
-    // Resource Admin 
+    // =========================================================================
+    // RESOURCE ADMIN (PRESTASI & AKTIVITAS)
+    // =========================================================================
+    Route::get('/achievements/export', [AchievementController::class, 'export'])->name('achievements.export');
+    Route::patch('/achievements/{id}/verify', [AchievementController::class, 'verify'])->name('achievements.verify'); // TAMBAHAN: Route Verifikasi Laporan Siswa
     Route::resource('achievements', AchievementController::class);
     Route::resource('school-activities', SchoolActivityController::class);
 
@@ -544,7 +550,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{id}', [AcademicCalendarController::class, 'destroy'])->name('destroy');
     });
 
-    Route::resource('activities', SchoolActivityController::class)->except(['show']);
     Route::get('/settings/academic', [AcademicYearController::class, 'index'])->name('settings.academic.index');
     Route::post('/settings/academic', [AcademicYearController::class, 'store'])->name('settings.academic.store');
     Route::patch('/settings/academic/{id}/activate', [AcademicYearController::class, 'activate'])->name('settings.academic.activate');
