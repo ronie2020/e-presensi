@@ -464,8 +464,8 @@
                         <div class="flex flex-col sm:flex-row justify-between items-center px-2 gap-4">
 
                             {{-- JUMLAH SOAL --}}
-                            <span class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm" title="Jumlah Total Soal">
-                              Soal {{ $bank->questions->count() }}
+                            <span class="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5" title="Total Nilai">
+                                <i class=" ph-fill ph-book-open-text text-base"></i> Soal {{ $bank->questions->count() }}
                             </span>
 
                             {{-- PERBAIKAN: TOTAL POIN SEKARANG AKAN TERLIHAT --}}
