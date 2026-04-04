@@ -1,9 +1,9 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-500" x-data="{ showAddModal: false, isSubmitting: false, imgPreview: null }">
     
-    {{-- KOLOM KIRI: SUMMARY & STATISTIK (Sticky) --}}
+    
     <div class="lg:col-span-1">
         <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-emerald-100 sticky top-24">
-            {{-- Header Card --}}
+            
             <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-700 p-6 text-white shadow-lg shadow-emerald-500/20">
                 <div class="absolute top-0 right-0 p-4 opacity-10">
                     <i class="ph-fill ph-trophy text-8xl"></i>
@@ -11,14 +11,14 @@
                 
                 <div class="relative z-10">
                     <p class="text-xs font-bold uppercase tracking-widest text-emerald-100 mb-1">Total Poin Kebaikan</p>
-                    <h2 class="text-5xl font-black tracking-tight">+{{ $total_merit_points ?? 0 }}</h2>
+                    <h2 class="text-5xl font-black tracking-tight">+<?php echo e($total_merit_points ?? 0); ?></h2>
                     <div class="mt-4 flex items-center gap-2 text-xs font-medium bg-white/20 w-fit px-3 py-1.5 rounded-lg backdrop-blur-sm">
                         <i class="ph-bold ph-trend-up"></i> Terus Meningkat
                     </div>
                 </div>
             </div>
 
-            {{-- Quote Card --}}
+            
             <div class="mt-6 bg-slate-50 p-6 rounded-3xl border border-slate-100 relative">
                 <i class="ph-fill ph-quotes text-slate-200 text-4xl absolute top-4 left-4"></i>
                 <p class="text-sm text-slate-600 italic text-center relative z-10 leading-relaxed pt-2">
@@ -33,10 +33,10 @@
         </div>
     </div>
 
-    {{-- KOLOM KANAN: TIMELINE (Dual Mode: Prestasi & Kebaikan) --}}
+    
     <div class="lg:col-span-2 space-y-6">
         
-        {{-- Header Section DENGAN TOMBOL LAPOR PRESTASI --}}
+        
         <div class="flex flex-col sm:flex-row items-center justify-between bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm gap-4">
             <div class="w-full sm:w-auto text-center sm:text-left">
                 <h3 class="text-xl font-black text-slate-800 flex items-center justify-center sm:justify-start gap-2">
@@ -45,41 +45,41 @@
                 <p class="text-slate-400 text-sm mt-1">Riwayat pencapaian dan perilaku positifmu.</p>
             </div>
             <div class="flex items-center gap-3 w-full sm:w-auto">
-                {{-- Tombol Lapor --}}
+                
                 <button @click="showAddModal = true" class="flex-1 sm:flex-none justify-center inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl text-sm font-bold hover:from-emerald-600 hover:to-teal-700 transition-all shadow-lg shadow-emerald-500/20 active:scale-95">
                     <i class="ph-bold ph-plus-circle text-lg"></i> Lapor Prestasi
                 </button>
                 
                 <div class="hidden sm:block">
                     <span class="px-4 py-2.5 bg-slate-50 rounded-xl text-xs font-bold text-slate-500 border border-slate-200">
-                        Total: {{ isset($achievements) ? count($achievements) : 0 }} Catatan
+                        Total: <?php echo e(isset($achievements) ? count($achievements) : 0); ?> Catatan
                     </span>
                 </div>
             </div>
         </div>
 
-        {{-- Timeline Content --}}
-        @if(isset($achievements) && count($achievements) > 0)
+        
+        <?php if(isset($achievements) && count($achievements) > 0): ?>
             <div class="space-y-4">
-                @foreach($achievements as $record)
-                    @php
+                <?php $__currentLoopData = $achievements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $record): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
                         // Cek Tipe: Apakah Prestasi Besar (Lomba) atau Poin Harian
                         $isMajorAchievement = isset($record->type) && $record->type === 'achievement_record';
                         
                         // Fallback Status jika kolom status belum ada di database, default ke approved agar data lama aman
                         $status = $record->status ?? 'approved'; 
-                    @endphp
+                    ?>
 
-                    @if($isMajorAchievement)
-                        {{-- 1. KARTU PRESTASI BESAR (GOLD STYLE) --}}
+                    <?php if($isMajorAchievement): ?>
+                        
                         <div class="relative group">
-                            {{-- Efek Opacity jika status ditolak --}}
-                            <div class="absolute inset-0 bg-gradient-to-r from-yellow-100 to-amber-50 rounded-3xl transform translate-y-2 translate-x-2 transition-transform group-hover:translate-x-3 group-hover:translate-y-3 {{ $status === 'rejected' ? 'opacity-50' : '' }}"></div>
                             
-                            <div class="relative bg-white p-6 rounded-3xl border {{ $status === 'rejected' ? 'border-rose-100 bg-rose-50/30' : 'border-amber-100' }} shadow-sm flex flex-col sm:flex-row gap-5 overflow-hidden">
-                                {{-- Icon/Image --}}
+                            <div class="absolute inset-0 bg-gradient-to-r from-yellow-100 to-amber-50 rounded-3xl transform translate-y-2 translate-x-2 transition-transform group-hover:translate-x-3 group-hover:translate-y-3 <?php echo e($status === 'rejected' ? 'opacity-50' : ''); ?>"></div>
+                            
+                            <div class="relative bg-white p-6 rounded-3xl border <?php echo e($status === 'rejected' ? 'border-rose-100 bg-rose-50/30' : 'border-amber-100'); ?> shadow-sm flex flex-col sm:flex-row gap-5 overflow-hidden">
+                                
                                 <div class="shrink-0">
-                                    <div class="w-16 h-16 rounded-2xl {{ $status === 'rejected' ? 'bg-slate-300' : 'bg-gradient-to-br from-yellow-400 to-amber-600 shadow-lg shadow-amber-200' }} flex items-center justify-center text-white">
+                                    <div class="w-16 h-16 rounded-2xl <?php echo e($status === 'rejected' ? 'bg-slate-300' : 'bg-gradient-to-br from-yellow-400 to-amber-600 shadow-lg shadow-amber-200'); ?> flex items-center justify-center text-white">
                                         <i class="ph-duotone ph-trophy text-3xl"></i>
                                     </div>
                                 </div>
@@ -89,59 +89,62 @@
                                         <div>
                                             <div class="flex items-center gap-2 mb-1">
                                                 <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 text-[10px] font-black uppercase tracking-wider border border-amber-200">
-                                                    {{ $record->level ?? 'PENGHARGAAN' }}
+                                                    <?php echo e($record->level ?? 'PENGHARGAAN'); ?>
+
                                                 </span>
                                                 <span class="text-xs text-slate-400 font-medium">
-                                                    {{ \Carbon\Carbon::parse($record->date)->translatedFormat('d F Y') }}
+                                                    <?php echo e(\Carbon\Carbon::parse($record->date)->translatedFormat('d F Y')); ?>
+
                                                 </span>
                                             </div>
-                                            <h4 class="text-lg font-black {{ $status === 'rejected' ? 'text-slate-500 line-through' : 'text-slate-800 group-hover:text-amber-600' }} leading-snug transition-colors">
-                                                {{ $record->title }}
+                                            <h4 class="text-lg font-black <?php echo e($status === 'rejected' ? 'text-slate-500 line-through' : 'text-slate-800 group-hover:text-amber-600'); ?> leading-snug transition-colors">
+                                                <?php echo e($record->title); ?>
+
                                             </h4>
                                         </div>
                                     </div>
                                     
-                                    @if($record->notes)
-                                        <p class="text-sm text-slate-600 mt-2 line-clamp-2">{{ $record->notes }}</p>
-                                    @endif
+                                    <?php if($record->notes): ?>
+                                        <p class="text-sm text-slate-600 mt-2 line-clamp-2"><?php echo e($record->notes); ?></p>
+                                    <?php endif; ?>
 
-                                    {{-- Actions (Foto & Sertifikat & STATUS) --}}
+                                    
                                     <div class="mt-4 flex flex-wrap items-center gap-2">
-                                        @if(!empty($record->photo))
-                                            <a href="{{ asset('storage/' . $record->photo) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-800 text-[10px] font-bold rounded-lg transition-colors border border-amber-200">
+                                        <?php if(!empty($record->photo)): ?>
+                                            <a href="<?php echo e(asset('storage/' . $record->photo)); ?>" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:text-amber-800 text-[10px] font-bold rounded-lg transition-colors border border-amber-200">
                                                 <i class="ph-bold ph-image text-sm"></i> Foto Dokumentasi
                                             </a>
-                                        @endif
+                                        <?php endif; ?>
                                         
-                                        @if(!empty($record->certificate_path))
-                                            <a href="{{ asset('storage/' . $record->certificate_path) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 text-[10px] font-bold rounded-lg transition-colors border border-blue-200">
+                                        <?php if(!empty($record->certificate_path)): ?>
+                                            <a href="<?php echo e(asset('storage/' . $record->certificate_path)); ?>" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:text-blue-800 text-[10px] font-bold rounded-lg transition-colors border border-blue-200">
                                                 <i class="ph-bold ph-certificate text-sm"></i> Sertifikat Asli
                                             </a>
-                                        @endif
+                                        <?php endif; ?>
 
-                                        {{-- STATUS VALIDASI DINAMIS --}}
-                                        @if($status === 'approved')
+                                        
+                                        <?php if($status === 'approved'): ?>
                                             <div class="flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg ml-auto shadow-sm">
                                                 <i class="ph-fill ph-check-circle"></i> Divalidasi
                                             </div>
-                                        @elseif($status === 'pending')
+                                        <?php elseif($status === 'pending'): ?>
                                             <div class="flex items-center gap-1.5 text-[10px] font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg ml-auto shadow-sm animate-pulse">
                                                 <i class="ph-fill ph-clock"></i> Menunggu Verifikasi
                                             </div>
-                                        @elseif($status === 'rejected')
+                                        <?php elseif($status === 'rejected'): ?>
                                             <div class="flex items-center gap-1.5 text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-lg ml-auto shadow-sm">
                                                 <i class="ph-fill ph-x-circle"></i> Laporan Ditolak
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
 
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    @else
-                        {{-- 2. KARTU POIN HARIAN (SIMPLE CLEAN STYLE) --}}
+                    <?php else: ?>
+                        
                         <div class="flex gap-4 group">
-                            {{-- Timeline Connector --}}
+                            
                             <div class="flex flex-col items-center">
                                 <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100 shrink-0 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
                                     <i class="ph-bold ph-plus"></i>
@@ -154,32 +157,35 @@
                                     <div class="flex justify-between items-start">
                                         <div>
                                             <h5 class="font-bold text-slate-800 text-sm">
-                                                {{ $record->disciplineType->name ?? 'Kebaikan Harian' }}
+                                                <?php echo e($record->disciplineType->name ?? 'Kebaikan Harian'); ?>
+
                                             </h5>
                                             <p class="text-xs text-slate-400 mt-0.5">
-                                                {{ \Carbon\Carbon::parse($record->date)->translatedFormat('l, d F Y') }}
+                                                <?php echo e(\Carbon\Carbon::parse($record->date)->translatedFormat('l, d F Y')); ?>
+
                                             </p>
                                         </div>
-                                        @if(isset($record->disciplineType->point_value) && $record->disciplineType->point_value > 0)
+                                        <?php if(isset($record->disciplineType->point_value) && $record->disciplineType->point_value > 0): ?>
                                             <span class="text-emerald-600 font-black text-sm bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100">
-                                                +{{ $record->disciplineType->point_value }}
+                                                +<?php echo e($record->disciplineType->point_value); ?>
+
                                             </span>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                     
-                                    @if($record->notes)
+                                    <?php if($record->notes): ?>
                                         <div class="mt-2 text-xs text-slate-600 bg-slate-50 p-2 rounded-lg italic">
-                                            "{{ $record->notes }}"
+                                            "<?php echo e($record->notes); ?>"
                                         </div>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
-                    @endif
-                @endforeach
+                    <?php endif; ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
-        @else
-            {{-- Empty State --}}
+        <?php else: ?>
+            
             <div class="bg-white rounded-[2.5rem] p-12 text-center border-2 border-dashed border-slate-200">
                 <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce-subtle">
                     <i class="ph-duotone ph-medal text-5xl text-slate-300"></i>
@@ -189,10 +195,10 @@
                     Setiap langkah kecil menuju kebaikan adalah prestasi. Ayo mulai kumpulkan poin kebaikanmu!
                 </p>
             </div>
-        @endif
+        <?php endif; ?>
     </div>
 
-    {{-- MODAL FORM LAPOR PRESTASI (POP-UP) - DIPERBAIKI --}}
+    
     <div x-show="showAddModal" x-cloak class="fixed inset-0 z-[9999] overflow-y-auto" style="display: none;">
         
         <!-- Backdrop -->
@@ -218,11 +224,11 @@
                 </div>
                 
                 <!-- Form Container -->
-                <form action="{{ route('student.achievements.store') ?? '#' }}" method="POST" enctype="multipart/form-data" class="flex flex-col flex-1 overflow-hidden" @submit="isSubmitting = true">
-                    @csrf
+                <form action="<?php echo e(route('student.achievements.store') ?? '#'); ?>" method="POST" enctype="multipart/form-data" class="flex flex-col flex-1 overflow-hidden" @submit="isSubmitting = true">
+                    <?php echo csrf_field(); ?>
                     
-                    {{-- Input Hidden ID Siswa yang login --}}
-                    <input type="hidden" name="student_id" value="{{ $student->id ?? '' }}">
+                    
+                    <input type="hidden" name="student_id" value="<?php echo e($student->id ?? ''); ?>">
                     
                     <!-- Body Modal (Area yang bisa di-scroll) -->
                     <div class="flex-1 overflow-y-auto p-6 space-y-5 custom-scrollbar">
@@ -292,4 +298,4 @@
             </div>
         </div>
     </div>
-</div>
+</div><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/students/portal/partials/tab-prestasi.blade.php ENDPATH**/ ?>
