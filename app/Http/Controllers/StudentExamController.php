@@ -28,48 +28,79 @@ class StudentExamController extends Controller
         return (bool) preg_match($pattern, trim($className));
     }
 
- public function index()
+    public function index()
     {
         $student = Auth::guard('student')->user();
         $className = $student->schoolClass->name ?? '';
 
-        // Mengambil semua ujian yang aktif
         $allExams = CbtExam::where('is_active', true)
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // FILTERING TEPAT MENGGUNAKAN HELPER
         $exams = $allExams->filter(function($exam) use ($className) {
             return $this->checkClassMatch($className, $exam->class_level);
         });
+
+        $now = Carbon::now(); // Ambil waktu sekarang
 
         foreach($exams as $exam) {
             $session = CbtStudentExam::where('student_id', $this->getStudentId())
                 ->where('cbt_exam_id', $exam->id)
                 ->first();
             
-            $exam->student_status = $session ? $session->status : 'open'; 
-            $exam->session_id = $session ? $session->id : null;
-            $exam->student_score = $session ? $session->total_score : 0; // data score siswa
-        }
+            // LOGIKA WAKTU DITAMBAHKAN DI SINI
+            $startTime = Carbon::parse($exam->start_time);
+            $endTime = $exam->end_time ? Carbon::parse($exam->end_time) : null;
+
+            if ($session) {
+                $exam->student_status = $session->status;
+            } else {
+                // Jika waktu sekarang masih kurang dari waktu mulai
+                if ($now->lessThan($startTime)) {
+                    $exam->student_status = 'upcoming';
+                } 
+                // Jika waktu sekarang sudah melewati waktu selesai (opsional, jika ada end_time)
+                elseif ($endTime && $now->greaterThan($endTime)) {
+                    $exam->student_status = 'finished'; // Atau bisa buat status baru 'expired'
+                } 
+                // Jika sudah masuk rentang waktu ujian
+                else {
+                    $exam->student_status = 'open';
+                }
+            }
+            
+                $exam->session_id = $session ? $session->id : null;
+                $exam->student_score = $session ? $session->total_score : 0;
+            }
 
         return view('cbt.student.index', compact('exams'));
     }
 
-    public function showStart($exam_id)
-    {
-        $exam = CbtExam::findOrFail($exam_id);
-        $student = Auth::guard('student')->user();
-        $className = $student->schoolClass->name ?? '';
-        
-        // PROTEKSI KEAMANAN URL MENGGUNAKAN HELPER
-        if (!$this->checkClassMatch($className, $exam->class_level)) {
-            return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Ujian ini bukan untuk tingkat kelas Anda.');
-        }
+public function showStart($exam_id)
+{
+    $exam = CbtExam::findOrFail($exam_id);
+    $student = Auth::guard('student')->user();
+    $className = $student->schoolClass->name ?? '';
+    
+    if (!$this->checkClassMatch($className, $exam->class_level)) {
+        return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Ujian ini bukan untuk tingkat kelas Anda.');
+    }
 
-        $existingSession = CbtStudentExam::where('student_id', $this->getStudentId())
-            ->where('cbt_exam_id', $exam_id)
-            ->first();
+    // PENGECEKAN WAKTU
+    $now = Carbon::now();
+    $startTime = Carbon::parse($exam->start_time);
+    $endTime = $exam->end_time ? Carbon::parse($exam->end_time) : null;
+
+    if ($now->lessThan($startTime)) {
+        return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Waktu ujian belum dimulai.');
+    }
+    if ($endTime && $now->greaterThan($endTime)) {
+        return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Waktu ujian sudah berakhir.');
+    }
+
+    $existingSession = CbtStudentExam::where('student_id', $this->getStudentId())
+        ->where('cbt_exam_id', $exam_id)
+        ->first();
 
         if ($existingSession && $existingSession->status == 'finished') {
             return redirect()->route('student.exam.index')->with('error', 'Anda sudah menyelesaikan ujian ini.');
@@ -88,9 +119,14 @@ class StudentExamController extends Controller
         $student = Auth::guard('student')->user();
         $className = $student->schoolClass->name ?? '';
 
-        // PROTEKSI KEAMANAN URL (Double Check) MENGGUNAKAN HELPER
         if (!$this->checkClassMatch($className, $exam->class_level)) {
             return redirect()->route('student.exam.index')->with('error', 'Akses Ditolak: Anda tidak diizinkan memulai ujian ini.');
+        }
+
+        // PENGECEKAN WAKTU (Double Security)
+        $now = Carbon::now();
+        if ($now->lessThan(Carbon::parse($exam->start_time))) {
+            return redirect()->route('student.exam.index')->with('error', 'Ujian belum dimulai. Silakan tunggu jadwalnya.');
         }
 
         if ($exam->token) {
