@@ -20,7 +20,7 @@ return [
                 'name' => 'Profil Saya',
                 'route' => 'profile.edit',
                 'icon' => 'ph-user-circle',  
-                'roles' => ['*'] // Tanda bintang (*) artinya semua role bisa melihat menu ini
+                'roles' => ['*'] 
             ], 
             [
                 'name' => 'Kelola Portofolio',
@@ -285,7 +285,7 @@ return [
                 'route' => 'admin.bk.index',
                 'active_check' => 'admin.bk.*',
                 'icon' => 'ph-chat-centered-text',
-                'roles' => ['Admin', 'Kepala Sekolah', 'Guru'] // Asumsi Guru BK role-nya Guru atau Admin
+                'roles' => ['Admin', 'Kepala Sekolah', 'Guru'] 
             ],
         ],
         'Persuratan & Dinas' => [
@@ -383,7 +383,7 @@ return [
                 'route' => 'subjects.index',
                 'active_check' => 'subjects.*',
                 'icon' => 'ph-notebook',
-                'roles' => ['Admin', 'TU'] // Kepsek hanya perlu lihat laporan, bukan edit master data
+                'roles' => ['Admin', 'TU'] 
             ],
             [
                 'name' => 'Atur Jadwal',
