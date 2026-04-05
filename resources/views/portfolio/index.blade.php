@@ -323,14 +323,38 @@
                         </div>
                     </div>
 
-                    {{-- 3. TAB PRESTASI / GALERI --}}
+                    {{-- 3. TAB PRESTASI / GALERI (DENGAN CLIENT-SIDE VALIDATION SIZE) --}}
                     <div x-show="activeTab === 'portofolio'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
                         <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
                             <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="ph-bold ph-trophy"></i></div>
                             <h3 class="text-lg font-black text-slate-800">Galeri Portofolio & Pencapaian</h3>
                         </div>
                         
-                        <form action="{{ route('portfolio.port.store') }}" method="POST" enctype="multipart/form-data" x-data="{ isSubmitting: false, imagePreview: null }" @submit="isSubmitting = true" class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8">
+                        <form action="{{ route('portfolio.port.store') }}" method="POST" enctype="multipart/form-data" 
+                              x-data="{ isSubmitting: false, imagePreviews: [] }" 
+                              @submit.prevent="
+                                  let fileInput = $el.querySelector('input[type=file]');
+                                  let files = fileInput.files;
+                                  let overSize = false;
+                                  let totalSize = 0;
+                                  for(let i=0; i<files.length; i++) {
+                                      if(files[i].size > 2048 * 1024) overSize = true; // max 2MB/file
+                                      totalSize += files[i].size;
+                                  }
+                                  
+                                  if(overSize) {
+                                      Swal.fire({ icon: 'warning', title: 'Foto Terlalu Besar', text: 'Ukuran maksimal 1 foto adalah 2MB. Silakan kompres foto Anda terlebih dahulu.', confirmButtonColor: '#10b981', customClass: { popup: 'rounded-3xl' } });
+                                      return;
+                                  }
+                                  if(totalSize > 8388608) { // 8MB
+                                      Swal.fire({ icon: 'warning', title: 'Kapasitas Penuh', text: 'Total keseluruhan foto melebihi kapasitas memori server (8MB). Silakan kurangi jumlah foto yang diupload bersamaan.', confirmButtonColor: '#10b981', customClass: { popup: 'rounded-3xl' } });
+                                      return;
+                                  }
+                                  
+                                  isSubmitting = true; 
+                                  $el.submit();
+                              " 
+                              class="bg-slate-50/50 p-6 rounded-3xl border border-slate-100 mb-8">
                             @csrf
                             @if(request('user_id')) <input type="hidden" name="user_id" value="{{ request('user_id') }}"> @endif
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
@@ -344,14 +368,18 @@
                                 </div>
                                 <div class="md:col-span-3 p-4 bg-white border-2 border-dashed border-slate-200 rounded-2xl flex flex-col md:flex-row gap-4 items-center justify-between">
                                     <div class="flex-1 w-full">
-                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Upload Foto Dokumentasi</label>
-                                        <input type="file" name="image" accept="image/*" @change="imagePreview = URL.createObjectURL($event.target.files[0])" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-emerald-50 file:text-emerald-700" required>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Upload Foto Dokumentasi (Bisa Pilih Lebih Dari Satu)</label>
+                                        <input type="file" name="images[]" accept="image/*" multiple @change="imagePreviews = Array.from($event.target.files).map(file => URL.createObjectURL(file))" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-emerald-50 file:text-emerald-700" required>
                                     </div>
                                     
-                                    {{-- Area Preview --}}
-                                    <template x-if="imagePreview">
-                                        <div class="w-24 h-24 rounded-xl overflow-hidden border border-slate-200 shrink-0 shadow-sm">
-                                            <img :src="imagePreview" class="w-full h-full object-cover">
+                                    {{-- Area Preview Multiple --}}
+                                    <template x-if="imagePreviews.length > 0">
+                                        <div class="flex gap-2 overflow-x-auto max-w-[200px] custom-scrollbar">
+                                            <template x-for="img in imagePreviews">
+                                                <div class="w-16 h-16 rounded-xl overflow-hidden border border-slate-200 shrink-0 shadow-sm">
+                                                    <img :src="img" class="w-full h-full object-cover">
+                                                </div>
+                                            </template>
                                         </div>
                                     </template>
 
@@ -365,9 +393,27 @@
 
                         <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                             @forelse($portfolios ?? [] as $port)
+                                @php
+                                    $images = json_decode($port->image_path, true);
+                                    if (!is_array($images)) {
+                                        $images = $port->image_path ? [$port->image_path] : [];
+                                    }
+                                    $port->images_array = $images;
+                                @endphp
                                 <div class="relative group rounded-3xl overflow-hidden border border-slate-200 shadow-sm">
-                                    <div class="aspect-square bg-slate-100">
-                                        <img src="{{ asset('storage/' . $port->image_path) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                    <div class="aspect-square bg-slate-100 relative">
+                                        @if(count($images) > 0)
+                                            <img src="{{ asset('storage/' . $images[0]) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                            @if(count($images) > 1)
+                                                <div class="absolute top-3 left-3 bg-black/50 backdrop-blur-md text-white text-[10px] font-black px-2.5 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+                                                    <i class="ph-bold ph-images"></i> +{{ count($images) - 1 }} Foto
+                                                </div>
+                                            @endif
+                                        @else
+                                            <div class="w-full h-full flex items-center justify-center text-slate-300">
+                                                <i class="ph-duotone ph-image text-4xl"></i>
+                                            </div>
+                                        @endif
                                     </div>
                                     <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-black/20 md:to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col justify-between p-4">
                                         <div class="flex justify-end gap-2">
@@ -564,8 +610,31 @@
                         </button>
                     </div>
 
-                    <!-- Modal Body / Form -->
-                    <form :action="editFormAction" method="POST" enctype="multipart/form-data" class="p-6 overflow-y-auto custom-scrollbar flex-1" x-data="{ isModalSubmitting: false, editImagePreview: null }" @submit="isModalSubmitting = true">
+                     <!-- Modal Body / Form -->
+                    <form :action="editFormAction" method="POST" enctype="multipart/form-data" class="p-6 overflow-y-auto custom-scrollbar flex-1" 
+                          x-data="{ isModalSubmitting: false, editImagePreview: null, editImagePreviews: [] }" 
+                          @submit.prevent="
+                              let fileInputs = $el.querySelectorAll('input[type=file]');
+                              let overSize = false;
+                              let totalSize = 0;
+                              fileInputs.forEach(input => {
+                                  let files = input.files;
+                                  for(let i=0; i<files.length; i++) {
+                                      if(files[i].size > 2048 * 1024) overSize = true; // max 2MB
+                                      totalSize += files[i].size;
+                                  }
+                              });
+                              if(overSize) {
+                                  Swal.fire({ icon: 'warning', title: 'File Terlalu Besar', text: 'Ukuran maksimal per file adalah 2MB.', confirmButtonColor: '#3b82f6', customClass: { popup: 'rounded-3xl' } });
+                                  return;
+                              }
+                              if(totalSize > 8388608) { // 8MB
+                                  Swal.fire({ icon: 'warning', title: 'Kapasitas Penuh', text: 'Total file melampaui batas server (8MB).', confirmButtonColor: '#3b82f6', customClass: { popup: 'rounded-3xl' } });
+                                  return;
+                              }
+                              isModalSubmitting = true; 
+                              $el.submit();
+                          ">
                         @csrf
                         @method('PUT')
                         @if(request('user_id')) <input type="hidden" name="user_id" value="{{ request('user_id') }}"> @endif
@@ -624,7 +693,7 @@
                             </div>
                         </template>
 
-                        <!-- Form Edit: Portofolio/Galeri (port) -->
+                       <!-- Form Edit: Portofolio/Galeri (port) -->
                         <template x-if="editType === 'port'">
                             <div class="space-y-4">
                                 <div>
@@ -635,19 +704,34 @@
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tahun</label>
                                     <input type="text" name="year" x-model="editData.year" class="w-full rounded-2xl border-slate-200 bg-white focus:border-emerald-500 focus:ring-emerald-500 font-bold text-slate-700">
                                 </div>
-                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-4">
+                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-3">
                                     <div class="flex-1">
-                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ganti Foto (Opsional)</label>
-                                        <p class="text-xs text-slate-500 mb-2">Biarkan kosong jika tidak ingin mengubah foto.</p>
-                                        <input type="file" name="image" accept="image/*" @change="editImagePreview = URL.createObjectURL($event.target.files[0])" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-emerald-100 file:text-emerald-700">
+                                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ganti Foto (Opsional, Bisa Lebih Dari Satu)</label>
+                                        <p class="text-xs text-slate-500 mb-2">Pilih beberapa foto sekaligus. Biarkan kosong jika tidak ingin mengubah foto lama.</p>
+                                        <input type="file" name="images[]" multiple accept="image/*" @change="editImagePreviews = Array.from($event.target.files).map(file => URL.createObjectURL(file))" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-emerald-100 file:text-emerald-700">
                                     </div>
-                                    <template x-if="editImagePreview">
-                                        <img :src="editImagePreview" class="w-16 h-16 rounded-lg object-cover border border-slate-200">
+                                    
+                                    <!-- Preview Foto Baru -->
+                                    <template x-if="editImagePreviews.length > 0">
+                                        <div class="flex gap-2 overflow-x-auto custom-scrollbar pb-2">
+                                            <template x-for="img in editImagePreviews">
+                                                <img :src="img" class="w-16 h-16 rounded-lg object-cover border border-slate-200 shrink-0">
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <!-- Preview Foto Lama -->
+                                    <template x-if="editImagePreviews.length === 0 && editData.images_array && editData.images_array.length > 0">
+                                        <div class="flex gap-2 overflow-x-auto custom-scrollbar pb-2">
+                                            <template x-for="img in editData.images_array">
+                                                <img :src="'{{ asset('storage') }}/' + img" class="w-16 h-16 rounded-lg object-cover border border-slate-200 shrink-0">
+                                            </template>
+                                        </div>
                                     </template>
                                 </div>
                             </div>
                         </template>
-
+                        
                         <!-- Form Edit: Artikel (art) -->
                         <template x-if="editType === 'art'">
                             <div class="space-y-4">

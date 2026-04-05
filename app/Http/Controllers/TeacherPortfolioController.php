@@ -224,7 +224,7 @@ class TeacherPortfolioController extends Controller
         return back()->with('success', 'Materi/Media berhasil diperbarui.');
     }
 
-    // ==========================================
+   // ==========================================
     // CRUD PORTOFOLIO GURU
     // ==========================================
     public function storePortfolio(Request $request)
@@ -232,11 +232,21 @@ class TeacherPortfolioController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'year' => 'nullable|string|max:10',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'images' => 'required|array', // Ubah menjadi images array
+            'images.*' => 'image|mimes:jpeg,png,jpg|max:2048', // Validasi tiap file maks 2MB
         ]);
 
         $data = $request->only('title', 'year');
-        $data['image_path'] = $request->file('image')->store('teacher_portfolios', 'public');
+        
+        $imagePaths = [];
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $imagePaths[] = $file->store('teacher_portfolios', 'public');
+            }
+        }
+        
+        // Simpan array path gambar ke dalam bentuk JSON String
+        $data['image_path'] = json_encode($imagePaths);
 
         $targetUser = $this->getTargetUser($request);
         $targetUser->portfolios()->create($data);
@@ -249,7 +259,18 @@ class TeacherPortfolioController extends Controller
         $targetUser = $this->getTargetUser($request);
         $port = $targetUser->portfolios()->findOrFail($id);
         
-        if ($port->image_path) Storage::disk('public')->delete($port->image_path);
+        if ($port->image_path) {
+            // Coba decode JSON, jika berupa array maka hapus semua fotonya
+            $images = json_decode($port->image_path, true);
+            if (is_array($images)) {
+                foreach ($images as $img) {
+                    Storage::disk('public')->delete($img);
+                }
+            } else {
+                // Backward compatibility untuk foto tunggal lama
+                Storage::disk('public')->delete($port->image_path);
+            }
+        }
         $port->delete();
         
         return back()->with('success', 'Portofolio berhasil dihapus.');
@@ -260,7 +281,8 @@ class TeacherPortfolioController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'year' => 'nullable|string|max:10',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
+            'images' => 'nullable|array', 
+            'images.*' => 'image|mimes:jpeg,png,jpg|max:2048', 
         ]);
 
         $targetUser = $this->getTargetUser($request);
@@ -268,16 +290,29 @@ class TeacherPortfolioController extends Controller
 
         $data = $request->only('title', 'year');
         
-        if ($request->hasFile('image')) {
-            if ($port->image_path) Storage::disk('public')->delete($port->image_path);
-            $data['image_path'] = $request->file('image')->store('teacher_portfolios', 'public');
+        if ($request->hasFile('images')) {
+            // Hapus gambar-gambar lama
+            if ($port->image_path) {
+                $oldImages = json_decode($port->image_path, true);
+                if (is_array($oldImages)) {
+                    foreach ($oldImages as $img) Storage::disk('public')->delete($img);
+                } else {
+                    Storage::disk('public')->delete($port->image_path);
+                }
+            }
+            
+            // Upload gambar-gambar baru
+            $imagePaths = [];
+            foreach ($request->file('images') as $file) {
+                $imagePaths[] = $file->store('teacher_portfolios', 'public');
+            }
+            $data['image_path'] = json_encode($imagePaths);
         }
 
         $port->update($data);
         
         return back()->with('success', 'Portofolio/Pencapaian berhasil diperbarui.');
     }
-
 
     // ==========================================
     // CRUD ARTIKEL TERPUBLIKASI
