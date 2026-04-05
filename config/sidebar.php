@@ -19,6 +19,7 @@ return [
             [
                 'name' => 'Profil Saya',
                 'route' => 'profile.edit',
+                'active_check' => 'profile.*',
                 'icon' => 'ph-user-circle',  
                 'roles' => ['*'] 
             ], 

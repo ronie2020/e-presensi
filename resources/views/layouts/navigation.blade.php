@@ -107,6 +107,25 @@
                                 } else {
                                     $isActive = request()->routeIs($checkRoute);
                                 }
+                                
+                                // -------------------------------------------------------------
+                                // LOGIKA KHUSUS UNTUK "PROFIL SAYA" (KARENA REDIRECT DARI WEB.PHP)
+                                // -------------------------------------------------------------
+                                $editedUserId = request()->route('user');
+                                if(is_object($editedUserId)) {
+                                    $editedUserId = $editedUserId->id;
+                                }
+                                
+                                $isEditingMyProfile = request()->routeIs('users.edit', 'users.update') && $editedUserId == auth()->id();
+
+                                if ($item['name'] === 'Profil Saya' && $isEditingMyProfile) {
+                                    $isActive = true; // Paksa nyala untuk Profil Saya
+                                }
+                                
+                                if ($item['name'] === 'Data Pengguna' && $isEditingMyProfile) {
+                                    $isActive = false; // Paksa mati untuk Data Pengguna
+                                }
+                                // -------------------------------------------------------------
                             @endphp
 
                             <li class="relative">
