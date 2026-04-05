@@ -1,8 +1,8 @@
-@extends('layouts.public')
 
-@section('title', 'Portofolio ' . ($teacher->name ?? 'Guru') . ' - ' . config('app.name', 'SMP Negeri 3 Lakbok'))
 
-@push('styles')
+<?php $__env->startSection('title', 'Portofolio ' . ($teacher->name ?? 'Guru') . ' - ' . config('app.name', 'SMP Negeri 3 Lakbok')); ?>
+
+<?php $__env->startPush('styles'); ?>
     <style>
         /* Mencegah tab berkedip saat halaman baru dimuat (Wajib untuk AlpineJS) */
         [x-cloak] { display: none !important; }
@@ -15,9 +15,9 @@
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
     <!-- HEADER PROFIL (Hero Section) -->
     <div class="bg-slate-900 pt-32 pb-24 relative overflow-hidden -mt-24">
         <div class="absolute inset-0 bg-blue-600/10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
@@ -27,94 +27,95 @@
             <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
                 <!-- Foto -->
                 <div class="w-40 h-40 md:w-48 md:h-48 rounded-full p-2 bg-white/10 backdrop-blur border border-white/20 shadow-2xl shrink-0">
-                    <img src="{{ !empty($teacher->photo_path) ? asset('storage/' . $teacher->photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($teacher->name ?? 'Guru').'&background=random' }}" 
-                         alt="{{ $teacher->name ?? 'Foto Guru' }}" 
+                    <img src="<?php echo e(!empty($teacher->photo_path) ? asset('storage/' . $teacher->photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($teacher->name ?? 'Guru').'&background=random'); ?>" 
+                         alt="<?php echo e($teacher->name ?? 'Foto Guru'); ?>" 
                          class="w-full h-full rounded-full object-cover bg-slate-800">
                 </div>
 
                 <!-- Info Utama -->
                 <div class="text-center md:text-left flex-1 mt-4 md:mt-0">
-                    @php
+                    <?php
                         // Logika decode role (Sama seperti di teachers.blade.php)
                         $displayRole = $teacher->position ?? null;
                         if (empty($displayRole) && isset($teacher->role)) {
                             $decodedRoles = is_string($teacher->role) ? json_decode($teacher->role, true) : $teacher->role;
                             $displayRole = is_array($decodedRoles) ? implode(', ', $decodedRoles) : $teacher->role;
                         }
-                    @endphp
+                    ?>
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-bold uppercase tracking-wider mb-4">
-                        <i class="ph-fill ph-briefcase"></i> {{ $displayRole ?: 'Tenaga Pendidik' }}
+                        <i class="ph-fill ph-briefcase"></i> <?php echo e($displayRole ?: 'Tenaga Pendidik'); ?>
+
                     </div>
-                    <h1 class="text-3xl md:text-5xl font-black text-white mb-2 tracking-tight">{{ $teacher->name ?? 'Nama Tidak Diketahui' }}</h1>
-                    <p class="text-slate-400 font-mono text-sm mb-6">{{ !empty($teacher->nip) ? 'NIP. ' . $teacher->nip : 'Non-NIP' }}</p>
+                    <h1 class="text-3xl md:text-5xl font-black text-white mb-2 tracking-tight"><?php echo e($teacher->name ?? 'Nama Tidak Diketahui'); ?></h1>
+                    <p class="text-slate-400 font-mono text-sm mb-6"><?php echo e(!empty($teacher->nip) ? 'NIP. ' . $teacher->nip : 'Non-NIP'); ?></p>
                     
                     <p class="text-slate-300 max-w-2xl leading-relaxed text-sm md:text-base italic mb-6">
-                        "{{ $teacher->bio ?? 'Terus belajar dan menginspirasi generasi bangsa.' }}"
+                        "<?php echo e($teacher->bio ?? 'Terus belajar dan menginspirasi generasi bangsa.'); ?>"
                     </p>
 
                    <!-- Sosial Media (Opsi 2: Kotak Glow) -->
                     <div class="flex items-center justify-center md:justify-start gap-4">
-                        @if(!empty($teacher->instagram))
-                        <a href="{{ $teacher->instagram }}" target="_blank" class="w-11 h-11 rounded-xl bg-pink-500/10 border border-pink-500/20 text-pink-400 hover:bg-gradient-to-tr hover:from-pink-500 hover:to-purple-500 hover:text-white flex items-center justify-center transition-all duration-300 hover:shadow-[0_0_15px_rgba(236,72,153,0.4)] hover:-translate-y-1">
+                        <?php if(!empty($teacher->instagram)): ?>
+                        <a href="<?php echo e($teacher->instagram); ?>" target="_blank" class="w-11 h-11 rounded-xl bg-pink-500/10 border border-pink-500/20 text-pink-400 hover:bg-gradient-to-tr hover:from-pink-500 hover:to-purple-500 hover:text-white flex items-center justify-center transition-all duration-300 hover:shadow-[0_0_15px_rgba(236,72,153,0.4)] hover:-translate-y-1">
                             <i class="ph ph-instagram-logo text-2xl"></i>
                         </a>
-                        @endif
+                        <?php endif; ?>
 
-                        @if(!empty($teacher->facebook))
-                        <a href="{{ $teacher->facebook }}" target="_blank" class="w-11 h-11 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-all duration-300 hover:shadow-[0_0_15px_rgba(37,99,235,0.4)] hover:-translate-y-1">
+                        <?php if(!empty($teacher->facebook)): ?>
+                        <a href="<?php echo e($teacher->facebook); ?>" target="_blank" class="w-11 h-11 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-600 hover:text-white flex items-center justify-center transition-all duration-300 hover:shadow-[0_0_15px_rgba(37,99,235,0.4)] hover:-translate-y-1">
                             <i class="ph ph-facebook-logo text-2xl"></i>
                         </a>
-                        @endif
+                        <?php endif; ?>
 
-                        @if(!empty($teacher->tiktok))
-                        <a href="{{ $teacher->tiktok }}" target="_blank" class="w-11 h-11 rounded-xl bg-slate-700/30 border border-slate-600 text-slate-300 hover:bg-slate-900 hover:text-white flex items-center justify-center transition-all duration-300 hover:shadow-[0_0_15px_rgba(15,23,42,0.4)] hover:-translate-y-1">
+                        <?php if(!empty($teacher->tiktok)): ?>
+                        <a href="<?php echo e($teacher->tiktok); ?>" target="_blank" class="w-11 h-11 rounded-xl bg-slate-700/30 border border-slate-600 text-slate-300 hover:bg-slate-900 hover:text-white flex items-center justify-center transition-all duration-300 hover:shadow-[0_0_15px_rgba(15,23,42,0.4)] hover:-translate-y-1">
                             <i class="ph ph-tiktok-logo text-2xl"></i>
                         </a>
-                        @endif
+                        <?php endif; ?>
 
-                        @if(!empty($teacher->phone))
-                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $teacher->phone) }}" target="_blank" class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white flex items-center justify-center transition-all duration-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:-translate-y-1">
+                        <?php if(!empty($teacher->phone)): ?>
+                        <a href="https://wa.me/<?php echo e(preg_replace('/[^0-9]/', '', $teacher->phone)); ?>" target="_blank" class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white flex items-center justify-center transition-all duration-300 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] hover:-translate-y-1">
                             <i class="ph ph-whatsapp-logo text-2xl"></i>
                         </a>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
                     <!-- Keahlian & Hobi (BARU) -->
-                    @if(!empty($teacher->keahlian) || !empty($teacher->hobi))
+                    <?php if(!empty($teacher->keahlian) || !empty($teacher->hobi)): ?>
                         <div class="mt-8 flex flex-col md:flex-row gap-6 border-t border-white/10 pt-6 text-left">
-                            @if(!empty($teacher->keahlian))
+                            <?php if(!empty($teacher->keahlian)): ?>
                             <div class="flex-1">
                                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center md:justify-start gap-2">
                                     <i class="ph-bold ph-star text-amber-400"></i> Keahlian Utama
                                 </h3>
                                 <div class="flex flex-wrap justify-center md:justify-start gap-2">
-                                    {{-- Menggunakan null coalescing '??' untuk mencegah error pada fungsi explode jika nilai keahlian null --}}
-                                    @foreach(array_map('trim', explode(',', $teacher->keahlian ?? '')) as $keahlian)
-                                        @if(!empty($keahlian))
-                                        <span class="px-3 py-1 bg-white/5 text-slate-300 border border-white/10 rounded-lg text-xs font-medium">{{ $keahlian }}</span>
-                                        @endif
-                                    @endforeach
+                                    
+                                    <?php $__currentLoopData = array_map('trim', explode(',', $teacher->keahlian ?? '')); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $keahlian): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php if(!empty($keahlian)): ?>
+                                        <span class="px-3 py-1 bg-white/5 text-slate-300 border border-white/10 rounded-lg text-xs font-medium"><?php echo e($keahlian); ?></span>
+                                        <?php endif; ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </div>
-                            @endif
+                            <?php endif; ?>
 
-                            @if(!empty($teacher->hobi))
+                            <?php if(!empty($teacher->hobi)): ?>
                             <div class="flex-1">
                                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center justify-center md:justify-start gap-2">
                                     <i class="ph-bold ph-heart text-rose-400"></i> Minat & Hobi
                                 </h3>
                                 <div class="flex flex-wrap justify-center md:justify-start gap-2">
-                                    {{-- Sama seperti di atas, penambahan ?? '' agar aman --}}
-                                    @foreach(array_map('trim', explode(',', $teacher->hobi ?? '')) as $hobi)
-                                        @if(!empty($hobi))
-                                        <span class="px-3 py-1 bg-white/5 text-slate-300 border border-white/10 rounded-lg text-xs font-medium">{{ $hobi }}</span>
-                                        @endif
-                                    @endforeach
+                                    
+                                    <?php $__currentLoopData = array_map('trim', explode(',', $teacher->hobi ?? '')); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $hobi): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php if(!empty($hobi)): ?>
+                                        <span class="px-3 py-1 bg-white/5 text-slate-300 border border-white/10 rounded-lg text-xs font-medium"><?php echo e($hobi); ?></span>
+                                        <?php endif; ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -147,7 +148,7 @@
 
                     <hr class="my-4 border-slate-100 hidden lg:block">
                     
-                    <a href="{{ route('teachers.index') }}" class="hidden lg:flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm transition-colors">
+                    <a href="<?php echo e(route('teachers.index')); ?>" class="hidden lg:flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm transition-colors">
                         <i class="ph-bold ph-arrow-left"></i> Kembali ke Direktori
                     </a>
                 </div>
@@ -163,20 +164,20 @@
                     </h2>
                     
                     <div class="relative border-l-2 border-slate-100 ml-4 space-y-8 pb-4">
-                        {{-- Aman: sudah menggunakan ?? [] --}}
-                        @forelse($teacher->educations ?? [] as $edu)
+                        
+                        <?php $__empty_1 = true; $__currentLoopData = $teacher->educations ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $edu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <div class="relative pl-6">
                                 <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-cyan-500 border-4 border-white shadow"></div>
-                                <span class="text-xs font-bold text-cyan-500 mb-1 block">{{ $edu->start_year ?? '-' }} - {{ $edu->end_year ?? 'Sekarang' }}</span>
-                                <h3 class="text-lg font-bold text-slate-800">{{ $edu->institution ?? 'Institusi Tidak Diketahui' }}</h3>
-                                <p class="text-slate-500 text-sm mt-1">{{ $edu->degree ?? '-' }}</p>
+                                <span class="text-xs font-bold text-cyan-500 mb-1 block"><?php echo e($edu->start_year ?? '-'); ?> - <?php echo e($edu->end_year ?? 'Sekarang'); ?></span>
+                                <h3 class="text-lg font-bold text-slate-800"><?php echo e($edu->institution ?? 'Institusi Tidak Diketahui'); ?></h3>
+                                <p class="text-slate-500 text-sm mt-1"><?php echo e($edu->degree ?? '-'); ?></p>
                             </div>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <div class="py-10 text-center text-slate-400">
                                 <i class="ph-duotone ph-graduation-cap text-5xl mb-3 opacity-50"></i>
                                 <p>Belum ada data pendidikan yang ditambahkan.</p>
                             </div>
-                        @endforelse
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -187,27 +188,27 @@
                     </h2>
                     
                     <div class="relative border-l-2 border-slate-100 ml-4 space-y-8 pb-4">
-                        {{-- Aman: Ditambahkan ?? [] untuk menghindari error jika variabel belum dikirim --}}
-                        @forelse($experiences ?? [] as $exp)
+                        
+                        <?php $__empty_1 = true; $__currentLoopData = $experiences ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $exp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <div class="relative pl-6">
                                 <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500 border-4 border-white shadow"></div>
-                                <span class="text-xs font-bold text-blue-500 mb-1 block">Tahun {{ $exp->year ?? 'N/A' }}</span>
-                                <h3 class="text-lg font-bold text-slate-800">{{ $exp->title ?? 'Tanpa Judul' }}</h3>
-                                <p class="text-slate-500 text-sm mt-1 mb-2">{{ $exp->organizer ?? '-' }}</p>
+                                <span class="text-xs font-bold text-blue-500 mb-1 block">Tahun <?php echo e($exp->year ?? 'N/A'); ?></span>
+                                <h3 class="text-lg font-bold text-slate-800"><?php echo e($exp->title ?? 'Tanpa Judul'); ?></h3>
+                                <p class="text-slate-500 text-sm mt-1 mb-2"><?php echo e($exp->organizer ?? '-'); ?></p>
                                 
-                                {{-- TAMBAHAN: Tombol Lihat Sertifikat --}}
-                                @if(!empty($exp->certificate_path))
-                                    <a href="{{ asset('storage/' . $exp->certificate_path) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg text-xs font-bold transition-colors">
+                                
+                                <?php if(!empty($exp->certificate_path)): ?>
+                                    <a href="<?php echo e(asset('storage/' . $exp->certificate_path)); ?>" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg text-xs font-bold transition-colors">
                                         <i class="ph-bold ph-certificate"></i> Lihat Sertifikat
                                     </a>
-                                @endif
+                                <?php endif; ?>
                             </div>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <div class="py-10 text-center text-slate-400">
                                 <i class="ph-duotone ph-folder-open text-5xl mb-3 opacity-50"></i>
                                 <p>Belum ada data pelatihan yang ditambahkan.</p>
                             </div>
-                        @endforelse
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -218,25 +219,25 @@
                     </h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {{-- Aman: Ditambahkan ?? [] --}}
-                        @forelse($materials ?? [] as $material)
-                            <a href="{{ !empty($material->file_url) ? $material->file_url : '#' }}" target="_blank" class="group block p-4 border border-slate-200 rounded-2xl hover:border-purple-300 hover:shadow-lg hover:shadow-purple-100 transition-all bg-slate-50/50">
+                        
+                        <?php $__empty_1 = true; $__currentLoopData = $materials ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $material): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <a href="<?php echo e(!empty($material->file_url) ? $material->file_url : '#'); ?>" target="_blank" class="group block p-4 border border-slate-200 rounded-2xl hover:border-purple-300 hover:shadow-lg hover:shadow-purple-100 transition-all bg-slate-50/50">
                                 <div class="flex items-start gap-4">
                                     <div class="w-12 h-12 shrink-0 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-                                        <i class="ph-fill {{ $material->icon ?? 'ph-file-text' }}"></i>
+                                        <i class="ph-fill <?php echo e($material->icon ?? 'ph-file-text'); ?>"></i>
                                     </div>
                                     <div>
-                                        <h4 class="font-bold text-slate-800 group-hover:text-purple-600 transition-colors line-clamp-2">{{ $material->title ?? 'Dokumen' }}</h4>
-                                        <p class="text-xs text-slate-500 mt-1">{{ $material->type ?? 'Materi' }}</p>
+                                        <h4 class="font-bold text-slate-800 group-hover:text-purple-600 transition-colors line-clamp-2"><?php echo e($material->title ?? 'Dokumen'); ?></h4>
+                                        <p class="text-xs text-slate-500 mt-1"><?php echo e($material->type ?? 'Materi'); ?></p>
                                     </div>
                                 </div>
                             </a>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <div class="col-span-1 md:col-span-2 py-10 text-center text-slate-400">
                                 <i class="ph-duotone ph-folder-open text-5xl mb-3 opacity-50"></i>
                                 <p>Belum ada data materi yang dibagikan.</p>
                             </div>
-                        @endforelse
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -247,27 +248,27 @@
                     </h2>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {{-- Aman: Ditambahkan ?? [] --}}
-                        @forelse($portfolios ?? [] as $portfolio)
+                        
+                        <?php $__empty_1 = true; $__currentLoopData = $portfolios ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $portfolio): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <div class="group rounded-2xl overflow-hidden border border-slate-200 relative">
                                 <div class="aspect-video bg-slate-200 flex items-center justify-center">
-                                    @if(!empty($portfolio->image_path))
-                                        <img src="{{ asset('storage/' . $portfolio->image_path) }}" alt="Portofolio" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                    @else
+                                    <?php if(!empty($portfolio->image_path)): ?>
+                                        <img src="<?php echo e(asset('storage/' . $portfolio->image_path)); ?>" alt="Portofolio" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <?php else: ?>
                                         <i class="ph-duotone ph-image text-slate-400 text-3xl"></i>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                                 <div class="p-4 bg-white">
-                                    <h4 class="font-bold text-slate-800 mb-1">{{ $portfolio->title ?? 'Portofolio' }}</h4>
-                                    <p class="text-xs text-slate-500">Tahun {{ $portfolio->year ?? '-' }}</p>
+                                    <h4 class="font-bold text-slate-800 mb-1"><?php echo e($portfolio->title ?? 'Portofolio'); ?></h4>
+                                    <p class="text-xs text-slate-500">Tahun <?php echo e($portfolio->year ?? '-'); ?></p>
                                 </div>
                             </div>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <div class="col-span-1 sm:col-span-2 py-10 text-center text-slate-400">
                                 <i class="ph-duotone ph-folder-open text-5xl mb-3 opacity-50"></i>
                                 <p>Belum ada portofolio yang ditambahkan.</p>
                             </div>
-                        @endforelse
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -278,35 +279,37 @@
                     </h2>
 
                     <div class="space-y-4">
-                        {{-- Aman: Ditambahkan ?? [] --}}
-                        @forelse($articles ?? [] as $article)
-                            <a href="{{ !empty($article->url) ? $article->url : '#' }}" class="flex flex-col sm:flex-row gap-4 p-4 rounded-2xl border border-slate-100 hover:bg-slate-50 hover:border-slate-200 transition-all group">
-                                @if(!empty($article->image_path))
+                        
+                        <?php $__empty_1 = true; $__currentLoopData = $articles ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $article): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <a href="<?php echo e(!empty($article->url) ? $article->url : '#'); ?>" class="flex flex-col sm:flex-row gap-4 p-4 rounded-2xl border border-slate-100 hover:bg-slate-50 hover:border-slate-200 transition-all group">
+                                <?php if(!empty($article->image_path)): ?>
                                 <div class="sm:w-32 aspect-video sm:aspect-square rounded-xl bg-slate-200 overflow-hidden shrink-0">
-                                    <img src="{{ asset('storage/' . $article->image_path) }}" alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                    <img src="<?php echo e(asset('storage/' . $article->image_path)); ?>" alt="Thumbnail" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                 </div>
-                                @endif
+                                <?php endif; ?>
                                 <div class="flex flex-col justify-center">
-                                    <span class="text-xs font-bold text-orange-500 mb-1">{{ $article->category ?? 'Pendidikan' }}</span>
-                                    <h4 class="text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{{ $article->title ?? 'Tanpa Judul' }}</h4>
-                                    <p class="text-sm text-slate-500 mt-2 line-clamp-2">{{ $article->excerpt ?? '' }}</p>
+                                    <span class="text-xs font-bold text-orange-500 mb-1"><?php echo e($article->category ?? 'Pendidikan'); ?></span>
+                                    <h4 class="text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors"><?php echo e($article->title ?? 'Tanpa Judul'); ?></h4>
+                                    <p class="text-sm text-slate-500 mt-2 line-clamp-2"><?php echo e($article->excerpt ?? ''); ?></p>
                                     <span class="text-xs text-slate-400 mt-3">
                                         <i class="ph-regular ph-calendar-blank"></i> 
-                                        {{-- Pencegahan Error jika tanggal null --}}
-                                        {{ !empty($article->published_at) ? \Carbon\Carbon::parse($article->published_at)->translatedFormat('d F Y') : 'Belum dipublikasi' }}
+                                        
+                                        <?php echo e(!empty($article->published_at) ? \Carbon\Carbon::parse($article->published_at)->translatedFormat('d F Y') : 'Belum dipublikasi'); ?>
+
                                     </span>
                                 </div>
                             </a>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <div class="py-10 text-center text-slate-400">
                                 <i class="ph-duotone ph-folder-open text-5xl mb-3 opacity-50"></i>
                                 <p>Belum ada artikel yang dipublikasikan.</p>
                             </div>
-                        @endforelse
+                        <?php endif; ?>
                     </div>
                 </div>
 
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.public', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/teacher-detail.blade.php ENDPATH**/ ?>
