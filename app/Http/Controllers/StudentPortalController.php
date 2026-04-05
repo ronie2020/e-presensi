@@ -59,8 +59,16 @@ class StudentPortalController extends Controller
 
         Auth::guard('student')->login($student);
 
+        // ========================================================
+        // LOGIKA BARU: REDIRECT KE ALUMNI JIKA STATUS GRADUATED
+        // ========================================================
+        if ($student->status === 'graduated') {
+            return redirect()->route('alumni.dashboard')
+                             ->with('success', 'Selamat datang di Dashboard Alumni.');
+        }
+        // JIKA BUKAN ALUMNI, MASUK KE PORTAL SISWA AKTIF
         return redirect()->route('portal.show', $student->id)
-                         ->with('success', 'Berhasil masuk ke Portal Informasi.');
+                         ->with('success', 'Berhasil masuk ke Portal Informasi Siswa.');
     }
 
     public function show($id)
@@ -77,6 +85,10 @@ class StudentPortalController extends Controller
             'schoolClass.schedules.teacher', 
             'alumniProfile'
         ])->findOrFail($id);
+
+         if ($student->status === 'graduated') {
+            return redirect()->route('alumni.dashboard');
+        }
         
         $isAlumni = $student->status === 'graduated';
         $classId = $student->class_id ?? $student->school_class_id ?? optional($student->schoolClass)->id;
@@ -88,8 +100,8 @@ class StudentPortalController extends Controller
        // A. PRIORITY EXAMS (CBT)
         $priorityExams = collect([]);
         
-        if (class_exists(\App\Models\CbtExam::class)) {           
-            $studentLevel = $student->schoolClass->level ?? filter_var($student->schoolClass->name, FILTER_SANITIZE_NUMBER_INT) ?? null;
+         if (class_exists(\App\Models\CbtExam::class)) {  
+            $studentLevel = $student->schoolClass?->level ?? filter_var($student->schoolClass?->name, FILTER_SANITIZE_NUMBER_INT) ?? null;
            
             $now = Carbon::now('Asia/Jakarta');            
             $activeExams = \App\Models\CbtExam::where('is_active', true)
@@ -335,8 +347,7 @@ class StudentPortalController extends Controller
             $totalPoints = $habits->count() * 100; 
         }
 
-        // --- DATA LMS (FULL) ---
-        // PERBAIKAN: Gunakan collect([]) agar count() di view tidak error
+        // --- DATA LMS (FULL) ---        
         $lms_assignments_grouped = collect([]); 
         $lms_materials_grouped = collect([]); 
         $lms_grades = [];
@@ -383,8 +394,7 @@ class StudentPortalController extends Controller
             }
         }
 
-        // --- JURNAL KBM ---
-        // PERBAIKAN UTAMA: Harus berupa collect() bukan array biasa
+        // --- JURNAL KBM ---       
         $teaching_journals = collect([]); 
         if (class_exists(TeachingSession::class) && $classId) {
              $teaching_journals = TeachingSession::with(['schedule.subject', 'schedule.teacher', 'attendances'])

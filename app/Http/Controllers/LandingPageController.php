@@ -206,7 +206,7 @@ class LandingPageController extends Controller
         extract($generalData); 
         
         // 7. DATA ALUMNI
-        $alumniData = Cache::remember('landing_alumni_data', 43200, function() {
+        $alumniData = Cache::remember('landing_alumni_data', 300, function() {
             return [
                 'stats' => [
                     'total' => Student::where('status', 'graduated')->count(),
