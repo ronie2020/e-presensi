@@ -16,16 +16,14 @@ class TeacherPortfolioController extends Controller
     {
         $currentUser = Auth::user();
         
-        if ($request->filled('user_id')) {
-            // Cek apakah user yang login punya hak Admin
-            $roles = is_string($currentUser->role) ? json_decode($currentUser->role, true) : $currentUser->role;
-            if (!is_array($roles)) $roles = explode(',', $currentUser->role);
-            
-            if (in_array('Admin', $roles)) {
-                return User::findOrFail($request->user_id);
-            }
+        // Jika terdapat request user_id (ingin melihat/mengubah porto orang lain)
+        // Pastikan HANYA Admin yang diizinkan melakukannya.
+        if ($request->filled('user_id') && $currentUser->hasRole('Admin')) {
+            return User::findOrFail($request->user_id);
         }
         
+        // Jika bukan admin atau tidak ada request user_id, 
+        // paksa kembalikan profil user yang sedang login saat ini.
         return $currentUser;
     }
 
@@ -40,11 +38,8 @@ class TeacherPortfolioController extends Controller
         $materials = $targetUser->materials()->latest()->get();
         $portfolios = $targetUser->portfolios()->orderBy('year', 'desc')->get();
         $articles = $targetUser->articles()->latest()->get();
-        
-        // MENGAKTIFKAN PENGAMBILAN DATA PENDIDIKAN       
         $educations = $targetUser->educations()->orderBy('start_year', 'desc')->get();
 
-        // MENAMBAHKAN 'educations' KE DALAM COMPACT
         return view('portfolio.index', compact('experiences', 'materials', 'portfolios', 'articles', 'educations', 'targetUser'));
     }
 
@@ -53,7 +48,6 @@ class TeacherPortfolioController extends Controller
     // ==========================================
     public function storeEducation(Request $request)
     {
-        // Menyesuaikan dengan kolom start_year dan end_year dari file migrasi
         $request->validate([
             'institution' => 'required|string|max:255',
             'degree' => 'required|string|max:255',
@@ -62,8 +56,6 @@ class TeacherPortfolioController extends Controller
         ]);
 
         $targetUser = $this->getTargetUser($request);
-        
-        // Simpan data
         $targetUser->educations()->create($request->only('institution', 'degree', 'start_year', 'end_year'));
         
         return back()->with('success', 'Riwayat Pendidikan berhasil ditambahkan.');
@@ -72,8 +64,6 @@ class TeacherPortfolioController extends Controller
     public function destroyEducation(Request $request, $id)
     {
         $targetUser = $this->getTargetUser($request);
-        
-        // Cari data pendidikan berdasarkan ID dan hapus
         $edu = $targetUser->educations()->findOrFail($id);
         $edu->delete();
         
@@ -91,14 +81,13 @@ class TeacherPortfolioController extends Controller
 
         $targetUser = $this->getTargetUser($request);
         $edu = $targetUser->educations()->findOrFail($id);
-        
         $edu->update($request->only('institution', 'degree', 'start_year', 'end_year'));
         
         return back()->with('success', 'Riwayat Pendidikan berhasil diperbarui.');
     }
 
     // ==========================================
-    // CRUD PENGALAMAN & PELATIHAN (UPDATED WITH CERTIFICATE UPLOAD)
+    // CRUD PENGALAMAN & PELATIHAN
     // ==========================================
     public function storeExperience(Request $request)
     {
@@ -106,12 +95,11 @@ class TeacherPortfolioController extends Controller
             'title' => 'required|string|max:255',
             'year' => 'nullable|string|max:10',
             'organizer' => 'nullable|string|max:255',
-            'certificate' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048', // Validasi file sertifikat
+            'certificate' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048',
         ]);
 
         $data = $request->only('title', 'year', 'organizer');
 
-        // Jika ada file sertifikat yang diunggah
         if ($request->hasFile('certificate')) {
             $data['certificate_path'] = $request->file('certificate')->store('teacher_certificates', 'public');
         }
@@ -127,7 +115,6 @@ class TeacherPortfolioController extends Controller
         $targetUser = $this->getTargetUser($request);
         $exp = $targetUser->experiences()->findOrFail($id);
         
-        // Hapus file sertifikat dari storage jika ada
         if ($exp->certificate_path) {
             Storage::disk('public')->delete($exp->certificate_path);
         }
@@ -143,7 +130,7 @@ class TeacherPortfolioController extends Controller
             'title' => 'required|string|max:255',
             'year' => 'nullable|string|max:10',
             'organizer' => 'nullable|string|max:255',
-            'certificate' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048', // Validasi file sertifikat
+            'certificate' => 'nullable|file|mimes:pdf,jpeg,png,jpg|max:2048',
         ]);
 
         $targetUser = $this->getTargetUser($request);
@@ -151,9 +138,7 @@ class TeacherPortfolioController extends Controller
         
         $data = $request->only('title', 'year', 'organizer');
 
-        // Jika ada file sertifikat baru yang diunggah
         if ($request->hasFile('certificate')) {
-            // Hapus file lama jika ada
             if ($exp->certificate_path) {
                 Storage::disk('public')->delete($exp->certificate_path);
             }
@@ -221,16 +206,13 @@ class TeacherPortfolioController extends Controller
 
         $data = $request->only('title', 'type', 'file_url');
         
-        // Update Icon berdasarkan tipe
         $type = strtolower($request->type ?? '');
         if (str_contains($type, 'pdf')) $data['icon'] = 'ph-file-pdf text-red-500';
         elseif (str_contains($type, 'ppt') || str_contains($type, 'slide')) $data['icon'] = 'ph-file-slides text-orange-500';
         elseif (str_contains($type, 'video')) $data['icon'] = 'ph-file-video text-blue-500';
         else $data['icon'] = 'ph-file-text text-slate-500';
 
-        // Jika ada file baru yang diunggah
         if ($request->hasFile('file')) {
-            // Hapus file lama jika ada
             if ($mat->file_path) Storage::disk('public')->delete($mat->file_path);
             
             $data['file_path'] = $request->file('file')->store('teacher_materials', 'public');
@@ -267,7 +249,7 @@ class TeacherPortfolioController extends Controller
         $targetUser = $this->getTargetUser($request);
         $port = $targetUser->portfolios()->findOrFail($id);
         
-        Storage::disk('public')->delete($port->image_path);
+        if ($port->image_path) Storage::disk('public')->delete($port->image_path);
         $port->delete();
         
         return back()->with('success', 'Portofolio berhasil dihapus.');
@@ -278,7 +260,7 @@ class TeacherPortfolioController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'year' => 'nullable|string|max:10',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Boleh kosong saat update
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
         ]);
 
         $targetUser = $this->getTargetUser($request);
@@ -287,7 +269,6 @@ class TeacherPortfolioController extends Controller
         $data = $request->only('title', 'year');
         
         if ($request->hasFile('image')) {
-            // Hapus foto lama sebelum menyimpan yang baru
             if ($port->image_path) Storage::disk('public')->delete($port->image_path);
             $data['image_path'] = $request->file('image')->store('teacher_portfolios', 'public');
         }
@@ -342,7 +323,7 @@ class TeacherPortfolioController extends Controller
             'excerpt' => 'nullable|string|max:500',
             'url' => 'nullable|url',
             'published_at' => 'nullable|date',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Boleh kosong saat update
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', 
         ]);
 
         $targetUser = $this->getTargetUser($request);
@@ -351,7 +332,6 @@ class TeacherPortfolioController extends Controller
         $data = $request->only('title', 'category', 'excerpt', 'url', 'published_at');
         
         if ($request->hasFile('image')) {
-            // Hapus thumbnail lama jika ada unggahan baru
             if ($art->image_path) Storage::disk('public')->delete($art->image_path);
             $data['image_path'] = $request->file('image')->store('teacher_articles', 'public');
         }

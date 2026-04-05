@@ -15,7 +15,13 @@ return [
                 'route' => 'dashboard',
                 'icon' => 'ph-squares-four',  
                 'roles' => ['*']              
-            ],   
+            ],  
+            [
+                'name' => 'Profil Saya',
+                'route' => 'profile.edit',
+                'icon' => 'ph-user-circle',  
+                'roles' => ['*'] // Tanda bintang (*) artinya semua role bisa melihat menu ini
+            ], 
             [
                 'name' => 'Kelola Portofolio',
                 'route' => 'portfolio.index', 
@@ -23,6 +29,9 @@ return [
                 'icon' => 'ph-medal',
                 'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas', 'Guru Mata Pelajaran', 'Guru', 'Guru Piket']
             ],
+        ],
+
+        'Menu Absensi Siswa' => [
             [
                 'name' => 'Scan Aktifitas',
                 'route' => 'scan.show',
@@ -68,7 +77,8 @@ return [
                 'icon' => 'ph-chalkboard-teacher',
                 'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas', 'TU']
             ],
-        ],
+        ],           
+            
         'Spesial Ramadhan' => [
             [
                 'name' => 'Rekap Mutabaah',

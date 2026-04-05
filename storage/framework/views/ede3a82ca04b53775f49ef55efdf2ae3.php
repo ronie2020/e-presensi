@@ -378,13 +378,13 @@
                                 <div class="flex items-center gap-2 flex-wrap">
                                     <!-- Sosial Media (Menggunakan formatSocialUrl) -->
                                     <template x-if="teacher.instagram">
-                                        <a :href="formatSocialUrl('ig', teacher.instagram)" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-pink-500 hover:text-white flex items-center justify-center text-slate-500 transition-all" title="Instagram"><i class="ph-logo ph-instagram-logo text-xl"></i></a>
+                                        <a :href="formatSocialUrl('ig', teacher.instagram)" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-pink-500 hover:text-white flex items-center justify-center text-slate-500 transition-all hover:-translate-y-1 hover:shadow-md" title="Instagram"><i class="ph-fill ph-instagram-logo text-xl"></i></a>
                                     </template>
                                     <template x-if="teacher.facebook">
-                                        <a :href="formatSocialUrl('fb', teacher.facebook)" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-blue-600 hover:text-white flex items-center justify-center text-slate-500 transition-all" title="Facebook"><i class="ph-logo ph-facebook-logo text-xl"></i></a>
+                                        <a :href="formatSocialUrl('fb', teacher.facebook)" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-blue-600 hover:text-white flex items-center justify-center text-slate-500 transition-all hover:-translate-y-1 hover:shadow-md" title="Facebook"><i class="ph-fill ph-facebook-logo text-xl"></i></a>
                                     </template>
                                     <template x-if="teacher.tiktok">
-                                        <a :href="formatSocialUrl('tiktok', teacher.tiktok)" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-800 hover:text-white flex items-center justify-center text-slate-500 transition-all" title="TikTok"><i class="ph-logo ph-tiktok-logo text-xl"></i></a>
+                                        <a :href="formatSocialUrl('tiktok', teacher.tiktok)" target="_blank" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-800 hover:text-white flex items-center justify-center text-slate-500 transition-all hover:-translate-y-1 hover:shadow-md" title="TikTok"><i class="ph-fill ph-tiktok-logo text-xl"></i></a>
                                     </template>
 
                                     <!-- Tombol Bagikan Link Profil -->

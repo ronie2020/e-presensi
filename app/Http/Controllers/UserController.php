@@ -32,7 +32,6 @@ class UserController extends Controller
 
     /**
      * Helper: Cek apakah user yang login memiliki role Admin
-     * (Sekarang sangat ringkas menggunakan method bawaan Spatie)
      */
     private function checkIsAdmin()
     {
@@ -41,7 +40,6 @@ class UserController extends Controller
 
     public function index()
     {
-        // Sebaiknya kita eager load 'roles' milik Spatie agar tidak kena N+1 Query
         $users = User::with('roles')->latest()->paginate(10);
         return view('users.index', ['users' => $users]);
     }
@@ -71,9 +69,9 @@ class UserController extends Controller
             'facebook' => ['nullable', 'string', 'max:50'],
         ]);
 
-        // KEAMANAN: Hanya Admin yang boleh membuat user dengan role Admin
-        if (in_array('Admin', $request->role) && !$this->checkIsAdmin()) {
-            return redirect()->back()->with('error', 'Anda tidak memiliki hak akses untuk membuat user Admin.');
+        // KEAMANAN: Hanya Admin yang boleh membuat user
+        if (!$this->checkIsAdmin()) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki hak akses untuk membuat user baru.');
         }
 
         $photoPath = null;
@@ -81,7 +79,6 @@ class UserController extends Controller
             $photoPath = $request->file('photo')->store('teachers', 'public');
         }
 
-        // Simpan Data User Utama (Hapus 'role' dari sini)
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -97,7 +94,6 @@ class UserController extends Controller
             'facebook' => $request->facebook,
         ]);
 
-        // Berikan Role ke User menggunakan fitur Spatie
         $user->assignRole($request->role);
 
         return redirect()->route('users.index')->with('success', 'Pengguna baru berhasil ditambahkan.');
@@ -105,18 +101,28 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        // Load target user beserta roles-nya
+        // CEK OTORISASI: Hanya Admin atau User pemilik profil yang boleh membuka halaman edit
+        if (!$this->checkIsAdmin() && Auth::id() !== $user->id) {
+            abort(403, 'Anda tidak memiliki akses untuk mengedit profil pengguna lain.');
+        }
+
         $user->load('roles');
         return view('users.edit', compact('user'));
     }
 
     public function update(Request $request, User $user)
     {
-        $request->validate([
+        $imAdmin = $this->checkIsAdmin();
+
+        // CEK OTORISASI: Tolak jika yang mengedit bukan admin dan bukan profilnya sendiri
+        if (!$imAdmin && Auth::id() !== $user->id) {
+            abort(403, 'Anda tidak memiliki akses untuk mengubah profil ini.');
+        }
+
+        // Aturan validasi dasar (berlaku untuk semuanya)
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'role' => ['required', 'array'],
-            'role.*' => ['string', 'in:' . implode(',', $this->availableRoles)],
             'position' => ['nullable', 'string', 'max:50'],
             'pangkat' => ['nullable', 'string', 'max:50'],
             'bio' => ['nullable', 'string', 'max:255'],
@@ -127,7 +133,7 @@ class UserController extends Controller
             'instagram' => ['nullable', 'string', 'max:50'],
             'tiktok' => ['nullable', 'string', 'max:50'],
             'facebook' => ['nullable', 'string', 'max:50'],
-            // [BARU] Validasi Data CV
+            // Validasi Data CV
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
             'tanggal_lahir' => ['nullable', 'date'],
             'jenis_kelamin' => ['nullable', 'string', 'in:Laki-laki,Perempuan'],
@@ -136,18 +142,21 @@ class UserController extends Controller
             'alamat' => ['nullable', 'string'],
             'keahlian' => ['nullable', 'string'],
             'hobi' => ['nullable', 'string'],
-        ]);
-        
-        $imAdmin = $this->checkIsAdmin();
+        ];
 
-        // Jika SAYA bukan admin, DAN saya mencoba menambahkan role 'Admin' ke target -> TOLAK
-        if (!$imAdmin && in_array('Admin', $request->role)) {
-             return redirect()->back()->with('error', 'Anda tidak memiliki hak akses untuk menjadikan user sebagai Admin.');
+        // Jika yang login Admin, tambahkan validasi untuk Role
+        if ($imAdmin) {
+            $rules['role'] = ['required', 'array'];
+            $rules['role.*'] = ['string', 'in:' . implode(',', $this->availableRoles)];
         }
 
+        $request->validate($rules);
+
         // Cegah Admin menghapus role Admin-nya sendiri (Anti Lockout)
-        if (Auth::id() == $user->id && !in_array('Admin', $request->role)) {
-             return redirect()->back()->with('error', 'Anda tidak boleh menghapus role Admin dari akun Anda sendiri.');
+        if ($imAdmin && Auth::id() == $user->id) {
+            if (!$request->has('role') || !in_array('Admin', $request->role)) {
+                return redirect()->back()->with('error', 'Anda tidak boleh menghapus role Admin dari akun Anda sendiri.');
+            }
         }
 
         $data = [
@@ -161,7 +170,6 @@ class UserController extends Controller
             'instagram' => $request->instagram,
             'tiktok' => $request->tiktok,
             'facebook' => $request->facebook,
-            // Simpan Data CV
             'tempat_lahir' => $request->tempat_lahir,
             'tanggal_lahir' => $request->tanggal_lahir,
             'jenis_kelamin' => $request->jenis_kelamin,
@@ -183,13 +191,20 @@ class UserController extends Controller
             $data['photo_path'] = $request->file('photo')->store('teachers', 'public');
         }
 
-        // Update basic data (tanpa kolom role JSON lama)
+        // Update data utama
         $user->update($data);
 
-        // SYNC ROLES SPATIE (Otomatis menghapus yang di-uncheck & nambah yang baru)
-        $user->syncRoles($request->role);
+        // SYNC ROLES SPATIE (Hanya izinkan Admin yang bisa memodifikasi Role)
+        if ($imAdmin && $request->has('role')) {
+            $user->syncRoles($request->role);
+        }
 
-        return redirect()->route('users.index')->with('success', 'Data pengguna berhasil diperbarui.');
+        // Arahkan kembali (redirect) dengan cerdas
+        if ($imAdmin && Auth::id() !== $user->id) {
+            return redirect()->route('users.index')->with('success', 'Data pengguna berhasil diperbarui.');
+        } else {
+            return redirect()->route('dashboard')->with('success', 'Profil Anda berhasil diperbarui.');
+        }
     }
 
     public function destroy(User $user)
@@ -198,14 +213,13 @@ class UserController extends Controller
             return redirect()->route('users.index')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
         }
 
-        $amIAdmin = $this->checkIsAdmin();
+        // CEK OTORISASI: Hanya Admin
+        if (!$this->checkIsAdmin()) {
+            abort(403, 'Akses ditolak.');
+        }
 
-        // Jika bukan admin
-        if (!$amIAdmin) {
-            // Cek apakah target punya role Admin menggunakan Spatie
-            if ($user->hasRole('Admin')) {
-                return redirect()->route('users.index')->with('error', 'Anda tidak memiliki wewenang menghapus Administrator.');
-            }
+        if ($user->hasRole('Admin')) {
+            return redirect()->route('users.index')->with('error', 'Anda tidak memiliki wewenang menghapus sesama Administrator.');
         }
 
         if ($user->photo_path) {
@@ -217,7 +231,6 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'Pengguna berhasil dihapus.');
     }
 
-    // Export Import tetap sama...
     public function export()
     {
         return Excel::download(new UsersExport, 'data-pengguna.xlsx');
@@ -228,6 +241,10 @@ class UserController extends Controller
         $request->validate([
             'file' => 'required|mimes:xlsx,xls|max:5120'
         ]);
+
+        if (!$this->checkIsAdmin()) {
+            abort(403, 'Akses ditolak.');
+        }
 
         try {
             Excel::import(new UsersImport, $request->file('file'));

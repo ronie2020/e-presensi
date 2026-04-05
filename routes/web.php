@@ -256,12 +256,15 @@ Route::middleware('auth')->group(function () {
            
     // Dashboard & Profile
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+     Route::get('/profile', function() {
+        return redirect()->route('users.edit', auth()->id());
+    })->name('profile.edit');
+    
+    //Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+   // Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
     // =========================================================================
-    //  PERBAIKAN: ROUTE REKAPITULASI KELAS (SUMMARY)    
+    //  ROUTE REKAPITULASI KELAS (SUMMARY)    
     // =========================================================================
     Route::get('/reports/classes', [ReportController::class, 'indexClass'])->name('reports.class');
     
