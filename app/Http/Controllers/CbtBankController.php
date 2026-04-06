@@ -456,9 +456,13 @@ class CbtBankController extends Controller
         }
     }
 
-    public function importToExam(Request $request, $exam_id)
+     public function importToExam(Request $request, $exam_id)
     {
-        $request->validate(['bank_id' => 'required']);
+        $request->validate([
+            'bank_id' => 'required',
+            'import_mode' => 'nullable|string',
+            'selected_question_ids' => 'nullable|array'
+        ]);
         
         $exam = CbtExam::findOrFail($exam_id);
         $bank = CbtQuestionBank::with('questions')->findOrFail($request->bank_id);
@@ -467,10 +471,24 @@ class CbtBankController extends Controller
             return back()->with('error', 'Bank soal ini kosong.');
         }
 
+        // LOGIKA BARU: Cek mode import, apakah sebagian atau semua
+        $questionsToImport = collect();
+        if ($request->import_mode === 'partial' && !empty($request->selected_question_ids)) {
+            // Ambil hanya soal yang dicentang
+            $questionsToImport = $bank->questions->whereIn('id', $request->selected_question_ids);
+        } else {
+            // Ambil seluruh soal dari bank (Default lama)
+            $questionsToImport = $bank->questions;
+        }
+
+        if ($questionsToImport->count() == 0) {
+            return back()->with('error', 'Tidak ada soal valid yang dipilih untuk diimpor.');
+        }
+
         DB::beginTransaction();
         try {
             $count = 0;
-            foreach ($bank->questions as $q) {
+            foreach ($questionsToImport as $q) {
                 $newQ = $q->replicate();
                 $newQ->cbt_question_bank_id = null;
                 $newQ->cbt_exam_id = $exam->id;
