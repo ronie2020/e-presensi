@@ -1,33 +1,30 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>" class="scroll-smooth">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    {{-- PENGEMBANGAN: Optimasi SEO & Open Graph untuk WhatsApp/Sosmed --}}
+    
     <meta name="description" content="Website Resmi SMP Negeri 3 Lakbok. Informasi akademik, kesiswaan, dan prestasi sekolah terkini.">
-    <meta property="og:title" content="{{ config('app.name', 'SMP Negeri 3 Lakbok') }}">
+    <meta property="og:title" content="<?php echo e(config('app.name', 'SMP Negeri 3 Lakbok')); ?>">
     <meta property="og:description" content="Website Resmi SMP Negeri 3 Lakbok. Informasi akademik, kesiswaan, dan prestasi sekolah terkini.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url()->current() }}">
-    {{-- Pastikan Anda memiliki gambar default untuk preview link --}}
-    <meta property="og:image" content="{{ asset('images/netila.jpg') }}"> 
+    <meta property="og:url" content="<?php echo e(url()->current()); ?>">
     
-    <title>{{ config('app.name', 'SMP Negeri 3 Lakbok') }}</title>
+    <meta property="og:image" content="<?php echo e(asset('images/netila.jpg')); ?>"> 
     
-    {{-- CSS & Meta Tags --}}
-    @include('landing.styles')
+    <title><?php echo e(config('app.name', 'SMP Negeri 3 Lakbok')); ?></title>
+    
+    
+    <?php echo $__env->make('landing.styles', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
-    {{-- PENGEMBANGAN: Style x-cloak wajib ada untuk mencegah flicker pada Alpine.js --}}
+    
     <style>
         [x-cloak] { display: none !important; }
     </style>
 
-    {{-- 
-        === KONFIGURASI POP-UP INFO SEKOLAH === 
-        Ubah bagian ini sesuai kebutuhan (PPDB, Ramadhan, Ujian, dll)
-    --}}
-    @php
+    
+    <?php
         $infoPopup = [
             'active' => true, 
             'id' => 'Idul_Fitri_2026', 
@@ -58,7 +55,7 @@
                 'btn_bg' => 'bg-emerald-600', 'btn_hover' => 'hover:bg-emerald-500', 'btn_ring' => 'focus-visible:outline-emerald-600'
             ],
         };
-    @endphp
+    ?>
 </head>
 <body class="antialiased text-slate-800 bg-slate-50 overflow-x-hidden selection:bg-blue-500 selection:text-white" 
     x-data="{ 
@@ -70,8 +67,8 @@
         infoPopupOpen: false,
         
         initPopup() {
-            const isActive = {{ $infoPopup['active'] ? 'true' : 'false' }};
-            const popupId = '{{ $infoPopup['id'] }}';
+            const isActive = <?php echo e($infoPopup['active'] ? 'true' : 'false'); ?>;
+            const popupId = '<?php echo e($infoPopup['id']); ?>';
             
             if (isActive) {
                 const hasSeen = localStorage.getItem('seen_' + popupId);
@@ -90,7 +87,7 @@
             document.body.style.overflow = ''; 
             
             if (dontShowAgain) {
-                localStorage.setItem('seen_{{ $infoPopup['id'] }}', 'true');
+                localStorage.setItem('seen_<?php echo e($infoPopup['id']); ?>', 'true');
             }
         },
 
@@ -155,7 +152,7 @@
          class="fixed inset-0 z-[100] overflow-y-auto" 
          role="dialog" aria-modal="true" aria-labelledby="modal-title">
         
-        {{-- Backdrop --}}
+        
         <div x-show="infoPopupOpen" 
              x-transition:enter="ease-out duration-300"
              x-transition:enter-start="opacity-0"
@@ -166,10 +163,10 @@
              class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" 
              @click="closeInfoPopup(false)"></div>
 
-        {{-- PERBAIKAN FINAL: Gunakan flex biasa (tanpa items-center) --}}
+        
         <div class="flex min-h-full p-4 sm:p-6">
 
-            {{-- Modal Panel --}}
+            
             <!-- SOLUSI: Menggunakan class 'm-auto' untuk memusatkan secara otomatis. 
                  Jika konten lebih panjang dari layar, scroll luar akan bekerja secara alami 
                  tanpa memotong bagian atas atau bawah pop-up. -->
@@ -189,32 +186,34 @@
 
                 <!-- Container Utama Pop-up -->
                 <div class="flex flex-col md:flex-row w-full">
-                    {{-- Image Side --}}
+                    
                     <div class="md:w-5/12 h-48 sm:h-56 md:h-auto shrink-0 relative bg-slate-200">
-                        <img src="{{ $infoPopup['image'] }}" alt="Info Sekolah" class="absolute inset-0 w-full h-full object-cover">
+                        <img src="<?php echo e($infoPopup['image']); ?>" alt="Info Sekolah" class="absolute inset-0 w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-black/10"></div>
                     </div>
 
-                    {{-- Content Side --}}
+                    
                     <!-- Diberikan padding yang lega agar konten tidak bertabrakan -->
                     <div class="md:w-7/12 p-6 md:p-8 flex flex-col justify-center bg-white relative">
                         <div class="mb-4">
-                            <span class="inline-flex items-center rounded-md {{ $colorTheme['badge_bg'] }} px-2 py-1 text-xs font-medium {{ $colorTheme['badge_text'] }} ring-1 ring-inset {{ $colorTheme['badge_ring'] }} mb-3">
+                            <span class="inline-flex items-center rounded-md <?php echo e($colorTheme['badge_bg']); ?> px-2 py-1 text-xs font-medium <?php echo e($colorTheme['badge_text']); ?> ring-1 ring-inset <?php echo e($colorTheme['badge_ring']); ?> mb-3">
                                 Informasi Terbaru
                             </span>
                             <h3 id="modal-title" class="text-xl font-black text-slate-900 leading-tight">
-                                {{ $infoPopup['title'] }}
+                                <?php echo e($infoPopup['title']); ?>
+
                             </h3>
                         </div>
                         
                         <div class="prose prose-sm text-slate-500 mb-6 leading-relaxed">
-                            <p>{{ $infoPopup['message'] }}</p>
+                            <p><?php echo e($infoPopup['message']); ?></p>
                         </div>
 
                         <!-- mt-auto dihapus, diganti mt-6 agar alur padding natural -->
                         <div class="flex flex-col sm:flex-row gap-3 items-center mt-6">
-                            <a href="{{ $infoPopup['cta_link'] }}" @click="closeInfoPopup(false)" class="w-full sm:w-auto text-center inline-flex justify-center items-center gap-2 rounded-xl {{ $colorTheme['btn_bg'] }} px-5 py-2.5 text-sm font-semibold text-white shadow-sm {{ $colorTheme['btn_hover'] }} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 {{ $colorTheme['btn_ring'] }} transition-all">
-                                {{ $infoPopup['cta_text'] }}
+                            <a href="<?php echo e($infoPopup['cta_link']); ?>" @click="closeInfoPopup(false)" class="w-full sm:w-auto text-center inline-flex justify-center items-center gap-2 rounded-xl <?php echo e($colorTheme['btn_bg']); ?> px-5 py-2.5 text-sm font-semibold text-white shadow-sm <?php echo e($colorTheme['btn_hover']); ?> focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 <?php echo e($colorTheme['btn_ring']); ?> transition-all">
+                                <?php echo e($infoPopup['cta_text']); ?>
+
                                 <i class="ph-bold ph-arrow-right"></i>
                             </a>
                             
@@ -230,73 +229,73 @@
     </div>
 
     <!-- NAVBAR -->
-    @include('landing.navbar')
+    <?php echo $__env->make('landing.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <!-- SOLUSI: Bungkus semua konten dengan div anti-bocor (overflow-x-hidden) -->
     <div class="w-full overflow-x-hidden relative">
 
         <!-- HERO SECTION -->
-        @include('landing.hero')
+        <?php echo $__env->make('landing.hero', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- PPDB TRACKS -->
-        @include('landing.ppdb')
+        <?php echo $__env->make('landing.ppdb', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- 7 HABITS (KARAKTER) -->
-        @include('landing.character')
+        <?php echo $__env->make('landing.character', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- QUICK ACCESS MENU -->
-        @include('landing.quick-access')
+        <?php echo $__env->make('landing.quick-access', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- DOWNLOAD AREA -->
-        @include('landing.downloads')
+        <?php echo $__env->make('landing.downloads', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- KEPALA SEKOLAH -->
-        @include('landing.headmaster')
+        <?php echo $__env->make('landing.headmaster', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- PROFIL SEKOLAH -->
-        @include('landing.profile')
+        <?php echo $__env->make('landing.profile', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- VIDEO PROFIL -->
-        @include('landing.video')
+        <?php echo $__env->make('landing.video', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- GURU & STAFF -->
-        @include('landing.teachers')
+        <?php echo $__env->make('landing.teachers', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- KEGIATAN -->
-        @include('landing.activities')
+        <?php echo $__env->make('landing.activities', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- ARTIKEL --> 
-        @include('landing.articles')
+        <?php echo $__env->make('landing.articles', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- PRESTASI -->
-        @include('landing.achievements')
+        <?php echo $__env->make('landing.achievements', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- EKSTRAKURIKULER -->
-        @include('landing.extracurricular')
+        <?php echo $__env->make('landing.extracurricular', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- ALUMNI -->
-        @include('landing.alumni')
+        <?php echo $__env->make('landing.alumni', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- KATA MEREKA / GUESTBOOK -->
-        @include('landing.guestbook')
+        <?php echo $__env->make('landing.guestbook', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- LIBRARY -->
-        @include('landing.library')
+        <?php echo $__env->make('landing.library', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- E-BOOKS -->
-        @include('landing.ebooks')
+        <?php echo $__env->make('landing.ebooks', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <!-- ANNOUNCEMENTS, AGENDA & FOOTER -->
-        @include('landing.footer')
+        <?php echo $__env->make('landing.footer', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     </div>
     <!-- Penutup Solusi -->
 
     <!-- MODALS -->
-    @include('landing.modals')
+    <?php echo $__env->make('landing.modals', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <!-- BACK TO TOP -->
-    {{-- PENGEMBANGAN: Ditambahkan x-cloak dan aria-label --}}
+    
     <button 
         x-cloak
         x-show="showBackToTop" 
@@ -313,8 +312,8 @@
         <i class="ph-bold ph-arrow-up text-xl"></i>
     </button>
 
-    {{-- Scripts JS --}}
-    @include('landing.scripts')
+    
+    <?php echo $__env->make('landing.scripts', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
 </body>
-</html>
+</html><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/welcome.blade.php ENDPATH**/ ?>
