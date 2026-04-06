@@ -63,18 +63,10 @@
             
             <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
                 <div class="flex-1">
-                    <div class="flex flex-wrap gap-3 mb-6 mx-auto xl:mx-0">
-                        <a href="<?php echo e(route('dashboard')); ?>" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit">
-                            <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
-                            <span>Kembali ke Dashboard</span>
-                        </a>
-                        
-                        <a href="<?php echo e(route('teacher.habits.leaderboard')); ?>" class="group bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit">
-                            <i class="ph-fill ph-trophy text-lg group-hover:scale-110 transition-transform"></i>
-                            <span>Siswa Terajin</span>
-                        </a>
-                    </div>
-                    
+                    <a href="<?php echo e(route('dashboard')); ?>" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
+                        <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
+                        <span>Kembali ke Dashboard</span>
+                    </a>
                     <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 text-blue-200 text-[10px] font-black uppercase tracking-[0.2em] mb-6 backdrop-blur-md shadow-inner">
                         <span class="relative flex h-2 w-2">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -211,7 +203,7 @@
                         <div class="relative w-full md:w-48 shrink-0">
                             <select id="statusFilter" onchange="searchTable()" class="w-full pl-4 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none cursor-pointer">
                                 <option value="all">Semua Status</option>
-                                <option value="waiting">⏳ Menunggu Dinilai</option>
+                                <option value="pending">⏳ Menunggu Dinilai</option>
                                 <option value="graded">✅ Sudah Dinilai</option>
                                 <option value="missing">❌ Belum Lapor</option>
                             </select>
@@ -219,18 +211,18 @@
                         </div>
 
                         
-                        <div class="relative w-full md:w-64">
+                        <div class="relative w-full md:w-64 shrink-0">
                             <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
                             <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Cari nama siswa..." 
                                 class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-slate-400">
                         </div>
 
-                        <div class="flex gap-2 w-full md:w-auto shrink-0">
-                            <span class="px-4 py-2 rounded-xl bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider flex-1 text-center whitespace-nowrap">
+                         <div class="flex gap-2 w-full md:w-auto shrink-0">
+                             <span class="px-4 py-2 rounded-xl bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider flex-1 text-center whitespace-nowrap">
                                 Kelas: <?php echo e($classes->find($classId)->name ?? '-'); ?>
 
-                            </span>
-                        </div>
+                             </span>
+                         </div>
                     </div>
                 </div>
 
@@ -248,10 +240,10 @@
                         <tbody class="divide-y divide-slate-50">
                             <?php $__empty_1 = true; $__currentLoopData = $students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <?php
-                                    // Menentukan Status Row untuk fitur Filter JavaScript
+                                    // Menentukan Status Row untuk filter JavaScript
                                     $rowStatus = 'missing';
                                     if ($student->habit_status == 'submitted') {
-                                        $rowStatus = ($student->habit_data && $student->habit_data->teacher_feedback) ? 'graded' : 'waiting';
+                                        $rowStatus = ($student->habit_data && !empty($student->habit_data->teacher_feedback)) ? 'graded' : 'pending';
                                     }
                                 ?>
 
@@ -264,7 +256,7 @@
                                             </div>
                                             <div>
                                                 <div class="student-name font-black text-slate-800 group-hover:text-blue-600 transition-colors uppercase tracking-tight text-sm"><?php echo e($student->name); ?></div>
-                                                <div class="text-[9px] text-slate-400 font-bold tracking-widest uppercase mt-0.5"><?php echo e($student->student_id ?? '-'); ?></div>
+                                                <div class="text-[9px] text-slate-400 font-bold tracking-widest uppercase mt-0.5"><?php echo e($student->student_id); ?></div>
                                             </div>
                                         </div>
                                     </td>
@@ -303,7 +295,7 @@
                                     </td>
                                     <td class="px-10 py-5 text-right">
                                         <?php if($student->habit_data): ?>
-                                            <div class="flex items-center justify-end gap-2">
+                                            <div class="flex items-center justify-end gap-3">
                                                 <div id="badge-feedback-<?php echo e($student->habit_data->id); ?>" class="mr-2 hidden md:block">
                                                     <?php if($student->habit_data->teacher_feedback): ?>
                                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-black uppercase tracking-wider">
@@ -311,14 +303,14 @@
                                                         </span>
                                                     <?php else: ?>
                                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-50 border border-amber-100 text-amber-600 text-[10px] font-black uppercase tracking-wider animate-pulse">
-                                                            <i class="ph-bold ph-warning-circle"></i> Menunggu
+                                                            <i class="ph-bold ph-clock"></i> Menunggu
                                                         </span>
                                                     <?php endif; ?>
                                                 </div>
 
                                                 <button onclick="openDetail(<?php echo e($student->habit_data->id); ?>)" 
-                                                    class="inline-flex items-center gap-2 text-blue-600 hover:text-white font-black text-[9px] uppercase tracking-[0.1em] bg-blue-50 hover:bg-blue-600 px-6 py-3 rounded-2xl transition-all active:scale-90 border border-blue-100 shadow-sm">
-                                                    <i class="ph-bold ph-notebook text-sm"></i> Tinjau Laporan
+                                                    class="inline-flex items-center gap-2 text-slate-700 hover:text-white font-black text-[9px] uppercase tracking-[0.1em] bg-slate-100 hover:bg-slate-900 px-6 py-3 rounded-2xl transition-all active:scale-90 border border-slate-200 shadow-sm">
+                                                    Tinjau Laporan <i class="ph-bold ph-caret-right text-sm"></i>
                                                 </button>
                                             </div>
                                         <?php else: ?>
@@ -337,8 +329,9 @@
                                 </tr>
                             <?php endif; ?>
                             <tr id="noResultsRow" class="hidden">
-                                <td colspan="5" class="px-8 py-16 text-center text-slate-400 text-sm italic">
-                                    Siswa dengan status/nama tersebut tidak ditemukan.
+                                <td colspan="5" class="px-8 py-16 text-center text-slate-400 text-sm font-medium italic">
+                                    <i class="ph-duotone ph-magnifying-glass mb-2 text-2xl"></i><br>
+                                    Data siswa tidak ditemukan dengan filter tersebut.
                                 </td>
                             </tr>
                         </tbody>
@@ -351,7 +344,19 @@
             <div class="animate-enter space-y-6" style="animation-delay: 100ms">
                 
                 
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 px-2">
+                <?php
+                    $currentStatus = request('status');
+                    $displaySubmissions = isset($latestSubmissions) ? clone $latestSubmissions : collect([]);
+                    
+                    if ($currentStatus === 'pending') {
+                        $displaySubmissions = $displaySubmissions->whereNull('teacher_feedback');
+                    } elseif ($currentStatus === 'graded') {
+                        $displaySubmissions = $displaySubmissions->whereNotNull('teacher_feedback');
+                    }
+                ?>
+
+                
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
                     <div>
                         <h3 class="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
                             <i class="ph-duotone ph-lightning text-yellow-500"></i>
@@ -359,17 +364,34 @@
                         </h3>
                         <p class="text-slate-500 text-sm font-medium mt-1">Daftar siswa yang baru saja mengirimkan laporan kebiasaan hari ini.</p>
                     </div>
-                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-600 uppercase tracking-widest shadow-sm">
-                        <i class="ph-bold ph-calendar-check text-blue-500"></i>
-                        <?php echo e(\Carbon\Carbon::parse($date)->translatedFormat('l, d F Y')); ?>
 
+                    
+                    <div class="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
+                        <a href="<?php echo e(request()->fullUrlWithQuery(['status' => null])); ?>" 
+                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all <?php echo e(!$currentStatus ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'); ?>">
+                            <i class="ph-bold ph-list-dashes"></i> Semua
+                        </a>
+                        
+                        <a href="<?php echo e(request()->fullUrlWithQuery(['status' => 'pending'])); ?>" 
+                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 <?php echo e($currentStatus == 'pending' ? 'bg-amber-100 text-amber-700 shadow-sm border border-amber-200' : 'text-slate-500 hover:bg-slate-50'); ?>">
+                            <i class="ph-bold ph-clock-countdown"></i> Antrean Penilaian
+                            <?php $pendingCount = (isset($latestSubmissions) ? $latestSubmissions : collect([]))->whereNull('teacher_feedback')->count(); ?>
+                            <?php if($pendingCount > 0): ?>
+                                <span class="bg-amber-500 text-white px-1.5 py-0.5 rounded-md text-[9px]"><?php echo e($pendingCount); ?></span>
+                            <?php endif; ?>
+                        </a>
+                        
+                        <a href="<?php echo e(request()->fullUrlWithQuery(['status' => 'graded'])); ?>" 
+                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 <?php echo e($currentStatus == 'graded' ? 'bg-emerald-100 text-emerald-700 shadow-sm border border-emerald-200' : 'text-slate-500 hover:bg-slate-50'); ?>">
+                            <i class="ph-bold ph-check-circle"></i> Sudah Dinilai
+                        </a>
                     </div>
                 </div>
 
                 
-                <?php if(isset($latestSubmissions) && $latestSubmissions->count() > 0): ?>
+                <?php if($displaySubmissions->count() > 0): ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        <?php $__currentLoopData = $latestSubmissions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $submission): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php $__currentLoopData = $displaySubmissions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $submission): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="group bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-200 transition-all duration-300 relative overflow-hidden">
                             
                             
@@ -447,8 +469,17 @@
                         <div class="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-slate-300 rotate-3 transition-transform hover:rotate-0">
                             <i class="ph-duotone ph-coffee text-5xl"></i>
                         </div>
-                        <h3 class="text-xl font-black text-slate-800 tracking-tight">Belum Ada Aktivitas Hari Ini</h3>
-                        <p class="text-slate-500 text-sm mt-2 max-w-sm mx-auto">Tampaknya belum ada siswa yang mengisi jurnal monitoring pada tanggal ini.</p>
+                        <h3 class="text-xl font-black text-slate-800 tracking-tight">
+                            <?php echo e($currentStatus == 'pending' ? 'Hore! Antrean Kosong' : 'Belum Ada Aktivitas'); ?>
+
+                        </h3>
+                        <p class="text-slate-500 text-sm mt-2 max-w-sm mx-auto">
+                            <?php echo e($currentStatus == 'pending' ? 'Semua jurnal kebiasaan untuk hari ini sudah kamu nilai.' : 'Tampaknya belum ada siswa yang mengisi jurnal dengan filter ini.'); ?>
+
+                        </p>
+                        <?php if($currentStatus): ?>
+                            <a href="<?php echo e(route('teacher.habits.index')); ?>" class="inline-block mt-6 px-6 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-slate-200 transition-colors">Reset Filter</a>
+                        <?php endif; ?>
                     </div>
                 <?php endif; ?>
             </div>
@@ -489,7 +520,7 @@
                         <div class="bg-white p-6 rounded-[2rem] border border-emerald-100 shadow-sm">
                             <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-50">
                                 <h4 class="font-black text-emerald-600 uppercase tracking-widest text-xs flex items-center gap-2"><i class="ph-fill ph-check-circle text-lg"></i> Sudah Lapor</h4>
-                                <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold"><?php echo e($stats['submitted'] ?? 0); ?> Siswa</span>
+                                <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold"><?php echo e($stats['submitted']); ?> Siswa</span>
                             </div>
                             <ol class="list-decimal list-inside space-y-2 text-sm font-medium text-slate-600 marker:font-bold marker:text-emerald-300">
                                 <?php $__empty_1 = true; $__currentLoopData = $students->where('habit_status', 'submitted'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?> <li class="pl-2"><?php echo e($s->name); ?></li>
@@ -499,7 +530,7 @@
                         <div class="bg-white p-6 rounded-[2rem] border border-rose-100 shadow-sm">
                             <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-50">
                                 <h4 class="font-black text-rose-500 uppercase tracking-widest text-xs flex items-center gap-2"><i class="ph-fill ph-x-circle text-lg"></i> Belum Lapor</h4>
-                                <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-lg text-xs font-bold"><?php echo e($stats['missing'] ?? 0); ?> Siswa</span>
+                                <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-lg text-xs font-bold"><?php echo e($stats['missing']); ?> Siswa</span>
                             </div>
                             <ol class="list-decimal list-inside space-y-2 text-sm font-medium text-slate-600 marker:font-bold marker:text-rose-300">
                                 <?php $__empty_1 = true; $__currentLoopData = $students->where('habit_status', 'missing'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?> <li class="pl-2"><?php echo e($s->name); ?></li>
@@ -520,13 +551,13 @@ Kelas: <?php echo e($classes->find($classId)->name ?? '-'); ?>
 Tanggal: <?php echo e(\Carbon\Carbon::parse($date)->translatedFormat('l, d F Y')); ?>
 
 
-✅ *SUDAH LAPOR (<?php echo e($stats['submitted'] ?? 0); ?>):*
+✅ *SUDAH LAPOR (<?php echo e($stats['submitted']); ?>):*
 <?php $__currentLoopData = $students->where('habit_status', 'submitted'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 <?php echo e($loop->iteration); ?>. <?php echo e($s->name); ?>
 
 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-❌ *BELUM LAPOR (<?php echo e($stats['missing'] ?? 0); ?>):*
+❌ *BELUM LAPOR (<?php echo e($stats['missing']); ?>):*
 <?php $__currentLoopData = $students->where('habit_status', 'missing'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 <?php echo e($loop->iteration); ?>. <?php echo e($s->name); ?>
 
@@ -541,7 +572,36 @@ Terima kasih. 🙏
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // 1. FUNGSI FILTER & MODAL DASAR
+        // 1. FUNGSI PENCARIAN DI TABEL & FILTER STATUS (Dipadukan)
+        function searchTable() {
+            const input = document.getElementById("searchInput").value.toLowerCase();
+            const statusFilter = document.getElementById("statusFilter").value;
+            const rows = document.querySelectorAll(".student-row");
+            let hasResults = false;
+
+            rows.forEach(row => {
+                const nameText = row.querySelector(".student-name").innerText.toLowerCase();
+                const rowStatus = row.getAttribute("data-status");
+
+                const matchName = nameText.includes(input);
+                const matchStatus = (statusFilter === 'all' || rowStatus === statusFilter);
+
+                if (matchName && matchStatus) {
+                    row.style.display = "";
+                    hasResults = true;
+                } else {
+                    row.style.display = "none";
+                }
+            });
+
+            // Menampilkan atau menyembunyikan tulisan "Tidak ada data"
+            const noResultsRow = document.getElementById("noResultsRow");
+            if(noResultsRow) {
+                noResultsRow.style.display = hasResults ? "none" : "";
+            }
+        }
+
+        // 2. FUNGSI LAINNYA
         function submitFilter() {
             document.getElementById('formLoading').classList.remove('hidden');
             document.getElementById('filterForm').submit();
@@ -591,41 +651,8 @@ Terima kasih. 🙏
             navigator.clipboard.writeText(text).then(() => { alert('Rekap berhasil disalin ke Clipboard!'); }).catch(err => { console.error(err); alert('Gagal menyalin.'); });
         }
 
-        // 2. FITUR DIPERBARUI: PENCARIAN & FILTER STATUS DI TABEL (JS MURNI)
-        function searchTable() {
-            const input = document.getElementById("searchInput").value.toLowerCase();
-            const statusFilter = document.getElementById("statusFilter").value; // Ambil nilai dropdown status
-            
-            const rows = document.querySelectorAll(".student-row");
-            let hasResults = false;
-
-            rows.forEach(row => {
-                const nameText = row.querySelector(".student-name").innerText.toLowerCase();
-                const rowStatus = row.getAttribute("data-status"); // Ambil status dari atribut baris
-
-                // Cek apakah teks cocok
-                const matchName = nameText.includes(input);
-                
-                // Cek apakah status cocok ('all' berarti tampilkan semua)
-                const matchStatus = (statusFilter === 'all' || rowStatus === statusFilter);
-
-                if (matchName && matchStatus) {
-                    row.style.display = "";
-                    hasResults = true;
-                } else {
-                    row.style.display = "none";
-                }
-            });
-
-            // Tampilkan pesan "Tidak Ditemukan" jika pencarian/filter kosong
-            const noResultsRow = document.getElementById("noResultsRow");
-            if(noResultsRow) {
-                noResultsRow.style.display = hasResults ? "none" : "";
-            }
-        }
-
-        // 3. FITUR AJAX SUBMIT FEEDBACK (DIPERBARUI)
-        function submitFeedbackAjax(event, formElement) {
+        // 3. FUNGSI AJAX SUBMIT FEEDBACK (DIPERBARUI)
+        function submitFeedbackAjax(event, formElement, passedHabitId = null) {
             event.preventDefault(); // Mencegah reload halaman
             
             const url = formElement.action;
@@ -633,9 +660,12 @@ Terima kasih. 🙏
             const btnSubmit = formElement.querySelector('#btn-submit-feedback');
             const originalText = btnSubmit.innerHTML;
             
-            // Ekstrak ID habit dari URL action form
-            const urlParts = url.split('/');
-            const habitId = urlParts[urlParts.length - 2]; 
+            // Ekstrak ID habit dengan benar
+            let habitId = passedHabitId;
+            if (!habitId) {
+                const urlParts = url.split('/').filter(Boolean); // Filter untuk buang slash berlebih
+                habitId = urlParts[urlParts.length - 1]; // Ambil elemen paling akhir (ID Angka)
+            }
 
             // Ubah status tombol loading
             btnSubmit.disabled = true;
@@ -648,6 +678,7 @@ Terima kasih. 🙏
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json',
+                    // Token CSRF sudah ada di dalam FormData
                 }
             })
             .then(response => {
@@ -655,6 +686,7 @@ Terima kasih. 🙏
                 return response.json(); 
             })
             .then(data => {
+                // Tampilkan SweetAlert
                 Swal.fire({
                     icon: 'success', 
                     title: 'Berhasil!', 
@@ -666,23 +698,23 @@ Terima kasih. 🙏
                     customClass: { popup: 'rounded-xl shadow-lg border border-emerald-100 bg-white' }
                 });
 
+                // Update teks tombol
                 btnSubmit.innerHTML = '<i class="ph-bold ph-check"></i> Perbarui Feedback';
 
                 // ==========================================
-                // UPDATE UI BADGE & DATA-STATUS (REAL-TIME)
+                // UPDATE UI BADGE DI HALAMAN UTAMA (REAL-TIME)
                 // ==========================================
                 const badgeElement = document.getElementById('badge-feedback-' + habitId);
                 if (badgeElement) {
-                    // Update tampilan badge
                     badgeElement.innerHTML = `
                         <div class="flex items-center gap-1.5 text-emerald-600 text-[10px] font-black uppercase tracking-wide bg-emerald-50 px-2 py-1 rounded-lg">
                             <i class="ph-bold ph-check-circle"></i> Dinilai
                         </div>
                     `;
                     
-                    // UPDATE JUGA ATRIBUT PADA BARIS TABEL AGAR FILTER TETAP BEKERJA
+                    // UPDATE ATRIBUT BARIS (Agar Filter Status di Tabel tetap Akurat)
                     const tableRow = badgeElement.closest('tr.student-row');
-                    if (tableRow) {
+                    if(tableRow) {
                         tableRow.setAttribute('data-status', 'graded');
                     }
                 }
