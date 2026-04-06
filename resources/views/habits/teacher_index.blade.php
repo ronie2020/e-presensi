@@ -54,10 +54,18 @@
             
             <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
                 <div class="flex-1">
-                    <a href="{{ route('dashboard') }}" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
-                        <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
-                        <span>Kembali ke Dashboard</span>
-                    </a>
+                    <div class="flex flex-wrap gap-3 mb-6 mx-auto xl:mx-0">
+                        <a href="{{ route('dashboard') }}" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit">
+                            <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
+                            <span>Kembali ke Dashboard</span>
+                        </a>
+                        {{-- TOMBOL MENUJU LEADERBOARD --}}
+                        <a href="{{ route('teacher.habits.leaderboard') }}" class="group bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit">
+                            <i class="ph-fill ph-trophy text-lg group-hover:scale-110 transition-transform"></i>
+                            <span>Siswa Terajin</span>
+                        </a>
+                    </div>
+                    
                     <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 text-blue-200 text-[10px] font-black uppercase tracking-[0.2em] mb-6 backdrop-blur-md shadow-inner">
                         <span class="relative flex h-2 w-2">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -142,7 +150,7 @@
                 <div>
                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Sudah Melapor</p>
                     <p class="text-4xl font-black text-slate-800 tracking-tighter">
-                        {{ $stats['submitted'] }} <span class="text-sm font-bold text-slate-400">SISWA</span>
+                        {{ $stats['submitted'] ?? 0 }} <span class="text-sm font-bold text-slate-400">SISWA</span>
                     </p>
                     @if(!$classId)
                         <span class="text-[9px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-md">Total Sekolah</span>
@@ -158,7 +166,7 @@
                 <div>
                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Belum Melapor</p>
                     <p class="text-4xl font-black text-slate-800 tracking-tighter">
-                        {{ $stats['missing'] }} <span class="text-sm font-bold text-slate-400">SISWA</span>
+                        {{ $stats['missing'] ?? 0 }} <span class="text-sm font-bold text-slate-400">SISWA</span>
                     </p>
                 </div>
             </div>
@@ -171,7 +179,7 @@
                 </div>
                 <div>
                     <p class="text-[10px] font-black text-blue-300/60 uppercase tracking-widest mb-1">Tingkat Partisipasi</p>
-                    <p class="text-4xl font-black text-white tracking-tighter">{{ $stats['percentage'] }}%</p>
+                    <p class="text-4xl font-black text-white tracking-tighter">{{ $stats['percentage'] ?? 0 }}%</p>
                 </div>
             </div>
         </div>
@@ -182,25 +190,37 @@
         @if($classId)
             {{-- === JIKA KELAS DIPILIH: TAMPILKAN TABEL DAFTAR SISWA === --}}
             <div class="animate-enter bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden mb-12" style="animation-delay: 200ms">
-                <div class="px-8 py-6 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="px-8 py-6 border-b border-slate-50 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                     <h2 class="text-xl font-black text-slate-800 flex items-center gap-3">
                         <i class="ph-bold ph-list-checks text-blue-600"></i> 
                         Status Monitoring Harian
                     </h2>
                     
-                    <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                        {{-- FITUR BARU: Kolom Pencarian Cepat --}}
+                    <div class="flex flex-col md:flex-row items-center gap-3 w-full xl:w-auto">
+                        
+                        {{-- FILTER STATUS BARU --}}
+                        <div class="relative w-full md:w-48 shrink-0">
+                            <select id="statusFilter" onchange="searchTable()" class="w-full pl-4 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none cursor-pointer">
+                                <option value="all">Semua Status</option>
+                                <option value="waiting">⏳ Menunggu Dinilai</option>
+                                <option value="graded">✅ Sudah Dinilai</option>
+                                <option value="missing">❌ Belum Lapor</option>
+                            </select>
+                            <i class="ph-bold ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                        </div>
+
+                        {{-- Kolom Pencarian Cepat --}}
                         <div class="relative w-full md:w-64">
                             <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
                             <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Cari nama siswa..." 
                                 class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-slate-400">
                         </div>
 
-                         <div class="flex gap-2 w-full md:w-auto">
-                             <span class="px-4 py-2 rounded-xl bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider flex-1 text-center whitespace-nowrap">
+                        <div class="flex gap-2 w-full md:w-auto shrink-0">
+                            <span class="px-4 py-2 rounded-xl bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider flex-1 text-center whitespace-nowrap">
                                 Kelas: {{ $classes->find($classId)->name ?? '-' }}
-                             </span>
-                         </div>
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -217,7 +237,15 @@
                         </thead>
                         <tbody class="divide-y divide-slate-50">
                             @forelse($students as $student)
-                                <tr class="hover:bg-blue-50/30 transition-all group student-row">
+                                @php
+                                    // Menentukan Status Row untuk fitur Filter JavaScript
+                                    $rowStatus = 'missing';
+                                    if ($student->habit_status == 'submitted') {
+                                        $rowStatus = ($student->habit_data && $student->habit_data->teacher_feedback) ? 'graded' : 'waiting';
+                                    }
+                                @endphp
+
+                                <tr class="hover:bg-blue-50/30 transition-all group student-row" data-status="{{ $rowStatus }}">
                                     <td class="px-10 py-5">
                                         <div class="flex items-center gap-5">
                                             <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-600 font-black text-sm border border-slate-200 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-500 transition-all duration-300">
@@ -225,7 +253,7 @@
                                             </div>
                                             <div>
                                                 <div class="student-name font-black text-slate-800 group-hover:text-blue-600 transition-colors uppercase tracking-tight text-sm">{{ $student->name }}</div>
-                                                <div class="text-[9px] text-slate-400 font-bold tracking-widest uppercase mt-0.5">{{ $student->student_id }}</div>
+                                                <div class="text-[9px] text-slate-400 font-bold tracking-widest uppercase mt-0.5">{{ $student->student_id ?? '-' }}</div>
                                             </div>
                                         </div>
                                     </td>
@@ -263,10 +291,24 @@
                                     </td>
                                     <td class="px-10 py-5 text-right">
                                         @if($student->habit_data)
-                                            <button onclick="openDetail({{ $student->habit_data->id }})" 
-                                                class="inline-flex items-center gap-2 text-blue-600 hover:text-white font-black text-[9px] uppercase tracking-[0.1em] bg-blue-50 hover:bg-blue-600 px-6 py-3 rounded-2xl transition-all active:scale-90 border border-blue-100 shadow-sm">
-                                                <i class="ph-bold ph-notebook text-sm"></i> Tinjau Laporan
-                                            </button>
+                                            <div class="flex items-center justify-end gap-2">
+                                                <div id="badge-feedback-{{ $student->habit_data->id }}" class="mr-2 hidden md:block">
+                                                    @if($student->habit_data->teacher_feedback)
+                                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-black uppercase tracking-wider">
+                                                            <i class="ph-fill ph-check-circle"></i> Dinilai
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-50 border border-amber-100 text-amber-600 text-[10px] font-black uppercase tracking-wider animate-pulse">
+                                                            <i class="ph-bold ph-warning-circle"></i> Menunggu
+                                                        </span>
+                                                    @endif
+                                                </div>
+
+                                                <button onclick="openDetail({{ $student->habit_data->id }})" 
+                                                    class="inline-flex items-center gap-2 text-blue-600 hover:text-white font-black text-[9px] uppercase tracking-[0.1em] bg-blue-50 hover:bg-blue-600 px-6 py-3 rounded-2xl transition-all active:scale-90 border border-blue-100 shadow-sm">
+                                                    <i class="ph-bold ph-notebook text-sm"></i> Tinjau Laporan
+                                                </button>
+                                            </div>
                                         @else
                                             <span class="text-slate-300 text-[9px] font-black uppercase tracking-widest italic opacity-50">Laporan Kosong</span>
                                         @endif
@@ -284,7 +326,7 @@
                             @endforelse
                             <tr id="noResultsRow" class="hidden">
                                 <td colspan="5" class="px-8 py-16 text-center text-slate-400 text-sm italic">
-                                    Siswa yang dicari tidak ditemukan.
+                                    Siswa dengan status/nama tersebut tidak ditemukan.
                                 </td>
                             </tr>
                         </tbody>
@@ -360,15 +402,19 @@
 
                                 {{-- Tombol Action --}}
                                 <div class="flex items-center justify-between gap-3 pt-5 border-t border-slate-50">
-                                    @if($submission->teacher_feedback)
-                                        <div class="flex items-center gap-1.5 text-emerald-600 text-[10px] font-black uppercase tracking-wide bg-emerald-50 px-2 py-1 rounded-lg">
-                                            <i class="ph-bold ph-check-circle"></i> Dinilai
-                                        </div>
-                                    @else
-                                        <div class="flex items-center gap-1.5 text-amber-500 text-[10px] font-black uppercase tracking-wide bg-amber-50 px-2 py-1 rounded-lg animate-pulse">
-                                            <i class="ph-bold ph-clock"></i> Menunggu
-                                        </div>
-                                    @endif
+                                    
+                                    <!-- WRAPPER BADGE FEEDBACK -->
+                                    <div id="badge-feedback-{{ $submission->id }}">
+                                        @if($submission->teacher_feedback)
+                                            <div class="flex items-center gap-1.5 text-emerald-600 text-[10px] font-black uppercase tracking-wide bg-emerald-50 px-2 py-1 rounded-lg">
+                                                <i class="ph-bold ph-check-circle"></i> Dinilai
+                                            </div>
+                                        @else
+                                            <div class="flex items-center gap-1.5 text-amber-500 text-[10px] font-black uppercase tracking-wide bg-amber-50 px-2 py-1 rounded-lg animate-pulse">
+                                                <i class="ph-bold ph-clock"></i> Menunggu
+                                            </div>
+                                        @endif
+                                    </div>
 
                                     <button onclick="openDetail({{ $submission->id }})" 
                                         class="pl-4 pr-3 py-2 bg-slate-900 hover:bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-200 hover:shadow-blue-200 transition-all active:scale-95 flex items-center gap-2 group-hover:translate-x-1">
@@ -427,7 +473,7 @@
                         <div class="bg-white p-6 rounded-[2rem] border border-emerald-100 shadow-sm">
                             <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-50">
                                 <h4 class="font-black text-emerald-600 uppercase tracking-widest text-xs flex items-center gap-2"><i class="ph-fill ph-check-circle text-lg"></i> Sudah Lapor</h4>
-                                <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold">{{ $stats['submitted'] }} Siswa</span>
+                                <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold">{{ $stats['submitted'] ?? 0 }} Siswa</span>
                             </div>
                             <ol class="list-decimal list-inside space-y-2 text-sm font-medium text-slate-600 marker:font-bold marker:text-emerald-300">
                                 @forelse($students->where('habit_status', 'submitted') as $s) <li class="pl-2">{{ $s->name }}</li>
@@ -437,7 +483,7 @@
                         <div class="bg-white p-6 rounded-[2rem] border border-rose-100 shadow-sm">
                             <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-50">
                                 <h4 class="font-black text-rose-500 uppercase tracking-widest text-xs flex items-center gap-2"><i class="ph-fill ph-x-circle text-lg"></i> Belum Lapor</h4>
-                                <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-lg text-xs font-bold">{{ $stats['missing'] }} Siswa</span>
+                                <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-lg text-xs font-bold">{{ $stats['missing'] ?? 0 }} Siswa</span>
                             </div>
                             <ol class="list-decimal list-inside space-y-2 text-sm font-medium text-slate-600 marker:font-bold marker:text-rose-300">
                                 @forelse($students->where('habit_status', 'missing') as $s) <li class="pl-2">{{ $s->name }}</li>
@@ -456,12 +502,12 @@
 Kelas: {{ $classes->find($classId)->name ?? '-' }}
 Tanggal: {{ \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y') }}
 
-✅ *SUDAH LAPOR ({{ $stats['submitted'] }}):*
+✅ *SUDAH LAPOR ({{ $stats['submitted'] ?? 0 }}):*
 @foreach($students->where('habit_status', 'submitted') as $index => $s)
 {{ $loop->iteration }}. {{ $s->name }}
 @endforeach
 
-❌ *BELUM LAPOR ({{ $stats['missing'] }}):*
+❌ *BELUM LAPOR ({{ $stats['missing'] ?? 0 }}):*
 @foreach($students->where('habit_status', 'missing') as $index => $s)
 {{ $loop->iteration }}. {{ $s->name }}
 @endforeach
@@ -525,15 +571,25 @@ Terima kasih. 🙏
             navigator.clipboard.writeText(text).then(() => { alert('Rekap berhasil disalin ke Clipboard!'); }).catch(err => { console.error(err); alert('Gagal menyalin.'); });
         }
 
-        // 2. FITUR BARU: PENCARIAN CEPAT DI TABEL
+        // 2. FITUR DIPERBARUI: PENCARIAN & FILTER STATUS DI TABEL (JS MURNI)
         function searchTable() {
             const input = document.getElementById("searchInput").value.toLowerCase();
+            const statusFilter = document.getElementById("statusFilter").value; // Ambil nilai dropdown status
+            
             const rows = document.querySelectorAll(".student-row");
             let hasResults = false;
 
             rows.forEach(row => {
                 const nameText = row.querySelector(".student-name").innerText.toLowerCase();
-                if (nameText.includes(input)) {
+                const rowStatus = row.getAttribute("data-status"); // Ambil status dari atribut baris
+
+                // Cek apakah teks cocok
+                const matchName = nameText.includes(input);
+                
+                // Cek apakah status cocok ('all' berarti tampilkan semua)
+                const matchStatus = (statusFilter === 'all' || rowStatus === statusFilter);
+
+                if (matchName && matchStatus) {
                     row.style.display = "";
                     hasResults = true;
                 } else {
@@ -541,14 +597,14 @@ Terima kasih. 🙏
                 }
             });
 
-            // Tampilkan pesan "Tidak Ditemukan" jika pencarian kosong
+            // Tampilkan pesan "Tidak Ditemukan" jika pencarian/filter kosong
             const noResultsRow = document.getElementById("noResultsRow");
             if(noResultsRow) {
                 noResultsRow.style.display = hasResults ? "none" : "";
             }
         }
 
-        // 3. FITUR BARU: AJAX SUBMIT FEEDBACK (Dipanggil dari dalam modal)
+        // 3. FITUR AJAX SUBMIT FEEDBACK (DIPERBARUI)
         function submitFeedbackAjax(event, formElement) {
             event.preventDefault(); // Mencegah reload halaman
             
@@ -557,6 +613,10 @@ Terima kasih. 🙏
             const btnSubmit = formElement.querySelector('#btn-submit-feedback');
             const originalText = btnSubmit.innerHTML;
             
+            // Ekstrak ID habit dari URL action form
+            const urlParts = url.split('/');
+            const habitId = urlParts[urlParts.length - 2]; 
+
             // Ubah status tombol loading
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...';
@@ -568,7 +628,6 @@ Terima kasih. 🙏
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json',
-                    // Token CSRF sudah ada di dalam FormData
                 }
             })
             .then(response => {
@@ -576,7 +635,6 @@ Terima kasih. 🙏
                 return response.json(); 
             })
             .then(data => {
-                // Tampilkan SweetAlert
                 Swal.fire({
                     icon: 'success', 
                     title: 'Berhasil!', 
@@ -588,8 +646,26 @@ Terima kasih. 🙏
                     customClass: { popup: 'rounded-xl shadow-lg border border-emerald-100 bg-white' }
                 });
 
-                // Update teks tombol
                 btnSubmit.innerHTML = '<i class="ph-bold ph-check"></i> Perbarui Feedback';
+
+                // ==========================================
+                // UPDATE UI BADGE & DATA-STATUS (REAL-TIME)
+                // ==========================================
+                const badgeElement = document.getElementById('badge-feedback-' + habitId);
+                if (badgeElement) {
+                    // Update tampilan badge
+                    badgeElement.innerHTML = `
+                        <div class="flex items-center gap-1.5 text-emerald-600 text-[10px] font-black uppercase tracking-wide bg-emerald-50 px-2 py-1 rounded-lg">
+                            <i class="ph-bold ph-check-circle"></i> Dinilai
+                        </div>
+                    `;
+                    
+                    // UPDATE JUGA ATRIBUT PADA BARIS TABEL AGAR FILTER TETAP BEKERJA
+                    const tableRow = badgeElement.closest('tr.student-row');
+                    if (tableRow) {
+                        tableRow.setAttribute('data-status', 'graded');
+                    }
+                }
             })
             .catch(error => {
                 console.error('Error:', error);

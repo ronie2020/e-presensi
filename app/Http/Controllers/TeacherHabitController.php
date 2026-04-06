@@ -145,4 +145,10 @@ class TeacherHabitController extends Controller
 
         return view('habits.print', compact('students', 'date', 'class'));
     }
+
+    public function leaderboard()
+    {
+        // Sesuaikan view dengan nama file yang Anda simpan, misal 'habits.teacher_leaderboard'
+        return view('habits.teacher_leaderboard'); 
+    }
 }

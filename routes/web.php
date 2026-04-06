@@ -649,8 +649,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/{id}/record', [BkTeacherController::class, 'storeRecord'])->name('store_record');
     });
 
-    // MONITORING 7 KEBIASAAN (GURU)
+     // MONITORING 7 KEBIASAAN (GURU)
     Route::get('/teacher/habits', [TeacherHabitController::class, 'index'])->name('teacher.habits.index');
+    Route::get('/teacher/habits/leaderboard', [TeacherHabitController::class, 'leaderboard'])->name('teacher.habits.leaderboard');
     Route::get('/teacher/habits/print', [TeacherHabitController::class, 'print'])->name('teacher.habits.print'); 
     Route::get('/teacher/habits/detail/{id}', [TeacherHabitController::class, 'show'])->name('teacher.habits.show');
     Route::post('/teacher/habits/feedback/{id}', [TeacherHabitController::class, 'feedback'])->name('teacher.habits.feedback');
