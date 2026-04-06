@@ -54,10 +54,21 @@
             
             <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
                 <div class="flex-1">
-                    <a href="{{ route('dashboard') }}" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
-                        <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
-                        <span>Kembali ke Dashboard</span>
-                    </a>
+                    
+                    {{-- KUMPULAN TOMBOL NAVIGASI ATAS --}}
+                    <div class="flex flex-wrap gap-3 mb-6 justify-center lg:justify-start">
+                        <a href="{{ route('dashboard') }}" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit">
+                            <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
+                            <span>Kembali ke Dashboard</span>
+                        </a>
+                        
+                        {{-- TOMBOL LEADERBOARD SISWA TERAJIN (KEMBALI DITAMBAHKAN) --}}
+                        <a href="{{ route('teacher.habits.leaderboard') }}" class="group bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-lg shadow-orange-500/20 w-fit">
+                            <i class="ph-fill ph-trophy text-lg group-hover:scale-110 transition-transform"></i>
+                            <span>Siswa Terajin</span>
+                        </a>
+                    </div>
+
                     <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 text-blue-200 text-[10px] font-black uppercase tracking-[0.2em] mb-6 backdrop-blur-md shadow-inner">
                         <span class="relative flex h-2 w-2">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -503,7 +514,7 @@
                         <div class="bg-white p-6 rounded-[2rem] border border-emerald-100 shadow-sm">
                             <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-50">
                                 <h4 class="font-black text-emerald-600 uppercase tracking-widest text-xs flex items-center gap-2"><i class="ph-fill ph-check-circle text-lg"></i> Sudah Lapor</h4>
-                                <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold">{{ $stats['submitted'] }} Siswa</span>
+                                <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-lg text-xs font-bold">{{ $stats['submitted'] ?? 0 }} Siswa</span>
                             </div>
                             <ol class="list-decimal list-inside space-y-2 text-sm font-medium text-slate-600 marker:font-bold marker:text-emerald-300">
                                 @forelse($students->where('habit_status', 'submitted') as $s) <li class="pl-2">{{ $s->name }}</li>
@@ -513,7 +524,7 @@
                         <div class="bg-white p-6 rounded-[2rem] border border-rose-100 shadow-sm">
                             <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-50">
                                 <h4 class="font-black text-rose-500 uppercase tracking-widest text-xs flex items-center gap-2"><i class="ph-fill ph-x-circle text-lg"></i> Belum Lapor</h4>
-                                <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-lg text-xs font-bold">{{ $stats['missing'] }} Siswa</span>
+                                <span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-lg text-xs font-bold">{{ $stats['missing'] ?? 0 }} Siswa</span>
                             </div>
                             <ol class="list-decimal list-inside space-y-2 text-sm font-medium text-slate-600 marker:font-bold marker:text-rose-300">
                                 @forelse($students->where('habit_status', 'missing') as $s) <li class="pl-2">{{ $s->name }}</li>
@@ -532,12 +543,12 @@
 Kelas: {{ $classes->find($classId)->name ?? '-' }}
 Tanggal: {{ \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y') }}
 
-✅ *SUDAH LAPOR ({{ $stats['submitted'] }}):*
+✅ *SUDAH LAPOR ({{ $stats['submitted'] ?? 0 }}):*
 @foreach($students->where('habit_status', 'submitted') as $index => $s)
 {{ $loop->iteration }}. {{ $s->name }}
 @endforeach
 
-❌ *BELUM LAPOR ({{ $stats['missing'] }}):*
+❌ *BELUM LAPOR ({{ $stats['missing'] ?? 0 }}):*
 @foreach($students->where('habit_status', 'missing') as $index => $s)
 {{ $loop->iteration }}. {{ $s->name }}
 @endforeach
@@ -630,9 +641,12 @@ Terima kasih. 🙏
             navigator.clipboard.writeText(text).then(() => { alert('Rekap berhasil disalin ke Clipboard!'); }).catch(err => { console.error(err); alert('Gagal menyalin.'); });
         }
 
-        // 3. FUNGSI AJAX SUBMIT FEEDBACK (DIPERBARUI)
+        // =========================================================================
+        // 3. FUNGSI AJAX SUBMIT FEEDBACK (INI YANG DIPERBAIKI SANGAT PENTING)
+        // Menangkap parameter ke-3: passedHabitId dari file detail_modal
+        // =========================================================================
         function submitFeedbackAjax(event, formElement, passedHabitId = null) {
-            event.preventDefault(); // Mencegah reload halaman
+            event.preventDefault(); // Mencegah browser me-reload halaman
             
             const url = formElement.action;
             const formData = new FormData(formElement);
@@ -642,11 +656,11 @@ Terima kasih. 🙏
             // Ekstrak ID habit dengan benar
             let habitId = passedHabitId;
             if (!habitId) {
-                const urlParts = url.split('/').filter(Boolean); // Filter untuk buang slash berlebih
-                habitId = urlParts[urlParts.length - 1]; // Ambil elemen paling akhir (ID Angka)
+                const urlParts = url.split('/').filter(Boolean);
+                habitId = urlParts[urlParts.length - 1]; 
             }
 
-            // Ubah status tombol loading
+            // Ubah status tombol jadi "Menyimpan..."
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = '<i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...';
             btnSubmit.classList.add('opacity-70');
@@ -657,15 +671,14 @@ Terima kasih. 🙏
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json',
-                    // Token CSRF sudah ada di dalam FormData
                 }
             })
             .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
+                if (!response.ok) throw new Error('Network error');
                 return response.json(); 
             })
             .then(data => {
-                // Tampilkan SweetAlert
+                // Munculkan notifikasi sukses
                 Swal.fire({
                     icon: 'success', 
                     title: 'Berhasil!', 
@@ -677,14 +690,16 @@ Terima kasih. 🙏
                     customClass: { popup: 'rounded-xl shadow-lg border border-emerald-100 bg-white' }
                 });
 
-                // Update teks tombol
+                // Ganti nama tombol di modal
                 btnSubmit.innerHTML = '<i class="ph-bold ph-check"></i> Perbarui Feedback';
 
                 // ==========================================
-                // UPDATE UI BADGE DI HALAMAN UTAMA (REAL-TIME)
+                // MENCARI & MENGUBAH BADGE TANPA RELOAD
                 // ==========================================
                 const badgeElement = document.getElementById('badge-feedback-' + habitId);
+                
                 if (badgeElement) {
+                    // Update tampilan badge menjadi Hijau ("Dinilai")
                     badgeElement.innerHTML = `
                         <div class="flex items-center gap-1.5 text-emerald-600 text-[10px] font-black uppercase tracking-wide bg-emerald-50 px-2 py-1 rounded-lg">
                             <i class="ph-bold ph-check-circle"></i> Dinilai
@@ -696,6 +711,8 @@ Terima kasih. 🙏
                     if(tableRow) {
                         tableRow.setAttribute('data-status', 'graded');
                     }
+                } else {
+                    console.log("Badge untuk ID " + habitId + " tidak terdeteksi");
                 }
             })
             .catch(error => {
