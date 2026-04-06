@@ -28,12 +28,12 @@
         $infoPopup = [
             'active' => true, 
             'id' => 'Idul_Fitri_2026', 
-            'image' => asset('images/netila.jpg'),
-            'title' => 'Idul Fitri 1447 H 2026',
-            'message' => 'SMP Negeri 3 Lakbok Mengucapkan " Selamat Hari Raya Idul Fitri 1 Syawal 1447 H 2026". Mohon Maaf lahir bathin, ',
-            'cta_text' => 'info jurnal siswa',
+            'image' => asset('images/tka.png'),
+            'title' => 'Tes Kemampuan Akademik (TKA) 2026',
+            'message' => 'SELAMAT MELAKSANAKAN TKA 2026! Semoga sukses untuk semua peserta. Pastikan membawa perlengkapan yang diperlukan dan datang tepat waktu. Untuk informasi lebih lanjut, silakan klik tombol di bawah.',
+            'cta_text' => 'info TKA 2026',
             'cta_link' => 'https://e-presensi.smpn3lakbok.sch.id/portal', 
-            'color' => 'emerald' 
+            'color' => 'blue' // Pilihan warna: blue, amber, rose, emerald (default)
         ];
 
         // Mapping warna agar Tailwind JIT/Purge bisa membaca class secara utuh

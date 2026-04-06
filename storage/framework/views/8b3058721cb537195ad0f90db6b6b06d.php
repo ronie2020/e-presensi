@@ -1,11 +1,17 @@
-<x-app-layout>
-    {{-- 
-        X-DATA CONTEXT:
-        State 'activeTab' untuk perpindahan antar menu (Mapel vs Jam Sekolah).
-    --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <div x-data="{ activeTab: 'mapel' }" class="py-8 sm:py-10 font-sans text-slate-800">
         
-        {{-- HERO SECTION --}}
+        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
             <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
@@ -13,7 +19,7 @@
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     <div class="max-w-2xl">
-                        <a href="{{ route('dashboard') }}" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
+                        <a href="<?php echo e(route('dashboard')); ?>" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
                             <i class="ph-bold ph-arrow-left text-sm group-hover:-translate-x-1 transition-transform"></i>
                             <span>Kembali ke Dashboard</span>
                         </a>
@@ -46,21 +52,21 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            {{-- Pesan Flash --}}
-            @if (session('success'))
+            
+            <?php if(session('success')): ?>
                 <div x-data="{ show: true }" x-show="show" x-transition class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-[2rem] flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3 px-2">
                         <div class="p-2 bg-emerald-100 rounded-full text-emerald-600">
                             <i class="ph-bold ph-check-circle text-xl"></i>
                         </div>
-                        <span class="font-bold text-sm">{{ session('success') }}</span>
+                        <span class="font-bold text-sm"><?php echo e(session('success')); ?></span>
                     </div>
                     <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 p-2 rounded-xl hover:bg-emerald-100 transition"><i class="ph-bold ph-x"></i></button>
                 </div>
-            @endif
+            <?php endif; ?>
             
-            {{-- Error Validation Alert --}}
-            @if ($errors->any())
+            
+            <?php if($errors->any()): ?>
                 <div x-data="{ show: true }" x-show="show" x-transition class="mb-8 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-[2rem] flex items-center gap-3 shadow-sm relative">
                     <div class="p-2 bg-rose-100 rounded-full text-rose-600 shrink-0 ml-2">
                         <i class="ph-bold ph-warning-circle text-xl"></i>
@@ -68,20 +74,20 @@
                     <div>
                         <p class="font-bold text-sm mb-1">Terjadi kesalahan input:</p>
                         <ul class="list-disc list-inside text-xs font-medium">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
+                            <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><?php echo e($error); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </ul>
                     </div>
                     <button @click="show = false" class="absolute top-4 right-4 text-rose-400 hover:text-rose-600"><i class="ph-bold ph-x"></i></button>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- TAB 1: JADWAL MAPEL --}}
+            
             <div x-show="activeTab === 'mapel'" x-transition:enter="transition ease-out duration-300 transform opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                     
-                    {{-- Form Input --}}
+                    
                     <div class="lg:col-span-1">
                         <div class="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden sticky top-24">
                             <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
@@ -93,21 +99,35 @@
                                 <h2 class="text-lg font-black text-slate-800">Tambah Jadwal</h2>
                             </div>
 
-                            <form action="{{ route('schedules.store') }}" method="POST" class="space-y-4">
-                                @csrf
+                            <form action="<?php echo e(route('schedules.store')); ?>" method="POST" class="space-y-4">
+                                <?php echo csrf_field(); ?>
                                 
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Kelas</label>
                                     <div class="relative">
-                                        <select name="school_class_id" required class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm font-bold text-slate-700 transition-all shadow-sm appearance-none cursor-pointer @error('school_class_id') border-rose-300 bg-rose-50 @enderror">
+                                        <select name="school_class_id" required class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm font-bold text-slate-700 transition-all shadow-sm appearance-none cursor-pointer <?php $__errorArgs = ['school_class_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-rose-300 bg-rose-50 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                             <option value="">-- Pilih Kelas --</option>
-                                            @foreach($classes as $c)
-                                                <option value="{{ $c->id }}" {{ old('school_class_id') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
-                                            @endforeach
+                                            <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($c->id); ?>" <?php echo e(old('school_class_id') == $c->id ? 'selected' : ''); ?>><?php echo e($c->name); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                         <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                                     </div>
-                                    @error('school_class_id') <span class="text-[10px] text-rose-500 font-bold ml-1">{{ $message }}</span> @enderror
+                                    <?php $__errorArgs = ['school_class_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-[10px] text-rose-500 font-bold ml-1"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
 
                                 <div>
@@ -115,9 +135,9 @@
                                     <div class="relative">
                                         <select name="subject_id" required class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm font-bold text-slate-700 transition-all shadow-sm appearance-none cursor-pointer">
                                             <option value="">-- Pilih Mapel --</option>
-                                            @foreach($subjects as $s)
-                                                <option value="{{ $s->id }}" {{ old('subject_id') == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>
-                                            @endforeach
+                                            <?php $__currentLoopData = $subjects; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($s->id); ?>" <?php echo e(old('subject_id') == $s->id ? 'selected' : ''); ?>><?php echo e($s->name); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                         <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                                     </div>
@@ -126,28 +146,43 @@
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Guru Pengampu</label>
                                     <div class="relative">
-                                        <select name="teacher_id" required class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm font-bold text-slate-700 transition-all shadow-sm appearance-none cursor-pointer @error('teacher_id') border-rose-300 bg-rose-50 @enderror">
+                                        <select name="teacher_id" required class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm font-bold text-slate-700 transition-all shadow-sm appearance-none cursor-pointer <?php $__errorArgs = ['teacher_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-rose-300 bg-rose-50 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                             <option value="">-- Pilih Guru --</option>
-                                            @foreach($teachers as $t)
-                                                <option value="{{ $t->id }}" {{ old('teacher_id') == $t->id ? 'selected' : '' }}>{{ $t->name }}</option>
-                                            @endforeach
+                                            <?php $__currentLoopData = $teachers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($t->id); ?>" <?php echo e(old('teacher_id') == $t->id ? 'selected' : ''); ?>><?php echo e($t->name); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                         <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                                     </div>
-                                    @error('teacher_id') <span class="text-[10px] text-rose-500 font-bold ml-1">{{ $message }}</span> @enderror
+                                    <?php $__errorArgs = ['teacher_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> <span class="text-[10px] text-rose-500 font-bold ml-1"><?php echo e($message); ?></span> <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
 
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Hari</label>
                                     <div class="grid grid-cols-3 gap-2">
-                                        @foreach(['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'] as $day)
+                                        <?php $__currentLoopData = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $day): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <label class="cursor-pointer">
-                                                <input type="radio" name="day" value="{{ $day }}" class="peer sr-only" {{ old('day') == $day ? 'checked' : '' }} required>
+                                                <input type="radio" name="day" value="<?php echo e($day); ?>" class="peer sr-only" <?php echo e(old('day') == $day ? 'checked' : ''); ?> required>
                                                 <div class="text-center py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-500 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 peer-checked:shadow-md transition-all hover:bg-slate-100">
-                                                    {{ substr($day, 0, 3) }}
+                                                    <?php echo e(substr($day, 0, 3)); ?>
+
                                                 </div>
                                             </label>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </div>
                                 </div>
 
@@ -156,9 +191,9 @@
                                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Mulai Jam Ke-</label>
                                         <div class="relative">
                                             <select name="start_time" required class="w-full text-center py-3 rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 focus:ring-blue-500 appearance-none cursor-pointer">
-                                                @for ($i = 1; $i <= 12; $i++)
-                                                    <option value="{{ $i }}" {{ old('start_time') == $i ? 'selected' : '' }}>Jam {{ $i }}</option>
-                                                @endfor
+                                                <?php for($i = 1; $i <= 12; $i++): ?>
+                                                    <option value="<?php echo e($i); ?>" <?php echo e(old('start_time') == $i ? 'selected' : ''); ?>>Jam <?php echo e($i); ?></option>
+                                                <?php endfor; ?>
                                             </select>
                                             <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                                         </div>
@@ -167,9 +202,9 @@
                                         <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Selesai Jam Ke-</label>
                                         <div class="relative">
                                             <select name="end_time" required class="w-full text-center py-3 rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 focus:ring-blue-500 appearance-none cursor-pointer">
-                                                @for ($i = 1; $i <= 12; $i++)
-                                                    <option value="{{ $i }}" {{ old('end_time') == $i ? 'selected' : '' }}>Jam {{ $i }}</option>
-                                                @endfor
+                                                <?php for($i = 1; $i <= 12; $i++): ?>
+                                                    <option value="<?php echo e($i); ?>" <?php echo e(old('end_time') == $i ? 'selected' : ''); ?>>Jam <?php echo e($i); ?></option>
+                                                <?php endfor; ?>
                                             </select>
                                             <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                                         </div>
@@ -184,7 +219,7 @@
                         </div>
                     </div>
 
-                    {{-- Tabel Jadwal --}}
+                    
                     <div class="lg:col-span-2">
                         <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col relative min-h-[600px]">
                             <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
@@ -196,7 +231,7 @@
                                     </div>
                                     <div>
                                         <h3 class="text-lg font-black text-slate-800">Daftar Jadwal</h3>
-                                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total {{ $schedules->count() }} Sesi</p>
+                                        <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total <?php echo e($schedules->count()); ?> Sesi</p>
                                     </div>
                                 </div>
                                 
@@ -204,9 +239,9 @@
                                     <div class="relative">
                                         <select name="class_id" onchange="this.form.submit()" class="w-full sm:w-48 pl-4 pr-10 py-2.5 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm font-bold text-slate-700 transition-all shadow-sm appearance-none cursor-pointer">
                                             <option value="">Semua Kelas</option>
-                                            @foreach($classes as $c)
-                                                <option value="{{ $c->id }}" {{ request('class_id') == $c->id ? 'selected' : '' }}>Kelas {{ $c->name }}</option>
-                                            @endforeach
+                                            <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $c): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($c->id); ?>" <?php echo e(request('class_id') == $c->id ? 'selected' : ''); ?>>Kelas <?php echo e($c->name); ?></option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                         <i class="ph-bold ph-funnel absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                                     </div>
@@ -225,44 +260,47 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-50">
-                                        @forelse($schedules as $item)
+                                        <?php $__empty_1 = true; $__currentLoopData = $schedules; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                         <tr class="hover:bg-slate-50 transition-colors group">
                                             <td class="px-6 py-5 whitespace-nowrap">
                                                 <div class="flex flex-col">
-                                                    <span class="font-black text-slate-800 text-sm mb-1">{{ $item->day }}</span>
-                                                    {{-- MENGGUNAKAN ACCESSOR DARI MODEL --}}
+                                                    <span class="font-black text-slate-800 text-sm mb-1"><?php echo e($item->day); ?></span>
+                                                    
                                                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 text-blue-600 text-[10px] font-mono font-bold border border-blue-100 w-fit">
                                                         <i class="ph-bold ph-clock"></i>
-                                                        JP {{ $item->clean_start_time }} - {{ $item->clean_end_time }}
+                                                        JP <?php echo e($item->clean_start_time); ?> - <?php echo e($item->clean_end_time); ?>
+
                                                     </span>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-5 whitespace-nowrap">
                                                 <span class="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200">
-                                                    {{ $item->schoolClass->name }}
+                                                    <?php echo e($item->schoolClass->name); ?>
+
                                                 </span>
                                             </td>
                                             <td class="px-6 py-5 whitespace-nowrap">
-                                                <div class="font-bold text-slate-700">{{ $item->subject->name }}</div>
+                                                <div class="font-bold text-slate-700"><?php echo e($item->subject->name); ?></div>
                                             </td>
                                             <td class="px-6 py-5 whitespace-nowrap">
                                                 <div class="flex items-center gap-2">
                                                     <div class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500">
-                                                        {{ substr($item->teacher->name, 0, 1) }}
+                                                        <?php echo e(substr($item->teacher->name, 0, 1)); ?>
+
                                                     </div>
-                                                    <span class="font-bold text-slate-600 text-xs">{{ $item->teacher->name }}</span>
+                                                    <span class="font-bold text-slate-600 text-xs"><?php echo e($item->teacher->name); ?></span>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-5 whitespace-nowrap text-right">
                                                 <div class="flex justify-end items-center">
-                                                    <form action="{{ route('schedules.destroy', $item->id) }}" 
+                                                    <form action="<?php echo e(route('schedules.destroy', $item->id)); ?>" 
                                                           method="POST" 
-                                                          id="delete-schedule-{{ $item->id }}"
+                                                          id="delete-schedule-<?php echo e($item->id); ?>"
                                                           class="shrink-0 block">
-                                                        @csrf @method('DELETE')
+                                                        <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                                                         
                                                         <button type="button" 
-                                                                onclick="confirmDelete('delete-schedule-{{ $item->id }}', 'Hapus jadwal mapel {{ $item->subject->name }} di kelas {{ $item->schoolClass->name }}?')"
+                                                                onclick="confirmDelete('delete-schedule-<?php echo e($item->id); ?>', 'Hapus jadwal mapel <?php echo e($item->subject->name); ?> di kelas <?php echo e($item->schoolClass->name); ?>?')"
                                                                 class="w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-300 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm">
                                                             <i class="ph-bold ph-trash text-lg leading-none"></i>
                                                         </button>
@@ -270,7 +308,7 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                        @empty
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                         <tr>
                                             <td colspan="5" class="px-6 py-20 text-center text-slate-400">
                                                 <div class="flex flex-col items-center justify-center">
@@ -282,7 +320,7 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                        @endforelse
+                                        <?php endif; ?>
                                     </tbody>
                                 </table>
                             </div>
@@ -291,11 +329,11 @@
                 </div>
             </div>
 
-            {{-- TAB 2: JAM SEKOLAH (BEL) --}}
+            
             <div x-show="activeTab === 'jam'" x-cloak x-transition:enter="transition ease-out duration-300 transform opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                     
-                    {{-- Jam Reguler --}}
+                    
                     <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
                         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-purple-500 to-fuchsia-600"></div>
                         
@@ -309,10 +347,10 @@
                             </div>
                         </div>
 
-                        <form action="{{ route('schedules.regular.store') }}" method="POST" class="p-6 sm:p-8 space-y-8">
-                            @csrf
+                        <form action="<?php echo e(route('schedules.regular.store')); ?>" method="POST" class="p-6 sm:p-8 space-y-8">
+                            <?php echo csrf_field(); ?>
                             
-                            {{-- Hari Biasa --}}
+                            
                             <div class="bg-slate-50/80 p-5 sm:p-6 rounded-[2rem] border border-slate-200 relative group hover:border-blue-200 transition-colors">
                                 <div class="flex items-center justify-between mb-4">
                                     <h4 class="font-black text-slate-700 flex items-center gap-2">
@@ -326,11 +364,11 @@
                                         <label class="block text-[10px] uppercase font-bold text-slate-400 mb-2 sm:text-center">Masuk</label>
                                         <div class="flex gap-2 sm:gap-1.5">
                                             <div class="w-full">
-                                                <input type="time" name="start_in[]" value="{{ optional($regularSchedules->get('Biasa'))->start_in ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->start_in)->format('H:i') : '' }}" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm focus:ring-blue-500" title="Jam Buka Scanner Masuk">
+                                                <input type="time" name="start_in[]" value="<?php echo e(optional($regularSchedules->get('Biasa'))->start_in ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->start_in)->format('H:i') : ''); ?>" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm focus:ring-blue-500" title="Jam Buka Scanner Masuk">
                                                 <p class="text-[9px] text-slate-400 text-center mt-1">Buka Scan</p>
                                             </div>
                                             <div class="w-full">
-                                                <input type="time" name="end_in[]" value="{{ optional($regularSchedules->get('Biasa'))->end_in ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->end_in)->format('H:i') : '' }}" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm focus:ring-blue-500" title="Batas Terlambat">
+                                                <input type="time" name="end_in[]" value="<?php echo e(optional($regularSchedules->get('Biasa'))->end_in ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->end_in)->format('H:i') : ''); ?>" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm focus:ring-blue-500" title="Batas Terlambat">
                                                 <p class="text-[9px] text-slate-400 text-center mt-1">Batas Telat</p>
                                             </div>
                                         </div>
@@ -339,11 +377,11 @@
                                         <label class="block text-[10px] uppercase font-bold text-slate-400 mb-2 mt-2 sm:mt-0 sm:text-center">Pulang</label>
                                         <div class="flex gap-2 sm:gap-1.5">
                                             <div class="w-full">
-                                                <input type="time" name="start_out[]" value="{{ optional($regularSchedules->get('Biasa'))->start_out ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->start_out)->format('H:i') : '' }}" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm focus:ring-blue-500" title="Jam Boleh Pulang">
+                                                <input type="time" name="start_out[]" value="<?php echo e(optional($regularSchedules->get('Biasa'))->start_out ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->start_out)->format('H:i') : ''); ?>" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm focus:ring-blue-500" title="Jam Boleh Pulang">
                                                 <p class="text-[9px] text-slate-400 text-center mt-1">Boleh Plg</p>
                                             </div>
                                             <div class="w-full">
-                                                <input type="time" name="end_out[]" value="{{ optional($regularSchedules->get('Biasa'))->end_out ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->end_out)->format('H:i') : '' }}" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm focus:ring-blue-500" title="Tutup Scanner Pulang">
+                                                <input type="time" name="end_out[]" value="<?php echo e(optional($regularSchedules->get('Biasa'))->end_out ? \Carbon\Carbon::parse($regularSchedules->get('Biasa')->end_out)->format('H:i') : ''); ?>" class="w-full rounded-xl border-slate-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm focus:ring-blue-500" title="Tutup Scanner Pulang">
                                                 <p class="text-[9px] text-slate-400 text-center mt-1">Tutup Scan</p>
                                             </div>
                                         </div>
@@ -351,7 +389,7 @@
                                 </div>
                             </div>
 
-                            {{-- Hari Jumat --}}
+                            
                             <div class="bg-purple-50/50 p-5 sm:p-6 rounded-[2rem] border border-purple-100 relative group hover:border-purple-200 transition-colors">
                                 <div class="flex items-center justify-between mb-4">
                                     <h4 class="font-black text-purple-900 flex items-center gap-2">
@@ -365,11 +403,11 @@
                                         <label class="block text-[10px] uppercase font-bold text-purple-400 mb-2 sm:text-center">Masuk</label>
                                         <div class="flex gap-2 sm:gap-1.5">
                                             <div class="w-full">
-                                                <input type="time" name="start_in[]" value="{{ optional($regularSchedules->get('Jumat'))->start_in ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->start_in)->format('H:i') : '' }}" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm text-purple-900 focus:ring-purple-500">
+                                                <input type="time" name="start_in[]" value="<?php echo e(optional($regularSchedules->get('Jumat'))->start_in ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->start_in)->format('H:i') : ''); ?>" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm text-purple-900 focus:ring-purple-500">
                                                 <p class="text-[9px] text-purple-400/80 text-center mt-1">Buka Scan</p>
                                             </div>
                                             <div class="w-full">
-                                                <input type="time" name="end_in[]" value="{{ optional($regularSchedules->get('Jumat'))->end_in ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->end_in)->format('H:i') : '' }}" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm text-purple-900 focus:ring-purple-500">
+                                                <input type="time" name="end_in[]" value="<?php echo e(optional($regularSchedules->get('Jumat'))->end_in ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->end_in)->format('H:i') : ''); ?>" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm text-purple-900 focus:ring-purple-500">
                                                 <p class="text-[9px] text-purple-400/80 text-center mt-1">Batas Telat</p>
                                             </div>
                                         </div>
@@ -378,11 +416,11 @@
                                         <label class="block text-[10px] uppercase font-bold text-purple-400 mb-2 mt-2 sm:mt-0 sm:text-center">Pulang</label>
                                         <div class="flex gap-2 sm:gap-1.5">
                                             <div class="w-full">
-                                                <input type="time" name="start_out[]" value="{{ optional($regularSchedules->get('Jumat'))->start_out ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->start_out)->format('H:i') : '' }}" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm text-purple-900 focus:ring-purple-500">
+                                                <input type="time" name="start_out[]" value="<?php echo e(optional($regularSchedules->get('Jumat'))->start_out ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->start_out)->format('H:i') : ''); ?>" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm text-purple-900 focus:ring-purple-500">
                                                 <p class="text-[9px] text-purple-400/80 text-center mt-1">Boleh Plg</p>
                                             </div>
                                             <div class="w-full">
-                                                <input type="time" name="end_out[]" value="{{ optional($regularSchedules->get('Jumat'))->end_out ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->end_out)->format('H:i') : '' }}" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm text-purple-900 focus:ring-purple-500">
+                                                <input type="time" name="end_out[]" value="<?php echo e(optional($regularSchedules->get('Jumat'))->end_out ? \Carbon\Carbon::parse($regularSchedules->get('Jumat')->end_out)->format('H:i') : ''); ?>" class="w-full rounded-xl border-purple-200 text-xs font-bold text-center bg-white py-2.5 px-1 shadow-sm text-purple-900 focus:ring-purple-500">
                                                 <p class="text-[9px] text-purple-400/80 text-center mt-1">Tutup Scan</p>
                                             </div>
                                         </div>
@@ -397,7 +435,7 @@
                         </form>
                     </div>
 
-                    {{-- Jadwal Khusus --}}
+                    
                     <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative" x-data="{ isHoliday: false }">
                         <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-500 to-rose-500"></div>
                         
@@ -412,8 +450,8 @@
                         </div>
 
                         <div class="p-8 space-y-8">
-                            <form action="{{ route('schedules.special.store') }}" method="POST" class="space-y-5">
-                                @csrf
+                            <form action="<?php echo e(route('schedules.special.store')); ?>" method="POST" class="space-y-5">
+                                <?php echo csrf_field(); ?>
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tanggal</label>
                                     <input type="date" name="date" required class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-orange-500 focus:ring-orange-500 font-bold text-slate-700 text-sm shadow-sm">
@@ -464,31 +502,32 @@
                             <div>
                                 <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-3 ml-1">Terbaru Ditambahkan</h4>
                                 <div class="space-y-3 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-                                    @forelse($specialSchedules as $ss)
-                                        <div class="flex items-center justify-between p-4 rounded-2xl border {{ $ss->is_holiday ? 'bg-rose-50 border-rose-100' : 'bg-blue-50 border-blue-100' }}">
+                                    <?php $__empty_1 = true; $__currentLoopData = $specialSchedules; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $ss): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                        <div class="flex items-center justify-between p-4 rounded-2xl border <?php echo e($ss->is_holiday ? 'bg-rose-50 border-rose-100' : 'bg-blue-50 border-blue-100'); ?>">
                                             <div class="overflow-hidden mr-3"> 
-                                                <p class="text-xs font-black {{ $ss->is_holiday ? 'text-rose-700' : 'text-blue-700' }}">
-                                                    {{ \Carbon\Carbon::parse($ss->date)->format('d M Y') }}
+                                                <p class="text-xs font-black <?php echo e($ss->is_holiday ? 'text-rose-700' : 'text-blue-700'); ?>">
+                                                    <?php echo e(\Carbon\Carbon::parse($ss->date)->format('d M Y')); ?>
+
                                                 </p>
-                                                <p class="text-[10px] font-bold text-slate-500 truncate max-w-[150px]">{{ $ss->description }}</p>
+                                                <p class="text-[10px] font-bold text-slate-500 truncate max-w-[150px]"><?php echo e($ss->description); ?></p>
                                             </div>
                                             
-                                            <form action="{{ route('schedules.special.destroy', $ss->id) }}" 
+                                            <form action="<?php echo e(route('schedules.special.destroy', $ss->id)); ?>" 
                                                   method="POST"
-                                                  id="delete-special-{{ $ss->id }}"
+                                                  id="delete-special-<?php echo e($ss->id); ?>"
                                                   class="shrink-0 block">
-                                                @csrf @method('DELETE')
+                                                <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                                                 
                                                 <button type="button"
-                                                        onclick="confirmDelete('delete-special-{{ $ss->id }}', 'Hapus agenda {{ $ss->description }} pada tanggal {{ \Carbon\Carbon::parse($ss->date)->format('d M Y') }}?')"
+                                                        onclick="confirmDelete('delete-special-<?php echo e($ss->id); ?>', 'Hapus agenda <?php echo e($ss->description); ?> pada tanggal <?php echo e(\Carbon\Carbon::parse($ss->date)->format('d M Y')); ?>?')"
                                                         class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/50 hover:bg-white text-slate-400 hover:text-rose-600 transition-all shadow-sm">
                                                     <i class="ph-bold ph-trash text-lg leading-none"></i>
                                                 </button>
                                             </form>
                                         </div>
-                                    @empty
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                         <div class="text-center py-4 text-xs font-bold text-slate-400 italic">Belum ada data.</div>
-                                    @endforelse
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -500,7 +539,7 @@
         </div>
     </div>
 
-    {{-- SweetAlert2 Library --}}
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
@@ -535,4 +574,13 @@
             });
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/admin/schedules/index.blade.php ENDPATH**/ ?>
