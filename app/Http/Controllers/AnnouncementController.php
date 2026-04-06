@@ -9,6 +9,7 @@ use App\Models\Agenda;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Jobs\SendGeneralWaJob;
+use Illuminate\Support\Facades\Cache; // TAMBAHKAN CLASS CACHE INI
 
 class AnnouncementController extends Controller
 {
@@ -46,8 +47,7 @@ class AnnouncementController extends Controller
 
     /**
      * Fungsi khusus untuk menu 'Agenda Kegiatan'
-     * 
-     */
+     * */
     public function agendas()
     {
         return $this->index();
@@ -67,12 +67,19 @@ class AnnouncementController extends Controller
             'user_id' => Auth::id(),
         ]);
 
+        // HAPUS CACHE LANDING PAGE AGAR DATA BARU MUNCUL
+        Cache::forget('landing_general_data');
+
         return back()->with('success', 'Pengumuman berhasil dipublikasikan.');
     }
 
     public function destroy($id)
     {
         Announcement::findOrFail($id)->delete();
+        
+        // HAPUS CACHE LANDING PAGE AGAR DATA BARU MUNCUL
+        Cache::forget('landing_general_data');
+
         return back()->with('success', 'Pengumuman dihapus.');
     }
 
@@ -87,12 +94,19 @@ class AnnouncementController extends Controller
 
         Agenda::create($request->all());
 
+        // HAPUS CACHE LANDING PAGE AGAR DATA BARU MUNCUL
+        Cache::forget('landing_general_data');
+
         return back()->with('success', 'Agenda kegiatan berhasil dijadwalkan.');
     }
 
     public function destroyAgenda($id)
     {
         Agenda::findOrFail($id)->delete();
+        
+        // HAPUS CACHE LANDING PAGE AGAR DATA BARU MUNCUL
+        Cache::forget('landing_general_data');
+
         return back()->with('success', 'Agenda kegiatan dihapus.');
     }
 
