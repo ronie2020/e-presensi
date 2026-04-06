@@ -225,7 +225,7 @@ class CbtController extends Controller
             }
         }
         
-        $exam->delete();
+       $exam->delete();
 
         return redirect()->route('cbt.index')->with('success', 'Data ujian berhasil dihapus.');
     }
@@ -235,8 +235,14 @@ class CbtController extends Controller
         $exam = CbtExam::with('questions')->findOrFail($id);   
         $totalPoints = $exam->questions->sum('score_weight');
         
-        return view('cbt.manage_questions', compact('exam', 'totalPoints'));
+        // Ambil data bank soal yang relevan untuk dikirim ke view
+        $banks = \App\Models\CbtQuestionBank::where('class_level', $exam->class_level)
+            ->orWhere('subject_name', 'like', '%' . $exam->subject_name . '%')
+            ->get();
+        
+        return view('cbt.manage_questions', compact('exam', 'totalPoints', 'banks'));
     }
+
 
 
     public function storeQuestion(Request $request, $id)
