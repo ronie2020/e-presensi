@@ -342,18 +342,6 @@
             {{-- === JIKA BELUM PILIH KELAS: TAMPILKAN FEED AKTIVITAS === --}}
             <div class="animate-enter space-y-6" style="animation-delay: 100ms">
                 
-                {{-- Logika Filtering Collection Manual via Blade (Tanpa Perlu Edit Controller) --}}
-                @php
-                    $currentStatus = request('status');
-                    $displaySubmissions = isset($latestSubmissions) ? clone $latestSubmissions : collect([]);
-                    
-                    if ($currentStatus === 'pending') {
-                        $displaySubmissions = $displaySubmissions->whereNull('teacher_feedback');
-                    } elseif ($currentStatus === 'graded') {
-                        $displaySubmissions = $displaySubmissions->whereNotNull('teacher_feedback');
-                    }
-                @endphp
-
                 {{-- Header Feed & Tabs --}}
                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
                     <div>
@@ -366,31 +354,30 @@
 
                     {{-- TABS FILTER STATUS --}}
                     <div class="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
-                        <a href="{{ request()->fullUrlWithQuery(['status' => null]) }}" 
-                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all {{ !$currentStatus ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50' }}">
+                        <a href="{{ request()->fullUrlWithQuery(['status' => null, 'page' => 1]) }}" 
+                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all {{ !request('status') ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50' }}">
                             <i class="ph-bold ph-list-dashes"></i> Semua
                         </a>
                         
-                        <a href="{{ request()->fullUrlWithQuery(['status' => 'pending']) }}" 
-                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 {{ $currentStatus == 'pending' ? 'bg-amber-100 text-amber-700 shadow-sm border border-amber-200' : 'text-slate-500 hover:bg-slate-50' }}">
+                        <a href="{{ request()->fullUrlWithQuery(['status' => 'pending', 'page' => 1]) }}" 
+                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 {{ request('status') == 'pending' ? 'bg-amber-100 text-amber-700 shadow-sm border border-amber-200' : 'text-slate-500 hover:bg-slate-50' }}">
                             <i class="ph-bold ph-clock-countdown"></i> Antrean Penilaian
-                            @php $pendingCount = (isset($latestSubmissions) ? $latestSubmissions : collect([]))->whereNull('teacher_feedback')->count(); @endphp
-                            @if($pendingCount > 0)
-                                <span class="bg-amber-500 text-white px-1.5 py-0.5 rounded-md text-[9px]">{{ $pendingCount }}</span>
+                            @if(isset($stats['pending_feedback']) && $stats['pending_feedback'] > 0)
+                                <span class="bg-amber-500 text-white px-1.5 py-0.5 rounded-md text-[9px]">{{ $stats['pending_feedback'] }}</span>
                             @endif
                         </a>
                         
-                        <a href="{{ request()->fullUrlWithQuery(['status' => 'graded']) }}" 
-                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 {{ $currentStatus == 'graded' ? 'bg-emerald-100 text-emerald-700 shadow-sm border border-emerald-200' : 'text-slate-500 hover:bg-slate-50' }}">
+                        <a href="{{ request()->fullUrlWithQuery(['status' => 'graded', 'page' => 1]) }}" 
+                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 {{ request('status') == 'graded' ? 'bg-emerald-100 text-emerald-700 shadow-sm border border-emerald-200' : 'text-slate-500 hover:bg-slate-50' }}">
                             <i class="ph-bold ph-check-circle"></i> Sudah Dinilai
                         </a>
                     </div>
                 </div>
 
                 {{-- Grid Card Siswa --}}
-                @if($displaySubmissions->count() > 0)
+                @if($latestSubmissions->count() > 0)
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        @foreach($displaySubmissions as $submission)
+                        @foreach($latestSubmissions as $submission)
                         <div class="group bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-200 transition-all duration-300 relative overflow-hidden">
                             
                             {{-- Dekorasi Background --}}
@@ -459,6 +446,11 @@
                         </div>
                         @endforeach
                     </div>
+
+                    {{-- TAMBAHAN: PAGINATION LINKS --}}
+                    <div class="mt-8">
+                        {{ $latestSubmissions->links() }}
+                    </div>
                 @else
                     {{-- Empty State jika Feed Kosong --}}
                     <div class="text-center py-32 bg-white rounded-[2.5rem] border border-slate-100 border-dashed shadow-sm">
@@ -466,12 +458,12 @@
                             <i class="ph-duotone ph-coffee text-5xl"></i>
                         </div>
                         <h3 class="text-xl font-black text-slate-800 tracking-tight">
-                            {{ $currentStatus == 'pending' ? 'Hore! Antrean Kosong' : 'Belum Ada Aktivitas' }}
+                            {{ request('status') == 'pending' ? 'Hore! Antrean Kosong' : 'Belum Ada Aktivitas' }}
                         </h3>
                         <p class="text-slate-500 text-sm mt-2 max-w-sm mx-auto">
-                            {{ $currentStatus == 'pending' ? 'Semua jurnal kebiasaan untuk hari ini sudah kamu nilai.' : 'Tampaknya belum ada siswa yang mengisi jurnal dengan filter ini.' }}
+                            {{ request('status') == 'pending' ? 'Semua jurnal kebiasaan untuk hari ini sudah kamu nilai.' : 'Tampaknya belum ada siswa yang mengisi jurnal dengan filter ini.' }}
                         </p>
-                        @if($currentStatus)
+                        @if(request('status'))
                             <a href="{{ route('teacher.habits.index') }}" class="inline-block mt-6 px-6 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-slate-200 transition-colors">Reset Filter</a>
                         @endif
                     </div>

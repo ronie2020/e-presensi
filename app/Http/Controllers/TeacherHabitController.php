@@ -74,15 +74,30 @@ class TeacherHabitController extends Controller
             $stats['missing'] = max(0, $totalStudentsAll - $submittedAll);
             $stats['percentage'] = $totalStudentsAll > 0 ? round(($submittedAll / $totalStudentsAll) * 100) : 0;
 
-            // 2. Ambil Feed Aktivitas Terbaru
-            $latestSubmissions = StudentHabit::with(['student', 'student.schoolClass'])
-                ->whereHas('student.schoolClass') // FIX: Filter agar alumni tidak muncul di feed
-                ->whereDate('report_date', $date)
-                ->orderBy('updated_at', 'desc')
-                ->limit(10)
-                ->get();
-        }
+            // TAMBAHAN: Hitung jumlah Antrean Penilaian untuk notifikasi angka merah
+            $stats['pending_feedback'] = StudentHabit::whereHas('student.schoolClass')
+                                            ->whereDate('report_date', $date)
+                                            ->whereNull('teacher_feedback')
+                                            ->count();
 
+            // 2. Ambil Feed Aktivitas Terbaru (DENGAN FILTER & PAGINATION)
+            $statusFilter = $request->input('status');
+            
+            $query = StudentHabit::with(['student', 'student.schoolClass'])
+                ->whereHas('student.schoolClass') 
+                ->whereDate('report_date', $date);
+
+            // Terapkan Filter Berdasarkan Tab yang Dipilih
+            if ($statusFilter === 'pending') {
+                $query->whereNull('teacher_feedback');
+            } elseif ($statusFilter === 'graded') {
+                $query->whereNotNull('teacher_feedback');
+            }
+
+            // Ganti limit(10)->get() menjadi paginate(12)
+            $latestSubmissions = $query->orderBy('updated_at', 'desc')->paginate(12)->withQueryString();
+        }
+        
         // Kirim semua variabel ke view
         return view('habits.teacher_index', compact('classes', 'students', 'date', 'classId', 'stats', 'latestSubmissions'));
     }

@@ -355,18 +355,6 @@
             <div class="animate-enter space-y-6" style="animation-delay: 100ms">
                 
                 
-                <?php
-                    $currentStatus = request('status');
-                    $displaySubmissions = isset($latestSubmissions) ? clone $latestSubmissions : collect([]);
-                    
-                    if ($currentStatus === 'pending') {
-                        $displaySubmissions = $displaySubmissions->whereNull('teacher_feedback');
-                    } elseif ($currentStatus === 'graded') {
-                        $displaySubmissions = $displaySubmissions->whereNotNull('teacher_feedback');
-                    }
-                ?>
-
-                
                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
                     <div>
                         <h3 class="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
@@ -378,31 +366,30 @@
 
                     
                     <div class="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
-                        <a href="<?php echo e(request()->fullUrlWithQuery(['status' => null])); ?>" 
-                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all <?php echo e(!$currentStatus ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'); ?>">
+                        <a href="<?php echo e(request()->fullUrlWithQuery(['status' => null, 'page' => 1])); ?>" 
+                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all <?php echo e(!request('status') ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'); ?>">
                             <i class="ph-bold ph-list-dashes"></i> Semua
                         </a>
                         
-                        <a href="<?php echo e(request()->fullUrlWithQuery(['status' => 'pending'])); ?>" 
-                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 <?php echo e($currentStatus == 'pending' ? 'bg-amber-100 text-amber-700 shadow-sm border border-amber-200' : 'text-slate-500 hover:bg-slate-50'); ?>">
+                        <a href="<?php echo e(request()->fullUrlWithQuery(['status' => 'pending', 'page' => 1])); ?>" 
+                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 <?php echo e(request('status') == 'pending' ? 'bg-amber-100 text-amber-700 shadow-sm border border-amber-200' : 'text-slate-500 hover:bg-slate-50'); ?>">
                             <i class="ph-bold ph-clock-countdown"></i> Antrean Penilaian
-                            <?php $pendingCount = (isset($latestSubmissions) ? $latestSubmissions : collect([]))->whereNull('teacher_feedback')->count(); ?>
-                            <?php if($pendingCount > 0): ?>
-                                <span class="bg-amber-500 text-white px-1.5 py-0.5 rounded-md text-[9px]"><?php echo e($pendingCount); ?></span>
+                            <?php if(isset($stats['pending_feedback']) && $stats['pending_feedback'] > 0): ?>
+                                <span class="bg-amber-500 text-white px-1.5 py-0.5 rounded-md text-[9px]"><?php echo e($stats['pending_feedback']); ?></span>
                             <?php endif; ?>
                         </a>
                         
-                        <a href="<?php echo e(request()->fullUrlWithQuery(['status' => 'graded'])); ?>" 
-                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 <?php echo e($currentStatus == 'graded' ? 'bg-emerald-100 text-emerald-700 shadow-sm border border-emerald-200' : 'text-slate-500 hover:bg-slate-50'); ?>">
+                        <a href="<?php echo e(request()->fullUrlWithQuery(['status' => 'graded', 'page' => 1])); ?>" 
+                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 <?php echo e(request('status') == 'graded' ? 'bg-emerald-100 text-emerald-700 shadow-sm border border-emerald-200' : 'text-slate-500 hover:bg-slate-50'); ?>">
                             <i class="ph-bold ph-check-circle"></i> Sudah Dinilai
                         </a>
                     </div>
                 </div>
 
                 
-                <?php if($displaySubmissions->count() > 0): ?>
+                <?php if($latestSubmissions->count() > 0): ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        <?php $__currentLoopData = $displaySubmissions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $submission): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php $__currentLoopData = $latestSubmissions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $submission): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="group bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-200 transition-all duration-300 relative overflow-hidden">
                             
                             
@@ -474,6 +461,12 @@
                         </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
+
+                    
+                    <div class="mt-8">
+                        <?php echo e($latestSubmissions->links()); ?>
+
+                    </div>
                 <?php else: ?>
                     
                     <div class="text-center py-32 bg-white rounded-[2.5rem] border border-slate-100 border-dashed shadow-sm">
@@ -481,14 +474,14 @@
                             <i class="ph-duotone ph-coffee text-5xl"></i>
                         </div>
                         <h3 class="text-xl font-black text-slate-800 tracking-tight">
-                            <?php echo e($currentStatus == 'pending' ? 'Hore! Antrean Kosong' : 'Belum Ada Aktivitas'); ?>
+                            <?php echo e(request('status') == 'pending' ? 'Hore! Antrean Kosong' : 'Belum Ada Aktivitas'); ?>
 
                         </h3>
                         <p class="text-slate-500 text-sm mt-2 max-w-sm mx-auto">
-                            <?php echo e($currentStatus == 'pending' ? 'Semua jurnal kebiasaan untuk hari ini sudah kamu nilai.' : 'Tampaknya belum ada siswa yang mengisi jurnal dengan filter ini.'); ?>
+                            <?php echo e(request('status') == 'pending' ? 'Semua jurnal kebiasaan untuk hari ini sudah kamu nilai.' : 'Tampaknya belum ada siswa yang mengisi jurnal dengan filter ini.'); ?>
 
                         </p>
-                        <?php if($currentStatus): ?>
+                        <?php if(request('status')): ?>
                             <a href="<?php echo e(route('teacher.habits.index')); ?>" class="inline-block mt-6 px-6 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-slate-200 transition-colors">Reset Filter</a>
                         <?php endif; ?>
                     </div>
