@@ -413,6 +413,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/{id}', [CbtBankController::class, 'update'])->name('update'); 
         Route::delete('/{id}', [CbtBankController::class, 'destroy'])->name('destroy');
 
+        Route::get('/{id}/preview', [CbtBankController::class, 'preview'])->name('preview');
+        Route::get('/{id}/export-word', [CbtBankController::class, 'exportWord'])->name('export_word');
+   
         Route::get('/{id}/questions/print', [CbtBankController::class, 'printQuestions'])->name('questions.print');
         Route::post('/{id}/import', [CbtBankController::class, 'importQuestions'])->name('questions.import');
         Route::get('/questions/template', [CbtBankController::class, 'downloadTemplate'])->name('questions.template');

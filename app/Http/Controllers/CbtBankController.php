@@ -625,4 +625,34 @@ class CbtBankController extends Controller
         ]);
     }    
 
+    // =========================================================================
+    // FITUR BARU: PREVIEW & EXPORT WORD
+    // =========================================================================
+
+    /**
+     * Mode Pratinjau (Preview) seperti tampilan siswa
+     */
+    public function preview($id)
+    {
+        $bank = CbtQuestionBank::with('questions')->findOrFail($id);
+        return view('cbt.bank.preview', compact('bank'));
+    }
+
+    /**
+     * Export ke format Microsoft Word (.doc)
+     */
+    public function exportWord($id)
+    {
+        $bank = CbtQuestionBank::with('questions')->findOrFail($id);
+        $fileName = 'Bank_Soal_' . Str::slug($bank->title) . '_' . date('Ymd') . '.doc';
+
+        $headers = [
+            "Content-type" => "application/vnd.ms-word",
+            "Content-Disposition" => "attachment;Filename={$fileName}",
+            "Pragma" => "no-cache",
+            "Expires" => "0"
+        ];
+
+        return response()->view('cbt.bank.export_word', compact('bank'))->withHeaders($headers);
+    }
 }

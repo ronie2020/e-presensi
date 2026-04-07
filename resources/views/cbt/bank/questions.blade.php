@@ -437,28 +437,37 @@
                         </form>
 
                         <div class="flex flex-col sm:flex-row justify-between items-center px-2 gap-4">
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-3 flex-wrap">
                                 <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
                                     <i class="ph-fill ph-list-dashes text-indigo-500"></i> Isi Bank Soal
-                                    
-                                    {{-- TOMBOL IMPORT --}}
-                                    <button @click="showImportModal = true" class="ml-3 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow-sm flex items-center gap-1.5">
-                                        <i class="ph-bold ph-file-arrow-up text-base"></i> Import Excel
-                                    </button>                                  
+                                </h3>
+                                
+                                {{-- TOMBOL IMPORT --}}
+                                <button @click="showImportModal = true" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow-sm flex items-center gap-1.5 ml-2">
+                                    <i class="ph-bold ph-file-arrow-up text-base"></i> Import
+                                </button>                                  
 
-                                    @if($bank->questions->count() > 0)
-                                        {{-- TOMBOL EXPORT EXCEL (BARU) --}}
-                                        <a href="{{ route('bank.questions.export', $bank->id) }}" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition shadow-sm flex items-center gap-1.5">
-                                            <i class="ph-bold ph-file-xls text-base"></i> Export Excel
-                                        </a>                                        
+                                @if($bank->questions->count() > 0)
+                                    {{-- TOMBOL EXPORT EXCEL --}}
+                                    <a href="{{ route('bank.questions.export', $bank->id) }}" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition shadow-sm flex items-center gap-1.5">
+                                        <i class="ph-bold ph-file-xls text-base"></i> Excel
+                                    </a>                                        
 
-                                        {{-- TOMBOL CETAK PDF --}}
-                                        <a href="{{ route('bank.questions.print', $bank->id) }}" target="_blank" class="px-3 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-lg text-xs font-bold hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 transition shadow-sm flex items-center gap-1.5">
-                                            <i class="ph-bold ph-printer text-base"></i> Cetak PDF
-                                        </a>
-                                    @endif
-                                </h3>                                
-                               
+                                    {{-- TOMBOL EXPORT WORD (BARU) --}}
+                                    <a href="{{ route('bank.export_word', $bank->id) }}" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-1.5">
+                                        <i class="ph-bold ph-file-doc text-base"></i> Word
+                                    </a>                                        
+
+                                    {{-- TOMBOL PREVIEW (BARU) --}}
+                                    <a href="{{ route('bank.preview', $bank->id) }}" target="_blank" class="px-3 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-bold hover:bg-slate-900 transition shadow-sm flex items-center gap-1.5">
+                                        <i class="ph-bold ph-desktop text-base"></i> Pratinjau
+                                    </a>
+
+                                    {{-- TOMBOL CETAK PDF --}}
+                                    <a href="{{ route('bank.questions.print', $bank->id) }}" target="_blank" class="px-3 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-lg text-xs font-bold hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 transition shadow-sm flex items-center gap-1.5">
+                                        <i class="ph-bold ph-printer text-base"></i> PDF
+                                    </a>
+                                @endif
                             </div>                            
                         </div>
                         <div class="flex flex-col sm:flex-row justify-between items-center px-2 gap-4">
@@ -468,7 +477,7 @@
                                 <i class=" ph-fill ph-book-open-text text-base"></i> Soal {{ $bank->questions->count() }}
                             </span>
 
-                            {{-- PERBAIKAN: TOTAL POIN SEKARANG AKAN TERLIHAT --}}
+                            {{-- TOTAL POIN --}}
                             <span class="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5" title="Akumulasi Bobot Nilai">
                                 <i class="ph-fill ph-chart-bar text-base"></i> Poin {{ $totalPoints ?? 0 }}
                             </span>
