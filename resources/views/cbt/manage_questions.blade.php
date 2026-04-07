@@ -8,7 +8,24 @@
         trix-editor { min-height: 150px; background-color: #f8fafc; border-radius: 1rem; border-color: #e2e8f0; }
         .trix-content ul { list-style-type: disc; padding-left: 1.5rem; }
         .trix-content ol { list-style-type: decimal; padding-left: 1.5rem; }
+        /* Fix z-index modal agar toolbar trix tidak tembus */
+        .trix-button-group { background-color: white; }
     </style>
+
+    {{-- CONFIG MATHJAX (Untuk Rumus Matematika) --}}
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' },
+            startup: {
+                ready: () => {
+                    MathJax.startup.defaultReady();
+                    window.renderMath = () => { MathJax.typesetPromise(); };
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <div x-data="{ 
         showImportModal: false, 
@@ -145,8 +162,13 @@
             this.showEditModal = true;
             this.$nextTick(() => {
                 const trix = document.getElementById('edit-trix-editor');
-                if(trix) trix.editor.loadHTML(this.editState.question_text);
-                if (window.MathJax) MathJax.typesetPromise();
+                if(trix) {
+                    // Update hidden input
+                    document.getElementById('q_input_edit').value = this.editState.question_text;
+                    // Render to visual editor
+                    trix.editor.loadHTML(this.editState.question_text);
+                }
+                if (window.renderMath) window.renderMath();
             });
         },
         
@@ -183,7 +205,7 @@
                         @if(!isset($exam->exam_type) || $exam->exam_type !== 'google_form')
                         <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
                             @if($exam->questions->count() > 0)
-                                 {{-- TOMBOL DOWNLOAD SOAL EXCEL (BARU) --}}
+                                 {{-- TOMBOL DOWNLOAD SOAL EXCEL --}}
                                 <a href="{{ route('cbt.questions.export_excel', $exam->id) }}" class="group px-4 py-2.5 bg-emerald-100 text-emerald-700 font-bold rounded-xl hover:bg-emerald-200 transition flex items-center justify-center gap-2 border border-emerald-200 text-xs">
                                     <i class="ph-bold ph-file-xls text-lg"></i> <span>Download Excel</span>
                                 </a>
@@ -194,7 +216,7 @@
                                 </a>
 
                                 {{-- TOMBOL PREVIEW (BARU) --}}
-                                <a href="{{ route('cbt.preview', $exam->id) }}" target="_blank" class="group px-4 py-2.5 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition flex items-center justify-center gap-2 border border-slate-700 text-xs">
+                                <a href="{{ route('cbt.preview', $exam->id) }}" target="_blank" class="group px-4 py-2.5 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition flex items-center justify-center gap-2 border border-slate-700 text-xs shadow-lg">
                                     <i class="ph-bold ph-desktop text-lg"></i> <span>Pratinjau</span>
                                 </a>
 
@@ -613,8 +635,9 @@
                                         </div>
                                     </div>
 
-                                    {{-- ACTION BUTTONS --}}
+                                    {{-- ACTION BUTTONS TERBARU (Kuning/Merah) --}}
                                     <div class="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                        {{-- Tombol Edit --}}
                                         <button type="button" @click="openEdit({
                                                 question_type: '{{ $qType }}',
                                                 question_text: {{ json_encode($q->question_text) }},
@@ -632,20 +655,21 @@
                                                 score_weight: {{ $q->score_weight }},
                                                 tags: '{{ addslashes($q->tags ?? '') }}'
                                             }, '{{ route('cbt.questions.update', $q->id) }}')"
-                                            class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 shadow-sm flex items-center justify-center transition-all hover:scale-105">
+                                            class="w-9 h-9 rounded-xl bg-white border border-amber-200 text-amber-500 hover:text-amber-600 hover:bg-amber-50 hover:border-amber-300 shadow-sm flex items-center justify-center transition-all hover:scale-105">
                                             <i class="ph-bold ph-pencil-simple text-lg"></i>
                                         </button>
 
+                                        {{-- Tombol Delete --}}
                                         <form action="{{ route('cbt.questions.destroy', $q->id) }}" method="POST" class="delete-form">
                                             @csrf @method('DELETE')
-                                            <button type="button" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 shadow-sm flex items-center justify-center transition-all hover:scale-105 btn-delete"><i class="ph-bold ph-trash text-lg"></i></button>
+                                            <button type="button" class="w-9 h-9 rounded-xl bg-white border border-rose-200 text-rose-500 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 shadow-sm flex items-center justify-center transition-all hover:scale-105 btn-delete"><i class="ph-bold ph-trash text-lg"></i></button>
                                         </form>
                                     </div>
                                 </div>
                             @empty
                                 <div class="text-center py-16 bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200">
                                     <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300 animate-pulse"><i class="ph-duotone ph-clipboard-text text-4xl"></i></div>
-                                    <h3 class="text-slate-800 font-black text-xl mb-1">Bank Soal Kosong</h3>
+                                    <h3 class="text-slate-800 font-black text-xl mb-1">Soal Kosong</h3>
                                     <p class="text-slate-500 text-sm max-w-xs mx-auto font-medium">Mulai tambahkan soal secara manual atau import dari file Excel.</p>
                                 </div>
                             @endforelse
@@ -663,7 +687,6 @@
                     <div class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all sm:w-full sm:max-w-2xl border border-slate-100">
                         <form :action="editState.url" method="POST" enctype="multipart/form-data" id="editQuestionForm">
                             @csrf @method('PUT')
-                            <!-- ... Isi Form Edit Tetap Sama ... -->
                              <input type="hidden" name="delete_image" x-model="deleteImage">
 
                             <div class="bg-white px-8 py-6 border-b border-slate-100 flex justify-between items-center">
@@ -894,14 +917,14 @@
 
                                 {{-- Bobot --}}
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Bobot</label>
-                                    <input type="number" name="score_weight" x-model="editState.score_weight" required class="w-full rounded-xl border-slate-200 text-sm font-bold text-center h-11">
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Bobot Nilai</label>
+                                    <input type="number" name="score_weight" x-model="editState.score_weight" required class="w-full rounded-xl border-slate-200 bg-white text-sm font-bold text-center h-11 focus:ring-blue-500">
                                 </div>
                             </div>
 
                             <div class="bg-white px-8 py-5 flex justify-end gap-3 rounded-b-[2.5rem] border-t border-slate-100 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] relative z-10">
                                 <button type="button" @click="showEditModal = false" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition text-sm">Batal</button>
-                                <button type="submit" class="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-500/30 text-sm flex items-center gap-2"><i class="ph-bold ph-floppy-disk text-lg"></i> Simpan</button>
+                                <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 text-sm flex items-center gap-2"><i class="ph-bold ph-floppy-disk text-lg"></i> Simpan</button>
                             </div>
                         </form>
                     </div>
@@ -930,7 +953,7 @@
                 </div>
             </div>
 
-            {{-- 3. MODAL AMBIL DARI BANK SOAL (UPDATED) --}}
+            {{-- 3. MODAL AMBIL DARI BANK SOAL --}}
             <div x-show="showBankModal" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto">
                 <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="showBankModal = false"></div>
                 <div class="flex min-h-screen items-center justify-center p-4">
@@ -941,7 +964,6 @@
                             importMode: 'all',
                             bankQuestions: [],
                             selectedBankQuestions: [],
-                            // Pre-load data bank soal beserta relasi pertanyaannya dari Blade
                             banksData: {{ Js::from(\App\Models\CbtQuestionBank::with('questions')->where('class_level', $exam->class_level)->orWhere('subject_name', 'like', '%'.$exam->subject_name.'%')->get()) }},
                             
                             updateQuestionList() {
@@ -1140,6 +1162,24 @@
                     @endif
                     @if(session('error'))
                         Swal.fire({ icon: 'error', title: 'Gagal!', text: "{{ session('error') }}", toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, customClass: { popup: 'rounded-xl' } });
+                    @endif
+
+                    {{-- TAMBAHAN: Tampilkan Pesan Error Validasi Backend --}}
+                    @if($errors->any())
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal Menyimpan!',
+                            html: `
+                                <div class="text-sm text-rose-500 font-medium text-left mt-2">
+                                    <ul class="list-disc list-inside">
+                                        @foreach($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            `,
+                            customClass: { popup: 'rounded-[2rem]' }
+                        });
                     @endif
                 });
                 function viewImage(url) {

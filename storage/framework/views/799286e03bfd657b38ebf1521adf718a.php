@@ -17,7 +17,24 @@
         trix-editor { min-height: 150px; background-color: #f8fafc; border-radius: 1rem; border-color: #e2e8f0; }
         .trix-content ul { list-style-type: disc; padding-left: 1.5rem; }
         .trix-content ol { list-style-type: decimal; padding-left: 1.5rem; }
+        /* Fix z-index modal agar toolbar trix tidak tembus */
+        .trix-button-group { background-color: white; }
     </style>
+
+    
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' },
+            startup: {
+                ready: () => {
+                    MathJax.startup.defaultReady();
+                    window.renderMath = () => { MathJax.typesetPromise(); };
+                }
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <div x-data="{ 
         showImportModal: false, 
@@ -154,8 +171,13 @@
             this.showEditModal = true;
             this.$nextTick(() => {
                 const trix = document.getElementById('edit-trix-editor');
-                if(trix) trix.editor.loadHTML(this.editState.question_text);
-                if (window.MathJax) MathJax.typesetPromise();
+                if(trix) {
+                    // Update hidden input
+                    document.getElementById('q_input_edit').value = this.editState.question_text;
+                    // Render to visual editor
+                    trix.editor.loadHTML(this.editState.question_text);
+                }
+                if (window.renderMath) window.renderMath();
             });
         },
         
@@ -203,7 +225,7 @@
                                 </a>
 
                                 
-                                <a href="<?php echo e(route('cbt.preview', $exam->id)); ?>" target="_blank" class="group px-4 py-2.5 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition flex items-center justify-center gap-2 border border-slate-700 text-xs">
+                                <a href="<?php echo e(route('cbt.preview', $exam->id)); ?>" target="_blank" class="group px-4 py-2.5 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition flex items-center justify-center gap-2 border border-slate-700 text-xs shadow-lg">
                                     <i class="ph-bold ph-desktop text-lg"></i> <span>Pratinjau</span>
                                 </a>
 
@@ -627,6 +649,7 @@
 
                                     
                                     <div class="absolute top-6 right-6 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                        
                                         <button type="button" @click="openEdit({
                                                 question_type: '<?php echo e($qType); ?>',
                                                 question_text: <?php echo e(json_encode($q->question_text)); ?>,
@@ -644,20 +667,21 @@
                                                 score_weight: <?php echo e($q->score_weight); ?>,
                                                 tags: '<?php echo e(addslashes($q->tags ?? '')); ?>'
                                             }, '<?php echo e(route('cbt.questions.update', $q->id)); ?>')"
-                                            class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 shadow-sm flex items-center justify-center transition-all hover:scale-105">
+                                            class="w-9 h-9 rounded-xl bg-white border border-amber-200 text-amber-500 hover:text-amber-600 hover:bg-amber-50 hover:border-amber-300 shadow-sm flex items-center justify-center transition-all hover:scale-105">
                                             <i class="ph-bold ph-pencil-simple text-lg"></i>
                                         </button>
 
+                                        
                                         <form action="<?php echo e(route('cbt.questions.destroy', $q->id)); ?>" method="POST" class="delete-form">
                                             <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
-                                            <button type="button" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 shadow-sm flex items-center justify-center transition-all hover:scale-105 btn-delete"><i class="ph-bold ph-trash text-lg"></i></button>
+                                            <button type="button" class="w-9 h-9 rounded-xl bg-white border border-rose-200 text-rose-500 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-300 shadow-sm flex items-center justify-center transition-all hover:scale-105 btn-delete"><i class="ph-bold ph-trash text-lg"></i></button>
                                         </form>
                                     </div>
                                 </div>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <div class="text-center py-16 bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200">
                                     <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300 animate-pulse"><i class="ph-duotone ph-clipboard-text text-4xl"></i></div>
-                                    <h3 class="text-slate-800 font-black text-xl mb-1">Bank Soal Kosong</h3>
+                                    <h3 class="text-slate-800 font-black text-xl mb-1">Soal Kosong</h3>
                                     <p class="text-slate-500 text-sm max-w-xs mx-auto font-medium">Mulai tambahkan soal secara manual atau import dari file Excel.</p>
                                 </div>
                             <?php endif; ?>
@@ -675,7 +699,6 @@
                     <div class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all sm:w-full sm:max-w-2xl border border-slate-100">
                         <form :action="editState.url" method="POST" enctype="multipart/form-data" id="editQuestionForm">
                             <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
-                            <!-- ... Isi Form Edit Tetap Sama ... -->
                              <input type="hidden" name="delete_image" x-model="deleteImage">
 
                             <div class="bg-white px-8 py-6 border-b border-slate-100 flex justify-between items-center">
@@ -906,14 +929,14 @@
 
                                 
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Bobot</label>
-                                    <input type="number" name="score_weight" x-model="editState.score_weight" required class="w-full rounded-xl border-slate-200 text-sm font-bold text-center h-11">
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Bobot Nilai</label>
+                                    <input type="number" name="score_weight" x-model="editState.score_weight" required class="w-full rounded-xl border-slate-200 bg-white text-sm font-bold text-center h-11 focus:ring-blue-500">
                                 </div>
                             </div>
 
                             <div class="bg-white px-8 py-5 flex justify-end gap-3 rounded-b-[2.5rem] border-t border-slate-100 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] relative z-10">
                                 <button type="button" @click="showEditModal = false" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition text-sm">Batal</button>
-                                <button type="submit" class="px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition shadow-lg shadow-indigo-500/30 text-sm flex items-center gap-2"><i class="ph-bold ph-floppy-disk text-lg"></i> Simpan</button>
+                                <button type="submit" class="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 text-sm flex items-center gap-2"><i class="ph-bold ph-floppy-disk text-lg"></i> Simpan</button>
                             </div>
                         </form>
                     </div>
@@ -953,7 +976,6 @@
                             importMode: 'all',
                             bankQuestions: [],
                             selectedBankQuestions: [],
-                            // Pre-load data bank soal beserta relasi pertanyaannya dari Blade
                             banksData: <?php echo e(Js::from(\App\Models\CbtQuestionBank::with('questions')->where('class_level', $exam->class_level)->orWhere('subject_name', 'like', '%'.$exam->subject_name.'%')->get())); ?>,
                             
                             updateQuestionList() {
@@ -1152,6 +1174,24 @@
                     <?php endif; ?>
                     <?php if(session('error')): ?>
                         Swal.fire({ icon: 'error', title: 'Gagal!', text: "<?php echo e(session('error')); ?>", toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, customClass: { popup: 'rounded-xl' } });
+                    <?php endif; ?>
+
+                    
+                    <?php if($errors->any()): ?>
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal Menyimpan!',
+                            html: `
+                                <div class="text-sm text-rose-500 font-medium text-left mt-2">
+                                    <ul class="list-disc list-inside">
+                                        <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <li><?php echo e($error); ?></li>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    </ul>
+                                </div>
+                            `,
+                            customClass: { popup: 'rounded-[2rem]' }
+                        });
                     <?php endif; ?>
                 });
                 function viewImage(url) {
