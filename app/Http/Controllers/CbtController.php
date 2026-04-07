@@ -1238,5 +1238,36 @@ class CbtController extends Controller
             "Expires"             => "0"
         ]);
     }
+
+     // =========================================================================
+    // FITUR BARU: PREVIEW & EXPORT WORD
+    // =========================================================================
+
+    /**
+     * Mode Pratinjau (Preview) seperti tampilan siswa
+     */
+    public function preview($id)
+    {
+        $exam = CbtExam::with('questions')->findOrFail($id);
+        return view('cbt.preview', compact('exam'));
+    }
+
+    /**
+     * Export ke format Microsoft Word (.doc)
+     */
+    public function exportWord($id)
+    {
+        $exam = CbtExam::with('questions')->findOrFail($id);
+        $fileName = 'Soal_Ujian_' . Str::slug($exam->title) . '_' . date('Ymd') . '.doc';
+
+        $headers = [
+            "Content-type" => "application/vnd.ms-word",
+            "Content-Disposition" => "attachment;Filename={$fileName}",
+            "Pragma" => "no-cache",
+            "Expires" => "0"
+        ];
+
+        return response()->view('cbt.export_word', compact('exam'))->withHeaders($headers);
+    }
     
 }

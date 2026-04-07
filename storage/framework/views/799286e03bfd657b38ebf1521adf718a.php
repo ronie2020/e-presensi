@@ -196,6 +196,17 @@
                                 <a href="<?php echo e(route('cbt.questions.export_excel', $exam->id)); ?>" class="group px-4 py-2.5 bg-emerald-100 text-emerald-700 font-bold rounded-xl hover:bg-emerald-200 transition flex items-center justify-center gap-2 border border-emerald-200 text-xs">
                                     <i class="ph-bold ph-file-xls text-lg"></i> <span>Download Excel</span>
                                 </a>
+
+                                
+                                <a href="<?php echo e(route('cbt.export_word', $exam->id)); ?>" class="group px-4 py-2.5 bg-blue-100 text-blue-700 font-bold rounded-xl hover:bg-blue-200 transition flex items-center justify-center gap-2 border border-blue-200 text-xs">
+                                    <i class="ph-bold ph-file-doc text-lg"></i> <span>Export Word</span>
+                                </a>
+
+                                
+                                <a href="<?php echo e(route('cbt.preview', $exam->id)); ?>" target="_blank" class="group px-4 py-2.5 bg-slate-800 text-white font-bold rounded-xl hover:bg-slate-900 transition flex items-center justify-center gap-2 border border-slate-700 text-xs">
+                                    <i class="ph-bold ph-desktop text-lg"></i> <span>Pratinjau</span>
+                                </a>
+
                                 <button @click="showExportBankModal = true" class="group px-4 py-2.5 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition flex items-center justify-center gap-2 border border-white/10 text-xs">
                                     <i class="ph-bold ph-upload-simple text-lg"></i> <span>Simpan ke Bank</span>
                                 </button>

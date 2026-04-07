@@ -446,28 +446,37 @@
                         </form>
 
                         <div class="flex flex-col sm:flex-row justify-between items-center px-2 gap-4">
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-3 flex-wrap">
                                 <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
                                     <i class="ph-fill ph-list-dashes text-indigo-500"></i> Isi Bank Soal
-                                    
-                                    
-                                    <button @click="showImportModal = true" class="ml-3 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow-sm flex items-center gap-1.5">
-                                        <i class="ph-bold ph-file-arrow-up text-base"></i> Import Excel
-                                    </button>                                  
+                                </h3>
+                                
+                                
+                                <button @click="showImportModal = true" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-700 transition shadow-sm flex items-center gap-1.5 ml-2">
+                                    <i class="ph-bold ph-file-arrow-up text-base"></i> Import
+                                </button>                                  
 
-                                    <?php if($bank->questions->count() > 0): ?>
-                                        
-                                        <a href="<?php echo e(route('bank.questions.export', $bank->id)); ?>" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition shadow-sm flex items-center gap-1.5">
-                                            <i class="ph-bold ph-file-xls text-base"></i> Export Excel
-                                        </a>                                        
+                                <?php if($bank->questions->count() > 0): ?>
+                                    
+                                    <a href="<?php echo e(route('bank.questions.export', $bank->id)); ?>" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition shadow-sm flex items-center gap-1.5">
+                                        <i class="ph-bold ph-file-xls text-base"></i> Excel
+                                    </a>                                        
 
-                                        
-                                        <a href="<?php echo e(route('bank.questions.print', $bank->id)); ?>" target="_blank" class="px-3 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-lg text-xs font-bold hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 transition shadow-sm flex items-center gap-1.5">
-                                            <i class="ph-bold ph-printer text-base"></i> Cetak PDF
-                                        </a>
-                                    <?php endif; ?>
-                                </h3>                                
-                               
+                                    
+                                    <a href="<?php echo e(route('bank.export_word', $bank->id)); ?>" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-1.5">
+                                        <i class="ph-bold ph-file-doc text-base"></i> Word
+                                    </a>                                        
+
+                                    
+                                    <a href="<?php echo e(route('bank.preview', $bank->id)); ?>" target="_blank" class="px-3 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-bold hover:bg-slate-900 transition shadow-sm flex items-center gap-1.5">
+                                        <i class="ph-bold ph-desktop text-base"></i> Pratinjau
+                                    </a>
+
+                                    
+                                    <a href="<?php echo e(route('bank.questions.print', $bank->id)); ?>" target="_blank" class="px-3 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-lg text-xs font-bold hover:text-indigo-600 hover:bg-indigo-50 hover:border-indigo-200 transition shadow-sm flex items-center gap-1.5">
+                                        <i class="ph-bold ph-printer text-base"></i> PDF
+                                    </a>
+                                <?php endif; ?>
                             </div>                            
                         </div>
                         <div class="flex flex-col sm:flex-row justify-between items-center px-2 gap-4">

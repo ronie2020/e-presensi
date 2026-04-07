@@ -375,6 +375,10 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/exam/{exam}/questions/print', [CbtController::class, 'printQuestions'])->name('questions.print');
         Route::get('/exam/{exam}/export-questions', [CbtController::class, 'exportQuestions'])->name('questions.export_excel');
+
+          // --- PREVIEW DAN EXPORT WORD CBT ---
+        Route::get('/exam/{exam}/preview', [CbtController::class, 'preview'])->name('preview');
+        Route::get('/exam/{exam}/export-word', [CbtController::class, 'exportWord'])->name('export_word');
         
         Route::post('/exam/{exam}/import', [CbtController::class, 'importQuestions'])->name('questions.import');
         Route::get('/questions/template', [CbtController::class, 'downloadTemplate'])->name('questions.template');
