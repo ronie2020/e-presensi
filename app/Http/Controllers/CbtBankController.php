@@ -53,6 +53,28 @@ class CbtBankController extends Controller
     }
 
     /**
+     * Update Bank Soal (Header)
+     */
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'subject_name' => 'required|string',
+            'class_level' => 'required',
+        ]);
+
+        $bank = CbtQuestionBank::findOrFail($id);
+        
+        $bank->update([
+            'title' => $request->title,
+            'subject_name' => $request->subject_name,
+            'class_level' => $request->class_level,
+        ]);
+
+        return back()->with('success', 'Informasi Bank Soal berhasil diperbarui!');
+    }
+
+    /**
      * Kelola Isi Soal di dalam Bank
      */
     public function manage($id)
