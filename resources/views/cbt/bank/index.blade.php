@@ -257,7 +257,7 @@
                             </a>
                             
                             {{-- Button Edit --}}
-                            <button type="button" @click="openEditModal({{ json_encode(['id' => $bank->id, 'title' => $bank->title, 'subject_name' => $bank->subject_name, 'class_level' => $bank->class_level]) }}, '{{ route('bank.update', $bank->id) }}')" class="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 text-slate-500 rounded-xl hover:bg-indigo-50 hover:border-indigo-200 hover:text-indigo-600 transition" title="Edit Bank Soal">
+                            <button type="button" @click="openEditModal({{ json_encode(['id' => $bank->id, 'title' => $bank->title, 'subject_name' => $bank->subject_name, 'class_level' => $bank->class_level]) }}, '{{ route('bank.update', $bank->id) }}')" class="w-10 h-10 flex items-center justify-center bg-white border border-amber-200 text-amber-500 rounded-xl hover:bg-amber-50 hover:border-amber-300 hover:text-amber-600 transition-all" title="Edit Bank Soal">
                                 <i class="ph-bold ph-pencil-simple text-lg"></i>
                             </button>
 
