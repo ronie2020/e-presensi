@@ -126,7 +126,7 @@ class DisciplineController extends Controller
 
         return view('discipline.index', compact(
             'students', 'violationTypes', 'meritTypes', 
-            'classSummaries', 'topViolators', 'topMerits', 'historyRecords', // Kirim variable baru
+            'classSummaries', 'topViolators', 'topMerits', 'historyRecords', 
             'todayViolations', 'todayMerits'
         ));
     }
@@ -149,72 +149,16 @@ class DisciplineController extends Controller
             $data['date'] = Carbon::today()->toDateString();
         }
 
-        // =========================================================================
-        // LOGIKA SMART SYSTEM E-COUNSELING (BP/BK)
-        // =========================================================================
-        $studentId = $request->student_id;
-
-        // Ambil semua poin siswa ini dari DisciplineRecord
-        $points = DisciplineRecord::where('student_id', $studentId)
-            ->with('disciplineType')
-            ->get();
-
-        $totalMinus = $points->where('disciplineType.type', 'Pelanggaran')->sum('disciplineType.point_value');
-        $totalPlus = $points->where('disciplineType.type', 'Kebaikan')->sum('disciplineType.point_value');
-
-        // LOGIKA 1: PELANGGARAN MELEBIHI BATAS (>= 200)
-        if ($totalMinus >= 200) {
-            $activeViolationTicket = \App\Models\BkSession::where('student_id', $studentId)
-                ->whereIn('status', ['pending', 'approved', 'ongoing']) 
-                ->where('is_system_generated', true)
-                ->where('initial_message', 'like', '%PELANGGARAN%')
-                ->exists();
-
-            if (!$activeViolationTicket) {
-                $kategoriId = \App\Models\BkCategory::where('name', 'like', '%Disiplin%')->first()->id ?? 1;
-
-                \App\Models\BkSession::create([
-                    'student_id' => $studentId,
-                    'bk_category_id' => $kategoriId,
-                    'initial_message' => "[SISTEM OTOMATIS: PELANGGARAN BERAT]\nSistem mendeteksi siswa ini telah mencapai ambang batas pelanggaran sekolah dengan akumulasi {$totalMinus} Poin. Mohon segera dilakukan pemanggilan dan pembinaan.",
-                    'method' => 'offline',
-                    'status' => 'pending',
-                    'is_system_generated' => true,
-                ]);
-            }
-        }
-
-        // LOGIKA 2: PRESTASI SANGAT BAIK (>= 100)
-        if ($totalPlus >= 100) {
-            $activeMeritTicket = \App\Models\BkSession::where('student_id', $studentId)
-                ->whereIn('status', ['pending', 'approved', 'ongoing'])
-                ->where('is_system_generated', true)
-                ->where('initial_message', 'like', '%PRESTASI%')
-                ->exists();
-
-            if (!$activeMeritTicket) {
-                $kategoriId = \App\Models\BkCategory::where('name', 'like', '%Prestasi%')->first()->id ?? 1;
-
-                \App\Models\BkSession::create([
-                    'student_id' => $studentId,
-                    'bk_category_id' => $kategoriId,
-                    'initial_message' => "[SISTEM OTOMATIS: APRESIASI PRESTASI]\nSistem mendeteksi siswa ini memiliki rekam jejak yang sangat baik dengan akumulasi +{$totalPlus} Poin Kebaikan. Direkomendasikan untuk diberikan apresiasi atau bimbingan karir lanjutan.",
-                    'method' => 'offline',
-                    'status' => 'pending',
-                    'is_system_generated' => true,
-                ]);
-            }
-        }
-        // =========================================================================
-        
+        // Simpan Data Disiplin
         DisciplineRecord::create($data);
         
-       // =========================================================================
-        // 2. TRIGGER SISTEM E-COUNSELING OTOMATIS
-        // Karena ini fungsi global di Model Student, cukup panggil 1 baris ini!
+        // =========================================================================
+        // TRIGGER SISTEM E-COUNSELING OTOMATIS (BK INTEGRATION)
+        // Cukup panggil method dari model Student agar Controller bersih (DRY Principle)
         // =========================================================================
         $student = Student::find($request->student_id);
         if ($student) {
+            // Fungsi ini akan menghitung poin dan membuat tiket BK jika mencapai ambang batas
             $student->checkBkThresholds();
         }
         // =========================================================================
