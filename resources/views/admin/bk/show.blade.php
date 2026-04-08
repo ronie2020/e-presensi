@@ -1,12 +1,11 @@
 <x-app-layout>
     {{-- 
         REDESIGN DETAIL KONSELING (BLUE THEME)
-        - Menyesuaikan style dengan Index/Dashboard
-        - Rounded corners besar, shadow halus, warna dominan biru/slate
+        - Diperbarui dengan UI Alert khusus untuk tiket hasil integrasi Sistem Disiplin
     --}}
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         
-        {{-- HEADER SECTION (Custom, menggantikan x-slot) --}}
+        {{-- HEADER SECTION --}}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -86,6 +85,14 @@
                                     <i class="ph-slash ph-whatsapp-logo text-xl"></i> No. WA Tidak Ada
                                 </div>
                             @endif
+
+                            {{-- LINK MENUJU HALAMAN DISIPLIN SISWA (Opsional tapi direkomendasikan untuk integrasi) --}}
+                            @if(Route::has('admin.discipline.student_history'))
+                                <a href="{{ route('admin.discipline.student_history', $session->student->id) }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-indigo-50 text-indigo-600 font-bold rounded-xl border border-indigo-100 hover:bg-indigo-100 transition-colors mt-2">
+                                    <i class="ph-bold ph-shield-warning text-xl"></i> 
+                                    Lihat Rekam Disiplin
+                                </a>
+                            @endif
                         </div>
                     </div>
 
@@ -107,11 +114,36 @@
                                 @endif
                             </span>
                         </div>
+
+                        {{-- ALERT INTEGRASI SISTEM DISIPLIN --}}
+                        @if($session->is_system_generated)
+                            @if(str_contains($session->initial_message, 'PELANGGARAN'))
+                                <div class="mb-4 bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-start gap-3">
+                                    <div class="p-2 bg-rose-100 text-rose-600 rounded-lg animate-pulse">
+                                        <i class="ph-fill ph-warning-octagon text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-black text-rose-800 uppercase tracking-wider mb-1">Panggilan Otomatis Sistem</h4>
+                                        <p class="text-xs text-rose-700 font-medium">Tiket ini dibuat secara otomatis karena siswa telah mencapai ambang batas poin pelanggaran di modul Disiplin.</p>
+                                    </div>
+                                </div>
+                            @elseif(str_contains($session->initial_message, 'PRESTASI'))
+                                <div class="mb-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+                                    <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                                        <i class="ph-fill ph-medal text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xs font-black text-blue-800 uppercase tracking-wider mb-1">Apresiasi Sistem Otomatis</h4>
+                                        <p class="text-xs text-blue-700 font-medium">Siswa mencapai poin kebaikan luar biasa. Tiket ini dibuat untuk pemberian apresiasi / bimbingan lanjutan.</p>
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
                         
                         <div class="relative mb-2">
                             <div class="absolute -top-3 -left-2 text-5xl text-blue-100 font-serif opacity-50">“</div>
                             <div class="relative z-10 bg-blue-50/50 p-5 rounded-2xl border border-blue-100 text-slate-700 italic font-medium leading-relaxed">
-                                {{ $session->initial_message }}
+                                {!! nl2br(e($session->initial_message)) !!}
                             </div>
                         </div>
                         
