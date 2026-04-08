@@ -408,9 +408,12 @@ class StudentPortalController extends Controller
             $complaints = Complaint::where('student_id', $student->id)->latest()->get();
         }
         $bkSessions = collect([]);
+        $unreadSystemBk = 0;
         if (class_exists(BkSession::class)) {
             $bkSessions = BkSession::where('student_id', $student->id)->with(['category', 'teacher'])->latest()->get();
+            $unreadSystemBk = $bkSessions->where('is_system_generated', true)->whereIn('status', ['pending', 'ongoing'])->count();
         }
+
 
         // --- TABS CONFIGURATION ---
         $tabs = ['ringkasan' => ['icon' => 'squares-four', 'label' => 'Ringkasan']];
@@ -423,9 +426,9 @@ class StudentPortalController extends Controller
                 'literasi_mandiri' => ['icon' => 'pencil-circle', 'label' => 'Jurnal Literasi'],
                 'ramadan_jurnal' => ['icon' => 'moon-stars', 'label' => 'Mutabaah Ramadhan', 'badge' => (!$isRamadanEnded && !$todayRamadanLog) ? 1 : 0], 
                 'ramadan_rank'   => ['icon' => 'trophy', 'label' => 'Peringkat Kebaikan'], 
-                'bk' => ['icon' => 'heart-beat', 'label' => 'Konseling BK'],
+                'bk' => ['icon' => 'heart-beat', 'label' => 'Konseling BK', 'badge' => $unreadSystemBk > 0 ? $unreadSystemBk : 0],
                 'penghubung' => ['icon' => 'notebook', 'label' => 'Buku Penghubung'],
-                'pengaduan' => ['icon' => 'megaphone', 'label' => 'Lapor Masalah'],   
+                'pengaduan' => ['icon' => 'megaphone', 'label' => 'Lapor Masalah'], 
                 'jadwal' => ['icon' => 'calendar-blank', 'label' => 'Jadwal Pelajaran'],
                 'lms' => ['icon' => 'clipboard-text', 'label' => 'Tugas Online', 'badge' => $pendingTasks->count()],
                 'kbm' => ['icon' => 'chalkboard-teacher', 'label' => 'Jurnal KBM'],

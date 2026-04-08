@@ -102,20 +102,29 @@
                     
                     <div class="space-y-6">
                         <div>
-                            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Kategori</label>
-                            <div class="mt-2">
-                                <span class="inline-block px-4 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-sm font-bold border border-slate-200">
-                                    {{ $session->category->name }}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Keluhan / Pesan Kamu</label>
-                            <div class="mt-3 p-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed italic relative">
-                                <i class="ph-fill ph-quotes text-4xl text-slate-200 absolute -top-3 -left-2"></i>
-                                <span class="relative z-10">"{{ $session->initial_message }}"</span>
-                            </div>
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                                {{ ($session->is_system_generated ?? false) ? 'Pemberitahuan dari Sekolah' : 'Keluhan / Pesan Kamu' }}
+                            </label>
+                            
+                            @if($session->is_system_generated ?? false)
+                                @php
+                                    $isPrestasi = str_contains($session->initial_message, 'PRESTASI');
+                                    $sysBg = $isPrestasi ? 'bg-blue-50' : 'bg-rose-50';
+                                    $sysBorder = $isPrestasi ? 'border-blue-100' : 'border-rose-100';
+                                    $sysText = $isPrestasi ? 'text-blue-800' : 'text-rose-800';
+                                    $sysIconColor = $isPrestasi ? 'text-blue-200' : 'text-rose-200';
+                                    $sysIcon = $isPrestasi ? 'ph-medal' : 'ph-warning-circle';
+                                @endphp
+                                <div class="mt-3 p-6 {{ $sysBg }} rounded-2xl border {{ $sysBorder }} {{ $sysText }} font-medium leading-relaxed relative">
+                                    <i class="ph-fill {{ $sysIcon }} text-4xl {{ $sysIconColor }} absolute -top-3 -left-2"></i>
+                                    <span class="relative z-10 whitespace-pre-line">{{ $session->initial_message }}</span>
+                                </div>
+                            @else
+                                <div class="mt-3 p-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed italic relative">
+                                    <i class="ph-fill ph-quotes text-4xl text-slate-200 absolute -top-3 -left-2"></i>
+                                    <span class="relative z-10">"{{ $session->initial_message }}"</span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
