@@ -72,7 +72,8 @@
                         <div class="space-y-4 relative z-10">
                             <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
                                 <span class="text-xs font-bold text-slate-400 uppercase">NIS / NISN</span>
-                                <span class="font-bold text-slate-700 font-mono">{{ $session->student->nis ?? '-' }} / {{ $session->student->nisn ?? '-' }}</span>
+                                {{-- PERBAIKAN: Mengubah 'nisn' menjadi 'student_id' sesuai database --}}
+                                <span class="font-bold text-slate-700 font-mono">{{ $session->student->nis ?? '-' }} / {{ $session->student->student_id ?? '-' }}</span>
                             </div>
                             
                             @if($session->student->parent_wa_number ?? false)
