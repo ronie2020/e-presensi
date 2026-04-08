@@ -10,6 +10,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+// --- TAMBAHAN UNTUK LOGIKA E-COUNSELING ---
+use App\Models\BkSession;
+use App\Models\BkCategory;
+use App\Models\DisciplineRecord;
+use App\Models\AttendanceSiswa;
+
 class Student extends Authenticatable
 {
     use HasFactory, SoftDeletes, Notifiable;
@@ -255,5 +261,87 @@ class Student extends Authenticatable
             'prefix' => $yearShort,
             'sequence' => $sequence
         ];
+    }
+
+    /**
+     * ====================================================================
+     * FUNGSI GLOBAL: Cek Ambang Batas Poin untuk E-Counseling (BP/BK)
+     * Fungsi ini akan dipanggil dari Controller mana pun yang mengubah Poin!
+     * ====================================================================
+     */
+    public function checkBkThresholds()
+    {
+        $id = $this->id;
+
+        // 1. Hitung Poin Manual (Pelanggaran & Kebaikan)
+        $manualMinus = 0; $manualPlus = 0;
+        if (class_exists(DisciplineRecord::class)) {
+            $records = DisciplineRecord::where('student_id', $id)->with('disciplineType')->get();
+            $manualMinus = $records->where('disciplineType.type', 'Pelanggaran')->sum('disciplineType.point_value');
+            $manualPlus = $records->where('disciplineType.type', 'Kebaikan')->sum('disciplineType.point_value');
+        }
+
+        // 2. Hitung Poin Otomatis (Kehadiran & Ibadah)
+        $alfaCount = 0; $lateCount = 0; $prayerCount = 0;
+        if (class_exists(AttendanceSiswa::class)) {
+            $attendances = AttendanceSiswa::where('student_id', $id)->get();
+            
+            $alfaCount = $attendances->whereIn('status', ['Alfa', 'Alpa', 'alpha', 'alfa', 'Tanpa Keterangan'])->count();
+            $lateCount = $attendances->whereIn('status', ['Terlambat', 'terlambat'])->count();
+            $prayerCount = $attendances->filter(function($att) {
+                $act = strtolower($att->activity ?? '');
+                return strtolower($att->type ?? '') === 'keagamaan' && (str_contains($act, 'dhuha') || str_contains($act, 'dhuhur'));
+            })->count();
+        }
+
+        // 3. GRAND TOTAL POIN (Sesuai dengan logika di StudentPortal)
+        $totalMinus = $manualMinus + ($alfaCount * 10) + ($lateCount * 5);
+        $totalPlus = $manualPlus + ($prayerCount * 5);
+
+        // ==========================================
+        // EKSEKUSI PEMBUATAN TIKET OTOMATIS
+        // ==========================================
+
+        // A. CEK PELANGGARAN (>= 200)
+        if ($totalMinus >= 200) {
+            $activeTicket = BkSession::where('student_id', $id)
+                ->whereIn('status', ['pending', 'approved', 'ongoing']) 
+                ->where('is_system_generated', true)
+                ->where('initial_message', 'like', '%PELANGGARAN%')
+                ->exists();
+
+            if (!$activeTicket) {
+                $kategoriId = BkCategory::where('name', 'like', '%Disiplin%')->first()->id ?? 1;
+                BkSession::create([
+                    'student_id' => $id,
+                    'bk_category_id' => $kategoriId,
+                    'initial_message' => "[SISTEM OTOMATIS: PELANGGARAN BERAT]\nSistem mendeteksi siswa ini telah mencapai ambang batas pelanggaran sekolah (Total Akumulasi: {$totalMinus} Poin, termasuk riwayat Alpa/Terlambat). Mohon segera dilakukan pemanggilan dan pembinaan.",
+                    'method' => 'offline',
+                    'status' => 'pending',
+                    'is_system_generated' => true,
+                ]);
+            }
+        }
+
+        // B. CEK PRESTASI (>= 100)
+        if ($totalPlus >= 100) {
+            $activeMeritTicket = BkSession::where('student_id', $id)
+                ->whereIn('status', ['pending', 'approved', 'ongoing'])
+                ->where('is_system_generated', true)
+                ->where('initial_message', 'like', '%PRESTASI%')
+                ->exists();
+
+            if (!$activeMeritTicket) {
+                $kategoriId = BkCategory::where('name', 'like', '%Prestasi%')->first()->id ?? 1;
+                BkSession::create([
+                    'student_id' => $id,
+                    'bk_category_id' => $kategoriId,
+                    'initial_message' => "[SISTEM OTOMATIS: APRESIASI PRESTASI]\nSistem mendeteksi siswa ini memiliki rekam jejak sangat baik (Total Akumulasi: +{$totalPlus} Poin Kebaikan). Direkomendasikan untuk diberikan apresiasi atau bimbingan karir lanjutan.",
+                    'method' => 'offline',
+                    'status' => 'pending',
+                    'is_system_generated' => true,
+                ]);
+            }
+        }
     }
 }

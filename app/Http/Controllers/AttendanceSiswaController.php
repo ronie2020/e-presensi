@@ -174,6 +174,11 @@ class AttendanceSiswaController extends Controller
 
                 if ($isLate) {
                     $this->logActivity($student, 'Violation', 'Terlambat Masuk', "Terlambat hadir (Limit: {$scheduleLimit})", -5);
+                    
+                    // =========================================================
+                    // TRIGGER SISTEM E-COUNSELING JIKA TERLAMBAT
+                    // =========================================================
+                    $student->checkBkThresholds();
                 }
 
                 SendWaScanNotificationJob::dispatch($attendance)->afterCommit();
@@ -234,6 +239,11 @@ class AttendanceSiswaController extends Controller
                 ['student_id' => $student->id, 'report_date' => $today->toDateString()],
                 [$colName => true]
             );
+
+            // =========================================================
+            // TRIGGER SISTEM E-COUNSELING (POIN KEBAIKAN IBADAH)
+            // =========================================================
+            $student->checkBkThresholds();
 
             return $this->successResponse($student, 'Selesai', "Shalat {$type} {$student->name} Tercatat (+5 Poin)", $type, $att);
         });

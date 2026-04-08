@@ -209,6 +209,16 @@ class DisciplineController extends Controller
         
         DisciplineRecord::create($data);
         
+       // =========================================================================
+        // 2. TRIGGER SISTEM E-COUNSELING OTOMATIS
+        // Karena ini fungsi global di Model Student, cukup panggil 1 baris ini!
+        // =========================================================================
+        $student = Student::find($request->student_id);
+        if ($student) {
+            $student->checkBkThresholds();
+        }
+        // =========================================================================
+        
         $type = DisciplineType::find($request->discipline_type_id);
         $msg = ($type->type == 'Pelanggaran') ? 'Pelanggaran tercatat.' : 'Prestasi berhasil ditambahkan!';
 
