@@ -558,13 +558,20 @@ class ReportController extends Controller
         return view('reports.print_class_report', $data);
     }
     
-    /**
-     * Stub untuk Export Excel
+   /**
+     * Export Excel Rekapitulasi Kelas (Sudah Diaktifkan)
      */
     public function exportClassExcel(Request $request)
     {
-        // Fitur ini menggunakan Maatwebsite/Excel
-        return redirect()->back()->with('warning', 'Fitur Export Excel belum tersedia.');
+        // 1. Ambil tanggal dari request
+        $startDate = $request->input('start_date', \Carbon\Carbon::now()->startOfMonth()->toDateString());
+        $endDate = $request->input('end_date', \Carbon\Carbon::now()->toDateString());
+
+        // 2. Download file Excel menggunakan class Export
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\ClassAttendanceExport($startDate, $endDate), 
+            'Rekapitulasi_Kelas_' . $startDate . '_sd_' . $endDate . '.xlsx'
+        );
     }
 
     /**

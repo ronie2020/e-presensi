@@ -59,8 +59,7 @@
 
                    
                     
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <a href="<?php echo e(route('reports.class.excel', request()->all())); ?>" target="_blank" class="bg-white hover:bg-emerald-50 text-emerald-600 border border-white/20 px-4 py-3 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-lg flex-1 sm:flex-none" title="Download Excel">
+                        <a href="<?php echo e(route('reports.class.excel', ['start_date' => $startDate, 'end_date' => $endDate])); ?>" target="_blank" class="bg-white hover:bg-emerald-50 text-emerald-600 border border-white/20 px-4 py-3 rounded-2xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-lg flex-1 sm:flex-none" title="Download Excel">
                             <i class="ph-bold ph-microsoft-excel-logo text-lg"></i> 
                             <span>Excel</span>
                         </a>

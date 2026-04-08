@@ -77,6 +77,7 @@ class ClassReportController extends Controller
                 'id' => $class->id,
                 'name' => $class->name,
                 'total_students' => $totalStudents, 
+                'hadir' => $hadirCount, // <--- TAMBAHKAN BARIS INI
                 'telat' => $telatCount,
                 'izin_sakit' => $izinSakitCount,
                 'alpha' => $alphaCount,
@@ -120,17 +121,18 @@ class ClassReportController extends Controller
      */
     public function exportExcel(Request $request)
     {
-        $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
-        $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
+        $startDate = $request->input('start_date', \Carbon\Carbon::now()->startOfMonth()->toDateString());
+        $endDate = $request->input('end_date', \Carbon\Carbon::now()->endOfMonth()->toDateString());
 
         $reportData = $this->getReportData($startDate, $endDate);
-        $filename = 'Rekap_Kelas_' . $startDate . '.xls';
+        
+        // 1. Ubah ekstensi file dari .xls menjadi .xlsx (Native Excel)
+        $filename = 'Rekap_Kelas_' . $startDate . '.xlsx';
 
-        return response()->streamDownload(function() use ($reportData, $startDate, $endDate) {
-            echo view('reports.excel_class_recap', compact('reportData', 'startDate', 'endDate'));
-        }, $filename, [
-            "Content-Type" => "application/vnd.ms-excel",
-            "Content-Disposition" => "attachment; filename=\"$filename\""
-        ]);
+        // 2. Gunakan package Maatwebsite Excel untuk mengunduh
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\ClassRecapExport($reportData, $startDate, $endDate), 
+            $filename
+        );
     }
 }
