@@ -89,6 +89,13 @@ class StudentPortalController extends Controller
          if ($student->status === 'graduated') {
             return redirect()->route('alumni.dashboard');
         }
+
+        // ========================================================
+        // 🚀 SAFETY NET: TRIGGER SISTEM E-COUNSELING OTOMATIS
+        // Mengecek ambang batas poin setiap kali portal dibuka agar 
+        // tiket tetap tercipta jika ada poin masuk dari database manual
+        // ========================================================
+        $student->checkBkThresholds();
         
         $isAlumni = $student->status === 'graduated';
         $classId = $student->class_id ?? $student->school_class_id ?? optional($student->schoolClass)->id;
@@ -410,6 +417,7 @@ class StudentPortalController extends Controller
         $bkSessions = collect([]);
         $unreadSystemBk = 0;
         if (class_exists(BkSession::class)) {
+            // Data tiket terbaru langsung terambil dari DB berkat Safety Net di atas
             $bkSessions = BkSession::where('student_id', $student->id)->with(['category', 'teacher'])->latest()->get();
             $unreadSystemBk = $bkSessions->where('is_system_generated', true)->whereIn('status', ['pending', 'ongoing'])->count();
         }
