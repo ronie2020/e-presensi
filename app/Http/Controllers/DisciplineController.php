@@ -8,6 +8,7 @@ use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DisciplineController extends Controller
 {
@@ -17,14 +18,36 @@ class DisciplineController extends Controller
     public function index(Request $request)
     {
         // ==========================================
-        // 1. DATA MASTER (DROPDOWN & FORM)
+        // 1. QUERY OPTIMAL & DATA MASTER
         // ==========================================
-        
-        $studentsRaw = Student::with(['schoolClass', 'disciplineRecords.disciplineType'])
-            ->where('status', '!=', 'graduated') 
+        // Dapatkan nama tabel secara dinamis untuk mencegah error jika tabel bukan default
+        $studentTable = app(Student::class)->getTable();
+        $recordTable = app(DisciplineRecord::class)->getTable();
+        $typeTable = app(DisciplineType::class)->getTable();
+
+        // Subquery untuk menghitung total poin per siswa di level SQL (Sangat Cepat & Hemat Memori)
+        $violationSubquery = DisciplineRecord::select(DB::raw("COALESCE(SUM({$typeTable}.point_value), 0)"))
+            ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
+            ->whereColumn("{$recordTable}.student_id", "{$studentTable}.id")
+            ->where("{$typeTable}.type", 'Pelanggaran');
+
+        $meritSubquery = DisciplineRecord::select(DB::raw("COALESCE(SUM({$typeTable}.point_value), 0)"))
+            ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
+            ->whereColumn("{$recordTable}.student_id", "{$studentTable}.id")
+            ->where("{$typeTable}.type", 'Kebaikan');
+
+        // Ambil data siswa dengan relasi kelas menggunakan 'with' bawaan Eloquent
+        // Ini akan secara otomatis mencari tabel relasi kelas yang benar (mencegah error table not found)
+        $studentsRaw = Student::with('schoolClass')
+            ->where('status', '!=', 'graduated')
+            ->select("{$studentTable}.*") 
+            ->selectSub($violationSubquery, 'total_violation')
+            ->selectSub($meritSubquery, 'total_merit')
             ->get();
 
-        // Data Dropdown (Sorted by Class then Name)
+        // ==========================================
+        // 2. DATA DROPDOWN & FILTER
+        // ==========================================
         $students = $studentsRaw->sortBy(function ($student) {
                 $className = $student->schoolClass->name ?? 'ZZZ'; 
                 return $className . ' ' . $student->name;
@@ -41,7 +64,7 @@ class DisciplineController extends Controller
         $meritTypes = DisciplineType::where('type', 'Kebaikan')->orderBy('name', 'asc')->get();
 
         // ==========================================
-        // 2. STATISTIK HARI INI
+        // 3. STATISTIK HARI INI
         // ==========================================
         $todayViolations = DisciplineRecord::whereDate('created_at', Carbon::today())
             ->whereHas('disciplineType', fn($q) => $q->where('type', 'Pelanggaran'))
@@ -52,63 +75,43 @@ class DisciplineController extends Controller
             ->count();
 
         // ==========================================
-        // 3. LOGIKA REKAP PER KELAS
+        // 4. REKAP & TOP RANK
         // ==========================================
-        $classSummaries = $studentsRaw->groupBy(function ($student) {
-                return $student->schoolClass->name ?? 'Tanpa Kelas';
-            })
-            ->map(function ($studentsInClass, $className) {
-                $totalViolation = $studentsInClass->sum(function ($student) {
-                    return $student->disciplineRecords->filter(fn($r) => optional($r->disciplineType)->type == 'Pelanggaran')
-                        ->sum(fn($r) => optional($r->disciplineType)->point_value);
-                });
-
-                $totalMerit = $studentsInClass->sum(function ($student) {
-                    return $student->disciplineRecords->filter(fn($r) => optional($r->disciplineType)->type == 'Kebaikan')
-                        ->sum(fn($r) => optional($r->disciplineType)->point_value);
-                });
-
-                return (object) [
-                    'class_name' => $className,
-                    'student_count' => $studentsInClass->count(),
-                    'total_violation' => $totalViolation,
-                    'total_merit' => $totalMerit,
-                ];
-            })
-            ->sortBy('class_name', SORT_NATURAL);
-
-        // ==========================================
-        // 4. LOGIKA TOP RANK SISWA (PELANGGARAN VS PRESTASI)
-        // ==========================================
-        
-        // A. Hitung dulu poin semua siswa
-        $allStudentPoints = $studentsRaw->map(function ($student) {
-            $violationPoints = $student->disciplineRecords->filter(fn($r) => optional($r->disciplineType)->type == 'Pelanggaran')
-                ->sum(fn($r) => optional($r->disciplineType)->point_value);
-
-            $meritPoints = $student->disciplineRecords->filter(fn($r) => optional($r->disciplineType)->type == 'Kebaikan')
-                ->sum(fn($r) => optional($r->disciplineType)->point_value);
-
+        // Rekap per kelas
+        $classSummaries = $studentsRaw->groupBy(function($student) {
+            return $student->schoolClass->name ?? 'Tanpa Kelas';
+        })->map(function ($group, $className) {
             return (object) [
-                'id' => $student->id,
-                'name' => $student->name,
-                'class' => $student->schoolClass->name ?? '-',
-                'total_violation' => $violationPoints,
-                'total_merit' => $meritPoints,
+                'class_name' => $className,
+                'student_count' => $group->count(),
+                'total_violation' => $group->sum('total_violation'),
+                'total_merit' => $group->sum('total_merit'),
             ];
-        });
+        })->sortBy('class_name', SORT_NATURAL);
 
-        // B. Ambil Top 10 Pelanggaran
-        $topViolators = $allStudentPoints
-            ->where('total_violation', '>', 0)
+        // Top 10 Pelanggaran
+        $topViolators = $studentsRaw->where('total_violation', '>', 0)
             ->sortByDesc('total_violation')
-            ->take(10);
+            ->take(10)
+            ->map(function($student) {
+                return (object) [
+                    'name' => $student->name,
+                    'class_name' => $student->schoolClass->name ?? '-',
+                    'total_violation' => $student->total_violation
+                ];
+            });
 
-        // C. Ambil Top 10 Prestasi (SISWA TELADAN)
-        $topMerits = $allStudentPoints
-            ->where('total_merit', '>', 0)
+        // Top 10 Prestasi
+        $topMerits = $studentsRaw->where('total_merit', '>', 0)
             ->sortByDesc('total_merit')
-            ->take(10);
+            ->take(10)
+            ->map(function($student) {
+                return (object) [
+                    'name' => $student->name,
+                    'class_name' => $student->schoolClass->name ?? '-',
+                    'total_merit' => $student->total_merit
+                ];
+            });
 
         // ==========================================
         // 5. DATA RIWAYAT
@@ -154,7 +157,6 @@ class DisciplineController extends Controller
         
         // =========================================================================
         // TRIGGER SISTEM E-COUNSELING OTOMATIS (BK INTEGRATION)
-        // Cukup panggil method dari model Student agar Controller bersih (DRY Principle)
         // =========================================================================
         $student = Student::find($request->student_id);
         if ($student) {

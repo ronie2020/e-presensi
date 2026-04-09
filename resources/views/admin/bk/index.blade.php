@@ -4,13 +4,20 @@
         - Menyesuaikan style halaman Kelulusan
         - Warna dominan: Blue-900 (Hero), Blue-600 (Primary)
     --}}
+    
+    <style>
+        /* CSS untuk menyembunyikan scrollbar pada menu filter tab tapi tetap bisa digeser dengan rapi */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         
         {{-- HERO SECTION --}}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
             <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-950 via-blue-900 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
                 
-                {{-- Background Decorations (Sesuai Referensi) --}}
+                {{-- Background Decorations --}}
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/30 transition-all duration-700"></div>
                 <div class="absolute bottom-0 right-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -28,7 +35,7 @@
                         </p>
                     </div>
 
-                    {{-- Quick Action (Optional) --}}
+                    {{-- Quick Action --}}
                     <div class="hidden md:block">
                         <div class="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex items-center gap-4">
                             <div class="p-3 bg-blue-500 rounded-xl text-white shadow-lg shadow-blue-500/30">
@@ -44,7 +51,7 @@
             </div>
         </div>
 
-        {{-- STATISTIK CARDS (Grid Style) --}}
+        {{-- STATISTIK CARDS --}}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <!-- Pending -->
@@ -55,7 +62,7 @@
                         </div>
                         <span class="bg-amber-100 text-amber-700 py-1 px-2 rounded text-[10px] font-bold uppercase">Pending</span>
                     </div>
-                    <div class="text-3xl font-black text-slate-800">{{ \App\Models\BkSession::where('status', 'pending')->count() }}</div>
+                    <div class="text-3xl font-black text-slate-800">{{ $stats['pending'] }}</div>
                     <div class="text-xs font-bold text-slate-400 mt-1">Menunggu Respon</div>
                 </a>
 
@@ -67,7 +74,7 @@
                         </div>
                         <span class="bg-blue-100 text-blue-700 py-1 px-2 rounded text-[10px] font-bold uppercase">Terjadwal</span>
                     </div>
-                    <div class="text-3xl font-black text-slate-800">{{ \App\Models\BkSession::where('status', 'approved')->count() }}</div>
+                    <div class="text-3xl font-black text-slate-800">{{ $stats['approved'] }}</div>
                     <div class="text-xs font-bold text-slate-400 mt-1">Akan Datang</div>
                 </a>
 
@@ -79,7 +86,7 @@
                         </div>
                         <span class="bg-emerald-100 text-emerald-700 py-1 px-2 rounded text-[10px] font-bold uppercase">Selesai</span>
                     </div>
-                    <div class="text-3xl font-black text-slate-800">{{ \App\Models\BkSession::where('status', 'finished')->whereMonth('created_at', now()->month)->count() }}</div>
+                    <div class="text-3xl font-black text-slate-800">{{ $stats['finished'] }}</div>
                     <div class="text-xs font-bold text-slate-400 mt-1">Bulan Ini</div>
                 </a>
 
@@ -91,38 +98,99 @@
                         </div>
                         <span class="bg-rose-100 text-rose-700 py-1 px-2 rounded text-[10px] font-bold uppercase">Ditolak</span>
                     </div>
-                    <div class="text-3xl font-black text-slate-800">{{ \App\Models\BkSession::where('status', 'rejected')->whereMonth('created_at', now()->month)->count() }}</div>
+                    <div class="text-3xl font-black text-slate-800">{{ $stats['rejected'] }}</div>
                     <div class="text-xs font-bold text-slate-400 mt-1">Bulan Ini</div>
                 </a>
             </div>
         </div>
 
-        {{-- FILTER & SEARCH BAR --}}
+        {{-- FILTER & SEARCH BAR (REDESIGN: SUSUNAN ATAS BAWAH AGAR TIDAK MENABRAK) --}}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-4 justify-between items-center">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-5">
                 
-                {{-- Filter Status (Tab Style) --}}
-                <div class="w-full sm:w-auto p-1 bg-slate-100 rounded-xl flex gap-1">
-                    @foreach(['pending' => 'Pending', 'approved' => 'Terjadwal', 'all' => 'Semua'] as $key => $label)
-                        <a href="{{ route('admin.bk.index', ['status' => $key]) }}" 
-                           class="flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold text-center transition-all
-                           {{ (request('status') == $key || ($key == 'all' && !request('status'))) 
-                                ? 'bg-white text-blue-600 shadow-sm' 
-                                : 'text-slate-500 hover:text-slate-700' }}">
-                           {{ $label }}
-                        </a>
-                    @endforeach
+                {{-- BARIS 1: JUDUL & PENCARIAN --}}
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 w-full">
+                    <div class="flex items-center gap-3 text-sm font-bold text-slate-600">
+                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                            <i class="ph-bold ph-funnel text-lg"></i>
+                        </div>
+                        Filter & Pencarian Sesi
+                    </div>
+
+                    {{-- SEARCH BAR --}}
+                    <form method="GET" action="{{ route('admin.bk.index') }}" class="w-full md:w-auto shrink-0 flex flex-col sm:flex-row gap-2">
+                        @if(request('status')) <input type="hidden" name="status" value="{{ request('status') }}"> @endif
+                        @if(request('type')) <input type="hidden" name="type" value="{{ request('type') }}"> @endif
+                        
+                        <div class="relative w-full sm:w-64 lg:w-72">
+                            <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Siswa / Topik..." 
+                                   class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-slate-50 text-sm font-bold focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        </div>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <button type="submit" class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm transition-colors text-center">
+                                Cari
+                            </button>
+                            @if(request('search') || request('status') || request('type'))
+                                <a href="{{ route('admin.bk.index') }}" class="flex-1 sm:flex-none bg-slate-100 hover:bg-slate-200 text-slate-600 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center">
+                                    Reset
+                                </a>
+                            @endif
+                        </div>
+                    </form>
                 </div>
 
-                {{-- Search --}}
-                <form method="GET" class="w-full sm:w-auto relative">
-                    @if(request('status')) 
-                        <input type="hidden" name="status" value="{{ request('status') }}"> 
-                    @endif
-                    <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Siswa / Topik..." 
-                           class="w-full sm:w-64 pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-slate-50 text-sm font-bold focus:ring-blue-500 focus:border-blue-500 transition-all">
-                </form>
+                {{-- DIVIDER --}}
+                <div class="w-full h-px bg-slate-100"></div>
+
+                {{-- BARIS 2: KELOMPOK FILTER TAB --}}
+                <div class="w-full overflow-x-auto hide-scrollbar">
+                    <div class="flex items-center gap-4 w-max pb-1">
+                        
+                        {{-- Filter Status --}}
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Status:</span>
+                            <div class="p-1 bg-slate-50 border border-slate-100 rounded-xl flex gap-1">
+                                @foreach(['pending' => 'Pending', 'approved' => 'Terjadwal', 'all' => 'Semua Status'] as $key => $label)
+                                    <a href="{{ request()->fullUrlWithQuery(['status' => $key, 'page' => 1]) }}" 
+                                       class="px-4 py-2 rounded-lg text-xs font-bold text-center transition-all whitespace-nowrap
+                                       {{ (request('status') == $key || ($key == 'all' && !request('status'))) 
+                                            ? 'bg-white text-blue-600 shadow-sm border border-slate-200/60' 
+                                            : 'text-slate-500 hover:text-slate-700' }}">
+                                       {{ $label }}
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        {{-- Divider Vertikal --}}
+                        <div class="w-px h-8 bg-slate-200 mx-2"></div>
+
+                        {{-- Filter Tipe --}}
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tipe:</span>
+                            <div class="p-1 bg-slate-50 border border-slate-100 rounded-xl flex gap-1">
+                                @foreach(['all' => 'Semua Tipe', 'bermasalah' => 'Bermasalah', 'berprestasi' => 'Berprestasi', 'mandiri' => 'Pengajuan Siswa'] as $key => $label)
+                                    @php
+                                        $activeClass = 'bg-white text-slate-800 shadow-sm border border-slate-200/60';
+                                        if($key == 'bermasalah') $activeClass = 'bg-rose-50 text-rose-600 shadow-sm border border-rose-200/60';
+                                        if($key == 'berprestasi') $activeClass = 'bg-blue-50 text-blue-600 shadow-sm border border-blue-200/60';
+                                        if($key == 'mandiri') $activeClass = 'bg-indigo-50 text-indigo-600 shadow-sm border border-indigo-200/60';
+                                    @endphp
+                                    <a href="{{ request()->fullUrlWithQuery(['type' => $key, 'page' => 1]) }}" 
+                                       class="px-4 py-2 rounded-lg text-xs font-bold text-center transition-all whitespace-nowrap
+                                       {{ (request('type') == $key || ($key == 'all' && !request('type'))) 
+                                            ? $activeClass 
+                                            : 'text-slate-500 hover:text-slate-700' }}">
+                                       {{ $label }}
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -217,7 +285,6 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @php
-                                        // Ubah 'approved' menjadi biru (blue)
                                         $colors = [
                                             'pending' => 'bg-amber-100 text-amber-700 border-amber-200',
                                             'approved' => 'bg-blue-100 text-blue-700 border-blue-200', 
@@ -248,9 +315,25 @@
                                 <td colspan="5" class="px-6 py-12 text-center text-slate-400">
                                     <div class="flex flex-col items-center justify-center gap-3">
                                         <div class="p-4 bg-slate-50 rounded-full">
-                                            <i class="ph-duotone ph-clipboard-text text-3xl text-slate-300"></i>
+                                            @if(request('type') == 'berprestasi')
+                                                <i class="ph-duotone ph-medal text-3xl text-slate-300"></i>
+                                            @elseif(request('type') == 'bermasalah')
+                                                <i class="ph-duotone ph-warning-octagon text-3xl text-slate-300"></i>
+                                            @else
+                                                <i class="ph-duotone ph-clipboard-text text-3xl text-slate-300"></i>
+                                            @endif
                                         </div>
-                                        <span class="font-medium">Belum ada data pengajuan konseling.</span>
+                                        <span class="font-medium">
+                                            @if(request('type') == 'berprestasi')
+                                                Belum ada data siswa berprestasi.
+                                            @elseif(request('type') == 'bermasalah')
+                                                Belum ada data siswa bermasalah.
+                                            @elseif(request('search'))
+                                                Tidak ada data yang cocok dengan pencarian Anda.
+                                            @else
+                                                Belum ada data pengajuan konseling.
+                                            @endif
+                                        </span>
                                     </div>
                                 </td>
                             </tr>

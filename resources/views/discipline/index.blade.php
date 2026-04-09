@@ -2,6 +2,9 @@
     {{-- LIBRARY PENDUKUNG --}}
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Tambahan TomSelect untuk Pencarian Dropdown -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
     
     <style>
         /* Style untuk area kamera agar responsif */
@@ -16,6 +19,12 @@
         /* Hilangkan scrollbar default pada tabel agar bersih */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Customisasi TomSelect agar sesuai dengan tema Tailwind */
+        .ts-control { border-radius: 1rem !important; border: 1px solid #e2e8f0 !important; background-color: #f8fafc !important; padding: 0.875rem 1rem !important; font-size: 0.875rem !important; font-weight: 700 !important; color: #334155 !important;}
+        .ts-control.focus { border-color: #f43f5e !important; box-shadow: none !important; background-color: white !important;} /* Merah untuk pelanggaran */
+        #student_select_merit-ts-control.focus { border-color: #10b981 !important; } /* Hijau untuk kebaikan */
+        .ts-dropdown { border-radius: 1rem !important; overflow: hidden !important; border: 1px solid #e2e8f0 !important; font-size: 0.875rem !important; font-weight: 500 !important;}
     </style>
 
     <div class="py-8 sm:py-10 font-sans text-slate-800">
@@ -58,8 +67,8 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
                 
                 <!-- KIRI: Form Pelanggaran (Tema Merah) -->
-                <div class="bg-white rounded-[2.5rem] shadow-xl shadow-rose-900/5 border border-slate-100 overflow-hidden relative group hover:border-rose-100 transition-all duration-300">
-                    <div class="absolute top-0 left-0 w-full h-1.5 bg-rose-500"></div>
+                <div class="bg-white rounded-[2.5rem] shadow-xl shadow-rose-900/5 border border-slate-100 overflow-visible relative group hover:border-rose-100 transition-all duration-300">
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-rose-500 rounded-t-[2.5rem]"></div>
                     <div class="p-8 relative z-10">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-rose-100 group-hover:scale-110 transition-transform duration-300">
@@ -80,9 +89,9 @@
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Pilih Siswa</label>
                                 <div class="flex gap-2">
                                     <div class="relative flex-1">
-                                        <select name="student_id" id="student_select_violation" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-rose-500 focus:ring-rose-500 text-sm font-bold text-slate-700 py-3.5 pl-4 pr-10 appearance-none cursor-pointer">
+                                        <!-- Menambahkan placeholder agar rapi dengan TomSelect -->
+                                        <select name="student_id" id="student_select_violation" required placeholder="Ketik nama atau kelas siswa...">
                                             <option value="">-- Cari / Pilih Nama Siswa --</option>
-                                            {{-- UPDATED: Menambahkan data-student-id dan data-rfid --}}
                                             @foreach ($students as $student)
                                                 <option value="{{ $student->id }}" 
                                                         data-nis="{{ $student->nis ?? '' }}" 
@@ -94,9 +103,8 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
                                     </div>
-                                    <button type="button" onclick="startScanner('student_select_violation')" class="shrink-0 bg-slate-800 text-white w-12 rounded-2xl hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center" title="Scan QR Code">
+                                    <button type="button" onclick="startScanner('student_select_violation')" class="shrink-0 bg-slate-800 text-white w-[52px] h-[52px] rounded-2xl hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center" title="Scan QR Code">
                                         <i class="ph-bold ph-qr-code text-xl"></i>
                                     </button>
                                 </div>
@@ -131,8 +139,8 @@
                 </div>
 
                 <!-- KANAN: Form Kebaikan (Tema Hijau) -->
-                <div class="bg-white rounded-[2.5rem] shadow-xl shadow-emerald-900/5 border border-slate-100 overflow-hidden relative group hover:border-emerald-100 transition-all duration-300">
-                    <div class="absolute top-0 left-0 w-full h-1.5 bg-emerald-500"></div>
+                <div class="bg-white rounded-[2.5rem] shadow-xl shadow-emerald-900/5 border border-slate-100 overflow-visible relative group hover:border-emerald-100 transition-all duration-300">
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-emerald-500 rounded-t-[2.5rem]"></div>
                     <div class="p-8 relative z-10">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-emerald-100 group-hover:scale-110 transition-transform duration-300">
@@ -153,9 +161,8 @@
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Pilih Siswa</label>
                                 <div class="flex gap-2">
                                     <div class="relative flex-1">
-                                        <select name="student_id" id="student_select_merit" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 text-sm font-bold text-slate-700 py-3.5 pl-4 pr-10 appearance-none cursor-pointer">
+                                        <select name="student_id" id="student_select_merit" required placeholder="Ketik nama atau kelas siswa...">
                                             <option value="">-- Cari / Pilih Nama Siswa --</option>
-                                            {{-- UPDATED: Menambahkan data-student-id dan data-rfid --}}
                                             @foreach ($students as $student)
                                                 <option value="{{ $student->id }}" 
                                                         data-nis="{{ $student->nis ?? '' }}" 
@@ -167,9 +174,8 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                        <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
                                     </div>
-                                    <button type="button" onclick="startScanner('student_select_merit')" class="shrink-0 bg-slate-800 text-white w-12 rounded-2xl hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center" title="Scan QR Code">
+                                    <button type="button" onclick="startScanner('student_select_merit')" class="shrink-0 bg-slate-800 text-white w-[52px] h-[52px] rounded-2xl hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center" title="Scan QR Code">
                                         <i class="ph-bold ph-qr-code text-xl"></i>
                                     </button>
                                 </div>
@@ -318,7 +324,7 @@
                                     <td colspan="6" class="px-6 py-12 text-center text-slate-400">
                                         <div class="flex flex-col items-center">
                                             <i class="ph-duotone ph-clipboard-text text-3xl mb-2 text-slate-300"></i>
-                                            <span>Belum ada data aktivitas hari ini.</span>
+                                            <span>Belum ada data aktivitas.</span>
                                         </div>
                                     </td>
                                 </tr>
@@ -394,7 +400,7 @@
                                         <td class="px-4 py-3 font-bold text-rose-300 text-sm">{{ $loop->iteration }}</td>
                                         <td class="px-4 py-3">
                                             <span class="font-bold text-slate-700 block text-sm">{{ $summary->name }}</span>
-                                            <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $summary->class }}</span>
+                                            <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $summary->class_name ?? $summary->class }}</span>
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             <span class="text-rose-600 font-black text-sm">-{{ $summary->total_violation }}</span>
@@ -428,7 +434,7 @@
                                         <td class="px-4 py-3 font-bold text-emerald-300 text-sm">{{ $loop->iteration }}</td>
                                         <td class="px-4 py-3">
                                             <span class="font-bold text-slate-700 block text-sm">{{ $summary->name }}</span>
-                                            <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $summary->class }}</span>
+                                            <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $summary->class_name ?? $summary->class }}</span>
                                         </td>
                                         <td class="px-4 py-3 text-center">
                                             <span class="text-emerald-600 font-black text-sm">+{{ $summary->total_merit }}</span>
@@ -481,6 +487,15 @@
     <script>
         let html5QrcodeScanner = null;
         let currentTargetInput = null;
+        
+        // Deklarasi instance TomSelect
+        let tsViolation, tsMerit;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Aktifkan Fitur Search pada Dropdown
+            tsViolation = new TomSelect("#student_select_violation", { create: false, sortField: { field: "text", direction: "asc" }});
+            tsMerit = new TomSelect("#student_select_merit", { create: false, sortField: { field: "text", direction: "asc" }});
+        });
 
         function updateStatus(message) {
             const statusEl = document.getElementById('scanner-status');
@@ -547,52 +562,44 @@
             // 1. Bersihkan teks hasil scan
             const scannedText = String(decodedText).trim();
             
-            console.log("-----------------------------------");
             console.log("QR Terbaca:", scannedText);
             
+            // Kita baca dari select aslinya
             let selectElement = document.getElementById(currentTargetInput);
             
             let found = false;
             let foundName = "";
+            let foundValue = "";
 
             // 2. Loop mencari data di dropdown
             for (let i = 0; i < selectElement.options.length; i++) {
                 const option = selectElement.options[i];
+                if(option.value === "") continue; 
                 
                 // Ambil data atribut
                 const optValue = String(option.value).trim(); // Student ID (PK)
                 const optNis = option.getAttribute('data-nis') ? String(option.getAttribute('data-nis')).trim() : '';
                 const optNisn = option.getAttribute('data-nisn') ? String(option.getAttribute('data-nisn')).trim() : '';
-                // UPDATED: Ambil student_id dan rfid_id dari atribut
                 const optStudentId = option.getAttribute('data-student-id') ? String(option.getAttribute('data-student-id')).trim() : '';
                 const optRfid = option.getAttribute('data-rfid') ? String(option.getAttribute('data-rfid')).trim() : '';
 
-                // --- LOGIKA 1: EXACT MATCH (String sama persis) ---
-                // Cek ke semua kemungkinan field: NIS, NISN, StudentID, RFID
-                if (optValue === scannedText || 
-                    optNis === scannedText || 
-                    optNisn === scannedText || 
-                    optStudentId === scannedText || 
-                    optRfid === scannedText) {
-                    
-                    selectElement.selectedIndex = i;
-                    found = true;
+                // --- LOGIKA 1: EXACT MATCH ---
+                if (optValue === scannedText || optNis === scannedText || optNisn === scannedText || optStudentId === scannedText || optRfid === scannedText) {
+                    foundValue = optValue;
                     foundName = option.text;
+                    found = true;
                     break;
                 }
 
-                // --- LOGIKA 2: NUMBER MATCH (Smart Match) ---
-                // Hanya jalankan jika scannedText berupa angka saja
+                // --- LOGIKA 2: NUMBER MATCH ---
                 if (/^\d+$/.test(scannedText)) {
                     const scanNum = parseInt(scannedText, 10);
-                    
-                    // Helper untuk cek number match
                     const checkNum = (val) => val && /^\d+$/.test(val) && parseInt(val, 10) === scanNum;
 
                     if (checkNum(optNis) || checkNum(optNisn) || checkNum(optStudentId)) {
-                        selectElement.selectedIndex = i;
-                        found = true;
+                        foundValue = optValue;
                         foundName = option.text;
+                        found = true;
                         break;
                     }
                 }
@@ -601,6 +608,11 @@
             if (found) {
                 playBeep();
                 closeScanner();
+                
+                // Set nilai ke UI TomSelect
+                let targetSelect = (currentTargetInput === 'student_select_violation') ? tsViolation : tsMerit;
+                targetSelect.setValue(foundValue);
+
                 Swal.fire({
                     icon: 'success', 
                     title: 'Siswa Ditemukan!',

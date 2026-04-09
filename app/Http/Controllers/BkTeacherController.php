@@ -17,10 +17,35 @@ class BkTeacherController extends Controller
      */
     public function index(Request $request)
     {
-        
-        $query = BkSession::with(['student', 'category']);
+        // 1. MENGHITUNG STATISTIK UNTUK CARDS (Dipindah dari Blade ke Controller)
+        $stats = [
+            'pending' => BkSession::where('status', 'pending')->count(),
+            'approved' => BkSession::where('status', 'approved')->count(),
+            'finished' => BkSession::where('status', 'finished')->whereMonth('created_at', now()->month)->count(),
+            'rejected' => BkSession::where('status', 'rejected')->whereMonth('created_at', now()->month)->count(),
+        ];
 
-        // Filter Status (Logika Tetap)
+        // 2. QUERY UTAMA (Tambahkan student.schoolClass agar tidak terjadi N+1 Problem di view)
+        $query = BkSession::with(['student.schoolClass', 'category']);
+
+        // 3. FITUR PENCARIAN (Sebelumnya belum ada logika ini)
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                // Cari berdasarkan nama siswa
+                $q->whereHas('student', function($sq) use ($searchTerm) {
+                    $sq->where('name', 'like', '%' . $searchTerm . '%');
+                })
+                // Atau cari berdasarkan nama kategori/topik
+                ->orWhereHas('category', function($sq) use ($searchTerm) {
+                    $sq->where('name', 'like', '%' . $searchTerm . '%');
+                })
+                // Atau cari di dalam pesan awal
+                ->orWhere('initial_message', 'like', '%' . $searchTerm . '%');
+            });
+        }
+
+        // 4. FILTER STATUS
         if ($request->has('status') && $request->status != 'all') {
             $query->where('status', $request->status);
         } else {
@@ -28,9 +53,25 @@ class BkTeacherController extends Controller
             $query->orderByRaw("FIELD(status, 'pending', 'approved', 'ongoing', 'finished', 'rejected')");
         }
 
-        $sessions = $query->latest()->paginate(15);
+        // 5. FILTER TIPE KATEGORI (Memisahkan Bermasalah & Berprestasi)
+        if ($request->has('type') && $request->type != 'all') {
+            if ($request->type == 'bermasalah') {
+                $query->where('is_system_generated', true)
+                      ->where('initial_message', 'like', '%PELANGGARAN%');
+            } elseif ($request->type == 'berprestasi') {
+                $query->where('is_system_generated', true)
+                      ->where('initial_message', 'like', '%PRESTASI%');
+            } elseif ($request->type == 'mandiri') {
+                $query->where(function($q) {
+                    $q->where('is_system_generated', false)
+                      ->orWhereNull('is_system_generated');
+                });
+            }
+        }
 
-        return view('admin.bk.index', compact('sessions'));
+        $sessions = $query->latest()->paginate(15)->withQueryString(); // Tambahkan withQueryString agar pagination tidak mereset pencarian
+
+        return view('admin.bk.index', compact('sessions', 'stats'));
     }
 
     /**
@@ -38,7 +79,7 @@ class BkTeacherController extends Controller
      */
     public function show($id)
     {        
-        $session = BkSession::with(['student', 'category', 'record'])->findOrFail($id);
+        $session = BkSession::with(['student.schoolClass', 'category', 'record'])->findOrFail($id);
         
         return view('admin.bk.show', compact('session'));
     }
@@ -68,7 +109,7 @@ class BkTeacherController extends Controller
             $date = Carbon::parse($request->scheduled_at)->translatedFormat('l, d F Y H:i');
             $guru = Auth::user()->name;
             
-            $message = "Halo *{$session->student->name}*,\n\nPengajuan konseling kamu telah *DISETUJUI*.\n\n👨‍🏫 Guru: {$guru}\n📅 Jadwal: {$date} WIB\n💬 Metode: {$session->method}\n📝 Pesan: _{$request->response_message}_\n\nSilakan datang tepat waktu ya. Terima kasih.";
+            $message = "Halo *{$session->student->name}*,\n\nPengajuan konseling kamu telah *DISETUJUI*.\n\n👨‍🏫 Guru: {$guru}\n📅 Jadwal: {$date} WIB\n📍 Metode: {$session->method}\n💬 Pesan: _{$request->response_message}_\n\nSilakan datang tepat waktu ya. Terima kasih.";
             
             try {
                 SendGeneralWaJob::dispatch($session->student->parent_wa_number, $message);
