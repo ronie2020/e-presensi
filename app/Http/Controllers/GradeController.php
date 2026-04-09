@@ -97,27 +97,37 @@ class GradeController extends Controller
     {
         $request->validate([
             'grades' => 'array',
-            'descriptions' => 'array',
         ]);
 
         DB::transaction(function () use ($request) {
             foreach ($request->grades as $studentId => $score) {          
-                if ($score === null) continue;
+                // Cari record induk
+                $record = GradeRecord::where('student_id', $studentId)
+                            ->where('academic_year', $request->academic_year)
+                            ->where('semester', $request->semester)
+                            ->first();
 
-                // 1. Buat atau Ambil Record Rapor Utama
-                $record = GradeRecord::firstOrCreate(
-                    [
+                // FITUR HAPUS: Jika score kosong, hapus item nilainya
+                if ($score === null || $score === '') {
+                    if ($record) {
+                        GradeItem::where('grade_record_id', $record->id)
+                                 ->where('subject_id', $request->subject_id)
+                                 ->delete();
+                    }
+                    continue;
+                }
+
+                // Jika record belum ada, buat baru
+                if (!$record) {
+                    $record = GradeRecord::create([
                         'student_id' => $studentId,
                         'academic_year' => $request->academic_year,
                         'semester' => $request->semester,
-                    ],
-                    [
                         'class_name' => SchoolClass::find($request->class_id)->name,
                         'report_date' => now(),
-                    ]
-                );
+                    ]);
+                }
 
-                // 2. Simpan Item Nilai (Mapel)
                 GradeItem::updateOrCreate(
                     [
                         'grade_record_id' => $record->id,
@@ -132,9 +142,8 @@ class GradeController extends Controller
             }
         });
 
-        return redirect()->route('grades.index')->with('success', 'Nilai Mapel berhasil disimpan!');
+        return redirect()->route('grades.index')->with('success', 'Data nilai berhasil diperbarui!');
     }
-
 
     // =========================================================================
     //  MODE 2: INPUT PER SISWA (Satu Siswa, Banyak Mapel)
@@ -143,7 +152,7 @@ class GradeController extends Controller
     /**
      * Form Input Manual Per Siswa
      */
-    public function createByStudent(Request $request)
+     public function createByStudent(Request $request)
     {
         $request->validate([
             'class_id' => 'required',
@@ -152,25 +161,16 @@ class GradeController extends Controller
         ]);
 
         $class = SchoolClass::findOrFail($request->class_id);
-        
-        // Ambil siswa sekelas untuk dropdown navigasi
         $students = Student::where('class_id', $class->id)->orderBy('name')->get();
 
         if ($students->isEmpty()) {
             return redirect()->back()->with('error', 'Kelas ini belum memiliki siswa.');
         }
 
-        // Tentukan siswa target (dari request atau default siswa pertama)
         $targetStudentId = $request->student_id ?? $students->first()->id;
         $student = $students->find($targetStudentId);
-
-        if (!$student) {
-             return redirect()->back()->with('error', 'Siswa tidak ditemukan.');
-        }
-
         $subjects = Subject::orderBy('order')->get();
 
-        // Ambil nilai existing siswa tersebut
         $existingGrades = [];
         $record = GradeRecord::where('student_id', $student->id)
                     ->where('academic_year', $request->academic_year)
@@ -200,30 +200,35 @@ class GradeController extends Controller
     public function storeByStudent(Request $request)
     {
         $request->validate([
-            'class_id' => 'required',
-            'student_id' => 'required',
-            'academic_year' => 'required',
-            'semester' => 'required',
             'grades' => 'array', 
         ]);
 
         DB::transaction(function () use ($request) {
-            // 1. Buat Record Rapor
-            $record = GradeRecord::firstOrCreate(
-                [
-                    'student_id' => $request->student_id,
-                    'academic_year' => $request->academic_year,
-                    'semester' => $request->semester,
-                ],
-                [
-                    'class_name' => SchoolClass::find($request->class_id)->name,
-                    'report_date' => now(),
-                ]
-            );
+            $record = GradeRecord::where('student_id', $request->student_id)
+                        ->where('academic_year', $request->academic_year)
+                        ->where('semester', $request->semester)
+                        ->first();
 
-            // 2. Loop semua mapel
             foreach ($request->grades as $subjectId => $score) {
-                if ($score === null || $score === '') continue;
+                // FITUR HAPUS: Jika score kosong, hapus item nilainya
+                if ($score === null || $score === '') {
+                    if ($record) {
+                        GradeItem::where('grade_record_id', $record->id)
+                                 ->where('subject_id', $subjectId)
+                                 ->delete();
+                    }
+                    continue;
+                }
+
+                if (!$record) {
+                    $record = GradeRecord::create([
+                        'student_id' => $request->student_id,
+                        'academic_year' => $request->academic_year,
+                        'semester' => $request->semester,
+                        'class_name' => SchoolClass::find($request->class_id)->name,
+                        'report_date' => now(),
+                    ]);
+                }
 
                 GradeItem::updateOrCreate(
                     [
@@ -239,7 +244,6 @@ class GradeController extends Controller
             }
         });
 
-        // Redirect kembali ke halaman input siswa yang sama
         return redirect()
             ->route('grades.create_by_student', [
                 'class_id' => $request->class_id,
@@ -247,9 +251,8 @@ class GradeController extends Controller
                 'academic_year' => $request->academic_year,
                 'semester' => $request->semester
             ])
-            ->with('success', 'Nilai untuk siswa ' . Student::find($request->student_id)->name . ' berhasil disimpan!');
-    }
-
+            ->with('success', 'Pembaruan nilai berhasil disimpan!');
+    }  
 
     // =========================================================================
     //  FITUR IMPORT EXCEL & AJAX HELPER

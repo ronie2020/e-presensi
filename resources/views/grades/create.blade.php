@@ -50,6 +50,7 @@
                 </div>
             </div>
 
+           
             <form id="gradeForm" action="{{ route('grades.store') }}" method="POST" @submit="isDirty = false">
                 @csrf
                 <input type="hidden" name="class_id" value="{{ $class->id }}">
@@ -57,30 +58,15 @@
                 <input type="hidden" name="academic_year" value="{{ $academic_year }}">
                 <input type="hidden" name="semester" value="{{ $semester }}">
 
-                <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
-                    
-                    {{-- Instruksi Navigasi --}}
-                    <div class="bg-blue-50/50 px-8 py-3 text-xs font-bold text-blue-700 flex flex-col sm:flex-row items-center justify-between border-b border-blue-100/50 gap-2">
-                        <div class="flex items-center gap-2">
-                            <i class="ph-fill ph-info text-lg"></i>
-                            <span>Tips: Gunakan <strong>Panah Atas/Bawah</strong> untuk pindah baris dengan cepat.</span>
-                        </div>
-                        <div class="flex gap-4 font-mono opacity-80 bg-white px-3 py-1 rounded-lg border border-blue-100 shadow-sm">
-                            <span class="text-emerald-600">A: >92</span>
-                            <span class="text-blue-600">B: >83</span>
-                            <span class="text-amber-600">C: >75</span>
-                        </div>
-                    </div>
-
-                    {{-- Table Wrapper --}}
+                <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
                     <div class="overflow-x-auto max-h-[70vh] overflow-y-auto custom-scrollbar">
                         <table class="w-full text-left border-collapse relative">
                             <thead class="bg-slate-50 sticky top-0 z-10 shadow-sm text-slate-500 border-b border-slate-200">
                                 <tr>
                                     <th class="px-6 py-5 text-xs font-black uppercase tracking-wider w-16 text-center text-slate-400">No</th>
                                     <th class="px-6 py-5 text-xs font-black uppercase tracking-wider min-w-[250px]">Nama Siswa</th>
-                                    <th class="px-6 py-5 text-xs font-black uppercase tracking-wider w-48 text-center">Nilai (0-100)</th>
-                                    <th class="px-6 py-5 text-xs font-black uppercase tracking-wider min-w-[300px]">Deskripsi (Opsional)</th>
+                                    <th class="px-6 py-5 text-xs font-black uppercase tracking-wider w-64 text-center">Nilai (0-100)</th>
+                                    <th class="px-6 py-5 text-xs font-black uppercase tracking-wider min-w-[300px]">Deskripsi</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-50 bg-white">
@@ -90,54 +76,44 @@
                                         $existingDesc = $existingGrades[$student->id]->description ?? '';
                                     @endphp
                                     <tr class="hover:bg-blue-50/20 transition-colors group focus-within:bg-blue-50/40" 
-                                        data-row-index="{{ $index }}"
                                         x-data="{ score: '{{ $existingScore }}', predikat: '' }"
                                         x-init="predikat = calculatePredicate(score)">
                                         
                                         <td class="px-6 py-4 text-center font-bold text-slate-400 text-sm">{{ $index + 1 }}</td>
                                         <td class="px-6 py-4">
-                                            <div class="flex items-center gap-4">
-                                                <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xs shadow-sm border border-slate-200 shrink-0">
-                                                    {{ substr($student->name, 0, 2) }}
-                                                </div>
-                                                <div>
-                                                    <div class="font-bold text-slate-700 text-sm group-hover:text-blue-700 transition-colors">{{ $student->name }}</div>
-                                                    <div class="text-[10px] text-slate-400 font-mono font-medium tracking-wide">NIS: {{ $student->student_id }}</div>
-                                                </div>
-                                            </div>
+                                            <div class="font-bold text-slate-700 text-sm">{{ $student->name }}</div>
+                                            <div class="text-[10px] text-slate-400 font-mono tracking-wide">NIS: {{ $student->student_id }}</div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <div class="relative flex items-center justify-center gap-3">
+                                            <div class="flex items-center justify-center gap-2">
                                                 <input type="number" 
                                                        name="grades[{{ $student->id }}]" 
                                                        x-model="score"
                                                        @input="isDirty = true; predikat = calculatePredicate(score)"
                                                        @keydown="handleKeydown($event, {{ $index }}, 'score')"
-                                                       min="0" max="100"
-                                                       class="input-score w-20 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-center font-black text-slate-800 py-2.5 transition-all shadow-sm placeholder:font-normal placeholder:text-slate-300 text-lg"
+                                                       class="input-score w-20 rounded-xl border-slate-200 bg-slate-50 text-center font-black py-2"
                                                        placeholder="-">
                                                 
-                                                {{-- LIVE PREDIKAT BADGE --}}
-                                                <div class="w-9 h-9 flex items-center justify-center rounded-xl font-black text-sm shadow-sm transition-all duration-300 border border-transparent"
+                                                <div class="w-8 h-8 flex items-center justify-center rounded-lg font-black text-xs border border-transparent"
                                                      :class="{
-                                                        'bg-emerald-100 text-emerald-700 border-emerald-200': predikat === 'A',
-                                                        'bg-blue-100 text-blue-700 border-blue-200': predikat === 'B',
-                                                        'bg-amber-100 text-amber-700 border-amber-200': predikat === 'C',
-                                                        'bg-rose-100 text-rose-700 border-rose-200': predikat === 'D' || predikat === 'E',
-                                                        'bg-slate-50 text-slate-300 border-slate-100': !predikat
-                                                     }">
-                                                    <span x-text="predikat || '-'"></span>
-                                                </div>
+                                                        'bg-emerald-100 text-emerald-700': predikat === 'A',
+                                                        'bg-blue-100 text-blue-700': predikat === 'B',
+                                                        'bg-amber-100 text-amber-700': predikat === 'C',
+                                                        'bg-rose-100 text-rose-700': predikat === 'D',
+                                                        'bg-slate-50 text-slate-300': !predikat
+                                                     }" x-text="predikat || '-'"></div>
+
+                                                {{-- TOMBOL HAPUS --}}
+                                                <button type="button" 
+                                                        @click="if(confirm('Hapus nilai {{ addslashes($student->name) }}?')) { score = ''; predikat = ''; isDirty = true; }"
+                                                        class="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition"
+                                                        title="Hapus Nilai">
+                                                    <i class="ph-bold ph-trash"></i>
+                                                </button>
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <input type="text" 
-                                                   name="descriptions[{{ $student->id }}]" 
-                                                   value="{{ $existingDesc }}"
-                                                   @input="isDirty = true"
-                                                   @keydown="handleKeydown($event, {{ $index }}, 'desc')"
-                                                   class="input-desc w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm font-medium text-slate-600 py-2.5 px-4 transition-all shadow-sm"
-                                                   placeholder="Deskripsi pencapaian...">
+                                            <input type="text" name="descriptions[{{ $student->id }}]" value="{{ $existingDesc }}" @input="isDirty = true" class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm py-2 px-3">
                                         </td>
                                     </tr>
                                 @endforeach
@@ -145,17 +121,11 @@
                         </table>
                     </div>
 
-                    {{-- Action Bar --}}
-                    <div class="p-6 bg-white border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between sticky bottom-0 z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] gap-4">
-                        <div class="text-xs text-slate-400 font-medium hidden sm:block">
-                            <span x-show="isDirty" class="text-amber-500 font-bold mr-2 flex items-center gap-1"><i class="ph-fill ph-warning-circle text-lg"></i> Perubahan belum disimpan</span>
-                            <span>Menampilkan <span class="font-bold text-slate-700">{{ count($students) }}</span> Siswa.</span>
-                        </div>
-                        <div class="flex gap-3 w-full sm:w-auto">
-                            <a href="{{ route('grades.index') }}" class="px-6 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 hover:text-slate-800 transition text-center w-full sm:w-auto shadow-sm">Batal</a>
-                            <button type="submit" class="px-8 py-3 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 shadow-lg shadow-blue-900/20 transition flex items-center justify-center gap-2 w-full sm:w-auto transform active:scale-95">
-                                <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Data
-                            </button>
+                    <div class="p-6 bg-white border-t border-slate-100 flex justify-between items-center sticky bottom-0 z-20">
+                        <span x-show="isDirty" class="text-amber-500 font-bold text-xs flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Perubahan belum disimpan</span>
+                        <div class="flex gap-3">
+                            <a href="{{ route('grades.index') }}" class="px-6 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm">Batal</a>
+                            <button type="submit" class="px-8 py-3 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 shadow-lg transition">Simpan Data</button>
                         </div>
                     </div>
                 </div>
