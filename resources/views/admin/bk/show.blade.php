@@ -1,11 +1,7 @@
 <x-app-layout>
     {{-- 
         REDESIGN DETAIL KONSELING (BLUE THEME)
-        - Diperbarui dengan UI Alert khusus untuk tiket hasil integrasi Sistem Disiplin
-        - DITAMBAHKAN: Fitur Template Cepat (Quick Templates) Pesan WA
-        - DITAMBAHKAN: Fitur Cetak Dokumen & Print Styles CSS
-        - DITAMBAHKAN: Validasi Tanggal dan Konfirmasi Simpan Jurnal
-        - DITAMBAHKAN (BARU): Kop Surat Print, Visual Tracker, Auto-expand Textarea, Copy Teks WA.
+        - DITAMBAHKAN (BARU): SweetAlert2 menggantikan Alert Tradisional (Pop-up Konfirmasi & Copy Text)
     --}}
 
     <style>
@@ -112,17 +108,6 @@
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <!-- Notifikasi Flash Message -->
-            @if(session('success'))
-                <div class="mb-6 bg-emerald-100 border border-emerald-200 text-emerald-800 px-5 py-4 rounded-2xl shadow-sm flex items-center gap-3 print:hidden" role="alert">
-                    <div class="p-2 bg-emerald-200 rounded-full text-emerald-700">
-                        <i class="ph-fill ph-check-circle text-xl"></i>
-                    </div>
-                    <span class="font-bold">{{ session('success') }}</span>
-                </div>
-            @endif
-
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 <!-- KOLOM KIRI: INFO SISWA & MASALAH -->
@@ -271,11 +256,20 @@
                                 }
                             },
                             
-                            // Fitur Copy to Clipboard
+                            // Fitur Copy to Clipboard Diubah Menggunakan SweetAlert2
                             copyToClipboard() {
                                 if (!this.responseMsg) return;
                                 navigator.clipboard.writeText(this.responseMsg).then(() => {
-                                    alert('Teks berhasil disalin!');
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Teks Disalin!',
+                                        text: 'Template siap di-paste ke WhatsApp.',
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false,
+                                        timer: 2000,
+                                        customClass: { popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans' }
+                                    });
                                 }).catch(err => {
                                     console.error('Gagal menyalin: ', err);
                                 });
@@ -445,8 +439,9 @@
 
                         <!-- Form Input Jurnal -->
                         @if($session->status == 'approved')
-                        {{-- Menggunakan onsubmit bawaan untuk konfirmasi sebelum mengunci jurnal --}}
-                        <form action="{{ route('admin.bk.store_record', $session->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menyelesaikan sesi ini?\n\nJurnal yang disimpan akan bersifat Read-Only (terkunci) sebagai arsip resmi sekolah dan tidak dapat diubah kembali.');">
+                        
+                        {{-- MENGGANTI ONSUBMIT DEFAULT DENGAN ID FORM UNTUK JS SWEETALERT --}}
+                        <form id="jurnalForm" action="{{ route('admin.bk.store_record', $session->id) }}" method="POST">
                             @csrf
                             <div class="space-y-6">
                                 <div>
@@ -471,7 +466,8 @@
                                 </label>
 
                                 <div class="pt-4 border-t border-slate-100 mt-4 print:hidden">
-                                    <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-4 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/30 flex justify-center items-center gap-2 transition-all transform hover:scale-[1.01]">
+                                    {{-- Menggunakan Button type button yang men-trigger SweetAlert --}}
+                                    <button type="button" onclick="confirmJurnal()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-4 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/30 flex justify-center items-center gap-2 transition-all transform hover:scale-[1.01]">
                                         <i class="ph-bold ph-check-circle text-xl"></i> Simpan & Selesaikan Sesi
                                     </button>
                                 </div>
@@ -529,4 +525,68 @@
 
         </div>
     </div>
+
+    {{-- SCRIPT SWEETALERT2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Logika Pop-Up Konfirmasi Jurnal
+        function confirmJurnal() {
+            Swal.fire({
+                title: 'Selesaikan Sesi?',
+                html: "Jurnal yang disimpan akan bersifat <b class='text-rose-500'>Read-Only (terkunci)</b> sebagai arsip resmi sekolah dan tidak dapat diubah kembali.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981', // Warna emerald-500
+                cancelButtonColor: '#94a3b8',  // Warna slate-400
+                confirmButtonText: 'Ya, Selesaikan',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-[2rem] font-sans border border-slate-100 shadow-2xl',
+                    confirmButton: 'rounded-xl font-bold px-6 py-3',
+                    cancelButton: 'rounded-xl font-bold px-6 py-3'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit form jika menekan 'Ya'
+                    document.getElementById('jurnalForm').submit();
+                }
+            });
+        }
+
+        // Logika Toast Global jika ada Flash Message
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{!! session('success') !!}",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans'
+                    }
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: "{!! session('error') !!}",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans'
+                    }
+                });
+            @endif
+        });
+    </script>
 </x-app-layout>

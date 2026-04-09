@@ -4,6 +4,7 @@
         - Menyesuaikan style halaman Kelulusan
         - Warna dominan: Blue-900 (Hero), Blue-600 (Primary)
         - PENINGKATAN: Clickable Rows, Quick WA, SLA Tracker, & Print Mode
+        - BARU: Integrasi SweetAlert2 untuk Notifikasi (Toast)
     --}}
     
     <style>
@@ -428,4 +429,42 @@
 
         </div>
     </div>
+
+    {{-- SCRIPT SWEETALERT2 UNTUK NOTIFIKASI GLOBAL DI HALAMAN INDEX --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{!! session('success') !!}",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans'
+                    }
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: "{!! session('error') !!}",
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans'
+                    }
+                });
+            @endif
+        });
+    </script>
 </x-app-layout>
