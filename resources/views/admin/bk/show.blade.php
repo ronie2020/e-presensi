@@ -2,6 +2,7 @@
     {{-- 
         REDESIGN DETAIL KONSELING (BLUE THEME)
         - Diperbarui dengan UI Alert khusus untuk tiket hasil integrasi Sistem Disiplin
+        - DITAMBAHKAN: Fitur Template Cepat (Quick Templates) Pesan WA
     --}}
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         
@@ -72,12 +73,16 @@
                         <div class="space-y-4 relative z-10">
                             <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
                                 <span class="text-xs font-bold text-slate-400 uppercase">NIS / NISN</span>
-                                {{-- PERBAIKAN: Mengubah 'nisn' menjadi 'student_id' sesuai database --}}
                                 <span class="font-bold text-slate-700 font-mono">{{ $session->student->nis ?? '-' }} / {{ $session->student->student_id ?? '-' }}</span>
                             </div>
                             
                             @if($session->student->parent_wa_number ?? false)
-                                <a href="https://wa.me/{{ preg_replace('/^0/', '62', $session->student->parent_wa_number) }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-emerald-50 text-emerald-600 font-bold rounded-xl border border-emerald-100 hover:bg-emerald-100 transition-colors">
+                                @php
+                                    // Template Pesan WA Manual (Di luar form Auto-WA)
+                                    $waMessage = "Salam hormat Bapak/Ibu Orang Tua/Wali dari " . ($session->student->name ?? '') . ",\n\nKami dari pihak Bimbingan Konseling sekolah ingin berdiskusi terkait ananda. Mohon konfirmasi ketersediaan Bapak/Ibu untuk komunikasi lebih lanjut. Terima kasih.";
+                                    $waLink = "https://wa.me/" . preg_replace('/^0/', '62', $session->student->parent_wa_number) . "?text=" . urlencode($waMessage);
+                                @endphp
+                                <a href="{{ $waLink }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-emerald-50 text-emerald-600 font-bold rounded-xl border border-emerald-100 hover:bg-emerald-100 transition-colors">
                                     <i class="ph-fill ph-whatsapp-logo text-xl"></i> 
                                     Hubungi Orang Tua
                                 </a>
@@ -87,7 +92,7 @@
                                 </div>
                             @endif
 
-                            {{-- LINK MENUJU HALAMAN DISIPLIN SISWA (Opsional tapi direkomendasikan untuk integrasi) --}}
+                            {{-- LINK MENUJU HALAMAN DISIPLIN SISWA --}}
                             @if(Route::has('admin.discipline.student_history'))
                                 <a href="{{ route('admin.discipline.student_history', $session->student->id) }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-indigo-50 text-indigo-600 font-bold rounded-xl border border-indigo-100 hover:bg-indigo-100 transition-colors mt-2">
                                     <i class="ph-bold ph-shield-warning text-xl"></i> 
@@ -158,9 +163,27 @@
                 <!-- KOLOM KANAN: AKSI & JURNAL -->
                 <div class="lg:col-span-2 space-y-6">
                     
-                    <!-- 1. FORM APPROVAL (Action Card) -->
+                    <!-- 1. FORM APPROVAL & TEMPLATE WA (Action Card) -->
                     @if($session->status == 'pending')
-                    <div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-amber-500/10 border border-amber-100 relative overflow-hidden" x-data="{ action: 'approved' }">
+                    <div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-amber-500/10 border border-amber-100 relative overflow-hidden" 
+                         x-data="{ 
+                            action: 'approved',
+                            responseMsg: '',
+                            studentName: '{{ addslashes($session->student->name ?? 'Siswa') }}',
+                            
+                            // Logika Injeksi Template Cepat
+                            setTemplate(type) {
+                                if(type === 'panggilan') {
+                                    this.responseMsg = `Yth. Bapak/Ibu Orang Tua/Wali dari ${this.studentName},\n\nKami mengundang kehadiran Bapak/Ibu ke sekolah (Ruang BK) pada jadwal yang telah kami jadwalkan untuk mendiskusikan laporan evaluasi kedisiplinan ananda.\n\nAtas perhatian dan kehadirannya kami ucapkan terima kasih.`;
+                                } else if(type === 'apresiasi') {
+                                    this.responseMsg = `Yth. Bapak/Ibu Orang Tua/Wali dari ${this.studentName},\n\nKami ingin menyampaikan apresiasi dari pihak sekolah terkait pencapaian positif ananda baru-baru ini. Kami mengundang Bapak/Ibu untuk berdiskusi terkait langkah dukungan selanjutnya.\n\nTerima kasih.`;
+                                } else if(type === 'umum') {
+                                    this.responseMsg = `Halo ${this.studentName},\n\nPengajuan konseling kamu telah kami terima dan disetujui. Silakan datang ke ruang BK tepat waktu sesuai jadwal yang dilampirkan ya. Semangat!`;
+                                } else {
+                                    this.responseMsg = '';
+                                }
+                            }
+                         }">
                         <!-- Accent Line -->
                         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 to-orange-500"></div>
                         
@@ -189,7 +212,7 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Field Jadwal: Transisi Halus -->
+                                <!-- Field Jadwal -->
                                 <div x-show="action === 'approved'" 
                                      x-transition:enter="transition ease-out duration-300"
                                      x-transition:enter-start="opacity-0 transform scale-95"
@@ -201,14 +224,34 @@
                                 </div>
                             </div>
 
+                            <!-- EDITOR PESAN & TEMPLATE -->
                             <div class="mb-6">
-                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                                    <span x-text="action === 'approved' ? 'Pesan Konfirmasi (Lokasi/Catatan)' : 'Alasan Penolakan'"></span>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+                                    <span x-text="action === 'approved' ? 'Pesan Konfirmasi / Auto-WA' : 'Alasan Penolakan'"></span>
                                 </label>
-                                <textarea name="response_message" rows="3" class="w-full px-4 py-3 rounded-xl border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all shadow-sm" placeholder="Tulis pesan untuk siswa disini..." required></textarea>
+
+                                <!-- Baris Tombol Template (Hanya tampil jika Disetujui) -->
+                                <div x-show="action === 'approved'" class="flex flex-wrap gap-2 mb-3" x-transition>
+                                    <button type="button" @click="setTemplate('panggilan')" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-colors shadow-sm">
+                                        <i class="ph-bold ph-warning"></i> Panggilan Ortu
+                                    </button>
+                                    <button type="button" @click="setTemplate('apresiasi')" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-colors shadow-sm">
+                                        <i class="ph-bold ph-medal"></i> Apresiasi Ortu
+                                    </button>
+                                    <button type="button" @click="setTemplate('umum')" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition-colors shadow-sm">
+                                        <i class="ph-bold ph-chat-text"></i> Info ke Siswa
+                                    </button>
+                                    <button type="button" @click="setTemplate('kosong')" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-white text-slate-400 border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm">
+                                        <i class="ph-bold ph-eraser"></i> Hapus
+                                    </button>
+                                </div>
+
+                                <!-- Textarea Pesan (Terhubung dengan x-model="responseMsg") -->
+                                <textarea name="response_message" x-model="responseMsg" rows="5" class="w-full px-4 py-3 rounded-xl border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all shadow-sm" placeholder="Tulis atau pilih template pesan di sini..." required></textarea>
+                                
                                 <p class="text-xs text-slate-400 mt-2 flex items-center gap-1.5 font-medium">
                                     <i class="ph-fill ph-info text-blue-400"></i> 
-                                    Notifikasi WhatsApp akan dikirim otomatis ke Orang Tua/Siswa.
+                                    Isi pesan ini akan digabungkan otomatis dengan tanggal dan nama guru pada sistem Notifikasi WhatsApp.
                                 </p>
                             </div>
 
@@ -262,8 +305,8 @@
                                             <i class="ph-bold ph-chat-centered-text"></i>
                                         </div>
                                         <div>
-                                            <div class="text-xs font-bold text-slate-400 uppercase">Respon Guru</div>
-                                            <div class="font-medium text-slate-600 text-sm italic">"{{ $session->response_message }}"</div>
+                                            <div class="text-xs font-bold text-slate-400 uppercase">Pesan & Informasi</div>
+                                            <div class="font-medium text-slate-600 text-sm italic whitespace-pre-line leading-relaxed">"{{ $session->response_message }}"</div>
                                         </div>
                                     </div>
                                 </div>
@@ -284,7 +327,7 @@
 
                     <!-- 2. FORM JURNAL (Main Content) -->
                     @if($session->status == 'approved' || $session->status == 'finished')
-                    <div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/60 border border-slate-100">
+                    <div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/60 border border-slate-100 mt-6">
                         <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
                             <h3 class="text-xl font-black text-slate-800 flex items-center gap-3">
                                 <div class="p-2.5 bg-indigo-100 rounded-xl text-indigo-600">
