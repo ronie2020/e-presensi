@@ -3,18 +3,43 @@
         LAYOUT MODERN (BLUE THEME)
         - Menyesuaikan style halaman Kelulusan
         - Warna dominan: Blue-900 (Hero), Blue-600 (Primary)
+        - PENINGKATAN: Clickable Rows, Quick WA, SLA Tracker, & Print Mode
     --}}
     
     <style>
-        /* CSS untuk menyembunyikan scrollbar pada menu filter tab tapi tetap bisa digeser dengan rapi */
+        /* Sembunyikan scrollbar pada menu filter tab */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* CSS Khusus untuk Mode Cetak (Print / Save as PDF) */
+        @media print {
+            body { background-color: white !important; }
+            .print\:hidden { display: none !important; }
+            .print\:block { display: block !important; }
+            .shadow-xl, .shadow-sm, .shadow-md, .shadow-lg { box-shadow: none !important; border: none !important; }
+            .bg-white, .bg-slate-50 { background-color: white !important; }
+            .table-container { overflow: visible !important; }
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { border: 1px solid #cbd5e1 !important; padding: 12px !important; }
+            @page { margin: 1.5cm; size: landscape; } /* Landscape agar kolom tabel muat */
+        }
     </style>
 
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         
+        {{-- ========================================================= --}}
+        {{-- KOP SURAT (HANYA MUNCUL SAAT DI-PRINT / CETAK PDF)        --}}
+        {{-- ========================================================= --}}
+        <div class="hidden print:block w-full border-b-4 border-double border-slate-800 pb-4 mb-8 text-center">
+            <h3 class="text-sm font-bold uppercase tracking-widest text-slate-600 mb-1">Pemerintah Provinsi Daerah</h3>
+            <h1 class="text-2xl font-black uppercase tracking-wider text-slate-900 mb-1">Nama Sekolah Anda</h1>
+            <p class="text-xs font-medium text-slate-700">Jl. Contoh Alamat Sekolah No. 123, Kota/Kabupaten, Kode Pos 12345</p>
+            <h2 class="text-lg font-bold uppercase tracking-widest text-slate-800 mt-6 underline decoration-2 underline-offset-4">Rekapitulasi Data Bimbingan Konseling</h2>
+            <p class="text-xs font-bold text-slate-500 mt-2">Dicetak pada: {{ now()->translatedFormat('d F Y, H:i') }} WIB</p>
+        </div>
+
         {{-- HERO SECTION --}}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 print:hidden">
             <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-950 via-blue-900 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
                 
                 {{-- Background Decorations --}}
@@ -52,7 +77,7 @@
         </div>
 
         {{-- STATISTIK CARDS --}}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 print:hidden">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <!-- Pending -->
                 <a href="{{ route('admin.bk.index', ['status' => 'pending']) }}" class="bg-white p-5 rounded-2xl shadow-sm border border-amber-100 hover:border-amber-300 hover:shadow-md transition group">
@@ -104,8 +129,8 @@
             </div>
         </div>
 
-        {{-- FILTER & SEARCH BAR (REDESIGN: SUSUNAN ATAS BAWAH AGAR TIDAK MENABRAK) --}}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+        {{-- FILTER & SEARCH BAR --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 print:hidden">
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col gap-5">
                 
                 {{-- BARIS 1: JUDUL & PENCARIAN --}}
@@ -202,29 +227,47 @@
                 <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <div class="flex items-center gap-2">
                         <i class="ph-duotone ph-list-dashes text-blue-500 text-lg"></i>
-                        <span class="text-sm font-bold text-slate-700">Daftar Antrian & Riwayat</span>
+                        <span class="text-sm font-bold text-slate-700">
+                            @if(request('status') || request('type') || request('search'))
+                                Hasil Filter Rekam Konseling
+                            @else
+                                Daftar Antrian & Riwayat Terbaru
+                            @endif
+                        </span>
                     </div>
+                    
+                    {{-- TOMBOL CETAK TABEL --}}
+                    <button onclick="window.print()" class="print:hidden text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-xl border border-indigo-200 transition-colors flex items-center gap-2">
+                        <i class="ph-bold ph-printer"></i> Cetak Tabel Ini
+                    </button>
                 </div>
 
                 {{-- Table Body --}}
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto table-container">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-50 text-xs uppercase font-bold text-slate-400 tracking-wider">
                             <tr>
                                 <th class="px-6 py-4 rounded-tl-2xl">Siswa</th>
                                 <th class="px-6 py-4">Topik & Pesan</th>
-                                <th class="px-6 py-4">Metode</th>
+                                <th class="px-6 py-4 print:hidden">Metode</th>
                                 <th class="px-6 py-4">Status & Jadwal</th>
-                                <th class="px-6 py-4 rounded-tr-2xl text-center">Aksi</th>
+                                <th class="px-6 py-4 rounded-tr-2xl text-center print:hidden">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 text-sm">
                             @forelse($sessions as $session)
-                            <tr class="hover:bg-blue-50/30 transition-colors group">
+                            
+                            {{-- LOGIKA SLA / OVERDUE: Tiket lebih dari 2 hari belum direspon --}}
+                            @php
+                                $isOverdue = $session->status == 'pending' && $session->created_at->diffInHours(now()) > 48;
+                            @endphp
+
+                            {{-- INTERAKTIF UX: Seluruh Baris Bisa Diklik Menuju Detail --}}
+                            <tr class="hover:bg-blue-50/30 transition-colors group cursor-pointer" onclick="window.location.href='{{ route('admin.bk.show', $session->id) }}'">
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         <!-- Avatar -->
-                                        <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs shrink-0 overflow-hidden border-2 border-white shadow-sm">
+                                        <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs shrink-0 overflow-hidden border-2 border-white shadow-sm print:hidden">
                                             @if($session->student && $session->student->photo_path)
                                                 <img src="{{ asset('storage/' . $session->student->photo_path) }}" class="w-full h-full object-cover">
                                             @else
@@ -239,34 +282,42 @@
                                 </td>
                                     <td class="px-6 py-4">
                                         <div class="flex flex-wrap items-center gap-2 mb-1">
-                                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold uppercase">
-                                                {{ $session->category->name ?? 'Umum' }}
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-bold uppercase print:border-none print:px-0 print:py-0 print:bg-transparent">
+                                                <i class="ph-bold ph-tag print:hidden"></i> {{ $session->category->name ?? 'Umum' }}
                                             </span>
                                             
                                             @if($session->is_system_generated ?? false)
                                                 @if(str_contains($session->initial_message, 'PELANGGARAN'))
-                                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-rose-50 text-rose-700 text-[10px] font-black rounded-lg border border-rose-200 uppercase tracking-widest animate-pulse">
-                                                        <i class="ph-bold ph-warning"></i> Urgent: Sistem
+                                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-rose-50 text-rose-700 text-[10px] font-black rounded-lg border border-rose-200 uppercase tracking-widest animate-pulse print:border-none print:px-0 print:py-0 print:bg-transparent print:text-rose-600">
+                                                        <i class="ph-bold ph-warning print:hidden"></i> Urgent: Sistem
                                                     </span>
                                                 @else
-                                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-black rounded-lg border border-blue-200 uppercase tracking-widest">
-                                                        <i class="ph-bold ph-medal"></i> Apresiasi Sistem
+                                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-black rounded-lg border border-blue-200 uppercase tracking-widest print:border-none print:px-0 print:py-0 print:bg-transparent">
+                                                        <i class="ph-bold ph-medal print:hidden"></i> Apresiasi Sistem
                                                     </span>
                                                 @endif
                                             @else
-                                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 text-slate-500 text-[10px] font-bold rounded-lg border border-slate-200 uppercase tracking-widest">
+                                                <span class="inline-flex items-center gap-1 px-2 py-1 bg-slate-50 text-slate-500 text-[10px] font-bold rounded-lg border border-slate-200 uppercase tracking-widest print:hidden">
                                                     <i class="ph-bold ph-user"></i> Pengajuan Siswa
                                                 </span>
                                             @endif
                                         </div>
-                                        <p class="text-sm text-slate-600 truncate w-48 italic" title="{{ $session->initial_message }}">
+                                        <p class="text-sm text-slate-600 truncate w-48 italic print:w-auto print:whitespace-normal" title="{{ $session->initial_message }}">
                                             "{{ $session->initial_message }}"
                                         </p>
-                                        <div class="text-[10px] text-slate-400 mt-1 flex items-center gap-1 font-medium">
-                                            <i class="ph-bold ph-clock"></i> {{ $session->created_at->diffForHumans() }}
+                                        
+                                        <div class="text-[10px] mt-1 flex items-center gap-1 font-medium">
+                                            <span class="text-slate-400"><i class="ph-bold ph-clock"></i> {{ $session->created_at->diffForHumans() }}</span>
+                                            
+                                            {{-- LENCANA SLA / KETERLAMBATAN --}}
+                                            @if($isOverdue)
+                                                <span class="ml-2 bg-rose-100 text-rose-700 border border-rose-200 px-1.5 py-0.5 rounded font-black tracking-wider uppercase animate-pulse print:hidden">
+                                                    > 48 Jam
+                                                </span>
+                                            @endif
                                         </div>
                                     </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 print:hidden">
                                     @if($session->method == 'online')
                                         <div class="flex items-center gap-2">
                                             <div class="p-1.5 rounded-full bg-purple-100 text-purple-600">
@@ -294,20 +345,33 @@
                                         ];
                                         $statusClass = $colors[$session->status] ?? 'bg-slate-100 text-slate-700';
                                     @endphp
-                                    <span class="px-2.5 py-1 inline-flex text-[10px] font-black uppercase tracking-wide rounded-lg border {{ $statusClass }}">
+                                    <span class="px-2.5 py-1 inline-flex text-[10px] font-black uppercase tracking-wide rounded-lg border {{ $statusClass }} print:border-none print:px-0 print:py-0 print:bg-transparent">
                                         {{ ucfirst($session->status == 'approved' ? 'Terjadwal' : $session->status) }}
                                     </span>
                                     
                                     @if($session->scheduled_at && $session->status == 'approved')
-                                        <div class="text-xs text-blue-600 font-bold mt-1.5 flex items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-md w-fit">
-                                            <i class="ph-bold ph-calendar-check"></i> {{ $session->scheduled_at->format('d M, H:i') }}
+                                        <div class="text-xs text-blue-600 font-bold mt-1.5 flex items-center gap-1.5 bg-blue-50 px-2 py-1 rounded-md w-fit print:bg-transparent print:p-0">
+                                            <i class="ph-bold ph-calendar-check print:hidden"></i> {{ $session->scheduled_at->format('d M, H:i') }}
                                         </div>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 text-center">
-                                    <a href="{{ route('admin.bk.show', $session->id) }}" class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:bg-blue-600 hover:text-white hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300" title="Proses">
-                                        <i class="ph-bold ph-caret-right text-lg"></i>
-                                    </a>
+                                <td class="px-6 py-4 text-center print:hidden">
+                                    <div class="flex items-center justify-center gap-2">
+                                        {{-- TOMBOL SHORTCUT WA (Tanpa masuk halaman detail) --}}
+                                        @if($session->student && $session->student->parent_wa_number)
+                                            <a href="https://wa.me/{{ preg_replace('/^0/', '62', $session->student->parent_wa_number) }}" 
+                                               target="_blank" 
+                                               onclick="event.stopPropagation();" 
+                                               class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-emerald-50 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all" title="WA Orang Tua">
+                                                <i class="ph-fill ph-whatsapp-logo text-lg"></i>
+                                            </a>
+                                        @endif
+                                        
+                                        {{-- TOMBOL DETAIL --}}
+                                        <div class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-slate-100 text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300" title="Buka Detail">
+                                            <i class="ph-bold ph-caret-right text-lg"></i>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             @empty
@@ -343,10 +407,25 @@
                 </div>
                 
                 {{-- Pagination --}}
-                <div class="px-6 py-4 border-t border-slate-100 bg-slate-50">
+                <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 print:hidden">
                     {{ $sessions->links() }}
                 </div>
             </div>
+            
+            {{-- BAGIAN TANDA TANGAN (HANYA MUNCUL SAAT DI-PRINT REKAP TABEL) --}}
+            <div class="hidden print:flex justify-between items-end mt-12 px-8 break-inside-avoid">
+                <div class="text-center">
+                    <p class="text-sm font-medium mb-16">Mengetahui,<br>Kepala Sekolah</p>
+                    <p class="text-sm font-bold underline decoration-1 underline-offset-2">_________________________</p>
+                    <p class="text-xs mt-1">NIP. ..............................</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-sm font-medium mb-16">Kota/Kabupaten, {{ now()->translatedFormat('d F Y') }}<br>Guru Bimbingan Konseling</p>
+                    <p class="text-sm font-bold underline decoration-1 underline-offset-2">{{ Auth::user()->name ?? '_________________________' }}</p>
+                    <p class="text-xs mt-1">NIP. ..............................</p>
+                </div>
+            </div>
+
         </div>
     </div>
 </x-app-layout>
