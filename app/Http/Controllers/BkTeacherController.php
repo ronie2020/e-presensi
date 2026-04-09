@@ -104,22 +104,41 @@ class BkTeacherController extends Controller
             'teacher_id' => Auth::id(),
         ]);
 
-        // --- LOGIKA NOTIFIKASI WA ---
-        if ($request->status == 'approved' && $session->student && $session->student->parent_wa_number) {
-            $date = Carbon::parse($request->scheduled_at)->translatedFormat('l, d F Y H:i');
+         // --- LOGIKA NOTIFIKASI WA (DIPERBARUI UNTUK MENDUKUNG APRESIASI LANGSUNG) ---
+        if (in_array($request->status, ['approved', 'finished']) && $session->student && $session->student->parent_wa_number) {
             $guru = Auth::user()->name;
+            $message = "";
             
-            $message = "Halo *{$session->student->name}*,\n\nPengajuan konseling kamu telah *DISETUJUI*.\n\n👨‍🏫 Guru: {$guru}\n📅 Jadwal: {$date} WIB\n📍 Metode: {$session->method}\n💬 Pesan: _{$request->response_message}_\n\nSilakan datang tepat waktu ya. Terima kasih.";
-            
+            if ($request->status == 'approved') {
+                // Template jika dijadwalkan
+                $date = Carbon::parse($request->scheduled_at)->translatedFormat('l, d F Y H:i');
+                $message = "Halo *{$session->student->name}*,\n\nPengajuan konseling kamu telah *DISETUJUI*.\n\n👨‍🏫 Guru: {$guru}\n📅 Jadwal: {$date} WIB\n📍 Metode: {$session->method}\n💬 Pesan: _{$request->response_message}_\n\nSilakan datang tepat waktu ya. Terima kasih.";
+            } elseif ($request->status == 'finished') {
+                // Template jika sekadar pemberitahuan/apresiasi tanpa jadwal
+                $message = "Pemberitahuan dari BK untuk *{$session->student->name}*:\n\n{$request->response_message}\n\n👨‍🏫 Salam hangat, {$guru} (Guru BK)";
+            }
+
             try {
                 SendGeneralWaJob::dispatch($session->student->parent_wa_number, $message);
             } catch (\Exception $e) {
-                // Silent fail jika WA error agar tidak mengganggu proses simpan
                 \Log::error("Gagal kirim WA: " . $e->getMessage());
             }
         }
 
-        return back()->with('success', 'Status konseling berhasil diperbarui.');
+        // Jika aksi adalah "Pemberitahuan Langsung" (Selesai), kita buat jurnal otomatis
+        if ($request->status == 'finished') {
+            BkRecord::updateOrCreate(
+                ['bk_session_id' => $session->id],
+                [
+                    'problem_analysis' => 'Penyampaian informasi atau apresiasi secara langsung via Sistem dan WhatsApp.',
+                    'solution' => 'Pesan pemberitahuan telah berhasil dikirim tanpa memerlukan tatap muka.',
+                    'result' => $request->response_message,
+                    'is_confidential' => 0,
+                ]
+            );
+        }
+
+        return back()->with('success', 'Status konseling & notifikasi berhasil diperbarui.');
     }
 
     /**

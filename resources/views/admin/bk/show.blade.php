@@ -1,7 +1,12 @@
 <x-app-layout>
     {{-- 
         REDESIGN DETAIL KONSELING (BLUE THEME)
-        - DITAMBAHKAN (BARU): SweetAlert2 menggantikan Alert Tradisional (Pop-up Konfirmasi & Copy Text)
+        - Diperbarui dengan UI Alert khusus untuk tiket hasil integrasi Sistem Disiplin
+        - DITAMBAHKAN: Fitur Template Cepat (Quick Templates) Pesan WA
+        - DITAMBAHKAN: Fitur Cetak Dokumen & Print Styles CSS
+        - DITAMBAHKAN: Validasi Tanggal dan Konfirmasi Simpan Jurnal
+        - DITAMBAHKAN (BARU): Kop Surat Print, Visual Tracker, Auto-expand Textarea, Copy Teks WA.
+        - DITAMBAHKAN (BARU): Fitur "Pemberitahuan Langsung / Apresiasi" Tanpa Jadwal.
     --}}
 
     <style>
@@ -248,7 +253,9 @@
                                 if(type === 'panggilan') {
                                     this.responseMsg = `Yth. Bapak/Ibu Orang Tua/Wali dari ${this.studentName},\n\nKami mengundang kehadiran Bapak/Ibu ke sekolah (Ruang BK) pada jadwal yang telah kami tentukan untuk mendiskusikan laporan evaluasi kedisiplinan ananda.\n\nAtas perhatian dan kehadirannya kami ucapkan terima kasih.`;
                                 } else if(type === 'apresiasi') {
-                                    this.responseMsg = `Yth. Bapak/Ibu Orang Tua/Wali dari ${this.studentName},\n\nKami ingin menyampaikan apresiasi dari pihak sekolah terkait pencapaian positif ananda baru-baru ini. Kami mengundang Bapak/Ibu untuk berdiskusi terkait langkah dukungan selanjutnya.\n\nTerima kasih.`;
+                                    this.responseMsg = `Yth. Bapak/Ibu Orang Tua/Wali dari ${this.studentName},\n\nKami ingin menyampaikan apresiasi dari pihak sekolah terkait pencapaian positif ananda baru-baru ini. Mari kita terus dukung ananda agar semakin berprestasi!\n\nSalam hangat dari sekolah.`;
+                                } else if(type === 'teguran') {
+                                    this.responseMsg = `Yth. Bapak/Ibu Orang Tua/Wali dari ${this.studentName},\n\nMelalui pesan ini kami ingin menginformasikan evaluasi kedisiplinan ananda di sekolah. Mohon kerja samanya di rumah untuk memberikan arahan dan bimbingan.\n\nTerima kasih.`;
                                 } else if(type === 'umum') {
                                     this.responseMsg = `Halo ${this.studentName},\n\nPengajuan konseling kamu telah kami terima dan disetujui. Silakan datang ke ruang BK tepat waktu sesuai jadwal yang dilampirkan ya. Semangat!`;
                                 } else {
@@ -256,7 +263,7 @@
                                 }
                             },
                             
-                            // Fitur Copy to Clipboard Diubah Menggunakan SweetAlert2
+                            // Fitur Copy to Clipboard
                             copyToClipboard() {
                                 if (!this.responseMsg) return;
                                 navigator.clipboard.writeText(this.responseMsg).then(() => {
@@ -293,7 +300,8 @@
                                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Keputusan</label>
                                     <div class="relative">
                                         <select name="status" x-model="action" class="w-full pl-4 pr-10 py-3 rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-slate-700 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all appearance-none cursor-pointer shadow-sm">
-                                            <option value="approved">Setujui & Jadwalkan</option>
+                                            <option value="approved">Setujui & Jadwalkan Pertemuan</option>
+                                            <option value="finished">Pemberitahuan Langsung (Selesai)</option>
                                             <option value="rejected">Tolak Pengajuan</option>
                                         </select>
                                         <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-500">
@@ -302,7 +310,7 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Field Jadwal dengan Validasi Minimal Hari Ini -->
+                                <!-- Field Jadwal (Hanya muncul jika disetujui / dijadwalkan) -->
                                 <div x-show="action === 'approved'" 
                                      x-transition:enter="transition ease-out duration-300"
                                      x-transition:enter-start="opacity-0 transform scale-95"
@@ -318,25 +326,35 @@
                             <div class="mb-6">
                                 <div class="flex justify-between items-end mb-3">
                                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                        <span x-text="action === 'approved' ? 'Pesan Konfirmasi / Auto-WA' : 'Alasan Penolakan'"></span>
+                                        <span x-text="action === 'rejected' ? 'Alasan Penolakan' : 'Pesan / Pemberitahuan (Auto-WA)'"></span>
                                     </label>
                                     
                                     <!-- Tombol Salin -->
-                                    <button type="button" @click="copyToClipboard()" x-show="action === 'approved' && responseMsg.length > 0" class="text-[10px] font-bold text-blue-600 flex items-center gap-1 hover:text-blue-800 transition">
+                                    <button type="button" @click="copyToClipboard()" x-show="action !== 'rejected' && responseMsg.length > 0" class="text-[10px] font-bold text-blue-600 flex items-center gap-1 hover:text-blue-800 transition">
                                         <i class="ph-bold ph-copy"></i> Salin Teks
                                     </button>
                                 </div>
 
-                                <div x-show="action === 'approved'" class="flex flex-wrap gap-2 mb-3" x-transition>
-                                    <button type="button" @click="setTemplate('panggilan')" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-colors shadow-sm">
+                                <!-- Template Buttons dinamis tergantung tipe keputusan -->
+                                <div x-show="action !== 'rejected'" class="flex flex-wrap gap-2 mb-3" x-transition>
+                                    
+                                    <!-- Muncul jika akan dijadwalkan (Approved) -->
+                                    <button type="button" @click="setTemplate('panggilan')" x-show="action === 'approved'" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-colors shadow-sm">
                                         <i class="ph-bold ph-warning"></i> Panggilan Ortu
                                     </button>
-                                    <button type="button" @click="setTemplate('apresiasi')" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-colors shadow-sm">
-                                        <i class="ph-bold ph-medal"></i> Apresiasi Ortu
-                                    </button>
-                                    <button type="button" @click="setTemplate('umum')" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition-colors shadow-sm">
+                                    <button type="button" @click="setTemplate('umum')" x-show="action === 'approved'" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition-colors shadow-sm">
                                         <i class="ph-bold ph-chat-text"></i> Info ke Siswa
                                     </button>
+
+                                    <!-- Muncul jika hanya pemberitahuan langsung (Finished) -->
+                                    <button type="button" @click="setTemplate('apresiasi')" x-show="action === 'finished'" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-colors shadow-sm">
+                                        <i class="ph-bold ph-medal"></i> Apresiasi Prestasi
+                                    </button>
+                                    <button type="button" @click="setTemplate('teguran')" x-show="action === 'finished'" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 transition-colors shadow-sm">
+                                        <i class="ph-bold ph-warning"></i> Teguran Ringan
+                                    </button>
+
+                                    <!-- Hapus Teks -->
                                     <button type="button" @click="setTemplate('kosong')" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-white text-slate-400 border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm">
                                         <i class="ph-bold ph-eraser"></i> Hapus
                                     </button>
@@ -346,12 +364,13 @@
                                 
                                 <p class="text-xs text-slate-400 mt-2 flex items-center gap-1.5 font-medium">
                                     <i class="ph-fill ph-info text-blue-400"></i> 
-                                    Isi pesan ini akan digabungkan otomatis dengan tanggal dan nama guru pada sistem Notifikasi WhatsApp.
+                                    Isi pesan ini akan dikirimkan secara otomatis via Notifikasi WhatsApp.
                                 </p>
                             </div>
 
                             <button type="submit" class="w-full md:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center gap-2">
-                                <i class="ph-bold ph-paper-plane-right text-lg"></i> Simpan & Kirim Notifikasi
+                                <i class="ph-bold ph-paper-plane-right text-lg"></i> 
+                                <span x-text="action === 'finished' ? 'Kirim Pemberitahuan & Selesai' : 'Simpan & Kirim Notifikasi'"></span>
                             </button>
                         </form>
                     </div>
@@ -383,7 +402,8 @@
                         <div class="flex flex-col md:flex-row justify-between items-start gap-4">
                             <div>
                                 <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
-                                    <i class="ph-duotone ph-calendar-check text-blue-500 text-2xl print:hidden"></i> Sesi Terjadwal
+                                    <i class="ph-duotone ph-calendar-check text-blue-500 text-2xl print:hidden"></i> 
+                                    {{ $session->scheduled_at ? 'Sesi Terjadwal' : 'Pemberitahuan Selesai' }}
                                 </h3>
                                 <div class="mt-4 space-y-2">
                                     <div class="flex items-center gap-3">
@@ -392,7 +412,13 @@
                                         </div>
                                         <div>
                                             <div class="text-xs font-bold text-slate-400 uppercase">Waktu Pertemuan</div>
-                                            <div class="font-bold text-slate-800">{{ $session->scheduled_at ? $session->scheduled_at->translatedFormat('l, d F Y - H:i') : '-' }} WIB</div>
+                                            <div class="font-bold text-slate-800">
+                                                @if($session->scheduled_at)
+                                                    {{ $session->scheduled_at->translatedFormat('l, d F Y - H:i') }} WIB
+                                                @else
+                                                    <span class="text-emerald-600">Pemberitahuan Langsung (Tanpa Tatap Muka)</span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="flex items-start gap-3 pt-2">
@@ -477,12 +503,12 @@
                             <!-- TAMPILAN READ ONLY (Style Dokumen) -->
                             <div class="space-y-6">
                                 <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Analisis Masalah</h4>
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Analisis Permasalahan / Pencapaian</h4>
                                     <div class="text-slate-700 text-sm leading-relaxed whitespace-pre-line">{{ $session->record->problem_analysis ?? '-' }}</div>
                                 </div>
                                 
                                 <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Solusi / Tindakan</h4>
+                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Solusi / Tindakan Lanjutan</h4>
                                     <div class="text-slate-700 text-sm leading-relaxed whitespace-pre-line">{{ $session->record->solution ?? '-' }}</div>
                                 </div>
 
