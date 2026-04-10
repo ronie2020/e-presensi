@@ -69,7 +69,7 @@
         <div class="text-right">
             <table>
                 <tr><td class="font-bold w-20">Periode</td><td>: {{ $startDate->translatedFormat('F Y') }}</td></tr>
-                <tr><td class="font-bold text-rose-600">Libur</td><td class="text-rose-600 font-medium">: Minggu / Hari Libur Nasional</td></tr>
+                <tr><td class="font-bold text-rose-600">Libur</td><td class="text-rose-600 font-medium">: Sabtu Minggu / Hari Libur Nasional</td></tr>
             </table>
         </div>
     </div>
