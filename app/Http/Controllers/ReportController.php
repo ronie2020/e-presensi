@@ -448,6 +448,7 @@ class ReportController extends Controller
         // Kirim ke View 'class_attendance.blade.php'       
         return view('reports.class_attendance', compact('reportData', 'startDate', 'endDate'));
     }
+    
     private function getClassReportData(Request $request)
     {
         $monthStr = $request->input('month', Carbon::now()->format('Y-m'));
@@ -484,53 +485,68 @@ class ReportController extends Controller
 
             foreach ($students as $student) {
                 $attendanceMap = [];
-                // PERBAIKAN: Tambahkan kunci H_half (Hadir Setengah)
-                $summary = ['H' => 0, 'H_half' => 0, 'S' => 0, 'I' => 0, 'A' => 0];
+                // PERBAIKAN: Ganti kunci H_half menjadi B (Bolos) untuk Masuk tapi Tidak Pulang
+                $summary = ['H' => 0, 'B' => 0, 'S' => 0, 'I' => 0, 'A' => 0];
                 $studentAttendances = $attendances->get($student->id, collect());
 
                 foreach ($dates as $date) {
                     $dateStr = $date->format('Y-m-d');
                     $record = $studentAttendances->where('attendance_date', $dateStr)->first();
                     
-                    $code = '-'; 
-                    $color = 'text-slate-300';
+                    // LOGIKA BARU: Dua kolom per tanggal (Masuk & Pulang)
+                    $inCode = '-'; $outCode = '-'; 
+                    $inColor = 'text-slate-300'; $outColor = 'text-slate-300';
                     
                     if ($record) {
-                        // LOGIKA BARU: Cek apakah absen pulang (time_out) masih kosong
                         $isHalfDay = empty($record->time_out) || $record->time_out == '00:00:00';
 
                         switch ($record->status) {
                             case 'Hadir':
+                                $inCode = 'H'; $inColor = 'text-emerald-600 font-bold';
                                 if ($isHalfDay) {
-                                    $code = 'H½'; $color = 'text-blue-500 font-bold'; $summary['H_half']++;
+                                    $outCode = 'B'; $outColor = 'text-rose-500 font-bold'; 
+                                    $summary['B']++; // Bolos pulang
                                 } else {
-                                    $code = 'H'; $color = 'text-emerald-600 font-bold'; $summary['H']++;
+                                    $outCode = 'H'; $outColor = 'text-emerald-600 font-bold'; 
+                                    $summary['H']++;
                                 }
                                 break;
                             case 'Terlambat':
+                                $inCode = 'T'; $inColor = 'text-amber-600 font-bold';
                                 if ($isHalfDay) {
-                                    $code = 'T½'; $color = 'text-orange-500 font-bold'; $summary['H_half']++;
+                                    $outCode = 'B'; $outColor = 'text-rose-500 font-bold'; 
+                                    $summary['B']++; // Bolos pulang
                                 } else {
-                                    $code = 'T'; $color = 'text-amber-600 font-bold'; $summary['H']++;
+                                    $outCode = 'H'; $outColor = 'text-emerald-600 font-bold'; 
+                                    $summary['H']++;
                                 }
                                 break; 
                             case 'Sakit':
-                                $code = 'S'; $color = 'text-blue-600 font-bold'; $summary['S']++; break;
+                                $inCode = 'S'; $outCode = 'S';
+                                $inColor = 'text-blue-600 font-bold'; $outColor = 'text-blue-600 font-bold';
+                                $summary['S']++; break;
                             case 'Izin':
-                                $code = 'I'; $color = 'text-indigo-600 font-bold'; $summary['I']++; break;
+                                $inCode = 'I'; $outCode = 'I';
+                                $inColor = 'text-indigo-600 font-bold'; $outColor = 'text-indigo-600 font-bold';
+                                $summary['I']++; break;
                             case 'Alfa':
                             case 'Alpa':
                             case 'Alpha':
-                                $code = 'A'; $color = 'text-rose-600 font-bold'; $summary['A']++; break;
+                                $inCode = 'A'; $outCode = 'A';
+                                $inColor = 'text-rose-600 font-bold'; $outColor = 'text-rose-600 font-bold';
+                                $summary['A']++; break;
                         }
                     }
 
-                    if ($code === '-' && ($date->isSaturday() || $date->isSunday())) {
-                         $code = ''; 
-                         $color = 'bg-gray-200';
+                    if ($inCode === '-' && ($date->isSaturday() || $date->isSunday())) {
+                         $inCode = ''; $outCode = '';
+                         $inColor = 'bg-gray-200'; $outColor = 'bg-gray-200';
                     }
 
-                    $attendanceMap[$dateStr] = ['code' => $code, 'class' => $color];
+                    $attendanceMap[$dateStr] = [
+                        'in_code' => $inCode, 'in_class' => $inColor,
+                        'out_code' => $outCode, 'out_class' => $outColor
+                    ];
                 }
 
                 $student->attendance_map = $attendanceMap;
