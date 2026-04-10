@@ -10,11 +10,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-// --- TAMBAHAN UNTUK LOGIKA E-COUNSELING ---
+// --- LOGIKA E-COUNSELING ---
 use App\Models\BkSession;
 use App\Models\BkCategory;
 use App\Models\DisciplineRecord;
 use App\Models\AttendanceSiswa;
+use Carbon\Carbon;
 
 class Student extends Authenticatable
 {
@@ -131,8 +132,7 @@ class Student extends Authenticatable
     ];
 
     /**
-     * ELOQUENT CASTS (PENTING!)
-     * Ini wajib agar di Blade kita bisa langsung pakai $student->dob->format()
+     * ELOQUENT CASTS (PENTING!)    
      */
     protected $casts = [
         'dob' => 'date',
@@ -247,20 +247,12 @@ class Student extends Authenticatable
     /**
      * Helper Static untuk Generate NIS Otomatis     
      */
-    public static function generateNextNis()
+     public static function generateNextNis()
     {
-        $yearShort = date('y'); // Contoh: 24        
-        
-        $lastStudent = self::where('nis', 'like', $yearShort . '%')
-                           ->orderBy('nis', 'desc')
-                           ->first();
-             
+        $yearShort = date('y');
+        $lastStudent = self::where('nis', 'like', $yearShort . '%')->orderBy('nis', 'desc')->first();
         $sequence = $lastStudent ? intval(substr($lastStudent->nis, -3)) + 1 : 1;
-        
-        return [
-            'prefix' => $yearShort,
-            'sequence' => $sequence
-        ];
+        return ['prefix' => $yearShort, 'sequence' => $sequence];
     }
 
     /**
@@ -273,7 +265,7 @@ class Student extends Authenticatable
     {
         $id = $this->id;
 
-        // 1. Hitung Poin Manual (Pelanggaran & Kebaikan)
+        // 1. Hitung Poin Manual
         $manualMinus = 0; $manualPlus = 0;
         if (class_exists(DisciplineRecord::class)) {
             $records = DisciplineRecord::where('student_id', $id)->with('disciplineType')->get();
@@ -281,11 +273,10 @@ class Student extends Authenticatable
             $manualPlus = $records->where('disciplineType.type', 'Kebaikan')->sum('disciplineType.point_value');
         }
 
-        // 2. Hitung Poin Otomatis (Kehadiran & Ibadah)
+        // 2. Hitung Poin Otomatis
         $alfaCount = 0; $lateCount = 0; $prayerCount = 0;
         if (class_exists(AttendanceSiswa::class)) {
             $attendances = AttendanceSiswa::where('student_id', $id)->get();
-            
             $alfaCount = $attendances->whereIn('status', ['Alfa', 'Alpa', 'alpha', 'alfa', 'Tanpa Keterangan'])->count();
             $lateCount = $attendances->whereIn('status', ['Terlambat', 'terlambat'])->count();
             $prayerCount = $attendances->filter(function($att) {
@@ -294,28 +285,29 @@ class Student extends Authenticatable
             })->count();
         }
 
-        // 3. GRAND TOTAL POIN (Sesuai dengan logika di StudentPortal)
         $totalMinus = $manualMinus + ($alfaCount * 10) + ($lateCount * 5);
         $totalPlus = $manualPlus + ($prayerCount * 5);
 
-        // ==========================================
-        // EKSEKUSI PEMBUATAN TIKET OTOMATIS
-        // ==========================================
+        // --- LOGIKA BULAN INI ---
+        $thisMonth = now()->month;
+        $thisYear = now()->year;
 
         // A. CEK PELANGGARAN (>= 200)
         if ($totalMinus >= 200) {
-            $activeTicket = BkSession::where('student_id', $id)
-                ->whereIn('status', ['pending', 'approved', 'ongoing']) 
+            // PERBAIKAN: Cek apakah sudah ada tiket bulan ini (apapun statusnya)
+            $existingTicket = BkSession::where('student_id', $id)
                 ->where('is_system_generated', true)
                 ->where('initial_message', 'like', '%PELANGGARAN%')
+                ->whereMonth('created_at', $thisMonth)
+                ->whereYear('created_at', $thisYear)
                 ->exists();
 
-            if (!$activeTicket) {
+            if (!$existingTicket) {
                 $kategoriId = BkCategory::where('name', 'like', '%Disiplin%')->first()->id ?? 1;
                 BkSession::create([
                     'student_id' => $id,
                     'bk_category_id' => $kategoriId,
-                    'initial_message' => "[SISTEM OTOMATIS: PELANGGARAN BERAT]\nSistem mendeteksi siswa ini telah mencapai ambang batas pelanggaran sekolah (Total Akumulasi: {$totalMinus} Poin, termasuk riwayat Alpa/Terlambat). Mohon segera dilakukan pemanggilan dan pembinaan.",
+                    'initial_message' => "[SISTEM OTOMATIS: PELANGGARAN BERAT]\nSistem mendeteksi siswa ini telah mencapai ambang batas pelanggaran sekolah (Total Akumulasi: {$totalMinus} Poin). Mohon segera dilakukan pemanggilan.",
                     'method' => 'offline',
                     'status' => 'pending',
                     'is_system_generated' => true,
@@ -325,18 +317,20 @@ class Student extends Authenticatable
 
         // B. CEK PRESTASI (>= 100)
         if ($totalPlus >= 100) {
-            $activeMeritTicket = BkSession::where('student_id', $id)
-                ->whereIn('status', ['pending', 'approved', 'ongoing'])
+            // PERBAIKAN: Cek apakah sudah ada tiket bulan ini (apapun statusnya)
+            $existingMeritTicket = BkSession::where('student_id', $id)
                 ->where('is_system_generated', true)
                 ->where('initial_message', 'like', '%PRESTASI%')
+                ->whereMonth('created_at', $thisMonth)
+                ->whereYear('created_at', $thisYear)
                 ->exists();
 
-            if (!$activeMeritTicket) {
+            if (!$existingMeritTicket) {
                 $kategoriId = BkCategory::where('name', 'like', '%Prestasi%')->first()->id ?? 1;
                 BkSession::create([
                     'student_id' => $id,
                     'bk_category_id' => $kategoriId,
-                    'initial_message' => "[SISTEM OTOMATIS: APRESIASI PRESTASI]\nSistem mendeteksi siswa ini memiliki rekam jejak sangat baik (Total Akumulasi: +{$totalPlus} Poin Kebaikan). Direkomendasikan untuk diberikan apresiasi atau bimbingan karir lanjutan.",
+                    'initial_message' => "[SISTEM OTOMATIS: APRESIASI PRESTASI]\nSistem mendeteksi siswa ini memiliki rekam jejak sangat baik (Total Akumulasi: +{$totalPlus} Poin Kebaikan).",
                     'method' => 'offline',
                     'status' => 'pending',
                     'is_system_generated' => true,
