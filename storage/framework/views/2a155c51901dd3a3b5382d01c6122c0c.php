@@ -117,7 +117,7 @@
                                     
                                     
                                     <?php $__currentLoopData = $dates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $date): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                        <th colspan="2" class="p-1 font-bold text-[10px] text-center border-r border-slate-200 <?php echo e($date->isSunday() ? 'bg-rose-50/50 text-rose-400' : ''); ?>">
+                                        <th colspan="2" class="p-1 font-bold text-[10px] text-center border-r border-slate-200 <?php echo e(($date->isSaturday() || $date->isSunday()) ? 'bg-rose-50/50 text-rose-400' : ''); ?>">
                                             <?php echo e($date->format('d')); ?>
 
                                         </th>
@@ -133,8 +133,8 @@
                                 <tr class="bg-slate-50 border-b border-slate-200 text-slate-500">
                                     
                                     <?php $__currentLoopData = $dates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $date): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                        <th class="p-1 font-bold text-[8px] text-center border-r border-slate-100 min-w-[20px] <?php echo e($date->isSunday() ? 'bg-rose-50/50' : ''); ?>" title="Masuk">M</th>
-                                        <th class="p-1 font-bold text-[8px] text-center border-r border-slate-200 min-w-[20px] <?php echo e($date->isSunday() ? 'bg-rose-50/50' : ''); ?>" title="Pulang">P</th>
+                                        <th class="p-1 font-bold text-[8px] text-center border-r border-slate-100 min-w-[20px] <?php echo e(($date->isSaturday() || $date->isSunday()) ? 'bg-rose-50/50' : ''); ?>">M</th>
+                                        <th class="p-1 font-bold text-[8px] text-center border-r border-slate-200 min-w-[20px] <?php echo e(($date->isSaturday() || $date->isSunday()) ? 'bg-rose-50/50' : ''); ?>">P</th>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tr>
                             </thead>

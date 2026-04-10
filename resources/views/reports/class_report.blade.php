@@ -108,7 +108,7 @@
                                     
                                     {{-- Loop Tanggal --}}
                                     @foreach($dates as $date)
-                                        <th colspan="2" class="p-1 font-bold text-[10px] text-center border-r border-slate-200 {{ $date->isSunday() ? 'bg-rose-50/50 text-rose-400' : '' }}">
+                                        <th colspan="2" class="p-1 font-bold text-[10px] text-center border-r border-slate-200 {{ ($date->isSaturday() || $date->isSunday()) ? 'bg-rose-50/50 text-rose-400' : '' }}">
                                             {{ $date->format('d') }}
                                         </th>
                                     @endforeach
@@ -123,8 +123,8 @@
                                 <tr class="bg-slate-50 border-b border-slate-200 text-slate-500">
                                     {{-- Sub-Kolom Masuk & Pulang --}}
                                     @foreach($dates as $date)
-                                        <th class="p-1 font-bold text-[8px] text-center border-r border-slate-100 min-w-[20px] {{ $date->isSunday() ? 'bg-rose-50/50' : '' }}" title="Masuk">M</th>
-                                        <th class="p-1 font-bold text-[8px] text-center border-r border-slate-200 min-w-[20px] {{ $date->isSunday() ? 'bg-rose-50/50' : '' }}" title="Pulang">P</th>
+                                        <th class="p-1 font-bold text-[8px] text-center border-r border-slate-100 min-w-[20px] {{ ($date->isSaturday() || $date->isSunday()) ? 'bg-rose-50/50' : '' }}">M</th>
+                                        <th class="p-1 font-bold text-[8px] text-center border-r border-slate-200 min-w-[20px] {{ ($date->isSaturday() || $date->isSunday()) ? 'bg-rose-50/50' : '' }}">P</th>
                                     @endforeach
                                 </tr>
                             </thead>

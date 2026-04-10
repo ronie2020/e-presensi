@@ -537,10 +537,10 @@ class ReportController extends Controller
                                 $summary['A']++; break;
                         }
                     }
-
+                    
+                   // Logika Libur (Sabtu & Minggu)
                     if ($inCode === '-' && ($date->isSaturday() || $date->isSunday())) {
-                         $inCode = ''; $outCode = '';
-                         $inColor = 'bg-gray-200'; $outColor = 'bg-gray-200';
+                         $inCode = ''; $outCode = ''; $inColor = 'bg-gray-200'; $outColor = 'bg-gray-200';
                     }
 
                     $attendanceMap[$dateStr] = [
