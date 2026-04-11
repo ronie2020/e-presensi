@@ -69,6 +69,58 @@ class BkTeacherController extends Controller
             }
         }
 
+         // === FITUR BARU: EXPORT PDF & EXCEL ===
+        if ($request->has('export')) {
+            $sessionsExport = $query->latest()->get(); // Ambil semua data sesuai filter (tanpa pagination)
+
+            // Export Mode PDF/Print
+            if ($request->export == 'pdf') {
+                return view('admin.bk.print', ['sessions' => $sessionsExport]);
+            }
+
+            // Export Mode Excel (CSV Format agar tanpa package eksternal)
+            if ($request->export == 'excel') {
+                $fileName = 'Laporan_Konseling_' . date('Y-m-d') . '.csv';
+
+                $headers = array(
+                    "Content-type"        => "text/csv; charset=UTF-8",
+                    "Content-Disposition" => "attachment; filename=$fileName",
+                    "Pragma"              => "no-cache",
+                    "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
+                    "Expires"             => "0"
+                );
+
+                $columns = array('No', 'Nama Siswa', 'Kelas', 'Kategori/Topik', 'Pesan Pengajuan', 'Metode', 'Status', 'Tanggal Pengajuan');
+
+                $callback = function() use($sessionsExport, $columns) {
+                    $file = fopen('php://output', 'w');
+                    // Tambahkan BOM agar karakter khusus dibaca UTF-8 dengan benar di MS Excel
+                    fputs($file, $bom =(chr(0xEF) . chr(0xBB) . chr(0xBF))); 
+                    fputcsv($file, $columns);
+
+                    $no = 1;
+                    foreach ($sessionsExport as $session) {
+                        $row['No']  = $no++;
+                        $row['Nama Siswa']    = $session->student->name ?? 'Data Terhapus';
+                        $row['Kelas']    = $session->student->schoolClass->name ?? '-';
+                        $row['Kategori/Topik']  = $session->category->name ?? 'Umum';
+                        $row['Pesan Pengajuan']  = str_replace(["\r", "\n"], " ", $session->initial_message); // Bersihkan enter
+                        $row['Metode']  = $session->method == 'online' ? 'Online' : 'Tatap Muka';
+                        
+                        $statusMap = ['pending' => 'Pending', 'approved' => 'Terjadwal', 'ongoing' => 'Berlangsung', 'finished' => 'Selesai', 'rejected' => 'Ditolak'];
+                        $row['Status']  = $statusMap[$session->status] ?? $session->status;
+                        
+                        $row['Tanggal Pengajuan']  = $session->created_at->format('Y-m-d H:i');
+
+                        fputcsv($file, array($row['No'], $row['Nama Siswa'], $row['Kelas'], $row['Kategori/Topik'], $row['Pesan Pengajuan'], $row['Metode'], $row['Status'], $row['Tanggal Pengajuan']));
+                    }
+                    fclose($file);
+                };
+
+                return response()->stream($callback, 200, $headers);
+            }
+        }
+
         $sessions = $query->latest()->paginate(15)->withQueryString(); // Tambahkan withQueryString agar pagination tidak mereset pencarian
 
         return view('admin.bk.index', compact('sessions', 'stats'));

@@ -240,12 +240,16 @@
                                 Daftar Antrian & Riwayat Terbaru
                             <?php endif; ?>
                         </span>
+                    </div>                    
+                     
+                    <div class="flex flex-wrap items-center gap-2 print:hidden w-full sm:w-auto">
+                        <a href="<?php echo e(request()->fullUrlWithQuery(['export' => 'excel'])); ?>" class="flex-1 sm:flex-none text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl border border-emerald-200 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            <i class="ph-bold ph-file-csv text-base"></i> Unduh Excel
+                        </a>
+                        <a href="<?php echo e(request()->fullUrlWithQuery(['export' => 'pdf'])); ?>" target="_blank" class="flex-1 sm:flex-none text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 px-4 py-2 rounded-xl border border-rose-200 transition-colors flex items-center justify-center gap-2 shadow-sm">
+                            <i class="ph-bold ph-printer text-base"></i> Cetak Laporan
+                        </a>
                     </div>
-                    
-                    
-                    <button onclick="window.print()" class="print:hidden text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-xl border border-indigo-200 transition-colors flex items-center gap-2">
-                        <i class="ph-bold ph-printer"></i> Cetak Tabel Ini
-                    </button>
                 </div>
 
                 
