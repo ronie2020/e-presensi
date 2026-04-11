@@ -1,5 +1,14 @@
-<x-app-layout>
-    {{-- LIBRARY PENDUKUNG --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Tambahan TomSelect untuk Pencarian Dropdown -->
@@ -30,7 +39,7 @@
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION --}}
+            
             <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 mb-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -45,23 +54,23 @@
                         </p>
                     </div>
                     
-                    <a href="{{ route('discipline-types.index') }}" class="group bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm border border-white/10 transition-all flex items-center gap-2 shadow-lg">
+                    <a href="<?php echo e(route('discipline-types.index')); ?>" class="group bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm border border-white/10 transition-all flex items-center gap-2 shadow-lg">
                         <i class="ph-bold ph-gear text-xl group-hover:rotate-90 transition-transform duration-500"></i>
                         <span>Atur Jenis Poin</span>
                     </a>
                 </div>
             </div>
 
-            {{-- Pesan Flash Sukses --}}
-            @if (session('success'))
+            
+            <?php if(session('success')): ?>
                 <div x-data="{ show: true }" x-show="show" class="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-[1.5rem] flex items-center justify-between shadow-sm animate-in slide-in-from-top-2">
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"><i class="ph-bold ph-check"></i></div>
-                        <span class="font-bold text-sm">{{ session('success') }}</span>
+                        <span class="font-bold text-sm"><?php echo e(session('success')); ?></span>
                     </div>
                     <button @click="show = false" class="p-2 hover:bg-emerald-100 rounded-lg transition"><i class="ph-bold ph-x"></i></button>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <!-- BAGIAN 1: FORM INPUT (GRID 2 KOLOM) -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
@@ -80,11 +89,11 @@
                             </div>
                         </div>
 
-                        <form action="{{ route('discipline.store') }}" method="POST" class="space-y-5">
-                            @csrf
-                            <input type="hidden" name="date" value="{{ \Carbon\Carbon::today()->toDateString() }}">
+                        <form action="<?php echo e(route('discipline.store')); ?>" method="POST" class="space-y-5">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="date" value="<?php echo e(\Carbon\Carbon::today()->toDateString()); ?>">
                             
-                            {{-- PILIH SISWA --}}
+                            
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Pilih Siswa</label>
                                 <div class="flex gap-2">
@@ -92,16 +101,16 @@
                                         <!-- Menambahkan placeholder agar rapi dengan TomSelect -->
                                         <select name="student_id" id="student_select_violation" required placeholder="Ketik nama atau kelas siswa...">
                                             <option value="">-- Cari / Pilih Nama Siswa --</option>
-                                            @foreach ($students as $student)
-                                                <option value="{{ $student->id }}" 
-                                                        data-nis="{{ $student->nis ?? '' }}" 
-                                                        data-nisn="{{ $student->nisn ?? '' }}"
-                                                        data-student-id="{{ $student->student_id ?? '' }}"
-                                                        data-rfid="{{ $student->rfid_id ?? '' }}"
-                                                        data-class="{{ $student->schoolClass->name ?? '' }}">
-                                                    {{ $student->name }} ({{ $student->schoolClass->name ?? 'N/A' }})
+                                            <?php $__currentLoopData = $students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($student->id); ?>" 
+                                                        data-nis="<?php echo e($student->nis ?? ''); ?>" 
+                                                        data-nisn="<?php echo e($student->nisn ?? ''); ?>"
+                                                        data-student-id="<?php echo e($student->student_id ?? ''); ?>"
+                                                        data-rfid="<?php echo e($student->rfid_id ?? ''); ?>"
+                                                        data-class="<?php echo e($student->schoolClass->name ?? ''); ?>">
+                                                    <?php echo e($student->name); ?> (<?php echo e($student->schoolClass->name ?? 'N/A'); ?>)
                                                 </option>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                     </div>
                                     <button type="button" onclick="startScanner('student_select_violation')" class="shrink-0 bg-slate-800 text-white w-[52px] h-[52px] rounded-2xl hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center" title="Scan QR Code">
@@ -110,21 +119,21 @@
                                 </div>
                             </div>
                             
-                            {{-- JENIS PELANGGARAN --}}
+                            
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Jenis Pelanggaran</label>
                                 <div class="relative">
                                     <select name="discipline_type_id" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-rose-500 focus:ring-rose-500 text-sm font-bold text-slate-700 py-3.5 pl-4 pr-10 appearance-none cursor-pointer">
                                         <option value="">-- Pilih Kategori --</option>
-                                        @foreach ($violationTypes as $type)
-                                            <option value="{{ $type->id }}">{{ $type->name }} (-{{ $type->point_value }} Poin)</option>
-                                        @endforeach
+                                        <?php $__currentLoopData = $violationTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($type->id); ?>"><?php echo e($type->name); ?> (-<?php echo e($type->point_value); ?> Poin)</option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </select>
                                     <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
                                 </div>
                             </div>
                             
-                            {{-- CATATAN --}}
+                            
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Kronologi / Catatan</label>
                                 <textarea name="notes" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-rose-500 focus:ring-rose-500 text-sm font-medium p-4" placeholder="Jelaskan singkat kejadiannya..."></textarea>
@@ -152,27 +161,27 @@
                             </div>
                         </div>
 
-                        <form action="{{ route('discipline.store') }}" method="POST" class="space-y-5">
-                            @csrf
-                            <input type="hidden" name="date" value="{{ \Carbon\Carbon::today()->toDateString() }}">
+                        <form action="<?php echo e(route('discipline.store')); ?>" method="POST" class="space-y-5">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="date" value="<?php echo e(\Carbon\Carbon::today()->toDateString()); ?>">
                             
-                            {{-- PILIH SISWA --}}
+                            
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Pilih Siswa</label>
                                 <div class="flex gap-2">
                                     <div class="relative flex-1">
                                         <select name="student_id" id="student_select_merit" required placeholder="Ketik nama atau kelas siswa...">
                                             <option value="">-- Cari / Pilih Nama Siswa --</option>
-                                            @foreach ($students as $student)
-                                                <option value="{{ $student->id }}" 
-                                                        data-nis="{{ $student->nis ?? '' }}" 
-                                                        data-nisn="{{ $student->nisn ?? '' }}"
-                                                        data-student-id="{{ $student->student_id ?? '' }}"
-                                                        data-rfid="{{ $student->rfid_id ?? '' }}"
-                                                        data-class="{{ $student->schoolClass->name ?? '' }}">
-                                                    {{ $student->name }} ({{ $student->schoolClass->name ?? 'N/A' }})
+                                            <?php $__currentLoopData = $students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($student->id); ?>" 
+                                                        data-nis="<?php echo e($student->nis ?? ''); ?>" 
+                                                        data-nisn="<?php echo e($student->nisn ?? ''); ?>"
+                                                        data-student-id="<?php echo e($student->student_id ?? ''); ?>"
+                                                        data-rfid="<?php echo e($student->rfid_id ?? ''); ?>"
+                                                        data-class="<?php echo e($student->schoolClass->name ?? ''); ?>">
+                                                    <?php echo e($student->name); ?> (<?php echo e($student->schoolClass->name ?? 'N/A'); ?>)
                                                 </option>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                     </div>
                                     <button type="button" onclick="startScanner('student_select_merit')" class="shrink-0 bg-slate-800 text-white w-[52px] h-[52px] rounded-2xl hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center" title="Scan QR Code">
@@ -181,21 +190,21 @@
                                 </div>
                             </div>
                             
-                            {{-- JENIS PRESTASI --}}
+                            
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Jenis Kebaikan</label>
                                 <div class="relative">
                                     <select name="discipline_type_id" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 text-sm font-bold text-slate-700 py-3.5 pl-4 pr-10 appearance-none cursor-pointer">
                                         <option value="">-- Pilih Kategori --</option>
-                                        @foreach ($meritTypes as $type)
-                                            <option value="{{ $type->id }}">{{ $type->name }} (+{{ $type->point_value }} Poin)</option>
-                                        @endforeach
+                                        <?php $__currentLoopData = $meritTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($type->id); ?>"><?php echo e($type->name); ?> (+<?php echo e($type->point_value); ?> Poin)</option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </select>
                                     <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
                                 </div>
                             </div>
                             
-                            {{-- CATATAN --}}
+                            
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Detail Tambahan</label>
                                 <textarea name="notes" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 text-sm font-medium p-4" placeholder="Keterangan prestasi..."></textarea>
@@ -211,7 +220,7 @@
             </div>
 
             <!-- BAGIAN 3: RIWAYAT / LOG -->
-            @if(isset($historyRecords))
+            <?php if(isset($historyRecords)): ?>
             <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden mb-10">
                 <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col lg:flex-row justify-between items-center gap-4">
                     <div>
@@ -220,12 +229,12 @@
                     </div>
                 
                     <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-                        <form action="{{ route('discipline.index') }}" method="GET" class="flex flex-col sm:flex-row w-full gap-2">
-                            <input type="date" name="filter_date" value="{{ request('filter_date') }}" 
+                        <form action="<?php echo e(route('discipline.index')); ?>" method="GET" class="flex flex-col sm:flex-row w-full gap-2">
+                            <input type="date" name="filter_date" value="<?php echo e(request('filter_date')); ?>" 
                                 class="rounded-xl border-slate-200 text-sm py-2 px-3 text-slate-600 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto">
                             
                             <div class="relative w-full sm:w-auto">
-                                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama siswa..." 
+                                <input type="text" name="search" value="<?php echo e(request('search')); ?>" placeholder="Cari nama siswa..." 
                                     class="rounded-xl border-slate-200 text-sm py-2 pl-9 pr-3 text-slate-700 focus:ring-blue-500 focus:border-blue-500 w-full">
                                 <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
                             </div>
@@ -234,15 +243,15 @@
                                 Cari
                             </button>
                             
-                            @if(request('search') || request('filter_date'))
-                                <a href="{{ route('discipline.index') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-xl text-sm font-bold transition-colors flex items-center justify-center">
+                            <?php if(request('search') || request('filter_date')): ?>
+                                <a href="<?php echo e(route('discipline.index')); ?>" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-xl text-sm font-bold transition-colors flex items-center justify-center">
                                     Reset
                                 </a>
-                            @endif
+                            <?php endif; ?>
                         </form>
 
                         <div class="text-xs font-bold text-slate-500 bg-white px-3 py-2 rounded-xl border border-slate-200 shadow-sm whitespace-nowrap">
-                            {{ $historyRecords->total() }} Data
+                            <?php echo e($historyRecords->total()); ?> Data
                         </div>
                     </div>
                 </div>             
@@ -259,37 +268,38 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-50">
-                            @forelse ($historyRecords as $record)
-                                @php
+                            <?php $__empty_1 = true; $__currentLoopData = $historyRecords; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $record): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <?php
                                     $isViolation = optional($record->disciplineType)->type == 'Pelanggaran';
                                     $color = $isViolation ? 'rose' : 'emerald';
                                     $sign = $isViolation ? '-' : '+';
-                                @endphp
+                                ?>
                                 <tr class="hover:bg-slate-50 transition-colors">
                                     <td class="px-6 py-4">
-                                        <div class="text-sm font-bold text-slate-700">{{ $record->created_at->format('d/m H:i') }}</div>
-                                        <div class="text-[10px] font-bold text-slate-400">{{ $record->created_at->diffForHumans() }}</div>
+                                        <div class="text-sm font-bold text-slate-700"><?php echo e($record->created_at->format('d/m H:i')); ?></div>
+                                        <div class="text-[10px] font-bold text-slate-400"><?php echo e($record->created_at->diffForHumans()); ?></div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm font-bold text-slate-800">{{ $record->student->name }}</div>
-                                        <div class="text-xs text-slate-500 font-medium">{{ $record->student->schoolClass->name ?? '-' }}</div>
+                                        <div class="text-sm font-bold text-slate-800"><?php echo e($record->student->name); ?></div>
+                                        <div class="text-xs text-slate-500 font-medium"><?php echo e($record->student->schoolClass->name ?? '-'); ?></div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm font-bold text-slate-700">{{ $record->disciplineType->name ?? '-' }}</div>
-                                        @if($record->notes) 
-                                            <div class="text-xs text-slate-500 italic mt-0.5 truncate max-w-xs">"{{ $record->notes }}"</div> 
-                                        @endif
+                                        <div class="text-sm font-bold text-slate-700"><?php echo e($record->disciplineType->name ?? '-'); ?></div>
+                                        <?php if($record->notes): ?> 
+                                            <div class="text-xs text-slate-500 italic mt-0.5 truncate max-w-xs">"<?php echo e($record->notes); ?>"</div> 
+                                        <?php endif; ?>
                                     </td>
                                     <td class="px-6 py-4 text-center">
-                                        <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-black bg-{{ $color }}-100 text-{{ $color }}-700 border border-{{ $color }}-200 shadow-sm">
-                                            {{ $sign }}{{ $record->disciplineType->point_value ?? 0 }}
+                                        <span class="inline-flex px-2.5 py-1 rounded-lg text-xs font-black bg-<?php echo e($color); ?>-100 text-<?php echo e($color); ?>-700 border border-<?php echo e($color); ?>-200 shadow-sm">
+                                            <?php echo e($sign); ?><?php echo e($record->disciplineType->point_value ?? 0); ?>
+
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-right">
-                                        <span class="text-xs font-bold text-slate-500">{{ $record->recorder->name ?? 'Sistem' }}</span>
+                                        <span class="text-xs font-bold text-slate-500"><?php echo e($record->recorder->name ?? 'Sistem'); ?></span>
                                     </td>
                                     <td class="px-6 py-4 text-center">
-                                        <form action="{{ route('discipline.destroy', $record->id) }}" method="POST" 
+                                        <form action="<?php echo e(route('discipline.destroy', $record->id)); ?>" method="POST" 
                                             onsubmit="event.preventDefault(); 
                                                         const form = this;
                                                         Swal.fire({
@@ -311,15 +321,15 @@
                                                         }).then((result) => {
                                                             if (result.isConfirmed) form.submit();
                                                         });">
-                                            @csrf 
-                                            @method('DELETE')
+                                            <?php echo csrf_field(); ?> 
+                                            <?php echo method_field('DELETE'); ?>
                                             <button type="submit" class="text-slate-300 hover:text-rose-500 transition-colors p-2 rounded-lg hover:bg-rose-50" title="Hapus Riwayat">
                                                 <i class="ph-bold ph-trash text-lg"></i>
                                             </button>
                                         </form>
                                     </td>
                                 </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="6" class="px-6 py-12 text-center text-slate-400">
                                         <div class="flex flex-col items-center">
@@ -328,20 +338,21 @@
                                         </div>
                                     </td>
                                 </tr>
-                            @endforelse
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
                 <div class="p-6 border-t border-slate-50 bg-slate-50/30">
-                    {{ $historyRecords->links() }}
+                    <?php echo e($historyRecords->links()); ?>
+
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
 
             <!-- BAGIAN 4: STATISTIK & KLASEMEN -->
-            @if(isset($classSummaries) && isset($topViolators) && isset($topMerits))
+            <?php if(isset($classSummaries) && isset($topViolators) && isset($topMerits)): ?>
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                {{-- A. REKAP PER KELAS --}}
+                
                 <div class="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm xl:col-span-1">
                     <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                         <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wider flex items-center gap-2">
@@ -358,27 +369,27 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                @foreach ($classSummaries as $summary)
+                                <?php $__currentLoopData = $classSummaries; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $summary): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr class="hover:bg-slate-50 transition-colors">
-                                        <td class="px-4 py-3 font-bold text-slate-700 text-sm">{{ $summary->class_name }}</td>
+                                        <td class="px-4 py-3 font-bold text-slate-700 text-sm"><?php echo e($summary->class_name); ?></td>
                                         <td class="px-4 py-3 text-center">
-                                            @if($summary->total_violation > 0)
-                                                <span class="text-rose-600 text-xs font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100">-{{ $summary->total_violation }}</span>
-                                            @else <span class="text-slate-300 text-xs">-</span> @endif
+                                            <?php if($summary->total_violation > 0): ?>
+                                                <span class="text-rose-600 text-xs font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100">-<?php echo e($summary->total_violation); ?></span>
+                                            <?php else: ?> <span class="text-slate-300 text-xs">-</span> <?php endif; ?>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            @if($summary->total_merit > 0)
-                                                <span class="text-emerald-600 text-xs font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">+{{ $summary->total_merit }}</span>
-                                            @else <span class="text-slate-300 text-xs">-</span> @endif
+                                            <?php if($summary->total_merit > 0): ?>
+                                                <span class="text-emerald-600 text-xs font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">+<?php echo e($summary->total_merit); ?></span>
+                                            <?php else: ?> <span class="text-slate-300 text-xs">-</span> <?php endif; ?>
                                         </td>
                                     </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                {{-- B. TOP 10 PELANGGARAN --}}
+                
                 <div class="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm xl:col-span-1">
                     <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                         <h3 class="text-sm font-bold text-rose-600 uppercase tracking-wider flex items-center gap-2">
@@ -395,24 +406,24 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                @foreach ($topViolators as $index => $summary)
+                                <?php $__currentLoopData = $topViolators; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $summary): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr class="hover:bg-rose-50/30 transition-colors">
-                                        <td class="px-4 py-3 font-bold text-rose-300 text-sm">{{ $loop->iteration }}</td>
+                                        <td class="px-4 py-3 font-bold text-rose-300 text-sm"><?php echo e($loop->iteration); ?></td>
                                         <td class="px-4 py-3">
-                                            <span class="font-bold text-slate-700 block text-sm">{{ $summary->name }}</span>
-                                            <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $summary->class_name ?? $summary->class }}</span>
+                                            <span class="font-bold text-slate-700 block text-sm"><?php echo e($summary->name); ?></span>
+                                            <span class="text-[10px] text-slate-400 font-bold uppercase"><?php echo e($summary->class_name ?? $summary->class); ?></span>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <span class="text-rose-600 font-black text-sm">-{{ $summary->total_violation }}</span>
+                                            <span class="text-rose-600 font-black text-sm">-<?php echo e($summary->total_violation); ?></span>
                                         </td>
                                     </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                {{-- C. TOP 10 PRESTASI --}}
+                
                 <div class="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm xl:col-span-1">
                     <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                         <h3 class="text-sm font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-2">
@@ -429,29 +440,29 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                @foreach ($topMerits as $index => $summary)
+                                <?php $__currentLoopData = $topMerits; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $summary): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr class="hover:bg-emerald-50/30 transition-colors">
-                                        <td class="px-4 py-3 font-bold text-emerald-300 text-sm">{{ $loop->iteration }}</td>
+                                        <td class="px-4 py-3 font-bold text-emerald-300 text-sm"><?php echo e($loop->iteration); ?></td>
                                         <td class="px-4 py-3">
-                                            <span class="font-bold text-slate-700 block text-sm">{{ $summary->name }}</span>
-                                            <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $summary->class_name ?? $summary->class }}</span>
+                                            <span class="font-bold text-slate-700 block text-sm"><?php echo e($summary->name); ?></span>
+                                            <span class="text-[10px] text-slate-400 font-bold uppercase"><?php echo e($summary->class_name ?? $summary->class); ?></span>
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <span class="text-emerald-600 font-black text-sm">+{{ $summary->total_merit }}</span>
+                                            <span class="text-emerald-600 font-black text-sm">+<?php echo e($summary->total_merit); ?></span>
                                         </td>
                                     </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
 
         </div>
     </div>
 
-    {{-- MODAL SCANNER QR CODE --}}
+    
     <div id="qrModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-center justify-center min-h-screen p-4 text-center">
             <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" onclick="closeScanner()"></div>
@@ -483,7 +494,7 @@
         </div>
     </div>
 
-    {{-- SCRIPT SCANNER & LOGIC --}}
+    
     <script>
         let html5QrcodeScanner = null;
         let currentTargetInput = null;
@@ -674,4 +685,13 @@
             }
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/discipline/index.blade.php ENDPATH**/ ?>
