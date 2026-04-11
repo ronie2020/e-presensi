@@ -1,10 +1,10 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
     
-    {{-- KOLOM KIRI: SCORE CARD --}}
+    
     <div class="lg:col-span-1 space-y-6">
         
-        {{-- 1. Main Score Card --}}
-        @php 
+        
+        <?php 
             $score = $finalScore ?? 100;
             // Tentukan warna berdasarkan skor
             if($score >= 90) {
@@ -28,89 +28,66 @@
                 $icon = 'ph-warning-octagon';
                 $msg = 'Segera perbaiki sikap & perilaku!';
             }
-        @endphp
+        ?>
 
         <div class="bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden text-center">
-            {{-- Background Radial --}}
-            <div class="absolute inset-0 bg-gradient-to-b from-{{ $theme }}-50/50 to-transparent pointer-events-none"></div>
+            
+            <div class="absolute inset-0 bg-gradient-to-b from-<?php echo e($theme); ?>-50/50 to-transparent pointer-events-none"></div>
             
             <h3 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-6 relative z-10">Skor Perilaku</h3>
             
-            {{-- Circular Score Indicator --}}
+            
             <div class="relative w-48 h-48 mx-auto mb-6 flex items-center justify-center">
-                {{-- Outer Ring --}}
+                
                 <div class="absolute inset-0 rounded-full border-[12px] border-slate-50"></div>
-                {{-- Colored Ring --}}
+                
                 <svg class="absolute inset-0 w-full h-full -rotate-90 transform">
                     <circle cx="96" cy="96" r="84" stroke="currentColor" stroke-width="12" fill="transparent" 
-                        class="text-{{ $theme }}-500 transition-all duration-1000 ease-out" 
+                        class="text-<?php echo e($theme); ?>-500 transition-all duration-1000 ease-out" 
                         stroke-dasharray="527" 
-                        stroke-dashoffset="{{ 527 - (527 * $score / 100) }}"
+                        stroke-dashoffset="<?php echo e(527 - (527 * $score / 100)); ?>"
                         stroke-linecap="round">
                     </circle>
                 </svg>
                 
                 <div class="flex flex-col items-center relative z-10">
-                    <span class="text-6xl font-black text-slate-800 tracking-tighter">{{ $score }}</span>
-                    <span class="text-xs font-bold text-{{ $theme }}-600 bg-{{ $theme }}-100 px-2 py-0.5 rounded-md mt-1 border border-{{ $theme }}-200">
-                        {{ $label }}
+                    <span class="text-6xl font-black text-slate-800 tracking-tighter"><?php echo e($score); ?></span>
+                    <span class="text-xs font-bold text-<?php echo e($theme); ?>-600 bg-<?php echo e($theme); ?>-100 px-2 py-0.5 rounded-md mt-1 border border-<?php echo e($theme); ?>-200">
+                        <?php echo e($label); ?>
+
                     </span>
                 </div>
             </div>
 
             <p class="text-sm font-medium text-slate-500 relative z-10 px-4">
-                <i class="ph-fill {{ $icon }} text-{{ $theme }}-500 mr-1"></i> {{ $msg }}
+                <i class="ph-fill <?php echo e($icon); ?> text-<?php echo e($theme); ?>-500 mr-1"></i> <?php echo e($msg); ?>
+
             </p>
         </div>
 
-        {{-- 2. Program Pemulihan (AMNESTY TASKS - NEW) --}}
-        @if($score < 100)
-        <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
-            <h4 class="text-sm font-black text-slate-800 mb-4 flex items-center gap-2">
-                <i class="ph-fill ph-leaf text-emerald-500"></i> Program Pemulihan
-            </h4>
-            <div class="space-y-3">
-                @if(isset($amnestyTasks))
-                    @foreach($amnestyTasks as $task)
-                    <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between group hover:border-emerald-200 transition-all cursor-default">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-emerald-600 shadow-sm">
-                                <i class="{{ $task['icon'] }}"></i>
-                            </div>
-                            <span class="text-[10px] font-bold text-slate-600 leading-tight max-w-[120px]">{{ $task['title'] }}</span>
-                        </div>
-                        <span class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">-{{ $task['points'] }} Poin</span>
-                    </div>
-                    @endforeach
-                @endif
-            </div>
-            <p class="text-[9px] text-slate-400 mt-4 text-center italic">Hubungi Guru BK untuk mengambil tugas pemulihan.</p>
-        </div>
-        @endif
-
-        {{-- 3. Breakdown Points --}}
+        
         <div class="grid grid-cols-2 gap-3">
-            {{-- Pelanggaran --}}
+            
             <div class="bg-rose-50 p-4 rounded-3xl border border-rose-100 text-center group hover:bg-rose-100 transition-colors">
                 <div class="w-8 h-8 mx-auto bg-white rounded-full flex items-center justify-center text-rose-500 shadow-sm mb-2 group-hover:scale-110 transition-transform">
                     <i class="ph-bold ph-minus"></i>
                 </div>
-                <p class="text-2xl font-black text-rose-700">{{ $total_violation_points ?? 0 }}</p>
+                <p class="text-2xl font-black text-rose-700"><?php echo e($total_violation_points ?? 0); ?></p>
                 <p class="text-[10px] font-bold text-rose-400 uppercase tracking-wider">Minus</p>
             </div>
 
-            {{-- Kebaikan --}}
+            
             <div class="bg-emerald-50 p-4 rounded-3xl border border-emerald-100 text-center group hover:bg-emerald-100 transition-colors">
                 <div class="w-8 h-8 mx-auto bg-white rounded-full flex items-center justify-center text-emerald-500 shadow-sm mb-2 group-hover:scale-110 transition-transform">
                     <i class="ph-bold ph-plus"></i>
                 </div>
-                <p class="text-2xl font-black text-emerald-700">{{ $total_merit_points ?? 0 }}</p>
+                <p class="text-2xl font-black text-emerald-700"><?php echo e($total_merit_points ?? 0); ?></p>
                 <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Plus</p>
             </div>
         </div>
     </div>
 
-    {{-- KOLOM KANAN: RIWAYAT PELANGGARAN --}}
+    
     <div class="lg:col-span-2">
         <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-6 md:p-8 h-full">
             <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-50">
@@ -122,73 +99,83 @@
                 </h4>
                 <div class="bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
                     <span class="text-xs font-bold text-slate-500">
-                        {{ isset($violations) ? count($violations) : 0 }} Kasus
+                        <?php echo e(isset($violations) ? count($violations) : 0); ?> Kasus
                     </span>
                 </div>
             </div>
 
-            @if(isset($violations) && count($violations) > 0)
+            <?php if(isset($violations) && count($violations) > 0): ?>
                 <div class="space-y-4">
-                    @foreach($violations as $record)
-                        @php
+                    <?php $__currentLoopData = $violations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $record): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             // LOGIKA UNTUK MENANGANI DATA MANUAL VS OTOMATIS
+                            // 1. Poin: Ambil dari DisciplineType (manual) atau point_earned (otomatis)
                             $pointVal = $record->disciplineType->point_value ?? abs($record->point_earned ?? 0);
+                            
+                            // 2. Nama: Ambil dari DisciplineType (manual) atau activity_name (otomatis)
                             $title = $record->disciplineType->name ?? ($record->activity_name ?? 'Pelanggaran');
+
+                            // 3. Deskripsi: Ambil dari notes (manual) atau description (otomatis)
                             $desc = $record->notes ?? ($record->description ?? null);
+                            
+                            // 4. Tanggal
                             $date = \Carbon\Carbon::parse($record->date ?? $record->created_at);
-                        @endphp
+                        ?>
 
                         <div class="group relative bg-white border border-slate-100 rounded-2xl p-5 hover:shadow-md hover:border-rose-100 transition-all duration-300">
-                            {{-- Side Accent --}}
+                            
                             <div class="absolute left-0 top-4 bottom-4 w-1 bg-rose-500 rounded-r-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             
                             <div class="flex flex-col sm:flex-row justify-between gap-4">
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2 mb-1">
                                         <span class="bg-rose-50 text-rose-700 text-[10px] font-black px-2 py-0.5 rounded border border-rose-100 uppercase">
-                                            -{{ $pointVal }} Poin
+                                            -<?php echo e($pointVal); ?> Poin
                                         </span>
                                         <span class="text-xs text-slate-400 font-medium flex items-center gap-1">
                                             <i class="ph-bold ph-calendar-blank"></i>
-                                            {{ $date->translatedFormat('d F Y') }}
+                                            <?php echo e($date->translatedFormat('d F Y')); ?>
+
                                         </span>
-                                        @if(!$record->disciplineType)
+                                        <?php if(!$record->disciplineType): ?>
+                                            
                                             <span class="bg-slate-100 text-slate-500 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">
                                                 System
                                             </span>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                     
                                     <h4 class="font-bold text-slate-800 text-base group-hover:text-rose-600 transition-colors">
-                                        {{ $title }}
+                                        <?php echo e($title); ?>
+
                                     </h4>
                                     
-                                    @if($desc)
+                                    <?php if($desc): ?>
                                         <p class="text-sm text-slate-500 mt-2 bg-slate-50 p-3 rounded-xl border border-slate-100 italic leading-relaxed">
-                                            "{{ $desc }}"
+                                            "<?php echo e($desc); ?>"
                                         </p>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
 
-                                {{-- Recorder Info --}}
+                                
                                 <div class="sm:text-right flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-0 mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-0 border-slate-50">
                                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Pelapor</p>
                                     <div class="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">
-                                        @if(isset($record->recorder) && $record->recorder)
+                                        <?php if(isset($record->recorder) && $record->recorder): ?>
                                             <i class="ph-fill ph-user-circle text-slate-400"></i>
-                                            <span class="text-xs font-bold text-slate-600">{{ $record->recorder->name }}</span>
-                                        @else
+                                            <span class="text-xs font-bold text-slate-600"><?php echo e($record->recorder->name); ?></span>
+                                        <?php else: ?>
                                             <i class="ph-fill ph-robot text-blue-400"></i>
                                             <span class="text-xs font-bold text-slate-600">Sistem Otomatis</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
-            @else
-                {{-- Zero Violation State --}}
+            <?php else: ?>
+                
                 <div class="flex flex-col items-center justify-center py-16 text-center h-full">
                     <div class="w-32 h-32 bg-gradient-to-b from-emerald-50 to-white rounded-full flex items-center justify-center mb-6 shadow-sm border border-emerald-50 animate-bounce-subtle">
                         <i class="ph-duotone ph-shield-check text-6xl text-emerald-400"></i>
@@ -198,7 +185,7 @@
                         Tidak ada catatan pelanggaran hingga saat ini. Kamu adalah contoh siswa yang luar biasa. Pertahankan!
                     </p>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
-</div>
+</div><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/students/portal/partials/tab-disiplin.blade.php ENDPATH**/ ?>

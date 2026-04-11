@@ -160,14 +160,15 @@ class BkTeacherController extends Controller
         if (in_array($request->status, ['approved', 'finished']) && $session->student && $session->student->parent_wa_number) {
             $guru = Auth::user()->name;
             $message = "";
-            
+                         
             if ($request->status == 'approved') {
-                // Template jika dijadwalkan
                 $date = Carbon::parse($request->scheduled_at)->translatedFormat('l, d F Y H:i');
-                $message = "Halo *{$session->student->name}*,\n\nPengajuan konseling kamu telah *DISETUJUI*.\n\n👨‍🏫 Guru: {$guru}\n📅 Jadwal: {$date} WIB\n📍 Metode: {$session->method}\n💬 Pesan: _{$request->response_message}_\n\nSilakan datang tepat waktu ya. Terima kasih.";
+                $message = "Halo *{$session->student->name}*,\n\nPengajuan konseling kamu telah *DISETUJUI*.\n\n👨‍🏫 Guru: {$guru}\n📅 Jadwal: {$date} WIB\n📍 Lokasi: Ruang BK\n💬 Pesan: _{$request->response_message}_";
+            } elseif ($request->status == 'ongoing') {
+                // Notifikasi untuk memulai chat online
+                $message = "Halo *{$session->student->name}*,\n\nSaya telah menerima pengajuan konseling *Online* kamu. Mari kita berdiskusi melalui sistem atau chat WhatsApp sekarang.\n\n💬 Pesan Guru: _{$request->response_message}_";
             } elseif ($request->status == 'finished') {
-                // Template jika sekadar pemberitahuan/apresiasi tanpa jadwal
-                $message = "Pemberitahuan dari BK untuk *{$session->student->name}*:\n\n{$request->response_message}\n\n👨‍🏫 Salam hangat, {$guru} (Guru BK)";
+                $message = "Pemberitahuan dari BK untuk *{$session->student->name}*:\n\n{$request->response_message}\n\n👨‍🏫 Sesi konseling telah dinyatakan Selesai.";
             }
 
             try {
@@ -219,5 +220,31 @@ class BkTeacherController extends Controller
         $session->update(['status' => 'finished']);
 
         return redirect()->route('admin.bk.index')->with('success', 'Jurnal konseling berhasil disimpan.');
+    }
+
+    /**
+     * API Chat BK (Logika Mirip Liaison Book)
+     */
+    public function getMessages($id)
+    {
+        $messages = BkChat::where('bk_session_id', $id)
+            ->oldest()
+            ->get();
+            
+        return response()->json($messages);
+    }
+
+    public function sendMessage(Request $request, $id)
+    {
+        $request->validate(['message' => 'required|string']);
+
+        $chat = BkChat::create([
+            'bk_session_id' => $id,
+            'user_id' => Auth::id(), // Guru yang login
+            'message' => $request->message,
+            'sender_type' => 'teacher'
+        ]);
+
+        return response()->json($chat);
     }
 }

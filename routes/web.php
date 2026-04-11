@@ -185,7 +185,11 @@ Route::middleware(['auth:student'])->group(function () {
      Route::post('/portal/literacy', [StudentPortalController::class, 'storeLiteracy'])
         ->name('portal.literacy.store');
 
-     //---- 6. SISTEM RAMADHAN SISWA ---
+    // -- 6. ROUTE FEEDBACK & RATING BK
+    Route::post('/student/portal/bk-feedback/{id}', [StudentPortalController::class, 'storeBkFeedback'])
+        ->name('student.portal.bk_feedback');
+
+     //---- 7. SISTEM RAMADHAN SISWA ---
     Route::prefix('student/ramadan')->name('student.ramadan.')->group(function() {
         Route::get('/tracker', [RamadanLogController::class, 'studentIndex'])->name('index');
         Route::post('/save', [RamadanLogController::class, 'store'])->name('save');
@@ -193,7 +197,7 @@ Route::middleware(['auth:student'])->group(function () {
     Route::get('/ramadan/leaderboard', [RamadanLogController::class, 'leaderboard'])->name('leaderboard');
     Route::get('/ramadan/leaderboard-alias', [RamadanLogController::class, 'leaderboard'])->name('ramadan.leaderboard');
     
-    // --- 7. LAYANAN E-COUNSELING (BK) UNTUK SISWA ---
+    // --- 8. LAYANAN E-COUNSELING (BK) UNTUK SISWA ---
     Route::prefix('student/bk')->name('student.bk.')->group(function() {
         Route::get('/', [BkStudentController::class, 'index'])->name('index'); 
         Route::get('/konsultasi', [BkStudentController::class, 'create'])->name('create'); 
@@ -201,7 +205,7 @@ Route::middleware(['auth:student'])->group(function () {
         Route::get('/{id}', [BkStudentController::class, 'show'])->name('show'); 
     });
 
-    // --- 8. LAPOR PRESTASI MANDIRI ---
+    // --- 9. LAPOR PRESTASI MANDIRI ---
     Route::post('/student/achievements', [StudentPortalController::class, 'storeStudentAchievement'])->name('student.achievements.store');
 });
 

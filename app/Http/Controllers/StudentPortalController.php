@@ -91,11 +91,11 @@ class StudentPortalController extends Controller
         }
 
         // ========================================================
-        // 🚀 SAFETY NET: TRIGGER SISTEM E-COUNSELING OTOMATIS
-        // Mengecek ambang batas poin setiap kali portal dibuka agar 
-        // tiket tetap tercipta jika ada poin masuk dari database manual
+        // 🚀 SAFETY NET: TRIGGER SISTEM E-COUNSELING OTOMATIS        
         // ========================================================
-        $student->checkBkThresholds();
+        if (method_exists($student, 'checkBkThresholds')) {
+            $student->checkBkThresholds();
+        }
         
         $isAlumni = $student->status === 'graduated';
         $classId = $student->class_id ?? $student->school_class_id ?? optional($student->schoolClass)->id;
@@ -345,6 +345,35 @@ class StudentPortalController extends Controller
         $total_merit_points = $manualMerits->sum(fn($a) => $a->point ?? $a->disciplineType->point_value ?? 0) + $prayerAchievements->sum(fn($a) => $a->point ?? 0);
         $finalScore = 100 - $total_violation_points + $total_merit_points;
 
+         // ==========================================
+        //  4. FITUR BARU: ALERT PRIORITAS & AMNESTI
+        // ==========================================
+        $priorityAlerts = collect([]);
+        if (class_exists(BkSession::class)) {
+            $upcomingBk = BkSession::where('student_id', $id)->where('status', 'approved')
+                ->whereBetween('scheduled_at', [Carbon::now(), Carbon::now()->addHours(24)])->first();
+            if ($upcomingBk) {
+                $priorityAlerts->push([
+                    'type' => 'bk_schedule', 'title' => 'Jadwal BK Mendatang', 'color' => 'blue', 'icon' => 'ph-fill ph-clock-countdown',
+                    'message' => 'Kamu memiliki jadwal konseling pada ' . Carbon::parse($upcomingBk->scheduled_at)->translatedFormat('H:i') . ' WIB.'
+                ]);
+            }
+        }
+        if ($finalScore < 60) {
+            $priorityAlerts->push([
+                'type' => 'character_warning', 'title' => 'Skor Perilaku Kritis', 'color' => 'rose', 'icon' => 'ph-fill ph-warning-octagon',
+                'message' => 'Skor karakter kamu berada di zona merah (' . $finalScore . '). Segera lakukan tindakan pemulihan poin.'
+            ]);
+        }
+
+        $amnestyTasks = [
+            ['title' => 'Membantu Inventaris Perpustakaan', 'points' => 10, 'icon' => 'ph-book-open'],
+            ['title' => 'Piket Kebersihan Masjid Sekolah', 'points' => 15, 'icon' => 'ph-mosque'],
+            ['title' => 'Membantu Administrasi Tata Usaha', 'points' => 10, 'icon' => 'ph-files'],
+            ['title' => 'Partisipasi Penanaman Pohon Sekolah', 'points' => 20, 'icon' => 'ph-leaf'],
+        ];
+
+
         // --- JURNAL 7 KEBIASAAN ---
         $todayEntry = null; $habits = collect([]); 
         $totalPoints = 0;
@@ -569,6 +598,35 @@ class StudentPortalController extends Controller
         return view('portal.show', $data);
     }
 
+     /**
+     * FITUR BARU: Menyimpan Rating & Feedback Sesi BK dari Siswa.
+     */
+    public function storeBkFeedback(Request $request, $id)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'feedback' => 'nullable|string|max:500',
+        ]);
+
+        $session = BkSession::where('student_id', Auth::guard('student')->id())->findOrFail($id);
+
+        if ($session->status !== 'finished') {
+            return back()->with('error', 'Penilaian hanya dapat diberikan untuk sesi yang telah Selesai.');
+        }
+
+        if ($session->rating) {
+            return back()->with('error', 'Kamu sudah memberikan penilaian untuk sesi ini.');
+        }
+
+        $session->update([
+            'rating' => $request->rating,
+            'student_feedback' => $request->feedback,
+            'feedback_at' => now(),
+        ]);
+
+        return back()->with('success', 'Terima kasih! Ulasanmu membantu kami meningkatkan kualitas layanan bimbingan sekolah.');
+    }
+    
     public function storeLiteracy(Request $request)
     {
         $request->validate([
