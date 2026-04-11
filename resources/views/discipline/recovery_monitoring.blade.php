@@ -17,13 +17,13 @@
                     <form action="{{ route('recovery.trigger_decay') }}" method="POST" onsubmit="return confirm('Jalankan pengecekan point decay otomatis sekarang?');">
                         @csrf
                         <button type="submit" class="px-5 py-2.5 bg-blue-600 rounded-2xl text-white font-bold hover:bg-blue-700 transition-all flex items-center gap-2 shadow-lg shadow-blue-200">
-                            <i class="ph-bold ph-robot"></i> Simulasi Decay
+                            <i class="ph-bold ph-robot"></i> Cek Poin Kebaikan 
                         </button>
                     </form>
 
                     {{-- TOMBOL INPUT TUGAS POSITIF (MANUAL) --}}
                     <button onclick="document.getElementById('modalAmnesti').classList.remove('hidden')" class="px-5 py-2.5 bg-emerald-600 rounded-2xl text-white font-bold hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-200">
-                        <i class="ph-bold ph-plus-circle"></i> Input Tugas Positif
+                        <i class="ph-bold ph-plus-circle"></i> Input Manual Tugas Positif
                     </button>
                     
                     <a href="{{ route('discipline.index') }}" class="px-5 py-2.5 bg-white border border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-slate-50 transition-all flex items-center gap-2">

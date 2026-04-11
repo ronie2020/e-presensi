@@ -250,7 +250,7 @@
                         <p>Menyetujui,</p>
                         <p>Kepala Sekolah</p>
                         <div class="ttd-space"></div>
-                        <p style="font-weight: bold; text-decoration: underline;">TANTAN SUTANDI NUGRAHA, S.Pd., M.Pd</p>
+                        <p style="font-weight: bold; text-decoration: underline;">TANTAN SUTANDI N., S.Pd., M.Pd</p>
                         <p>NIP. 19820928 201101 1 002</p>
                     </div>
 
