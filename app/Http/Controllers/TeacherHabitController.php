@@ -36,18 +36,25 @@ class TeacherHabitController extends Controller
         if ($classId) {
             // === KONDISI A: JIKA KELAS DIPILIH (Statistik Per Kelas) ===
             
-            $students = Student::where('class_id', $classId)
-                ->orderBy('name')
-                ->get()
-                ->map(function ($student) use ($date) {
-                    $habit = StudentHabit::where('student_id', $student->id)
-                                ->whereDate('report_date', $date) 
-                                ->first();
-                    
-                    $student->habit_status = $habit ? 'submitted' : 'missing';
-                    $student->habit_data = $habit; 
-                    return $student;
-                });
+            // Mengambil data siswa
+            $students = Student::where('class_id', $classId)->orderBy('name')->get();
+            
+            // [OPTIMASI N+1 QUERY]: Ambil semua habit untuk siswa di kelas ini dalam 1 kali query
+            $studentIds = $students->pluck('id');
+            $habits = StudentHabit::whereIn('student_id', $studentIds)
+                        ->whereDate('report_date', $date)
+                        ->get()
+                        ->keyBy('student_id'); // Jadikan student_id sebagai key array agar mudah dicari
+
+            // Gabungkan data habit ke masing-masing siswa
+            $students->map(function ($student) use ($habits) {
+                // Cek apakah ada data habit berdasarkan ID siswa
+                $habit = $habits->get($student->id); 
+                
+                $student->habit_status = $habit ? 'submitted' : 'missing';
+                $student->habit_data = $habit; 
+                return $student;
+            });
 
             // Hitung Statistik Kelas
             $totalStudents = $students->count();
@@ -60,21 +67,16 @@ class TeacherHabitController extends Controller
         } else {
             // === KONDISI B: JIKA BELUM PILIH KELAS (Statistik Global) ===
             
-            // 1. Hitung Statistik Global (Satu Sekolah)
-            // FIX: Hanya hitung siswa yang punya kelas (Siswa Aktif)
-            // Sebelumnya: Student::count(); -> Ini menghitung alumni juga
             $totalStudentsAll = Student::whereHas('schoolClass')->count();
 
-            // Hitung jumlah laporan unik hari ini (Hanya dari siswa aktif)
             $submittedAll = StudentHabit::whereDate('report_date', $date)
-                                ->whereHas('student.schoolClass') // Safety: Pastikan siswa masih aktif
+                                ->whereHas('student.schoolClass') 
                                 ->count();
 
             $stats['submitted'] = $submittedAll;
             $stats['missing'] = max(0, $totalStudentsAll - $submittedAll);
             $stats['percentage'] = $totalStudentsAll > 0 ? round(($submittedAll / $totalStudentsAll) * 100) : 0;
 
-            // TAMBAHAN: Hitung jumlah Antrean Penilaian untuk notifikasi angka merah
             $stats['pending_feedback'] = StudentHabit::whereHas('student.schoolClass')
                                             ->whereDate('report_date', $date)
                                             ->whereNull('teacher_feedback')
@@ -87,18 +89,15 @@ class TeacherHabitController extends Controller
                 ->whereHas('student.schoolClass') 
                 ->whereDate('report_date', $date);
 
-            // Terapkan Filter Berdasarkan Tab yang Dipilih
             if ($statusFilter === 'pending') {
                 $query->whereNull('teacher_feedback');
             } elseif ($statusFilter === 'graded') {
                 $query->whereNotNull('teacher_feedback');
             }
 
-            // Ganti limit(10)->get() menjadi paginate(12)
             $latestSubmissions = $query->orderBy('updated_at', 'desc')->paginate(12)->withQueryString();
         }
         
-        // Kirim semua variabel ke view
         return view('habits.teacher_index', compact('classes', 'students', 'date', 'classId', 'stats', 'latestSubmissions'));
     }
 
@@ -124,7 +123,6 @@ class TeacherHabitController extends Controller
             'validated_at' => now()
         ]);
 
-        // === TAMBAHAN FIX UNTUK AJAX ===
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
@@ -132,9 +130,9 @@ class TeacherHabitController extends Controller
             ], 200);
         }
 
-        // Fallback jika tidak menggunakan AJAX
         return back()->with('success', 'Feedback berhasil dikirim.');
     }
+
     /**
      * Cetak Laporan PDF/Print
      */
@@ -149,21 +147,39 @@ class TeacherHabitController extends Controller
 
         $class = SchoolClass::findOrFail($classId);
         
-        $students = Student::where('class_id', $classId)
-            ->orderBy('name', 'asc')
-            ->get()
-            ->each(function($student) use ($date) {
-                $student->habit_data = StudentHabit::where('student_id', $student->id)
+        // Mengambil data siswa
+        $students = Student::where('class_id', $classId)->orderBy('name', 'asc')->get();
+        
+        // [OPTIMASI N+1 QUERY UNTUK HALAMAN CETAK]
+        $studentIds = $students->pluck('id');
+        $habits = StudentHabit::whereIn('student_id', $studentIds)
                     ->whereDate('report_date', $date)
-                    ->first();
-            });
+                    ->get()
+                    ->keyBy('student_id');
+
+        // Gabungkan data
+        $students->each(function($student) use ($habits) {
+            $student->habit_data = $habits->get($student->id);
+        });
 
         return view('habits.print', compact('students', 'date', 'class'));
     }
 
+    /**
+     * Papan Peringkat Siswa Terajin
+     */
     public function leaderboard()
     {
-        // Sesuaikan view dengan nama file yang Anda simpan, misal 'habits.teacher_leaderboard'
-        return view('habits.teacher_leaderboard'); 
+        // [PERBAIKAN MVC]: Memindahkan Query dari file Blade ke Controller
+        $leaderboard = StudentHabit::with(['student', 'student.schoolClass'])
+            ->selectRaw('student_id, count(*) as total_days')
+            ->whereMonth('report_date', Carbon::now()->month)
+            ->whereYear('report_date', Carbon::now()->year)
+            ->groupBy('student_id')
+            ->orderByDesc('total_days')
+            ->take(50) 
+            ->get();
+
+        return view('habits.teacher_leaderboard', compact('leaderboard')); 
     }
 }

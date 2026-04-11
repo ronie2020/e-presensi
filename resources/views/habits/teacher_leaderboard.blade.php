@@ -5,18 +5,18 @@
         .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); }
     </style>
 
-    @php
+    // @php
         // LOGIKA QUERY MENGAMBIL DATA SISWA PALING RAJIN
         // Menghitung berapa hari (total_days) siswa mengisi jurnal di bulan ini
-        $leaderboard = \App\Models\StudentHabit::with(['student', 'student.schoolClass'])
-            ->selectRaw('student_id, count(*) as total_days')
-            ->whereMonth('report_date', \Carbon\Carbon::now()->month)
-            ->whereYear('report_date', \Carbon\Carbon::now()->year)
-            ->groupBy('student_id')
-            ->orderByDesc('total_days')
-            ->take(50) // Ambil Top 50 besar
-            ->get();
-    @endphp
+        //$leaderboard = \App\Models\StudentHabit::with(['student', 'student.schoolClass'])
+        //    ->selectRaw('student_id, count(*) as total_days')
+         //   ->whereMonth('report_date', \Carbon\Carbon::now()->month)
+         //  ->whereYear('report_date', \Carbon\Carbon::now()->year)
+          //  ->groupBy('student_id')
+          //  ->orderByDesc('total_days')
+           // ->take(50) // Ambil Top 50 besar
+          //  ->get();
+   // @endphp
 
     <div class="min-h-screen bg-slate-50 font-jakarta p-4 md:p-8 pb-20">
         
