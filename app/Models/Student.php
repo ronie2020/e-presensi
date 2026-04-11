@@ -255,69 +255,96 @@ class Student extends Authenticatable
         return ['prefix' => $yearShort, 'sequence' => $sequence];
     }
 
+    public function getCleanViolationPoints()
+    {
+        $records = $this->disciplineRecords()->with('disciplineType')->get();
+        
+        // 1. Hitung Pelanggaran Manual
+        $manualMinus = $records->where('disciplineType.type', 'Pelanggaran')->sum('disciplineType.point_value');
+        
+        // 2. Hitung Pelanggaran Otomatis (Absensi)
+        $attendances = AttendanceSiswa::where('student_id', $this->id)->get();
+        $alfaCount = $attendances->whereIn('status', ['Alfa', 'Alpa', 'alpha', 'alfa', 'Tanpa Keterangan'])->count();
+        $lateCount = $attendances->whereIn('status', ['Terlambat', 'terlambat'])->count();
+        $autoMinus = ($alfaCount * 10) + ($lateCount * 5);
+
+        // 3. Hitung Poin Pemulihan (Amnesti / Tugas Positif)
+        // Kita mencari record kategori "Kebaikan" yang namanya mengandung "Amnesti" atau "Pemutihan"
+        $amnestyPoints = $records->filter(function($r) {
+            $name = strtolower($r->disciplineType->name ?? '');
+            return $r->disciplineType->type === 'Kebaikan' && 
+                   (str_contains($name, 'amnesti') || str_contains($name, 'pemutihan') || str_contains($name, 'decay'));
+        })->sum('disciplineType.point_value');
+
+        return max(0, ($manualMinus + $autoMinus) - $amnestyPoints);
+    }
+
     /**
      * ====================================================================
      * FUNGSI GLOBAL: Cek Ambang Batas Poin untuk E-Counseling (BP/BK)
-     * Fungsi ini akan dipanggil dari Controller mana pun yang mengubah Poin!
+     * Menggabungkan Poin Manual, Absensi Otomatis, dan Fitur Pemulihan.
      * ====================================================================
      */
     public function checkBkThresholds()
     {
         $id = $this->id;
+        $thisMonth = now()->month;
+        $thisYear = now()->year;
 
-        // 1. Hitung Poin Manual
-        $manualMinus = 0; $manualPlus = 0;
-        if (class_exists(DisciplineRecord::class)) {
-            $records = DisciplineRecord::where('student_id', $id)->with('disciplineType')->get();
-            $manualMinus = $records->where('disciplineType.type', 'Pelanggaran')->sum('disciplineType.point_value');
-            $manualPlus = $records->where('disciplineType.type', 'Kebaikan')->sum('disciplineType.point_value');
-        }
+        // 1. AMBIL DATA REKAM DISIPLIN (MANUAL)
+        $records = DisciplineRecord::where('student_id', $id)->with('disciplineType')->get();
+        $manualMinus = $records->where('disciplineType.type', 'Pelanggaran')->sum('disciplineType.point_value');
+        $manualPlus = $records->where('disciplineType.type', 'Kebaikan')->sum('disciplineType.point_value');
 
-        // 2. Hitung Poin Otomatis
+        // 2. HITUNG POIN OTOMATIS (ABSENSI & KEAGAMAAN)
         $alfaCount = 0; $lateCount = 0; $prayerCount = 0;
         if (class_exists(AttendanceSiswa::class)) {
             $attendances = AttendanceSiswa::where('student_id', $id)->get();
             $alfaCount = $attendances->whereIn('status', ['Alfa', 'Alpa', 'alpha', 'alfa', 'Tanpa Keterangan'])->count();
             $lateCount = $attendances->whereIn('status', ['Terlambat', 'terlambat'])->count();
+            
+            // Logika baru dari Anda: Shalat Dhuha/Dhuhur sebagai poin prestasi
             $prayerCount = $attendances->filter(function($att) {
                 $act = strtolower($att->activity ?? '');
                 return strtolower($att->type ?? '') === 'keagamaan' && (str_contains($act, 'dhuha') || str_contains($act, 'dhuhur'));
             })->count();
         }
 
-        $totalMinus = $manualMinus + ($alfaCount * 10) + ($lateCount * 5);
+        // 3. HITUNG POIN PEMULIHAN / AMNESTI (DEDUCTION POIN MINUS)
+        $recoveryPoints = $records->filter(function($r) {
+            $name = strtolower($r->disciplineType->name ?? '');
+            return str_contains($name, 'pemutihan') || str_contains($name, 'amnesti') || str_contains($name, 'bonus');
+        })->sum('disciplineType.point_value');
+
+        // 4. KALKULASI TOTAL AKHIR
+        $grossMinus = $manualMinus + ($alfaCount * 10) + ($lateCount * 5);
+        $totalMinusClean = max(0, $grossMinus - $recoveryPoints); // Poin minus bersih setelah amnesti
         $totalPlus = $manualPlus + ($prayerCount * 5);
 
-        // --- LOGIKA BULAN INI ---
-        $thisMonth = now()->month;
-        $thisYear = now()->year;
-
-        // A. CEK PELANGGARAN (>= 200)
-        if ($totalMinus >= 200) {
-            // PERBAIKAN: Cek apakah sudah ada tiket bulan ini (apapun statusnya)
-            $existingTicket = BkSession::where('student_id', $id)
+        // 5. LOGIKA TRIGGER TIKET BK A: PELANGGARAN (>= 200)
+        if ($totalMinusClean >= 200) {
+            $existingViolationTicket = BkSession::where('student_id', $id)
                 ->where('is_system_generated', true)
                 ->where('initial_message', 'like', '%PELANGGARAN%')
                 ->whereMonth('created_at', $thisMonth)
                 ->whereYear('created_at', $thisYear)
                 ->exists();
 
-            if (!$existingTicket) {
+            if (!$existingViolationTicket) {
                 $kategoriId = BkCategory::where('name', 'like', '%Disiplin%')->first()->id ?? 1;
                 BkSession::create([
                     'student_id' => $id,
                     'bk_category_id' => $kategoriId,
-                    'initial_message' => "[SISTEM OTOMATIS: PELANGGARAN BERAT]\nSistem mendeteksi siswa ini telah mencapai ambang batas pelanggaran sekolah (Total Akumulasi: {$totalMinus} Poin). Mohon segera dilakukan pemanggilan.",
-                    'method' => 'offline',
+                    'initial_message' => "[SISTEM: PELANGGARAN BERAT]\nAkumulasi poin bersih siswa: {$totalMinusClean}. (Total Minus: {$grossMinus}, Amnesti: {$recoveryPoints}). Mohon pembinaan.",
                     'status' => 'pending',
+                    'method' => 'offline',
                     'is_system_generated' => true,
                 ]);
             }
         }
 
-        // B. CEK PRESTASI (>= 100)
+        // 6. LOGIKA TRIGGER TIKET BK B: APRESIASI PRESTASI (>= 100)
         if ($totalPlus >= 100) {
-            // PERBAIKAN: Cek apakah sudah ada tiket bulan ini (apapun statusnya)
             $existingMeritTicket = BkSession::where('student_id', $id)
                 ->where('is_system_generated', true)
                 ->where('initial_message', 'like', '%PRESTASI%')
@@ -330,9 +357,9 @@ class Student extends Authenticatable
                 BkSession::create([
                     'student_id' => $id,
                     'bk_category_id' => $kategoriId,
-                    'initial_message' => "[SISTEM OTOMATIS: APRESIASI PRESTASI]\nSistem mendeteksi siswa ini memiliki rekam jejak sangat baik (Total Akumulasi: +{$totalPlus} Poin Kebaikan).",
-                    'method' => 'offline',
+                    'initial_message' => "[SISTEM: APRESIASI PRESTASI]\nSiswa memiliki rekam jejak sangat baik dengan akumulasi +{$totalPlus} poin kebaikan (Termasuk poin shalat berjamaah).",
                     'status' => 'pending',
+                    'method' => 'offline',
                     'is_system_generated' => true,
                 ]);
             }

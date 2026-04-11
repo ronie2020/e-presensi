@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan BK - <?php echo e(\Carbon\Carbon::now()->format('d-m-Y')); ?></title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        /* PENGATURAN KERTAS F4 (Folio) - Landscape untuk Tabel Lebar */
+        @page { 
+            size: 33cm 21.5cm; 
+            margin: 0; 
+        }
+        
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 11pt;
+            background-color: #f1f5f9; /* Slate-100 */
+            -webkit-print-color-adjust: exact;
+        }
+
+        /* TAMPILAN KERTAS DI LAYAR */
+        .sheet {
+            background: white;
+            width: 33cm;
+            min-height: 21.5cm;
+            margin: 30px auto;
+            padding: 1.5cm 2cm;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            position: relative;
+            page-break-after: always; 
+        }
+        
+        /* MODE PRINT */
+        @media print {
+            body { background: none; margin: 0; }
+            .sheet { width: 100%; margin: 0; padding: 1cm 1.5cm; box-shadow: none; border: none; page-break-after: always; }
+            .sheet:last-child { page-break-after: auto; }
+            .no-print { display: none !important; }
+        }
+
+        /* TYPOGRAPHY SURAT */
+        .header-text h3 { margin: 0; font-size: 14pt; font-weight: bold; text-transform: uppercase; }
+        .header-text h4 { margin: 0; font-size: 12pt; font-weight: bold; text-transform: uppercase; }
+        .header-text p { margin: 0; font-size: 10pt; }
+        
+        .double-line { border-top: 4px double #000; margin-top: 8px; margin-bottom: 20px; }
+        
+        .judul-surat { text-align: center; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; }
+        .judul-surat h2 { margin: 0; text-decoration: underline; font-size: 13pt; }
+        .judul-surat p { margin: 0; font-size: 11pt; font-weight: normal; text-transform: none; }
+
+        /* TABEL DATA UTAMA */
+        table.data { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10pt; }
+        table.data th, table.data td { border: 1px solid black; padding: 8px 5px; vertical-align: top; }
+        table.data th { background-color: #f2f2f2 !important; font-weight: bold; text-align: center; text-transform: uppercase; }
+        
+        .text-center { text-align: center; }
+        .text-italic { font-style: italic; }
+        
+        /* FOOTER TTD */
+        .footer-section { margin-top: 30px; width: 100%; }
+        .ttd-container { display: flex; justify-content: space-between; margin-top: 20px; }
+        .ttd-box { width: 40%; text-align: center; }
+        
+        .clear { clear: both; }
+    </style>
+</head>
+<body>
+
+    <!-- TOOLBAR (Floating) -->
+    <div class="no-print fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm p-4 flex justify-between items-center z-50">
+        <div class="flex items-center gap-4">
+            <div class="bg-blue-900 p-2.5 rounded-xl text-white shadow-lg shadow-blue-900/20">
+                <i class="ph-bold ph-printer text-xl"></i>
+            </div>
+            <div>
+                <h1 class="font-black text-slate-800 text-sm md:text-base font-sans">Pratinjau Laporan Konseling</h1>
+                <p class="text-xs text-slate-500 font-sans font-bold">Format: Kedinasan (Folio Landscape)</p>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="window.close()" class="px-5 py-2.5 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition shadow-sm font-sans flex items-center gap-2">
+                <i class="ph-bold ph-x"></i> Tutup
+            </button>
+            <button onclick="window.print()" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-900 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/30 font-sans flex items-center gap-2">
+                <i class="ph-bold ph-printer"></i> Cetak Laporan
+            </button>
+        </div>
+    </div>
+    <div class="no-print h-24"></div>
+
+    <!-- HALAMAN REKAPITULASI -->
+    <div class="sheet">
+         <!-- KOP SURAT (Sesuai Konsep SPPD) -->
+        <div class="relative py-2 flex items-center justify-center">
+            <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo Daerah" class="absolute left-0 top-1 w-16 h-auto object-contain" onerror="this.style.display='none'"> 
+            <div class="text-center header-text">
+                <h3>PEMERINTAH KABUPATEN CIAMIS</h3>
+                <h3>DINAS PENDIDIKAN</h3>
+                <h4>SMP NEGERI 3 LAKBOK</h4>
+                <p>Jalan Mekarjaya No. 199 Sidaharja Kecamatan Lakbok Kabupaten Ciamis</p>
+            </div>
+            <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo Sekolah" class="absolute right-0 top-1 w-20 h-auto object-contain" onerror="this.style.display='none'">
+        </div>
+        <div class="double-line"></div>
+
+        <div class="judul-surat">
+            <h2>REKAPITULASI DATA BIMBINGAN KONSELING (BK)</h2>
+            <p>Periode Laporan: <?php echo e(\Carbon\Carbon::now()->translatedFormat('F Y')); ?></p>
+        </div>
+
+        <!-- INFO FILTER -->
+        <div class="mb-4 grid grid-cols-2 text-xs font-bold uppercase">
+            <div>
+                <p>Status: <?php echo e(request('status') ? ucfirst(request('status')) : 'SEMUA STATUS'); ?></p>
+                <p>Tipe: <?php echo e(request('type') ? ucfirst(request('type')) : 'SEMUA TIPE'); ?></p>
+            </div>
+            <div class="text-right">
+                <p>Tanggal Cetak: <?php echo e(\Carbon\Carbon::now()->translatedFormat('d F Y, H:i')); ?> WIB</p>
+                <p>Total Data: <?php echo e($sessions->count()); ?> Laporan</p>
+            </div>
+        </div>
+
+        <table class="data">
+            <thead>
+                <tr>
+                    <th style="width: 30px;">No</th>
+                    <th style="width: 150px;">Nama Siswa</th>
+                    <th style="width: 80px;">Kelas</th>
+                    <th style="width: 120px;">Kategori</th>
+                    <th>Pesan / Permasalahan</th>
+                    <th style="width: 100px;">Metode</th>
+                    <th style="width: 100px;">Status</th>
+                    <th style="width: 100px;">Tgl Lapor</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php $__empty_1 = true; $__currentLoopData = $sessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <tr>
+                    <td class="text-center"><?php echo e($index + 1); ?></td>
+                    <td style="text-transform: uppercase; font-weight: bold;"><?php echo e($session->student->name ?? 'Data Terhapus'); ?></td>
+                    <td class="text-center"><?php echo e($session->student->schoolClass->name ?? '-'); ?></td>
+                    <td class="text-center"><?php echo e($session->category->name ?? 'Umum'); ?></td>
+                    <td class="text-italic">
+                        <?php if($session->is_system_generated): ?>
+                            <strong>[SISTEM]</strong> 
+                        <?php endif; ?>
+                        "<?php echo e($session->initial_message); ?>"
+                    </td>
+                    <td class="text-center"><?php echo e($session->method == 'online' ? 'Online' : 'Tatap Muka'); ?></td>
+                    <td class="text-center" style="font-weight: bold; text-transform: uppercase; font-size: 9pt;">
+                        <?php echo e($session->status == 'approved' ? 'Terjadwal' : $session->status); ?>
+
+                    </td>
+                    <td class="text-center"><?php echo e($session->created_at->format('d/m/Y')); ?></td>
+                </tr>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                <tr>
+                    <td colspan="8" class="text-center" style="padding: 30px;">Tidak ada data yang tersedia untuk laporan ini.</td>
+                </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+
+        <!-- BAGIAN TANDA TANGAN (Sesuai Konsep SPPD) -->
+        <div class="footer-section">
+            <div class="ttd-container">
+                <div class="ttd-box">
+                    <p>Mengetahui,</p>
+                    <p class="mb-16">Kepala Sekolah</p>
+                    <p style="font-weight: bold; text-decoration: underline;">TANTAN SUTANDI NUGRAHA, S.Pd., M.Pd</p>
+                    <p>NIP. 19820928 201101 1 002</p>
+                </div>
+                <div class="ttd-box">
+                    <p>Lakbok, <?php echo e(\Carbon\Carbon::now()->translatedFormat('d F Y')); ?></p>
+                    <p class="mb-16">Guru Bimbingan Konseling</p>
+                    <p style="font-weight: bold; text-decoration: underline;"><?php echo e(auth()->user()->name ?? '( ........................................... )'); ?></p>
+                    <p>NIP. .....................................</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views\admin\bk\print.blade.php ENDPATH**/ ?>

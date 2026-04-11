@@ -210,6 +210,13 @@ return [
                 'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas']
             ],
             [
+                'name' => 'Pemulihan Poin (Amnesti)',
+                'route' => 'recovery.index',
+                'active_check' => 'recovery.*',
+                'icon' => 'ph-leaf',
+                'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas', 'Guru']
+            ],
+            [
                 'name' => 'Data Siswa Aktif', 
                 'route' => 'students.index',
                 'icon' => 'ph-student',               

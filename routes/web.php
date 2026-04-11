@@ -80,9 +80,11 @@ use App\Http\Controllers\LiaisonBookController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\TeacherHabitController; 
 
+
 // CONTROLLER BIMBINGAN KONSELING (BK)
 use App\Http\Controllers\BkStudentController; 
 use App\Http\Controllers\BkTeacherController; 
+use App\Http\Controllers\RecoveryController;
 
 // CONTROLLER RAMADAN LOG
 use App\Http\Controllers\RamadanLogController;
@@ -409,6 +411,8 @@ Route::middleware('auth')->group(function () {
     });
 
 
+
+
      // === BANK SOAL TERPUSAT (Gudang Soal) ===
     Route::prefix('bank-soal')->name('bank.')->group(function() {
         Route::get('/', [CbtBankController::class, 'index'])->name('index');
@@ -456,6 +460,13 @@ Route::middleware('auth')->group(function () {
         Route::post('/store', [StudentPermitController::class, 'store'])->name('store');    
     });
 
+      // Rute Monitoring Pemulihan Poin (Amnesti & Decay)
+    Route::prefix('admin/discipline/recovery')->name('recovery.')->group(function () {
+        Route::get('/', [RecoveryController::class, 'index'])->name('index');
+        Route::post('/store', [RecoveryController::class, 'store'])->name('store');
+    });
+
+    // Catatan Disiplin Utama
     Route::resource('discipline', DisciplineController::class)->only(['index', 'store', 'destroy']);
     Route::resource('discipline-types', DisciplineTypeController::class);
     Route::get('/discipline/analytics', [DisciplineController::class, 'analytics'])->name('discipline.analytics');
