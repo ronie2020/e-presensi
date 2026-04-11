@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\DisciplineRecord;
 use App\Models\DisciplineType;
 use App\Models\Student;
+use App\Models\BkSession; // Tambahkan ini
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+
 
 class DisciplineController extends Controller
 {
@@ -19,13 +21,12 @@ class DisciplineController extends Controller
     {
         // ==========================================
         // 1. QUERY OPTIMAL & DATA MASTER
-        // ==========================================
-        // Dapatkan nama tabel secara dinamis untuk mencegah error jika tabel bukan default
+        // ==========================================       
         $studentTable = app(Student::class)->getTable();
         $recordTable = app(DisciplineRecord::class)->getTable();
         $typeTable = app(DisciplineType::class)->getTable();
 
-        // Subquery untuk menghitung total poin per siswa di level SQL (Sangat Cepat & Hemat Memori)
+        // Subquery untuk menghitung total poin per siswa di level SQL 
         $violationSubquery = DisciplineRecord::select(DB::raw("COALESCE(SUM({$typeTable}.point_value), 0)"))
             ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
             ->whereColumn("{$recordTable}.student_id", "{$studentTable}.id")
@@ -36,8 +37,7 @@ class DisciplineController extends Controller
             ->whereColumn("{$recordTable}.student_id", "{$studentTable}.id")
             ->where("{$typeTable}.type", 'Kebaikan');
 
-        // Ambil data siswa dengan relasi kelas menggunakan 'with' bawaan Eloquent
-        // Ini akan secara otomatis mencari tabel relasi kelas yang benar (mencegah error table not found)
+        // Ambil data siswa dengan relasi kelas     
         $studentsRaw = Student::with('schoolClass')
             ->where('status', '!=', 'graduated')
             ->select("{$studentTable}.*") 
@@ -74,6 +74,7 @@ class DisciplineController extends Controller
             ->whereHas('disciplineType', fn($q) => $q->where('type', 'Kebaikan'))
             ->count();
 
+                
         // ==========================================
         // 4. REKAP & TOP RANK
         // ==========================================
@@ -134,7 +135,88 @@ class DisciplineController extends Controller
         ));
     }
 
-    public function create() { return redirect()->route('discipline.index'); }
+ public function analytics()
+    {
+        // 1. Ambil data dasar
+        $historyRecords = DisciplineRecord::with('disciplineType')->get();
+        
+        $studentTable = app(Student::class)->getTable();
+        $recordTable = app(DisciplineRecord::class)->getTable();
+        $typeTable = app(DisciplineType::class)->getTable();
+
+        $violationSubquery = DisciplineRecord::select(DB::raw("COALESCE(SUM({$typeTable}.point_value), 0)"))
+            ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
+            ->whereColumn("{$recordTable}.student_id", "{$studentTable}.id")
+            ->where("{$typeTable}.type", 'Pelanggaran');
+
+        $meritSubquery = DisciplineRecord::select(DB::raw("COALESCE(SUM({$typeTable}.point_value), 0)"))
+            ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
+            ->whereColumn("{$recordTable}.student_id", "{$studentTable}.id")
+            ->where("{$typeTable}.type", 'Kebaikan');
+
+        $students = Student::with('schoolClass')
+            ->where('status', '!=', 'graduated')
+            ->select("{$studentTable}.*") 
+            ->selectSub($violationSubquery, 'total_violation')
+            ->selectSub($meritSubquery, 'total_merit')
+            ->get();
+
+        // 2. Rekap Per Kelas
+        $classSummaries = $students->groupBy(fn($s) => $s->schoolClass->name ?? 'Tanpa Kelas')
+            ->map(fn($group, $key) => (object)[
+                'class_name' => $key,
+                'total_violation' => $group->sum('total_violation'),
+                'total_merit' => $group->sum('total_merit')
+            ])->sortBy('class_name', SORT_NATURAL);
+
+        $topViolators = $students->where('total_violation', '>', 0)->sortByDesc('total_violation')->take(10);
+
+        // 3. LOGIKA TREN BULANAN (REAL DATA)
+        $monthlyTrend = DisciplineRecord::select(
+                DB::raw('MONTH(date) as month'),
+                DB::raw("SUM(CASE WHEN {$typeTable}.type = 'Pelanggaran' THEN {$typeTable}.point_value ELSE 0 END) as violations"),
+                DB::raw("SUM(CASE WHEN {$typeTable}.type = 'Kebaikan' THEN {$typeTable}.point_value ELSE 0 END) as merits")
+            )
+            ->join($typeTable, "{$recordTable}.discipline_type_id", '=', "{$typeTable}.id")
+            ->whereYear('date', date('Y'))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        $trendLabels = [];
+        $trendViolations = [];
+        $trendMerits = [];
+
+        // Loop 12 bulan agar grafik lengkap dari Jan - Des
+        for ($m = 1; $m <= 12; $m++) {
+            $monthName = Carbon::create()->month($m)->translatedFormat('M');
+            $trendLabels[] = $monthName;
+            
+            $data = $monthlyTrend->firstWhere('month', $m);
+            $trendViolations[] = $data ? (int)$data->violations : 0;
+            $trendMerits[] = $data ? (int)$data->merits : 0;
+        }
+
+        return view('discipline.discipline_analytics', compact(
+            'historyRecords', 'students', 'classSummaries', 'topViolators',
+            'trendLabels', 'trendViolations', 'trendMerits'
+        ));
+    }
+
+    /**
+     * Cetak Surat Peringatan
+     */
+    public function spPrint($id)
+    {
+        $student = Student::with(['disciplineRecords.disciplineType', 'schoolClass'])->findOrFail($id);
+        
+        // Hitung total_violation secara dinamis untuk view SP
+        $student->total_violation = $student->disciplineRecords
+            ->where('disciplineType.type', 'Pelanggaran')
+            ->sum('disciplineType.point_value');
+
+        return view('discipline.sp_print', compact('student'));
+    }
 
     public function store(Request $request)
     {
@@ -169,7 +251,7 @@ class DisciplineController extends Controller
         $msg = ($type->type == 'Pelanggaran') ? 'Pelanggaran tercatat.' : 'Prestasi berhasil ditambahkan!';
 
         return redirect()->route('discipline.index')->with('success', $msg);
-    }
+    }    
 
     public function destroy(DisciplineRecord $discipline)
     {

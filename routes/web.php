@@ -458,6 +458,8 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('discipline', DisciplineController::class)->only(['index', 'store', 'destroy']);
     Route::resource('discipline-types', DisciplineTypeController::class);
+    Route::get('/discipline/analytics', [DisciplineController::class, 'analytics'])->name('discipline.analytics');
+    Route::get('/discipline/sp-print/{id}', [DisciplineController::class, 'spPrint'])->name('discipline.sp_print');
     
      // E-RAPOR & PENILAIAN
         Route::get('/grades', [GradeController::class, 'index'])->name('grades.index');

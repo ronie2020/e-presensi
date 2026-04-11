@@ -204,6 +204,12 @@ return [
                 'roles' => ['Admin', 'Guru Piket', 'Wali Kelas', 'Kepala Sekolah', 'Guru']
             ],
             [
+                'name' => 'Analitik Disiplin', // <--- TAMBAHAN MENU BARU
+                'route' => 'discipline.analytics',
+                'icon' => 'ph-chart-pie-slice',
+                'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas']
+            ],
+            [
                 'name' => 'Data Siswa Aktif', 
                 'route' => 'students.index',
                 'icon' => 'ph-student',               

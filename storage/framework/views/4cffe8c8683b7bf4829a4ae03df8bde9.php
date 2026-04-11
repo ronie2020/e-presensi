@@ -53,11 +53,17 @@
                             Kelola poin siswa, pantau klasemen pelanggaran, dan lihat rekapitulasi per kelas dalam satu dashboard yang terintegrasi.
                         </p>
                     </div>
-                    
-                    <a href="<?php echo e(route('discipline-types.index')); ?>" class="group bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm border border-white/10 transition-all flex items-center gap-2 shadow-lg">
-                        <i class="ph-bold ph-gear text-xl group-hover:rotate-90 transition-transform duration-500"></i>
-                        <span>Atur Jenis Poin</span>
-                    </a>
+                    <div class="flex gap-2">
+                        
+                        <a href="<?php echo e(route('discipline.analytics')); ?>" class="group bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 shadow-lg shadow-indigo-900/20">
+                            <i class="ph-bold ph-chart-line-up text-xl"></i>
+                            <span>Statistik & Analitik</span>
+                        </a>
+                        <a href="<?php echo e(route('discipline-types.index')); ?>" class="group bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm border border-white/10 transition-all flex items-center gap-2 shadow-lg">
+                            <i class="ph-bold ph-gear text-xl"></i>
+                            <span>Atur Jenis Poin</span>
+                        </a>
+                    </div>                    
                 </div>
             </div>
 
@@ -646,26 +652,33 @@
         }
 
          function closeScanner() {
-            if (isScannerStopping) return;
-            
             const modal = document.getElementById('qrModal');
             
-            // 1. Langsung sembunyikan modal secara visual (agar responsif)
-            if(modal) modal.classList.add('hidden');
-            document.body.style.overflow = 'auto'; 
-
-            // 2. Berhentikan kamera jika sedang berjalan
-            if (html5QrcodeScanner && html5QrcodeScanner.isScanning) {
-                isScannerStopping = true;
-                html5QrcodeScanner.stop().then(() => {
-                    html5QrcodeScanner.clear();
-                    isScannerStopping = false;
-                    console.log("Kamera dimatikan.");
-                }).catch(err => {
-                    console.warn("Gagal stop kamera (mungkin sudah tertutup):", err);
-                    isScannerStopping = false;
-                });
+            // 1. Prioritas Utama: Sembunyikan UI seketika
+            if (modal) {
+                modal.classList.add('hidden');
             }
+            document.body.style.overflow = 'auto'; // Kembalikan scroll body
+
+            // 2. Bersihkan scanner dengan aman (tanpa menghambat penutupan UI)
+            if (html5QrcodeScanner) {
+                try {
+                    // Gunakan try-catch agar jika library gagal/error saat stop, UI tetap tertutup
+                    if (html5QrcodeScanner.getState() !== 1) { // 1 = NOT_STARTED
+                        html5QrcodeScanner.stop().then(() => {
+                            html5QrcodeScanner.clear();
+                            console.log("Scanner cleaned up successfully.");
+                        }).catch(e => {
+                            console.warn("Library cleanup error (ignored):", e);
+                            html5QrcodeScanner.clear();
+                        });
+                    }
+                } catch (e) {
+                    console.error("Scanner exception (ignored):", e);
+                }
+            }
+            
+            isScannerStopping = false;
         }
 
 

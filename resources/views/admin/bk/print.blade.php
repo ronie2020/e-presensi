@@ -172,8 +172,8 @@
                 <div class="ttd-box">
                     <p>Mengetahui,</p>
                     <p class="mb-16">Kepala Sekolah</p>
-                    <p style="font-weight: bold; text-decoration: underline;">( ........................................... )</p>
-                    <p>NIP. .....................................</p>
+                    <p style="font-weight: bold; text-decoration: underline;">TANTAN SUTANDI NUGRAHA, S.Pd., M.Pd</p>
+                    <p>NIP. 19820928 201101 1 002</p>
                 </div>
                 <div class="ttd-box">
                     <p>Lakbok, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
