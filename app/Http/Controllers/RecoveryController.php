@@ -75,4 +75,59 @@ class RecoveryController extends Controller
 
         return redirect()->back()->with('success', 'Tugas pemulihan berhasil divalidasi. Poin pelanggaran siswa akan otomatis berkurang.');
     }
+
+     /**
+     * FUNGSI SIMULASI: Menjalankan Sistem Point Decay Otomatis via Tombol UI
+     */
+    public function triggerAutoDecay()
+    {
+        // 1. Pastikan Master Data untuk Decay Otomatis tersedia
+        $decayType = DisciplineType::firstOrCreate(
+            ['name' => 'Bonus Perilaku Baik (Otomatis Monthly Decay)'],
+            ['type' => 'Kebaikan', 'point_value' => 20] // Default 20 poin
+        );
+
+        // 2. Ambil semua siswa aktif
+        $students = Student::where(function($q) {
+                $q->where('status', '!=', 'graduated')
+                  ->orWhereNull('status');
+            })->get();
+
+        $count = 0;
+
+        foreach ($students as $student) {
+            // Logika: Cek apakah ada record PELANGGARAN dalam 30 hari terakhir
+            $hasRecentViolation = DisciplineRecord::where('student_id', $student->id)
+                ->whereHas('disciplineType', fn($q) => $q->where('type', 'Pelanggaran'))
+                ->where('date', '>=', Carbon::now()->subDays(30))
+                ->exists();
+
+            // Jika bersih dari pelanggaran selama 30 hari
+            if (!$hasRecentViolation) {
+                // Pastikan bulan ini belum pernah diberikan bonus agar tidak double input
+                $alreadyDecayed = DisciplineRecord::where('student_id', $student->id)
+                    ->where('discipline_type_id', $decayType->id)
+                    ->whereMonth('date', Carbon::now()->month)
+                    ->whereYear('date', Carbon::now()->year)
+                    ->exists();
+
+                if (!$alreadyDecayed) {
+                    DisciplineRecord::create([
+                        'student_id' => $student->id,
+                        'discipline_type_id' => $decayType->id,
+                        'notes' => 'Sistem: Bonus pengurangan poin pelanggaran (Point Decay) atas konsistensi perilaku baik selama 30 hari terakhir.',
+                        'date' => Carbon::today(),
+                        'recorded_by_user_id' => Auth::id(), 
+                    ]);
+                    $count++;
+                }
+            }
+        }
+
+        if ($count > 0) {
+            return redirect()->back()->with('success', "Simulasi berhasil! Sistem telah mendeteksi dan memberikan bonus pemulihan kepada {$count} siswa.");
+        } else {
+            return redirect()->back()->with('error', "Simulasi dijalankan, tetapi tidak ada siswa yang memenuhi syarat untuk mendapatkan Point Decay saat ini (mungkin karena baru saja melanggar atau sudah menerima decay bulan ini).");
+        }
+    }
 }

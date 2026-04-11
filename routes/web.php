@@ -464,6 +464,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin/discipline/recovery')->name('recovery.')->group(function () {
         Route::get('/', [RecoveryController::class, 'index'])->name('index');
         Route::post('/store', [RecoveryController::class, 'store'])->name('store');
+        Route::post('/trigger-decay', [RecoveryController::class, 'triggerAutoDecay'])->name('trigger_decay');
     });
 
     // Catatan Disiplin Utama
