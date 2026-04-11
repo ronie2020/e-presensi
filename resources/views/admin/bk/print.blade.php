@@ -3,143 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laporan Bimbingan Konseling - {{ \Carbon\Carbon::now()->format('d-m-Y') }}</title>
+    <title>Laporan BK - {{ \Carbon\Carbon::now()->format('d-m-Y') }}</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    {{-- Phosphor Icons --}}
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
     <style>
-        @page { size: A4 landscape; margin: 1.5cm; }
-        
-        body { font-family: 'Times New Roman', serif; color: #000; line-height: 1.3; font-size: 10pt; }
-        
-        .no-print { display: block; }
-        @media print { 
-            .no-print { display: none !important; } 
-            body { -webkit-print-color-adjust: exact; }
-            .page-break { page-break-before: always; }
+        /* PENGATURAN KERTAS F4 (Folio) - Landscape untuk Tabel Lebar */
+        @page { 
+            size: 33cm 21.5cm; 
+            margin: 0; 
         }
         
-        /* Header Kop Surat */
-        .header { text-align: center; margin-bottom: 20px; border-bottom: 3px double #000; padding-bottom: 10px; }
-        .header h1 { font-size: 16pt; margin: 0; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-        .header h2 { font-size: 14pt; margin: 5px 0 0; font-weight: bold; text-transform: uppercase; }
-        .header p { font-size: 10pt; margin: 2px 0; font-style: italic; }
-
-        /* Meta Info */
-        .meta-table { width: 100%; margin-bottom: 15px; font-size: 10pt; border: none; }
-        .meta-table td { padding: 2px 0; vertical-align: top; }
-        .meta-title { font-weight: bold; width: 120px; }
-
-        /* Main Table */
-        table.data { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 9pt; }
-        table.data th, table.data td { border: 1px solid #000; padding: 6px 4px; }
-        table.data th { background-color: #f3f3f3; text-align: center; font-weight: bold; vertical-align: middle; height: 30px; }
-        table.data td { vertical-align: top; }
-        table.data .center { text-align: center; }
-        table.data .left { text-align: left; padding-left: 5px; }
-        
-        /* Footer */
-        .footer { margin-top: 30px; width: 100%; page-break-inside: avoid; }
-        .signature-box { float: right; width: 250px; text-align: center; }
-        .signature-box p { margin-bottom: 60px; }
-        
-        /* Tombol Cetak */
-        .btn-print {
-            position: fixed; bottom: 30px; right: 30px;
-            background: #e11d48; color: white; border: none;
-            padding: 12px 24px; border-radius: 50px; cursor: pointer;
-            font-weight: bold; box-shadow: 0 4px 15px rgba(225, 29, 72, 0.4);
-            font-family: sans-serif; display: flex; align-items: center; gap: 8px; z-index: 1000;
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 11pt;
+            background-color: #f1f5f9; /* Slate-100 */
+            -webkit-print-color-adjust: exact;
         }
-        .btn-print:hover { background: #be123c; }
+
+        /* TAMPILAN KERTAS DI LAYAR */
+        .sheet {
+            background: white;
+            width: 33cm;
+            min-height: 21.5cm;
+            margin: 30px auto;
+            padding: 1.5cm 2cm;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            position: relative;
+            page-break-after: always; 
+        }
         
-        .status-badge { font-weight: bold; text-transform: uppercase; font-size: 8pt;}
+        /* MODE PRINT */
+        @media print {
+            body { background: none; margin: 0; }
+            .sheet { width: 100%; margin: 0; padding: 1cm 1.5cm; box-shadow: none; border: none; page-break-after: always; }
+            .sheet:last-child { page-break-after: auto; }
+            .no-print { display: none !important; }
+        }
+
+        /* TYPOGRAPHY SURAT */
+        .header-text h3 { margin: 0; font-size: 14pt; font-weight: bold; text-transform: uppercase; }
+        .header-text h4 { margin: 0; font-size: 12pt; font-weight: bold; text-transform: uppercase; }
+        .header-text p { margin: 0; font-size: 10pt; }
+        
+        .double-line { border-top: 4px double #000; margin-top: 8px; margin-bottom: 20px; }
+        
+        .judul-surat { text-align: center; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; }
+        .judul-surat h2 { margin: 0; text-decoration: underline; font-size: 13pt; }
+        .judul-surat p { margin: 0; font-size: 11pt; font-weight: normal; text-transform: none; }
+
+        /* TABEL DATA UTAMA */
+        table.data { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10pt; }
+        table.data th, table.data td { border: 1px solid black; padding: 8px 5px; vertical-align: top; }
+        table.data th { background-color: #f2f2f2 !important; font-weight: bold; text-align: center; text-transform: uppercase; }
+        
+        .text-center { text-align: center; }
+        .text-italic { font-style: italic; }
+        
+        /* FOOTER TTD */
+        .footer-section { margin-top: 30px; width: 100%; }
+        .ttd-container { display: flex; justify-content: space-between; margin-top: 20px; }
+        .ttd-box { width: 40%; text-align: center; }
+        
+        .clear { clear: both; }
     </style>
 </head>
 <body>
 
-    <button onclick="window.print()" class="btn-print no-print">
-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-        Cetak Laporan / Simpan PDF
-    </button>
-
-    <div class="header">
-        <h1>REKAPITULASI LAPORAN BIMBINGAN KONSELING</h1>
-        <h2>NAMA SEKOLAH ANDA</h2>
-        <p>Jl. Contoh Alamat Sekolah No. 123, Kota/Kabupaten, Kode Pos 12345</p>
-    </div>
-
-    <table class="meta-table">
-        <tr>
-            <td class="meta-title">Tanggal Dicetak</td>
-            <td width="10">:</td>
-            <td width="300">{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</td>
-            
-            <td class="meta-title">Total Data</td>
-            <td width="10">:</td>
-            <td>{{ $sessions->count() }} Laporan</td>
-        </tr>
-        <tr>
-            <td class="meta-title">Dicetak Oleh</td>
-            <td>:</td>
-            <td>{{ auth()->user()->name ?? 'Administrator' }}</td>
-
-            <td class="meta-title">Filter Pencarian</td>
-            <td>:</td>
-            <td>
-                Status: {{ ucfirst(request('status', 'Semua')) }} | Tipe: {{ ucfirst(request('type', 'Semua')) }} 
-                @if(request('search')) | Keyword: "{{ request('search') }}" @endif
-            </td>
-        </tr>
-    </table>
-
-    <table class="data">
-        <thead>
-            <tr>
-                <th width="4%">No</th>
-                <th width="15%">Nama Siswa</th>
-                <th width="10%">Kelas</th>
-                <th width="12%">Kategori</th>
-                <th width="35%">Pesan / Laporan</th>
-                <th width="8%">Metode</th>
-                <th width="8%">Status</th>
-                <th width="8%">Tanggal</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($sessions as $index => $session)
-            <tr>
-                <td class="center">{{ $index + 1 }}</td>
-                <td class="left" style="text-transform: uppercase;">{{ $session->student->name ?? 'Data Terhapus' }}</td>
-                <td class="center">{{ $session->student->schoolClass->name ?? '-' }}</td>
-                <td class="center">{{ $session->category->name ?? 'Umum' }}</td>
-                <td class="left" style="font-style: italic;">
-                    @if($session->is_system_generated)
-                        <strong>[SISTEM]</strong> 
-                    @endif
-                    "{{ $session->initial_message }}"
-                </td>
-                <td class="center">{{ $session->method == 'online' ? 'Online' : 'Tatap Muka' }}</td>
-                <td class="center status-badge">
-                    {{ $session->status == 'approved' ? 'Terjadwal' : $session->status }}
-                </td>
-                <td class="center">{{ $session->created_at->format('d/m/Y') }}</td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="8" class="center" style="padding: 20px;">Tidak ada data laporan yang sesuai dengan filter.</td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    <div class="footer">
-        <div class="signature-box">
-            <p>
-                Mengetahui,<br>
-                Guru Bimbingan Konseling
-            </p>
-            <div style="font-weight: bold; text-decoration: underline; margin-top: 20px;">
-                {{ auth()->user()->name ?? '( ........................................... )' }}
+    <!-- TOOLBAR (Floating) -->
+    <div class="no-print fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm p-4 flex justify-between items-center z-50">
+        <div class="flex items-center gap-4">
+            <div class="bg-blue-900 p-2.5 rounded-xl text-white shadow-lg shadow-blue-900/20">
+                <i class="ph-bold ph-printer text-xl"></i>
             </div>
-            <div style="margin-top: 5px;">NIP. .....................................</div>
+            <div>
+                <h1 class="font-black text-slate-800 text-sm md:text-base font-sans">Pratinjau Laporan Konseling</h1>
+                <p class="text-xs text-slate-500 font-sans font-bold">Format: Kedinasan (Folio Landscape)</p>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="window.close()" class="px-5 py-2.5 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition shadow-sm font-sans flex items-center gap-2">
+                <i class="ph-bold ph-x"></i> Tutup
+            </button>
+            <button onclick="window.print()" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-900 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/30 font-sans flex items-center gap-2">
+                <i class="ph-bold ph-printer"></i> Cetak Laporan
+            </button>
+        </div>
+    </div>
+    <div class="no-print h-24"></div>
+
+    <!-- HALAMAN REKAPITULASI -->
+    <div class="sheet">
+         <!-- KOP SURAT (Sesuai Konsep SPPD) -->
+        <div class="relative py-2 flex items-center justify-center">
+            <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Daerah" class="absolute left-0 top-1 w-16 h-auto object-contain" onerror="this.style.display='none'"> 
+            <div class="text-center header-text">
+                <h3>PEMERINTAH KABUPATEN CIAMIS</h3>
+                <h3>DINAS PENDIDIKAN</h3>
+                <h4>SMP NEGERI 3 LAKBOK</h4>
+                <p>Jalan Mekarjaya No. 199 Sidaharja Kecamatan Lakbok Kabupaten Ciamis</p>
+            </div>
+            <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="absolute right-0 top-1 w-20 h-auto object-contain" onerror="this.style.display='none'">
+        </div>
+        <div class="double-line"></div>
+
+        <div class="judul-surat">
+            <h2>REKAPITULASI DATA BIMBINGAN KONSELING (BK)</h2>
+            <p>Periode Laporan: {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</p>
+        </div>
+
+        <!-- INFO FILTER -->
+        <div class="mb-4 grid grid-cols-2 text-xs font-bold uppercase">
+            <div>
+                <p>Status: {{ request('status') ? ucfirst(request('status')) : 'SEMUA STATUS' }}</p>
+                <p>Tipe: {{ request('type') ? ucfirst(request('type')) : 'SEMUA TIPE' }}</p>
+            </div>
+            <div class="text-right">
+                <p>Tanggal Cetak: {{ \Carbon\Carbon::now()->translatedFormat('d F Y, H:i') }} WIB</p>
+                <p>Total Data: {{ $sessions->count() }} Laporan</p>
+            </div>
+        </div>
+
+        <table class="data">
+            <thead>
+                <tr>
+                    <th style="width: 30px;">No</th>
+                    <th style="width: 150px;">Nama Siswa</th>
+                    <th style="width: 80px;">Kelas</th>
+                    <th style="width: 120px;">Kategori</th>
+                    <th>Pesan / Permasalahan</th>
+                    <th style="width: 100px;">Metode</th>
+                    <th style="width: 100px;">Status</th>
+                    <th style="width: 100px;">Tgl Lapor</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($sessions as $index => $session)
+                <tr>
+                    <td class="text-center">{{ $index + 1 }}</td>
+                    <td style="text-transform: uppercase; font-weight: bold;">{{ $session->student->name ?? 'Data Terhapus' }}</td>
+                    <td class="text-center">{{ $session->student->schoolClass->name ?? '-' }}</td>
+                    <td class="text-center">{{ $session->category->name ?? 'Umum' }}</td>
+                    <td class="text-italic">
+                        @if($session->is_system_generated)
+                            <strong>[SISTEM]</strong> 
+                        @endif
+                        "{{ $session->initial_message }}"
+                    </td>
+                    <td class="text-center">{{ $session->method == 'online' ? 'Online' : 'Tatap Muka' }}</td>
+                    <td class="text-center" style="font-weight: bold; text-transform: uppercase; font-size: 9pt;">
+                        {{ $session->status == 'approved' ? 'Terjadwal' : $session->status }}
+                    </td>
+                    <td class="text-center">{{ $session->created_at->format('d/m/Y') }}</td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="8" class="text-center" style="padding: 30px;">Tidak ada data yang tersedia untuk laporan ini.</td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+
+        <!-- BAGIAN TANDA TANGAN (Sesuai Konsep SPPD) -->
+        <div class="footer-section">
+            <div class="ttd-container">
+                <div class="ttd-box">
+                    <p>Mengetahui,</p>
+                    <p class="mb-16">Kepala Sekolah</p>
+                    <p style="font-weight: bold; text-decoration: underline;">( ........................................... )</p>
+                    <p>NIP. .....................................</p>
+                </div>
+                <div class="ttd-box">
+                    <p>Lakbok, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
+                    <p class="mb-16">Guru Bimbingan Konseling</p>
+                    <p style="font-weight: bold; text-decoration: underline;">{{ auth()->user()->name ?? '( ........................................... )' }}</p>
+                    <p>NIP. .....................................</p>
+                </div>
+            </div>
         </div>
     </div>
 
