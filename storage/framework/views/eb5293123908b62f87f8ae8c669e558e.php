@@ -21,7 +21,7 @@
                     <p class="text-slate-500 font-medium">Log amnesti poin dan monitoring penyusutan poin otomatis (Point Decay).</p>
                 </div>
                 
-                <div class="flex gap-2">
+               <div class="flex gap-2">
                     
                     <form action="<?php echo e(route('recovery.trigger_decay')); ?>" method="POST" onsubmit="return confirm('Jalankan pengecekan point decay otomatis sekarang?');">
                         <?php echo csrf_field(); ?>

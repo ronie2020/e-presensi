@@ -1,4 +1,0 @@
-<svg <?php echo e($attributes->merge(['class' => ''])); ?> xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.5v15h15V4.5H3.75zm-1.5 0A2.25 2.25 0 014.5 2.25h15a2.25 2.25 0 012.25 2.25v15a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25v-15z" />
-  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 8.25h1.5v1.5h-1.5v-1.5zm3 0h1.5v1.5h-1.5v-1.5zm3 0h1.5v1.5h-1.5v-1.5zm-6 3h1.5v1.5h-1.5v-1.5zm3 0h1.5v1.5h-1.5v-1.5zm3 0h1.5v1.5h-1.5v-1.5zm-6 3h1.5v1.5h-1.5v-1.5zm3 0h1.5v1.5h-1.5v-1.5zm3 0h1.5v1.5h-1.5v-1.5z" />
-</svg><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views\components\heroicon-o-qr-code.blade.php ENDPATH**/ ?>
