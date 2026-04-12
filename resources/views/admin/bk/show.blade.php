@@ -7,6 +7,7 @@
         - DITAMBAHKAN: Validasi Tanggal dan Konfirmasi Simpan Jurnal
         - DITAMBAHKAN (BARU): Kop Surat Print, Visual Tracker, Auto-expand Textarea, Copy Teks WA.
         - DITAMBAHKAN (BARU): Fitur "Pemberitahuan Langsung / Apresiasi" Tanpa Jadwal.
+        - TERINTEGRASI: Ruang Chat Online AlpineJS & Tampilan Rating Siswa.
     --}}
 
     <style>
@@ -22,9 +23,21 @@
             .break-inside-avoid { break-inside: avoid; } 
             @page { margin: 1.5cm; }
         }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        [x-cloak] { display: none !important; }
+        
+        /* Style untuk input yang dikunci (Jurnal Selesai) */
+        .input-locked {
+            background-color: #f8fafc !important;
+            color: #475569 !important;
+            cursor: not-allowed;
+            border-style: dashed !important;
+        }
     </style>
 
-    <div class="py-8 sm:py-10 font-sans text-slate-800">
+    <div class="py-8 sm:py-10 font-sans text-slate-800" x-data="bkTeacherChatHandler({{ $session->id }})">
         
         {{-- ========================================================= --}}
         {{-- KOP SURAT (HANYA MUNCUL SAAT DI-PRINT / CETAK PDF)        --}}
@@ -43,13 +56,13 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <div class="flex items-center gap-2 text-sm font-bold text-blue-600 mb-1 uppercase tracking-wider">
-                        <i class="ph-fill ph-hash"></i> Sesi Konseling {{ $session->id }}
+                        <i class="ph-fill ph-hash"></i> Sesi Konseling {{ str_pad($session->id, 5, '0', STR_PAD_LEFT) }}
                     </div>
                     <h1 class="text-3xl font-black text-slate-900 tracking-tight">Proses & Tindak Lanjut</h1>
                     <p class="text-slate-500 font-medium">Kelola status pengajuan dan rekam hasil konseling siswa.</p>
                 </div>
                 
-                <div class="flex items-center gap-3">
+                <div class="flex flex-wrap items-center gap-3">
                     {{-- TOMBOL CETAK (Hanya Muncul Jika Selesai) --}}
                     @if($session->status == 'finished')
                         <button onclick="window.print()" class="group flex items-center gap-2 px-5 py-2.5 bg-indigo-50 border border-indigo-200 rounded-2xl text-indigo-700 font-bold hover:bg-indigo-600 hover:text-white shadow-sm hover:shadow-md transition-all">
@@ -115,7 +128,9 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
-                <!-- KOLOM KIRI: INFO SISWA & MASALAH -->
+                <!-- ========================================== -->
+                <!-- KOLOM KIRI: INFO SISWA & MASALAH           -->
+                <!-- ========================================== -->
                 <div class="lg:col-span-1 space-y-6">
                     
                     <!-- KARTU 1: Info Siswa -->
@@ -238,14 +253,16 @@
                     </div>
                 </div>
 
-                <!-- KOLOM KANAN: AKSI & JURNAL -->
+                <!-- ========================================== -->
+                <!-- KOLOM KANAN: AKSI & JURNAL                 -->
+                <!-- ========================================== -->
                 <div class="lg:col-span-2 space-y-6">
                     
-                    <!-- 1. FORM APPROVAL & TEMPLATE WA (Action Card) -->
+                    <!-- 1. FORM APPROVAL & TEMPLATE WA (Action Card - Hanya Pending) -->
                     @if($session->status == 'pending')
                     <div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-amber-500/10 border border-amber-100 relative overflow-hidden print:hidden" 
                          x-data="{ 
-                            action: 'approved',
+                            action: '{{ $session->method == 'online' ? 'ongoing' : 'approved' }}',
                             responseMsg: '',
                             studentName: '{{ addslashes($session->student->name ?? 'Siswa') }}',
                             
@@ -263,23 +280,15 @@
                                 }
                             },
                             
-                            // Fitur Copy to Clipboard
                             copyToClipboard() {
                                 if (!this.responseMsg) return;
                                 navigator.clipboard.writeText(this.responseMsg).then(() => {
                                     Swal.fire({
-                                        icon: 'success',
-                                        title: 'Teks Disalin!',
-                                        text: 'Template siap di-paste ke WhatsApp.',
-                                        toast: true,
-                                        position: 'top-end',
-                                        showConfirmButton: false,
-                                        timer: 2000,
+                                        icon: 'success', title: 'Teks Disalin!', text: 'Template siap di-paste ke WhatsApp.',
+                                        toast: true, position: 'top-end', showConfirmButton: false, timer: 2000,
                                         customClass: { popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans' }
                                     });
-                                }).catch(err => {
-                                    console.error('Gagal menyalin: ', err);
-                                });
+                                }).catch(err => { console.error('Gagal menyalin: ', err); });
                             }
                          }">
                         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 to-orange-500"></div>
@@ -308,13 +317,10 @@
                                             <option value="finished">Selesaikan Langsung (Apresiasi/Pesan)</option>
                                             <option value="rejected">Tolak Pengajuan</option>
                                         </select>
-                                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-500">
-                                            <i class="ph-bold ph-caret-down"></i>
-                                        </div>
                                     </div>
                                 </div>
                                 
-                                <!-- Field Jadwal (Hanya muncul jika disetujui / dijadwalkan) -->
+                                <!-- Field Jadwal -->
                                 <div x-show="action === 'approved'" 
                                      x-transition:enter="transition ease-out duration-300"
                                      x-transition:enter-start="opacity-0 transform scale-95"
@@ -339,26 +345,20 @@
                                     </button>
                                 </div>
 
-                                <!-- Template Buttons dinamis tergantung tipe keputusan -->
+                                <!-- Template Buttons -->
                                 <div x-show="action !== 'rejected'" class="flex flex-wrap gap-2 mb-3" x-transition>
-                                    
-                                    <!-- Muncul jika akan dijadwalkan (Approved) -->
                                     <button type="button" @click="setTemplate('panggilan')" x-show="action === 'approved'" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-colors shadow-sm">
                                         <i class="ph-bold ph-warning"></i> Panggilan Ortu
                                     </button>
                                     <button type="button" @click="setTemplate('umum')" x-show="action === 'approved'" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition-colors shadow-sm">
                                         <i class="ph-bold ph-chat-text"></i> Info ke Siswa
                                     </button>
-
-                                    <!-- Muncul jika hanya pemberitahuan langsung (Finished) -->
                                     <button type="button" @click="setTemplate('apresiasi')" x-show="action === 'finished'" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 transition-colors shadow-sm">
                                         <i class="ph-bold ph-medal"></i> Apresiasi Prestasi
                                     </button>
                                     <button type="button" @click="setTemplate('teguran')" x-show="action === 'finished'" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-amber-50 text-amber-600 border border-amber-200 hover:bg-amber-100 transition-colors shadow-sm">
                                         <i class="ph-bold ph-warning"></i> Teguran Ringan
                                     </button>
-
-                                    <!-- Hapus Teks -->
                                     <button type="button" @click="setTemplate('kosong')" class="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-white text-slate-400 border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm">
                                         <i class="ph-bold ph-eraser"></i> Hapus
                                     </button>
@@ -380,7 +380,7 @@
                     </div>
                     @endif
 
-                    <!-- BLOK STATUS: REJECTED -->
+                    {{-- 2. BLOK STATUS: REJECTED --}}
                     @if($session->status == 'rejected')
                     <div class="bg-rose-50 rounded-[2rem] p-6 border border-rose-100 flex flex-col md:flex-row items-start gap-4 break-inside-avoid">
                         <div class="p-3 bg-white rounded-2xl text-rose-500 shadow-sm shrink-0 print:hidden">
@@ -398,10 +398,71 @@
                     </div>
                     @endif
 
-                    <!-- BLOK STATUS: JADWAL (Approved/Finished) -->
+                    {{-- 3. RUANG CHAT AKTIF (Jika Sesi Berlangsung Online) --}}
+                    @if($session->status == 'ongoing' && $session->method == 'online')
+                    <div class="bg-white rounded-[2.5rem] shadow-2xl border border-indigo-100 overflow-hidden flex flex-col h-[600px] animate-in zoom-in-95 duration-300 print:hidden">
+                        <!-- Header Chat -->
+                        <div class="p-5 sm:p-6 bg-slate-800 text-white flex justify-between items-center z-10 shadow-md">
+                            <div class="flex items-center gap-3 md:gap-4">
+                                <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/10 flex items-center justify-center border border-white/20"><i class="ph-fill ph-chats-circle text-xl md:text-2xl"></i></div>
+                                <div>
+                                    <h3 class="font-black text-sm md:text-base leading-tight">Ruang Bimbingan Digital</h3>
+                                    <div class="flex items-center gap-1.5 mt-0.5">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                                        <p class="text-[9px] md:text-[10px] font-bold text-indigo-300 uppercase tracking-widest">Sesi Aktif Bersama {{ current(explode(' ', $session->student->name)) }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <form action="{{ route('admin.bk.update_status', $session->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin mengakhiri sesi chat ini dan melanjutkan ke pengisian jurnal? Siswa tidak akan bisa membalas lagi.');">
+                                @csrf @method('PUT')
+                                <input type="hidden" name="status" value="finished">
+                                <button type="submit" class="px-4 py-2.5 bg-rose-500 text-white text-[10px] md:text-xs font-black uppercase rounded-xl hover:bg-rose-600 transition-colors shadow-lg shadow-rose-900/20 flex items-center gap-1.5">
+                                    <i class="ph-bold ph-power"></i> <span class="hidden sm:inline">Akhiri Sesi</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Area Chat -->
+                        <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/80 custom-scrollbar" x-ref="chatBox">
+                            <div class="text-center py-4 opacity-50" x-show="messages.length === 0">
+                                <span class="bg-slate-200 text-slate-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Mulai Percakapan</span>
+                            </div>
+
+                            <template x-for="msg in messages" :key="msg.id">
+                                <div :class="msg.sender_type === 'teacher' ? 'flex justify-end' : 'flex justify-start'">
+                                    <div :class="msg.sender_type === 'teacher' ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-sm shadow-indigo-200' : 'bg-white text-slate-800 border border-slate-200 rounded-2xl rounded-tl-sm shadow-slate-100'"
+                                         class="max-w-[85%] sm:max-w-[75%] p-3 sm:p-4 shadow-md relative group animate-in slide-in-from-bottom-2 duration-300">
+                                        <p class="text-sm leading-relaxed font-medium break-words" x-text="msg.message"></p>
+                                        <div class="flex justify-end items-center gap-1 mt-1 opacity-60">
+                                            <span class="text-[8px] sm:text-[9px] font-bold" x-text="formatTime(msg.created_at)"></span>
+                                            <template x-if="msg.sender_type === 'teacher'">
+                                                <i class="ph-bold ph-checks text-[10px]"></i>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Input Chat -->
+                        <div class="p-4 sm:p-5 bg-white border-t border-slate-100 z-10">
+                            <div class="flex gap-2 sm:gap-3 relative">
+                                <input type="text" x-model="newMessage" @keydown.enter="send()" placeholder="Ketik pesan untuk siswa..." 
+                                    class="flex-1 rounded-2xl border-slate-200 bg-slate-50 text-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-3 sm:py-4 transition-all">
+                                <button @click="send()" :disabled="isSending" class="w-12 h-12 sm:w-14 sm:h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 transition-all disabled:opacity-50 active:scale-95 shrink-0">
+                                    <i class="ph-bold ph-paper-plane-right text-lg sm:text-xl" x-show="!isSending"></i>
+                                    <i class="ph-bold ph-spinner animate-spin text-lg sm:text-xl" x-show="isSending" x-cloak></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- 4. BLOK STATUS: JADWAL (Approved/Finished) & INFO BALASAN GURU --}}
                     @if($session->status == 'approved' || $session->status == 'finished')
                     <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-slate-200/60 border border-slate-100 relative overflow-hidden break-inside-avoid">
-                         <div class="absolute top-0 left-0 w-1 h-full bg-blue-500 print:hidden"></div>
+                        <div class="absolute top-0 left-0 w-1 h-full bg-blue-500 print:hidden"></div>
                          
                         <div class="flex flex-col md:flex-row justify-between items-start gap-4">
                             <div>
@@ -430,7 +491,7 @@
                                             <i class="ph-bold ph-chat-centered-text"></i>
                                         </div>
                                         <div>
-                                            <div class="text-xs font-bold text-slate-400 uppercase">Pesan & Informasi</div>
+                                            <div class="text-xs font-bold text-slate-400 uppercase">Pesan & Informasi (Siswa)</div>
                                             <div class="font-medium text-slate-600 text-sm italic whitespace-pre-line leading-relaxed">"{{ $session->response_message }}"</div>
                                         </div>
                                     </div>
@@ -450,89 +511,114 @@
                     </div>
                     @endif
 
-                    <!-- 2. FORM JURNAL (Main Content) -->
+                    {{-- 5. FORM JURNAL & HASIL RATING SISWA --}}
                     @if($session->status == 'approved' || $session->status == 'finished')
-                    <div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/60 border border-slate-100 mt-6 break-inside-avoid">
-                        <div class="flex justify-between items-center mb-8 border-b border-slate-100 pb-4">
+                    @php $isLocked = ($session->status == 'finished'); @endphp
+                    
+                    <div class="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/60 border {{ $isLocked ? 'border-emerald-200' : 'border-slate-100' }} mt-6 break-inside-avoid">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-slate-100 pb-4 print:border-black">
                             <h3 class="text-xl font-black text-slate-800 flex items-center gap-3">
                                 <div class="p-2.5 bg-indigo-100 rounded-xl text-indigo-600 print:hidden">
                                     <i class="ph-fill ph-notebook text-xl"></i>
                                 </div>
-                                Jurnal Konseling
+                                Jurnal Hasil Konseling
                             </h3>
-                            @if($session->status == 'finished')
-                                <span class="text-xs bg-slate-100 text-slate-500 px-3 py-1.5 rounded-lg border border-slate-200 font-bold flex items-center gap-1.5 uppercase tracking-wide">
-                                    <i class="ph-fill ph-lock-key"></i> Read Only
-                                </span>
+                            
+                            @if($isLocked)
+                                <div class="flex items-center gap-3">
+                                    <span class="text-xs bg-slate-100 text-slate-500 px-3 py-1.5 rounded-lg border border-slate-200 font-bold flex items-center gap-1.5 uppercase tracking-wide print:hidden">
+                                        <i class="ph-fill ph-lock-key"></i> Read Only
+                                    </span>
+                                </div>
                             @endif
                         </div>
 
-                        <!-- Form Input Jurnal -->
-                        @if($session->status == 'approved')
-                        
-                        {{-- MENGGANTI ONSUBMIT DEFAULT DENGAN ID FORM UNTUK JS SWEETALERT --}}
                         <form id="jurnalForm" action="{{ route('admin.bk.store_record', $session->id) }}" method="POST">
                             @csrf
                             <div class="space-y-6">
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Analisis Masalah</label>
-                                    <textarea name="problem_analysis" rows="3" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'" class="w-full px-4 py-3 rounded-xl border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none overflow-hidden" placeholder="Jelaskan akar permasalahan siswa secara detail..." required></textarea>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Analisis Masalah / Diagnosa</label>
+                                    <textarea name="problem_analysis" rows="3" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'" 
+                                              class="w-full px-4 py-3 rounded-xl border-slate-200 text-sm font-medium focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm resize-none overflow-hidden {{ $isLocked ? 'input-locked' : 'bg-slate-50 focus:bg-white' }}" 
+                                              placeholder="Jelaskan akar permasalahan siswa secara detail..." {{ $isLocked ? 'readonly' : 'required' }}>{{ $session->record->problem_analysis ?? '' }}</textarea>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Solusi / Tindakan</label>
-                                    <textarea name="solution" rows="3" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'" class="w-full px-4 py-3 rounded-xl border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none overflow-hidden" placeholder="Nasihat, perlakuan, atau tindakan yang diberikan..." required></textarea>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Solusi / Tindakan Diberikan</label>
+                                    <textarea name="solution" rows="3" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'" 
+                                              class="w-full px-4 py-3 rounded-xl border-slate-200 text-sm font-medium focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm resize-none overflow-hidden {{ $isLocked ? 'input-locked' : 'bg-slate-50 focus:bg-white' }}" 
+                                              placeholder="Nasihat, perlakuan, atau tindakan yang diberikan..." {{ $isLocked ? 'readonly' : 'required' }}>{{ $session->record->solution ?? '' }}</textarea>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Hasil Akhir (Follow Up)</label>
-                                    <textarea name="result" rows="2" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'" class="w-full px-4 py-3 rounded-xl border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all shadow-sm resize-none overflow-hidden" placeholder="Kesepakatan bersama atau rencana tindak lanjut..."></textarea>
+                                    <textarea name="result" rows="2" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'" 
+                                              class="w-full px-4 py-3 rounded-xl border-slate-200 text-sm font-medium focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm resize-none overflow-hidden {{ $isLocked ? 'input-locked' : 'bg-slate-50 focus:bg-white' }}" 
+                                              placeholder="Kesepakatan bersama atau rencana tindak lanjut..." {{ $isLocked ? 'readonly' : '' }}>{{ $session->record->result ?? '' }}</textarea>
                                 </div>
                                 
-                                <label class="flex items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 cursor-pointer transition-colors group print:hidden">
-                                    <input type="checkbox" name="is_confidential" value="1" checked class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 transition-colors">
-                                    <div>
-                                        <div class="text-sm font-bold text-slate-700 group-hover:text-blue-700 transition-colors">Bersifat Rahasia (Confidential)</div>
-                                        <div class="text-xs text-slate-400">Hanya Guru BK & Kepala Sekolah yang dapat melihat catatan ini.</div>
-                                    </div>
-                                </label>
+                                @if(!$isLocked)
+                                    <label class="flex items-center gap-3 p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 cursor-pointer transition-colors group print:hidden">
+                                        <input type="checkbox" name="is_confidential" value="1" {{ isset($session->record) && $session->record->is_confidential ? 'checked' : '' }} class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 transition-colors">
+                                        <div>
+                                            <div class="text-sm font-bold text-slate-700 group-hover:text-blue-700 transition-colors">Bersifat Rahasia (Confidential)</div>
+                                            <div class="text-xs text-slate-400">Hanya Guru BK & Kepala Sekolah yang dapat melihat catatan ini.</div>
+                                        </div>
+                                    </label>
 
-                                <div class="pt-4 border-t border-slate-100 mt-4 print:hidden">
-                                    {{-- Menggunakan Button type button yang men-trigger SweetAlert --}}
-                                    <button type="button" onclick="confirmJurnal()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-4 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/30 flex justify-center items-center gap-2 transition-all transform hover:scale-[1.01]">
-                                        <i class="ph-bold ph-check-circle text-xl"></i> Simpan & Selesaikan Sesi
-                                    </button>
-                                </div>
+                                    <div class="pt-4 border-t border-slate-100 mt-4 print:hidden">
+                                        <button type="button" onclick="confirmJurnal()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-4 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/30 flex justify-center items-center gap-2 transition-all transform hover:scale-[1.01]">
+                                            <i class="ph-bold ph-check-circle text-xl"></i> Simpan & Selesaikan Sesi
+                                        </button>
+                                    </div>
+                                @else
+                                    {{-- Cap Confidential Jika Selesai & Rahasia --}}
+                                    @if($session->record && $session->record->is_confidential)
+                                        <div class="flex items-center gap-2 px-4 py-3 bg-rose-50 text-rose-700 rounded-xl font-bold text-xs border border-rose-100 w-fit print:hidden">
+                                            <i class="ph-fill ph-lock-key"></i> Dokumen Rahasia (Confidential)
+                                        </div>
+                                        <div class="hidden print:block mt-8 text-center text-rose-700 font-bold uppercase text-2xl border-4 border-rose-700 px-4 py-2 w-max mx-auto opacity-50 rotate-[-15deg]">
+                                            CONFIDENTIAL / RAHASIA
+                                        </div>
+                                    @endif
+                                @endif
                             </div>
                         </form>
-                        @else
-                            <!-- TAMPILAN READ ONLY (Style Dokumen) -->
-                            <div class="space-y-6">
-                                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Analisis Permasalahan / Pencapaian</h4>
-                                    <div class="text-slate-700 text-sm leading-relaxed whitespace-pre-line">{{ $session->record->problem_analysis ?? '-' }}</div>
-                                </div>
-                                
-                                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Solusi / Tindakan Lanjutan</h4>
-                                    <div class="text-slate-700 text-sm leading-relaxed whitespace-pre-line">{{ $session->record->solution ?? '-' }}</div>
-                                </div>
 
-                                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hasil Akhir</h4>
-                                    <div class="text-slate-700 text-sm leading-relaxed whitespace-pre-line">{{ $session->record->result ?? '-' }}</div>
-                                </div>
-
-                                @if($session->record && $session->record->is_confidential)
-                                    <div class="flex items-center gap-2 px-4 py-3 bg-rose-50 text-rose-700 rounded-xl font-bold text-xs border border-rose-100 w-fit print:hidden">
-                                        <i class="ph-fill ph-lock-key"></i> Dokumen Rahasia (Confidential)
+                        {{-- TAMPILAN RATING & EVALUASI SISWA --}}
+                        @if($isLocked)
+                            <div class="mt-10 pt-8 border-t-2 border-dashed border-slate-100 print:hidden">
+                                <h3 class="text-sm font-black text-slate-800 flex items-center gap-2 mb-6">
+                                    <i class="ph-fill ph-star text-amber-500 text-xl"></i> Evaluasi Pelayanan (Siswa)
+                                </h3>
+                                @if($session->rating)
+                                    <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100 shadow-sm relative overflow-hidden">
+                                        <i class="ph-fill ph-quotes absolute right-4 bottom-4 text-6xl text-amber-200 opacity-30"></i>
+                                        <div class="flex items-center gap-2 text-amber-500 text-2xl mb-4 relative z-10">
+                                            @for($i=1; $i<=5; $i++)
+                                                <i class="{{ $i <= $session->rating ? 'ph-fill' : 'ph-bold' }} ph-star"></i>
+                                            @endfor
+                                            <span class="font-black text-amber-800 ml-3 text-xl">{{ $session->rating }}/5</span>
+                                        </div>
+                                        @if($session->student_feedback)
+                                            <div class="bg-white/70 p-4 rounded-xl border border-amber-200/50 text-amber-900 italic font-medium relative z-10 shadow-sm">
+                                                "{{ $session->student_feedback }}"
+                                            </div>
+                                        @else
+                                            <p class="text-amber-700/70 text-sm font-medium italic relative z-10">Siswa memberikan rating bintang tanpa ulasan teks.</p>
+                                        @endif
+                                        <p class="text-[10px] font-bold text-amber-600/70 mt-4 uppercase tracking-widest relative z-10">
+                                            Dinilai pada: {{ \Carbon\Carbon::parse($session->feedback_at)->translatedFormat('d M Y, H:i') }}
+                                        </p>
                                     </div>
-                                    
-                                    {{-- Cap Rahasia Khusus Saat Cetak Dokumen --}}
-                                    <div class="hidden print:block mt-8 text-center text-rose-700 font-bold uppercase text-2xl border-4 border-rose-700 px-4 py-2 w-max mx-auto opacity-50 rotate-[-15deg]">
-                                        CONFIDENTIAL / RAHASIA
+                                @else
+                                    <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 text-center">
+                                        <i class="ph-duotone ph-hourglass-high text-4xl text-slate-300 mb-3"></i>
+                                        <p class="text-sm font-bold text-slate-600">Menunggu Penilaian</p>
+                                        <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Siswa belum mengisi survei kepuasan layanan.</p>
                                     </div>
                                 @endif
                             </div>
                         @endif
+
                     </div>
                     @endif
 
@@ -556,7 +642,7 @@
         </div>
     </div>
 
-    {{-- SCRIPT SWEETALERT2 --}}
+    {{-- SCRIPTS --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Logika Pop-Up Konfirmasi Jurnal
@@ -566,8 +652,8 @@
                 html: "Jurnal yang disimpan akan bersifat <b class='text-rose-500'>Read-Only (terkunci)</b> sebagai arsip resmi sekolah dan tidak dapat diubah kembali.",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#10b981', // Warna emerald-500
-                cancelButtonColor: '#94a3b8',  // Warna slate-400
+                confirmButtonColor: '#10b981', // emerald-500
+                cancelButtonColor: '#94a3b8',  // slate-400
                 confirmButtonText: 'Ya, Selesaikan',
                 cancelButtonText: 'Batal',
                 reverseButtons: true,
@@ -578,80 +664,60 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Submit form jika menekan 'Ya'
                     document.getElementById('jurnalForm').submit();
                 }
             });
         }
 
-        // Logika Toast Global jika ada Flash Message
+        // Flash Messages
         document.addEventListener('DOMContentLoaded', function() {
             @if(session('success'))
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: "{!! session('success') !!}",
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    customClass: {
-                        popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans'
-                    }
+                    icon: 'success', title: 'Berhasil!', text: "{!! session('success') !!}",
+                    toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
+                    customClass: { popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans' }
                 });
             @endif
-
             @if(session('error'))
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: "{!! session('error') !!}",
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 4000,
-                    timerProgressBar: true,
-                    customClass: {
-                        popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans'
-                    }
+                    icon: 'error', title: 'Oops...', text: "{!! session('error') !!}",
+                    toast: true, position: 'top-end', showConfirmButton: false, timer: 4000,
+                    customClass: { popup: 'rounded-2xl border border-slate-100 shadow-lg font-sans' }
                 });
             @endif
         });
 
-          function bkChatHandler(sessionId) {
+        // Chat Handler
+        function bkTeacherChatHandler(sessionId) {
             return {
-                messages: [],
-                newMessage: '',
-                init() {
-                    this.fetchMessages();
-                    setInterval(() => this.fetchMessages(), 5000);
-                },
+                messages: [], newMessage: '', isSending: false,
+                init() { this.fetchMessages(); setInterval(() => this.fetchMessages(), 3000); },
                 fetchMessages() {
-                    fetch(`/admin/bk/chat/${sessionId}`)
+                    fetch(`/admin/bk/chat/${sessionId}`, { headers: { 'Accept': 'application/json' } })
                         .then(res => res.json())
                         .then(data => {
+                            let isNew = this.messages.length !== data.length;
                             this.messages = data;
-                            this.scrollToBottom();
-                        });
+                            if(isNew) this.scrollToBottom();
+                        }).catch(e => console.warn("Polling error:", e));
                 },
                 send() {
-                    if (!this.newMessage.trim()) return;
-                    let msg = this.newMessage;
-                    this.newMessage = '';
+                    if (!this.newMessage.trim() || this.isSending) return;
+                    let text = this.newMessage; this.newMessage = ''; this.isSending = true;
+                    
+                    this.messages.push({ id: 'temp-'+Date.now(), message: text, sender_type: 'teacher', created_at: new Date().toISOString() });
+                    this.scrollToBottom();
+                    
                     fetch(`/admin/bk/chat/${sessionId}`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                        body: JSON.stringify({ message: msg })
-                    }).then(() => this.fetchMessages());
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        body: JSON.stringify({ message: text })
+                    }).then(res => { if(!res.ok) throw new Error('Error'); return res.json(); })
+                      .then(data => { this.isSending = false; this.fetchMessages(); })
+                      .catch(err => { this.isSending = false; this.messages.pop(); Swal.fire('Gagal!', 'Tidak dapat mengirim pesan', 'error'); });
                 },
-                scrollToBottom() {
-                    this.$nextTick(() => {
-                        let b = this.$refs.chatBox;
-                        if(b) b.scrollTop = b.scrollHeight;
-                    });
-                },
-                formatTime(iso) { return new Date(iso).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}); }
+                scrollToBottom() { this.$nextTick(() => { let b = this.$refs.chatBox; if(b) b.scrollTop = b.scrollHeight; }); },
+                formatTime(iso) { if(!iso) return ''; return new Date(iso).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'}); }
             }
         }
     </script>

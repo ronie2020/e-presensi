@@ -66,6 +66,31 @@
         </div>
 
         
+        <?php if($score < 100): ?>
+        <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm">
+            <h4 class="text-sm font-black text-slate-800 mb-4 flex items-center gap-2">
+                <i class="ph-fill ph-leaf text-emerald-500"></i> Program Pemulihan
+            </h4>
+            <div class="space-y-3">
+                <?php if(isset($amnestyTasks)): ?>
+                    <?php $__currentLoopData = $amnestyTasks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $task): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between group hover:border-emerald-200 transition-all cursor-default">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-white flex items-center justify-center text-emerald-600 shadow-sm">
+                                <i class="<?php echo e($task['icon']); ?>"></i>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-600 leading-tight max-w-[120px]"><?php echo e($task['title']); ?></span>
+                        </div>
+                        <span class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">-<?php echo e($task['points']); ?> Poin</span>
+                    </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endif; ?>
+            </div>
+            <p class="text-[9px] text-slate-400 mt-4 text-center italic">Hubungi Guru BK untuk mengambil tugas pemulihan.</p>
+        </div>
+        <?php endif; ?>
+
+        
         <div class="grid grid-cols-2 gap-3">
             
             <div class="bg-rose-50 p-4 rounded-3xl border border-rose-100 text-center group hover:bg-rose-100 transition-colors">
@@ -109,16 +134,9 @@
                     <?php $__currentLoopData = $violations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $record): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <?php
                             // LOGIKA UNTUK MENANGANI DATA MANUAL VS OTOMATIS
-                            // 1. Poin: Ambil dari DisciplineType (manual) atau point_earned (otomatis)
                             $pointVal = $record->disciplineType->point_value ?? abs($record->point_earned ?? 0);
-                            
-                            // 2. Nama: Ambil dari DisciplineType (manual) atau activity_name (otomatis)
                             $title = $record->disciplineType->name ?? ($record->activity_name ?? 'Pelanggaran');
-
-                            // 3. Deskripsi: Ambil dari notes (manual) atau description (otomatis)
                             $desc = $record->notes ?? ($record->description ?? null);
-                            
-                            // 4. Tanggal
                             $date = \Carbon\Carbon::parse($record->date ?? $record->created_at);
                         ?>
 
@@ -138,7 +156,6 @@
 
                                         </span>
                                         <?php if(!$record->disciplineType): ?>
-                                            
                                             <span class="bg-slate-100 text-slate-500 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">
                                                 System
                                             </span>

@@ -7,7 +7,7 @@
         hoverValue: 0
      }">
     
-    <!-- 1. HEADER VIBRANT (Redesigned) -->
+    <!-- 1. HEADER VIBRANT -->
     <div class="bg-gradient-to-r from-blue-700 to-indigo-600 rounded-[2.5rem] p-8 md:p-10 text-white shadow-xl shadow-blue-900/10 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
         <div class="absolute top-0 right-0 opacity-10 pointer-events-none">
             <i class="ph-fill ph-heart-beat text-[200px] transform translate-x-10 -translate-y-10"></i>
@@ -72,7 +72,7 @@
                 <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Proses</span>
             </div>
             <p class="text-3xl font-black text-slate-800 relative z-10">{{ $bkSessions->where('status', 'pending')->count() }}</p>
-            <p class="text-xs text-slate-400 font-medium mt-1 relative z-10">Menunggu Respon</p>
+            <p class="text-xs text-slate-400 font-medium mt-1 relative z-10">Menunggu</p>
         </div>
 
         <div class="bg-white p-5 rounded-[2rem] border border-emerald-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
@@ -83,7 +83,7 @@
                 <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Selesai</span>
             </div>
             <p class="text-3xl font-black text-slate-800 relative z-10">{{ $bkSessions->where('status', 'finished')->count() }}</p>
-            <p class="text-xs text-slate-400 font-medium mt-1 relative z-10">Telah Dinilai</p>
+            <p class="text-xs text-slate-400 font-medium mt-1 relative z-10">Tuntas</p>
         </div>
     </div>
 
@@ -130,6 +130,7 @@
                                     $statusStyle = match($session->status) {
                                         'finished' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
                                         'approved' => 'bg-blue-100 text-blue-700 border-blue-200',
+                                        'ongoing' => 'bg-indigo-100 text-indigo-700 border-indigo-200',
                                         'pending' => 'bg-amber-100 text-amber-700 border-amber-200',
                                         'rejected' => 'bg-rose-100 text-rose-700 border-rose-200',
                                         default => 'bg-slate-100 text-slate-600'
@@ -137,6 +138,7 @@
                                     $statusLabel = match($session->status) {
                                         'finished' => 'Selesai',
                                         'approved' => 'Dijadwalkan',
+                                        'ongoing' => 'Chatting',
                                         'pending' => 'Menunggu',
                                         'rejected' => 'Ditolak',
                                         default => $session->status
@@ -154,7 +156,7 @@
                                                 <i class="{{ $i <= $session->rating ? 'ph-fill' : 'ph-bold' }} ph-star text-sm"></i>
                                             @endfor
                                         </div>
-                                        <p class="text-[10px] text-slate-400 mt-1 font-bold italic">Dinilai pada {{ Carbon::parse($session->feedback_at)->translatedFormat('d M') }}</p>
+                                        <p class="text-[10px] text-slate-400 mt-1 font-bold italic">Dinilai pada {{ \Carbon\Carbon::parse($session->feedback_at)->translatedFormat('d M') }}</p>
                                     @else
                                         <button @click="showRatingModal = true; selectedSessionId = {{ $session->id }}; selectedTopic = '{{ $session->category->name }}'" 
                                                 class="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg text-[10px] font-black uppercase hover:bg-amber-500 hover:text-white transition-all shadow-sm">
@@ -162,7 +164,7 @@
                                         </button>
                                     @endif
                                 @else
-                                    <span class="text-[10px] text-slate-400 italic">Tersedia setelah sesi selesai</span>
+                                    <span class="text-[10px] text-slate-400 italic">Tersedia setelah tuntas</span>
                                 @endif
                             </td>
                             <td class="px-6 py-5 text-center">
@@ -177,10 +179,12 @@
             </div>
         @else
             <div class="text-center py-20 px-4 bg-slate-50/50">
-                <i class="ph-duotone ph-chats-teardrop text-5xl text-slate-300 mb-6 block"></i>
+                <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300 border-4 border-slate-50 shadow-sm">
+                    <i class="ph-duotone ph-chats-teardrop text-5xl"></i>
+                </div>
                 <h4 class="text-xl font-black text-slate-800">Belum Ada Riwayat</h4>
                 <p class="text-slate-500 text-sm mt-2 max-w-sm mx-auto mb-8 leading-relaxed">Jangan ragu untuk berkonsultasi mengenai masalah akademik maupun non-akademik. Kami siap membantu.</p>
-                <a href="{{ route('student.bk.create') }}" class="inline-flex items-center justify-center gap-2 px-8 py-3 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-2xl text-sm hover:border-blue-500 hover:text-blue-600 transition-all">
+                <a href="{{ route('student.bk.create') }}" class="inline-flex items-center justify-center gap-2 px-8 py-3 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-2xl text-sm hover:border-blue-500 hover:text-blue-600 hover:shadow-lg transition-all">
                     <i class="ph-bold ph-plus-circle"></i> Mulai Konsultasi
                 </a>
             </div>
@@ -202,14 +206,12 @@
                     <i class="ph-fill ph-star"></i>
                 </div>
                 <h3 class="text-2xl font-black text-slate-800 leading-tight">Kepuasan Layanan</h3>
-                <p class="text-sm text-slate-500 mt-2 font-medium">Bantu kami meningkatkan kualitas layanan konseling <span class="text-blue-600 font-bold" x-text="selectedTopic"></span>.</p>
+                <p class="text-sm text-slate-500 mt-2 font-medium">Bantu kami meningkatkan layanan untuk topik <span class="text-blue-600 font-bold" x-text="selectedTopic"></span>.</p>
             </div>
 
-            <!-- Form dikirim ke storeBkFeedback -->
             <form :action="'{{ url('student/portal/bk-feedback') }}/' + selectedSessionId" method="POST">
                 @csrf
                 
-                <!-- Input Rating (Visual Stars Interaktif) -->
                 <div class="flex justify-center gap-3 mb-8">
                     <template x-for="i in 5">
                         <button type="button" 
@@ -229,9 +231,8 @@
                     <textarea name="feedback" 
                               rows="3" 
                               maxlength="500"
-                              placeholder="Ceritakan pengalamanmu... Apakah Guru membantu? Apakah solusi yang diberikan bermanfaat?" 
+                              placeholder="Ceritakan pengalamanmu..." 
                               class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:italic"></textarea>
-                    <p class="text-[10px] text-slate-400 mt-2 italic">* Ulasan ini akan menjadi bahan evaluasi internal Guru BK.</p>
                 </div>
 
                 <div class="flex gap-3">

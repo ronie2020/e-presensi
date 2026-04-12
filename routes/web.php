@@ -203,8 +203,12 @@ Route::middleware(['auth:student'])->group(function () {
         Route::get('/konsultasi', [BkStudentController::class, 'create'])->name('create'); 
         Route::post('/', [BkStudentController::class, 'store'])->name('store'); 
         Route::get('/{id}', [BkStudentController::class, 'show'])->name('show'); 
-    });
 
+    // --- ROUTE CHAT BK (SISI SISWA) ---
+        Route::get('/chat/{id}', [BkStudentController::class, 'getMessages'])->name('chat.get');
+        Route::post('/chat/{id}', [BkStudentController::class, 'sendMessage'])->name('chat.send');
+    });
+    
     // --- 9. LAPOR PRESTASI MANDIRI ---
     Route::post('/student/achievements', [StudentPortalController::class, 'storeStudentAchievement'])->name('student.achievements.store');
 });
@@ -672,6 +676,10 @@ Route::middleware('auth')->group(function () {
         
         // Input Hasil Konseling (Jurnal Rahasia)
         Route::post('/{id}/record', [BkTeacherController::class, 'storeRecord'])->name('store_record');
+
+         // --- ROUTE CHAT BK (SISI GURU) ---
+        Route::get('/chat/{id}', [BkTeacherController::class, 'getMessages'])->name('chat.get');
+        Route::post('/chat/{id}', [BkTeacherController::class, 'sendMessage'])->name('chat.send');
     });
 
      // MONITORING 7 KEBIASAAN (GURU)

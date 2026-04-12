@@ -3,18 +3,12 @@
     $date = \Carbon\Carbon::now();
     
     // --- PENGATURAN MANUAL TANGGAL HIJRIYAH ---
-    // Ubah angka ini jika tanggal Hijriyah selisih dengan ketetapan pemerintah.
-    // Contoh: 
-    // 0  = Sesuai algoritma komputer
-    // 1  = Ditambah 1 hari (Maju)
-    // -1 = Dikurang 1 hari (Mundur)
     $hijriOffset = -1; 
 
     // Default Fallback
     $hijriString = 'Tanggal Hijriyah';
     $hijriDateFull = '-';
 
-    // Cek apakah server mendukung Intl Calendar Islamic
     if(extension_loaded('intl')) {
         try {
             $fmt = new IntlDateFormatter(
@@ -24,26 +18,39 @@
                 'Asia/Jakarta', 
                 IntlDateFormatter::TRADITIONAL
             );
-            
-            // Terapkan Offset pada timestamp untuk Hijriyah saja
-            // Kita copy object date agar tanggal Masehi utama tidak ikut berubah
             $hijriTimestamp = $date->copy()->addDays($hijriOffset)->getTimestamp();
-            
             $hijriString = $fmt->format($hijriTimestamp);
-            // Hasil biasanya: "Selasa, 1 Ramadan 1447 AH"
-            
-            // Bersihkan format string
             $hijriString = str_replace([' AH', ' H'], '', $hijriString);
             $parts = explode(',', $hijriString);
-            $hijriDateFull = trim(end($parts)); // Ambil bagian "1 Ramadan 1447"
+            $hijriDateFull = trim(end($parts)); 
             
-        } catch (\Exception $e) {
-            // Fallback jika error
-        }
+        } catch (\Exception $e) {}
     }
 ?>
 
 <div class="space-y-8 animate-in fade-in duration-500 font-sans">
+
+    
+    <?php if(isset($priorityAlerts) && $priorityAlerts->isNotEmpty()): ?>
+        <div class="space-y-3">
+            <?php $__currentLoopData = $priorityAlerts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $alert): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <div class="flex items-center gap-4 p-5 rounded-[2rem] bg-<?php echo e($alert['color']); ?>-50 border border-<?php echo e($alert['color']); ?>-100 shadow-sm animate-pulse">
+                    <div class="w-12 h-12 rounded-2xl bg-<?php echo e($alert['color']); ?>-500 text-white flex items-center justify-center text-2xl shrink-0 shadow-lg shadow-<?php echo e($alert['color']); ?>-500/20">
+                        <i class="<?php echo e($alert['icon']); ?>"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-black text-<?php echo e($alert['color']); ?>-900 text-sm"><?php echo e($alert['title']); ?></h4>
+                        <p class="text-<?php echo e($alert['color']); ?>-700 text-xs font-medium"><?php echo e($alert['message']); ?></p>
+                    </div>
+                    <?php if($alert['type'] == 'bk_schedule'): ?>
+                        <button @click="updateTab('bk')" class="px-4 py-2 bg-<?php echo e($alert['color']); ?>-600 text-white text-[10px] font-black uppercase rounded-xl hover:bg-<?php echo e($alert['color']); ?>-700 transition-all">Detail</button>
+                    <?php else: ?>
+                        <button @click="updateTab('disiplin')" class="px-4 py-2 bg-<?php echo e($alert['color']); ?>-600 text-white text-[10px] font-black uppercase rounded-xl hover:bg-<?php echo e($alert['color']); ?>-700 transition-all">Pulihkan</button>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </div>
+    <?php endif; ?>
     
     
     <?php if(isset($priorityExams) && $priorityExams->isNotEmpty()): ?>
@@ -527,31 +534,26 @@
         
         
         <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col h-full">
-            <!-- Ikon Latar Belakang -->
             <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110">
                 <i class="ph-fill ph-star text-9xl text-amber-400"></i>
             </div>
             
             <div class="relative z-10 w-full flex flex-col h-full">
-                <!-- Pengepala (Header) & Indikator Streak -->
                 <div class="flex justify-between items-start mb-4">
                     <div class="flex flex-col">
                         <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider flex items-center gap-1 mb-1">
                             <i class="ph-bold ph-medal"></i> Poin Karakter
                         </h3>
-                        <!-- LOGIK STREAK: Boleh disambungkan dengan pangkalan data anda kelak (contoh $login_streak) -->
                         <?php $streak = $login_streak ?? 5; ?>
                         <span class="text-[10px] font-black text-orange-500 flex items-center gap-1">
                             <i class="ph-fill ph-fire text-orange-500 animate-pulse"></i> <?php echo e($streak); ?> Hari Streak!
                         </span>
                     </div>
                     
-                    <!-- Logik Pengiraan Tahap (Level) berasaskan markah -->
                     <?php 
                         $behaviorScore = 200 - ($total_violation_points ?? 0) + ($total_merit_points ?? 0);
                         $scoreColor = $behaviorScore >= 180 ? 'text-emerald-600 bg-emerald-50 border-emerald-100' : ($behaviorScore >= 150 ? 'text-amber-600 bg-amber-50 border-amber-100' : 'text-rose-600 bg-rose-50 border-rose-100');
                         
-                        // Sistem Tahap Gamifikasi
                         $levelTitles = [
                             1 => 'Pemula',
                             2 => 'Pelajar Biasa',
@@ -575,7 +577,6 @@
                     </span>
                 </div>
 
-                <!-- Palang Kemajuan (Progress Bar) -->
                 <div class="mb-4 mt-2">
                     <div class="flex justify-between items-end mb-1.5">
                         <span class="text-sm font-black text-slate-800 flex items-center gap-1.5">
@@ -604,7 +605,6 @@
                     </div>
                 </div>
 
-                <!-- Kotak Statistik Bawah -->
                 <div class="grid grid-cols-2 gap-3 mt-auto">
                     <div class="bg-emerald-50/50 p-3 rounded-2xl border border-emerald-100 text-center flex flex-col justify-center hover:bg-emerald-50 transition-colors cursor-default">
                         <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-1.5 text-sm shadow-sm">

@@ -9,10 +9,25 @@ class BkSession extends Model
 {
     use HasFactory;
 
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'student_id',
+        'bk_category_id',
+        'teacher_id',
+        'initial_message',
+        'response_message',
+        'scheduled_at',
+        'method',
+        'status',
+        'is_system_generated',
+        // --- Kolom khusus untuk fitur Rating & Feedback ---
+        'rating',           // Nilai bintang 1-5
+        'student_feedback', // Ulasan tekstual dari siswa
+        'feedback_at',      // Waktu siswa memberikan ulasan
+    ];
 
-    protected $casts = [
+      protected $casts = [
         'scheduled_at' => 'datetime',
+        'feedback_at'  => 'datetime',
     ];
 
     // Relasi ke Siswa (Yang curhat)
@@ -21,8 +36,7 @@ class BkSession extends Model
         return $this->belongsTo(Student::class);
     }
 
-    // Relasi ke Guru BK (Yang menangani)
-    // Menggunakan model User karena Guru ada di tabel users
+    // Relasi ke Guru BK (Yang menangani)   
     public function teacher()
     {
         return $this->belongsTo(User::class, 'teacher_id');
@@ -38,5 +52,11 @@ class BkSession extends Model
     public function record()
     {
         return $this->hasOne(BkRecord::class);
+    }
+     
+    // Relasi ke Chat BK (Pesan interaksi online).     
+    public function chats()
+    {
+        return $this->hasMany(BkChat::class, 'bk_session_id');
     }
 }

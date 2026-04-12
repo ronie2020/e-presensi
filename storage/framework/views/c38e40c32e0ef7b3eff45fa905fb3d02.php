@@ -1,14 +1,19 @@
-<div class="space-y-8 font-sans text-slate-800 animate-in fade-in duration-500">
+<div class="space-y-8 font-sans text-slate-800 animate-in fade-in duration-500" 
+     x-data="{ 
+        showRatingModal: false, 
+        selectedSessionId: null, 
+        selectedTopic: '',
+        ratingValue: 5,
+        hoverValue: 0
+     }">
     
-    <!-- 1. HEADER VIBRANT (Redesigned) -->
+    <!-- 1. HEADER VIBRANT -->
     <div class="bg-gradient-to-r from-blue-700 to-indigo-600 rounded-[2.5rem] p-8 md:p-10 text-white shadow-xl shadow-blue-900/10 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
-        <!-- Dekorasi Background -->
         <div class="absolute top-0 right-0 opacity-10 pointer-events-none">
             <i class="ph-fill ph-heart-beat text-[200px] transform translate-x-10 -translate-y-10"></i>
         </div>
         <div class="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full blur-3xl -ml-20 -mb-20 pointer-events-none"></div>
 
-        <!-- Konten Kiri -->
         <div class="relative z-10 max-w-2xl">
             <div class="flex items-center gap-5 mb-4">
                 <div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-3xl shadow-inner border border-white/20">
@@ -23,26 +28,20 @@
                 </div>
             </div>
             <p class="text-blue-50/90 text-sm md:text-base leading-relaxed pl-1">
-                "Setiap masalah punya solusi. Kami di sini untuk mendengarkan tanpa menghakimi. Ceritakan apa yang kamu rasakan di ruang aman ini."
+                "Umpan balikmu adalah kompas kami. Berikan penilaian setelah sesi selesai untuk membantu kami melayani lebih baik."
             </p>
         </div>
         
-        <!-- Tombol Aksi -->
         <div class="relative z-10 flex flex-col sm:flex-row gap-3 shrink-0 w-full md:w-auto">
-            <button type="button" @click="updateTab('pengaduan')" class="group bg-blue-800/50 text-blue-100 px-6 py-4 rounded-[1.5rem] font-black hover:bg-blue-800 hover:text-white transition-all flex items-center justify-center gap-3 active:scale-95 text-xs uppercase tracking-widest border border-blue-700/50">
-                <i class="ph-bold ph-arrow-left text-xl group-hover:-translate-x-1 transition-transform"></i>
-                Pengaduan
-            </button>
-            <a href="<?php echo e(route('student.bk.create')); ?>" class="group bg-white text-blue-600 px-8 py-4 rounded-[1.5rem] font-black shadow-xl shadow-blue-900/20 hover:bg-blue-50 transition-all flex items-center justify-center gap-3 active:scale-95 text-xs uppercase tracking-widest border-2 border-transparent hover:border-blue-100">
+            <a href="<?php echo e(route('student.bk.create')); ?>" class="group bg-white text-blue-600 px-8 py-4 rounded-[1.5rem] font-black shadow-xl shadow-blue-900/20 hover:bg-blue-50 transition-all flex items-center justify-center gap-3 active:scale-95 text-xs uppercase tracking-widest border-2 border-transparent">
                 <i class="ph-bold ph-chats text-xl group-hover:scale-110 transition-transform"></i>
-                Konsultasi
+                Konsultasi Baru
             </a>
         </div>
     </div>
 
-    <!-- 2. STATISTIK RINGKAS (Updated Icons & Colors) -->
+    <!-- 2. STATISTIK RINGKAS -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <!-- Total -->
         <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-all group">
             <div class="flex justify-between items-start mb-4">
                 <div class="p-3 bg-slate-50 rounded-2xl text-slate-400 group-hover:bg-slate-100 group-hover:text-slate-600 transition-colors">
@@ -54,9 +53,7 @@
             <p class="text-xs text-slate-400 font-medium mt-1">Sesi Diajukan</p>
         </div>
 
-        <!-- Disetujui / Akan Datang -->
         <div class="bg-white p-5 rounded-[2rem] border border-blue-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-            <div class="absolute -right-6 -top-6 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-110 transition-transform"></div>
             <div class="relative z-10 flex justify-between items-start mb-4">
                 <div class="p-3 bg-blue-50 rounded-2xl text-blue-600 shadow-sm">
                     <i class="ph-bold ph-calendar-check text-xl"></i>
@@ -67,9 +64,7 @@
             <p class="text-xs text-slate-400 font-medium mt-1 relative z-10">Akan Datang</p>
         </div>
 
-        <!-- Menunggu -->
         <div class="bg-white p-5 rounded-[2rem] border border-amber-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-            <div class="absolute -right-6 -top-6 w-24 h-24 bg-amber-50 rounded-full group-hover:scale-110 transition-transform"></div>
             <div class="relative z-10 flex justify-between items-start mb-4">
                 <div class="p-3 bg-amber-50 rounded-2xl text-amber-600 shadow-sm">
                     <i class="ph-bold ph-hourglass text-xl"></i>
@@ -77,12 +72,10 @@
                 <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Proses</span>
             </div>
             <p class="text-3xl font-black text-slate-800 relative z-10"><?php echo e($bkSessions->where('status', 'pending')->count()); ?></p>
-            <p class="text-xs text-slate-400 font-medium mt-1 relative z-10">Menunggu Respon</p>
+            <p class="text-xs text-slate-400 font-medium mt-1 relative z-10">Menunggu</p>
         </div>
 
-        <!-- Selesai -->
         <div class="bg-white p-5 rounded-[2rem] border border-emerald-100 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-            <div class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-110 transition-transform"></div>
             <div class="relative z-10 flex justify-between items-start mb-4">
                 <div class="p-3 bg-emerald-50 rounded-2xl text-emerald-600 shadow-sm">
                     <i class="ph-bold ph-check-circle text-xl"></i>
@@ -90,29 +83,17 @@
                 <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Selesai</span>
             </div>
             <p class="text-3xl font-black text-slate-800 relative z-10"><?php echo e($bkSessions->where('status', 'finished')->count()); ?></p>
-            <p class="text-xs text-slate-400 font-medium mt-1 relative z-10">Masalah Teratasi</p>
+            <p class="text-xs text-slate-400 font-medium mt-1 relative z-10">Tuntas</p>
         </div>
     </div>
 
-    <!-- 3. DAFTAR RIWAYAT -->
+    <!-- 3. DAFTAR RIWAYAT DENGAN OPSI RATING -->
     <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
-        <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-                <h4 class="font-bold text-slate-800 text-lg flex items-center gap-2">
-                    <i class="ph-duotone ph-list-dashes text-blue-500 text-xl"></i>
-                    Riwayat Konsultasi
-                </h4>
-                <p class="text-xs text-slate-400 mt-1">Daftar sesi konseling yang pernah kamu ajukan</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <button type="button" @click="updateTab('pengaduan')" class="inline-flex items-center justify-center px-4 py-2 bg-white hover:bg-slate-50 text-slate-600 text-xs font-bold rounded-xl transition-all border border-slate-200 shadow-sm active:scale-95 group">
-                    <i class="ph-bold ph-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i> Ke Pengaduan
-                </button>
-                <a href="<?php echo e(route('student.bk.index')); ?>" class="group flex items-center gap-2 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 px-4 py-2 rounded-xl hover:bg-blue-100 transition-all shadow-sm">
-                    Lihat Semua
-                    <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                </a>
-            </div>
+        <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50">
+            <h4 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                <i class="ph-duotone ph-list-dashes text-blue-500 text-xl"></i>
+                Log Konsultasi & Penilaian
+            </h4>
         </div>
         
         <?php if($bkSessions->count() > 0): ?>
@@ -120,76 +101,76 @@
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-slate-50 text-[10px] uppercase font-black text-slate-400 tracking-widest">
                         <tr>
-                            <th class="px-6 py-5 rounded-tl-2xl">Topik & Pesan</th>
-                            <th class="px-6 py-5">Jadwal</th>
+                            <th class="px-6 py-5">Topik & Konselor</th>
                             <th class="px-6 py-5">Status</th>
-                            <th class="px-6 py-5 rounded-tr-2xl text-center">Detail</th>
+                            <th class="px-6 py-5">Umpan Balik Siswa</th>
+                            <th class="px-6 py-5 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 text-sm">
-                        <?php $__currentLoopData = $bkSessions->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php $__currentLoopData = $bkSessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr class="hover:bg-blue-50/30 transition-colors group">
                             <td class="px-6 py-5">
                                 <div class="flex items-start gap-4">
-                                    <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-lg shrink-0 border border-slate-100 shadow-sm
-                                        <?php echo e($session->method == 'online' ? 'bg-indigo-50 text-indigo-600' : 'bg-blue-50 text-blue-600'); ?>">
-                                        <?php if($session->method == 'online'): ?> 
-                                            <i class="ph-duotone ph-chat-text"></i>
-                                        <?php else: ?>
-                                            <i class="ph-duotone ph-users-three"></i>
-                                        <?php endif; ?>
+                                    <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-lg shrink-0 border border-slate-100 shadow-sm bg-blue-50 text-blue-600">
+                                        <i class="ph-duotone ph-user-focus"></i>
                                     </div>
                                     <div>
                                         <div class="flex items-center gap-2 mb-1">
                                             <span class="font-bold text-slate-800 text-sm group-hover:text-blue-600 transition-colors"><?php echo e($session->category->name); ?></span>
-                                            <?php if($session->method == 'online'): ?>
-                                                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-600 border border-indigo-200 uppercase">Online</span>
-                                            <?php endif; ?>
                                         </div>
-                                        <p class="text-xs text-slate-500 leading-relaxed line-clamp-2 max-w-[200px]"><?php echo e($session->initial_message); ?></p>
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                                            Guru: <?php echo e($session->teacher->name ?? 'Belum Ditentukan'); ?>
+
+                                        </p>
                                     </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-5">
-                                <div class="flex flex-col">
-                                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Diajukan</span>
-                                    <span class="text-sm font-bold text-slate-700"><?php echo e($session->created_at->translatedFormat('d M Y')); ?></span>
-                                    
-                                    <?php if($session->scheduled_at): ?>
-                                        <div class="mt-2 flex items-center gap-1.5 text-blue-600 bg-blue-50 w-fit px-2 py-1 rounded-lg border border-blue-100">
-                                            <i class="ph-bold ph-clock text-xs"></i> 
-                                            <span class="text-xs font-bold"><?php echo e($session->scheduled_at->format('H:i')); ?></span>
-                                        </div>
-                                    <?php endif; ?>
                                 </div>
                             </td>
                             <td class="px-6 py-5">
                                 <?php
                                     $statusStyle = match($session->status) {
-                                        'pending' => 'bg-amber-100 text-amber-700 border-amber-200',
-                                        'approved' => 'bg-blue-100 text-blue-700 border-blue-200',
-                                        'ongoing' => 'bg-purple-100 text-purple-700 border-purple-200',
                                         'finished' => 'bg-emerald-100 text-emerald-700 border-emerald-200',
+                                        'approved' => 'bg-blue-100 text-blue-700 border-blue-200',
+                                        'ongoing' => 'bg-indigo-100 text-indigo-700 border-indigo-200',
+                                        'pending' => 'bg-amber-100 text-amber-700 border-amber-200',
                                         'rejected' => 'bg-rose-100 text-rose-700 border-rose-200',
                                         default => 'bg-slate-100 text-slate-600'
                                     };
                                     $statusLabel = match($session->status) {
-                                        'pending' => 'Menunggu',
-                                        'approved' => 'Disetujui',
-                                        'ongoing' => 'Berlangsung',
                                         'finished' => 'Selesai',
+                                        'approved' => 'Dijadwalkan',
+                                        'ongoing' => 'Chatting',
+                                        'pending' => 'Menunggu',
                                         'rejected' => 'Ditolak',
-                                        default => '-'
+                                        default => $session->status
                                     };
                                 ?>
                                 <span class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wide border <?php echo e($statusStyle); ?> inline-flex items-center gap-1.5 shadow-sm">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-current opacity-50"></span>
                                     <?php echo e($statusLabel); ?>
 
                                 </span>
                             </td>
+                            <td class="px-6 py-5">
+                                <?php if($session->status == 'finished'): ?>
+                                    <?php if($session->rating): ?>
+                                        <div class="flex items-center gap-0.5 text-amber-400">
+                                            <?php for($i=1; $i<=5; $i++): ?>
+                                                <i class="<?php echo e($i <= $session->rating ? 'ph-fill' : 'ph-bold'); ?> ph-star text-sm"></i>
+                                            <?php endfor; ?>
+                                        </div>
+                                        <p class="text-[10px] text-slate-400 mt-1 font-bold italic">Dinilai pada <?php echo e(\Carbon\Carbon::parse($session->feedback_at)->translatedFormat('d M')); ?></p>
+                                    <?php else: ?>
+                                        <button @click="showRatingModal = true; selectedSessionId = <?php echo e($session->id); ?>; selectedTopic = '<?php echo e($session->category->name); ?>'" 
+                                                class="flex items-center gap-2 px-3 py-1.5 bg-amber-50 text-amber-600 border border-amber-200 rounded-lg text-[10px] font-black uppercase hover:bg-amber-500 hover:text-white transition-all shadow-sm">
+                                            <i class="ph-bold ph-star-half"></i> Beri Rating
+                                        </button>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <span class="text-[10px] text-slate-400 italic">Tersedia setelah tuntas</span>
+                                <?php endif; ?>
+                            </td>
                             <td class="px-6 py-5 text-center">
-                                <a href="<?php echo e(route('student.bk.show', $session->id)); ?>" class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-white border-2 border-slate-100 text-slate-400 hover:bg-blue-600 hover:text-white hover:border-blue-600 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300">
+                                <a href="<?php echo e(route('student.bk.show', $session->id)); ?>" class="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-white border-2 border-slate-100 text-slate-400 hover:bg-blue-600 hover:text-white transition-all">
                                     <i class="ph-bold ph-caret-right text-lg"></i>
                                 </a>
                             </td>
@@ -206,10 +187,68 @@
                 <h4 class="text-xl font-black text-slate-800">Belum Ada Riwayat</h4>
                 <p class="text-slate-500 text-sm mt-2 max-w-sm mx-auto mb-8 leading-relaxed">Jangan ragu untuk berkonsultasi mengenai masalah akademik maupun non-akademik. Kami siap membantu.</p>
                 <a href="<?php echo e(route('student.bk.create')); ?>" class="inline-flex items-center justify-center gap-2 px-8 py-3 bg-white border-2 border-slate-200 text-slate-700 font-bold rounded-2xl text-sm hover:border-blue-500 hover:text-blue-600 hover:shadow-lg transition-all">
-                    <i class="ph-bold ph-plus-circle"></i>
-                    Mulai Konsultasi Pertama
+                    <i class="ph-bold ph-plus-circle"></i> Mulai Konsultasi
                 </a>
             </div>
         <?php endif; ?>
+    </div>
+
+    <!-- MODAL RATING & FEEDBACK (ALPINE JS) -->
+    <div x-show="showRatingModal" 
+         x-transition.opacity 
+         x-cloak 
+         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+         @keydown.escape.window="showRatingModal = false">
+        
+        <div class="bg-white rounded-[2.5rem] w-full max-w-lg p-8 shadow-2xl animate-in zoom-in duration-300" 
+             @click.away="showRatingModal = false">
+            
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
+                    <i class="ph-fill ph-star"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-800 leading-tight">Kepuasan Layanan</h3>
+                <p class="text-sm text-slate-500 mt-2 font-medium">Bantu kami meningkatkan layanan untuk topik <span class="text-blue-600 font-bold" x-text="selectedTopic"></span>.</p>
+            </div>
+
+            <form :action="'<?php echo e(url('student/portal/bk-feedback')); ?>/' + selectedSessionId" method="POST">
+                <?php echo csrf_field(); ?>
+                
+                <div class="flex justify-center gap-3 mb-8">
+                    <template x-for="i in 5">
+                        <button type="button" 
+                                @click="ratingValue = i" 
+                                @mouseover="hoverValue = i" 
+                                @mouseleave="hoverValue = 0"
+                                class="text-4xl transition-all transform hover:scale-125 focus:outline-none" 
+                                :class="(hoverValue || ratingValue) >= i ? 'text-amber-400' : 'text-slate-200'">
+                            <i :class="(hoverValue || ratingValue) >= i ? 'ph-fill ph-star' : 'ph-bold ph-star'"></i>
+                        </button>
+                    </template>
+                    <input type="hidden" name="rating" :value="ratingValue">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">Ulasan Kamu (Opsional)</label>
+                    <textarea name="feedback" 
+                              rows="3" 
+                              maxlength="500"
+                              placeholder="Ceritakan pengalamanmu..." 
+                              class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:italic"></textarea>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="button" 
+                            @click="showRatingModal = false" 
+                            class="flex-1 py-4 bg-slate-100 text-slate-500 font-black rounded-2xl hover:bg-slate-200 transition-all">
+                        Tutup
+                    </button>
+                    <button type="submit" 
+                            class="flex-1 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all">
+                        Kirim Penilaian
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/students/portal/partials/tab-bk.blade.php ENDPATH**/ ?>

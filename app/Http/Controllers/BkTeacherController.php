@@ -222,15 +222,14 @@ class BkTeacherController extends Controller
         return redirect()->route('admin.bk.index')->with('success', 'Jurnal konseling berhasil disimpan.');
     }
 
-    /**
-     * API Chat BK (Logika Mirip Liaison Book)
-     */
+   // =========================================================================
+    // API CHAT UNTUK GURU
+    // =========================================================================
+
     public function getMessages($id)
     {
-        $messages = BkChat::where('bk_session_id', $id)
-            ->oldest()
-            ->get();
-            
+        if (!class_exists('\App\Models\BkChat')) { return response()->json([]); }
+        $messages = \App\Models\BkChat::where('bk_session_id', $id)->oldest()->get();
         return response()->json($messages);
     }
 
@@ -238,12 +237,12 @@ class BkTeacherController extends Controller
     {
         $request->validate(['message' => 'required|string']);
 
-        $chat = BkChat::create([
-            'bk_session_id' => $id,
-            'user_id' => Auth::id(), // Guru yang login
-            'message' => $request->message,
-            'sender_type' => 'teacher'
-        ]);
+        $chat = new \App\Models\BkChat();
+        $chat->bk_session_id = $id;
+        $chat->user_id = Auth::id(); // ID Guru yang merespon
+        $chat->message = $request->message;
+        $chat->sender_type = 'teacher';
+        $chat->save();
 
         return response()->json($chat);
     }
