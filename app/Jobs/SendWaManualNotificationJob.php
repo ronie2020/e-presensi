@@ -3,16 +3,15 @@
 namespace App\Jobs;
 
 use App\Models\AttendanceSiswa;
+use App\Services\WhatsAppService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Throwable;
-use Exception;
 
 class SendWaManualNotificationJob implements ShouldQueue
 {
@@ -20,7 +19,6 @@ class SendWaManualNotificationJob implements ShouldQueue
 
     protected $attendance;
 
-    // Retry 3 kali jika gagal
     public $tries = 3;
     public $backoff = 10;
 
@@ -29,7 +27,7 @@ class SendWaManualNotificationJob implements ShouldQueue
         $this->attendance = $attendance;
     }
 
-    public function handle(): void
+    public function handle(WhatsAppService $waService): void
     {
         sleep(rand(3, 7));
 
@@ -37,62 +35,48 @@ class SendWaManualNotificationJob implements ShouldQueue
 
         $student = $this->attendance->student;
         
-        // --- VALIDASI NOMOR HP ---
-        $nomorWA = preg_replace('/[^0-9]/', '', $student->parent_wa_number);
-        if (substr($nomorWA, 0, 2) == '08') $nomorWA = '62' . substr($nomorWA, 1);
+        // --- SMART FALLBACK LOGIC ---
+        // Prioritas 1: parent_wa_number
+        // Prioritas 2: parent_phone
+        // Prioritas 3: phone (Nomor HP utama di biodata)
+        $targetNumber = $student->parent_wa_number ?: ($student->parent_phone ?: $student->phone);
         
-        if (strlen($nomorWA) < 10) return;
+        $nomorWA = $waService->formatPhoneNumber($targetNumber);
+        
+        // Berhenti jika ketiga kolom tersebut kosong atau tidak valid
+        if (!$nomorWA) {
+            Log::warning("WA Manual Skip: Tidak ada nomor valid untuk siswa {$student->name}");
+            return; 
+        }
 
-        // --- DATA ---
         $namaSiswa    = $student->name;
         $statusManual = $this->attendance->status; 
         $catatan      = $this->attendance->notes ?? '-';
         $tanggal      = Carbon::parse($this->attendance->attendance_date)->translatedFormat('d F Y');
 
-        // --- SALAM KONTEKSTUAL ---
-        $jamSekarang = now()->hour;
-        $waktu = ($jamSekarang < 11) ? 'Pagi' : (($jamSekarang < 15) ? 'Siang' : 'Sore');
-        
-        $salam = collect([
-            "Assalamualaikum,", 
-            "Selamat {$waktu},", 
-            "Yth. Wali Murid,", 
-            "Salam Hormat,"
-        ])->random();
+        $salam = $waService->getGreeting();
 
-        // --- TEMPLATE PESAN ---
-        $templates = [
-            "*PEMBERITAHUAN SEKOLAH*\n\n{$salam}\nKami informasikan status kehadiran Ananda:\n\nNama: *{$namaSiswa}*\nTanggal: {$tanggal}\nStatus: *{$statusManual}*\nKeterangan: _{$catatan}_\n\nTerima kasih atas perhatiannya.",
-            "🔔 *INFO PRESENSI*\n\nHalo Ayah/Bunda,\nHari ini ({$tanggal}), Ananda *{$namaSiswa}* tercatat tidak mengikuti KBM dengan keterangan: *{$statusManual}*.\nCatatan: {$catatan}.\n\nSemoga menjadi maklum.",
-            "*LAPORAN ABSENSI*\n\n{$salam}\nAnanda *{$namaSiswa}* hari ini izin/tidak masuk sekolah.\nStatus: *{$statusManual}*\nInfo: {$catatan}\n\nTerima kasih - SMPN 3 Lakbok."
-        ];
+        // --- LOGIKA TEMPLATE PESAN (SINKRON DENGAN BLADE) ---
+        if (in_array($statusManual, ['Sakit', 'Izin', 'Alfa'])) {
+            // Template jika siswa TIDAK MASUK
+            $templates = [
+                "*PEMBERITAHUAN SEKOLAH*\n\n{$salam}\nKami informasikan status kehadiran Ananda:\n\nNama: *{$namaSiswa}*\nTanggal: {$tanggal}\nStatus: *{$statusManual}*\nKeterangan: _{$catatan}_\n\nTerima kasih atas perhatiannya.",
+                "🔔 *INFO PRESENSI*\n\nHalo Ayah/Bunda,\nHari ini ({$tanggal}), Ananda *{$namaSiswa}* tercatat tidak mengikuti KBM dengan keterangan: *{$statusManual}*.\nCatatan: {$catatan}.\n\nSemoga menjadi maklum.",
+                "*LAPORAN ABSENSI*\n\n{$salam}\nAnanda *{$namaSiswa}* hari ini tidak masuk sekolah.\nStatus: *{$statusManual}*\nInfo: {$catatan}\n\nTerima kasih."
+            ];
+        } else {
+            // Template jika siswa HADIR / TERLAMBAT (Input Manual)
+            $templates = [
+                "*LAPORAN KEHADIRAN*\n\n{$salam}\nKami informasikan kehadiran Ananda:\n\nNama: *{$namaSiswa}*\nTanggal: {$tanggal}\nStatus: *{$statusManual}*\nCatatan: _{$catatan}_\n\nTerima kasih atas perhatiannya."
+            ];
+        }
 
         $message = $templates[array_rand($templates)];
 
         // --- KIRIM API ---
-        $authKey = config('app.wapanels_authkey');
-        $appKeys = config('app.wapanels_appkeys');
-
-        if (empty($appKeys) || empty($authKey)) {
-            throw new Exception("Config WA Kosong");
-        }
-
-        $selectedAppKey = $appKeys[array_rand($appKeys)];
-        $apiUrl = 'https://app.wapanels.com/api/create-message';
-
-        $response = Http::timeout(15)->asForm()->post($apiUrl, [
-            'appkey'  => $selectedAppKey,
-            'authkey' => $authKey,
-            'to'      => $nomorWA,
-            'message' => $message,
-            'sandbox' => 'false'
-        ]);
-
-        if ($response->failed()) {
-            throw new Exception("API WA Error: " . $response->body());
-        } else {
-            Log::info("WA Manual Terkirim ke {$namaSiswa} ({$statusManual})");
-        }
+        $waService->sendMessage($nomorWA, $message);
+        
+        Log::info("WA Manual Terkirim ke {$namaSiswa} ({$statusManual}) di nomor {$nomorWA}");
     }
 
     public function failed(Throwable $exception): void

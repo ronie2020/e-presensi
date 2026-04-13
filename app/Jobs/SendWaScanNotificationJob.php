@@ -3,28 +3,22 @@
 namespace App\Jobs;
 
 use App\Models\AttendanceSiswa;
+use App\Services\WhatsAppService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Throwable;
-use Exception;
 
 class SendWaScanNotificationJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $attendance;
-
-    // --- KONFIGURASI RETRY (PERCOBAAN ULANG) ---
-    // Jika gagal, sistem akan mencoba kirim ulang maksimal 3 kali
     public $tries = 3;
-    
-    // Jeda waktu (detik) sebelum mencoba ulang (Exponential Backoff)
     public $backoff = 10;
 
     public function __construct(AttendanceSiswa $attendance)
@@ -32,32 +26,28 @@ class SendWaScanNotificationJob implements ShouldQueue
         $this->attendance = $attendance;
     }
 
-    public function handle(): void
+    public function handle(WhatsAppService $waService): void
     {
-        // 1. Jeda Acak (Anti-Banned WA)
-        sleep(rand(2, 6));
+        sleep(rand(2, 6)); // Anti-Banned Jeda
 
         if (!$this->attendance->student) return;
 
-        $student   = $this->attendance->student;
+        $student = $this->attendance->student;
         
-        // --- 2. STANDARISASI NOMOR HP ---
-        // Hapus karakter selain angka
-        $nomorWA = preg_replace('/[^0-9]/', '', $student->parent_wa_number);
-        
-        // Ubah 08xx menjadi 628xx
-        if (substr($nomorWA, 0, 2) == '08') {
-            $nomorWA = '62' . substr($nomorWA, 1);
-        }
-        
-        // Validasi panjang nomor (minimal 10 digit)
-        if (strlen($nomorWA) < 10) {
-            // Nomor tidak valid, jangan diretry (langsung return)
+        // --- SMART FALLBACK LOGIC ---
+        // Prioritas 1: parent_wa_number
+        // Prioritas 2: parent_phone
+        // Prioritas 3: phone (Nomor HP utama di biodata)
+        $targetNumber = $student->parent_wa_number ?: ($student->parent_phone ?: $student->phone);
+
+        // 1. Validasi Nomor (Menggunakan Service)
+        $nomorWA = $waService->formatPhoneNumber($targetNumber);
+        if (!$nomorWA) {
             Log::warning("WA Skip: Nomor tidak valid untuk siswa {$student->name}");
             return;
         }
 
-        // --- 3. SIAPKAN DATA ---
+        // 2. Siapkan Data
         $namaSiswa = $student->name;
         $timeInRaw = $this->attendance->time_in;
         $timeOutRaw = $this->attendance->time_out;
@@ -67,44 +57,47 @@ class SendWaScanNotificationJob implements ShouldQueue
         $tipeAbsen = strtolower($this->attendance->type); 
         $aktivitas = strtolower($this->attendance->activity ?? $tipeAbsen);
         $status    = $this->attendance->status;
-        $catatan   = $this->attendance->notes ?? '';
 
-        // --- 4. SALAM KONTEKSTUAL (Berdasarkan Jam) ---
-        $jamSekarang = now()->hour;
-        $waktu = ($jamSekarang < 11) ? 'Pagi' : (($jamSekarang < 15) ? 'Siang' : (($jamSekarang < 18) ? 'Sore' : 'Malam'));
-        
-        $salam = collect([
-            "Assalamualaikum Wr. Wb.", 
-            "Selamat {$waktu},", 
-            "Yth. Wali Murid,", 
-            "Salam Hormat,"
-        ])->random();
-
+        // 3. Salam Kontekstual (Menggunakan Service - menambah variasi)
+        $salam = $waService->getGreeting();
         $message = "";
 
-        // --- LOGIKA PESAN (SKENARIO) ---
-
-        // A. SKENARIO PULANG
+        // 4. Logika Skenario Pesan & Template Variatif
         if (!empty($jamPulang)) {
+            // ============================================
+            // TEMPLATE PULANG (5 Variasi)
+            // ============================================
             $templates = [
-                "*LAPORAN KEPULANGAN*\n\n{$salam}\nAnanda *{$namaSiswa}* telah menyelesaikan kegiatan belajar dan meninggalkan sekolah.\n\n⏰ Jam Pulang: {$jamPulang} WIB\n\nMohon dipantau kepulangannya. Terima kasih.",
-                "*INFO PULANG SEKOLAH*\n\n{$salam}\nDiinformasikan bahwa Ananda *{$namaSiswa}* sudah absen pulang pada pukul *{$jamPulang} WIB*.\nHati-hati di jalan dan selamat beristirahat.\n\n- Admin Sekolah -",
+                "*LAPORAN KEPULANGAN*\n\n{$salam}\nAnanda *{$namaSiswa}* telah menyelesaikan kegiatan belajar...\n⏰ Jam Pulang: *{$jamPulang} WIB*\n\nMohon dipantau kepulangannya. Terima kasih.",
+                "🔔 *NOTIFIKASI PULANG SEKOLAH*\n\n{$salam}\nDiinformasikan bahwa ananda *{$namaSiswa}* sudah melakukan absensi pulang pada pukul *{$jamPulang} WIB*.\n\nHati-hati di jalan dan selamat beristirahat.",
+                "*INFO PRESENSI - PULANG*\n\n{$salam} Ayah/Bunda,\nKami memberitahukan bahwa *{$namaSiswa}* telah meninggalkan area sekolah pada *{$jamPulang} WIB*.\n\nTerima kasih atas kerja samanya.",
+                "🏫 *UPDATE KEHADIRAN*\n\n{$salam}\nWaktu belajar hari ini telah usai. Ananda *{$namaSiswa}* tercatat pulang pukul *{$jamPulang} WIB*.\n\nMohon pastikan ananda tiba di rumah dengan selamat.",
+                "*PESAN OTOMATIS SEKOLAH*\n\n{$salam}\nAnanda *{$namaSiswa}* baru saja melakukan scan kepulangan jam *{$jamPulang} WIB*.\nTerima kasih telah mempercayakan pendidikan ananda kepada kami."
             ];
             $message = $templates[array_rand($templates)];
-        }
-        // B. SKENARIO MASUK / TERLAMBAT
-        elseif (in_array($status, ['Hadir', 'Terlambat']) && empty($jamPulang)) {
-            if (str_contains($aktivitas, 'harian') || $tipeAbsen == 'harian' || $tipeAbsen == 'masuk') {
+
+        } elseif (in_array($status, ['Hadir', 'Terlambat']) && empty($jamPulang)) {
+            if (str_contains($aktivitas, 'harian') || in_array($tipeAbsen, ['harian', 'masuk'])) {
                 if ($status == 'Terlambat') {
+                    // ============================================
+                    // TEMPLATE TERLAMBAT (4 Variasi)
+                    // ============================================
                     $templates = [
-                        "⚠️ *INFO KETERLAMBATAN*\n\n{$salam}\nKami informasikan Ananda *{$namaSiswa}* telah tiba di sekolah namun tercatat *TERLAMBAT*.\n\n📅 Tanggal: {$tanggal}\n⏰ Jam Masuk: {$jamScan} WIB\n📝 Info: _{$catatan}_\n\nMohon pembinaan agar esok datang lebih awal.",
-                        "*LAPORAN KEHADIRAN*\n\n{$salam}\nAnanda *{$namaSiswa}* hadir di sekolah pada pukul {$jamScan} WIB.\nStatus: *TERLAMBAT*\nKeterangan: {$catatan}\n\nTerima kasih atas perhatiannya."
+                        "⚠️ *INFO KETERLAMBATAN*\n\n{$salam}\nKami informasikan Ananda *{$namaSiswa}* telah tiba di sekolah namun tercatat *TERLAMBAT*.\n\n📅 Tanggal: {$tanggal}\n⏰ Jam Masuk: *{$jamScan} WIB*\n\nMohon kerjasamanya untuk mengingatkan ananda agar berangkat lebih awal.",
+                        "🚨 *NOTIFIKASI KEHADIRAN (TERLAMBAT)*\n\n{$salam}\nHari ini ({$tanggal}), ananda *{$namaSiswa}* sampai di sekolah pukul *{$jamScan} WIB* (Melewati batas waktu masuk).\n\nMari bersama-sama mendisiplinkan ananda.",
+                        "*CATATAN KEDISIPLINAN*\n\n{$salam} Ayah/Bunda,\nKami beritahukan bahwa *{$namaSiswa}* hadir di sekolah terlambat hari ini pada pukul *{$jamScan} WIB*.\n\nTerima kasih atas perhatiannya.",
+                        "*LAPORAN PRESENSI*\n\n{$salam}\nAnanda *{$namaSiswa}* telah tiba di sekolah pukul *{$jamScan} WIB* dengan status *Terlambat*.\n\nSemoga besok bisa tiba lebih awal."
                     ];
                 } else {
+                    // ============================================
+                    // TEMPLATE HADIR TEPAT WAKTU (5 Variasi)
+                    // ============================================
                     $templates = [
-                        "*LAPORAN KEHADIRAN SISWA*\n\n{$salam}\nKami informasikan bahwa Ananda *{$namaSiswa}* telah tiba di sekolah dengan selamat.\n\n📅 Tanggal: {$tanggal}\n⏰ Pukul: {$jamScan} WIB\n✅ Status: TEPAT WAKTU\n\nTerima kasih.",
-                        "*INFO SEKOLAH*\n\n{$salam} Orang Tua Siswa.\nAnanda *{$namaSiswa}* terdeteksi absen masuk pada pukul *{$jamScan} WIB* hari ini ({$tanggal}).\nStatus: HADIR / TEPAT WAKTU.\n\nSemoga hari ini menyenangkan.",
-                        "🔔 *NOTIFIKASI PRESENSI*\n\nHalo Ayah/Bunda,\nAnanda *{$namaSiswa}* sudah siap belajar di sekolah! 🏫\nAbsen masuk tercatat pukul: {$jamScan} WIB.\n\nMohon doanya agar kegiatan belajar berjalan lancar.",
+                        "*LAPORAN KEHADIRAN SISWA*\n\n{$salam}\nAnanda *{$namaSiswa}* telah tiba di sekolah dengan selamat.\n\n📅 Tanggal: {$tanggal}\n⏰ Pukul: *{$jamScan} WIB*\n✅ Status: TEPAT WAKTU",
+                        "🟢 *NOTIFIKASI MASUK SEKOLAH*\n\n{$salam}\nKami informasikan ananda *{$namaSiswa}* sudah hadir di sekolah pada *{$jamScan} WIB*.\n\nSemoga ananda mendapatkan ilmu yang bermanfaat hari ini.",
+                        "*INFO PRESENSI KEHADIRAN*\n\n{$salam} Ayah/Bunda,\nAnanda *{$namaSiswa}* telah melakukan absen masuk pukul *{$jamScan} WIB* (Tepat Waktu).\n\nTerima kasih atas dukungan Ayah/Bunda.",
+                        "🏫 *UPDATE KEHADIRAN*\n\n{$salam}\nAlhamdulillah, ananda *{$namaSiswa}* sudah berada di lingkungan sekolah sejak pukul *{$jamScan} WIB*.\n\nSelamat beraktivitas kembali.",
+                        "*PESAN OTOMATIS SEKOLAH*\n\n{$salam}\nKehadiran ananda *{$namaSiswa}* hari ini ({$tanggal}) tercatat pada pukul *{$jamScan} WIB*.\n\nTerima kasih."
                     ];
                 }
                 $message = $templates[array_rand($templates)];
@@ -115,39 +108,19 @@ class SendWaScanNotificationJob implements ShouldQueue
             return;
         }
 
-        // --- 5. KIRIM KE API DENGAN ERROR HANDLING ---
-        $authKey = config('app.wapanels_authkey');
-        $appKeys = config('app.wapanels_appkeys'); 
+        // --- 5. INJEKSI UNIQUE REFERENCE ID (ANTI-SPAM) ---
+        // Membuat string acak seperti: _Ref: #a1b2_ di akhir pesan
+        // Ini memastikan hash text di WA server selalu berbeda
+        $uniqueId = substr(md5(uniqid()), 0, 4);
+        $finalMessage = $message . "\n\n_Ref: #{$uniqueId}_";
 
-        if (empty($appKeys) || empty($authKey)) {
-            // Throw exception agar masuk retry mechanism
-            throw new Exception("Konfigurasi API WA Kosong"); 
-        }
-
-        $selectedAppKey = $appKeys[array_rand($appKeys)];
-        $apiUrl = 'https://app.wapanels.com/api/create-message';
-
-        // Menggunakan timeout 15 detik untuk mencegah process hanging
-        $response = Http::timeout(15)->asForm()->post($apiUrl, [
-            'appkey' => $selectedAppKey,
-            'authkey' => $authKey,
-            'to' => $nomorWA,
-            'message' => $message,
-            'sandbox' => 'false'
-        ]);
-
-        // Cek jika API merespon failure (misal kuota habis, device disconnect)
-        if ($response->failed()) {
-            throw new Exception("API WA Error: " . $response->body());
-        }
+        // 6. Kirim Pesan (Menggunakan Service)
+        // Jika API error, exception akan otomatis di-throw dari dalam service
+        $waService->sendMessage($nomorWA, $finalMessage);
     }
 
-    // --- 6. HANDLER JIKA GAGAL TOTAL (Setelah 3x percobaan) ---
     public function failed(Throwable $exception): void
     {
         Log::error("WA SCAN GAGAL FINAL [ID: {$this->attendance->id}]: " . $exception->getMessage());
-        
-        // Opsional: Update status di database agar admin tahu notif gagal
-        // $this->attendance->update(['notification_status' => 'failed']);
     }
 }

@@ -2,15 +2,14 @@
 
 namespace App\Jobs;
 
+use App\Services\WhatsAppService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Throwable;
-use Exception;
 
 class SendGeneralWaJob implements ShouldQueue
 {
@@ -29,18 +28,16 @@ class SendGeneralWaJob implements ShouldQueue
         $this->message = $message;
     }
 
-    public function handle(): void
+    public function handle(WhatsAppService $waService): void
     {
         if (empty($this->phoneNumber)) return;
 
         // 1. Anti-Banned: Jeda lebih lama untuk Broadcast (5-10 detik)
         sleep(rand(5, 10));
 
-        // 2. Validasi Nomor HP
-        $nomorWA = preg_replace('/[^0-9]/', '', $this->phoneNumber);
-        if (substr($nomorWA, 0, 2) == '08') $nomorWA = '62' . substr($nomorWA, 1);
-        
-        if (strlen($nomorWA) < 10) {
+        // 2. Validasi Nomor HP (Gunakan service agar formatnya seragam)
+        $nomorWA = $waService->formatPhoneNumber($this->phoneNumber);
+        if (!$nomorWA) {
             Log::warning("Broadcast Skip: Nomor tidak valid {$this->phoneNumber}");
             return;
         }
@@ -49,29 +46,8 @@ class SendGeneralWaJob implements ShouldQueue
         $uniqueId = substr(md5(uniqid()), 0, 4);
         $finalMessage = $this->message . "\n\n_Ref: #{$uniqueId}_";
 
-        // 4. Konfigurasi Multi Device
-        $apiUrl  = 'https://app.wapanels.com/api/create-message';
-        $authKey = config('app.wapanels_authkey');
-        $appKeys = config('app.wapanels_appkeys');
-
-        if (empty($appKeys) || empty($authKey)) {
-            throw new Exception("Config WA Kosong");
-        }
-
-        $selectedAppKey = $appKeys[array_rand($appKeys)];
-
-        // 5. Kirim Pesan dengan Timeout
-        $response = Http::timeout(20)->asForm()->post($apiUrl, [
-            'appkey'  => $selectedAppKey,
-            'authkey' => $authKey,
-            'to'      => $nomorWA,
-            'message' => $finalMessage,
-            'sandbox' => 'false'
-        ]);
-
-        if ($response->failed()) {
-            throw new Exception("Gagal Broadcast WA: " . $response->body());
-        }
+        // 4. Kirim Pesan (Menggunakan Service)
+        $waService->sendMessage($nomorWA, $finalMessage);
     }
 
     public function failed(Throwable $exception): void
