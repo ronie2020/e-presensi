@@ -34,10 +34,7 @@ class SendWaScanNotificationJob implements ShouldQueue
 
         $student = $this->attendance->student;
         
-        // --- SMART FALLBACK LOGIC ---
-        // Prioritas 1: parent_wa_number
-        // Prioritas 2: parent_phone
-        // Prioritas 3: phone (Nomor HP utama di biodata)
+        // --- SMART FALLBACK LOGIC ---       
         $targetNumber = $student->parent_wa_number ?: ($student->parent_phone ?: $student->phone);
 
         // 1. Validasi Nomor (Menggunakan Service)
@@ -93,9 +90,9 @@ class SendWaScanNotificationJob implements ShouldQueue
                     // TEMPLATE HADIR TEPAT WAKTU (5 Variasi)
                     // ============================================
                     $templates = [
-                        "*LAPORAN KEHADIRAN SISWA*\n\n{$salam}\nAnanda *{$namaSiswa}* telah tiba di sekolah dengan selamat.\n\n📅 Tanggal: {$tanggal}\n⏰ Pukul: *{$jamScan} WIB*\n✅ Status: TEPAT WAKTU",
-                        "🟢 *NOTIFIKASI MASUK SEKOLAH*\n\n{$salam}\nKami informasikan ananda *{$namaSiswa}* sudah hadir di sekolah pada *{$jamScan} WIB*.\n\nSemoga ananda mendapatkan ilmu yang bermanfaat hari ini.",
-                        "*INFO PRESENSI KEHADIRAN*\n\n{$salam} Ayah/Bunda,\nAnanda *{$namaSiswa}* telah melakukan absen masuk pukul *{$jamScan} WIB* (Tepat Waktu).\n\nTerima kasih atas dukungan Ayah/Bunda.",
+                        "*INFO KEHADIRAN SISWA*\n\n{$salam}\nAnanda *{$namaSiswa}* telah tiba di sekolah dengan selamat.\n\n📅 Tanggal: {$tanggal}\n⏰ Pukul: *{$jamScan} WIB*\n✅ Status: TEPAT WAKTU",
+                        "🟢*NOTIFIKASI MASUK SEKOLAH*\n\n{$salam}\nKami informasikan ananda *{$namaSiswa}* sudah hadir di sekolah pada *{$jamScan} WIB*.\n\nSemoga ananda mendapatkan ilmu yang bermanfaat hari ini.",
+                        "*LAPORAN PRESENSI KEHADIRAN*\n\n{$salam} Ayah/Bunda,\nAnanda *{$namaSiswa}* telah melakukan absen masuk pukul *{$jamScan} WIB* (Tepat Waktu).\n\nTerima kasih atas dukungan Ayah/Bunda.",
                         "🏫 *UPDATE KEHADIRAN*\n\n{$salam}\nAlhamdulillah, ananda *{$namaSiswa}* sudah berada di lingkungan sekolah sejak pukul *{$jamScan} WIB*.\n\nSelamat beraktivitas kembali.",
                         "*PESAN OTOMATIS SEKOLAH*\n\n{$salam}\nKehadiran ananda *{$namaSiswa}* hari ini ({$tanggal}) tercatat pada pukul *{$jamScan} WIB*.\n\nTerima kasih."
                     ];
@@ -108,14 +105,11 @@ class SendWaScanNotificationJob implements ShouldQueue
             return;
         }
 
-        // --- 5. INJEKSI UNIQUE REFERENCE ID (ANTI-SPAM) ---
-        // Membuat string acak seperti: _Ref: #a1b2_ di akhir pesan
-        // Ini memastikan hash text di WA server selalu berbeda
+        // --- 5. INJEKSI UNIQUE REFERENCE ID (ANTI-SPAM) ---       
         $uniqueId = substr(md5(uniqid()), 0, 4);
         $finalMessage = $message . "\n\n_Ref: #{$uniqueId}_";
 
-        // 6. Kirim Pesan (Menggunakan Service)
-        // Jika API error, exception akan otomatis di-throw dari dalam service
+        // 6. Kirim Pesan (Menggunakan Service)    
         $waService->sendMessage($nomorWA, $finalMessage);
     }
 

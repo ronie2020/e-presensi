@@ -3,8 +3,9 @@
 namespace App\Jobs;
 
 use App\Models\Achievement;
-use App\Models\DisciplineRecord; // <-- PERBAIKAN: Gunakan DisciplineRecord, bukan Discipline
+use App\Models\DisciplineRecord; 
 use App\Models\DisciplineType;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -17,10 +18,13 @@ class AddAchievementPointJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $achievement;
+    protected $userId;
 
-    public function __construct(Achievement $achievement)
+    // === PERBAIKAN: Menerima userId dari Controller ===
+    public function __construct(Achievement $achievement, $userId = null)
     {
         $this->achievement = $achievement;
+        $this->userId = $userId;
     }
 
     public function handle(): void
@@ -30,22 +34,20 @@ class AddAchievementPointJob implements ShouldQueue
             return;
         }
 
-        // 2. Konfigurasi Poin Berdasarkan Tingkat (Bisa Anda ubah sesuai kebijakan sekolah)
+        // 2. Konfigurasi Poin Berdasarkan Tingkat
         $pointsMap = [
-            'Sekolah'       => 10,  // Poin terkecil
+            'Sekolah'       => 10,
             'Kecamatan'     => 15,
             'Kabupaten'     => 25,
             'Provinsi'      => 50,
             'Nasional'      => 75,
-            'Internasional' => 100, // Poin terbesar
+            'Internasional' => 100,
         ];
 
-        $level = $this->achievement->level; // Contoh: 'Kabupaten'
-        $points = $pointsMap[$level] ?? 10; // Default 10 jika level tidak ada di list
+        $level = $this->achievement->level; 
+        $points = $pointsMap[$level] ?? 10; 
 
         // 3. Cari atau Buat Kategori Poin (DisciplineType)
-        // Kita beri nama misal: "Prestasi Tingkat Kabupaten"
-        // Penting: Type harus 'Kebaikan' agar masuk ke rekap poin positif
         $typeName = "Prestasi Tingkat " . $level;
         
         $pointType = DisciplineType::firstOrCreate(
@@ -57,20 +59,25 @@ class AddAchievementPointJob implements ShouldQueue
             ]
         );
 
-        // Update poin jika ternyata data lama poinnya beda (Opsional, agar konsisten)
         if ($pointType->point_value != $points) {
             $pointType->update(['point_value' => $points]);
         }
 
+        // === PERBAIKAN: Fallback ke User Admin pertama jika Job berjalan via console/seeder ===
+        $recordedBy = $this->userId;
+        if (!$recordedBy) {
+            $adminUser = User::first(); // Ambil user pertama sebagai fallback (biasanya admin)
+            $recordedBy = $adminUser ? $adminUser->id : null;
+        }
+
         // 4. Simpan ke Catatan Disiplin
         try {
-            // PERBAIKAN: Menggunakan DisciplineRecord::create
             DisciplineRecord::create([
                 'student_id'         => $this->achievement->student_id,
                 'discipline_type_id' => $pointType->id,
-                'date'               => $this->achievement->date, // Sesuaikan tanggal poin dengan tanggal prestasi
-                'notes'              => "Otomatis: " . $this->achievement->title, // Catatan: Judul Juara
-                'recorded_by_user_id' => 1, // ID System/Admin (Pastikan User ID 1 ada di database)
+                'date'               => $this->achievement->date, 
+                'notes'              => "Otomatis: " . $this->achievement->title, 
+                'recorded_by_user_id' => $recordedBy, // Menggunakan User ID yang valid
             ]);
 
             Log::info("Poin Prestasi Berhasil: {$this->achievement->student->name} dapat {$points} poin ($level)");

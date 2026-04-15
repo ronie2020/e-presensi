@@ -52,7 +52,7 @@ class WhatsAppService
             return;
         }
 
-        $authKey = env('WAPANELS_AUTH_KEY'); // <-- Lebih aman pakai env() jika config/app.php belum diupdate
+        $authKey = env('WAPANELS_AUTH_KEY'); 
         $appKeysString = env('WAPANELS_APP_KEYS'); 
 
         if (empty($appKeysString) || empty($authKey)) {
@@ -60,22 +60,22 @@ class WhatsAppService
         }
 
         // --- PERBAIKAN: Pecah string menjadi array ---
-        $appKeysArray = explode(',', $appKeysString);
-        // Hapus spasi berlebih pada setiap elemen array (jika ada)
-        $appKeysArray = array_map('trim', $appKeysArray);
-
-        // Pilih satu key secara acak
+        $appKeysArray = explode(',', $appKeysString);        
+        $appKeysArray = array_map('trim', $appKeysArray);       
         $selectedAppKey = $appKeysArray[array_rand($appKeysArray)];
 
         $apiUrl = 'https://app.wapanels.com/api/create-message';
 
-        $response = Http::timeout(20)->asForm()->post($apiUrl, [
-            'appkey'  => $selectedAppKey,
-            'authkey' => $authKey,
-            'to'      => $nomorWA,
-            'message' => $message,
-            'sandbox' => 'false'
-        ]);
+        $response = Http::withoutVerifying()
+            ->timeout(20)
+            ->asForm()
+            ->post($apiUrl, [
+                'appkey'  => $selectedAppKey,
+                'authkey' => $authKey,
+                'to'      => $nomorWA,
+                'message' => $message,
+                'sandbox' => 'false'
+            ]);
 
         if ($response->failed()) {
             throw new Exception("API WA Error: " . $response->body());

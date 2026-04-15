@@ -35,10 +35,7 @@ class SendWaManualNotificationJob implements ShouldQueue
 
         $student = $this->attendance->student;
         
-        // --- SMART FALLBACK LOGIC ---
-        // Prioritas 1: parent_wa_number
-        // Prioritas 2: parent_phone
-        // Prioritas 3: phone (Nomor HP utama di biodata)
+        // --- SMART FALLBACK LOGIC ---       
         $targetNumber = $student->parent_wa_number ?: ($student->parent_phone ?: $student->phone);
         
         $nomorWA = $waService->formatPhoneNumber($targetNumber);
@@ -60,9 +57,9 @@ class SendWaManualNotificationJob implements ShouldQueue
         if (in_array($statusManual, ['Sakit', 'Izin', 'Alfa'])) {
             // Template jika siswa TIDAK MASUK
             $templates = [
-                "*PEMBERITAHUAN SEKOLAH*\n\n{$salam}\nKami informasikan status kehadiran Ananda:\n\nNama: *{$namaSiswa}*\nTanggal: {$tanggal}\nStatus: *{$statusManual}*\nKeterangan: _{$catatan}_\n\nTerima kasih atas perhatiannya.",
-                "🔔 *INFO PRESENSI*\n\nHalo Ayah/Bunda,\nHari ini ({$tanggal}), Ananda *{$namaSiswa}* tercatat tidak mengikuti KBM dengan keterangan: *{$statusManual}*.\nCatatan: {$catatan}.\n\nSemoga menjadi maklum.",
-                "*LAPORAN ABSENSI*\n\n{$salam}\nAnanda *{$namaSiswa}* hari ini tidak masuk sekolah.\nStatus: *{$statusManual}*\nInfo: {$catatan}\n\nTerima kasih."
+                "*PEMBERITAHUAN SEKOLAH*\n\n{$salam}\nKami mendapat Informasi status kehadiran Ananda:\n\nNama: *{$namaSiswa}*\nTanggal: {$tanggal}\nStatus: *{$statusManual}*\nKeterangan: _{$catatan}_\n\nTerima kasih, Mohon Konfirmasinya terima kasih.",
+                "🔔 *INFO PRESENSI*\n\nHalo Ayah/Bunda,\nHari ini ({$tanggal}), Kami mendapat informasi bahwa Ananda *{$namaSiswa}* tercatat tidak mengikuti KBM dengan keterangan: *{$statusManual}*.\nCatatan: {$catatan}.\n\nMohon konfirmasinya dan mohon menjadi maklum.",
+                "*LAPORAN ABSENSI*\n\n{$salam}\nAnanda *{$namaSiswa}* hari ini tidak masuk sekolah.\nStatus: *{$statusManual}*\nInfo: {$catatan}\n\nMohon Informasinya Apakah benar ? Terima kasih."
             ];
         } else {
             // Template jika siswa HADIR / TERLAMBAT (Input Manual)
