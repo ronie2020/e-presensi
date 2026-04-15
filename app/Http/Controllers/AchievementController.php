@@ -12,11 +12,9 @@ use Illuminate\Support\Facades\Auth;
 
 class AchievementController extends Controller
 {
-    public function index(Request $request)
-    {
-        // === PERBAIKAN PERFORMA (OPTIMASI QUERY) ===        
-        $students = Student::with('schoolClass:id,name')
-            ->select('id', 'name', 'school_class_id')
+   public function index(Request $request)
+    {        
+        $students = Student::with('schoolClass')
             ->get()
             ->sortBy(function ($student) {
                 $className = $student->schoolClass->name ?? 'ZZZ'; 
@@ -24,12 +22,12 @@ class AchievementController extends Controller
             });
 
         // Ambil data prestasi dengan filter & sorting
-        $achievements = Achievement::with(['student:id,name', 'student.schoolClass:id,name'])
+        $achievements = Achievement::with(['student', 'student.schoolClass'])
             ->when($request->search, function($q) use ($request) {
                 $q->where('title', 'like', '%'.$request->search.'%')
                   ->orWhere('name_manual', 'like', '%'.$request->search.'%');
             })
-            // MENGURUTKAN STATUS PENDING AGAR BERADA PALING ATAS
+            // Mengurutkan status pending agar berada di atas
             ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected') ASC")
             ->orderBy('date', 'desc')
             ->paginate(10)
@@ -47,7 +45,7 @@ class AchievementController extends Controller
             'date' => 'required|date',
             'photo' => 'nullable|image|max:2048', 
             'video_link' => 'nullable|url',
-            'certificate' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048', // <-- Ditambahkan
+            'certificate' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048', 
         ]);
 
         $data = $request->except(['photo', 'certificate']); // <-- Exclude certificate agar dihandle manual
