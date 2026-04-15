@@ -237,132 +237,130 @@
             @endif
         </div>
 
-        {{-- QUICK ACTIONS --}}
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 no-print animate-enter quick-actions" style="animation-delay: 100ms">
-            {{-- Tombol Data Siswa --}}
-            <a href="{{ route('students.index') }}" @click.prevent="navigate('{{ route('students.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-student text-xl"></i>
+        {{-- QUICK ACTIONS - 15 Tombol Disusun Menjadi 5 Kolom (3 Baris Sempurna) --}}
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8 no-print animate-enter quick-actions" style="animation-delay: 100ms">
+            {{-- 1. Tombol Data Siswa --}}
+            <a href="{{ route('students.index') }}" @click.prevent="navigate('{{ route('students.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-student text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-blue-700">Data Siswa</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-blue-700">Data Siswa</div>
             </a>
             
-            {{-- Tombol Kebiasaan --}}
-             <a href="{{ route('teacher.habits.index') }}" @click.prevent="navigate('{{ route('teacher.habits.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-calendar-check text-xl"></i>
+            {{-- 2. Tombol Kebiasaan --}}
+             <a href="{{ route('teacher.habits.index') }}" @click.prevent="navigate('{{ route('teacher.habits.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-calendar-check text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-emerald-700">Rekap 7 Kebiasaan Siswa</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-emerald-700">7 Kebiasaan</div>
             </a>
             
-            {{-- Tombol Ujian CBT --}}
-            <a href="{{ route('cbt.index') }}" @click.prevent="navigate('{{ route('cbt.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-purple-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-monitor-play text-xl"></i>
+            {{-- 3. Tombol Ujian CBT --}}
+            <a href="{{ route('cbt.index') }}" @click.prevent="navigate('{{ route('cbt.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-purple-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-monitor-play text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-purple-700">Ujian CBT</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-purple-700">Ujian CBT</div>
             </a>
 
-            {{-- Tombol Tugas & PR --}}
-            <a href="{{ route('lms.assignments.index') }}" @click.prevent="navigate('{{ route('lms.assignments.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-rose-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-pencil-simple text-xl"></i>
+            {{-- 4. Tombol Tugas & PR --}}
+            <a href="{{ route('lms.assignments.index') }}" @click.prevent="navigate('{{ route('lms.assignments.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-rose-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-pencil-simple text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-rose-700">Tugas & PR</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-rose-700">Tugas & PR</div>
             </a>
 
-            {{-- Tombol Rekap Nilai --}}
-            <a href="{{ route('lms.grades.index') }}" @click.prevent="navigate('{{ route('lms.grades.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-chart-bar text-xl"></i>
+            {{-- 5. Tombol Rekap Nilai --}}
+            <a href="{{ route('lms.grades.index') }}" @click.prevent="navigate('{{ route('lms.grades.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-chart-bar text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-emerald-700">Rekap Nilai</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-emerald-700">Rekap Nilai</div>
             </a>
 
-            {{-- Tombol Laporan Kelas --}}
-            <a href="{{ route('reports.class') }}" @click.prevent="navigate('{{ route('reports.class') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-amber-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-files text-xl"></i>
+            {{-- 6. Tombol Laporan Kelas --}}
+            <a href="{{ route('reports.class') }}" @click.prevent="navigate('{{ route('reports.class') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-amber-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-files text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-amber-700">Laporan Kelas</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-amber-700">Laporan Kelas</div>
             </a>
 
-            {{-- Tombol SKL --}}
-            <a href="{{ route('admin.graduation.index') }}" @click.prevent="navigate('{{ route('admin.graduation.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-rose-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-envelope-open text-xl"></i>
+            {{-- 7. Tombol SKL --}}
+            <a href="{{ route('admin.graduation.index') }}" @click.prevent="navigate('{{ route('admin.graduation.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-rose-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-envelope-open text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-rose-700">Kelulusan</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-rose-700">Kelulusan</div>
             </a>
 
-              {{-- Tombol PPDB --}}
-            <a href="{{ route('admin.ppdb.index') }}" @click.prevent="navigate('{{ route('admin.ppdb.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-amber-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-files text-xl"></i>
+            {{-- 8. Tombol PPDB --}}
+            <a href="{{ route('admin.ppdb.index') }}" @click.prevent="navigate('{{ route('admin.ppdb.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-amber-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-users text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-amber-700">SPMB/PPDB</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-amber-700">SPMB/PPDB</div>
             </a>
 
-             {{-- Tombol Data Siswa --}}
-            <a href="{{ route('letters.spt.index') }}" @click.prevent="navigate('{{ route('letters.spt.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-person-simple-run text-xl"></i>
+            {{-- 9. Tombol SPPD --}}
+            <a href="{{ route('letters.spt.index') }}" @click.prevent="navigate('{{ route('letters.spt.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-car-profile text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-blue-700">SPPD</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-blue-700">SPPD</div>
             </a>
 
-             {{-- Tombol Perpustakaan --}}
-            <a href="{{ route('library.dashboard') }}" @click.prevent="navigate('{{ route('library.dashboard') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-purple-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-book-open-text text-xl"></i>
+            {{-- 10. Tombol Perpustakaan --}}
+            <a href="{{ route('library.dashboard') }}" @click.prevent="navigate('{{ route('library.dashboard') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-purple-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-book-open-text text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-purple-700">Perpustakaan</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-purple-700">Perpustakaan</div>
             </a>
 
-            {{-- Tombol Atur Jadwal --}}
-             <a href="{{ route('schedules.index') }}" @click.prevent="navigate('{{ route('schedules.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-aemerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-clock text-xl"></i>
+            {{-- 11. Tombol Atur Jadwal --}}
+            <a href="{{ route('schedules.index') }}" @click.prevent="navigate('{{ route('schedules.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-clock text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-emerald-700">Atur Jadwal</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-emerald-700">Atur Jadwal</div>
             </a>
 
-            {{-- Tombol Jurnal Mengajar --}}
-            <a href="{{ route('teaching.index') }}" @click.prevent="navigate('{{ route('teaching.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-chalkboard-teacher text-xl"></i>
+            {{-- 12. Tombol Jurnal Mengajar --}}
+            <a href="{{ route('teaching.index') }}" @click.prevent="navigate('{{ route('teaching.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-chalkboard-teacher text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-blue-700">Jurnal Mengajar</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-blue-700">Jurnal Mengajar</div>
             </a>
 
-            {{-- Tombol Disiplin --}}
-            <a href="{{ route('discipline.index') }}" @click.prevent="navigate('{{ route('discipline.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-rose-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-warning-circle text-xl"></i>
+            {{-- 13. Tombol Kedisiplinan --}}
+            <a href="{{ route('discipline.index') }}" @click.prevent="navigate('{{ route('discipline.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-rose-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-warning-circle text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-rose-700">Laporan Kedisiplinan</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-rose-700">Kedisiplinan</div>
             </a>
 
-             {{-- Tombol Ramadhan --}}
-             <a href="{{ route('admin.ramadan.reports') }}" @click.prevent="navigate('{{ route('admin.ramadan.reports') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-book-open text-xl"></i>
+            {{-- 14. Tombol Ramadhan --}}
+            <a href="{{ route('admin.ramadan.reports') }}" @click.prevent="navigate('{{ route('admin.ramadan.reports') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-emerald-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-moon-stars text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-emerald-700">Rekap Aktivitas Ramadhan</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-emerald-700">Ramadhan</div>
             </a>
 
-              {{-- Tombol Ekstrakurikuler --}}
-            <a href="{{ route('extracurriculars.reports') }}" @click.prevent="navigate('{{ route('extracurriculars.reports') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 hover:shadow-md transition-all hover:border-amber-200 cursor-pointer">
-                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    <i class="ph-bold ph-file-text text-xl"></i>
+            {{-- 15. Tombol Ekstrakurikuler --}}
+            <a href="{{ route('extracurriculars.reports') }}" @click.prevent="navigate('{{ route('extracurriculars.reports') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-amber-200 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                    <i class="ph-bold ph-person-simple-walk text-2xl"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-700 group-hover:text-amber-700">Rekap Ekstrakurikuler</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-amber-700">Ekstrakurikuler</div>
             </a>
-
-
         </div>
 
-        {{-- KPI CARDS --}}
+        {{-- KPI CARDS (DIPERBARUI MENJADI INTERAKTIF TANPA LINK 404) --}}
         <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-5">
             @foreach($cards as $index => $card)
             @php
@@ -414,23 +412,24 @@
                 };
             @endphp
 
-            <a href="{{ url('attendance') }}?status={{ $card['filter_status'] ?? '' }}&period={{ request('period', 'today') }}" 
-               class="animate-enter group bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] hover:shadow-xl hover:shadow-slate-200 {{ $theme['hover_border'] }} transition-all duration-300 hover:-translate-y-1 relative overflow-hidden flex flex-col justify-between h-full card-print"
+            <!-- PERUBAHAN: Tag <a> diganti <div> dengan onclick memanggil SweetAlert -->
+            <div onclick="showCardInfo('{{ $card['title'] }}', '{{ $card['value'] }}', '{{ $colorKey }}')" 
+               class="cursor-pointer animate-enter group bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] hover:shadow-xl hover:shadow-slate-200 {{ $theme['hover_border'] }} transition-all duration-300 hover:-translate-y-1 relative overflow-hidden flex flex-col justify-between h-full card-print"
                style="animation-delay: {{ ($index + 1) * 100 }}ms">
+                
                 <i class="ph-duotone {{ $iconClass }} absolute -right-4 -bottom-4 text-[5rem] opacity-[0.03] text-slate-900 group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-500 no-print"></i>
+                
                 <div class="flex justify-between items-start mb-4 relative z-10">
                     <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-sm transition-all duration-300 {{ $theme['bg'] }} {{ $theme['text'] }} {{ $theme['hover_bg'] }} group-hover:text-white group-hover:scale-110">
                         <i class="ph-duotone {{ $iconClass }} text-2xl animate-wiggle"></i>
                     </div>
                     
-                    {{-- Badge Persentase (Existing) --}}
                     @if(isset($card['percentage']))
                     <span class="text-[10px] font-bold px-2 py-1 rounded-lg border {{ $card['percentage'] > 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100' }}">
                         {{ $card['percentage'] > 0 ? '+' : '' }}{{ $card['percentage'] }}%
                     </span>
                     @endif
                     
-                    {{-- Badge Tren (New) --}}
                     @if(isset($card['trend']) && $card['trend'] !== null)
                         <div class="text-[10px] font-bold px-2 py-1 rounded-lg border flex items-center gap-1 {{ $card['trend'] >= 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100' }}">
                             <i class="{{ $card['trend'] >= 0 ? 'ph-bold ph-trend-up' : 'ph-bold ph-trend-down' }}"></i>
@@ -445,7 +444,7 @@
                         <p class="text-[9px] text-slate-400 font-bold mt-1">vs Kemarin</p>
                     @endif
                 </div>
-            </a>
+            </div>
             @endforeach
         </div>
 
@@ -488,8 +487,8 @@
                 <div class="grid grid-cols-2 gap-3 mt-auto">
                     <div class="bg-emerald-50/50 p-3 rounded-xl border border-emerald-100"><span class="block text-[10px] font-bold text-emerald-600 uppercase mb-1">Hadir Tepat</span><span class="text-lg font-black text-slate-800">{{ $presentOnTimeCount ?? 0 }}</span></div>
                     <div class="bg-amber-50/50 p-3 rounded-xl border border-amber-100"><span class="block text-[10px] font-bold text-amber-600 uppercase mb-1">Terlambat</span><span class="text-lg font-black text-slate-800">{{ $lateCount ?? 0 }}</span></div>
-                    <div class="bg-rose-50/50 p-3 rounded-xl border border-rose-100"><span class="block text-[10px] font-bold text-rose-600 uppercase mb-1">Alfa/Belum</span><span class="text-lg font-black text-slate-800">{{ $absentCount ?? 0 }}</span></div>
-                     <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100"><span class="block text-[10px] font-bold text-blue-600 uppercase mb-1">Izin/Sakit</span><span class="text-lg font-black text-slate-800">{{ $sickPermitCount ?? 0 }}</span></div>
+                    <div class="bg-rose-50/50 p-3 rounded-xl border border-rose-100"><span class="block text-[10px] font-bold text-rose-600 uppercase mb-1">Alfa</span><span class="text-lg font-black text-slate-800">{{ $absentCount ?? 0 }}</span></div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200"><span class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Belum Hadir</span><span class="text-lg font-black text-slate-800">{{ $notYetScannedCount ?? 0 }}</span></div>
                 </div>
             </div>
         </div>
@@ -584,7 +583,7 @@
                 </div>
             </div>
 
-            {{-- Class Rank Table (WITH TABS FOR BEST/WORST) --}}
+            {{-- Class Rank Table --}}
             <div class="animate-enter bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 h-full card-print" style="animation-delay: 900ms" x-data="{ rankTab: 'best' }">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -675,8 +674,42 @@
     {{-- SCRIPT CHART.JS --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    {{-- SCRIPT INITIALIZATION --}}
+    {{-- SCRIPT INITIALIZATION & SWEETALERT CUSTOM FUNCTION --}}
     <script>
+        // Fungsi untuk menampilkan Popup Info saat kartu KPI diklik
+        function showCardInfo(title, value, colorKey) {
+            let colorHex = '#3b82f6'; // default blue
+            if(colorKey === 'emerald') colorHex = '#10b981';
+            if(colorKey === 'amber') colorHex = '#f59e0b';
+            if(colorKey === 'rose') colorHex = '#f43f5e';
+            if(colorKey === 'purple') colorHex = '#a855f7';
+            if(colorKey === 'slate') colorHex = '#64748b';
+            if(colorKey === 'yellow') colorHex = '#eab308';
+
+            Swal.fire({
+                title: `<span style="color: ${colorHex}; font-weight: 900;">${title}</span>`,
+                html: `
+                    <div class="mt-2 mb-6">
+                        <span class="text-5xl font-black text-slate-800">${value}</span>
+                        <span class="text-sm font-bold text-slate-400 ml-1">Siswa</span>
+                    </div>
+                    <p class="text-sm text-slate-500 leading-relaxed mb-4">
+                        Untuk melihat daftar nama siswa secara spesifik, silakan buka menu <b>Data Siswa</b> atau menu <b>Laporan Kelas</b> di pintasan atas.
+                    </p>
+                    <div class="inline-block bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400">
+                        Halaman tabel detail sedang dalam tahap persiapan.
+                    </div>
+                `,
+                icon: 'info',
+                confirmButtonColor: colorHex,
+                confirmButtonText: 'Tutup Info',
+                customClass: {
+                    popup: 'rounded-3xl border border-slate-100 shadow-2xl',
+                    confirmButton: 'rounded-xl font-bold px-6 py-2.5 shadow-md hover:shadow-lg transition-shadow'
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Animasi Angka
             const counters = document.querySelectorAll('.count-up');
@@ -747,10 +780,16 @@
                 new Chart(ctxDonut.getContext('2d'), {
                     type: 'doughnut',
                     data: {
-                        labels: ['Hadir', 'Telat', 'Absen', 'Izin'],
+                        labels: ['Hadir Tepat', 'Telat', 'Alfa', 'Izin/Sakit', 'Belum Hadir'],
                         datasets: [{ 
-                            data: [{{ $presentOnTimeCount ?? 0 }}, {{ $lateCount ?? 0 }}, {{ $absentCount ?? 0 }}, {{ $sickPermitCount ?? 0 }}], 
-                            backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#3b82f6'], 
+                            data: [
+                                {{ $presentOnTimeCount ?? 0 }}, 
+                                {{ $lateCount ?? 0 }}, 
+                                {{ $absentCount ?? 0 }}, 
+                                {{ $sickPermitCount ?? 0 }},
+                                {{ $notYetScannedCount ?? 0 }}
+                            ], 
+                            backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#3b82f6', '#cbd5e1'], 
                             borderWidth: 0 
                         }]
                     },
