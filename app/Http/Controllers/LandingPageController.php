@@ -32,6 +32,21 @@ class LandingPageController extends Controller
     {
         $today = Carbon::today();
         
+        // ==============================================================
+        // FITUR PENGHITUNG PENGUNJUNG (VISITOR COUNTER)
+        // ==============================================================
+        // Cek apakah pengunjung (session ini) sudah dihitung sebelumnya
+        if (!session()->has('has_visited_landing_page')) {
+            // Jika belum, tambahkan 1 ke total pengunjung
+            Cache::increment('total_landing_visitors');
+            // Tandai session ini agar tidak dihitung lagi saat direfresh
+            session()->put('has_visited_landing_page', true);
+        }
+        
+        // Ambil total pengunjung, jika kosong setel ke 1
+        $visitorCount = Cache::get('total_landing_visitors', 1);
+
+
         // --- DEFINISI STATUS (Case Insensitive handling) ---
         $statusHadir     = ['Hadir', 'hadir', 'Present', 'present', 'Tepat Waktu', 'tepat waktu'];
         $statusTerlambat = ['Terlambat', 'terlambat', 'Late', 'late', 'Telat'];
@@ -254,7 +269,8 @@ class LandingPageController extends Controller
             'announcements', 'achievements', 'activities', 'teachers',
             'guestbooks', 'allGuestbooks', 'extracurriculars', 'agendas', 'schoolStats',
             'alumniStats', 'alumniTestimonials', 'habitLabels', 'habitData', 'habitStats',
-            'latestBooks', 'latestArticles' 
+            'latestBooks', 'latestArticles',
+            'visitorCount' // <-- Pastikan variabel ini dipassing ke view
         ));
     }
 
