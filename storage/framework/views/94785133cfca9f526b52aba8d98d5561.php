@@ -1,110 +1,125 @@
-<!-- HERO SECTION (Updated to Match Dark Theme & Responsive Mobile) -->
-    <div id="home" class="relative bg-slate-900 pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden min-h-[90vh] flex items-center">
-        <!-- Background -->
-        <div class="absolute inset-0 z-0">
-             <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-30 transform scale-105 animate-[pulse_10s_ease-in-out_infinite]"></div>
-             <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/95 to-blue-950/80"></div>
-             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
-        </div>
-        
-        <!-- Animated Blobs -->
-        <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-600 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 animate-blob"></div>
-        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-600 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 animate-blob animation-delay-2000"></div>
+<!-- HERO SECTION (Gaya Microsoft Elevate - Fixed Mobile View) -->
+<section id="home" class="relative pt-44 pb-56 md:pt-48 md:pb-40 lg:pt-56 lg:pb-48 overflow-hidden bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 block">
+    
+    
+    <div class="absolute inset-0 z-0">
+        <div class="absolute top-0 left-0 w-full md:w-[60%] h-full bg-cyan-300/20 rounded-full blur-[100px] -translate-x-1/4 -translate-y-1/4 pointer-events-none animate-blob"></div>
+        <div class="absolute bottom-0 right-0 w-full md:w-[50%] h-[80%] bg-indigo-900/30 rounded-full blur-[120px] translate-x-1/4 translate-y-1/4 pointer-events-none animate-blob" style="animation-delay: 2s;"></div>
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.05] pointer-events-none mix-blend-overlay"></div>
+    </div>
 
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-12 lg:gap-20 z-10 w-full">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             
-            <!-- Text Content -->
-            <div class="lg:w-1/2 w-full text-center lg:text-left" data-aos="fade-right" data-aos-duration="1000">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-md">
-                    <span class="relative flex h-2 w-2">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                    </span>
-                    Sistem Informasi Akademik Terpadu
-                </div>
+            
+            <div class="max-w-2xl text-center lg:text-left mx-auto lg:mx-0 w-full" 
+                 data-aos="fade-right" 
+                 data-aos-duration="1000">
                 
-                <!-- Menambahkan px-2 di HP agar tidak mepet batas layar -->
-                <h1 class="text-4xl lg:text-6xl xl:text-7xl font-black text-white tracking-tight mb-6 leading-[1.1] drop-shadow-lg px-2 sm:px-0">
-                    Membangun Generasi <br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-300">Cerdas & Berkarakter</span>
+                
+                <div class="inline-flex items-center justify-center lg:justify-start gap-2 px-3 sm:px-4 py-1.5 rounded-3xl sm:rounded-full bg-white/10 border border-white/20 text-cyan-100 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-md shadow-sm max-w-full text-center">
+                    <span class="relative flex h-2 w-2 shrink-0">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-300 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
+                    </span>
+                    <span class="whitespace-normal leading-tight">Sistem Informasi Akademik Terpadu</span>
+                </div>
+
+                
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white tracking-tight leading-[1.1] mb-6 px-1 sm:px-0 break-words w-full">
+                    Membangun Generasi <br class="hidden sm:block">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">
+                        Cerdas & Berkarakter
+                    </span>
                 </h1>
                 
-                <!-- Teks diperhalus warnanya (text-slate-300 -> text-slate-300/90) & ditambahkan leading-relaxed -->
-                <p class="text-slate-300/90 text-base md:text-lg mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium px-5 sm:px-0">
+                
+                <p class="text-sm sm:text-base md:text-lg text-blue-50 mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium px-2 sm:px-0 opacity-90 break-words w-full">
                     SIMADU : Platform digital terintegrasi SMPN 3 Lakbok untuk pemantauan akademik, absensi kehadiran, dan pengembangan karakter siswa secara real-time.
                 </p>
+
                 
-                <!-- Buttons Area -->
-                <!-- Di HP dibikin w-full dan stack ke bawah (flex-col), dikasih padding (px-6) -->
-                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start mb-12 w-full max-w-sm sm:max-w-none mx-auto px-6 sm:px-0">
-                    <a href="<?php echo e(route('ppdb.create')); ?>" class="group relative px-6 py-4 rounded-full bg-blue-600 text-white font-bold text-sm shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] hover:-translate-y-1 transition-all overflow-hidden w-full sm:w-auto flex justify-center items-center">
-                        <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shine_1s_infinite]"></div>
-                        <span class="relative flex items-center gap-2"><i class="ph-bold ph-student text-xl"></i> Daftar PPDB 2025</span>
+                <div class="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start mb-12 w-full mx-auto px-2 sm:px-0">
+                    <a href="<?php echo e(route('ppdb.create')); ?>" class="group relative px-4 sm:px-6 py-3 sm:py-4 rounded-full bg-white text-blue-700 font-bold text-xs sm:text-sm shadow-[0_10px_20px_rgba(0,0,0,0.15)] hover:bg-slate-50 hover:-translate-y-1 transition-all overflow-hidden w-full sm:w-auto flex justify-center items-center gap-2">
+                        <i class="ph-bold ph-student text-lg sm:text-xl"></i> Daftar PPDB 2025
                     </a>
-                    
-                    <!-- Tombol Sekunder diperjelas dengan Border dan Bg yg kontrasnya pas -->
-                     <a href="<?php echo e(route('ppdb.check')); ?>" class="px-6 py-4 rounded-full bg-slate-800/80 border border-slate-700 text-slate-200 font-bold text-sm hover:bg-slate-700 hover:text-white hover:-translate-y-1 transition-all flex items-center justify-center gap-2 w-full sm:w-auto shadow-lg">
-                        <i class="ph-bold ph-magnifying-glass text-xl"></i> Cek Kelulusan
+                    <a href="<?php echo e(route('ppdb.check')); ?>" class="px-4 sm:px-6 py-3 sm:py-4 rounded-full bg-white/10 backdrop-blur-md border border-white/30 text-white font-bold text-xs sm:text-sm shadow-sm hover:bg-white/20 hover:-translate-y-1 transition-all flex items-center justify-center gap-2 w-full sm:w-auto">
+                        <i class="ph-bold ph-magnifying-glass text-lg sm:text-xl"></i> Cek Kelulusan
                     </a>
                 </div>
+
                 
-                <!-- Quick Stats -->
-                <!-- Grid diubah menjadi 2 kolom di HP, 3 kolom di layar besar. Ditambahkan px-6 untuk ruang lega di HP -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 w-full max-w-sm sm:max-w-md mx-auto lg:mx-0 px-6 sm:px-0">
-                    
-                    <!-- Kotak Hadir: Di HP dia makan 2 kolom penuh (col-span-2) agar teksnya bisa memanjang dan tidak bertumpuk -->
-                    <div class="col-span-2 sm:col-span-1 bg-white/5 border border-white/10 p-4 sm:p-5 rounded-2xl hover:bg-white/10 transition group flex flex-row sm:flex-col items-center justify-between sm:justify-center">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 w-full max-w-sm sm:max-w-md mx-auto lg:mx-0 px-2 sm:px-0">
+                    <div class="col-span-2 sm:col-span-1 bg-white/90 backdrop-blur-md border border-white/50 p-4 sm:p-5 rounded-2xl shadow-lg hover:shadow-xl transition-all group flex flex-row sm:flex-col items-center justify-between sm:justify-center">
                         <div class="text-left sm:text-center">
-                            <div class="text-3xl md:text-4xl font-black text-emerald-400 mb-0.5 group-hover:scale-110 transition-transform origin-left sm:origin-center"><?php echo e($stats['hadir'] ?? 0); ?></div>
+                            <div class="text-3xl md:text-4xl font-black text-emerald-500 mb-0.5 group-hover:scale-110 transition-transform origin-left sm:origin-center"><?php echo e($stats['hadir'] ?? 0); ?></div>
                         </div>
-                        <div class="text-[11px] md:text-xs uppercase font-bold text-slate-400 tracking-wider text-right sm:text-center">Hadir Hari Ini</div>
+                        <div class="text-[11px] md:text-xs uppercase font-bold text-slate-500 tracking-wider text-right sm:text-center">Hadir Hari Ini</div>
                     </div>
                     
-                    <!-- Kotak Terlambat -->
-                    <div class="col-span-1 bg-white/5 border border-white/10 p-4 sm:p-5 rounded-2xl hover:bg-white/10 transition group flex flex-col items-center sm:items-start lg:items-center justify-center text-center sm:text-left lg:text-center">
-                        <div class="text-2xl md:text-3xl font-black text-amber-400 mb-1 group-hover:scale-110 transition-transform origin-center"><?php echo e($stats['terlambat'] ?? 0); ?></div>
-                        <div class="text-[10px] md:text-[11px] uppercase font-bold text-slate-400 tracking-wider">Terlambat</div>
+                    <div class="col-span-1 bg-white/90 backdrop-blur-md border border-white/50 p-4 sm:p-5 rounded-2xl shadow-lg hover:shadow-xl transition-all group flex flex-col items-center justify-center text-center">
+                        <div class="text-2xl md:text-3xl font-black text-amber-500 mb-1 group-hover:scale-110 transition-transform origin-center"><?php echo e($stats['terlambat'] ?? 0); ?></div>
+                        <div class="text-[10px] md:text-[11px] uppercase font-bold text-slate-500 tracking-wider">Terlambat</div>
                     </div>
                     
-                    <!-- Kotak Absen -->
-                    <div class="col-span-1 bg-white/5 border border-white/10 p-4 sm:p-5 rounded-2xl hover:bg-white/10 transition group flex flex-col items-center sm:items-start lg:items-center justify-center text-center sm:text-left lg:text-center">
-                        <div class="text-2xl md:text-3xl font-black text-rose-400 mb-1 group-hover:scale-110 transition-transform origin-center"><?php echo e($stats['tidak_hadir'] ?? 0); ?></div>
-                        <div class="text-[10px] md:text-[11px] uppercase font-bold text-slate-400 tracking-wider">Absen</div>
+                    <div class="col-span-1 bg-white/90 backdrop-blur-md border border-white/50 p-4 sm:p-5 rounded-2xl shadow-lg hover:shadow-xl transition-all group flex flex-col items-center justify-center text-center">
+                        <div class="text-2xl md:text-3xl font-black text-rose-500 mb-1 group-hover:scale-110 transition-transform origin-center"><?php echo e($stats['tidak_hadir'] ?? 0); ?></div>
+                        <div class="text-[10px] md:text-[11px] uppercase font-bold text-slate-500 tracking-wider">Absen</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Chart / Visual Content -->
-            <!-- Ditambahkan padding px-4 agar grafik tidak menempel ke batas luar HP -->
-            <div class="lg:w-1/2 w-full px-4 sm:px-0" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
-                <div class="relative glass-dark rounded-[2.5rem] p-5 sm:p-6 lg:p-8 shadow-2xl transform hover:rotate-1 transition duration-500 border-t border-white/10">
-                    <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-4">
-                        <h3 class="font-bold text-base sm:text-lg text-white flex items-center gap-3">
-                            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
-                                <i class="ph-fill ph-chart-bar text-lg sm:text-xl"></i>
-                            </div>
-                            <span class="truncate">Statistik Kehadiran</span>
-                        </h3>
-                        <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 px-2.5 py-1.5 rounded-full border border-emerald-500/20 flex items-center gap-1.5 shrink-0">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live
-                        </span>
-                    </div>
-                    <!-- Height disesuaikan -->
-                    <div class="h-[280px] lg:h-[320px] w-full relative">
-                         <canvas id="publicWeeklyChart"></canvas>
-                    </div>
+            
+            <div class="relative w-full max-w-lg mx-auto lg:ml-auto mt-16 lg:mt-0 px-2 sm:px-0"
+                 data-aos="fade-left" 
+                 data-aos-duration="1000" 
+                 data-aos-delay="200">
+                
+                <div class="relative w-full h-[420px] sm:h-[450px] lg:h-[480px]">
                     
-                    <!-- Decorative Elements -->
-                    <div class="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl -z-10 blur-xl opacity-40"></div>
-                    <div class="absolute -bottom-4 -left-4 w-20 h-20 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-2xl -z-10 blur-xl opacity-40"></div>
+                    
+                    <div class="absolute -top-6 -left-4 sm:-left-6 w-32 h-40 sm:w-40 sm:h-48 bg-blue-900/80 backdrop-blur rounded-[2rem] shadow-2xl transform -rotate-6 z-0 animate-[wiggle_8s_ease-in-out_infinite]"></div>
+                    <div class="absolute -top-10 -right-2 sm:-right-8 w-40 h-40 sm:w-56 sm:h-56 bg-orange-200 rounded-[2.5rem] shadow-xl transform rotate-6 z-0"></div>
+
+                    
+                    <div class="relative z-10 w-full h-full rounded-[2.5rem] overflow-hidden border-[6px] border-white/80 shadow-2xl bg-white/95 backdrop-blur-xl flex flex-col p-4 sm:p-6 lg:p-8 transform hover:scale-[1.02] transition duration-500">
+                        
+                        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3 sm:pb-4 shrink-0">
+                            <h3 class="font-bold text-sm sm:text-base lg:text-lg text-slate-800 flex items-center gap-2 sm:gap-3">
+                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                                    <i class="ph-fill ph-chart-bar text-base sm:text-xl"></i>
+                                </div>
+                                <span class="truncate">Statistik Kehadiran</span>
+                            </h3>
+                            <span class="text-[8px] sm:text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-600 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full border border-emerald-100 flex items-center gap-1 sm:gap-1.5 shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live
+                            </span>
+                        </div>
+                        
+                        <!-- PERBAIKAN: Gunakan absolute layouting untuk Chart.js agar canvas tidak memaksa lebar pembungkus flexbox -->
+                        <div class="relative flex-1 w-full min-h-[150px] sm:min-h-[200px]">
+                             <canvas id="publicWeeklyChart" class="absolute inset-0 w-full h-full"></canvas>
+                        </div>
+                    </div>
+
+                    
+                    <div class="absolute -bottom-8 -left-2 sm:-left-4 w-24 h-32 sm:w-32 sm:h-40 bg-white/95 backdrop-blur-md border border-white rounded-[1.5rem] shadow-2xl z-20 flex flex-col items-center justify-center gap-2 transform -rotate-3 hover:rotate-0 transition-transform cursor-default">
+                        <div class="bg-blue-100 text-blue-600 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-1">
+                            <i class="ph-bold ph-shield-check text-xl sm:text-2xl"></i>
+                        </div>
+                        <span class="text-[10px] font-bold text-slate-600 text-center px-2 leading-tight">Sistem<br>Terintegrasi</span>
+                    </div>
+
                 </div>
             </div>
+
         </div>
-        
-        <!-- Wave Separator -->
-        <div class="absolute bottom-0 left-0 right-0 pointer-events-none">
-             <svg class="w-full h-16 lg:h-24 text-slate-50 fill-current" viewBox="0 0 1440 320" preserveAspectRatio="none">
-                 <path d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-             </svg>
-        </div>
-    </div><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/landing/hero.blade.php ENDPATH**/ ?>
+    </div>
+    
+    <!-- Wave Separator -->
+    <div class="absolute bottom-0 left-0 right-0 pointer-events-none translate-y-[1px] z-20">
+         <svg class="w-full h-16 lg:h-24 text-slate-50 fill-current" viewBox="0 0 1440 320" preserveAspectRatio="none">
+             <path d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+         </svg>
+    </div>
+</section><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/landing/hero.blade.php ENDPATH**/ ?>

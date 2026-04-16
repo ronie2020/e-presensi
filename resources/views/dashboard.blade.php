@@ -166,15 +166,7 @@
         </div>
 
         {{-- [WIDGET FIX] MONITORING SISWA KELUAR --}}
-        @php
-            $studentsOut = \App\Models\StudentPermit::with('student.schoolClass')
-                            ->where('status', 'OUT')
-                            ->orderBy('time_out', 'desc')
-                            ->get();
-            $countOut = $studentsOut->count();
-        @endphp
-
-        <!-- Widget ini sekarang akan SELALU TAMPIL -->
+        <!-- Widget ini sekarang akan SELALU TAMPIL dan datanya dikirim dari Controller -->
         <div class="animate-enter mb-8 no-print" style="animation-delay: 50ms">
             @if($countOut > 0)
                 {{-- STATUS WARNING: ADA SISWA KELUAR --}}
@@ -546,7 +538,8 @@
                                         </div>
                                     </div>
                                     <div class="text-right shrink-0">
-                                        <p class="text-xs font-bold font-mono text-slate-600 mb-1">{{ \Carbon\Carbon::parse($log->created_at)->format('H:i') }}</p>
+                                        {{-- PERBAIKAN FORMAT CARBON DISINI --}}
+                                        <p class="text-xs font-bold font-mono text-slate-600 mb-1">{{ $log->created_at->format('H:i') }}</p>
                                         <span class="text-[10px] font-bold px-2 py-1 rounded-lg {{ $theme['bg_badge'] }} {{ $theme['text_badge'] }}">{{ $statusText }}</span>
                                     </div>
                                 </div>

@@ -2,7 +2,7 @@
     <div id="guru" class="py-24 bg-slate-50 relative">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16" data-aos="fade-up">
-                <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold uppercase tracking-widest border border-blue-100">SDM Unggul</span>
+                <span class="px-3 py-1 bg-cyan-50 text-cyan-600 rounded-full text-xs font-bold uppercase tracking-widest border border-cyan-100">SDM Unggul</span>
                 <h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl mt-4">Tenaga Pendidik</h2>
                 <p class="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">Dibimbing oleh guru-guru profesional yang berdedikasi tinggi.</p>
             </div>
@@ -25,7 +25,7 @@
                                     <span class="text-6xl font-black opacity-30 select-none uppercase">{{ substr($teacher->name, 0, 2) }}</span>
                                 </div>
                             @else
-                                <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 text-blue-600">
+                                <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-cyan-50 to-blue-100 text-cyan-600">
                                     <span class="text-7xl font-black opacity-20 select-none uppercase group-hover:scale-110 transition-transform">{{ substr($teacher->name, 0, 2) }}</span>
                                 </div>
                             @endif
@@ -33,12 +33,11 @@
                         </div>
                         <div class="p-5 text-center relative bg-white flex-1 flex flex-col justify-end">
                             <div class="absolute -top-4 left-0 right-0 flex justify-center px-4">
-                                {{-- Menambahkan truncate dan max-w-full agar rapi jika teksnya panjang --}}
-                                <span class="bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-3 rounded-full shadow-lg border-2 border-white truncate max-w-full" title="{{ $displayRole }}">
+                                <span class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-3 rounded-full shadow-lg border-2 border-white truncate max-w-full" title="{{ $displayRole }}">
                                     {{ $displayRole }}
                                 </span>
                             </div>
-                            <h3 class="mt-4 text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">{{ $teacher->name }}</h3>
+                            <h3 class="mt-4 text-lg font-bold text-slate-900 group-hover:text-cyan-600 transition-colors line-clamp-1">{{ $teacher->name }}</h3>
                             @if(!empty($teacher->nip))
                                 <p class="text-xs text-slate-500 font-medium mt-1">NIP. {{ $teacher->nip }}</p>
                             @endif
@@ -49,7 +48,7 @@
                 @endforelse
             </div>
             <div class="text-center mt-12" data-aos="fade-up">
-                <a href="{{ route('teachers.index') }}" class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm hover:shadow-md">Lihat Seluruh Staff <i class="ph-bold ph-arrow-right ml-2"></i></a>
+                <a href="{{ route('teachers.index') }}" class="inline-flex items-center justify-center px-6 py-3 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-cyan-50 hover:text-cyan-600 hover:border-cyan-200 transition-all shadow-sm hover:shadow-md">Lihat Seluruh Staff <i class="ph-bold ph-arrow-right ml-2"></i></a>
             </div>
         </div>
     </div>

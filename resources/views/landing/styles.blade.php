@@ -28,11 +28,11 @@
 <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     
-    /* Custom Scrollbar */
+    /* Custom Scrollbar Diselaraskan Ke Tema Biru/Cyan */
     ::-webkit-scrollbar { width: 10px; }
     ::-webkit-scrollbar-track { background: #f8fafc; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; border: 2px solid #f8fafc; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 5px; border: 2px solid #f8fafc; }
+    ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
     
     /* Utility Animations */
     .animate-blob { animation: blob 7s infinite; }
@@ -68,7 +68,7 @@
 
     /* Preloader */
     #preloader { position: fixed; inset: 0; z-index: 9999; background: #0f172a; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s ease-out; }
-    .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: #3b82f6; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
+    .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: #0ea5e9; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
     @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .hide-preloader { opacity: 0; visibility: hidden; }
 </style>

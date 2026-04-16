@@ -11,33 +11,35 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                 <div class="space-y-8" data-aos="fade-right">
                     <div class="space-y-2">
-                        <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold uppercase tracking-widest border border-blue-100">Tentang Kami</span>
-                        <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 leading-tight">Mewujudkan Generasi <br><span class="text-blue-600">Cerdas & Berkarakter</span></h2>
+                        <!-- PERBAIKAN: Badge dan teks diubah menjadi nuansa Cyan/Blue -->
+                        <span class="px-3 py-1 bg-cyan-50 text-cyan-600 rounded-full text-xs font-bold uppercase tracking-widest border border-cyan-100">Tentang Kami</span>
+                        <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 leading-tight">Mewujudkan Generasi <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600">Cerdas & Berkarakter</span></h2>
                     </div>
                     <p class="text-lg text-slate-600 leading-relaxed text-justify lg:text-left">
                         SMP Negeri 3 Lakbok berkomitmen untuk memberikan layanan pendidikan terbaik yang mengintegrasikan kecerdasan akademik dengan nilai-nilai karakter luhur. Kami hadir untuk mencetak pemimpin masa depan yang kompetitif dan berakhlak mulia.
                     </p>
                     
+                    <!-- PERBAIKAN: Menyatukan tema kartu statistik menjadi seragam (Hover Cyan/Blue) -->
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg transition-all duration-300">
-                            <p class="text-3xl font-black text-slate-800">{{ $schoolStats['siswa'] ?? '-' }}</p>
+                        <div class="p-5 bg-white rounded-2xl border border-slate-100 text-center hover:border-cyan-300 hover:shadow-xl hover:shadow-cyan-500/10 hover:-translate-y-1 transition-all duration-300 group">
+                            <p class="text-3xl font-black text-slate-800 group-hover:text-cyan-600 transition-colors">{{ $schoolStats['siswa'] ?? '-' }}</p>
                             <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Siswa</p>
                         </div>
-                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg transition-all duration-300">
-                            <p class="text-3xl font-black text-slate-800">{{ $schoolStats['guru'] ?? '-' }}</p>
+                        <div class="p-5 bg-white rounded-2xl border border-slate-100 text-center hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300 group">
+                            <p class="text-3xl font-black text-slate-800 group-hover:text-blue-600 transition-colors">{{ $schoolStats['guru'] ?? '-' }}</p>
                             <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Guru</p>
                         </div>
-                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 text-center hover:bg-white hover:shadow-lg transition-all duration-300">
-                            <p class="text-3xl font-black text-slate-800">{{ $schoolStats['rombel'] ?? '-' }}</p>
+                        <div class="p-5 bg-white rounded-2xl border border-slate-100 text-center hover:border-cyan-300 hover:shadow-xl hover:shadow-cyan-500/10 hover:-translate-y-1 transition-all duration-300 group">
+                            <p class="text-3xl font-black text-slate-800 group-hover:text-cyan-600 transition-colors">{{ $schoolStats['rombel'] ?? '-' }}</p>
                             <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Rombel</p>
                         </div>
-                        <div class="p-5 bg-teal-50 rounded-2xl border border-teal-100 text-center hover:bg-white hover:shadow-lg hover:border-teal-200 transition-all duration-300">
-                            <p class="text-3xl font-black text-teal-600">{{ $schoolStats['materi'] ?? 0 }}</p>
-                            <p class="text-[10px] font-bold text-teal-400 uppercase mt-1 tracking-wider">Materi Digital</p>
+                        <div class="p-5 bg-white rounded-2xl border border-slate-100 text-center hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300 group">
+                            <p class="text-3xl font-black text-slate-800 group-hover:text-blue-600 transition-colors">{{ $schoolStats['materi'] ?? 0 }}</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Materi Digital</p>
                         </div>
-                        <div class="p-5 bg-indigo-50 rounded-2xl border border-indigo-100 text-center hover:bg-white hover:shadow-lg hover:border-indigo-200 transition-all duration-300 sm:col-span-2">
-                            <p class="text-3xl font-black text-indigo-600">{{ $schoolStats['tugas'] ?? 0 }}</p>
-                            <p class="text-[10px] font-bold text-indigo-400 uppercase mt-1 tracking-wider">Tugas & Kuis Online</p>
+                        <div class="p-5 bg-white rounded-2xl border border-slate-100 text-center hover:border-cyan-300 hover:shadow-xl hover:shadow-cyan-500/10 hover:-translate-y-1 transition-all duration-300 group sm:col-span-2">
+                            <p class="text-3xl font-black text-slate-800 group-hover:text-cyan-600 transition-colors">{{ $schoolStats['tugas'] ?? 0 }}</p>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Tugas & Kuis Online</p>
                         </div>
                     </div>
                 </div>

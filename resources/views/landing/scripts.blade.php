@@ -6,9 +6,9 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Chart Default Styling
         Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
-        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.color = '#64748b'; // Teks disesuaikan ke abu-abu medium agar terbaca di background putih
         
-        // --- 1. CHART ATTENDANCE ---
+        // --- 1. CHART ATTENDANCE (HERO SECTION) ---
         const ctx = document.getElementById('publicWeeklyChart');
         if(ctx) {
             const chartData = @json($barChartData ?? ['labels'=>[],'datasets'=>[]]); 
@@ -25,8 +25,15 @@
                     barThickness: 24,
                     plugins: { legend: { position: 'bottom' } },
                     scales: {
-                        x: { grid: { display: false }, ticks: { color: '#cbd5e1' } },
-                        y: { grid: { color: '#334155' }, border: { display: false }, ticks: { color: '#cbd5e1' } }
+                        x: { 
+                            grid: { display: false }, 
+                            ticks: { color: '#64748b', font: { weight: '600' } } // Warna font gelap untuk background terang
+                        },
+                        y: { 
+                            grid: { color: '#f1f5f9', borderDash: [4, 4] }, // Grid lebih halus
+                            border: { display: false }, 
+                            ticks: { color: '#64748b', font: { weight: '600' } } 
+                        }
                     }
                 }
             });
@@ -43,17 +50,17 @@
                     datasets: [{
                         label: 'Kunjungan',
                         data: libData.data,
-                        borderColor: '#10b981',
+                        borderColor: '#0ea5e9', // Diubah ke warna cyan/sky blue
                         backgroundColor: (context) => {
                             const ctx = context.chart.ctx;
                             const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                            gradient.addColorStop(0, 'rgba(16, 185, 129, 0.15)');
-                            gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+                            gradient.addColorStop(0, 'rgba(14, 165, 233, 0.15)');
+                            gradient.addColorStop(1, 'rgba(14, 165, 233, 0)');
                             return gradient;
                         },
                         borderWidth: 3,
                         pointBackgroundColor: '#ffffff',
-                        pointBorderColor: '#10b981',
+                        pointBorderColor: '#0ea5e9',
                         pointBorderWidth: 2,
                         pointRadius: 4,
                         pointHoverRadius: 6,
@@ -67,7 +74,7 @@
                     plugins: { 
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#10b981',
+                            backgroundColor: '#0ea5e9',
                             titleColor: '#fff',
                             bodyColor: '#fff',
                             padding: 10,
@@ -80,10 +87,11 @@
                             beginAtZero: true, 
                             border: { display: false }, 
                             grid: { color: '#f1f5f9' },
-                            ticks: { stepSize: 1 }
+                            ticks: { stepSize: 1, color: '#64748b' }
                         }, 
                         x: { 
-                            grid: { display: false }
+                            grid: { display: false },
+                            ticks: { color: '#64748b' }
                         } 
                     }
                 }
@@ -101,17 +109,17 @@
                 datasets: [{
                     label: 'Siswa Melapor',
                     data: @json($habitData ?? []),
-                    borderColor: '#3b82f6',
+                    borderColor: '#06b6d4', // Cyan
                     backgroundColor: (context) => {
                         const ctx = context.chart.ctx;
                         const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                        gradient.addColorStop(0, 'rgba(59, 130, 246, 0.2)');
-                        gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+                        gradient.addColorStop(0, 'rgba(6, 182, 212, 0.2)');
+                        gradient.addColorStop(1, 'rgba(6, 182, 212, 0)');
                         return gradient;
                     },
                     borderWidth: 4,
                     pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#3b82f6',
+                    pointBorderColor: '#06b6d4',
                     pointBorderWidth: 3,
                     pointRadius: 5,
                     pointHoverRadius: 8,
@@ -136,7 +144,7 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: { color: '#1e293b', drawBorder: false },
+                        grid: { color: '#e2e8f0', drawBorder: false }, // Grid disesuaikan ke light
                         ticks: { color: '#64748b', font: { weight: 'bold' } }
                     },
                     x: {

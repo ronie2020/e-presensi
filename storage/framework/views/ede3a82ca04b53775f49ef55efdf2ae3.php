@@ -1,8 +1,6 @@
-@extends('layouts.public')
+<?php $__env->startSection('title', 'Direktori Pengajar - ' . config('app.name', 'SMP Negeri 3 Lakbok')); ?>
 
-@section('title', 'Direktori Pengajar - ' . config('app.name', 'SMP Negeri 3 Lakbok'))
-
-@push('styles')
+<?php $__env->startPush('styles'); ?>
     <style>
         /* Mencegah elemen berkedip saat AlpineJS belum siap */
         [x-cloak] { display: none !important; }
@@ -24,10 +22,10 @@
         .modal-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
         .modal-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
-    {{-- Wrapper x-data: Memindahkan logika dari body ke sini agar tetap jalan di dalam layout --}}
+<?php $__env->startSection('content'); ?>
+    
     <div x-data="{ 
           modalOpen: false, 
           teacher: {},
@@ -90,7 +88,7 @@
             
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center animate-enter">
                 
-                {{-- Badge Status --}}
+                
                 <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-cyan-100 text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-md shadow-sm">
                     <span class="relative flex h-2 w-2">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-300 opacity-75"></span>
@@ -105,7 +103,7 @@
                 </p>
 
                 <!-- FORM PENCARIAN & FILTER -->
-                <form action="{{ route('teachers.index') }}" method="GET" class="max-w-2xl mx-auto relative group" @submit="isSearching = true">
+                <form action="<?php echo e(route('teachers.index')); ?>" method="GET" class="max-w-2xl mx-auto relative group" @submit="isSearching = true">
                     <div class="absolute -inset-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                     
                     <div class="relative flex flex-col sm:flex-row bg-white/95 backdrop-blur-xl rounded-[2rem] sm:rounded-full shadow-2xl transition-transform focus-within:scale-[1.02] border border-white/20">
@@ -117,8 +115,8 @@
                             </div>
                             <select name="kategori" class="w-full pl-14 pr-10 py-4 bg-transparent border-0 focus:ring-0 text-sm font-bold text-slate-600 cursor-pointer appearance-none rounded-t-[2rem] sm:rounded-l-full sm:rounded-tr-none">
                                 <option value="">Semua Peran</option>
-                                <option value="guru" {{ request('kategori') == 'guru' ? 'selected' : '' }}>Guru / Pendidik</option>
-                                <option value="staf" {{ request('kategori') == 'staf' ? 'selected' : '' }}>Staf Tata Usaha</option>
+                                <option value="guru" <?php echo e(request('kategori') == 'guru' ? 'selected' : ''); ?>>Guru / Pendidik</option>
+                                <option value="staf" <?php echo e(request('kategori') == 'staf' ? 'selected' : ''); ?>>Staf Tata Usaha</option>
                             </select>
                             <div class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
                                 <i class="ph-bold ph-caret-down text-lg"></i>
@@ -127,13 +125,13 @@
                         
                         <!-- Input Pencarian -->
                         <div class="relative w-full sm:w-3/5">
-                            <input type="text" name="q" value="{{ request('q') }}" placeholder="Ketik nama atau mapel..." class="w-full pl-6 pr-24 py-4 bg-transparent border-0 focus:ring-0 text-sm font-bold placeholder-slate-400 text-slate-800 rounded-b-[2rem] sm:rounded-r-full sm:rounded-bl-none">
+                            <input type="text" name="q" value="<?php echo e(request('q')); ?>" placeholder="Ketik nama atau mapel..." class="w-full pl-6 pr-24 py-4 bg-transparent border-0 focus:ring-0 text-sm font-bold placeholder-slate-400 text-slate-800 rounded-b-[2rem] sm:rounded-r-full sm:rounded-bl-none">
                             
                             <!-- Tombol Reset & Submit -->
                             <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
-                                @if(request('q') || request('kategori'))
-                                    <a href="{{ route('teachers.index') }}" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-100 hover:text-red-600 transition-colors" title="Reset Filter"><i class="ph-bold ph-x"></i></a>
-                                @endif
+                                <?php if(request('q') || request('kategori')): ?>
+                                    <a href="<?php echo e(route('teachers.index')); ?>" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-100 hover:text-red-600 transition-colors" title="Reset Filter"><i class="ph-bold ph-x"></i></a>
+                                <?php endif; ?>
                                 <button type="submit" class="w-10 h-10 flex items-center justify-center bg-cyan-500 rounded-full text-white hover:bg-cyan-600 transition shadow-lg shadow-cyan-500/30 hover:scale-110 active:scale-95">
                                     <i class="ph-bold ph-magnifying-glass text-lg"></i>
                                 </button>
@@ -148,7 +146,7 @@
             
             <!-- IDE PENGEMBANGAN 4: SKELETON LOADING -->
             <div x-show="isSearching" x-cloak class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                @for($i = 1; $i <= 8; $i++)
+                <?php for($i = 1; $i <= 8; $i++): ?>
                     <div class="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-100 flex flex-col h-full relative animate-pulse">
                         <div class="aspect-[4/5] sm:aspect-square bg-slate-200/60 relative overflow-hidden"></div>
                         <div class="p-5 text-center flex-1 flex flex-col relative bg-white">
@@ -161,51 +159,51 @@
                             </div>
                         </div>
                     </div>
-                @endfor
+                <?php endfor; ?>
             </div>
 
             <!-- KONTEN ASLI (Akan disembunyikan saat sedang loading/submit form) -->
             <div x-show="!isSearching" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                @forelse($teachers as $index => $teacher)
-                    @php
+                <?php $__empty_1 = true; $__currentLoopData = $teachers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $teacher): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
                         // Logika untuk mendecode Role yang berbentuk JSON string ["Guru", "Admin"]
                         $displayRole = $teacher->position;
                         if (empty($displayRole)) {
                             $decodedRoles = is_string($teacher->role) ? json_decode($teacher->role, true) : $teacher->role;
                             $displayRole = is_array($decodedRoles) ? implode(', ', $decodedRoles) : $teacher->role;
                         }
-                    @endphp
+                    ?>
                     <div @click="openModal({
-                            name: '{{ addslashes($teacher->name) }}',
-                            nip: '{{ $teacher->nip ?? '-' }}',
-                            pangkat: '{{ $teacher->pangkat ?? '-' }}',
-                            position: '{{ addslashes($displayRole) }}',
-                            bio: '{{ addslashes($teacher->bio ?? 'Belum ada pesan & kesan.') }}',
-                            keahlian: '{{ addslashes($teacher->keahlian ?? '') }}',
-                            hobi: '{{ addslashes($teacher->hobi ?? '') }}',
-                            phone: '{{ $teacher->phone }}',
-                            instagram: '{{ $teacher->instagram }}',
-                            tiktok: '{{ $teacher->tiktok }}',
-                            facebook: '{{ $teacher->facebook }}',
-                            photo_url: '{{ $teacher->photo_path ? asset('storage/' . $teacher->photo_path) : '' }}',
-                            profile_url: '{{ route('teachers.show', $teacher->id) }}',
-                            cv_url: '{{ route('teachers.cv', $teacher->id) }}'
+                            name: '<?php echo e(addslashes($teacher->name)); ?>',
+                            nip: '<?php echo e($teacher->nip ?? '-'); ?>',
+                            pangkat: '<?php echo e($teacher->pangkat ?? '-'); ?>',
+                            position: '<?php echo e(addslashes($displayRole)); ?>',
+                            bio: '<?php echo e(addslashes($teacher->bio ?? 'Belum ada pesan & kesan.')); ?>',
+                            keahlian: '<?php echo e(addslashes($teacher->keahlian ?? '')); ?>',
+                            hobi: '<?php echo e(addslashes($teacher->hobi ?? '')); ?>',
+                            phone: '<?php echo e($teacher->phone); ?>',
+                            instagram: '<?php echo e($teacher->instagram); ?>',
+                            tiktok: '<?php echo e($teacher->tiktok); ?>',
+                            facebook: '<?php echo e($teacher->facebook); ?>',
+                            photo_url: '<?php echo e($teacher->photo_path ? asset('storage/' . $teacher->photo_path) : ''); ?>',
+                            profile_url: '<?php echo e(route('teachers.show', $teacher->id)); ?>',
+                            cv_url: '<?php echo e(route('teachers.cv', $teacher->id)); ?>'
                          })"
                          class="animate-enter group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-2 transition-all duration-500 border border-slate-100 flex flex-col h-full relative cursor-pointer"
-                         style="animation-delay: {{ ($index % 4) * 100 }}ms">
+                         style="animation-delay: <?php echo e(($index % 4) * 100); ?>ms">
                         
                         <!-- Foto Guru -->
                         <div class="aspect-[4/5] sm:aspect-square bg-slate-200 relative overflow-hidden">
-                            @if($teacher->photo_path)
-                                <img src="{{ asset('storage/' . $teacher->photo_path) }}" alt="{{ $teacher->name }}" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter grayscale group-hover:grayscale-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <?php if($teacher->photo_path): ?>
+                                <img src="<?php echo e(asset('storage/' . $teacher->photo_path)); ?>" alt="<?php echo e($teacher->name); ?>" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 filter grayscale group-hover:grayscale-0" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                 <div class="hidden w-full h-full flex-col items-center justify-center bg-gradient-to-br from-cyan-50 to-blue-100 text-slate-400">
-                                    <span class="text-4xl font-bold opacity-30">{{ substr($teacher->name, 0, 2) }}</span>
+                                    <span class="text-4xl font-bold opacity-30"><?php echo e(substr($teacher->name, 0, 2)); ?></span>
                                 </div>
-                            @else
+                            <?php else: ?>
                                 <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-cyan-50 to-blue-100 text-cyan-500">
-                                    <span class="text-6xl sm:text-7xl font-black opacity-30 select-none uppercase group-hover:scale-110 transition-transform duration-500">{{ substr($teacher->name, 0, 1) }}</span>
+                                    <span class="text-6xl sm:text-7xl font-black opacity-30 select-none uppercase group-hover:scale-110 transition-transform duration-500"><?php echo e(substr($teacher->name, 0, 1)); ?></span>
                                 </div>
-                            @endif
+                            <?php endif; ?>
                             
                             <!-- Overlay Text (Call to Action) -->
                             <div class="absolute inset-0 bg-cyan-900/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -216,31 +214,32 @@
                         <!-- Info Singkat -->
                         <div class="p-5 text-center flex-1 flex flex-col relative bg-white">
                             <div class="absolute -top-4 left-0 right-0 flex justify-center px-4">
-                                <span class="inline-block px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-lg border-2 border-white transform group-hover:scale-105 transition-transform truncate max-w-full" title="{{ $displayRole }}">
-                                    {{ $displayRole }}
+                                <span class="inline-block px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-lg border-2 border-white transform group-hover:scale-105 transition-transform truncate max-w-full" title="<?php echo e($displayRole); ?>">
+                                    <?php echo e($displayRole); ?>
+
                                 </span>
                             </div>
                             <div class="mt-4 mb-2">
-                                <h3 class="text-base sm:text-lg font-bold text-slate-800 leading-tight group-hover:text-cyan-600 transition-colors line-clamp-1">{{ $teacher->name }}</h3>
-                                @if($teacher->nip)
-                                    <p class="text-[10px] sm:text-xs text-slate-400 font-mono mt-1 font-medium bg-slate-50 inline-block px-2 py-0.5 rounded">{{ $teacher->nip }}</p>
-                                @endif
+                                <h3 class="text-base sm:text-lg font-bold text-slate-800 leading-tight group-hover:text-cyan-600 transition-colors line-clamp-1"><?php echo e($teacher->name); ?></h3>
+                                <?php if($teacher->nip): ?>
+                                    <p class="text-[10px] sm:text-xs text-slate-400 font-mono mt-1 font-medium bg-slate-50 inline-block px-2 py-0.5 rounded"><?php echo e($teacher->nip); ?></p>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
-                 @empty
+                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="col-span-2 lg:col-span-4 py-24 text-center animate-enter">
                         <div class="inline-flex bg-slate-100 p-6 rounded-full mb-6 text-slate-300 ring-8 ring-slate-50"><i class="ph-duotone ph-magnifying-glass text-5xl"></i></div>
                         <h3 class="text-xl font-bold text-slate-800 mb-2">Data Tidak Ditemukan</h3>
                         <p class="text-slate-500 text-sm max-w-md mx-auto mb-6">Maaf, kami tidak dapat menemukan data guru dengan kata kunci atau filter tersebut.</p>
-                        @if(request('q') || request('kategori'))
-                            <a href="{{ route('teachers.index') }}" class="inline-flex items-center justify-center px-6 py-2.5 bg-cyan-500 text-white text-sm font-bold rounded-full hover:bg-cyan-600 transition shadow-lg shadow-cyan-500/30 gap-2"><i class="ph-bold ph-arrow-counter-clockwise"></i> Reset Pencarian & Filter</a>
-                        @endif
+                        <?php if(request('q') || request('kategori')): ?>
+                            <a href="<?php echo e(route('teachers.index')); ?>" class="inline-flex items-center justify-center px-6 py-2.5 bg-cyan-500 text-white text-sm font-bold rounded-full hover:bg-cyan-600 transition shadow-lg shadow-cyan-500/30 gap-2"><i class="ph-bold ph-arrow-counter-clockwise"></i> Reset Pencarian & Filter</a>
+                        <?php endif; ?>
                     </div>
-                @endforelse
+                <?php endif; ?>
             </div>
             
-            <div x-show="!isSearching" class="mt-16 px-4 animate-enter">{{ $teachers->withQueryString()->links() }}</div>
+            <div x-show="!isSearching" class="mt-16 px-4 animate-enter"><?php echo e($teachers->withQueryString()->links()); ?></div>
         </div>
 
         <!-- MODAL DETAIL GURU (POPUP) -->
@@ -411,4 +410,5 @@
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.public', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/teachers.blade.php ENDPATH**/ ?>

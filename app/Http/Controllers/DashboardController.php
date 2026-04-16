@@ -8,6 +8,7 @@ use App\Models\AttendanceSiswa;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Models\StudentPermit;
 
 class DashboardController extends Controller
 {
@@ -86,7 +87,7 @@ class DashboardController extends Controller
             if ($yesterday->isSunday()) $yesterday->subDay(2); // Lewati hari Minggu
             
             $yesterdayPresent = AttendanceSiswa::whereHas('student', $filterActiveStudent)
-                ->whereDate('attendance_date', $yesterday)
+                ->whereDate('attendance_date', $yesterday->toDateString())
                 ->whereIn('type', ['Harian', 'Masuk', 'Pulang', 'harian', 'masuk', 'pulang'])
                 ->whereIn('status', ['Hadir', 'Tepat Waktu', 'Terlambat', 'hadir', 'tepat waktu', 'terlambat'])
                 ->distinct('student_id')
@@ -192,6 +193,15 @@ class DashboardController extends Controller
         }
 
         // =====================================================================
+        // 8.5 MONITORING SISWA KELUAR
+        // =====================================================================
+        $studentsOut = StudentPermit::with('student.schoolClass')
+            ->where('status', 'OUT')
+            ->orderBy('time_out', 'desc')
+            ->get();
+        $countOut = $studentsOut->count();
+
+        // =====================================================================
         // 9. RENDER VIEW
         // =====================================================================
         return view('dashboard', [
@@ -213,6 +223,8 @@ class DashboardController extends Controller
             'weeklyPresentData' => $weeklyPresentData, 
             'weeklyLateData' => $weeklyLateData,       
             'weeklyAbsentData' => $weeklyAbsentData,   
+            'studentsOut' => $studentsOut, 
+            'countOut' => $countOut,       
         ]);
     }
 }
