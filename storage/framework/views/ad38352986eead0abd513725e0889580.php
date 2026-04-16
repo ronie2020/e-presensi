@@ -22,17 +22,38 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     borderRadius: 6,
-                    barThickness: 24,
-                    plugins: { legend: { position: 'bottom' } },
+                    // PERBAIKAN 1: Gunakan maxBarThickness agar ukuran bar bisa fleksibel mengecil di HP
+                    maxBarThickness: 24, 
+                    plugins: { 
+                        legend: { 
+                            position: 'bottom',
+                            // PERBAIKAN 2: Perkecil indikator warna legend agar tidak memakan tempat ke bawah
+                            labels: {
+                                boxWidth: 10,
+                                padding: 15,
+                                font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" }
+                            }
+                        } 
+                    },
                     scales: {
                         x: { 
                             grid: { display: false }, 
-                            ticks: { color: '#64748b', font: { weight: '600' } } // Warna font gelap untuk background terang
+                            ticks: { 
+                                color: '#64748b', 
+                                font: { weight: '600', size: 10 },
+                                // PERBAIKAN 3: Cegah teks tanggal bertumpuk
+                                autoSkip: true,
+                                maxTicksLimit: 5, // Batasi jumlah label tanggal yang muncul di HP
+                                maxRotation: 0 // Pastikan teks tetap mendatar (tidak miring yang memakan tinggi)
+                            } 
                         },
                         y: { 
-                            grid: { color: '#f1f5f9', borderDash: [4, 4] }, // Grid lebih halus
+                            grid: { color: '#f1f5f9', borderDash: [4, 4] }, 
                             border: { display: false }, 
-                            ticks: { color: '#64748b', font: { weight: '600' } } 
+                            ticks: { 
+                                color: '#64748b', 
+                                font: { weight: '600', size: 10 } 
+                            } 
                         }
                     }
                 }

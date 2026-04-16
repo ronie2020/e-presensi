@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- PERBAIKAN: Tambahkan overflow-x-hidden pada tag html -->
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth overflow-x-hidden">
+<!-- PERBAIKAN: Kunci lebar maksimal tepat pada 100% viewport (layar) -->
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth overflow-x-hidden w-full max-w-[100vw]">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,6 +15,11 @@
     <title>{{ config('app.name', 'SMP Negeri 3 Lakbok') }}</title>
     
     @include('landing.styles')
+
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+
 
     <style>
         [x-cloak] { display: none !important; }
@@ -168,7 +173,7 @@
         @include('landing.footer')
     </div>
 
-    <!-- MODALS -->
+   <!-- MODALS -->
     @include('landing.modals')
 
     <!-- VISITOR COUNTER (PERBAIKAN: Ukuran dikecilkan drastis untuk HP) -->
