@@ -70,11 +70,12 @@
             </div>
 
             {{-- 3. KOLOM GRAFIK & SHAPES (KANAN) --}}
-            <div class="relative w-full max-w-lg mx-auto lg:ml-auto mt-16 lg:mt-0 px-2 sm:px-0"
+            <div class="relative w-full max-w-lg mx-auto lg:ml-auto mt-16 lg:mt-0 px-4 sm:px-0"
                  data-aos="fade-left" 
                  data-aos-duration="1000" 
                  data-aos-delay="200">
                 
+                <!-- PERBAIKAN: Mengganti aspect-ratio menjadi tinggi (height) statis yang terkontrol agar tidak terlalu panjang di HP -->
                 <div class="relative w-full h-[420px] sm:h-[450px] lg:h-[480px]">
                     
                     {{-- OVERLAPPING SHAPES --}}
@@ -82,32 +83,34 @@
                     <div class="absolute -top-10 -right-2 sm:-right-8 w-40 h-40 sm:w-56 sm:h-56 bg-orange-200 rounded-[2.5rem] shadow-xl transform rotate-6 z-0"></div>
 
                     {{-- KARTU GRAFIK UTAMA --}}
-                    <div class="relative z-10 w-full h-full rounded-[2.5rem] overflow-hidden border-[6px] border-white/80 shadow-2xl bg-white/95 backdrop-blur-xl flex flex-col p-4 sm:p-6 lg:p-8 transform hover:scale-[1.02] transition duration-500">
+                    <!-- PERBAIKAN: Menambahkan padding bawah ekstra (pb-12 hingga pb-16) agar area chart naik dan tidak tertutup widget -->
+                    <div class="relative z-10 w-full h-full rounded-[2.5rem] overflow-hidden border-[6px] border-white/80 shadow-2xl bg-white/95 backdrop-blur-xl flex flex-col pt-5 px-5 pb-12 sm:pt-6 sm:px-6 sm:pb-14 lg:pt-8 lg:px-8 lg:pb-16 transform hover:scale-[1.02] transition duration-500">
                         
-                        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3 sm:pb-4 shrink-0">
-                            <h3 class="font-bold text-sm sm:text-base lg:text-lg text-slate-800 flex items-center gap-2 sm:gap-3">
+                        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-4 shrink-0">
+                            <h3 class="font-bold text-base sm:text-lg text-slate-800 flex items-center gap-3">
                                 <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                                    <i class="ph-fill ph-chart-bar text-base sm:text-xl"></i>
+                                    <i class="ph-fill ph-chart-bar text-lg sm:text-xl"></i>
                                 </div>
                                 <span class="truncate">Statistik Kehadiran</span>
                             </h3>
-                            <span class="text-[8px] sm:text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-600 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full border border-emerald-100 flex items-center gap-1 sm:gap-1.5 shrink-0">
+                            <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-600 px-2.5 py-1.5 rounded-full border border-emerald-100 flex items-center gap-1.5 shrink-0">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live
                             </span>
                         </div>
                         
-                        <!-- PERBAIKAN: Gunakan absolute layouting untuk Chart.js agar canvas tidak memaksa lebar pembungkus flexbox -->
-                        <div class="relative flex-1 w-full min-h-[150px] sm:min-h-[200px]">
-                             <canvas id="publicWeeklyChart" class="absolute inset-0 w-full h-full"></canvas>
+                        <!-- PERBAIKAN: Menggunakan flex-1 agar canvas secara otomatis mengisi sisa ruang kotak dengan proporsional -->
+                        <div class="flex-1 w-full relative">
+                             <canvas id="publicWeeklyChart"></canvas>
                         </div>
                     </div>
 
                     {{-- SHAPE KIRI BAWAH --}}
-                    <div class="absolute -bottom-8 -left-2 sm:-left-4 w-24 h-32 sm:w-32 sm:h-40 bg-white/95 backdrop-blur-md border border-white rounded-[1.5rem] shadow-2xl z-20 flex flex-col items-center justify-center gap-2 transform -rotate-3 hover:rotate-0 transition-transform cursor-default">
-                        <div class="bg-blue-100 text-blue-600 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-1">
-                            <i class="ph-bold ph-shield-check text-xl sm:text-2xl"></i>
+                    <!-- PERBAIKAN: Posisi digeser lebih turun (-bottom-10) dan ke kiri (-left-6), serta ukurannya sedikit di-compact -->
+                    <div class="absolute -bottom-10 -left-6 sm:-bottom-12 sm:-left-8 w-24 h-28 sm:w-28 sm:h-32 bg-white/95 backdrop-blur-md border border-white rounded-[1.5rem] shadow-2xl z-20 flex flex-col items-center justify-center gap-1.5 sm:gap-2 transform -rotate-3 hover:rotate-0 transition-transform cursor-default">
+                        <div class="bg-blue-100 text-blue-600 w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center mb-0.5">
+                            <i class="ph-bold ph-shield-check text-lg sm:text-xl"></i>
                         </div>
-                        <span class="text-[10px] font-bold text-slate-600 text-center px-2 leading-tight">Sistem<br>Terintegrasi</span>
+                        <span class="text-[9px] sm:text-[10px] font-bold text-slate-600 text-center px-2 leading-tight">Sistem<br>Terintegrasi</span>
                     </div>
 
                 </div>
