@@ -135,10 +135,10 @@
                                             </button>
 
                                             <div x-show="open" x-transition class="absolute right-0 mt-1 w-40 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1">
-                                                <button @click="updateStatus({{ $student->id }}, 'present'); currentStatus='present'; open=false" class="w-full text-left px-4 py-2 text-xs font-bold text-emerald-600 hover:bg-emerald-50">Hadir</button>
-                                                <button @click="updateStatus({{ $student->id }}, 'sick'); currentStatus='sick'; open=false" class="w-full text-left px-4 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50">Sakit</button>
-                                                <button @click="updateStatus({{ $student->id }}, 'permission'); currentStatus='permission'; open=false" class="w-full text-left px-4 py-2 text-xs font-bold text-amber-600 hover:bg-amber-50">Izin</button>
-                                                <button @click="updateStatus({{ $student->id }}, 'alpha'); currentStatus='alpha'; open=false" class="w-full text-left px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50">Alpha</button>
+                                                <button @click="updateStatus({{ $student->id }}, 'Hadir'); currentStatus='Hadir'; open=false" class="w-full text-left px-4 py-2 text-xs font-bold text-emerald-600 hover:bg-emerald-50">Hadir</button>
+                                                <button @click="updateStatus({{ $student->id }}, 'Sakit'); currentStatus='Sakit'; open=false" class="w-full text-left px-4 py-2 text-xs font-bold text-blue-600 hover:bg-blue-50">Sakit</button>
+                                                <button @click="updateStatus({{ $student->id }}, 'Izin'); currentStatus='Izin'; open=false" class="w-full text-left px-4 py-2 text-xs font-bold text-amber-600 hover:bg-amber-50">Izin</button>
+                                                <button @click="updateStatus({{ $student->id }}, 'Alpha'); currentStatus='Alpha'; open=false" class="w-full text-left px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50">Alpha</button>
                                                 <div class="border-t border-slate-100 my-1"></div>
                                                 <button @click="updateStatus({{ $student->id }}, null); currentStatus=null; open=false" class="w-full text-left px-4 py-2 text-xs text-slate-400 hover:bg-slate-50">Reset</button>
                                             </div>
