@@ -74,7 +74,7 @@
             if(calendar) calendar.render();
         });
 
-        // --- 3. CHART AKADEMIK (Original) ---
+        // --- 3. CHART AKADEMIK (Penyelarasan Warna Tema Microsoft Elevate) ---
         const academicCanvas = document.getElementById('academicChart');
         const academicData = @json($chartData ?? null);
         
@@ -86,9 +86,10 @@
                     datasets: [{
                         label: 'Nilai',
                         data: academicData.scores,
-                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
-                        borderColor: 'rgba(37, 99, 235, 1)',
-                        borderWidth: 2
+                        backgroundColor: 'rgba(6, 182, 212, 0.2)', // Warna Cyan transparan
+                        borderColor: 'rgba(6, 182, 212, 1)',       // Warna Cyan solid
+                        borderWidth: 2,
+                        borderRadius: 4
                     }]
                 },
                 options: { 
@@ -102,7 +103,7 @@
             });
         }
 
-        // --- 4. CHART KEHADIRAN (Placeholder Implementasi) ---
+        // --- 4. CHART KEHADIRAN (Penyelarasan Warna Tema Microsoft Elevate) ---
         const attendanceCanvas = document.getElementById('attendanceChart');
         const attData = @json($attendanceChart ?? null);
         
@@ -113,12 +114,13 @@
                     labels: ['Hadir', 'Sakit', 'Izin', 'Alpa'],
                     datasets: [{
                         data: [attData.hadir, attData.sakit, attData.izin, attData.alpa],
-                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
-                        borderWidth: 0
+                        backgroundColor: ['#06b6d4', '#3b82f6', '#f59e0b', '#f43f5e'], // Cyan, Blue, Amber, Rose
+                        borderWidth: 0,
+                        hoverOffset: 4
                     }]
                 },
                 options: {
-                    cutout: '70%',
+                    cutout: '75%',
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {

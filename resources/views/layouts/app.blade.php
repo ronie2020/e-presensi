@@ -69,7 +69,7 @@
                     
                     <div class="flex items-center gap-4">
                         <!-- Tombol Hamburger Mobile -->
-                        <button @click="sidebarOpen = true" class="md:hidden text-slate-500 hover:text-blue-600 focus:outline-none transition-colors p-1 rounded-lg hover:bg-blue-50">
+                         <button @click="sidebarOpen = true" class="md:hidden text-slate-500 hover:text-cyan-600 focus:outline-none transition-colors p-1 rounded-lg hover:bg-cyan-50">
                             <i class="ph-bold ph-list text-2xl"></i>
                         </button>
 
@@ -82,16 +82,16 @@
 
                     <!-- User Info -->
                     <div class="flex items-center gap-6">
-                        <div class="hidden md:block text-right border-r border-slate-100 pr-6">
-                            <p class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Tanggal</p>
+                       <div class="hidden md:block text-right border-r border-slate-200 pr-6">
+                            <p class="text-[10px] font-bold text-cyan-600 uppercase tracking-wider">Tanggal</p>
                             <p class="text-sm font-bold text-slate-700">{{ \Carbon\Carbon::now()->translatedFormat('d M Y') }}</p>
                         </div>
-
+                        
                         <!-- Dropdown User -->
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="flex items-center gap-3 focus:outline-none group">
                                 <div class="text-right hidden sm:block">
-                                    <p class="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{{ Auth::user()->name }}</p>
+                                    <p class="text-sm font-bold text-slate-800 group-hover:text-cyan-600 transition-colors">{{ Auth::user()->name }}</p>
                                     
                                     {{-- [MODIFIKASI MULAI] Logic untuk merapikan tampilan Role (JSON -> Text) --}}
                                     @php
@@ -124,16 +124,15 @@
                                         <p class="text-xs text-slate-500 font-medium">{{ $mainRole }}</p>
                                         
                                         @if($extraRolesCount > 0)
-                                            <span class="inline-flex items-center justify-center bg-blue-100 text-blue-600 text-[9px] font-bold px-1.5 py-0.5 rounded leading-none" 
+                                            <span class="inline-flex items-center justify-center bg-cyan-100 text-cyan-700 text-[9px] font-bold px-1.5 py-0.5 rounded leading-none" 
                                                   title="{{ implode(', ', array_slice($displayRoles, 1)) }}">
                                                 +{{ $extraRolesCount }}
                                             </span>
                                         @endif
                                     </div>
-                                    {{-- [MODIFIKASI SELESAI] --}}
-
                                 </div>
-                                <div class="h-10 w-10 rounded-full bg-blue-50 border-2 border-white shadow-md flex items-center justify-center text-blue-600 font-bold text-lg overflow-hidden shrink-0 ring-2 ring-transparent group-hover:ring-blue-100 transition-all">
+
+                               <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-cyan-100 to-blue-100 border border-blue-200 shadow-sm flex items-center justify-center text-blue-600 font-bold text-lg overflow-hidden shrink-0 ring-2 ring-transparent group-hover:ring-cyan-200 transition-all">
                                     @if(Auth::user()->photo_path)
                                         <img class="h-full w-full object-cover" src="{{ asset('storage/' . Auth::user()->photo_path) }}" alt="Avatar">
                                     @else
@@ -153,11 +152,11 @@
                                     <p class="text-xs text-slate-400 font-bold uppercase">Akun Saya</p>
                                 </div>
 
-                                <a href="{{ route('profile.edit') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-blue-50 hover:text-blue-600 font-medium transition-colors">
+                                <a href="{{ route('profile.edit') }}" class="flex items-center px-4 py-2 text-sm text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 font-medium transition-colors">
                                     <i class="ph-bold ph-user-circle mr-2"></i> {{ __('Profile') }}
                                 </a>
                                 
-                                <form method="POST" action="{{ route('logout') }}">
+                                  <form method="POST" action="{{ route('logout') }}">
                                     @csrf
                                     <a href="{{ route('logout') }}"
                                        onclick="event.preventDefault(); this.closest('form').submit();"

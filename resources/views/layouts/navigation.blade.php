@@ -11,35 +11,36 @@
     
     <!-- BACKGROUND ART -->
     <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div class="absolute -top-[100px] -left-[100px] w-[300px] h-[300px] bg-blue-600/30 rounded-full blur-[80px]"></div>
+        <div class="absolute -top-[100px] -left-[100px] w-[300px] h-[300px] bg-cyan-600/20 rounded-full blur-[80px]"></div>
         <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
     </div>
 
     <!-- TOMBOL PENGECIL SIDEBAR (TOGGLE BUTTON) - DESKTOP ONLY -->
     <button 
         @click="toggleSidebar()" 
-        class="absolute -right-3 top-20 z-50 hidden md:flex h-6 w-6 items-center justify-center rounded-full bg-white text-blue-900 shadow-[0_0_10px_rgba(0,0,0,0.2)] border border-blue-100 hover:bg-blue-50 transition-transform duration-300 hover:scale-110 focus:outline-none"
+        class="absolute -right-3 top-20 z-50 hidden md:flex h-6 w-6 items-center justify-center rounded-full bg-white text-blue-600 shadow-md border border-slate-200 hover:bg-cyan-50 transition-transform duration-300 hover:scale-110 focus:outline-none"
         :class="sidebarExpanded ? 'rotate-0' : 'rotate-180'">
         <i class="ph-bold ph-caret-left text-xs"></i>
     </button>
     
     <!-- TOMBOL CLOSE (X) - MOBILE ONLY -->
-    <button 
+     <button 
         @click="sidebarOpen = false" 
-        class="absolute right-4 top-4 z-50 md:hidden text-white/70 hover:text-white transition-colors">
+        class="absolute right-4 top-4 z-50 md:hidden text-blue-200 hover:text-white transition-colors">
         <i class="ph-bold ph-x text-2xl"></i>
     </button>
 
     <!-- HEADER LOGO -->
-    <div class="relative z-10 shrink-0 flex items-center h-24 border-b border-white/10 transition-all duration-300"
+    <div class="relative z-10 shrink-0 flex items-center h-20 border-b border-blue-900/50 transition-all duration-300"
          :class="sidebarExpanded ? 'px-6 justify-start' : 'px-0 justify-center'">
         
-        <a href="{{ route('dashboard') }}" class="flex items-center gap-3 overflow-hidden whitespace-nowrap w-full"
+        <a href="{{ route('dashboard') }}" class="flex items-center gap-3 overflow-hidden whitespace-nowrap w-full group"
            :class="sidebarExpanded ? 'justify-start' : 'justify-center'">
             <!-- Logo Icon -->
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30 shrink-0 border border-white/10 transition-all duration-300 relative"
-                 :class="sidebarExpanded ? 'mx-0' : 'mx-auto'">
-                <x-application-logo class="w-6 h-6 text-white fill-current" />
+            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-lg shadow-cyan-900/20 shrink-0 relative overflow-hidden transition-all duration-300"
+                 :class="sidebarExpanded ? 'mx-0' : 'mx-auto group-hover:scale-105'">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-6 h-6 object-contain z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                <i class="ph-bold ph-buildings text-xl hidden z-10"></i>
             </div>
             
             <!-- Teks Logo -->
@@ -48,8 +49,8 @@
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 scale-90 translate-x-[-10px]"
                  x-transition:enter-end="opacity-100 scale-100 translate-x-0">
-                <span class="font-extrabold text-white text-lg tracking-tight leading-none">SMPN 3 LAKBOK</span>
-                <span class="text-[10px] font-bold text-blue-300 uppercase tracking-[0.15em] mt-1">Unggul & Berkarakter</span>
+                <span class="font-bold text-white text-lg tracking-tight leading-none group-hover:text-cyan-200 transition-colors">SMPN 3 LAKBOK</span>
+                <span class="text-[10px] font-bold text-cyan-300 uppercase tracking-widest mt-1">Unggul & Berkarakter</span>
             </div>
         </a>
     </div>
@@ -81,13 +82,13 @@
                          :class="sidebarExpanded ? 'px-3' : 'px-0 text-center'">
                         
                         <h3 x-show="sidebarExpanded" 
-                            class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                            class="text-[10px] font-black text-blue-300/70 uppercase tracking-widest flex items-center gap-2">
                             {{ $groupTitle }}
-                            <span class="h-px flex-1 bg-white/5"></span>
+                            <span class="h-px flex-1 bg-blue-800/50"></span>
                         </h3>
                         
                         <!-- Divider saat kecil -->
-                        <div x-show="!sidebarExpanded" class="h-0.5 w-4 bg-white/10 mx-auto rounded-full group-hover:bg-blue-500 transition-colors"></div>
+                       <div x-show="!sidebarExpanded" class="h-0.5 w-4 bg-blue-800 mx-auto rounded-full group-hover:bg-cyan-500 transition-colors"></div>
                     </div>
 
                     <!-- Items (Looping $visibleItems yang sudah disaring) -->
@@ -171,25 +172,25 @@
     </div>
 
     <!-- FOOTER STATUS -->
-    <div class="relative z-10 p-4 border-t border-white/10 bg-[#0f172a] transition-all duration-300"
+    <div class="relative z-10 p-4 border-t border-blue-900/50 bg-blue-950 transition-all duration-300"
          :class="sidebarExpanded ? 'block' : 'flex justify-center p-2'">
         
-        <div class="rounded-xl border border-white/5 bg-white/5 flex items-center gap-3 transition-all hover:border-blue-500/30 cursor-pointer group"
+        <div class="rounded-xl border border-white/10 bg-white/5 flex items-center gap-3 transition-all hover:border-cyan-500/50 cursor-pointer group"
              :class="sidebarExpanded ? 'p-3' : 'justify-center p-2 h-10 w-10'"
              title="Status Sistem: Online">
             
             <div x-show="sidebarExpanded" class="flex-1 overflow-hidden">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-300 transition-colors">Status Sistem</p>
+                <p class="text-[10px] font-bold text-cyan-200/60 uppercase tracking-widest group-hover:text-cyan-200 transition-colors">Status Sistem</p>
                 <div class="flex items-center gap-2 mt-0.5">
                     <div class="relative flex h-2 w-2">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
                     </div>
-                    <p class="text-xs font-bold text-white">Online v5.5</p>
+                    <p class="text-xs font-bold text-white">Online v6.5</p>
                 </div>
             </div>
 
-            <i class="ph-bold ph-gear text-slate-400 text-xl group-hover:text-blue-400 group-hover:rotate-90 transition-all duration-500"></i>
+            <i class="ph-bold ph-gear text-cyan-400/60 text-xl group-hover:text-cyan-300 group-hover:rotate-90 transition-all duration-500"></i>
         </div>
     </div>
 </nav>

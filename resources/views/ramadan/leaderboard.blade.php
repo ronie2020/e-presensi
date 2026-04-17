@@ -8,30 +8,34 @@
 
     <div class="p-6 md:p-10 space-y-8 min-h-screen bg-slate-50 font-sans text-slate-800">
         
-        {{-- HEADER (ASLI - TIDAK DIHAPUS) --}}
-        <div class="relative rounded-[3rem] bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-600 p-8 md:p-12 text-white shadow-2xl overflow-hidden border border-white/10">
-            <div class="absolute -top-10 -right-10 opacity-10 rotate-12">
+        {{-- HEADER (Microsoft Elevate Theme) --}}
+        <div class="relative rounded-[3rem] bg-slate-900 p-8 md:p-12 text-white shadow-2xl overflow-hidden border border-white/10">
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-blue-900/80 to-slate-900 z-0"></div>
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none z-0"></div>
+            
+            <div class="absolute top-0 right-0 -mt-10 -mr-10 w-[400px] h-[400px] bg-cyan-500/20 rounded-full blur-[80px] z-0"></div>
+            <div class="absolute -top-10 -right-10 opacity-10 rotate-12 z-0 pointer-events-none">
                 <i class="ph-fill ph-trophy text-[200px]"></i>
             </div>            
             <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
                 <div class="text-center md:text-left">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 border border-white/10 text-emerald-50 text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-sm">
-                        <i class="ph-fill ph-star"></i> Fastabiqul Khairat
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 border border-white/10 text-cyan-50 text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-sm">
+                        <i class="ph-fill ph-star text-amber-300"></i> Fastabiqul Khairat
                     </div>
                     <h1 class="text-3xl md:text-5xl font-black mb-3 tracking-tight">Papan Peringkat Kebaikan</h1>
-                    <p class="text-emerald-50/80 max-w-xl text-sm md:text-base leading-relaxed">
+                    <p class="text-cyan-100/80 max-w-xl text-sm md:text-base leading-relaxed">
                         Daftar siswa paling aktif yang menginspirasi dalam menjalankan ibadah harian selama bulan suci Ramadhan.
                     </p>
                 </div>
                 
                 <div class="flex items-center gap-4">
                     <div class="bg-white/10 backdrop-blur-md p-4 rounded-3xl border border-white/10 text-center min-w-[120px]">
-                        <div class="text-2xl font-black">{{ $topStudents->count() }}</div>
-                        <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-200">Peserta Aktif</div>
+                        <div class="text-2xl font-black text-white">{{ $topStudents->count() }}</div>
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-200">Peserta Aktif</div>
                     </div>
                     <div class="bg-white/10 backdrop-blur-md p-4 rounded-3xl border border-white/10 text-center min-w-[120px]">
-                        <div class="text-2xl font-black">{{ number_format($topStudents->sum('points'), 0, ',', '.') }}</div>
-                        <div class="text-[10px] font-bold uppercase tracking-widest text-emerald-200">Total Poin</div>
+                        <div class="text-2xl font-black text-white">{{ number_format($topStudents->sum('points'), 0, ',', '.') }}</div>
+                        <div class="text-[10px] font-bold uppercase tracking-widest text-cyan-200">Total Poin</div>
                     </div>
                 </div>
             </div>
@@ -53,7 +57,7 @@
                 <div class="bg-white glass-card p-6 rounded-t-[2.5rem] w-full text-center border-x border-t border-slate-100 shadow-xl h-40 flex flex-col justify-center">
                     <h4 class="font-black text-slate-800 line-clamp-1">{{ $topStudents[1]->name }}</h4>
                     <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">{{ $topStudents[1]->schoolClass->name ?? 'Kelas' }}</p>
-                    <div class="text-emerald-600 font-black text-xl">{{ number_format($topStudents[1]->points, 0, ',', '.') }} pts</div>
+                    <div class="text-cyan-600 font-black text-xl">{{ number_format($topStudents[1]->points, 0, ',', '.') }} pts</div>
                 </div>
                 @endif
             </div>
@@ -73,7 +77,7 @@
                 <div class="bg-white glass-card p-8 rounded-t-[3rem] w-full text-center border-x border-t border-amber-100 shadow-2xl h-52 flex flex-col justify-center ring-1 ring-amber-100">
                     <h4 class="font-black text-slate-900 text-lg line-clamp-1">{{ $topStudents[0]->name }}</h4>
                     <p class="text-[10px] font-bold text-amber-500 uppercase mb-3 tracking-widest">Sultan Ibadah</p>
-                    <div class="bg-emerald-600 text-white px-4 py-1.5 rounded-full inline-block text-xl font-black shadow-lg shadow-emerald-200">
+                    <div class="bg-cyan-600 text-white px-4 py-1.5 rounded-full inline-block text-xl font-black shadow-lg shadow-cyan-200">
                         {{ number_format($topStudents[0]->points, 0, ',', '.') }} pts
                     </div>
                 </div>
@@ -92,7 +96,7 @@
                 <div class="bg-white glass-card p-6 rounded-t-[2.5rem] w-full text-center border-x border-t border-slate-100 shadow-xl h-32 flex flex-col justify-center">
                     <h4 class="font-black text-slate-800 line-clamp-1">{{ $topStudents[2]->name }}</h4>
                     <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">{{ $topStudents[2]->schoolClass->name ?? 'Kelas' }}</p>
-                    <div class="text-emerald-600 font-black text-xl">{{ number_format($topStudents[2]->points, 0, ',', '.') }} pts</div>
+                    <div class="text-cyan-600 font-black text-xl">{{ number_format($topStudents[2]->points, 0, ',', '.') }} pts</div>
                 </div>
                 @endif
             </div>
@@ -112,31 +116,31 @@
         <div class="max-w-4xl mx-auto bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
             <div class="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                 <h3 class="font-black text-slate-800 uppercase tracking-wider text-xs flex items-center gap-2">
-                    <i class="ph-bold ph-list-numbers text-emerald-600"></i> Daftar Peringkat Lainnya
+                    <i class="ph-bold ph-list-numbers text-cyan-600"></i> Daftar Peringkat Lainnya
                 </h3>
             </div>
             
             <div class="divide-y divide-slate-50">
                 @forelse($topStudents->slice(3) as $index => $student)
-                <div class="group flex items-center justify-between p-5 hover:bg-emerald-50/30 transition-all cursor-default">
+                <div class="group flex items-center justify-between p-5 hover:bg-cyan-50/30 transition-all cursor-default">
                     <div class="flex items-center gap-5">
-                        <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 font-black text-sm flex items-center justify-center border border-slate-200 group-hover:bg-white group-hover:text-emerald-600 group-hover:border-emerald-200 transition-colors">
+                        <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 font-black text-sm flex items-center justify-center border border-slate-200 group-hover:bg-white group-hover:text-cyan-600 group-hover:border-cyan-200 transition-colors">
                             #{{ $index + 4 }}
                         </div>
                         <div class="w-10 h-10 rounded-full overflow-hidden border border-slate-200">
                             <img src="https://ui-avatars.com/api/?name={{ urlencode($student->name) }}&background=f1f5f9&color=64748b" alt="avatar" class="w-full h-full object-cover">
                         </div>
                         <div>
-                            <div class="text-sm font-black text-slate-800 group-hover:text-emerald-700 transition-colors">{{ $student->name }}</div>
+                            <div class="text-sm font-black text-slate-800 group-hover:text-cyan-700 transition-colors">{{ $student->name }}</div>
                             <div class="text-[10px] font-bold text-slate-400 uppercase">{{ $student->schoolClass->name ?? 'Tanpa Kelas' }}</div>
                         </div>
                     </div>
                     
                     <div class="text-right">
-                        <div class="text-sm font-black text-emerald-600">{{ number_format($student->points, 0, ',', '.') }} pts</div>
+                        <div class="text-sm font-black text-cyan-600">{{ number_format($student->points, 0, ',', '.') }} pts</div>
                         <div class="w-24 bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
                             @php $percent = ($student->points / ($topStudents[0]->points ?: 1)) * 100; @endphp
-                            <div class="bg-emerald-500 h-full rounded-full transition-all duration-1000" style="width: {{ $percent }}%"></div>
+                            <div class="bg-cyan-500 h-full rounded-full transition-all duration-1000" style="width: {{ $percent }}%"></div>
                         </div>
                     </div>
                 </div>

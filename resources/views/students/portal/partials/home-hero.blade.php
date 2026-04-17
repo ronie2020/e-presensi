@@ -23,9 +23,9 @@
         
         <!-- Animated Blobs -->
         <div class="absolute top-1/4 left-1/4 w-64 h-64 md:w-96 md:h-96 rounded-full mix-blend-screen filter blur-[80px] md:blur-[100px] opacity-30 animate-blob transition-colors duration-700"
-             :class="mode === 'cbt' ? 'bg-rose-600' : 'bg-blue-500'"></div>
+             :class="mode === 'cbt' ? 'bg-rose-600' : 'bg-cyan-500'"></div>
         <div class="absolute bottom-1/4 right-1/4 w-64 h-64 md:w-96 md:h-96 rounded-full mix-blend-screen filter blur-[80px] md:blur-[100px] opacity-30 animate-blob animation-delay-2000 transition-colors duration-700"
-             :class="mode === 'cbt' ? 'bg-orange-600' : 'bg-indigo-500'"></div>
+             :class="mode === 'cbt' ? 'bg-orange-600' : 'bg-blue-600'"></div>
     </div>
 
     <!-- Konten Utama -->

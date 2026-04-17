@@ -1,6 +1,6 @@
-<div class="bg-white rounded-[2rem] shadow-xl overflow-hidden mb-6 border border-gray-100 relative group">
-    <!-- Background Banner -->
-    <div class="absolute top-0 left-0 w-full h-40 sm:h-52 z-0 overflow-hidden bg-slate-900">
+<div class="bg-blue-950 rounded-[2rem] shadow-xl overflow-hidden mb-6 border border-white/10 relative group">
+    <!-- Background Banner (Kini menutupi seluruh Card dengan absolute inset-0) -->
+    <div class="absolute inset-0 z-0 overflow-hidden bg-slate-900">
         {{-- Background Image --}}
         <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center opacity-20 mix-blend-overlay"></div>
         
@@ -8,14 +8,15 @@
         <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         
         <!-- Dekorasi Blur -->
-        <div class="absolute top-0 right-0 w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] {{ $isAlumni ? 'bg-amber-600' : 'bg-blue-600' }} rounded-full mix-blend-overlay filter blur-[60px] sm:blur-[80px] opacity-20 -mr-10 -mt-10"></div>
+        <div class="absolute top-0 right-0 w-[200px] sm:w-[400px] h-[200px] sm:h-[400px] {{ $isAlumni ? 'bg-amber-500' : 'bg-cyan-500' }} rounded-full mix-blend-overlay filter blur-[60px] sm:blur-[80px] opacity-30 -mr-10 -mt-10 animate-blob"></div>
+        <div class="absolute bottom-0 left-10 w-[150px] sm:w-[300px] h-[150px] sm:h-[300px] bg-blue-600 rounded-full mix-blend-overlay filter blur-[60px] opacity-20 animate-blob animation-delay-2000"></div>
     </div>
     
-    <!-- Content Container -->
-    <div class="relative z-10 px-6 sm:px-10 pt-20 sm:pt-28 pb-6 flex flex-col md:flex-row items-center md:items-end text-center md:text-left gap-4 sm:gap-6">
+    <!-- Content Container (Padding atas disesuaikan agar proporsional di dalam card penuh) -->
+    <div class="relative z-10 px-6 sm:px-10 pt-12 sm:pt-16 pb-8 flex flex-col md:flex-row items-center md:items-end text-center md:text-left gap-4 sm:gap-6">
         <!-- Foto Profil -->
         <div class="relative group shrink-0 mx-auto md:mx-0 -mb-2">
-            <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-white p-1 shadow-2xl relative z-10 transform group-hover:scale-105 transition-transform duration-300 ring-4 ring-white/20 backdrop-blur-sm">
+            <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-white p-1 shadow-2xl relative z-10 transform group-hover:scale-105 transition-transform duration-300 ring-4 ring-cyan-400/30 backdrop-blur-sm">
                 <div class="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-white relative">
                     @if($student->photo_path)
                         <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover">
@@ -80,8 +81,8 @@
                             <span>{{ $points }} XP</span>
                             <span>{{ $nextLevelPoints }} XP (Next Lvl)</span>
                         </div>
-                        <div class="h-2 w-full bg-blue-900/50 rounded-full overflow-hidden backdrop-blur-sm border border-white/10">
-                            <div class="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-1000 ease-out" style="width: {{ $progressPercent }}%"></div>
+                        <div class="h-2 w-full bg-blue-900/50 rounded-full overflow-hidden backdrop-blur-sm border border-white/10 shadow-inner">
+                            <div class="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(34,211,238,0.5)]" style="width: {{ $progressPercent }}%"></div>
                         </div>
                     </div>
                     @endif
@@ -90,7 +91,7 @@
                 <!-- Action Buttons -->
                 <div class="w-full md:w-auto flex flex-col sm:flex-row gap-2">
                     @if(!$isAlumni)
-                    <a href="{{ route('portal.card', $student->id) }}" target="_blank" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-3 bg-emerald-500/80 backdrop-blur-md border border-emerald-400/30 rounded-xl text-xs sm:text-sm font-bold text-white hover:bg-emerald-500 transition-all shadow-lg hover:shadow-emerald-500/20 group">
+                    <a href="{{ route('portal.card', $student->id) }}" target="_blank" class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-3 bg-cyan-500/80 backdrop-blur-md border border-cyan-400/30 rounded-xl text-xs sm:text-sm font-bold text-white hover:bg-cyan-500 transition-all shadow-lg hover:shadow-cyan-500/30 group">
                         <i class="ph-bold ph-identification-card mr-2 group-hover:animate-bounce"></i> Kartu OSIS
                     </a>
                     @endif

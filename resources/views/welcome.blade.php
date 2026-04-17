@@ -28,11 +28,11 @@
     @php
         $infoPopup = [
             'active' => true, 
-            'id' => 'Idul_Fitri_2026', 
-            'image' => asset('images/tka.png'),
-            'title' => 'Tes Kemampuan Akademik (TKA) 2026',
-            'message' => 'SELAMAT MELAKSANAKAN TKA 2026! Semoga sukses untuk semua peserta. Pastikan membawa perlengkapan yang diperlukan dan datang tepat waktu. Untuk informasi lebih lanjut, silakan klik tombol di bawah.',
-            'cta_text' => 'info TKA 2026',
+            'id' => 'Inovasi daerah', 
+            'image' => asset('images/simadu.jpg'),
+            'title' => 'Inovasi Daerah Kab. Ciamis 2026',
+            'message' => '"SIMADU Netila" SELAMAT MENGIKUTI INOVASI DAERAH 2026. Untuk informasi lebih lanjut, silakan klik tombol di bawah.',
+            'cta_text' => 'Info Simadu',
             'cta_link' => 'https://e-presensi.smpn3lakbok.sch.id/portal', 
             'color' => 'cyan'
         ];

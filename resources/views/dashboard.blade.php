@@ -65,7 +65,7 @@
             <p class="text-xs mt-2">Dicetak pada: {{ now()->format('d F Y H:i') }} oleh {{ Auth::user()->name }}</p>
         </div>
 
-        {{-- LOADING OVERLAY --}}
+        {{-- LOADING OVERLAY (Disesuaikan ke warna Cyan) --}}
         <div x-show="loading" 
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
@@ -79,23 +79,27 @@
             <div class="bg-white p-6 rounded-2xl shadow-2xl flex flex-col items-center transform transition-all scale-100">
                 <div class="relative w-12 h-12 mb-4">
                     <div class="absolute inset-0 rounded-full border-4 border-slate-100"></div>
-                    <div class="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
                 </div>
                 <span class="text-xs font-bold text-slate-700 tracking-wider uppercase animate-pulse">Memproses Data...</span>
             </div>
         </div>
 
-        {{-- HERO SECTION --}}
-        <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-r from-blue-900 via-slate-800 to-slate-900 p-6 md:p-10 mb-6 text-white shadow-2xl shadow-blue-900/20 overflow-hidden group border border-white/10 card-print">
+        {{-- HERO SECTION (Disesuaikan ke Tema Microsoft Elevate) --}}
+        <div class="animate-enter relative rounded-[2.5rem] bg-slate-900 p-6 md:p-10 mb-6 text-white shadow-2xl shadow-cyan-900/10 overflow-hidden group border border-white/10 card-print">
             
-            <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 no-print"></div>
-            <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 no-print"></div>
+            {{-- Background Gradient & Pattern (Mirip Header Profil) --}}
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-blue-900/80 to-slate-900 z-0"></div>
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none no-print"></div>
+            
+            {{-- Blobs Bercahaya Khas Elevate Theme --}}
+            <div class="absolute top-0 right-0 w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] bg-cyan-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 no-print animate-blob -mr-10 -mt-10"></div>
+            <div class="absolute bottom-0 left-0 w-[200px] sm:w-[300px] h-[200px] sm:h-[300px] bg-blue-600 rounded-full mix-blend-overlay filter blur-[80px] opacity-20 no-print animate-blob" style="animation-delay: 2s;"></div>
             
             <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
                 <div>
                     
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-blue-200 text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm no-print">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-cyan-100 text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm no-print">
                         <span class="relative flex h-2 w-2">
                           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                           <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
@@ -104,7 +108,7 @@
                     </div>
                     
                     <h1 class="text-2xl md:text-5xl font-extrabold text-white tracking-tight mb-3">
-                        Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">{{ Auth::user()->name ?? 'Administrator' }}</span> 
+                        Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white">{{ Auth::user()->name ?? 'Administrator' }}</span> 
                     </h1>
                     <p class="text-blue-100/80 text-sm md:text-base max-w-xl leading-relaxed">
                         Berikut adalah ringkasan aktivitas akademik dan kehadiran siswa untuk periode 
@@ -114,9 +118,9 @@
                 
                 {{-- FILTER CONTROLS --}}
                 <div class="flex flex-col gap-3 w-full md:w-auto md:min-w-[320px] filter-group no-print">
-                    <div class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-xl p-1 border border-white/10 mb-1 relative">
+                    <div class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-xl p-1 border border-white/10 mb-1 relative shadow-sm">
                         <div x-show="loadingTarget === 'date'" class="absolute inset-0 bg-slate-900/50 rounded-lg flex items-center justify-center z-10">
-                            <i class="ph-bold ph-spinner animate-spin text-white"></i>
+                            <i class="ph-bold ph-spinner animate-spin text-cyan-400"></i>
                         </div>
 
                         <button @click="changeDate(-1)" :disabled="loading" class="p-2 hover:bg-white/20 rounded-lg text-white transition disabled:opacity-50" title="Sebelumnya">
@@ -124,10 +128,10 @@
                         </button>
                         <div class="relative group/date flex-1 mx-2">
                              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="ph-bold ph-calendar text-blue-300 group-hover/date:text-white transition-colors"></i>
+                                <i class="ph-bold ph-calendar text-cyan-300 group-hover/date:text-white transition-colors"></i>
                             </div>
                             <input type="date" x-model="date" @change="loading = true; loadingTarget = 'date'; updateFilter(period)" 
-                                class="w-full bg-transparent border-none text-white text-xs font-bold text-center focus:ring-0 cursor-pointer placeholder-blue-200">
+                                class="w-full bg-transparent border-none text-white text-xs font-bold text-center focus:ring-0 cursor-pointer placeholder-cyan-200">
                         </div>
                         <button @click="changeDate(1)" :disabled="loading" class="p-2 hover:bg-white/20 rounded-lg text-white transition disabled:opacity-50" title="Berikutnya">
                             <i class="ph-bold ph-caret-right"></i>
@@ -136,21 +140,21 @@
 
                     <div class="bg-slate-900/50 backdrop-blur-md p-1.5 rounded-xl flex border border-white/10 shadow-lg overflow-x-auto">
                         <button @click="updateFilter('today')" :disabled="loading"
-                            :class="period === 'today' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-blue-200 hover:text-white hover:bg-white/5'" 
+                            :class="period === 'today' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-900/50 ring-1 ring-cyan-500' : 'text-blue-100 hover:text-white hover:bg-white/5'" 
                             class="flex-1 py-2.5 px-3 md:px-4 text-[10px] md:text-xs font-bold rounded-lg transition-all duration-300 flex justify-center items-center gap-1 md:gap-2 whitespace-nowrap">
                             <i x-show="loading && loadingTarget === 'today'" class="ph-bold ph-spinner animate-spin"></i>
                             <span x-text="(loading && loadingTarget === 'today') ? '' : 'Harian'"></span>
                         </button>
 
                         <button @click="updateFilter('week')" :disabled="loading"
-                            :class="period === 'week' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-blue-200 hover:text-white hover:bg-white/5'" 
+                            :class="period === 'week' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-900/50 ring-1 ring-cyan-500' : 'text-blue-100 hover:text-white hover:bg-white/5'" 
                             class="flex-1 py-2.5 px-3 md:px-4 text-[10px] md:text-xs font-bold rounded-lg transition-all duration-300 flex justify-center items-center gap-1 md:gap-2 whitespace-nowrap">
                             <i x-show="loading && loadingTarget === 'week'" class="ph-bold ph-spinner animate-spin"></i>
                             <span x-text="(loading && loadingTarget === 'week') ? '' : 'Mingguan'"></span>
                         </button>
 
                         <button @click="updateFilter('month')" :disabled="loading"
-                            :class="period === 'month' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-blue-200 hover:text-white hover:bg-white/5'" 
+                            :class="period === 'month' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-900/50 ring-1 ring-cyan-500' : 'text-blue-100 hover:text-white hover:bg-white/5'" 
                             class="flex-1 py-2.5 px-3 md:px-4 text-[10px] md:text-xs font-bold rounded-lg transition-all duration-300 flex justify-center items-center gap-1 md:gap-2 whitespace-nowrap">
                             <i x-show="loading && loadingTarget === 'month'" class="ph-bold ph-spinner animate-spin"></i>
                             <span x-text="(loading && loadingTarget === 'month') ? '' : 'Bulanan'"></span>
@@ -229,14 +233,14 @@
             @endif
         </div>
 
-        {{-- QUICK ACTIONS - 15 Tombol Disusun Menjadi 5 Kolom (3 Baris Sempurna) --}}
+        {{-- QUICK ACTIONS - Disesuaikan dengan aksen Cyan --}}
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-8 no-print animate-enter quick-actions" style="animation-delay: 100ms">
             {{-- 1. Tombol Data Siswa --}}
-            <a href="{{ route('students.index') }}" @click.prevent="navigate('{{ route('students.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer text-center">
-                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+            <a href="{{ route('students.index') }}" @click.prevent="navigate('{{ route('students.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-cyan-300 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-student text-2xl"></i>
                 </div>
-                <div class="text-[11px] font-bold text-slate-700 group-hover:text-blue-700">Data Siswa</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-cyan-700">Data Siswa</div>
             </a>
             
             {{-- 2. Tombol Kebiasaan --}}
@@ -296,11 +300,11 @@
             </a>
 
             {{-- 9. Tombol SPPD --}}
-            <a href="{{ route('letters.spt.index') }}" @click.prevent="navigate('{{ route('letters.spt.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer text-center">
-                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+            <a href="{{ route('letters.spt.index') }}" @click.prevent="navigate('{{ route('letters.spt.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-cyan-300 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-car-profile text-2xl"></i>
                 </div>
-                <div class="text-[11px] font-bold text-slate-700 group-hover:text-blue-700">SPPD</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-cyan-700">SPPD</div>
             </a>
 
             {{-- 10. Tombol Perpustakaan --}}
@@ -320,11 +324,11 @@
             </a>
 
             {{-- 12. Tombol Jurnal Mengajar --}}
-            <a href="{{ route('teaching.index') }}" @click.prevent="navigate('{{ route('teaching.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer text-center">
-                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+            <a href="{{ route('teaching.index') }}" @click.prevent="navigate('{{ route('teaching.index') }}')" class="group bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center gap-2 hover:shadow-md transition-all hover:border-cyan-300 cursor-pointer text-center">
+                <div class="w-12 h-12 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
                     <i class="ph-bold ph-chalkboard-teacher text-2xl"></i>
                 </div>
-                <div class="text-[11px] font-bold text-slate-700 group-hover:text-blue-700">Jurnal Mengajar</div>
+                <div class="text-[11px] font-bold text-slate-700 group-hover:text-cyan-700">Jurnal Mengajar</div>
             </a>
 
             {{-- 13. Tombol Kedisiplinan --}}
@@ -352,7 +356,7 @@
             </a>
         </div>
 
-        {{-- KPI CARDS (DIPERBARUI MENJADI INTERAKTIF TANPA LINK 404) --}}
+        {{-- KPI CARDS (Warna default Blue diganti Cyan) --}}
         <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-5">
             @foreach($cards as $index => $card)
             @php
@@ -386,11 +390,11 @@
                 } 
                 elseif (str_contains($titleLower, 'total') || str_contains($titleLower, 'siswa')) { 
                     $iconClass = 'ph-student'; 
-                    $colorKey = 'blue'; 
+                    $colorKey = 'cyan'; 
                 } 
                 else { 
                     $iconClass = (!empty($rawIcon) && !str_starts_with($rawIcon, 'M') && $rawIcon !== 'ph-hash') ? $rawIcon : 'ph-chart-bar'; 
-                    $colorKey = 'blue'; 
+                    $colorKey = 'cyan'; 
                 }
 
                 $theme = match($colorKey) {
@@ -400,11 +404,11 @@
                     'purple' => ['bg' => 'bg-purple-50', 'text' => 'text-purple-600', 'hover_bg' => 'group-hover:bg-purple-600', 'hover_border' => 'hover:border-purple-200'],
                     'yellow' => ['bg' => 'bg-yellow-50', 'text' => 'text-yellow-600', 'hover_bg' => 'group-hover:bg-yellow-600', 'hover_border' => 'hover:border-yellow-200'],
                     'slate' => ['bg' => 'bg-slate-100', 'text' => 'text-slate-600', 'hover_bg' => 'group-hover:bg-slate-600', 'hover_border' => 'hover:border-slate-300'],
-                    default => ['bg' => 'bg-blue-50', 'text' => 'text-blue-600', 'hover_bg' => 'group-hover:bg-blue-600', 'hover_border' => 'hover:border-blue-200'],
+                    default => ['bg' => 'bg-cyan-50', 'text' => 'text-cyan-600', 'hover_bg' => 'group-hover:bg-cyan-600', 'hover_border' => 'hover:border-cyan-200'],
                 };
             @endphp
 
-            <!-- PERUBAHAN: Tag <a> diganti <div> dengan onclick memanggil SweetAlert -->
+            <!-- Tag div dengan onclick memanggil SweetAlert -->
             <div onclick="showCardInfo('{{ $card['title'] }}', '{{ $card['value'] }}', '{{ $colorKey }}')" 
                class="cursor-pointer animate-enter group bg-white rounded-2xl p-5 border border-slate-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] hover:shadow-xl hover:shadow-slate-200 {{ $theme['hover_border'] }} transition-all duration-300 hover:-translate-y-1 relative overflow-hidden flex flex-col justify-between h-full card-print"
                style="animation-delay: {{ ($index + 1) * 100 }}ms">
@@ -447,14 +451,14 @@
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <div>
                         <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <i class="ph-fill ph-chart-bar text-blue-600"></i> Analisis Tren Kehadiran
+                            <i class="ph-fill ph-chart-bar text-cyan-600"></i> Analisis Tren Kehadiran
                         </h3>
                         <p class="text-xs text-slate-400 font-bold uppercase tracking-wide mt-1">
                             Statistik <span x-text="period === 'month' ? 'Bulanan' : 'Mingguan'"></span>
                         </p>
                     </div>
                     <div class="flex flex-wrap gap-2 no-print">
-                        <div class="px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center gap-2 text-[10px] font-bold text-emerald-700 uppercase"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Hadir</div>
+                        <div class="px-3 py-1 rounded-lg bg-cyan-50 border border-cyan-100 flex items-center gap-2 text-[10px] font-bold text-cyan-700 uppercase"><span class="w-2 h-2 rounded-full bg-cyan-500"></span> Hadir</div>
                         <div class="px-3 py-1 rounded-lg bg-amber-50 border border-amber-100 flex items-center gap-2 text-[10px] font-bold text-amber-700 uppercase"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Telat</div>
                         <div class="px-3 py-1 rounded-lg bg-rose-50 border border-rose-100 flex items-center gap-2 text-[10px] font-bold text-rose-700 uppercase"><span class="w-2 h-2 rounded-full bg-rose-500"></span> Absen</div>
                     </div>
@@ -477,7 +481,7 @@
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3 mt-auto">
-                    <div class="bg-emerald-50/50 p-3 rounded-xl border border-emerald-100"><span class="block text-[10px] font-bold text-emerald-600 uppercase mb-1">Hadir Tepat</span><span class="text-lg font-black text-slate-800">{{ $presentOnTimeCount ?? 0 }}</span></div>
+                    <div class="bg-cyan-50/50 p-3 rounded-xl border border-cyan-100"><span class="block text-[10px] font-bold text-cyan-600 uppercase mb-1">Hadir Tepat</span><span class="text-lg font-black text-slate-800">{{ $presentOnTimeCount ?? 0 }}</span></div>
                     <div class="bg-amber-50/50 p-3 rounded-xl border border-amber-100"><span class="block text-[10px] font-bold text-amber-600 uppercase mb-1">Terlambat</span><span class="text-lg font-black text-slate-800">{{ $lateCount ?? 0 }}</span></div>
                     <div class="bg-rose-50/50 p-3 rounded-xl border border-rose-100"><span class="block text-[10px] font-bold text-rose-600 uppercase mb-1">Alfa</span><span class="text-lg font-black text-slate-800">{{ $absentCount ?? 0 }}</span></div>
                     <div class="bg-slate-50 p-3 rounded-xl border border-slate-200"><span class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Belum Hadir</span><span class="text-lg font-black text-slate-800">{{ $notYetScannedCount ?? 0 }}</span></div>
@@ -491,7 +495,7 @@
             <div class="animate-enter bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col h-full card-print" style="animation-delay: 800ms" x-data="{ tab: 'activity' }">
                 <div class="flex items-center justify-between mb-6 no-print">
                     <div class="flex gap-6 border-b border-slate-100 w-full">
-                        <button @click="tab = 'activity'" :class="tab === 'activity' ? 'text-blue-900 border-blue-600' : 'text-slate-400 border-transparent hover:text-slate-600'" class="text-sm font-bold pb-3 border-b-2 transition-all px-1">Aktivitas Terbaru</button>
+                        <button @click="tab = 'activity'" :class="tab === 'activity' ? 'text-cyan-700 border-cyan-500' : 'text-slate-400 border-transparent hover:text-slate-600'" class="text-sm font-bold pb-3 border-b-2 transition-all px-1">Aktivitas Terbaru</button>
                         <button @click="tab = 'late_recap'" :class="tab === 'late_recap' ? 'text-amber-600 border-amber-500' : 'text-slate-400 border-transparent hover:text-slate-600'" class="text-sm font-bold pb-3 border-b-2 transition-all px-1">Top Terlambat</button>
                     </div>
                 </div>
@@ -504,7 +508,7 @@
                                     $type = $log->type;
                                     $statusText = $log->status;
                                     $subText = 'Absensi Sekolah';
-                                    $theme = ['bg_icon' => 'bg-emerald-50', 'border_icon' => 'border-emerald-100', 'text_icon' => 'text-emerald-600', 'dot' => 'bg-emerald-400', 'bg_badge' => 'bg-emerald-100', 'text_badge' => 'text-emerald-700'];
+                                    $theme = ['bg_icon' => 'bg-cyan-50', 'border_icon' => 'border-cyan-100', 'text_icon' => 'text-cyan-600', 'dot' => 'bg-cyan-400', 'bg_badge' => 'bg-cyan-100', 'text_badge' => 'text-cyan-700'];
                                     $icon = 'ph-check-circle';
 
                                     if ($type === 'Keagamaan') {
@@ -519,7 +523,7 @@
                                             $theme = ['bg_icon' => 'bg-amber-50', 'border_icon' => 'border-amber-100', 'text_icon' => 'text-amber-600', 'dot' => 'bg-amber-400', 'bg_badge' => 'bg-amber-100', 'text_badge' => 'text-amber-700'];
                                         } elseif ($type == 'Pulang') {
                                             $icon = 'ph-person-simple-walk'; $statusText = 'Pulang'; $subText = 'Selesai KBM';
-                                            $theme = ['bg_icon' => 'bg-blue-50', 'border_icon' => 'border-blue-100', 'text_icon' => 'text-blue-600', 'dot' => 'bg-blue-400', 'bg_badge' => 'bg-blue-100', 'text_badge' => 'text-blue-700'];
+                                            $theme = ['bg_icon' => 'bg-cyan-50', 'border_icon' => 'border-cyan-100', 'text_icon' => 'text-cyan-600', 'dot' => 'bg-cyan-400', 'bg_badge' => 'bg-cyan-100', 'text_badge' => 'text-cyan-700'];
                                         } else {
                                             $subText = $log->student->schoolClass->name ?? '-';
                                         }
@@ -533,12 +537,11 @@
                                             <i class="ph-bold {{ $icon }} text-lg"></i>
                                         </div>
                                         <div>
-                                            <p class="text-sm font-bold text-slate-800 line-clamp-1 group-hover:text-blue-700 transition-colors">{{ $log->student->name ?? 'Siswa' }}</p>
+                                            <p class="text-sm font-bold text-slate-800 line-clamp-1 group-hover:text-cyan-700 transition-colors">{{ $log->student->name ?? 'Siswa' }}</p>
                                             <p class="text-[10px] text-slate-500 font-bold px-2 py-0.5 rounded-md inline-block mt-1 border border-slate-100 bg-white">{{ $subText }}</p>
                                         </div>
                                     </div>
                                     <div class="text-right shrink-0">
-                                        {{-- PERBAIKAN FORMAT CARBON DISINI --}}
                                         <p class="text-xs font-bold font-mono text-slate-600 mb-1">{{ $log->created_at->format('H:i') }}</p>
                                         <span class="text-[10px] font-bold px-2 py-1 rounded-lg {{ $theme['bg_badge'] }} {{ $theme['text_badge'] }}">{{ $statusText }}</span>
                                     </div>
@@ -585,7 +588,7 @@
                     
                     {{-- Tab Switcher --}}
                     <div class="bg-slate-100 p-1 rounded-lg flex no-print">
-                        <button @click="rankTab = 'best'" :class="rankTab === 'best' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-2 py-1 rounded-md text-[10px] font-bold transition-all">Rajin</button>
+                        <button @click="rankTab = 'best'" :class="rankTab === 'best' ? 'bg-white text-cyan-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-2 py-1 rounded-md text-[10px] font-bold transition-all">Rajin</button>
                         <button @click="rankTab = 'worst'" :class="rankTab === 'worst' ? 'bg-white text-rose-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-2 py-1 rounded-md text-[10px] font-bold transition-all">Perlu Atensi</button>
                     </div>
                 </div>
@@ -608,7 +611,7 @@
                                         <div class="font-bold text-slate-700 mb-1">{{ $rank->class_name }}</div>
                                         <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden max-w-[150px]">
                                             @php $percent = min(100, ($rank->present_count / 40) * 100); @endphp
-                                            <div class="h-1.5 rounded-full {{ $index == 0 ? 'bg-yellow-400' : 'bg-emerald-500' }}" style="width: {{ $percent }}%"></div>
+                                            <div class="h-1.5 rounded-full {{ $index == 0 ? 'bg-yellow-400' : 'bg-cyan-500' }}" style="width: {{ $percent }}%"></div>
                                         </div>
                                     </td>
                                     <td class="py-4 text-right pr-2">
@@ -653,7 +656,7 @@
                         </table>
                     </div>
                     @else
-                     <div class="flex flex-col items-center justify-center h-40 text-center text-emerald-500">
+                     <div class="flex flex-col items-center justify-center h-40 text-center text-cyan-500">
                         <i class="ph-duotone ph-check-circle text-4xl mb-2 opacity-50"></i>
                         <p class="text-xs font-bold">Semua kelas hadir lengkap!</p>
                      </div>
@@ -671,13 +674,14 @@
     <script>
         // Fungsi untuk menampilkan Popup Info saat kartu KPI diklik
         function showCardInfo(title, value, colorKey) {
-            let colorHex = '#3b82f6'; // default blue
+            let colorHex = '#06b6d4'; // default cyan
             if(colorKey === 'emerald') colorHex = '#10b981';
             if(colorKey === 'amber') colorHex = '#f59e0b';
             if(colorKey === 'rose') colorHex = '#f43f5e';
             if(colorKey === 'purple') colorHex = '#a855f7';
             if(colorKey === 'slate') colorHex = '#64748b';
             if(colorKey === 'yellow') colorHex = '#eab308';
+            if(colorKey === 'blue') colorHex = '#3b82f6';
 
             Swal.fire({
                 title: `<span style="color: ${colorHex}; font-weight: 900;">${title}</span>`,
@@ -736,9 +740,9 @@
                         data: {
                             labels: labels,
                             datasets: [
-                                { label: 'Hadir', data: rawPresent, backgroundColor: '#10b981', borderRadius: 4, barThickness: 12 },
-                                { label: 'Telat', data: rawLate, backgroundColor: '#f59e0b', borderRadius: 4, barThickness: 12 },
-                                { label: 'Absen', data: rawAbsent, backgroundColor: '#f43f5e', borderRadius: 4, barThickness: 12 }
+                                { label: 'Hadir', data: rawPresent, backgroundColor: '#06b6d4', borderRadius: 4, barThickness: 12 }, // Cyan
+                                { label: 'Telat', data: rawLate, backgroundColor: '#f59e0b', borderRadius: 4, barThickness: 12 }, // Amber
+                                { label: 'Absen', data: rawAbsent, backgroundColor: '#f43f5e', borderRadius: 4, barThickness: 12 } // Rose
                             ]
                         },
                         options: {
@@ -782,7 +786,7 @@
                                 {{ $sickPermitCount ?? 0 }},
                                 {{ $notYetScannedCount ?? 0 }}
                             ], 
-                            backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#3b82f6', '#cbd5e1'], 
+                            backgroundColor: ['#06b6d4', '#f59e0b', '#f43f5e', '#3b82f6', '#cbd5e1'], // Cyan, Amber, Rose, Blue, Slate
                             borderWidth: 0 
                         }]
                     },

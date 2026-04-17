@@ -73,12 +73,12 @@
                     $isOngoing = $existingSession && $existingSession->status == 'ongoing';
                 @endphp
 
-                <div class="relative overflow-hidden rounded-[2.5rem] bg-slate-900 p-8 text-white shadow-xl shadow-slate-900/20 lg:p-10 border border-slate-800">
+                <div class="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-blue-900 to-blue-950 p-8 text-white shadow-xl shadow-blue-900/20 lg:p-10 border border-blue-800">
                     <!-- Background -->
                     @if($loop->iteration % 2 == 0)
-                        <div class="absolute top-0 right-0 -mr-20 -mt-20 h-80 w-80 rounded-full bg-indigo-600 blur-[100px] opacity-40 animate-pulse"></div>
+                        <div class="absolute top-0 right-0 -mr-20 -mt-20 h-80 w-80 rounded-full bg-cyan-600 blur-[100px] opacity-40 animate-pulse"></div>
                     @else
-                        <div class="absolute top-0 right-0 -mr-20 -mt-20 h-80 w-80 rounded-full bg-rose-600 blur-[100px] opacity-40 animate-pulse"></div>
+                        <div class="absolute top-0 right-0 -mr-20 -mt-20 h-80 w-80 rounded-full bg-blue-500 blur-[100px] opacity-40 animate-pulse"></div>
                     @endif
                     <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
 
@@ -169,7 +169,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {{-- A. JADWAL HARI INI (KALENDER MASEHI UTAMA) --}}
-        <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col h-full relative overflow-hidden group hover:border-emerald-100 transition-colors">
+        <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col h-full relative overflow-hidden group hover:border-cyan-100 transition-colors">
             
             <div class="flex flex-col sm:flex-row gap-6 h-full">
                 {{-- SIDEBAR KIRI: KALENDER & QUICK ACTIONS --}}
@@ -177,9 +177,9 @@
                     
                     {{-- Visual Kalender (MASEHI - BESAR) --}}
                     <div class="w-full bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden transform group-hover:rotate-1 transition-transform duration-500 mb-3">
-                        <div class="bg-emerald-700 h-7 flex items-center justify-center relative">
+                        <div class="bg-gradient-to-r from-cyan-600 to-blue-700 h-7 flex items-center justify-center relative">
                             <div class="absolute top-[-6px] w-2 h-2 rounded-full bg-slate-800 border border-white z-20"></div> 
-                            <span class="text-amber-50 font-black uppercase tracking-wider text-[8px] mt-1">KALENDER</span>
+                            <span class="text-cyan-50 font-black uppercase tracking-wider text-[8px] mt-1">KALENDER</span>
                         </div>
                         {{-- Bagian Tengah (Angka Masehi) --}}
                         <div class="h-16 flex flex-col items-center justify-center bg-white relative">
@@ -192,18 +192,18 @@
                         </div>
                         {{-- Bagian Bawah (Hari & Hijriyah Kecil) --}}
                         <div class="bg-slate-50 border-t border-slate-100 py-1.5 text-center px-1">
-                            <span class="text-[9px] font-bold text-emerald-600 uppercase block mb-0.5">
+                            <span class="text-[9px] font-bold text-cyan-600 uppercase block mb-0.5">
                                 {{ $date->translatedFormat('l') }}
                             </span>
                             <span class="text-[8px] font-bold text-slate-400 block border-t border-slate-200 pt-0.5 mt-0.5">
-                                <i class="ph-bold ph-moon-stars text-amber-500 mr-0.5"></i> {{ $hijriDateFull }}
+                                <i class="ph-bold ph-moon-stars text-blue-400 mr-0.5"></i> {{ $hijriDateFull }}
                             </span>
                         </div>
                     </div>
                     
                     {{-- Jam Digital --}}
                     <div class="text-center w-full mb-3">
-                        <span class="inline-flex items-center justify-center gap-1 w-full px-2 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 text-[10px] font-black border border-emerald-100">
+                        <span class="inline-flex items-center justify-center gap-1 w-full px-2 py-1.5 rounded-lg bg-cyan-50 text-cyan-700 text-[10px] font-black border border-cyan-100">
                             <i class="ph-bold ph-clock"></i> <span x-text="new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})"></span> WIB
                         </span>
                     </div>
@@ -211,7 +211,7 @@
                     {{-- PANEL AKSES JURNAL (3 Tombol) --}}
                     <div class="w-full space-y-2">
                         <button @click="updateTab('ramadan_jurnal')" 
-                                class="w-full py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-[10px] font-bold shadow-md transition-all flex items-center justify-center gap-1.5 group/btn border border-emerald-500/50 hover:-translate-y-0.5">
+                                class="w-full py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-[10px] font-bold shadow-md transition-all flex items-center justify-center gap-1.5 group/btn border border-blue-500/50 hover:-translate-y-0.5">
                             <i class="ph-fill ph-moon-stars text-xs text-amber-300"></i>
                             <span>{{ isset($todayRamadanLog) && $todayRamadanLog ? 'Lihat Ramadhan' : 'Jurnal Ramadhan' }}</span>
                         </button>
@@ -234,7 +234,7 @@
                 <div class="flex-1 min-w-0 flex flex-col">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                            <i class="ph-fill ph-chalkboard-teacher text-emerald-600 text-lg"></i>
+                            <i class="ph-fill ph-chalkboard-teacher text-cyan-600 text-lg"></i>
                             Jadwal Hari Ini
                         </h3>
                     </div>
@@ -246,10 +246,10 @@
                                 $isActive = $now >= $schedule->start_time && $now <= $schedule->end_time;
                                 $isPast = $now > $schedule->end_time;
                             @endphp
-                            <div class="flex items-center gap-3 p-3 rounded-2xl transition-all border {{ $isActive ? 'bg-emerald-50 border-emerald-200 shadow-sm' : ($isPast ? 'bg-slate-50 border-transparent opacity-60' : 'bg-white border-slate-100 hover:border-emerald-200') }}">
+                            <div class="flex items-center gap-3 p-3 rounded-2xl transition-all border {{ $isActive ? 'bg-cyan-50 border-cyan-200 shadow-sm' : ($isPast ? 'bg-slate-50 border-transparent opacity-60' : 'bg-white border-slate-100 hover:border-cyan-200') }}">
                                 {{-- Jam --}}
                                 <div class="w-12 text-center shrink-0">
-                                    <p class="text-[10px] font-black {{ $isActive ? 'text-emerald-700' : 'text-slate-700' }}">
+                                    <p class="text-[10px] font-black {{ $isActive ? 'text-cyan-700' : 'text-slate-700' }}">
                                         {{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}
                                     </p>
                                     <div class="w-0.5 h-2 bg-slate-200 mx-auto my-0.5"></div>
@@ -260,18 +260,18 @@
                                 
                                 {{-- Info Mapel --}}
                                 <div class="flex-1 min-w-0">
-                                    <h4 class="font-bold text-xs truncate {{ $isActive ? 'text-emerald-900' : 'text-slate-800' }}">
+                                    <h4 class="font-bold text-xs truncate {{ $isActive ? 'text-cyan-900' : 'text-slate-800' }}">
                                         {{ $schedule->subject->name ?? 'Mapel Umum' }}
                                     </h4>
                                     <div class="flex items-center gap-1 text-[10px] text-slate-500 mt-0.5 truncate">
-                                        <i class="ph-fill ph-user {{ $isActive ? 'text-emerald-500' : 'text-slate-400' }}"></i>
+                                        <i class="ph-fill ph-user {{ $isActive ? 'text-cyan-500' : 'text-slate-400' }}"></i>
                                         {{ Str::limit($schedule->teacher->name ?? '-', 15) }}
                                     </div>
                                 </div>
 
                                 {{-- Indikator Aktif --}}
                                 @if($isActive)
-                                    <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
+                                    <div class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.6)]"></div>
                                 @endif
                             </div>
                         @empty
@@ -285,7 +285,7 @@
                     </div>
                     
                     <div class="mt-3 pt-3 border-t border-slate-50 text-center">
-                        <button @click="updateTab('jadwal')" class="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 transition flex items-center justify-center gap-1">
+                        <button @click="updateTab('jadwal')" class="text-[10px] font-bold text-cyan-600 hover:text-cyan-700 transition flex items-center justify-center gap-1">
                             Lihat Jadwal Lengkap <i class="ph-bold ph-caret-right"></i>
                         </button>
                     </div>
@@ -350,7 +350,7 @@
                     </div>
                 @empty
                     <div class="text-center py-12">
-                        <div class="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-3 text-emerald-300">
+                        <div class="w-14 h-14 bg-cyan-50 rounded-full flex items-center justify-center mx-auto mb-3 text-cyan-500">
                             <i class="ph-duotone ph-check-fat text-2xl"></i>
                         </div>
                         <p class="text-sm font-bold text-slate-500">Hebat! Semua tugas beres.</p>
@@ -488,7 +488,7 @@
             {{-- 1. CARD KEHADIRAN --}}
             <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-lg transition-all duration-300 flex flex-col justify-between h-full">
                 <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition transform group-hover:scale-110">
-                    <i class="ph-fill ph-chart-pie-slice text-9xl text-blue-500"></i>
+                    <i class="ph-fill ph-chart-pie-slice text-9xl text-cyan-500"></i>
                 </div>
                 
                 <div class="relative z-10">
@@ -508,7 +508,7 @@
                     </div>
                     
                     <div class="w-full bg-slate-100 rounded-full h-3 mb-4 overflow-hidden flex">
-                        <div class="h-full bg-emerald-500" style="width: {{ $persen }}%"></div>
+                        <div class="h-full bg-cyan-500" style="width: {{ $persen }}%"></div>
                         @php
                             $persenSakitIzin = $total_hari > 0 ? round((($sakit+$izin)/$total_hari)*100) : 0;
                         @endphp
@@ -516,8 +516,8 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
-                        <div class="px-3 py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl text-xs font-bold flex items-center gap-2">
-                            <div class="w-2 h-2 rounded-full bg-emerald-500"></div> 
+                        <div class="px-3 py-2 bg-cyan-50 text-cyan-700 border border-cyan-100 rounded-xl text-xs font-bold flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full bg-cyan-500"></div> 
                             Hadir: {{ $hadir ?? 0 }}
                         </div>
                         <div class="px-3 py-2 bg-rose-50 text-rose-700 border border-rose-100 rounded-xl text-xs font-bold flex items-center gap-2">

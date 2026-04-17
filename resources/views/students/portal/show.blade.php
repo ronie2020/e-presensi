@@ -14,18 +14,28 @@
     [x-cloak] { display: none !important; }
     .ph-fill, .ph-duotone, .ph-bold { vertical-align: middle; }
     
-    /* Animasi transisi yang lebih halus untuk tab */
+    /* Animasi transisi yang lebih halus dan elegan untuk tab */
     .tab-content-enter {
-        animation: slideFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: slideFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     @keyframes slideFadeIn {
-        from { opacity: 0; transform: translateY(15px); }
-        to { opacity: 1; transform: translateY(0); }
+        from { opacity: 0; transform: translateY(20px); filter: blur(4px); }
+        to { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+    
+    /* Tambahan efek glass untuk container konten agar senada dengan Elevate Theme */
+    .content-glass-wrapper {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 10px 40px -10px rgba(6, 182, 212, 0.15); /* Bayangan cyan halus */
     }
 </style>
 
 <!-- X-DATA: Main Controller -->
-<div class="w-full max-w-6xl mx-auto pb-20 px-4 sm:px-6 min-h-screen"
+<div class="w-full max-w-6xl mx-auto pb-20 px-4 sm:px-6 min-h-screen relative z-10"
      x-data="{ 
         activeTab: new URLSearchParams(window.location.search).get('tab') || 'ringkasan',
         isTransitioning: false,
@@ -53,6 +63,17 @@
         }
      }">
     
+    {{-- Latar Belakang Dekoratif Tambahan (Microsoft Elevate Style) --}}
+    <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden bg-slate-50/50">
+        <!-- Ambient Globs -->
+        <div class="absolute -top-40 -right-40 w-[500px] h-[500px] bg-cyan-400/20 rounded-full blur-[120px] animate-blob"></div>
+        <div class="absolute top-1/2 -left-40 w-[600px] h-[600px] bg-blue-600/15 rounded-full blur-[150px] animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-40 right-20 w-[400px] h-[400px] bg-indigo-900/15 rounded-full blur-[120px] animate-blob animation-delay-4000"></div>
+        
+        <!-- Texture Overlay (Cubes) -->
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] mix-blend-overlay"></div>
+    </div>
+
     {{-- 1. HEADER PROFIL --}}
     @include('students.portal.partials.header')
 
@@ -60,7 +81,7 @@
     @include('students.portal.partials.tabs-nav')
 
     {{-- 3. CONTENT AREAS --}}
-    <div class="min-h-[400px] relative">
+    <div class="min-h-[400px] relative mt-4">
         
         <!-- Tab Ringkasan -->
         <div x-show="activeTab === 'ringkasan'" x-cloak

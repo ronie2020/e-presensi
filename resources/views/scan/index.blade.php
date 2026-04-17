@@ -53,9 +53,10 @@
         .scan-error-effect { box-shadow: inset 0 0 40px rgba(239, 68, 68, 0.5); border: 2px solid #ef4444; }
         .scan-makan-effect { box-shadow: inset 0 0 40px rgba(249, 115, 22, 0.5); border: 2px solid #f97316; }
 
+        /* TEMA ELEVATE: Garis Scan diubah menjadi warna Cyan (06b6d4) */
         .scanner-line {
             position: absolute; width: 100%; height: 3px;
-            background: #6366f1; box-shadow: 0 0 15px #6366f1;
+            background: #06b6d4; box-shadow: 0 0 15px #06b6d4;
             top: 0; animation: scanMove 2.5s infinite linear;
             z-index: 10; opacity: 0.8;
         }
@@ -67,7 +68,7 @@
         .hidden-col { display: none !important; }
         .hidden-row { display: none !important; }
         
-        @keyframes highlightRow { 0% { background-color: #e0e7ff; } 100% { background-color: transparent; } }
+        @keyframes highlightRow { 0% { background-color: #cffafe; } 100% { background-color: transparent; } } /* Efek highlight cyan */
         .new-row-entry { animation: highlightRow 2s ease-out; }
         
         .glass-panel { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
@@ -95,34 +96,36 @@
             })->toArray();
     @endphp
 
-    <div class="py-6 font-sans text-slate-800 bg-slate-50/50 min-h-screen selection:bg-indigo-100 selection:text-indigo-700">
+    <div class="py-6 font-sans text-slate-800 bg-slate-50/50 min-h-screen selection:bg-cyan-100 selection:text-cyan-700">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             
-            {{-- HERO SECTION --}}
-            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-r from-indigo-900 via-slate-800 to-slate-900 p-6 md:p-8 text-white shadow-2xl shadow-indigo-900/20 overflow-hidden group border border-white/10">
+            {{-- HERO SECTION (TEMA MICROSOFT ELEVATE) --}}
+            <div class="animate-enter relative rounded-[2.5rem] bg-slate-900 p-6 md:p-8 text-white shadow-2xl shadow-cyan-900/20 overflow-hidden group border border-white/10">
                 
                 {{-- Background Decorations --}}
-                <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 pointer-events-none"></div>
-                <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 pointer-events-none"></div>
-                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none"></div>
+                <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-blue-900/80 to-slate-900 z-0"></div>
+                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none z-0"></div>
+                
+                <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-cyan-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 pointer-events-none z-0"></div>
+                <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-600 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 pointer-events-none z-0"></div>
 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div class="flex items-center gap-5 w-full md:w-auto">
                         <div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner flex-shrink-0">
-                            <i class="ph-duotone ph-scan text-4xl text-blue-300"></i>
+                            <i class="ph-duotone ph-scan text-4xl text-cyan-300"></i>
                         </div>
                         <div>
                             <div class="flex items-center gap-2 mb-1">
                                 @if(isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false))
                                     <span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-200 border border-rose-500/30 text-[10px] font-bold uppercase tracking-wider">Libur: {{ $scheduleConfig['description'] }}</span>
                                 @else
-                                    <span class="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-200 border border-blue-500/30 text-[10px] font-bold uppercase tracking-wider">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-200 border border-cyan-500/30 text-[10px] font-bold uppercase tracking-wider">
                                         {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
                                     </span>
                                 @endif
                             </div>
                             <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight leading-none">
-                                Scanner <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">Aktivitas</span>
+                                Scanner <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white">Aktivitas</span>
                             </h2>
                             <p class="text-blue-100/70 text-sm mt-1">Monitoring kehadiran, makan siang, dan ibadah.</p>
                         </div>
@@ -131,10 +134,10 @@
                     {{-- CLOCK WIDGET --}}
                     <div class="glass-panel px-6 py-3 rounded-2xl flex items-center gap-4 shadow-lg w-full md:w-auto justify-between md:justify-start">
                         <div class="text-right">
-                            <p class="text-[10px] font-bold text-blue-200 uppercase tracking-widest mb-0.5">Waktu Server</p>
+                            <p class="text-[10px] font-bold text-cyan-200 uppercase tracking-widest mb-0.5">Waktu Server</p>
                             <div id="clock" class="text-3xl font-black text-white font-mono leading-none tracking-widest digital-clock">00:00:00</div>
                         </div>
-                        <div class="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/40 animate-pulse">
+                        <div class="w-10 h-10 rounded-xl bg-cyan-500 flex items-center justify-center text-white shadow-lg shadow-cyan-500/40 animate-pulse">
                             <i class="ph-bold ph-clock text-xl"></i>
                         </div>
                     </div>
@@ -151,8 +154,8 @@
                         <div class="flex justify-between items-center mb-5 px-1">
                             <h3 class="font-bold text-slate-700 flex items-center gap-2 text-lg">
                                 <span class="relative flex h-3 w-3">
-                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                  <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
                                 </span>
                                 Kamera Aktif
                             </h3>
@@ -181,7 +184,7 @@
                             {{-- Status Text Overlay --}}
                             <div class="absolute top-4 inset-x-0 flex justify-center z-30 pointer-events-none">
                                 <div id="scan-status" class="bg-black/60 backdrop-blur-md text-white text-xs py-2 px-5 rounded-full font-bold border border-white/20 shadow-lg flex items-center gap-2 transition-all">
-                                    <i class="ph-bold ph-circle-notch animate-spin text-indigo-300"></i> Memuat Kamera...
+                                    <i class="ph-bold ph-circle-notch animate-spin text-cyan-300"></i> Memuat Kamera...
                                 </div>
                             </div>
                         </div>
@@ -208,7 +211,7 @@
                             </button>
 
                             <!-- 4. Tombol Auto Mode -->
-                            <button id="btn-reset-auto" class="hidden w-full py-3 rounded-xl border-2 border-dashed border-indigo-200 text-indigo-600 font-bold text-[10px] uppercase tracking-wider hover:bg-indigo-50 hover:border-indigo-300 transition-all flex items-center justify-center gap-2 bg-white active:scale-95" onclick="resetAutoMode()">
+                            <button id="btn-reset-auto" class="hidden w-full py-3 rounded-xl border-2 border-dashed border-cyan-200 text-cyan-600 font-bold text-[10px] uppercase tracking-wider hover:bg-cyan-50 hover:border-cyan-300 transition-all flex items-center justify-center gap-2 bg-white active:scale-95" onclick="resetAutoMode()">
                                 <i class="ph-bold ph-arrows-clockwise animate-spin-slow"></i> Kembali Auto
                             </button>
 
@@ -271,7 +274,7 @@
                     <div id="extra-selector-container" class="hidden bg-white p-5 rounded-[2rem] border border-slate-100 shadow-lg shadow-purple-100/50">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-2 px-1">Pilih Kegiatan Ekskul</label>
                         <div class="relative">
-                            <select id="extra-activity-select" class="w-full rounded-2xl border-slate-200 focus:border-purple-500 focus:ring-0 font-bold text-slate-700 py-3 pl-4 pr-10 text-sm bg-slate-50 cursor-pointer hover:bg-white transition-colors">
+                            <select id="extra-activity-select" class="w-full rounded-2xl border-slate-200 focus:border-cyan-500 focus:ring-0 font-bold text-slate-700 py-3 pl-4 pr-10 text-sm bg-slate-50 cursor-pointer hover:bg-white transition-colors">
                                 <option value="">-- Pilih Ekstrakurikuler --</option>
                                 @if(isset($extracurriculars))
                                     @foreach($extracurriculars as $ekskul)
@@ -294,16 +297,16 @@
                         <div class="p-6 md:p-8 border-b border-slate-50 bg-white/80 backdrop-blur-md sticky top-0 z-20 flex justify-between items-center">
                             <div>
                                 <h3 class="font-bold text-slate-800 text-xl flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                                    <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center">
                                         <i class="ph-duotone ph-list-dashes text-lg"></i>
                                     </div>
                                     Log Aktivitas
                                 </h3>
                                 <p class="text-xs text-slate-500 font-medium mt-1 ml-10">Monitoring kehadiran realtime</p>
                             </div>
-                            <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-full shadow-sm">
-                                <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span>
-                                <span class="text-[10px] font-black uppercase tracking-wider text-emerald-600">Live</span>
+                            <div class="flex items-center gap-2 px-3 py-1.5 bg-cyan-50 border border-cyan-100 rounded-full shadow-sm">
+                                <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span></span>
+                                <span class="text-[10px] font-black uppercase tracking-wider text-cyan-600">Live</span>
                             </div>
                         </div>
                         
@@ -328,7 +331,7 @@
                                                     data-type-raw="{{ $scan['type_raw'] }}">
                                                     
                                                     <td class="px-6 py-4 rounded-l-xl">
-                                                        <div class="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">{{ $scan['student_name'] }}</div>
+                                                        <div class="font-bold text-slate-800 group-hover:text-cyan-600 transition-colors">{{ $scan['student_name'] }}</div>
                                                         <div class="text-[10px] text-slate-400 font-mono font-bold">{{ $scan['student_id'] }}</div>
                                                     </td>
                                                     
@@ -385,7 +388,7 @@
         <div id="absen-manual-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-[100] transition-opacity" x-data="manualAbsen">
             <div class="relative top-10 md:top-20 mx-auto p-0 border-0 w-full max-w-md shadow-2xl rounded-[2rem] bg-white overflow-hidden">
                 
-                <div class="bg-indigo-900 px-6 py-4 flex justify-between items-center">
+                <div class="bg-blue-950 px-6 py-4 flex justify-between items-center">
                     <h3 class="font-bold text-white text-lg">Input Manual & Izin</h3>
                     <button type="button" @click="closeManualModal()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>
                 </div>
@@ -404,7 +407,7 @@
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class="ph-bold ph-magnifying-glass text-slate-400"></i>
                                 </div>
-                                <input type="text" x-model="searchQuery" @input="searchStudents" @focus="showDropdown = true" @click.away="showDropdown = false" class="w-full pl-10 pr-4 py-3 rounded-xl border-slate-200 bg-slate-50 focus:ring-indigo-600 focus:border-indigo-600 font-bold text-slate-700 text-sm" placeholder="Ketik Nama, NISN, atau Kelas...">
+                                <input type="text" x-model="searchQuery" @input="searchStudents" @focus="showDropdown = true" @click.away="showDropdown = false" class="w-full pl-10 pr-4 py-3 rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 font-bold text-slate-700 text-sm" placeholder="Ketik Nama, NISN, atau Kelas...">
                             </div>
                             
                             <!-- Dropdown Hasil Pencarian -->
@@ -413,7 +416,7 @@
                                     <ul class="py-1 text-sm text-slate-700 divide-y divide-slate-50">
                                         <template x-for="student in filteredStudents" :key="student.id">
                                             <li>
-                                                <button type="button" @click="selectStudent(student)" class="w-full text-left px-4 py-2 hover:bg-indigo-50 hover:text-indigo-700 focus:bg-indigo-50 transition-colors flex flex-col">
+                                                <button type="button" @click="selectStudent(student)" class="w-full text-left px-4 py-2 hover:bg-cyan-50 hover:text-cyan-700 focus:bg-cyan-50 transition-colors flex flex-col">
                                                     <span class="font-bold" x-text="student.name"></span>
                                                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mt-0.5" x-text="student.nisn + ' • ' + student.class_name"></span>
                                                 </button>
@@ -428,13 +431,13 @@
                         </div>
 
                         <!-- Card Info Siswa Terpilih -->
-                        <div x-show="selectedStudent" class="p-3 bg-indigo-50 border border-indigo-100 rounded-xl flex justify-between items-center" style="display: none;">
+                        <div x-show="selectedStudent" class="p-3 bg-cyan-50 border border-cyan-100 rounded-xl flex justify-between items-center" style="display: none;">
                             <div>
-                                <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-0.5">Siswa Terpilih</p>
-                                <p class="font-bold text-indigo-900 leading-tight" x-text="selectedStudent?.name"></p>
-                                <p class="text-xs text-indigo-600 font-medium mt-0.5" x-text="selectedStudent?.nisn + ' • ' + selectedStudent?.class_name"></p>
+                                <p class="text-[10px] font-bold text-cyan-500 uppercase tracking-wider mb-0.5">Siswa Terpilih</p>
+                                <p class="font-bold text-cyan-900 leading-tight" x-text="selectedStudent?.name"></p>
+                                <p class="text-xs text-cyan-600 font-medium mt-0.5" x-text="selectedStudent?.nisn + ' • ' + selectedStudent?.class_name"></p>
                             </div>
-                            <button type="button" @click="clearStudent()" class="w-8 h-8 rounded-full bg-indigo-200/50 text-indigo-600 flex items-center justify-center hover:bg-indigo-200 transition-colors shrink-0" title="Ganti Siswa">
+                            <button type="button" @click="clearStudent()" class="w-8 h-8 rounded-full bg-cyan-200/50 text-cyan-600 flex items-center justify-center hover:bg-cyan-200 transition-colors shrink-0" title="Ganti Siswa">
                                 <i class="ph-bold ph-x"></i>
                             </button>
                         </div>
@@ -447,11 +450,11 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Tanggal</label>
-                            <input type="date" name="date" required value="{{ date('Y-m-d') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-indigo-600 focus:border-indigo-600 font-bold text-slate-700 text-sm">
+                            <input type="date" name="date" required value="{{ date('Y-m-d') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 font-bold text-slate-700 text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Status</label>
-                            <select name="status" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-indigo-600 focus:border-indigo-600 font-bold text-slate-700 text-sm">
+                            <select name="status" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 font-bold text-slate-700 text-sm">
                                 <option value="Sakit">Sakit</option>
                                 <option value="Izin">Izin</option>
                                 <option value="Alfa">Alfa</option>
@@ -465,20 +468,20 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Masuk</label>
-                            <input type="time" name="time_in" value="{{ now()->format('H:i') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-indigo-600 focus:border-indigo-600 text-center font-mono font-bold text-slate-700">
+                            <input type="time" name="time_in" value="{{ now()->format('H:i') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 text-center font-mono font-bold text-slate-700">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Pulang</label>
-                            <input type="time" name="time_out" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-indigo-600 focus:border-indigo-600 text-center font-mono font-bold text-slate-700">
+                            <input type="time" name="time_out" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 text-center font-mono font-bold text-slate-700">
                         </div>
                     </div>
                     
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Keterangan (Opsional)</label>
-                        <textarea name="notes" rows="2" placeholder="Contoh: Surat dokter menyusul..." class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-indigo-600 focus:border-indigo-600 text-sm font-medium"></textarea>
+                        <textarea name="notes" rows="2" placeholder="Contoh: Surat dokter menyusul..." class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 text-sm font-medium"></textarea>
                     </div>
 
-                    <button type="submit" class="w-full mt-2 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-900/30 transition-transform active:scale-95 flex items-center justify-center gap-2">
+                    <button type="submit" class="w-full mt-2 py-3 bg-cyan-600 text-white font-bold rounded-xl hover:bg-cyan-700 shadow-lg shadow-cyan-900/30 transition-transform active:scale-95 flex items-center justify-center gap-2">
                         <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Data
                     </button>
                 </form>
@@ -623,12 +626,12 @@
                 document.querySelectorAll('.scan-type-btn').forEach(btn => {
                     const isActive = btn.dataset.type === mode;
                     btn.classList.toggle('ring-2', isActive);
-                    btn.classList.toggle('ring-indigo-500', isActive);
-                    btn.classList.toggle('border-indigo-500', isActive);
+                    btn.classList.toggle('ring-cyan-500', isActive); // Elevate Theme
+                    btn.classList.toggle('border-cyan-500', isActive); // Elevate Theme
                     
                     const dot = btn.querySelector('.indicator-dot');
                     if(dot) {
-                        dot.className = `w-1.5 h-1.5 rounded-full indicator-dot transition-all ${isActive ? 'bg-indigo-500 scale-125' : 'border border-slate-300'}`;
+                        dot.className = `w-1.5 h-1.5 rounded-full indicator-dot transition-all ${isActive ? 'bg-cyan-500 scale-125' : 'border border-slate-300'}`;
                     }
                 });
 
@@ -636,7 +639,7 @@
                 dom.modeText.innerText = isAuto ? `Auto: ${labels[mode]}` : labels[mode];
                 dom.scanStatus.innerHTML = mode === 'Ekstrakurikuler' 
                     ? `<i class="ph-bold ph-warning text-amber-400"></i> Pilih Kegiatan Dulu` 
-                    : `<i class="ph-bold ph-qr-code text-indigo-300"></i> Siap Scan ${labels[mode]}`;
+                    : `<i class="ph-bold ph-qr-code text-cyan-300"></i> Siap Scan ${labels[mode]}`;
                 
                 filterLogTable(mode);
             };
@@ -703,7 +706,7 @@
 
                 state.isProcessing = true;
                 state.processedQr.add(studentId);
-                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-indigo-300"></i> Memproses...`;
+                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-cyan-300"></i> Memproses...`;
 
                 try {
                     let finalType = state.mode;
@@ -768,9 +771,9 @@
                     showLoaderOnConfirm: true,
                     customClass: {
                         popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
-                        confirmButton: 'bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-colors mx-2 shadow-lg shadow-indigo-900/20 flex items-center gap-2',
+                        confirmButton: 'bg-cyan-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-cyan-700 transition-colors mx-2 shadow-lg shadow-cyan-900/20 flex items-center gap-2',
                         cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2',
-                        input: 'rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 text-center text-lg font-mono font-bold w-4/5 mx-auto py-3'
+                        input: 'rounded-xl border-slate-200 focus:border-cyan-500 focus:ring-cyan-500 text-center text-lg font-mono font-bold w-4/5 mx-auto py-3'
                     },
                     buttonsStyling: false,
                     preConfirm: (inputValue) => {
@@ -829,7 +832,7 @@
 
                 row.innerHTML = `
                     <td class="px-6 py-4 rounded-l-xl">
-                        <div class="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">${scan.student_name}</div>
+                        <div class="font-bold text-slate-800 group-hover:text-cyan-600 transition-colors">${scan.student_name}</div>
                         <div class="text-[10px] text-slate-400 font-mono font-bold">${scan.student_id || '-'}</div>
                     </td>
                     <td class="col-harian px-4 py-4 text-center">
@@ -865,7 +868,7 @@
 
             qrScanner.start(cameraConstraints, config, onScanSuccess)
                 .then(() => {
-                    dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-indigo-300"></i> Siap Scan`;
+                    dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-cyan-300"></i> Siap Scan`;
                 })
                 .catch(err => {
                     dom.scanStatus.innerHTML = `<span class="text-rose-300"><i class="ph-bold ph-warning"></i> Kamera Ditolak / Error</span>`;
@@ -877,7 +880,7 @@
                 const file = e.target.files[0];
                 
                 initAudio();
-                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-indigo-300"></i> Membaca Gambar...`;
+                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-cyan-300"></i> Membaca Gambar...`;
 
                 try {
                     const decodedText = await qrScanner.scanFile(file, true);
@@ -896,7 +899,7 @@
             window.switchCamera = () => {
                 initAudio();
                 currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
-                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-indigo-300"></i> Memutar Kamera...`;
+                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-cyan-300"></i> Memutar Kamera...`;
 
                 qrScanner.stop().then(() => {
                     qrScanner.start(
@@ -904,7 +907,7 @@
                         config, 
                         onScanSuccess
                     ).then(() => {
-                        dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-indigo-300"></i> Siap Scan`;
+                        dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-cyan-300"></i> Siap Scan`;
                     }).catch(err => {
                         handleError('Gagal memuat kamera tujuan.');
                         console.warn(err);

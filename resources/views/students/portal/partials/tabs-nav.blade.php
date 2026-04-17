@@ -1,5 +1,5 @@
 <div class="mb-8 sticky top-4 z-40 transition-all duration-300" id="sticky-nav">
-    <div class="bg-white/90 backdrop-blur-xl p-1.5 rounded-2xl shadow-lg border border-gray-100/50 relative group">
+    <div class="bg-white/85 backdrop-blur-xl p-1.5 rounded-2xl shadow-lg border border-white/60 relative group shadow-cyan-900/5">
         {{-- Gradient Indikator Scroll Kanan (Mobile) --}}
         <div class="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden z-10 rounded-r-2xl"></div>
         {{-- Gradient Indikator Scroll Kiri (Mobile) --}}
@@ -16,11 +16,11 @@
                                     // PENGEMBANGAN: Auto-scroll menu yang diklik ke tengah layar (Berguna untuk Mobile)
                                     $el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
                                 " 
-                            :class="activeTab === '{{ $key }}' ? 'bg-slate-900 text-white shadow-lg shadow-slate-300 transform scale-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'"
-                            class="relative px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 whitespace-nowrap flex-shrink-0 outline-none focus:ring-2 focus:ring-slate-200 mb-1">
+                            :class="activeTab === '{{ $key }}' ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30 transform scale-100' : 'text-slate-500 hover:bg-cyan-50 hover:text-cyan-700'"
+                            class="relative px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 whitespace-nowrap flex-shrink-0 outline-none focus:ring-2 focus:ring-cyan-200 mb-1 group">
                             
                             {{-- PENGEMBANGAN: Ikon Dinamis (ph-fill jika aktif, ph-bold jika tidak aktif) --}}
-                            <i :class="activeTab === '{{ $key }}' ? 'ph-fill text-blue-300' : 'ph-bold'" 
+                            <i :class="activeTab === '{{ $key }}' ? 'ph-fill text-white' : 'ph-bold group-hover:text-cyan-500'" 
                                class="ph-{{ $tab['icon'] }} text-lg transition-colors duration-300"></i> 
                             {{ $tab['label'] }}
 

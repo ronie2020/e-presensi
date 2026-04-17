@@ -22,7 +22,7 @@
         
         <!-- HEADER -->
         <div class="mb-6 flex items-center gap-3">
-            <a href="{{ route('portal.show', Auth::guard('student')->id()) }}?tab=ramadan_jurnal" class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-500 flex items-center justify-center hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition shadow-sm">
+            <a href="{{ route('portal.show', Auth::guard('student')->id()) }}?tab=ramadan_jurnal" class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-500 flex items-center justify-center hover:bg-cyan-50 hover:text-cyan-600 hover:border-cyan-200 transition shadow-sm">
                 <i class="ph-bold ph-arrow-left"></i>
             </a>
             <div>
@@ -35,20 +35,23 @@
         <!-- PENGUMUMAN RAMADHAN SELESAI & LEADERBOARD  -->
         <!-- ========================================== -->
         @if($isRamadanEnded)
-        <div class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-[2.5rem] p-6 md:p-8 text-white shadow-xl shadow-teal-500/20 mb-8 relative overflow-hidden animate-in fade-in duration-700 slide-in-from-bottom-4 border border-emerald-400/30">
-            {{-- Ornamen Latar --}}
-            <div class="absolute -right-10 -top-10 opacity-10 rotate-12 pointer-events-none">
+        <div class="bg-slate-900 rounded-[2.5rem] p-6 md:p-8 text-white shadow-xl shadow-cyan-500/20 mb-8 relative overflow-hidden animate-in fade-in duration-700 slide-in-from-bottom-4 border border-cyan-400/30">
+            {{-- Ornamen Latar Microsoft Elevate --}}
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-blue-900/80 to-slate-900 z-0"></div>
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none z-0"></div>
+            <div class="absolute top-0 right-0 w-[300px] h-[300px] bg-cyan-500/20 rounded-full blur-[80px] z-0"></div>
+            <div class="absolute -right-10 -top-10 opacity-10 rotate-12 pointer-events-none z-0">
                 <i class="ph-fill ph-check-circle text-[200px]"></i>
             </div>
             
             <div class="relative z-10">
                 {{-- Pesan Utama --}}
                 <div class="mb-6 text-center md:text-left">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 border border-white/10 text-emerald-50 text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-sm">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 border border-white/10 text-cyan-50 text-xs font-bold uppercase tracking-widest mb-4 backdrop-blur-sm">
                         <i class="ph-fill ph-info"></i> Informasi
                     </div>
                     <h3 class="text-2xl md:text-3xl font-black mb-3">Alhamdulillah, Pengisian Jurnal Selesai! 🎉</h3>
-                    <p class="text-emerald-50/90 text-sm md:text-base leading-relaxed max-w-2xl mx-auto md:mx-0">
+                    <p class="text-cyan-50/90 text-sm md:text-base leading-relaxed max-w-2xl mx-auto md:mx-0">
                         Waktu pengisian Jurnal Ramadhan tahun ini telah resmi ditutup. Terima kasih atas semangat dan antusiasme kalian dalam beribadah selama sebulan penuh. Insya Allah kita akan berjumpa dan mulai mengisi jurnal kembali di Ramadhan tahun depan. Tetap istiqomah!
                     </p>
                 </div>
@@ -80,7 +83,7 @@
                     </div>
 
                     <div class="mt-6 flex justify-center md:justify-end">
-                        <a href="{{ route('portal.show', Auth::guard('student')->id() ?? 0) }}?tab=ramadan_rank" class="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-6 py-2.5 rounded-xl text-sm hover:bg-emerald-50 hover:shadow-lg transition-all">
+                        <a href="{{ route('portal.show', Auth::guard('student')->id() ?? 0) }}?tab=ramadan_rank" class="inline-flex items-center gap-2 bg-white text-cyan-700 font-bold px-6 py-2.5 rounded-xl text-sm hover:bg-cyan-50 hover:shadow-lg transition-all">
                             Lihat Papan Peringkat Lengkap <i class="ph-bold ph-arrow-right"></i>
                         </a>
                     </div>
@@ -130,12 +133,12 @@
                 <div class="relative z-10">
                     <div class="flex items-center justify-between mb-6 px-2 border-b border-slate-50 pb-4">
                         <h3 class="font-serif font-bold text-slate-800 flex items-center gap-3 text-lg">
-                            <span class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-sm">
+                            <span class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center shadow-sm">
                                 <i class="ph-fill ph-calendar-star text-xl"></i>
                             </span>
                             Kalender Ramadhan
                         </h3>
-                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full uppercase tracking-wider border border-emerald-100 flex items-center gap-2">
+                        <span class="text-[10px] font-bold text-cyan-700 bg-cyan-50 px-3 py-1.5 rounded-full uppercase tracking-wider border border-cyan-100 flex items-center gap-2">
                             <i class="ph-bold ph-star text-amber-400"></i>
                             Mulai: {{ \Carbon\Carbon::parse($startDate)->isoFormat('D MMMM') }}
                         </span>
@@ -154,10 +157,10 @@
                                 $badge = null;
 
                                 if ($isToday) {
-                                    $containerClass = "bg-gradient-to-br from-emerald-500 to-teal-600 border-emerald-500 text-white shadow-lg shadow-emerald-500/30 scale-110 ring-4 ring-white z-10";
+                                    $containerClass = "bg-gradient-to-br from-cyan-500 to-blue-600 border-cyan-500 text-white shadow-lg shadow-cyan-500/30 scale-110 ring-4 ring-white z-10";
                                 } elseif ($logExists) {
-                                    $containerClass = "bg-emerald-50 border-emerald-200 text-emerald-700";
-                                    $badge = '<div class="absolute -top-1.5 -right-1.5 bg-emerald-500 text-white rounded-full p-0.5 shadow-sm border-2 border-white"><i class="ph-bold ph-check text-[10px]"></i></div>';
+                                    $containerClass = "bg-cyan-50 border-cyan-200 text-cyan-700";
+                                    $badge = '<div class="absolute -top-1.5 -right-1.5 bg-cyan-500 text-white rounded-full p-0.5 shadow-sm border-2 border-white"><i class="ph-bold ph-check text-[10px]"></i></div>';
                                 } elseif ($isPast) {
                                     $containerClass = "bg-rose-50/50 border-rose-100 text-rose-300 opacity-80";
                                     $badge = '<div class="absolute -top-1.5 -right-1.5 bg-white text-rose-300 rounded-full p-0.5 shadow-sm border border-rose-100"><i class="ph-bold ph-x text-[10px]"></i></div>';
@@ -184,10 +187,10 @@
             @endif
             
             @if($todayRamadanLog)
-            <div class="bg-emerald-50 border border-emerald-200 p-6 rounded-[2rem] text-center mb-8">
-                <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3"><i class="ph-fill ph-check-fat text-2xl"></i></div>
-                <h3 class="font-bold text-emerald-800">Alhamdulillah!</h3>
-                <p class="text-sm text-emerald-600 mt-1">Kamu sudah mengisi jurnal hari ini. Data tersimpan aman.</p>
+            <div class="bg-cyan-50 border border-cyan-200 p-6 rounded-[2rem] text-center mb-8">
+                <div class="w-12 h-12 bg-cyan-100 text-cyan-600 rounded-full flex items-center justify-center mx-auto mb-3"><i class="ph-fill ph-check-fat text-2xl"></i></div>
+                <h3 class="font-bold text-cyan-800">Alhamdulillah!</h3>
+                <p class="text-sm text-cyan-600 mt-1">Kamu sudah mengisi jurnal hari ini. Data tersimpan aman.</p>
             </div>
             @endif
 
@@ -203,26 +206,26 @@
                             {{-- PUASA --}}
                             <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex items-center justify-between">
                                 <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="ph-bold ph-check-circle text-2xl"></i></div>
+                                    <div class="w-12 h-12 rounded-2xl bg-cyan-100 text-cyan-600 flex items-center justify-center"><i class="ph-bold ph-check-circle text-2xl"></i></div>
                                     <div><h3 class="font-bold text-slate-800">Status Puasa</h3><p class="text-xs text-slate-400">Apakah kamu berpuasa hari ini?</p></div>
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="hidden" name="is_fasting" value="0">
                                     <input type="checkbox" name="is_fasting" value="1" class="sr-only peer" {{ ($todayRamadanLog->is_fasting ?? true) ? 'checked' : '' }}>
-                                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
                                 </label>
                             </div>
 
                             {{-- SHALAT Wajib --}}
                             <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-                                <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2"><i class="ph-fill ph-clock text-emerald-500"></i> Shalat Wajib 5 Waktu</h3>
+                                <h3 class="font-bold text-slate-800 mb-6 flex items-center gap-2"><i class="ph-fill ph-clock text-cyan-500"></i> Shalat Wajib 5 Waktu</h3>
                                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
                                     @foreach(['subuh', 'dzuhur', 'ashar', 'maghrib', 'isya'] as $p)
                                     @php $checked = $todayRamadanLog->prayers[$p] ?? false; @endphp
                                     <label class="cursor-pointer group">
                                         <input type="hidden" name="prayer_{{ $p }}" value="0">
                                         <input type="checkbox" name="prayer_{{ $p }}" value="1" class="hidden peer" {{ $checked ? 'checked' : '' }}>
-                                        <div class="p-3 rounded-2xl border-2 border-slate-50 bg-slate-50 text-slate-400 transition-all peer-checked:bg-emerald-50 peer-checked:border-emerald-200 peer-checked:text-emerald-700 flex flex-col items-center gap-2">
+                                        <div class="p-3 rounded-2xl border-2 border-slate-50 bg-slate-50 text-slate-400 transition-all peer-checked:bg-cyan-50 peer-checked:border-cyan-200 peer-checked:text-cyan-700 flex flex-col items-center gap-2">
                                             <span class="text-[10px] font-bold uppercase">{{ $p }}</span>
                                             <i class="ph-bold ph-check-circle text-xl"></i>
                                         </div>
@@ -275,16 +278,16 @@
                                 <div class="space-y-3 flex-1">
                                     @foreach(['tarawih', 'witir', 'dhuha', 'rawatib', 'sedekah'] as $s)
                                     @php $checked = $todayRamadanLog->sunnah_deeds[$s] ?? false; @endphp
-                                    <label class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-50 cursor-pointer hover:border-emerald-200 transition-all">
+                                    <label class="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-50 cursor-pointer hover:border-cyan-200 transition-all">
                                         <span class="text-sm font-bold text-slate-600 capitalize">{{ $s }}</span>
                                         <input type="hidden" name="sunnah_{{ $s }}" value="0">
-                                        <input type="checkbox" name="sunnah_{{ $s }}" value="1" class="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500" {{ $checked ? 'checked' : '' }}>
+                                        <input type="checkbox" name="sunnah_{{ $s }}" value="1" class="w-5 h-5 rounded text-cyan-600 focus:ring-cyan-500" {{ $checked ? 'checked' : '' }}>
                                     </label>
                                     @endforeach
                                 </div>
 
                                 @if($canFill)
-                                <button type="submit" class="w-full mt-10 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 group hover:-translate-y-1" :disabled="isSaving">
+                                <button type="submit" class="w-full mt-10 bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-cyan-600/30 transition-all flex items-center justify-center gap-2 group hover:-translate-y-1" :disabled="isSaving">
                                     <template x-if="!isSaving"><div class="flex items-center gap-2"><i class="ph-bold ph-floppy-disk"></i> Simpan Jurnal</div></template>
                                     <template x-if="isSaving"><div class="flex items-center gap-2"><i class="ph-bold ph-spinner animate-spin"></i> Memproses...</div></template>
                                 </button>
@@ -313,12 +316,12 @@
                 text: "{!! session('success') !!}",
                 icon: 'success',
                 confirmButtonText: 'Kembali',
-                confirmButtonColor: '#10b981', 
-                background: '#f0fdf4', 
-                color: '#064e3b',
-                iconColor: '#10b981',
+                confirmButtonColor: '#06b6d4', /* Cyan 500 */
+                background: '#ecfeff', /* Cyan 50 */
+                color: '#164e63', /* Cyan 900 */
+                iconColor: '#06b6d4',
                 customClass: {
-                    popup: 'rounded-[2rem] border-2 border-emerald-100 font-sans',
+                    popup: 'rounded-[2rem] border-2 border-cyan-100 font-sans',
                     title: 'font-serif text-2xl font-bold'
                 }
             });
