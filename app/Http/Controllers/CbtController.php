@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\QuestionsImport;
 use App\Exports\CbtScoreExport; 
+use App\Exports\QuestionTemplateExport; // <-- TAMBAHAN: Import class Export Template
 use App\Models\LmsAssignment;
 use App\Models\LmsGrade;       
 use App\Models\LmsSubmission;  

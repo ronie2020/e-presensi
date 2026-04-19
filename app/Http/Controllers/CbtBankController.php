@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB; 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\BankQuestionsImport;
+use App\Exports\QuestionTemplateExport;
 
 class CbtBankController extends Controller
 {
@@ -528,7 +529,7 @@ class CbtBankController extends Controller
         }
     }
 
-    public function printQuestions($id)
+     public function printQuestions($id)
     {
         $bank = CbtQuestionBank::with('questions')->findOrFail($id);
         $title = $bank->title;
@@ -540,7 +541,7 @@ class CbtBankController extends Controller
         return view('cbt.print_questions', compact('title', 'subject', 'info', 'questions', 'type'));
     }
 
-      /**
+    /**
      * Proses Import Soal dari Excel
      */
     public function importQuestions(Request $request, $id)
@@ -550,7 +551,8 @@ class CbtBankController extends Controller
         ]);
 
         try {
-            Excel::import(new BankQuestionsImport($id), $request->file('file'));
+            // Beri nilai "true" di argumen kedua untuk memberitahu bahwa ini adalah Bank Soal
+            Excel::import(new QuestionsImport($id, true), $request->file('file'));
             return back()->with('success', 'Soal-soal dari Excel berhasil diimport ke Bank Soal!');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengimport soal: ' . $e->getMessage());
@@ -559,31 +561,15 @@ class CbtBankController extends Controller
 
     /**
      * Download Template Import Soal
-     */
+    */
     public function downloadTemplate()
     {
-        $headers = ['soal', 'opsi_a', 'opsi_b', 'opsi_c', 'opsi_d', 'opsi_e', 'kunci', 'bobot', 'materi_kd'];
-        
-        $callback = function() use ($headers) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, $headers);
-            // Contoh baris pengisian
-            fputcsv($file, ['Contoh soal: Siapa penemu lampu?', 'Edison', 'Tesla', 'Newton', 'Einstein', '', 'A', '2', 'IPA']);
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=template_bank_soal.csv",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
-        ]);
+        return Excel::download(new QuestionTemplateExport, 'template_bank_soal.xlsx');
     }
 
-     /**
+    /**
      * Export Soal dari Bank Soal ke CSV/Excel
-     */
+    */
     public function exportQuestions($id)
     {
         $bank = CbtQuestionBank::with('questions')->findOrFail($id);

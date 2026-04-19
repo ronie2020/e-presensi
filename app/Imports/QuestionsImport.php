@@ -3,47 +3,54 @@
 namespace App\Imports;
 
 use App\Models\CbtQuestion;
-use Maatwebsite\Excel\Concerns\ToModel;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class QuestionsImport implements ToModel, WithHeadingRow
+class QuestionsImport implements ToCollection, WithHeadingRow
 {
-    protected $examId;
+    protected $target_id;
+    protected $is_bank;
 
-    public function __construct($examId)
+    // Tambahkan parameter $is_bank dengan default false
+    public function __construct($target_id, $is_bank = false)
     {
-        $this->examId = $examId;
+        $this->target_id = $target_id;
+        $this->is_bank = $is_bank;
     }
 
-    /**
-     * Mapping data dari baris Excel ke Database
-     */
-    public function model(array $row)
+    public function collection(Collection $rows)
     {
-        // Pastikan baris memiliki isi (validasi sederhana)
-        if (!isset($row['soal']) || !isset($row['jawaban'])) {
-            return null;
+        foreach ($rows as $row) {
+            // Jika kolom 'soal' kosong pada baris ini, lewati (skip)
+            if (!isset($row['soal']) || empty(trim($row['soal']))) {
+                continue;
+            }
+
+            // Menyusun opsi jawaban ke dalam bentuk array (JSON)
+            $options = [
+                'A' => $row['opsi_a'] ?? '',
+                'B' => $row['opsi_b'] ?? '',
+                'C' => $row['opsi_c'] ?? '',
+                'D' => $row['opsi_d'] ?? '',
+                'E' => $row['opsi_e'] ?? '',
+            ];
+
+            // Membersihkan nilai yang null agar tidak tersimpan sebagai null di array
+            $options = array_filter($options, function($value) {
+                return !is_null($value) && $value !== '';
+            });
+
+            // Menyimpan baris soal ke dalam Database sesuai target (Bank atau Ujian)
+            CbtQuestion::create([
+                'cbt_exam_id'          => $this->is_bank ? null : $this->target_id,
+                'cbt_question_bank_id' => $this->is_bank ? $this->target_id : null,
+                'question_type'        => 'choice', // Secara default dari excel kita anggap Pilihan Ganda
+                'question_text'        => $row['soal'],
+                'options'              => $options, // Tergantung dari konfigurasi $casts di model CbtQuestion (pastikan ada 'options' => 'array')
+                'correct_answer'       => strtoupper(trim($row['jawaban'] ?? 'A')),
+                'score_weight'         => (int) ($row['bobot'] ?? 2),
+            ]);
         }
-
-        // Format Opsi menjadi JSON
-        $options = [
-            'A' => $row['opsi_a'],
-            'B' => $row['opsi_b'],
-            'C' => $row['opsi_c'] ?? null,
-            'D' => $row['opsi_d'] ?? null,
-            'E' => $row['opsi_e'] ?? null,
-        ];
-
-        // Bersihkan opsi kosong
-        $options = array_filter($options, fn($value) => !is_null($value) && $value !== '');
-
-        return new CbtQuestion([
-            'cbt_exam_id' => $this->examId,
-            'question_text' => $row['soal'],
-            'question_image' => null, // Import Excel tidak mendukung gambar langsung
-            'options' => $options,
-            'correct_answer' => strtoupper($row['jawaban']), // Pastikan huruf besar
-            'score_weight' => isset($row['bobot']) ? $row['bobot'] : 2,
-        ]);
     }
 }
