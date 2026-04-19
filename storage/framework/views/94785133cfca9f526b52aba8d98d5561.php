@@ -111,9 +111,6 @@
                         </div>
                     </div>
 
-                    
-                    <!-- Elemen yang sebelumnya mengganggu di bawah kiri sudah sepenuhnya dihilangkan -->
-
                 </div>
             </div>
 

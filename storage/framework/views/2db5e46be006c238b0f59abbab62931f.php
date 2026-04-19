@@ -31,7 +31,7 @@
             'id' => 'Inovasi daerah', 
             'image' => asset('images/simadu.jpg'),
             'title' => 'Inovasi Daerah Kab. Ciamis 2026',
-            'message' => '"SIMADU Netila" SELAMAT MENGIKUTI INOVASI DAERAH 2026. Untuk informasi lebih lanjut, silakan klik tombol di bawah.',
+            'message' => 'SELAMAT MENGIKUTI INOVASI DAERAH 2026. Untuk informasi lebih lanjut, silakan klik tombol di bawah.',
             'cta_text' => 'Info Simadu',
             'cta_link' => 'https://e-presensi.smpn3lakbok.sch.id/portal', 
             'color' => 'cyan'

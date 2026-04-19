@@ -111,9 +111,6 @@
                         </div>
                     </div>
 
-                    {{-- SHAPE KIRI BAWAH (DIHAPUS, dipindah ke background grafik) --}}
-                    <!-- Elemen yang sebelumnya mengganggu di bawah kiri sudah sepenuhnya dihilangkan -->
-
                 </div>
             </div>
 

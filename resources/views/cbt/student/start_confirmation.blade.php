@@ -26,24 +26,24 @@
     <div class="min-h-screen flex items-center justify-center p-4 bg-slate-50 bg-pattern" x-data="{ isSeb: navigator.userAgent.includes('SEB'), isSubmitting: false, formToken: '' }">
         
         {{-- Card Konfirmasi --}}
-        <div class="max-w-xl w-full bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200 border border-white overflow-hidden relative transform transition-all my-8">
+        <div class="max-w-xl w-full bg-white rounded-[2.5rem] shadow-2xl shadow-blue-900/10 border border-white overflow-hidden relative transform transition-all my-8">
             
-            {{-- Header Card --}}
-            <div class="bg-slate-900 p-10 text-center relative overflow-hidden group">
+            {{-- Header Card (TEMA BLUE-950) --}}
+            <div class="bg-blue-950 p-10 text-center relative overflow-hidden group">
                 {{-- Decoration --}}
-                <div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-900 to-rose-900/40"></div>
-                <div class="absolute -top-10 -right-10 w-40 h-40 bg-rose-500/20 rounded-full blur-3xl group-hover:bg-rose-500/30 transition-all duration-1000"></div>
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-950 via-blue-900 to-cyan-900/40"></div>
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl group-hover:bg-cyan-500/30 transition-all duration-1000"></div>
                 <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/30 transition-all duration-1000"></div>
                 
                 {{-- Icon Gembok Besar --}}
                 <div class="w-24 h-24 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl mx-auto flex items-center justify-center text-white text-5xl shadow-2xl mb-6 relative z-10 animate-bounce-slow">
-                    <i class="ph-duotone ph-lock-key-open text-rose-400"></i>
+                    <i class="ph-duotone ph-lock-key-open text-cyan-400"></i>
                 </div>
 
                 <h2 class="text-2xl font-black text-white relative z-10 leading-tight">{{ $exam->title }}</h2>
                 <div class="inline-flex items-center gap-2 mt-3 px-3 py-1 bg-white/5 border border-white/10 rounded-full relative z-10">
-                    <i class="ph-fill ph-book-bookmark text-blue-400 text-xs"></i>
-                    <p class="text-slate-300 font-bold text-xs uppercase tracking-wide">{{ $exam->subject_name }}</p>
+                    <i class="ph-fill ph-book-bookmark text-cyan-400 text-xs"></i>
+                    <p class="text-cyan-100 font-bold text-xs uppercase tracking-wide">{{ $exam->subject_name }}</p>
                 </div>
 
                 {{-- Badge Status Lingkungan --}}
@@ -62,7 +62,7 @@
                 {{-- Info Grid --}}
                 <div class="grid grid-cols-2 gap-4 mb-6">
                     <div class="p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100 text-center hover:bg-slate-100 transition-colors">
-                        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto mb-2 text-rose-500 text-xl border border-slate-100">
+                        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto mb-2 text-amber-500 text-xl border border-slate-100">
                             <i class="ph-fill ph-timer"></i>
                         </div>
                         <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Durasi</p>
@@ -80,7 +80,7 @@
                         </div>
                     @else
                         <div class="p-5 bg-slate-50 rounded-[1.5rem] border border-slate-100 text-center hover:bg-slate-100 transition-colors">
-                            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto mb-2 text-blue-500 text-xl border border-slate-100">
+                            <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto mb-2 text-cyan-500 text-xl border border-slate-100">
                                 <i class="ph-fill ph-list-numbers"></i>
                             </div>
                             <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Total Soal</p>
@@ -90,12 +90,12 @@
                 </div>
 
                 {{-- PENGEMBANGAN: Kotak Peringatan Aturan Ujian --}}
-                <div class="bg-blue-50/50 border border-blue-100 rounded-[1.5rem] p-5 mb-8">
-                    <h4 class="font-black text-blue-900 text-sm mb-3 flex items-center gap-2"><i class="ph-fill ph-info text-blue-500"></i> Tata Tertib Sistem</h4>
+                <div class="bg-cyan-50/50 border border-cyan-100 rounded-[1.5rem] p-5 mb-8">
+                    <h4 class="font-black text-cyan-900 text-sm mb-3 flex items-center gap-2"><i class="ph-fill ph-info text-cyan-600"></i> Tata Tertib Sistem</h4>
                     <ul class="space-y-3">
                         <li class="flex items-start gap-3">
-                            <i class="ph-fill ph-webcam text-blue-500 mt-0.5"></i>
-                            <p class="text-xs text-blue-800 font-medium leading-relaxed"><b>Kamera Aktif:</b> Sistem akan memantau dan mengambil foto secara berkala selama ujian berlangsung.</p>
+                            <i class="ph-fill ph-webcam text-cyan-600 mt-0.5"></i>
+                            <p class="text-xs text-cyan-900 font-medium leading-relaxed"><b>Kamera Aktif:</b> Sistem akan memantau dan mengambil foto secara berkala selama ujian berlangsung.</p>
                         </li>
                         <li class="flex items-start gap-3">
                             <i class="ph-fill ph-tabs text-rose-500 mt-0.5"></i>
@@ -129,7 +129,7 @@
                                 <input type="text" name="token" required 
                                     x-model="formToken"
                                     @input="formToken = $event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')"
-                                    class="w-full rounded-2xl border-2 border-slate-200 shadow-sm focus:ring-4 focus:ring-rose-100 focus:border-rose-500 text-center text-3xl font-black tracking-[0.2em] p-4 text-slate-800 placeholder-slate-200 transition-all outline-none" 
+                                    class="w-full rounded-2xl border-2 border-slate-200 shadow-sm focus:ring-4 focus:ring-cyan-100 focus:border-cyan-500 text-center text-3xl font-black tracking-[0.2em] p-4 text-slate-800 placeholder-slate-200 transition-all outline-none" 
                                     placeholder="TOKEN" autocomplete="off" maxlength="6">
                                 
                                 @if($errors->has('token'))
@@ -145,8 +145,8 @@
                             </p>
                         </div>
                     @else
-                        <div class="bg-blue-50 text-blue-700 p-4 rounded-2xl mb-8 text-sm flex items-center justify-center gap-3 border border-blue-100 font-bold">
-                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+                        <div class="bg-cyan-50 text-cyan-700 p-4 rounded-2xl mb-8 text-sm flex items-center justify-center gap-3 border border-cyan-100 font-bold">
+                            <div class="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center shrink-0">
                                 <i class="ph-fill ph-check"></i>
                             </div>
                             Ujian ini tidak memerlukan token.
@@ -158,7 +158,7 @@
                             Kembali
                         </a>
 
-                        <button type="submit" :disabled="isSubmitting" :class="{ 'opacity-70 cursor-not-allowed': isSubmitting }" class="py-3.5 px-6 bg-slate-900 text-white rounded-xl font-bold hover:bg-rose-600 shadow-lg shadow-slate-900/20 hover:shadow-rose-600/30 transition-all transform active:scale-95 flex items-center justify-center gap-2 order-1 sm:order-2">
+                        <button type="submit" :disabled="isSubmitting" :class="{ 'opacity-70 cursor-not-allowed': isSubmitting }" class="py-3.5 px-6 bg-blue-950 text-white rounded-xl font-bold hover:bg-cyan-600 shadow-lg shadow-blue-900/20 hover:shadow-cyan-600/30 transition-all transform active:scale-95 flex items-center justify-center gap-2 order-1 sm:order-2">
                             <template x-if="!isSubmitting">
                                 <div class="flex items-center gap-2">
                                     <span>Mulai Ujian</span> 

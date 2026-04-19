@@ -38,17 +38,18 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #1e293b; user-select: none; -webkit-user-select: none; overflow: hidden; }
         [x-cloak] { display: none !important; }
         
-        /* Custom Scrollbar */
+        /* Custom Scrollbar - Disesuaikan dengan tema Cyan/Blue */
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
         
         /* Security */
         @media print { body { display: none; } }
 
-        /* Loader */
+        /* Loader - Menggunakan warna blue-950 */
         #loading-overlay { position: fixed; inset: 0; background: #ffffff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.3s ease; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid #0f172a; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top: 4px solid #172554; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 1rem; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         /* Trix Editor Content Style */
@@ -284,7 +285,8 @@
                         this.savingQuestionId = null;
                     }
                 },
- handleSessionExpired() {
+
+                handleSessionExpired() {
                     this.saveStatus = 'error';
                     Swal.fire({
                         icon: 'warning',
@@ -293,7 +295,7 @@
                         showCancelButton: true,
                         confirmButtonText: '<i class="ph-bold ph-arrow-square-out"></i> Login di Tab Baru',
                         cancelButtonText: 'Tutup Peringatan',
-                        confirmButtonColor: '#0f172a',
+                        confirmButtonColor: '#172554', /* Warna Blue-950 */
                         allowOutsideClick: false
                     }).then((result) => {
                         if (result.isConfirmed) {
@@ -307,7 +309,7 @@
                         answers: this.answers, 
                         marked: this.markedQuestions, 
                         unsaved: Array.from(this.unsavedQuestions), 
-                        violationCount: this.violationCount, // DITAMBAHKAN: Simpan jumlah pelanggaran
+                        violationCount: this.violationCount,
                         timestamp: new Date().getTime()
                     })); 
                 },
@@ -319,7 +321,7 @@
                         this.answers = { ...data.answers, ...this.answers }; 
                         this.markedQuestions = data.marked || {}; 
                         if(data.unsaved) data.unsaved.forEach(id => this.unsavedQuestions.add(id)); 
-                        if(data.violationCount !== undefined) this.violationCount = data.violationCount; // DITAMBAHKAN: Muat ulang jumlah pelanggaran
+                        if(data.violationCount !== undefined) this.violationCount = data.violationCount;
                         this.updateProgress();
                     }
                 },
@@ -381,7 +383,7 @@
                  triggerViolation() {
                     if (this.showSecurityOverlay || this.timeLeft <= 0) return; 
                     this.violationCount++; 
-                    try { this.saveToLocal(); } catch(e){} // DITAMBAHKAN: Simpan state langsung saat terjadi pelanggaran
+                    try { this.saveToLocal(); } catch(e){} 
                     this.showSecurityOverlay = true;
                     
                     if(this.violationCount >= this.maxViolations) { 
@@ -437,7 +439,7 @@
                             title: 'Waktu Minimal Belum Tercapai!',
                             html: `Sistem mengunci pengumpulan karena Anda belum mengerjakan selama minimal setengah dari durasi ujian.<br><br>Sisa waktu tunggu: <b class='text-rose-600'>${waitText}</b>.`,
                             confirmButtonText: '<i class="ph-bold ph-arrow-u-up-left"></i> Kembali Mengerjakan',
-                            confirmButtonColor: '#0f172a',
+                            confirmButtonColor: '#172554', // Tema Blue-950
                             customClass: { popup: 'rounded-[2rem]' }
                         });
                         return;
@@ -445,7 +447,7 @@
 
                     let htmlContent = "";
                     if (this.examType === 'google_form') {
-                        htmlContent = "Apakah Anda sudah menekan tombol <b class='text-blue-600'>Kirim / Submit</b> pada Google Form di atas?<br><br><span class='text-xs text-slate-500 font-bold'>Penting: Menekan tombol selesai di sini hanya merekam waktu keluar Anda di sistem sekolah.</span>";
+                        htmlContent = "Apakah Anda sudah menekan tombol <b class='text-cyan-600'>Kirim / Submit</b> pada Google Form di atas?<br><br><span class='text-xs text-slate-500 font-bold'>Penting: Menekan tombol selesai di sini hanya merekam waktu keluar Anda di sistem sekolah.</span>";
                     } else {
                         const remaining = this.totalQuestions - this.answeredCount;
                         htmlContent = remaining > 0 ? `Masih ada <b class='text-rose-600'>${remaining}</b> soal kosong.` : "Pastikan semua jawaban sudah benar.";
@@ -461,7 +463,7 @@
                         icon: 'question', 
                         showCancelButton: true, 
                         confirmButtonText: 'Ya, Selesaikan', 
-                        confirmButtonColor: '#0f172a', 
+                        confirmButtonColor: '#172554', // Tema Blue-950
                         cancelButtonText: 'Batal', 
                         customClass: { popup: 'rounded-[2rem]' }
                     }).then((result) => { if (result.isConfirmed) this.submitExam(); });
@@ -541,7 +543,7 @@
                         showConfirmButton: false,
                         timer: 6000,
                         timerProgressBar: true,
-                        customClass: { popup: 'rounded-2xl border-2 border-blue-100 shadow-xl' }
+                        customClass: { popup: 'rounded-2xl border-2 border-cyan-100 shadow-xl' }
                     });
                 },
 
@@ -604,44 +606,44 @@
     </div>
     
     {{-- MODAL ZOOM GAMBAR --}}
-    <div x-show="zoomedImage" x-transition.opacity class="fixed inset-0 z-[10000] bg-black/95 flex items-center justify-center p-4 cursor-zoom-out" style="display: none;" @click="zoomedImage = null">
+    <div x-show="zoomedImage" x-transition.opacity class="fixed inset-0 z-[10000] bg-blue-950/95 flex items-center justify-center p-4 cursor-zoom-out" style="display: none;" @click="zoomedImage = null">
         <img :src="zoomedImage" class="max-w-full max-h-full rounded-lg shadow-2xl scale-100 transition-transform">
     </div>
 
     {{-- OVERLAY PELANGGARAN --}}
-    <div x-show="showSecurityOverlay" x-transition.opacity class="fixed inset-0 bg-slate-900/95 z-[9000] flex items-center justify-center text-center px-6" style="display: none;" x-cloak>
+    <div x-show="showSecurityOverlay" x-transition.opacity class="fixed inset-0 bg-blue-950/95 z-[9000] flex items-center justify-center text-center px-6" style="display: none;" x-cloak>
         <div class="max-w-md w-full bg-white rounded-[2rem] p-8 shadow-2xl">
             <div class="w-16 h-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 text-rose-600 text-3xl"><i class="ph-fill ph-warning-octagon"></i></div>
             <h2 class="text-xl font-black text-slate-900 mb-2 uppercase">Pelanggaran Terdeteksi</h2>
             <p class="text-slate-600 mb-6 text-sm font-medium leading-relaxed">Anda terdeteksi meninggalkan halaman ujian (pindah tab atau membuka aplikasi lain). <br>Sisa toleransi: <span class="font-black text-rose-600" x-text="Math.max(0, maxViolations - violationCount)"></span> kali.</p>
-            <button @click="showSecurityOverlay = false" class="w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-bold transition shadow-lg">Lanjutkan Mengerjakan</button>
+            <button @click="showSecurityOverlay = false" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white py-3.5 rounded-xl font-bold transition shadow-lg shadow-cyan-600/30">Lanjutkan Mengerjakan</button>
         </div>
     </div>
 
-    {{-- NAVBAR ATAS --}}
-    <nav class="bg-slate-900 text-white h-16 shrink-0 flex items-center justify-between px-4 lg:px-8 shadow-lg z-50 relative">
+    {{-- NAVBAR ATAS (TEMA BIRU GELAP / BLUE-950) --}}
+    <nav class="bg-blue-950 text-white h-16 shrink-0 flex items-center justify-between px-4 lg:px-8 shadow-xl border-b border-blue-900/50 z-50 relative">
         <div class="flex items-center gap-4 min-w-0 flex-1">
             <div class="flex items-center gap-3 shrink-0">
-                <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white border border-white/10 shrink-0">
+                <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-cyan-400 border border-white/10 shrink-0">
                     <i class="ph-bold ph-graduation-cap text-xl"></i>
                 </div>
                 <div class="hidden sm:block">
-                    <h1 class="font-bold text-sm lg:text-base truncate max-w-[200px]">{{ $exam->title }}</h1>
-                    <p class="text-[10px] lg:text-xs text-slate-400 font-bold uppercase tracking-wider truncate">{{ $exam->subject_name }}</p>
+                    <h1 class="font-bold text-sm lg:text-base truncate max-w-[200px] text-white">{{ $exam->title }}</h1>
+                    <p class="text-[10px] lg:text-xs text-cyan-300 font-bold uppercase tracking-wider truncate">{{ $exam->subject_name }}</p>
                 </div>
             </div>
 
             <div class="hidden md:block w-px h-8 bg-white/10 mx-2"></div>
 
             <div class="hidden md:flex items-center gap-3 min-w-0">
-                 <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold border border-white/20 shrink-0">
+                 <div class="w-8 h-8 rounded-full bg-cyan-600 flex items-center justify-center text-white text-xs font-bold border border-cyan-400/50 shrink-0 shadow-sm">
                      {{ substr($student->name ?? 'S', 0, 1) }}
                  </div>
                  <div class="truncate">
                      <p class="font-bold text-sm text-white truncate max-w-[150px]">
                          {{ $student->name ?? 'Peserta' }}
                      </p>
-                     <p class="text-[10px] text-indigo-300 font-bold truncate">
+                     <p class="text-[10px] text-cyan-200 font-bold truncate">
                          {{ $student->nis ?? $student->username ?? '' }}
                      </p>
                  </div>
@@ -651,36 +653,36 @@
         <div class="flex items-center gap-3 md:gap-4">
             {{-- Tombol Ukuran Font --}}
             <div x-show="examType !== 'google_form'" class="hidden md:flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg mr-2">
-                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mr-1">Teks:</span>
-                <button @click="fontSize = 1" class="font-medium hover:text-white transition px-1" :class="fontSize === 1 ? 'text-white font-black' : 'text-slate-400'">A</button>
-                <button @click="fontSize = 2" class="font-medium text-lg hover:text-white transition px-1" :class="fontSize === 2 ? 'text-white font-black' : 'text-slate-400'">A</button>
-                <button @click="fontSize = 3" class="font-medium text-xl hover:text-white transition px-1" :class="fontSize === 3 ? 'text-white font-black' : 'text-slate-400'">A</button>
+                <span class="text-[10px] text-cyan-200/70 font-bold uppercase tracking-wider mr-1">Teks:</span>
+                <button @click="fontSize = 1" class="font-medium hover:text-white transition px-1" :class="fontSize === 1 ? 'text-white font-black' : 'text-cyan-200/70'">A</button>
+                <button @click="fontSize = 2" class="font-medium text-lg hover:text-white transition px-1" :class="fontSize === 2 ? 'text-white font-black' : 'text-cyan-200/70'">A</button>
+                <button @click="fontSize = 3" class="font-medium text-xl hover:text-white transition px-1" :class="fontSize === 3 ? 'text-white font-black' : 'text-cyan-200/70'">A</button>
             </div>
 
             {{-- Indikator Offline --}}
             <div x-show="!isOnline" x-cloak class="hidden md:flex items-center gap-2 bg-rose-500/20 text-rose-300 px-3 py-1.5 rounded-lg border border-rose-500/30 text-xs font-bold animate-pulse"><i class="ph-fill ph-wifi-slash"></i> Offline</div>
             
             {{-- Indikator No Camera --}}
-            <div x-show="!cameraActive" x-cloak class="hidden md:flex items-center gap-2 bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold" title="Kamera Tidak Aktif">
+            <div x-show="!cameraActive" x-cloak class="hidden md:flex items-center gap-2 bg-white/10 text-cyan-200 px-3 py-1.5 rounded-lg text-xs font-bold" title="Kamera Tidak Aktif">
                 <i class="ph-fill ph-video-camera-slash"></i>
             </div>
 
             {{-- Timer --}}
-            <div class="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 transition-colors" :class="timeLeft < 300 ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 animate-pulse' : 'text-slate-200'">
+            <div class="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 transition-colors" :class="timeLeft < 300 ? 'bg-rose-500/20 border-rose-500/50 text-rose-300 animate-pulse' : 'text-cyan-50'">
                 <i class="ph-bold ph-timer text-lg"></i>
                 <span x-text="formattedTime" class="font-mono font-bold text-lg"></span>
             </div>
             
             {{-- Tombol Hamburger Map Soal --}}
-            <button x-show="examType !== 'google_form'" @click="showMobileMap = !showMobileMap" class="lg:hidden w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-white/20 transition">
+            <button x-show="examType !== 'google_form'" @click="showMobileMap = !showMobileMap" class="lg:hidden w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition">
                 <i class="ph-bold" :class="showMobileMap ? 'ph-x' : 'ph-squares-four'"></i>
             </button>
         </div>
     </nav>
 
-    {{-- PROGRESS BAR HORIZONTAL --}}
-    <div x-show="examType !== 'google_form'" class="h-1.5 w-full bg-slate-200 shrink-0 relative z-40">
-        <div class="h-full bg-blue-500 transition-all duration-500 ease-out" :style="`width: ${(answeredCount / totalQuestions) * 100}%`"></div>
+    {{-- PROGRESS BAR HORIZONTAL (TEMA CYAN CERAH) --}}
+    <div x-show="examType !== 'google_form'" class="h-1.5 w-full bg-blue-900 shrink-0 relative z-40 overflow-hidden">
+        <div class="h-full bg-cyan-400 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(34,211,238,0.8)]" :style="`width: ${(answeredCount / totalQuestions) * 100}%`"></div>
     </div>
 
     <div class="flex-1 flex overflow-hidden relative">
@@ -688,9 +690,9 @@
         {{-- KONDISI 1: GOOGLE FORM --}}
         @if(isset($exam->exam_type) && $exam->exam_type == 'google_form')
             <main class="flex-1 flex flex-col h-full bg-slate-100 relative z-0">
-                <div class="bg-blue-50/80 backdrop-blur-sm border-b border-blue-100 p-3 flex items-center justify-center shrink-0 z-10 shadow-sm">
-                    <p class="text-xs font-bold text-blue-800 flex items-center gap-2">
-                        <i class="ph-fill ph-warning-circle text-blue-600 text-lg"></i> 
+                <div class="bg-cyan-50/80 backdrop-blur-sm border-b border-cyan-100 p-3 flex items-center justify-center shrink-0 z-10 shadow-sm">
+                    <p class="text-xs font-bold text-cyan-800 flex items-center gap-2">
+                        <i class="ph-fill ph-warning-circle text-cyan-600 text-lg"></i> 
                         Pastikan Anda menekan tombol "Kirim / Submit" pada formulir di bawah sebelum mengklik tombol selesai.
                     </p>
                 </div>
@@ -705,7 +707,7 @@
                     </div>
                     <button @click="finishExam" 
                             class="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
-                            :class="timeLeft > (totalDuration / 2) ? 'bg-slate-200 text-slate-400 hover:bg-slate-300' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg'">
+                            :class="timeLeft > (totalDuration / 2) ? 'bg-slate-200 text-slate-400 hover:bg-slate-300' : 'bg-blue-950 text-white hover:bg-blue-900 shadow-lg shadow-blue-950/20'">
                         <i class="ph-bold" :class="timeLeft > (totalDuration / 2) ? 'ph-lock' : 'ph-check-circle'"></i>
                         <span x-text="timeLeft > (totalDuration / 2) ? 'Waktu Tunggu...' : 'Selesai & Keluar'"></span> 
                     </button>
@@ -720,11 +722,11 @@
                     
                     {{-- Header Soal --}}
                     <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                        <span class="bg-slate-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">Soal No. <span x-text="currentQuestion + 1"></span></span>
+                        <span class="bg-blue-950 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">Soal No. <span x-text="currentQuestion + 1"></span></span>
                         
                         {{-- Status Indikator --}}
                         <div class="flex items-center gap-4">
-                            <span x-show="saveStatus === 'saving'" class="text-[10px] font-bold text-blue-500 uppercase flex items-center gap-1"><i class="ph-bold ph-spinner animate-spin"></i> Menyimpan</span>
+                            <span x-show="saveStatus === 'saving'" class="text-[10px] font-bold text-cyan-600 uppercase flex items-center gap-1"><i class="ph-bold ph-spinner animate-spin"></i> Menyimpan</span>
                             <span x-show="saveStatus === 'saved'" class="text-[10px] font-bold text-emerald-500 uppercase flex items-center gap-1"><i class="ph-fill ph-cloud-check"></i> Tersimpan</span>
                             <span x-show="saveStatus === 'error'" class="text-[10px] font-bold text-rose-500 uppercase flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Error / Offline</span>
                             
@@ -772,14 +774,14 @@
                                         <template x-for="(optionKey, optIndex) in questions[currentQuestion].displayKeys" :key="optionKey">
                                             
                                             <label class="relative flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 group active:scale-[0.99]" 
-                                                   :class="answers[questions[currentQuestion].id] === optionKey ? 'border-blue-600 bg-blue-50 shadow-md' : 'border-slate-100 bg-white hover:border-blue-200 hover:bg-slate-50'">
+                                                   :class="answers[questions[currentQuestion].id] === optionKey ? 'border-cyan-500 bg-cyan-50 shadow-md' : 'border-slate-100 bg-white hover:border-cyan-200 hover:bg-cyan-50/30'">
                                                 
                                                 <input type="radio" :name="'q_' + questions[currentQuestion].id" :value="optionKey" 
                                                        @change="selectAnswer(questions[currentQuestion].id, optionKey)" 
                                                        x-model="answers[questions[currentQuestion].id]" class="peer sr-only">
                                                 
                                                 <div class="w-10 h-10 rounded-full border-2 flex items-center justify-center font-black text-sm shrink-0 transition-colors shadow-sm relative" 
-                                                     :class="answers[questions[currentQuestion].id] === optionKey ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-slate-300 text-slate-500 group-hover:border-blue-400 group-hover:text-blue-500'">
+                                                     :class="answers[questions[currentQuestion].id] === optionKey ? 'bg-cyan-500 border-cyan-500 text-white' : 'bg-white border-slate-300 text-slate-500 group-hover:border-cyan-400 group-hover:text-cyan-600'">
                                                     
                                                     {{-- SOLUSI: Secara visual huruf akan selalu berurutan A, B, C, D, E berdasarkan index posisinya --}}
                                                     <span x-text="['A', 'B', 'C', 'D', 'E'][optIndex]" 
@@ -796,7 +798,7 @@
                                                     } 
                                                 }">
                                                     <span class="font-medium transition-colors block" 
-                                                          :class="{'text-sm md:text-base': fontSize === 1, 'text-base md:text-lg': fontSize === 2, 'text-lg md:text-xl': fontSize === 3, 'text-blue-900': answers[questions[currentQuestion].id] === optionKey, 'text-slate-700': answers[questions[currentQuestion].id] !== optionKey}">
+                                                          :class="{'text-sm md:text-base': fontSize === 1, 'text-base md:text-lg': fontSize === 2, 'text-lg md:text-xl': fontSize === 3, 'text-cyan-900': answers[questions[currentQuestion].id] === optionKey, 'text-slate-700': answers[questions[currentQuestion].id] !== optionKey}">
                                                         
                                                         {{-- Teks Jawaban asli yang sudah teracak --}}
                                                         <span x-text="parsedOptions[optionKey]"></span>
@@ -839,15 +841,15 @@
                                     <div class="relative">
                                         <textarea x-model="answers[questions[currentQuestion].id]" 
                                             @input.debounce.1000ms="selectAnswer(questions[currentQuestion].id, $event.target.value)" 
-                                            class="w-full h-40 p-4 rounded-2xl border-2 border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all font-medium text-slate-700 leading-relaxed text-lg" 
+                                            class="w-full h-40 p-4 rounded-2xl border-2 border-slate-200 focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100 transition-all font-medium text-slate-700 leading-relaxed text-lg" 
                                             placeholder="Ketik jawaban Anda di sini..."></textarea>
                                         
-                                        <div class="absolute top-4 right-4 text-blue-500" x-show="savingQuestionId === questions[currentQuestion].id">
+                                        <div class="absolute top-4 right-4 text-cyan-600" x-show="savingQuestionId === questions[currentQuestion].id">
                                             <i class="ph-bold ph-spinner animate-spin text-xl"></i>
                                         </div>
 
                                         <div class="flex items-center gap-2 mt-3 text-slate-400">
-                                            <i class="ph-fill ph-info text-blue-500"></i>
+                                            <i class="ph-fill ph-info text-cyan-500"></i>
                                             <p class="text-xs font-bold">Jawaban tersimpan otomatis saat Anda berhenti mengetik.</p>
                                         </div>
                                     </div>
@@ -860,9 +862,9 @@
                                         <template x-for="(pair, idx) in questions[currentQuestion].options.pairs" :key="idx">
                                             <div class="flex flex-col sm:flex-row items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
                                                 <div class="flex-1 font-medium text-slate-800 bg-white p-3 rounded-lg border border-slate-100 shadow-sm w-full text-center sm:text-left" x-text="pair.left"></div>
-                                                <i class="ph-bold ph-arrows-left-right sm:ph-arrow-right text-blue-400 text-xl font-bold"></i>
+                                                <i class="ph-bold ph-arrows-left-right sm:ph-arrow-right text-cyan-400 text-xl font-bold"></i>
                                                 <div class="flex-1 w-full relative">
-                                                    <select class="w-full rounded-xl border-slate-300 text-sm font-bold text-slate-700 focus:ring-blue-500 py-3 px-4 shadow-sm"
+                                                    <select class="w-full rounded-xl border-slate-300 text-sm font-bold text-slate-700 focus:ring-cyan-500 py-3 px-4 shadow-sm"
                                                             @change="updateMatching(questions[currentQuestion].id, pair.left, $event.target.value)">
                                                         <option value="" selected disabled>-- Pilih Pasangan --</option>
                                                         <template x-for="pOption in questions[currentQuestion].options.pairs" :key="pOption.right">
@@ -889,13 +891,13 @@
                         </button>
                         
                         <button @click="nextQuestion" x-show="currentQuestion < totalQuestions - 1" 
-                                class="px-6 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-600/30 flex items-center gap-2 transition-all active:scale-95">
+                                class="px-6 py-3 rounded-xl font-bold bg-cyan-600 text-white hover:bg-cyan-500 shadow-lg shadow-cyan-600/30 flex items-center gap-2 transition-all active:scale-95">
                             <span class="hidden sm:inline">Selanjutnya</span> <i class="ph-bold ph-arrow-right"></i>
                         </button>
                         
                         <button @click="finishExam" x-show="currentQuestion === totalQuestions - 1" 
                                 class="px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2 transition-all active:scale-95"
-                                :class="timeLeft > (totalDuration / 2) ? 'bg-slate-200 text-slate-400 hover:bg-slate-300' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-900/30'">
+                                :class="timeLeft > (totalDuration / 2) ? 'bg-slate-200 text-slate-400 hover:bg-slate-300' : 'bg-blue-950 text-white hover:bg-blue-900 shadow-blue-950/30'">
                             <span>Kumpulkan</span> 
                             <i class="ph-bold" :class="timeLeft > (totalDuration / 2) ? 'ph-lock' : 'ph-check-circle'"></i>
                         </button>
@@ -910,21 +912,21 @@
             
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
-                    <i class="ph-fill ph-squares-four text-blue-500"></i> Navigasi Soal
+                    <i class="ph-fill ph-squares-four text-cyan-500"></i> Navigasi Soal
                 </h3>
                 <button @click="showMobileMap = false" class="lg:hidden text-slate-400 hover:text-slate-700">
                     <i class="ph-bold ph-x text-xl"></i>
                 </button>
             </div>
 
-            <div class="p-4 bg-indigo-50 border-b border-indigo-100 flex justify-between items-center">
+            <div class="p-4 bg-blue-950/5 border-b border-blue-900/10 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold shadow-md">
+                    <div class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center text-cyan-100 font-bold shadow-md border border-blue-800">
                         {{ substr($student->name ?? 'S', 0, 1) }}
                     </div>
                     <div class="min-w-0">
                         <p class="text-sm font-bold text-slate-800 truncate">{{ $student->name ?? 'Peserta' }}</p>
-                        <p class="text-[10px] text-indigo-600 font-bold uppercase tracking-wider">Progress: <span x-text="answeredCount"></span>/<span x-text="totalQuestions"></span></p>
+                        <p class="text-[10px] text-cyan-600 font-bold uppercase tracking-wider">Progress: <span x-text="answeredCount"></span>/<span x-text="totalQuestions"></span></p>
                     </div>
                 </div>
             </div>
@@ -935,10 +937,10 @@
                         <button @click="jumpTo(index)" 
                                 class="aspect-square rounded-xl flex items-center justify-center font-bold text-sm transition-all shadow-sm border-2 relative" 
                                 :class="{ 
-                                    'border-slate-900 bg-white ring-2 ring-slate-900 ring-offset-2 z-10': currentQuestion === index, 
-                                    'bg-blue-600 text-white border-blue-600': (answers[q.id] && Object.keys(answers[q.id] || {}).length > 0) && !markedQuestions[q.id] && currentQuestion !== index, 
+                                    'border-blue-950 bg-white ring-2 ring-blue-950 ring-offset-2 z-10': currentQuestion === index, 
+                                    'bg-cyan-500 text-white border-cyan-500': (answers[q.id] && Object.keys(answers[q.id] || {}).length > 0) && !markedQuestions[q.id] && currentQuestion !== index, 
                                     'bg-amber-400 text-white border-amber-400': markedQuestions[q.id], 
-                                    'bg-white text-slate-600 border-slate-200 hover:border-blue-300': (!answers[q.id] || Object.keys(answers[q.id] || {}).length === 0) && !markedQuestions[q.id] && currentQuestion !== index 
+                                    'bg-white text-slate-600 border-slate-200 hover:border-cyan-300': (!answers[q.id] || Object.keys(answers[q.id] || {}).length === 0) && !markedQuestions[q.id] && currentQuestion !== index 
                                 }">
                             <span x-text="index + 1"></span>
                             <span x-show="markedQuestions[q.id]" class="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full border-2 border-white"></span>
@@ -949,22 +951,22 @@
             
             <div class="p-6 border-t border-slate-100 bg-slate-50">
                 <div class="grid grid-cols-2 gap-4 mb-4 text-[10px] uppercase font-bold text-slate-500">
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-600"></span> Dijawab</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-cyan-500"></span> Dijawab</div>
                     <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-white border-2 border-slate-300"></span> Kosong</div>
                     <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-amber-400"></span> Ragu</div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full border-2 border-slate-900"></span> Aktif</div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full border-2 border-blue-950"></span> Aktif</div>
                 </div>
                 
                 <button @click="finishExam()" 
                         class="w-full py-3.5 rounded-xl font-bold shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
-                        :class="timeLeft > (totalDuration / 2) ? 'bg-slate-200 text-slate-400 hover:bg-slate-300' : 'bg-slate-900 text-white hover:shadow-xl hover:bg-slate-800'">
+                        :class="timeLeft > (totalDuration / 2) ? 'bg-slate-200 text-slate-400 hover:bg-slate-300' : 'bg-blue-950 text-white hover:shadow-xl hover:bg-blue-900'">
                     <i class="ph-bold" :class="timeLeft > (totalDuration / 2) ? 'ph-lock' : 'ph-paper-plane-right'"></i> 
                     <span x-text="timeLeft > (totalDuration / 2) ? 'Terkunci (Waktu Minimal)' : 'Kumpulkan Jawaban'"></span>
                 </button>
             </div>
         </aside>
         
-        <div x-show="showMobileMap" @click="showMobileMap = false" x-transition.opacity class="fixed inset-0 bg-slate-900/50 z-30 lg:hidden"></div>
+        <div x-show="showMobileMap" @click="showMobileMap = false" x-transition.opacity class="fixed inset-0 bg-blue-950/50 z-30 lg:hidden"></div>
         
         @endif
     </div>

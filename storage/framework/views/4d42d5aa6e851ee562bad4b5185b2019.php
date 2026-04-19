@@ -19,12 +19,12 @@
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             
             
-            <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-purple-900 to-purple-800 p-8 mb-8 text-white shadow-xl shadow-purple-900/30 overflow-hidden border border-white/10">
+            <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-cyan-900 p-8 mb-8 text-white shadow-xl shadow-cyan-900/30 overflow-hidden border border-white/10">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
-                        <div class="flex items-center gap-2 text-purple-300 text-sm font-bold mb-2">
+                        <div class="flex items-center gap-2 text-cyan-300 text-sm font-bold mb-2">
                             <a href="<?php echo e(route('cbt.index')); ?>" class="hover:text-white transition flex items-center gap-1">
                                 <i class="ph-bold ph-arrow-left"></i> Kembali
                             </a>
@@ -32,7 +32,7 @@
                             <span>Edit Jadwal</span>
                         </div>
                         <h1 class="text-3xl font-black tracking-tight leading-none text-white mb-2">Edit Data Ujian</h1>
-                        <p class="text-purple-200 text-sm font-medium">Perbarui detail pelaksanaan, metode ujian, durasi, atau token.</p>
+                        <p class="text-cyan-200 text-sm font-medium">Perbarui detail pelaksanaan, metode ujian, durasi, atau token.</p>
                     </div>
                 </div>
             </div>
@@ -55,7 +55,7 @@
             
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
                 <div class="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-xl shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center text-xl shadow-sm">
                         <i class="ph-bold ph-pencil-simple-line"></i>
                     </div>
                     <h3 class="font-bold text-slate-800 text-lg">Formulir Perubahan Data</h3>
@@ -79,9 +79,9 @@
                                 <!-- Opsi 1: CBT Internal -->
                                 <label class="relative cursor-pointer group">
                                     <input type="radio" name="exam_type" value="cbt" x-model="examType" class="peer sr-only">
-                                    <div class="p-5 rounded-2xl border-2 transition-all peer-checked:border-purple-500 peer-checked:bg-purple-50/50 bg-white border-slate-200 hover:border-purple-200">
+                                    <div class="p-5 rounded-2xl border-2 transition-all peer-checked:border-cyan-500 peer-checked:bg-cyan-50/50 bg-white border-slate-200 hover:border-cyan-200">
                                         <div class="flex items-center gap-4 relative z-10">
-                                            <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-2xl shrink-0 transition-transform peer-checked:scale-110">
+                                            <div class="w-12 h-12 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center text-2xl shrink-0 transition-transform peer-checked:scale-110">
                                                 <i class="ph-fill ph-desktop"></i>
                                             </div>
                                             <div>
@@ -89,7 +89,7 @@
                                                 <p class="text-xs text-slate-500 font-medium">Buat soal di sistem ini atau ambil dari Bank Soal.</p>
                                             </div>
                                         </div>
-                                        <div class="absolute top-5 right-5 w-5 h-5 rounded-full border-2 border-slate-200 flex items-center justify-center peer-checked:border-purple-500 peer-checked:bg-purple-500 text-transparent peer-checked:text-white transition-all">
+                                        <div class="absolute top-5 right-5 w-5 h-5 rounded-full border-2 border-slate-200 flex items-center justify-center peer-checked:border-cyan-500 peer-checked:bg-cyan-500 text-transparent peer-checked:text-white transition-all">
                                             <i class="ph-bold ph-check text-xs"></i>
                                         </div>
                                     </div>
@@ -150,7 +150,7 @@ unset($__errorArgs, $__bag); ?>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama / Judul Ujian <span class="text-rose-500">*</span></label>
                             <input type="text" name="title" value="<?php echo e(old('title', $exam->title)); ?>" required 
-                                   class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700 py-3.5 px-5 transition-all placeholder:font-normal placeholder:text-slate-400 <?php $__errorArgs = ['title'];
+                                   class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 py-3.5 px-5 transition-all placeholder:font-normal placeholder:text-slate-400 <?php $__errorArgs = ['title'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -175,7 +175,7 @@ unset($__errorArgs, $__bag); ?>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Mata Pelajaran <span class="text-rose-500">*</span></label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-book-bookmark"></i></div>
-                                    <select name="subject_name" required class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700 py-3.5 px-5 appearance-none cursor-pointer transition-all <?php $__errorArgs = ['subject_name'];
+                                    <select name="subject_name" required class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 py-3.5 px-5 appearance-none cursor-pointer transition-all <?php $__errorArgs = ['subject_name'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -207,7 +207,7 @@ unset($__errorArgs, $__bag); ?>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tingkat Kelas <span class="text-rose-500">*</span></label>
                                 <div class="relative">
-                                    <select name="class_level" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700 py-3.5 px-5 appearance-none cursor-pointer transition-all">
+                                    <select name="class_level" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 py-3.5 px-5 appearance-none cursor-pointer transition-all">
                                         <option value="7" <?php echo e(old('class_level', $exam->class_level) == '7' ? 'selected' : ''); ?>>Kelas 7</option>
                                         <option value="8" <?php echo e(old('class_level', $exam->class_level) == '8' ? 'selected' : ''); ?>>Kelas 8</option>
                                         <option value="9" <?php echo e(old('class_level', $exam->class_level) == '9' ? 'selected' : ''); ?>>Kelas 9</option>
@@ -222,7 +222,7 @@ unset($__errorArgs, $__bag); ?>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Waktu Mulai <span class="text-rose-500">*</span></label>
                                 <input type="datetime-local" name="start_time" x-model="startTime" required 
-                                       class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700 py-3.5 px-5 transition-all <?php $__errorArgs = ['start_time'];
+                                       class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 py-3.5 px-5 transition-all <?php $__errorArgs = ['start_time'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -244,7 +244,7 @@ unset($__errorArgs, $__bag); ?>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Waktu Selesai <span class="text-rose-500">*</span></label>
                                 <input type="datetime-local" name="end_time" x-model="endTime" required 
-                                       class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700 py-3.5 px-5 transition-all <?php $__errorArgs = ['end_time'];
+                                       class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 py-3.5 px-5 transition-all <?php $__errorArgs = ['end_time'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -273,7 +273,7 @@ unset($__errorArgs, $__bag); ?>
                             <div class="col-span-1">
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Durasi (Menit)</label>
                                 <div class="relative">
-                                    <input type="number" name="duration_minutes" value="<?php echo e(old('duration_minutes', $exam->duration_minutes)); ?>" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700 py-3.5 px-5 transition-all text-center">
+                                    <input type="number" name="duration_minutes" value="<?php echo e(old('duration_minutes', $exam->duration_minutes)); ?>" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 py-3.5 px-5 transition-all text-center">
                                     <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400 text-[10px] font-bold">MIN</div>
                                 </div>
                             </div>
@@ -291,7 +291,7 @@ unset($__errorArgs, $__bag); ?>
                             <!-- KKM -->
                             <div class="col-span-1" x-show="examType === 'cbt'">
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">KKM / Kriteria</label>
-                                <input type="number" name="passing_grade" value="<?php echo e(old('passing_grade', $exam->passing_grade)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700 py-3.5 px-5 transition-all text-center">
+                                <input type="number" name="passing_grade" value="<?php echo e(old('passing_grade', $exam->passing_grade)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 py-3.5 px-5 transition-all text-center">
                             </div>
 
                              <!-- Token -->
@@ -299,7 +299,7 @@ unset($__errorArgs, $__bag); ?>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Token (Opsional)</label>
                                 <div class="relative">
                                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-key"></i></div>
-                                    <input type="text" name="token" value="<?php echo e(old('token', $exam->token)); ?>" maxlength="6" class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-purple-500 font-mono font-black text-slate-800 py-3.5 px-5 transition-all uppercase tracking-widest placeholder:tracking-normal <?php $__errorArgs = ['token'];
+                                    <input type="text" name="token" value="<?php echo e(old('token', $exam->token)); ?>" maxlength="6" class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-mono font-black text-slate-800 py-3.5 px-5 transition-all uppercase tracking-widest placeholder:tracking-normal <?php $__errorArgs = ['token'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -360,7 +360,7 @@ unset($__errorArgs, $__bag); ?>
                         <div class="flex flex-row items-center gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-100">
                             <div class="relative flex items-center">
                                 <input type="checkbox" id="active" name="is_active" value="1" <?php echo e(old('is_active', $exam->is_active) ? 'checked' : ''); ?> class="peer sr-only">
-                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600 cursor-pointer"></div>
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600 cursor-pointer"></div>
                             </div>
                             <label for="active" class="text-sm font-bold text-slate-700 cursor-pointer select-none">Status Ujian Aktif</label>
                         </div>
@@ -368,7 +368,7 @@ unset($__errorArgs, $__bag); ?>
                         
                         <div class="pt-4 border-t border-slate-100 flex flex-col-reverse md:flex-row justify-end gap-3">
                             <a href="<?php echo e(route('cbt.index')); ?>" class="w-full md:w-auto text-center px-6 py-3.5 bg-white border border-slate-200 rounded-xl text-slate-600 font-bold hover:bg-slate-50 transition text-sm">Batal</a>
-                            <button type="submit" class="w-full md:w-auto px-8 py-3.5 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition shadow-lg shadow-purple-500/30 text-sm flex items-center justify-center gap-2 transform active:scale-95">
+                            <button type="submit" class="w-full md:w-auto px-8 py-3.5 bg-cyan-600 text-white rounded-xl font-bold hover:bg-cyan-700 transition shadow-lg shadow-cyan-500/30 text-sm flex items-center justify-center gap-2 transform active:scale-95">
                                 <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Perubahan
                             </button>
                         </div>
