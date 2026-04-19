@@ -17,6 +17,8 @@ class Borrowing extends Model
         'due_date',     // Tgl Jatuh Tempo (Wajib Kembali)
         'return_date',  // Tgl Dikembalikan (Real)
         'status',       // borrowed, returned, lost, damaged
+        'type',         // regular, textbook
+        'item_code',    // Kode Eksemplar Fisik
         'fine_amount',  // Denda
         'notes',        // Catatan kondisi
         'served_by',    // Petugas yang melayani

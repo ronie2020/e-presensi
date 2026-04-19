@@ -204,7 +204,7 @@ return [
                 'roles' => ['Admin', 'Guru Piket', 'Wali Kelas', 'Kepala Sekolah', 'Guru']
             ],
             [
-                'name' => 'Analitik Disiplin', // <--- TAMBAHAN MENU BARU
+                'name' => 'Analitik Disiplin', 
                 'route' => 'discipline.analytics',
                 'icon' => 'ph-chart-pie-slice',
                 'roles' => ['Admin', 'Kepala Sekolah', 'Wali Kelas']
@@ -355,7 +355,6 @@ return [
                 'icon' => 'ph-books',
                 'roles' => ['Admin', 'TU', 'Kepala Sekolah', 'Guru']
             ],
-            
             [
                 'name' => 'Sirkulasi',
                 'route' => 'library.circulation.index',
@@ -363,16 +362,36 @@ return [
                 'roles' => ['Admin', 'TU'] 
             ],
             [
+                'name' => 'Distribusi Paket',
+                'route' => 'library.circulation.bulk_borrow',
+                'active_check' => 'library.circulation.bulk_borrow',
+                'icon' => 'ph-stack',
+                'roles' => ['Admin', 'TU'] 
+            ],
+            [
                 'name' => 'Data Buku',
                 'route' => 'library.books.index',
-                'active_check' => 'library.books.*',
+                'active_check' => 'library.books.index',
                 'icon' => 'ph-book-bookmark',
                 'roles' => ['Admin', 'TU']
             ],
             [
+                'name' => 'Input Buku Baru',
+                'route' => 'library.books.create',
+                'active_check' => 'library.books.create',
+                'icon' => 'ph-plus-circle',
+                'roles' => ['Admin', 'TU']
+            ],
+            [
+                'name' => 'Bebas Pustaka',
+                'route' => 'library.tools.bebas_pustaka',
+                'icon' => 'ph-certificate',
+                'roles' => ['Admin', 'TU', 'Kepala Sekolah']
+            ],
+            [
                 'name' => 'Alat Admin',
                 'route' => 'library.tools.index',
-                'active_check' => 'library.tools.*',
+                'active_check' => 'library.tools.index',
                 'icon' => 'ph-printer',
                 'roles' => ['Admin', 'TU']
             ]

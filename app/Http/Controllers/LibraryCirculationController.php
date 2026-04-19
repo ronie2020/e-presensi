@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\Borrowing; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\SchoolClass;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -182,20 +183,31 @@ class LibraryCirculationController extends Controller
      */
     public function returnBook(Request $request)
     {
-        DB::beginTransaction();
+       DB::beginTransaction();
         try {
-            $bookCode = $request->get('book_code');
+            $scannedCode = $request->get('book_code');
 
-            $book = Book::where('book_code', $bookCode)->first();
-            if (!$book) {
-                return response()->json(['success' => false, 'message' => 'Buku tidak terdaftar di sistem.']);
-            }
-
+            // LOGIKA BARU: Cari berdasarkan 'item_code' (Eksemplar) TERLEBIH DAHULU
             $borrowing = Borrowing::with('student')
-                            ->where('book_id', $book->id)
+                            ->where('item_code', $scannedCode)
                             ->where('status', 'borrowed')
-                            ->latest() 
                             ->first();
+
+            // Jika tidak ketemu item_code, fallback cari berdasarkan 'book_code' reguler
+            if (!$borrowing) {
+                $book = Book::where('book_code', $scannedCode)->first();
+                if (!$book) {
+                    return response()->json(['success' => false, 'message' => 'Kode Buku / Eksemplar tidak ditemukan di sistem.']);
+                }
+
+                $borrowing = Borrowing::with('student')
+                                ->where('book_id', $book->id)
+                                ->where('status', 'borrowed')
+                                ->latest() 
+                                ->first();
+            } else {
+                $book = Book::find($borrowing->book_id);
+            }
 
             if (!$borrowing) {
                 return response()->json(['success' => false, 'message' => 'Buku ini sedang tidak dipinjam (Stok ada di rak).']);
@@ -211,14 +223,18 @@ class LibraryCirculationController extends Controller
                 $fine = $lateDays * 500; 
             }
 
-            if ($request->has('check_only')) {
+             if ($request->has('check_only')) {
                 DB::rollBack();
+                // Tambahkan info extra untuk mencegah kecurangan tukar buku
+                $extraMsg = $borrowing->item_code ? " (Kode Eksemplar: {$borrowing->item_code})" : "";
+                
                 return response()->json([
                     'success' => true,
                     'action' => 'confirm_needed',
                     'data' => [
                         'borrowing_id' => $borrowing->id,
                         'student_name' => $borrowing->student ? $borrowing->student->name : 'Siswa Tidak Ditemukan',
+                        'book_title' => $book->title . $extraMsg,
                         'borrow_date' => $borrowing->borrow_date,
                         'due_date' => $borrowing->due_date,
                         'late_days' => $lateDays,
@@ -241,6 +257,85 @@ class LibraryCirculationController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => 'Error Kembali: ' . $e->getMessage()]);
+        }
+    }
+    
+    /**
+     * MENAMPILKAN HALAMAN DISTRIBUSI MASSAL BUKU PAKET
+     */
+    public function bulkBorrow()
+    {
+        $classes = SchoolClass::orderBy('name', 'asc')->get();
+        // Ambil buku yang ditandai sebagai textbook, atau ambil semua jika is_textbook belum diisi dengan baik
+        $textbooks = Book::where('is_textbook', true)->orWhere('category_id', 2)->orderBy('title')->get(); 
+        
+        return view('library.circulation.bulk-borrow', compact('classes', 'textbooks'));
+    }
+
+    /**
+     * PROSES DISTRIBUSI MASSAL
+     */
+    public function storeBulk(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $request->validate([
+                'class_id' => 'required|exists:classes,id',
+                'book_id' => 'required|exists:books,id',
+                'due_date' => 'required|date',
+                'item_codes' => 'required|array' // Array: [student_id => item_code]
+            ]);
+
+            $book = Book::where('id', $request->book_id)->lockForUpdate()->first();
+            $itemCodesData = array_filter($request->item_codes); // Hapus input yang kosong
+            $validCount = count($itemCodesData);
+
+            if ($validCount == 0) {
+                return back()->with('error', 'Tidak ada kode eksemplar yang dimasukkan.');
+            }
+
+            if ($book->stock < $validCount) {
+                DB::rollBack();
+                return back()->with('error', "Stok tidak cukup! Butuh {$validCount} buku, stok tersisa {$book->stock}.");
+            }
+
+            $borrowingsData = [];
+            $now = now();
+            $assignedCount = 0;
+
+            foreach ($itemCodesData as $studentId => $itemCode) {
+                // Pastikan item_code spesifik ini belum dipakai oleh orang lain
+                $isUsed = Borrowing::where('item_code', $itemCode)->where('status', 'borrowed')->exists();
+                
+                if ($isUsed) {
+                    DB::rollBack();
+                    return back()->with('error', "Kode eksemplar {$itemCode} sedang dipinjam oleh siswa lain! Periksa kembali fisik buku.");
+                }
+
+                $borrowingsData[] = [
+                    'student_id' => $studentId,
+                    'book_id' => $book->id,
+                    'item_code' => $itemCode,
+                    'borrow_date' => $now,
+                    'due_date' => $request->due_date,
+                    'status' => 'borrowed',
+                    'type' => 'textbook',
+                    'served_by' => Auth::id(),
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+                $assignedCount++;
+            }
+
+            Borrowing::insert($borrowingsData);
+            $book->decrement('stock', $assignedCount);
+
+            DB::commit();
+            return back()->with('success', "{$assignedCount} buku paket berhasil didistribusikan ke kelas ini.");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal memproses: ' . $e->getMessage());
         }
     }
 }

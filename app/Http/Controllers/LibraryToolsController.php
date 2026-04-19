@@ -177,4 +177,93 @@ class LibraryToolsController extends Controller
         
         return $pdf->download('Laporan_' . $type . '_' . date('Ymd_His') . '.pdf');
     }
+
+    
+    
+    /**
+     * API Ambil Siswa Berdasarkan Kelas (Untuk Bulk Borrow)
+     */
+    public function getStudentsByClass($class_id)
+    {
+        try {
+            $students = Student::where('class_id', $class_id)
+                            ->orderBy('name', 'asc')
+                            ->get(['id', 'name', 'nisn', 'student_id']); 
+            
+            return response()->json([
+                'success' => true,
+                'students' => $students
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * 1. Halaman Utama Surat Bebas Pustaka (Form Pencarian)
+     */
+    public function bebasPustaka()
+    {
+        return view('library.tools.bebas-pustaka');
+    }
+
+    /**
+     * 2. API Cek Kelayakan Bebas Pustaka (Dipanggil oleh Javascript via fetch)
+     */
+    public function checkClearanceApi(Request $request)
+    {
+        $query = $request->q;
+        
+        // Cari Siswa berdasarkan NISN, NIS, ID, atau Nama
+        $student = Student::with('schoolClass')
+                    ->where('student_id', $query)
+                    ->orWhere('nis', $query)
+                    ->orWhere('nisn', $query)
+                    ->orWhere('name', 'like', "%{$query}%")
+                    ->first();
+
+        if (!$student) {
+            return response()->json(['success' => false, 'message' => 'Data Siswa tidak ditemukan.']);
+        }
+
+        // Cari pinjaman buku siswa ini yang statusnya masih 'borrowed'
+        $activeLoans = Borrowing::with('book')
+                        ->where('student_id', $student->id)
+                        ->where('status', 'borrowed')
+                        ->get()
+                        ->map(function($loan) {
+                            return [
+                                'book_title' => optional($loan->book)->title ?? 'Buku Tidak Dikenal',
+                                'item_code'  => $loan->item_code ?? null,
+                                'is_late'    => \Carbon\Carbon::now()->gt($loan->due_date)
+                            ];
+                        });
+
+        return response()->json([
+            'success' => true,
+            'student' => $student,
+            'active_loans' => $activeLoans
+        ]);
+    }
+
+    /**
+     * 3. Menampilkan Halaman Cetak Web-to-Print Bebas Pustaka
+     */
+    public function printClearance($id)
+    {
+        $student = Student::with('schoolClass')->findOrFail($id);
+
+        // Validasi Ekstra Keamanan: Pastikan siswa benar-benar tidak punya pinjaman
+        $hasLoans = Borrowing::where('student_id', $student->id)
+                        ->where('status', 'borrowed')
+                        ->exists();
+
+        if ($hasLoans) {
+            // Jika siswa iseng menebak URL id, sistem akan menolak
+            return abort(403, 'Akses Ditolak: Siswa masih memiliki tanggungan peminjaman buku!');
+        }
+
+        // Arahkan ke file Blade cetak yang telah disesuaikan dengan format SPPD
+        return view('library.reports.print-bebas-pustaka', compact('student'));
+    }
 }

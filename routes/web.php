@@ -514,13 +514,23 @@ Route::middleware('auth')->group(function () {
         Route::post('/circulation/borrow', [LibraryCirculationController::class, 'store'])->name('circulation.store');
         Route::post('/circulation/return', [LibraryCirculationController::class, 'returnBook'])->name('circulation.return');
      
+          // ROUTE PEMINJAMAN MASSAL BUKU PAKET
+        Route::get('/circulation/bulk', [LibraryCirculationController::class, 'bulkBorrow'])->name('circulation.bulk_borrow');
+        Route::post('/circulation/bulk', [LibraryCirculationController::class, 'storeBulk'])->name('circulation.storeBulk');
+     
         // ALAT BANTU & CETAK
         Route::controller(LibraryToolsController::class)->prefix('tools')->name('tools.')->group(function () {
             Route::get('/', 'index')->name('index');             
             Route::get('/print-card', 'printCard')->name('print-card');            
             Route::get('/print-label', 'printBookLabel')->name('print-book-label');            
             Route::get('/report', 'generateReport')->name('report');
-        });    
+
+          // ROUTE BEBAS PUSTAKA & API SISWA
+            Route::get('/bebas-pustaka', 'bebasPustaka')->name('bebas_pustaka');
+            Route::get('/api/check-clearance', 'checkClearanceApi')->name('checkClearanceApi');
+            Route::get('/print-clearance/{id}', 'printClearance')->name('printClearance');
+            Route::get('/api/students-by-class/{class_id}', 'getStudentsByClass')->name('getStudentsByClass');
+        });       
     });
         
         // ROUTE ADMIN LITERASI (MONITORING)      

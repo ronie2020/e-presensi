@@ -12,6 +12,7 @@ class Book extends Model
     protected $fillable = [
         'book_code',      // Kode Barcode
         'title',          // Judul
+        'is_textbook',    // Penanda Buku Paket
         'category_id',    // ID Kategori
         'author',         // Pengarang
         'publisher',      // Penerbit
@@ -38,6 +39,14 @@ class Book extends Model
     public function borrowings()
     {
         return $this->hasMany(Borrowing::class, 'book_id');
+    }
+
+      /**
+     * RELASI BARU: 1 Judul Buku punya BANYAK Eksemplar Fisik
+     */
+    public function copies()
+    {
+        return $this->hasMany(BookCopy::class, 'book_id');
     }
     
     /**
