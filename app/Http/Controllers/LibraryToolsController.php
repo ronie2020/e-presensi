@@ -259,8 +259,9 @@ class LibraryToolsController extends Controller
                         ->exists();
 
         if ($hasLoans) {
-            // Jika siswa iseng menebak URL id, sistem akan menolak
-            return abort(403, 'Akses Ditolak: Siswa masih memiliki tanggungan peminjaman buku!');
+            // PERBAIKAN: Redirect kembali dengan pesan error alih-alih menampilkan halaman error 403 statis
+            return redirect()->route('library.tools.bebas_pustaka')
+                             ->with('error', 'Akses Ditolak: ' . $student->name . ' masih memiliki tanggungan peminjaman buku!');
         }
 
         // Arahkan ke file Blade cetak yang telah disesuaikan dengan format SPPD

@@ -44,25 +44,13 @@ class LibraryCirculationController extends Controller
                 $studentQuery->with('schoolClass');
             } catch (\Exception $e) {}
 
-            // Coba load count borrowings dengan aman
-            try {
-                $studentQuery->withCount(['borrowings' => function($q) {
-                    $q->where('status', 'borrowed');
-                }]);
-            } catch (\Exception $e) {              
-                return response()->json([
-                    'success' => false, 
-                    'message' => 'Error Code: Relasi borrowings() tidak ditemukan di Model Student.php'
-                ]);
-            }
-
             $student = $studentQuery->first();
 
             if (!$student) {
                 return response()->json(['success' => false, 'message' => 'Anggota tidak ditemukan.']);
             }
 
-            // 2. CEK BUKU OVERDUE
+            // 2. CEK BUKU OVERDUE (Terlambat)
             $overdueLoans = Borrowing::with('book')
                             ->where('student_id', $student->id)
                             ->where('status', 'borrowed')
@@ -74,12 +62,13 @@ class LibraryCirculationController extends Controller
             });
 
             // 3. AMBIL DETAIL BUKU YANG SEDANG DIPINJAM
-            $activeLoanDetails = Borrowing::with('book')
+            $activeLoans = Borrowing::with('book')
                                 ->where('student_id', $student->id)
                                 ->where('status', 'borrowed')
                                 ->orderBy('borrow_date', 'desc')
-                                ->get()
-                                ->map(function($loan) {
+                                ->get();
+
+            $activeLoanDetails = $activeLoans->map(function($loan) {
                                     return [
                                         'title' => $loan->book ? $loan->book->title : 'Judul Tidak Diketahui',
                                         'due_date' => Carbon::parse($loan->due_date)->format('d M Y'),
@@ -90,7 +79,7 @@ class LibraryCirculationController extends Controller
             return response()->json([
                 'success' => true,
                 'student' => $student,
-                'active_loans' => $student->borrowings_count ?? 0,
+                'active_loans' => $activeLoans->count(),
                 'active_loan_details' => $activeLoanDetails,
                 'has_overdue' => $overdueLoans->count() > 0,
                 'overdue_titles' => $overdueTitles
@@ -112,6 +101,8 @@ class LibraryCirculationController extends Controller
         try {
             $query = $request->get('q');
             
+            // Mengubah query untuk memprioritaskan item_code dari BookCopy jika Anda menggunakan Eksemplar
+            // Namun fallback sementara ke book_code buku induk sesuai kode awal Anda
             $book = Book::where('book_code', $query)->first();
 
             if (!$book) {
@@ -129,7 +120,7 @@ class LibraryCirculationController extends Controller
     }
 
     /**
-     * PROSES PEMINJAMAN
+     * PROSES PEMINJAMAN REGULER (Maksimal 3 Buku, 1 Minggu)
      */
     public function store(Request $request)
     {
@@ -147,7 +138,21 @@ class LibraryCirculationController extends Controller
                 return response()->json(['success' => false, 'message' => 'Stok buku habis.']);
             }
 
-            // Cek Duplikasi
+            // LOGIKA TAMBAHAN 1: Cek batas maksimal pinjaman reguler (Maksimal 3 Buku)
+            // KITA HANYA MENGHITUNG BUKU NON-PAKET (Reguler)
+            $activeRegularLoansCount = Borrowing::where('student_id', $request->student_id)
+                ->where('status', 'borrowed')
+                ->whereHas('book', function($query) {
+                    $query->where('is_textbook', false); // Abaikan buku paket (11 mapel)
+                })
+                ->count();
+
+            if ($activeRegularLoansCount >= 3) {
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'Siswa telah mencapai batas maksimal peminjaman (3 Buku Reguler).']);
+            }
+
+            // LOGIKA TAMBAHAN 2: Cek Duplikasi Judul
             $isDuplicate = Borrowing::where('student_id', $request->student_id)
                             ->where('book_id', $request->book_id)
                             ->where('status', 'borrowed')
@@ -155,7 +160,7 @@ class LibraryCirculationController extends Controller
 
             if ($isDuplicate) {
                 DB::rollBack();
-                return response()->json(['success' => false, 'message' => 'Siswa sedang meminjam buku judul ini.']);
+                return response()->json(['success' => false, 'message' => 'Siswa sedang meminjam judul buku ini.']);
             }
 
             $book->decrement('stock');
@@ -164,8 +169,9 @@ class LibraryCirculationController extends Controller
                 'student_id' => $request->student_id,
                 'book_id' => $request->book_id,
                 'borrow_date' => now(),
-                'due_date' => now()->addDays(7),
+                'due_date' => now()->addDays(7), // Logika 1 Minggu (Sudah Benar)
                 'status' => 'borrowed',
+                'type' => 'regular', // Menandakan ini pinjaman biasa
                 'served_by' => Auth::id(),
             ]);
 
@@ -187,13 +193,13 @@ class LibraryCirculationController extends Controller
         try {
             $scannedCode = $request->get('book_code');
 
-            // LOGIKA BARU: Cari berdasarkan 'item_code' (Eksemplar) TERLEBIH DAHULU
+            // LOGIKA BARU: Cari berdasarkan 'item_code' (Eksemplar Buku Paket/Reguler)
             $borrowing = Borrowing::with('student')
                             ->where('item_code', $scannedCode)
                             ->where('status', 'borrowed')
                             ->first();
 
-            // Jika tidak ketemu item_code, fallback cari berdasarkan 'book_code' reguler
+            // Fallback cari berdasarkan 'book_code' induk (jika peminjaman reguler belum pakai eksemplar)
             if (!$borrowing) {
                 $book = Book::where('book_code', $scannedCode)->first();
                 if (!$book) {
@@ -220,12 +226,12 @@ class LibraryCirculationController extends Controller
 
             if ($now->gt($dueDate)) {
                 $lateDays = $now->diffInDays($dueDate);
+                // Denda Rp 500 per hari
                 $fine = $lateDays * 500; 
             }
 
              if ($request->has('check_only')) {
                 DB::rollBack();
-                // Tambahkan info extra untuk mencegah kecurangan tukar buku
                 $extraMsg = $borrowing->item_code ? " (Kode Eksemplar: {$borrowing->item_code})" : "";
                 
                 return response()->json([
@@ -235,8 +241,8 @@ class LibraryCirculationController extends Controller
                         'borrowing_id' => $borrowing->id,
                         'student_name' => $borrowing->student ? $borrowing->student->name : 'Siswa Tidak Ditemukan',
                         'book_title' => $book->title . $extraMsg,
-                        'borrow_date' => $borrowing->borrow_date,
-                        'due_date' => $borrowing->due_date,
+                        'borrow_date' => Carbon::parse($borrowing->borrow_date)->format('d-m-Y'),
+                        'due_date' => Carbon::parse($borrowing->due_date)->format('d-m-Y'),
                         'late_days' => $lateDays,
                         'fine' => $fine
                     ]
@@ -266,14 +272,14 @@ class LibraryCirculationController extends Controller
     public function bulkBorrow()
     {
         $classes = SchoolClass::orderBy('name', 'asc')->get();
-        // Ambil buku yang ditandai sebagai textbook, atau ambil semua jika is_textbook belum diisi dengan baik
-        $textbooks = Book::where('is_textbook', true)->orWhere('category_id', 2)->orderBy('title')->get(); 
+        // Hanya panggil buku paket
+        $textbooks = Book::where('is_textbook', true)->orderBy('title')->get(); 
         
         return view('library.circulation.bulk-borrow', compact('classes', 'textbooks'));
     }
 
     /**
-     * PROSES DISTRIBUSI MASSAL
+     * PROSES DISTRIBUSI MASSAL BUKU PAKET (1 Tahun Ajaran)
      */
     public function storeBulk(Request $request)
     {
@@ -287,7 +293,7 @@ class LibraryCirculationController extends Controller
             ]);
 
             $book = Book::where('id', $request->book_id)->lockForUpdate()->first();
-            $itemCodesData = array_filter($request->item_codes); // Hapus input yang kosong
+            $itemCodesData = array_filter($request->item_codes);
             $validCount = count($itemCodesData);
 
             if ($validCount == 0) {
@@ -304,12 +310,22 @@ class LibraryCirculationController extends Controller
             $assignedCount = 0;
 
             foreach ($itemCodesData as $studentId => $itemCode) {
-                // Pastikan item_code spesifik ini belum dipakai oleh orang lain
+                // Pastikan eksemplar tidak sedang dipinjam orang lain
                 $isUsed = Borrowing::where('item_code', $itemCode)->where('status', 'borrowed')->exists();
                 
                 if ($isUsed) {
                     DB::rollBack();
-                    return back()->with('error', "Kode eksemplar {$itemCode} sedang dipinjam oleh siswa lain! Periksa kembali fisik buku.");
+                    return back()->with('error', "Kode eksemplar {$itemCode} sedang dipinjam oleh siswa lain! Periksa fisik buku.");
+                }
+
+                // Opsional: Cek jika siswa sudah punya buku paket ini
+                $hasBook = Borrowing::where('student_id', $studentId)
+                            ->where('book_id', $book->id)
+                            ->where('status', 'borrowed')
+                            ->exists();
+                
+                if ($hasBook) {
+                    continue; // Skip jika sudah punya agar tidak duplikat
                 }
 
                 $borrowingsData[] = [
@@ -317,9 +333,9 @@ class LibraryCirculationController extends Controller
                     'book_id' => $book->id,
                     'item_code' => $itemCode,
                     'borrow_date' => $now,
-                    'due_date' => $request->due_date,
+                    'due_date' => $request->due_date, // Sesuai isian (Akhir Tahun Ajaran)
                     'status' => 'borrowed',
-                    'type' => 'textbook',
+                    'type' => 'textbook', // Penanda Buku Paket
                     'served_by' => Auth::id(),
                     'created_at' => $now,
                     'updated_at' => $now,
@@ -327,8 +343,10 @@ class LibraryCirculationController extends Controller
                 $assignedCount++;
             }
 
-            Borrowing::insert($borrowingsData);
-            $book->decrement('stock', $assignedCount);
+            if ($assignedCount > 0) {
+                Borrowing::insert($borrowingsData);
+                $book->decrement('stock', $assignedCount);
+            }
 
             DB::commit();
             return back()->with('success', "{$assignedCount} buku paket berhasil didistribusikan ke kelas ini.");

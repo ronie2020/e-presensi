@@ -1,44 +1,42 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <a href="{{ route('library.circulation.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 mb-6 transition-colors group">
+            <a href="<?php echo e(route('library.circulation.index')); ?>" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 mb-6 transition-colors group">
                 <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Sirkulasi
             </a>
 
-            @if ($errors->any())
+            <?php if($errors->any()): ?>
                 <div class="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-3 shadow-sm">
                     <i class="ph-fill ph-warning-circle text-rose-500 text-xl mt-0.5"></i>
                     <div>
                         <h3 class="text-sm font-bold text-rose-700">Gagal Memproses Distribusi</h3>
                         <ul class="list-disc list-inside text-xs text-rose-600 mt-1">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
+                            <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><?php echo e($error); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </ul>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            @if (session('success'))
+            <?php if(session('success')): ?>
                 <div class="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center gap-3 shadow-sm">
                     <i class="ph-fill ph-check-circle text-emerald-500 text-xl"></i>
-                    <p class="text-sm font-bold text-emerald-700">{{ session('success') }}</p>
+                    <p class="text-sm font-bold text-emerald-700"><?php echo e(session('success')); ?></p>
                 </div>
-            @endif
-
-             {{-- DITAMBAHKAN: Tangani Custom Error dari Controller (Misal: Barcode Sedang Dipinjam) --}}
-            @if (session('error'))
-                <div class="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-3 shadow-sm animate-fade-in-down">
-                    <i class="ph-fill ph-warning-circle text-rose-500 text-xl mt-0.5"></i>
-                    <div>
-                        <h3 class="text-sm font-bold text-rose-700">Distribusi Terhenti</h3>
-                        <p class="text-xs font-bold text-rose-600 mt-1">{{ session('error') }}</p>
-                    </div>
-                </div>
-            @endif
+            <?php endif; ?>
 
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
                 
@@ -58,12 +56,12 @@
                 </div>
 
                 <div class="p-8">
-                    <form action="{{ route('library.circulation.storeBulk') }}" method="POST" id="bulkBorrowForm">
-                        @csrf
+                    <form action="<?php echo e(route('library.circulation.storeBulk')); ?>" method="POST" id="bulkBorrowForm">
+                        <?php echo csrf_field(); ?>
                         
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             
-                            {{-- KOLOM KIRI: SETTING --}}
+                            
                             <div class="lg:col-span-1 space-y-6">
                                 <div class="bg-slate-50 p-6 rounded-[2rem] border border-slate-200">
                                     <h3 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
@@ -77,9 +75,9 @@
                                                 <i class="ph-bold ph-users-three absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                                                 <select name="class_id" id="class_id" required class="w-full pl-11 pr-10 py-3.5 rounded-2xl border-slate-200 bg-white font-bold text-slate-700 transition-all shadow-sm">
                                                     <option value="">-- Pilih Kelas --</option>
-                                                    @foreach($classes as $class)
-                                                        <option value="{{ $class->id }}">{{ $class->name }}</option>
-                                                    @endforeach
+                                                    <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $class): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                        <option value="<?php echo e($class->id); ?>"><?php echo e($class->name); ?></option>
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                 </select>
                                             </div>
                                         </div>
@@ -90,11 +88,11 @@
                                                 <i class="ph-bold ph-books absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                                                 <select name="book_id" id="book_id" required class="w-full pl-11 pr-10 py-3.5 rounded-2xl border-slate-200 bg-white font-bold text-slate-700 transition-all shadow-sm">
                                                     <option value="">-- Pilih Buku Paket --</option>
-                                                    @foreach($textbooks as $book)
-                                                        <option value="{{ $book->id }}" data-stock="{{ $book->stock }}">
-                                                            {{ $book->title }} (Stok: {{ $book->stock }})
+                                                    <?php $__currentLoopData = $textbooks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                        <option value="<?php echo e($book->id); ?>" data-stock="<?php echo e($book->stock); ?>">
+                                                            <?php echo e($book->title); ?> (Stok: <?php echo e($book->stock); ?>)
                                                         </option>
-                                                    @endforeach
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                 </select>
                                             </div>
                                         </div>
@@ -103,15 +101,15 @@
                                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tenggat Waktu <span class="text-rose-500">*</span></label>
                                             <div class="relative group">
                                                 <i class="ph-bold ph-calendar-blank absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                                @php $defaultDueDate = \Carbon\Carbon::create(date('Y') + 1, 6, 15)->format('Y-m-d'); @endphp
-                                                <input type="date" name="due_date" value="{{ $defaultDueDate }}" required class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-white font-bold text-slate-700 transition-all shadow-sm">
+                                                <?php $defaultDueDate = \Carbon\Carbon::create(date('Y') + 1, 6, 15)->format('Y-m-d'); ?>
+                                                <input type="date" name="due_date" value="<?php echo e($defaultDueDate); ?>" required class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-white font-bold text-slate-700 transition-all shadow-sm">
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {{-- KOLOM KANAN: DAFTAR SISWA & SCAN --}}
+                            
                             <div class="lg:col-span-2 flex flex-col">
                                 <div class="flex items-center justify-between mb-4">
                                     <h3 class="text-lg font-black text-slate-800">Daftar Penerima & Kode Fisik Buku</h3>
@@ -186,7 +184,7 @@
                 loadingState.classList.remove('hidden');
 
                 try {
-                    const response = await fetch(`{{ url('/library/tools/api/students-by-class') }}/${classId}`);
+                    const response = await fetch(`<?php echo e(url('/library/tools/api/students-by-class')); ?>/${classId}`);
                     const data = await response.json();
                     
                     if(data.success && data.students.length > 0) {
@@ -214,7 +212,7 @@
                             <td class="px-6 py-4">
                                 <div class="relative">
                                     <i class="ph-bold ph-barcode absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                    <input type="text" name="item_codes[${student.id}]" class="item-code-input w-full pl-9 pr-4 py-2 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 font-mono font-bold text-slate-700 text-sm transition-colors" placeholder="Scan kode buku kesini..." oninput="updateCounter()" onkeydown="focusNext(event, ${index})">
+                                    <input type="text" name="item_codes[${student.id}]" class="item-code-input w-full pl-9 pr-4 py-2 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 font-mono font-bold text-slate-700 text-sm" placeholder="Scan kode buku kesini..." oninput="updateCounter()" onkeydown="focusNext(event, ${index})">
                                 </div>
                             </td>
                         </tr>
@@ -223,7 +221,7 @@
                 studentContainer.innerHTML = html;
             }
 
-           // Fungsi agar saat dienter pindah ke input bawahnya
+            // Fungsi agar saat dienter pindah ke input bawahnya
             window.focusNext = function(event, currentIndex) {
                 if(event.key === 'Enter') {
                     event.preventDefault();
@@ -234,50 +232,14 @@
                 }
             }
 
-            // PERBAIKAN LOGIKA: Cek Duplikat Barcode Secara Realtime
             window.updateCounter = function() {
                 const inputs = document.querySelectorAll('.item-code-input');
                 let filledCount = 0;
-                let scannedCodes = [];
-                let hasDuplicate = false;
-
-                inputs.forEach(input => { 
-                    const val = input.value.trim();
-                    if(val !== '') { 
-                        filledCount++; 
-                        
-                        // Cek apakah barcode ini sudah di-scan di baris lain
-                        if(scannedCodes.includes(val)) {
-                            hasDuplicate = true;
-                            input.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-600', 'focus:border-rose-500', 'focus:ring-rose-500');
-                            input.classList.remove('border-slate-200', 'bg-slate-50', 'text-slate-700', 'focus:border-blue-500', 'focus:ring-blue-500');
-                        } else {
-                            scannedCodes.push(val);
-                            input.classList.remove('border-rose-500', 'bg-rose-50', 'text-rose-600', 'focus:border-rose-500', 'focus:ring-rose-500');
-                            input.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-700', 'focus:border-blue-500', 'focus:ring-blue-500');
-                        }
-                    } else {
-                        // Reset style jika kosong
-                        input.classList.remove('border-rose-500', 'bg-rose-50', 'text-rose-600', 'focus:border-rose-500', 'focus:ring-rose-500');
-                        input.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-700', 'focus:border-blue-500', 'focus:ring-blue-500');
-                    }
-                });
+                inputs.forEach(input => { if(input.value.trim() !== '') filledCount++; });
                 
                 scannedCountDisplay.innerText = filledCount;
                 const bookSelected = document.getElementById('book_id').value !== '';
-                
-                // Ubah status dan tampilan tombol submit
-                if (hasDuplicate) {
-                    btnSubmit.disabled = true;
-                    btnSubmit.innerHTML = '<i class="ph-bold ph-warning text-lg"></i> Ada Barcode Ganda';
-                    btnSubmit.classList.replace('bg-blue-600', 'bg-rose-600');
-                    btnSubmit.classList.replace('hover:bg-blue-700', 'hover:bg-rose-700');
-                } else {
-                    btnSubmit.disabled = filledCount === 0 || !bookSelected;
-                    btnSubmit.innerHTML = '<i class="ph-bold ph-paper-plane-right text-lg"></i> Simpan Distribusi';
-                    btnSubmit.classList.replace('bg-rose-600', 'bg-blue-600');
-                    btnSubmit.classList.replace('hover:bg-rose-700', 'hover:bg-blue-700');
-                }
+                btnSubmit.disabled = filledCount === 0 || !bookSelected;
             }
             document.getElementById('book_id').addEventListener('change', updateCounter);
         });
@@ -310,4 +272,13 @@
             });
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/library/circulation/bulk-borrow.blade.php ENDPATH**/ ?>
