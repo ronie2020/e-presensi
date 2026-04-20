@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\QuestionsImport;
 use App\Exports\CbtScoreExport; 
-use App\Exports\QuestionTemplateExport; // <-- TAMBAHAN: Import class Export Template
+use App\Exports\QuestionTemplateExport; 
 use App\Models\LmsAssignment;
 use App\Models\LmsGrade;       
 use App\Models\LmsSubmission;  
@@ -45,8 +45,7 @@ class CbtController extends Controller
         if ($request->filled('filter') && $request->filter != 'all') {
             $query->where('is_active', $request->filter == 'active');
         }
-
-        // withQueryString() memastikan saat pindah halaman (pagination), search & filter tidak hilang
+       
         $exams = $query->latest()->paginate(12)->withQueryString();
 
         return view('cbt.index', compact('stats', 'exams'));
@@ -81,19 +80,16 @@ class CbtController extends Controller
             $newExam->is_active = false; // Matikan default agar aman
             $newExam->save();
 
-            // Duplikasi setiap soal yang ada di ujian tersebut
             foreach ($exam->questions as $q) {
                 $newQ = $q->replicate();
                 $newQ->cbt_exam_id = $newExam->id;
-
-                // Salin file gambar utama soal jika ada
+                
                 if ($q->question_image && Storage::exists('public/' . $q->question_image)) {
                     $newPath = 'soal/copy_' . time() . '_' . basename($q->question_image);
                     Storage::copy('public/' . $q->question_image, 'public/' . $newPath);
                     $newQ->question_image = $newPath;
                 }
-
-                // Salin file gambar pada opsi jawaban (Jika ada)
+                
                 $opts = is_string($q->options) ? json_decode($q->options, true) : ($q->options ?? []);
                 $newOpts = $opts;
                 foreach(['A', 'B', 'C', 'D', 'E'] as $opt) {
@@ -130,8 +126,7 @@ class CbtController extends Controller
             'subject_name' => 'required|string',
         ]);
 
-        // 2. TANGKAP DATA SECARA EKSPLISIT (Solusi Anti-Gagal)
-        // Dengan cara ini, tidak ada lagi field yang akan diam-diam dibuang oleh Laravel
+        // 2. TANGKAP DATA SECARA EKSPLISIT 
         $data = [
             'title' => $request->title,
             'exam_type' => $request->exam_type,
@@ -172,8 +167,7 @@ class CbtController extends Controller
             'exam_type' => 'required|in:cbt,google_form',
             'subject_name' => 'required|string',
         ]);
-
-        // Tangkap data eksplisit untuk Update
+       
         $data = [
             'title' => $request->title,
             'exam_type' => $request->exam_type,
@@ -243,8 +237,6 @@ class CbtController extends Controller
         
         return view('cbt.manage_questions', compact('exam', 'totalPoints', 'banks'));
     }
-
-
 
     public function storeQuestion(Request $request, $id)
     {
@@ -500,7 +492,7 @@ class CbtController extends Controller
         return back()->with('success', 'Soal berhasil dihapus.');
     }
 
-    // --- FITUR BARU: BULK DELETE & BULK WEIGHT ---
+    // --- BULK DELETE & BULK WEIGHT ---
     public function bulkDelete(Request $request, $exam_id)
     {
         if (!$request->question_ids) return back()->with('error', 'Tidak ada soal yang dipilih.');
@@ -1269,6 +1261,59 @@ class CbtController extends Controller
         ];
 
         return response()->view('cbt.export_word', compact('exam'))->withHeaders($headers);
+    }
+
+    // =========================================================================
+    // FITUR BARU: CETAK ADMINISTRASI UJIAN
+    // =========================================================================
+
+    /**
+     * Cetak Daftar Hadir Peserta Ujian
+     */
+    public function attendanceList($id)
+    {
+        $exam = CbtExam::findOrFail($id);
+        
+        // Ambil data siswa berdasarkan kelas target ujian
+        $students = Student::with('schoolClass')
+            ->whereHas('schoolClass', function($query) use ($exam) {               
+                $query->where('name', 'like', $exam->class_level . '%');
+            })
+             ->get()
+            ->sortBy(function($student) {
+                // Urutkan berdasarkan Nama Kelas lalu Nama Siswa
+                return ($student->schoolClass->name ?? 'ZZZ') . ' - ' . $student->name;
+            })
+            ->values();
+        
+        $sessions = DB::table('cbt_student_exams')
+            ->where('cbt_exam_id', $id)
+            ->pluck('student_id')
+            ->toArray();
+
+        return view('cbt.daftar_hadir', compact('exam', 'students', 'sessions'));
+    }
+
+    /**
+     * Cetak Berita Acara Pelaksanaan Ujian
+     */
+    public function minutes($id)
+    {
+        $exam = CbtExam::findOrFail($id);
+        
+        // Hitung total peserta seharusnya
+        $totalStudents = Student::whereHas('schoolClass', function($query) use ($exam) {               
+                $query->where('name', 'like', $exam->class_level . '%');
+            })->count();
+
+        // Hitung jumlah yang hadir (berdasarkan data sesi ujian)
+        $presentStudents = DB::table('cbt_student_exams')
+            ->where('cbt_exam_id', $id)
+            ->count();
+            
+        $absentStudents = $totalStudents - $presentStudents;
+
+        return view('cbt.berita_acara', compact('exam', 'totalStudents', 'presentStudents', 'absentStudents'));
     }
     
 }

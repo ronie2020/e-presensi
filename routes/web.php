@@ -414,8 +414,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/exam/{exam}/pull-from-bank', [CbtBankController::class, 'importToExam'])->name('import_from_bank');
         Route::post('/exam/{exam}/export-to-bank', [CbtBankController::class, 'storeFromExam'])->name('export_to_bank');
     
-        Route::post('/exams/{id}/toggle-status', [\App\Http\Controllers\CbtController::class, 'toggleStatus'])->name('toggle_status');
+          Route::post('/exams/{id}/toggle-status', [\App\Http\Controllers\CbtController::class, 'toggleStatus'])->name('toggle_status');
         Route::post('/exams/{id}/clone', [\App\Http\Controllers\CbtController::class, 'cloneExam'])->name('clone');
+        
+        // Rute untuk Cetak Administrasi Ujian
+        Route::get('/{id}/attendance', [\App\Http\Controllers\CbtController::class, 'attendanceList'])->name('attendance');
+        Route::get('/{id}/minutes', [\App\Http\Controllers\CbtController::class, 'minutes'])->name('minutes');
     });
 
 

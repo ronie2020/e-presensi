@@ -110,29 +110,74 @@ class BookController extends Controller
             'title' => 'required|string|max:255',
             'cover' => 'nullable|image|max:5120',
             'ebook_file' => 'nullable|mimes:pdf|max:51200',
+            'tambah_eksemplar' => 'nullable|integer|min:0|max:500', // Validasi input baru
         ]);
 
-        // Abaikan book_code dan stock agar tidak dirubah manual
-        $data = $request->except(['cover', 'ebook_file', 'book_code', 'stock']); 
-        $data['is_textbook'] = $request->boolean('is_textbook');
+        DB::beginTransaction();
+        try {
+            // Abaikan book_code, stock, dan tambah_eksemplar dari mass assignment
+            $data = $request->except(['cover', 'ebook_file', 'book_code', 'stock', 'tambah_eksemplar']); 
+            $data['is_textbook'] = $request->boolean('is_textbook');
 
-        if ($request->hasFile('cover')) {
-            if ($book->cover_path && Storage::disk('public')->exists($book->cover_path)) {
-                Storage::disk('public')->delete($book->cover_path);
+            if ($request->hasFile('cover')) {
+                if ($book->cover_path && Storage::disk('public')->exists($book->cover_path)) {
+                    Storage::disk('public')->delete($book->cover_path);
+                }
+                $data['cover_path'] = $request->file('cover')->store('covers', 'public');
             }
-            $data['cover_path'] = $request->file('cover')->store('covers', 'public');
-        }
 
-        if ($request->hasFile('ebook_file')) {
-            if ($book->ebook_path && Storage::disk('public')->exists($book->ebook_path)) {
-                Storage::disk('public')->delete($book->ebook_path);
+            if ($request->hasFile('ebook_file')) {
+                if ($book->ebook_path && Storage::disk('public')->exists($book->ebook_path)) {
+                    Storage::disk('public')->delete($book->ebook_path);
+                }
+                $data['ebook_path'] = $request->file('ebook_file')->store('ebooks', 'public');
             }
-            $data['ebook_path'] = $request->file('ebook_file')->store('ebooks', 'public');
+
+            $book->update($data);
+
+            // --- LOGIKA PENAMBAHAN EKSEMPLAR FISIK (BUKU LAMA/RESTOCK) ---
+            if ($request->filled('tambah_eksemplar') && $request->tambah_eksemplar > 0) {
+                $jumlah_tambah = $request->tambah_eksemplar;
+                
+                // 1. Cek urutan barcode terakhir (misal sudah ada -02, maka mulai dari -03)
+                $lastCopy = BookCopy::where('book_id', $book->id)->orderBy('id', 'desc')->first();
+                $lastNumber = 0;
+                
+                if ($lastCopy) {
+                    // Ambil angka di belakang strip, contoh "ISBN123-05" jadi "05"
+                    $parts = explode('-', $lastCopy->copy_code);
+                    $lastNumber = (int) end($parts);
+                }
+                
+                // 2. Siapkan data array untuk insert batch (lebih cepat dari create satu-satu)
+                $copiesData = [];
+                for ($i = 1; $i <= $jumlah_tambah; $i++) {
+                    $newNumber = str_pad($lastNumber + $i, 2, '0', STR_PAD_LEFT);
+                    $copiesData[] = [
+                        'book_id' => $book->id,
+                        'copy_code' => $book->book_code . '-' . $newNumber,
+                        'status' => 'available',
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ];
+                }
+                
+                // 3. Masukkan ke database dan update stok induk
+                BookCopy::insert($copiesData);
+                $book->increment('stock', $jumlah_tambah);
+                
+                $pesanTambahan = " dan {$jumlah_tambah} eksemplar berhasil digenerate.";
+            } else {
+                $pesanTambahan = ".";
+            }
+
+            DB::commit();
+            return redirect()->route('library.books.index')->with('success', 'Data buku diperbarui' . $pesanTambahan);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->withErrors(['error' => 'Gagal memperbarui data: ' . $e->getMessage()]);
         }
-
-        $book->update($data);
-
-        return redirect()->route('library.books.index')->with('success', 'Data buku diperbarui.');
     }
 
     public function destroy(Book $book)

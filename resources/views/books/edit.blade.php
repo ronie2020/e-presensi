@@ -70,7 +70,7 @@
                                                 class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-500 font-bold text-slate-700 transition-all shadow-sm">
                                         </div>
 
-                                        {{-- Kategori --}}
+                                      {{-- Kategori --}}
                                         <div>
                                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Kategori</label>
                                             <div class="flex gap-2">
@@ -91,19 +91,34 @@
                                             </div>
                                         </div>
 
-                                        {{-- Stok & Tahun --}}
+                                        {{-- Stok & Penambahan Eksemplar (Solusi Buku Lama) --}}
                                        <div class="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Stok (Eksemplar)</label>
-                                                <input type="number" name="stock" value="{{ old('stock', $book->stock) }}" readonly 
-                                                    class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-slate-100 cursor-not-allowed font-bold text-slate-500 shadow-sm" title="Stok dikelola berdasarkan eksemplar fisik">
+                                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Stok Saat Ini</label>
+                                                <div class="relative">
+                                                    <i class="ph-bold ph-stack absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                                    <input type="number" value="{{ $book->stock }}" readonly 
+                                                        class="w-full pl-11 pr-4 py-3 rounded-2xl border-slate-200 bg-slate-100 cursor-not-allowed font-bold text-slate-500 shadow-sm" title="Total stok tidak bisa diubah manual">
+                                                </div>
                                             </div>
                                             <div>
-                                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tahun Terbit</label>
-                                                <input type="number" name="year" value="{{ old('year', $book->year) }}" placeholder="YYYY" min="1900" max="{{ date('Y') + 1 }}"
-                                                    class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-500 font-bold text-slate-700 transition-all shadow-sm">
+                                                <label class="block text-xs font-bold text-indigo-600 uppercase mb-2 ml-1">+ Tambah Eksemplar</label>
+                                                <div class="relative group">
+                                                    <i class="ph-bold ph-plus-circle absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400 group-focus-within:text-indigo-600 transition-colors"></i>
+                                                    <input type="number" name="tambah_eksemplar" value="0" min="0" max="500"
+                                                        class="w-full pl-11 pr-4 py-3 rounded-2xl border-indigo-200 bg-indigo-50 focus:border-indigo-500 focus:ring-indigo-500 font-bold text-indigo-700 transition-all shadow-sm" placeholder="Misal: 5">
+                                                </div>
                                             </div>
                                         </div>
+                                        <p class="text-[10px] text-slate-500 mt-0.5 ml-1 leading-relaxed"><i class="ph-bold ph-info text-indigo-500"></i> Isi angka pada kolom <b>Tambah Eksemplar</b> untuk men-generate barcode buku lama atau jika ada penambahan fisik buku baru.</p>
+
+                                        {{-- Tahun Terbit --}}
+                                        <div class="mt-2">
+                                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tahun Terbit</label>
+                                            <input type="number" name="year" value="{{ old('year', $book->year) }}" placeholder="YYYY" min="1900" max="{{ date('Y') + 1 }}"
+                                                class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-500 font-bold text-slate-700 transition-all shadow-sm">
+                                        </div>
+                                        
                                          {{-- Buku Paket Checkbox (BARU DITAMBAHKAN) --}}
                                         <div>
                                             <label class="flex items-center gap-3 p-4 border border-indigo-200 bg-white rounded-xl cursor-pointer hover:bg-indigo-50 transition mt-2">

@@ -152,7 +152,7 @@
                             <div x-show="mode === 'by_book'" x-transition>
                                 <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Pilih Judul Buku</label>
                                 <div class="relative">
-                                    <select name="book_id" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 font-bold text-slate-700 text-sm focus:ring-0 focus:border-purple-500 focus:bg-white focus:shadow-md transition-all appearance-none cursor-pointer">
+                                    <select name="book_id" :disabled="mode !== 'by_book'" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 font-bold text-slate-700 text-sm focus:ring-0 focus:border-purple-500 focus:bg-white focus:shadow-md transition-all appearance-none cursor-pointer">
                                         <option value="" disabled selected>-- Pilih Buku --</option>
                                         @foreach($books as $book)
                                             <option value="{{ $book->id }}">{{ $book->title }} ({{ $book->stock }} Eksemplar)</option>
@@ -168,7 +168,16 @@
                                 <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Jumlah Terakhir Ditambahkan</label>
                                 <div class="flex items-center px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus-within:border-purple-500 focus-within:bg-white focus-within:shadow-md transition-all">
                                     <i class="ph-bold ph-stack text-slate-400 mr-3"></i>
-                                    <input type="number" name="limit" value="10" min="1" max="100" class="w-full bg-transparent border-none focus:ring-0 text-slate-800 font-bold text-sm">
+                                    <input type="number" name="limit" :disabled="mode !== 'latest'" value="10" min="1" max="100" class="w-full bg-transparent border-none focus:ring-0 text-slate-800 font-bold text-sm">
+                                </div>
+                            </div>
+
+                            {{-- OPSI 3: MANUAL --}}
+                            <div x-show="mode === 'manual'" style="display: none;" x-transition>
+                                <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Kode Fisik (Pisahkan koma)</label>
+                                <div class="flex items-center px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus-within:border-purple-500 focus-within:bg-white focus-within:shadow-md transition-all">
+                                    <i class="ph-bold ph-keyboard text-slate-400 mr-3"></i>
+                                    <input type="text" name="book_codes" :disabled="mode !== 'manual'" class="w-full bg-transparent border-none focus:ring-0 text-slate-800 font-bold text-sm placeholder-slate-400" placeholder="BK-01, BK-02">
                                 </div>
                             </div>
 
