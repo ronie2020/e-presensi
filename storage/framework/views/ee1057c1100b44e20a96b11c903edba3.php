@@ -38,20 +38,31 @@
                 </div>
             <?php endif; ?>
 
+             
+            <?php if(session('error')): ?>
+                <div class="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-3 shadow-sm animate-fade-in-down">
+                    <i class="ph-fill ph-warning-circle text-rose-500 text-xl mt-0.5"></i>
+                    <div>
+                        <h3 class="text-sm font-bold text-rose-700">Distribusi Terhenti</h3>
+                        <p class="text-xs font-bold text-rose-600 mt-1"><?php echo e(session('error')); ?></p>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
                 
                 <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-800 p-8 text-white relative overflow-hidden">
                     <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
-                        <i class="ph-fill ph-stack"></i>
+                        <i class="ph-fill ph-barcode"></i>
                     </div>
                     <div class="relative z-10 flex items-center gap-3 mb-2">
                         <span class="px-3 py-1 bg-white/20 rounded-lg text-[10px] font-black uppercase tracking-widest border border-white/10 backdrop-blur-md">
-                            Mode Eksemplar Fisik
+                            Mode Pindai Eksemplar
                         </span>
                     </div>
                     <h2 class="text-3xl font-black relative z-10 tracking-tight">Distribusi Buku Paket</h2>
                     <p class="text-blue-200 text-sm font-medium relative z-10 mt-2 max-w-xl leading-relaxed">
-                        Pindai barcode unik dari setiap fisik buku dan pasangkan dengan nama siswa di kelas untuk mencegah kecurangan tukar buku saat pengembalian.
+                        Pindai barcode unik dari stiker masing-masing fisik buku dan pasangkan dengan nama siswa. Ini mencegah siswa menukar buku saat pengembalian.
                     </p>
                 </div>
 
@@ -112,7 +123,7 @@
                             
                             <div class="lg:col-span-2 flex flex-col">
                                 <div class="flex items-center justify-between mb-4">
-                                    <h3 class="text-lg font-black text-slate-800">Daftar Penerima & Kode Fisik Buku</h3>
+                                    <h3 class="text-lg font-black text-slate-800">Daftar Penerima & Scan Buku</h3>
                                     <div class="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg border border-blue-100 text-xs font-bold flex items-center gap-2">
                                         <i class="ph-bold ph-barcode"></i> Terisi: <span id="scannedCount">0</span> Siswa
                                     </div>
@@ -136,7 +147,7 @@
                                             <thead class="sticky top-0 z-10">
                                                 <tr class="bg-slate-100 text-xs uppercase tracking-wider text-slate-500 font-bold border-b border-slate-200">
                                                     <th class="px-6 py-4">Nama Siswa</th>
-                                                    <th class="px-6 py-4 w-1/2">Scan Barcode Buku (Item Code)</th>
+                                                    <th class="px-6 py-4 w-1/2">Scan Barcode (Stiker Buku)</th>
                                                 </tr>
                                             </thead>
                                             <tbody class="divide-y divide-slate-100" id="studentListContainer">
@@ -150,7 +161,7 @@
 
                         <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between">
                             <p class="text-xs text-slate-400 font-medium">
-                                <i class="ph-fill ph-info text-blue-500"></i> Hanya siswa dengan input barcode terisi yang akan tersimpan.
+                                <i class="ph-fill ph-info text-blue-500"></i> Pastikan tidak ada barcode merah (ganda). Tekan Enter setelah scan untuk lanjut ke baris berikutnya.
                             </p>
                             <button type="button" id="btnSubmit" onclick="confirmBulkSubmit()" disabled class="px-8 py-3.5 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-600/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                                 <i class="ph-bold ph-paper-plane-right text-lg"></i> Simpan Distribusi
@@ -212,7 +223,7 @@
                             <td class="px-6 py-4">
                                 <div class="relative">
                                     <i class="ph-bold ph-barcode absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                    <input type="text" name="item_codes[${student.id}]" class="item-code-input w-full pl-9 pr-4 py-2 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 font-mono font-bold text-slate-700 text-sm" placeholder="Scan kode buku kesini..." oninput="updateCounter()" onkeydown="focusNext(event, ${index})">
+                                    <input type="text" name="item_codes[${student.id}]" class="item-code-input w-full pl-9 pr-4 py-2 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 font-mono font-bold text-slate-700 text-sm transition-colors" placeholder="Scan barcode stiker..." oninput="updateCounter()" onkeydown="focusNext(event, ${index})">
                                 </div>
                             </td>
                         </tr>
@@ -232,14 +243,50 @@
                 }
             }
 
+            // Cek Duplikat Barcode Secara Realtime
             window.updateCounter = function() {
                 const inputs = document.querySelectorAll('.item-code-input');
                 let filledCount = 0;
-                inputs.forEach(input => { if(input.value.trim() !== '') filledCount++; });
+                let scannedCodes = [];
+                let hasDuplicate = false;
+
+                inputs.forEach(input => { 
+                    const val = input.value.trim();
+                    if(val !== '') { 
+                        filledCount++; 
+                        
+                        // Cek apakah barcode ini sudah di-scan di baris lain
+                        if(scannedCodes.includes(val)) {
+                            hasDuplicate = true;
+                            input.classList.add('border-rose-500', 'bg-rose-50', 'text-rose-600', 'focus:border-rose-500', 'focus:ring-rose-500');
+                            input.classList.remove('border-slate-200', 'bg-slate-50', 'text-slate-700', 'focus:border-blue-500', 'focus:ring-blue-500');
+                        } else {
+                            scannedCodes.push(val);
+                            input.classList.remove('border-rose-500', 'bg-rose-50', 'text-rose-600', 'focus:border-rose-500', 'focus:ring-rose-500');
+                            input.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-700', 'focus:border-blue-500', 'focus:ring-blue-500');
+                        }
+                    } else {
+                        // Reset style jika kosong
+                        input.classList.remove('border-rose-500', 'bg-rose-50', 'text-rose-600', 'focus:border-rose-500', 'focus:ring-rose-500');
+                        input.classList.add('border-slate-200', 'bg-slate-50', 'text-slate-700', 'focus:border-blue-500', 'focus:ring-blue-500');
+                    }
+                });
                 
                 scannedCountDisplay.innerText = filledCount;
                 const bookSelected = document.getElementById('book_id').value !== '';
-                btnSubmit.disabled = filledCount === 0 || !bookSelected;
+                
+                // Ubah status dan tampilan tombol submit
+                if (hasDuplicate) {
+                    btnSubmit.disabled = true;
+                    btnSubmit.innerHTML = '<i class="ph-bold ph-warning text-lg"></i> Ada Barcode Ganda';
+                    btnSubmit.classList.replace('bg-blue-600', 'bg-rose-600');
+                    btnSubmit.classList.replace('hover:bg-blue-700', 'hover:bg-rose-700');
+                } else {
+                    btnSubmit.disabled = filledCount === 0 || !bookSelected;
+                    btnSubmit.innerHTML = '<i class="ph-bold ph-paper-plane-right text-lg"></i> Simpan Distribusi';
+                    btnSubmit.classList.replace('bg-rose-600', 'bg-blue-600');
+                    btnSubmit.classList.replace('hover:bg-rose-700', 'hover:bg-blue-700');
+                }
             }
             document.getElementById('book_id').addEventListener('change', updateCounter);
         });

@@ -5,7 +5,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     
-    {{-- FONT BARCODE & TEXT --}}
+    
     <link href="https://fonts.googleapis.com/css2?family=Libre+Barcode+39+Text&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <style>
@@ -117,60 +117,65 @@
 
     <!-- AREA KERTAS -->
     <div class="page mt-24">
-        {{-- KITA MELOOPING $copies (Fisik Buku / Eksemplar) --}}
-        @foreach($copies as $copy)
         
-        @php
+        <?php $__currentLoopData = $copies; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $copy): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        
+        <?php
             $ddc = substr($copy->book->category->code ?? '000', 0, 3);
             $colorClass = 'border-black'; 
-        @endphp
+        ?>
 
         <div class="sticker" :class="showBorder ? 'show-border' : 'no-border'">
             
-            {{-- 1. BAGIAN KIRI: LABEL PUNGGUNG (SPINE) --}}
+            
             <div class="spine-label">
                 <div class="text-[6px] font-black uppercase tracking-tighter mb-1 text-slate-400">
                     PERPUS
                 </div>
                 
-                {{-- DDC / Kategori Klasifikasi --}}
+                
                 <h3 class="text-lg font-black text-slate-900 leading-none">
-                    {{ $ddc }}
+                    <?php echo e($ddc); ?>
+
                 </h3>
                 
-                {{-- Pengarang (3 Huruf) --}}
+                
                 <h3 class="text-xs font-bold text-slate-900 leading-none mt-1 uppercase font-mono">
-                    {{ substr($copy->book->author ?? 'XXX', 0, 3) }}
+                    <?php echo e(substr($copy->book->author ?? 'XXX', 0, 3)); ?>
+
                 </h3>
                 
-                {{-- Judul (1 Huruf) --}}
+                
                 <h3 class="text-xs font-bold text-slate-900 leading-none mt-0.5 lowercase font-mono">
-                    {{ substr($copy->book->title ?? 'x', 0, 1) }}
+                    <?php echo e(substr($copy->book->title ?? 'x', 0, 1)); ?>
+
                 </h3>
             </div>
 
-            {{-- 2. BAGIAN KANAN: BARCODE EKSEMPLAR --}}
+            
             <div class="cover-label">
-                {{-- Judul Buku Induk --}}
+                
                 <p class="text-[9px] font-bold text-slate-700 text-center leading-tight mb-1 w-full line-clamp-2 h-6 flex items-center justify-center px-1">
-                    {{ $copy->book->title }}
+                    <?php echo e($copy->book->title); ?>
+
                 </p>
                 
-                {{-- BARCODE SPESIFIK EKSEMPLAR --}}
+                
                 <div class="flex-1 flex items-center justify-center w-full">
                     <span class="font-barcode text-black">
-                        *{{ $copy->copy_code }}*
+                        *<?php echo e($copy->copy_code); ?>*
                     </span>
                 </div>
                 
-                {{-- Kode Teks di Bawah Barcode --}}
+                
                 <p class="text-[8.5px] font-mono font-bold text-slate-500 mt-0.5 truncate w-full text-center px-1">
-                    {{ $copy->copy_code }}
+                    <?php echo e($copy->copy_code); ?>
+
                 </p>
             </div>
         </div>
-        @endforeach
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/library/tools/print-book-label.blade.php ENDPATH**/ ?>

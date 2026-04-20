@@ -26,328 +26,232 @@
                 </div>
             @endif
 
-            {{-- Form Card --}}
-            <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
-                
-                {{-- Card Header --}}
-                <div class="bg-gradient-to-r from-blue-900 to-blue-800 p-8 text-white relative overflow-hidden">
-                    <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
-                        <i class="ph-fill ph-book-bookmark"></i>
-                    </div>
-                    <h2 class="text-2xl font-black relative z-10">Tambah Buku Baru</h2>
-                    <p class="text-blue-200 text-sm font-medium relative z-10 mt-1">Lengkapi detail buku untuk inventaris perpustakaan.</p>
+            {{-- HEADER HALAMAN --}}
+            <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-[2.5rem] p-8 mb-8 text-white shadow-xl shadow-blue-900/20 relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 text-white/5 text-9xl pointer-events-none">
+                    <i class="ph-fill ph-books"></i>
                 </div>
-
-                 <div class="p-8">
-                    <form action="{{ route('library.books.store') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
-                        @csrf
-                        
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            
-                            {{-- KOLOM KIRI: Identitas Induk Buku --}}
-                            <div class="space-y-6">
-                                <div class="bg-blue-50/50 p-6 rounded-[2rem] border border-blue-100">
-                                    <h3 class="text-xs font-black text-blue-900 uppercase tracking-widest mb-6 flex items-center gap-2">
-                                        <span class="w-6 h-6 rounded-full bg-blue-200 text-blue-700 flex items-center justify-center text-[10px]">1</span>
-                                        Identitas Buku
-                                    </h3>
-                                    
-                                    <div class="space-y-5">
-                                        {{-- Judul Buku --}}
-                                        <div>
-                                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Judul Buku <span class="text-rose-500">*</span></label>
-                                            <input type="text" name="title" value="{{ old('title') }}" placeholder="Masukkan judul lengkap..." required 
-                                                class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700 transition-all shadow-sm @error('title') border-rose-500 @enderror">
-                                            @error('title')
-                                                <p class="text-rose-500 text-xs font-bold mt-1 ml-1">{{ $message }}</p>
-                                            @enderror
-                                        </div>
-
-                                        {{-- Pengarang & Penerbit --}}
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pengarang</label>
-                                                <input type="text" name="author" value="{{ old('author') }}" class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 text-sm font-bold text-slate-700 transition-all shadow-sm">
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Penerbit</label>
-                                                <input type="text" name="publisher" value="{{ old('publisher') }}" class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 text-sm font-bold text-slate-700 transition-all shadow-sm">
-                                            </div>
-                                        </div>
-
-                                        {{-- Kategori & Rak --}}
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Kategori <span class="text-rose-500">*</span></label>
-                                                <div class="relative flex-1">
-                                                    <select name="category_id" id="category_id" required class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700 transition-all shadow-sm appearance-none cursor-pointer">
-                                                        <option value="">-- Pilih --</option>
-                                                        @foreach($categories as $cat)
-                                                            <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Lokasi Rak</label>
-                                                <input type="text" name="shelf_location" placeholder="Misal: Rak A1" value="{{ old('shelf_location') }}" class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 text-sm font-bold text-slate-700 transition-all shadow-sm">
-                                            </div>
-                                        </div>
-                                        
-                                        {{-- Tahun Terbit --}}
-                                        <div>
-                                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tahun Terbit</label>
-                                            <input type="number" name="year" value="{{ old('year') }}" placeholder="YYYY" min="1900" max="{{ date('Y') + 1 }}"
-                                                class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700 transition-all shadow-sm">
-                                        </div>
-
-                                        {{-- Buku Paket Checkbox --}}
-                                        <div>
-                                            <label class="flex items-center gap-3 p-4 border border-blue-200 bg-white rounded-xl cursor-pointer hover:bg-blue-50 transition">
-                                                <input type="checkbox" name="is_textbook" value="1" class="w-5 h-5 text-blue-600 border-blue-300 rounded focus:ring-blue-500">
-                                                <div>
-                                                    <span class="block text-sm font-bold text-blue-800">Ini Buku Paket / Pelajaran</span>
-                                                    <span class="block text-xs text-blue-600">Buku paket bisa dipinjam massal selama 1 tahun.</span>
-                                                </div>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- KOLOM KANAN: Fisik & Eksemplar --}}
-                            <div class="space-y-6">
-                                <div class="bg-slate-50 p-6 rounded-[2rem] border border-slate-200">
-                                    <h3 class="text-xs font-black text-indigo-500 uppercase tracking-widest mb-6 flex items-center gap-2">
-                                        <span class="w-6 h-6 rounded-full bg-indigo-200 text-indigo-700 flex items-center justify-center text-[10px]">2</span>
-                                        Fisik & Eksemplar
-                                    </h3>
-                                    
-                                     <div class="space-y-5">
-                                        {{-- Mode Pilihan --}}
-                                        <div class="grid grid-cols-2 gap-4 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
-                                            <label class="relative cursor-pointer">
-                                                <input type="radio" name="generation_mode" value="manual" class="peer sr-only" onchange="toggleMode()" {{ old('generation_mode', 'manual') == 'manual' ? 'checked' : '' }}>
-                                                <div class="p-3 text-center rounded-xl bg-transparent text-slate-500 font-bold text-sm peer-checked:bg-indigo-50 peer-checked:text-indigo-600 peer-checked:shadow-sm transition-all border border-transparent peer-checked:border-indigo-100">
-                                                    <i class="ph-bold ph-scan"></i> Scan Manual
-                                                </div>
-                                            </label>
-                                            <label class="relative cursor-pointer">
-                                                <input type="radio" name="generation_mode" value="auto" class="peer sr-only" onchange="toggleMode()" {{ old('generation_mode') == 'auto' ? 'checked' : '' }}>
-                                                <div class="p-3 text-center rounded-xl bg-transparent text-slate-500 font-bold text-sm peer-checked:bg-blue-50 peer-checked:text-blue-600 peer-checked:shadow-sm transition-all border border-transparent peer-checked:border-blue-100">
-                                                    <i class="ph-bold ph-magic-wand"></i> Auto-Generate
-                                                </div>
-                                            </label>
-                                        </div>
-
-                                        {{-- AREA MANUAL SCAN --}}
-                                        <div id="manualArea" class="{{ old('generation_mode', 'manual') == 'manual' ? 'block' : 'hidden' }} bg-indigo-50 border border-indigo-100 p-5 rounded-2xl animate-fade-in-down">
-                                            <label class="block text-xs font-bold text-indigo-700 uppercase mb-2">Scan Barcode Buku (1 Buah) <span class="text-rose-500">*</span></label>
-                                            <div class="flex gap-2">
-                                                <div class="relative flex-1">
-                                                    <i class="ph-bold ph-barcode absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                                    <input type="text" name="book_code" id="book_code" placeholder="Scan pakai alat..." class="w-full pl-10 pr-4 py-3 rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 font-mono font-bold text-slate-700">
-                                                </div>
-                                                <button type="button" onclick="startScanner()" class="px-4 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition tooltip" title="Scan pakai Kamera">
-                                                    <i class="ph-bold ph-camera text-xl"></i>
-                                                </button>
-                                            </div>
-                                            @error('book_code') <p class="text-rose-500 text-xs font-bold mt-1">{{ $message }}</p> @enderror
-                                            <p class="text-[10px] text-indigo-500 mt-2 font-bold"><i class="ph-bold ph-info"></i> Mode ini cocok untuk 1 buku dengan barcode bawaan.</p>
-                                        </div>
-
-                                       {{-- AREA AUTO GENERATE --}}
-                                        <div id="autoArea" class="{{ old('generation_mode') == 'auto' ? 'block' : 'hidden' }} bg-blue-50 border border-blue-100 p-5 rounded-2xl animate-fade-in-down">
-                                            <label class="block text-xs font-bold text-blue-700 uppercase mb-2">Jumlah Fisik Buku (Max 500) <span class="text-rose-500">*</span></label>
-                                            <div class="relative">
-                                                <i class="ph-bold ph-stack absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                                <input type="number" name="jumlah_buku" min="1" max="500" value="1" class="w-full pl-10 pr-4 py-3 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700 text-lg">
-                                            </div>
-                                            @error('jumlah_buku') <p class="text-rose-500 text-xs font-bold mt-1">{{ $message }}</p> @enderror
-                                            <p class="text-[10px] text-blue-500 mt-2 font-bold"><i class="ph-bold ph-info"></i> Sistem akan otomatis membuat banyak barcode unik. Cocok untuk Buku Paket.</p>
-                                        </div>
-
-                                        {{-- Cover Buku --}}
-                                        <div>
-                                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Cover Buku</label>
-                                            <div class="relative group">
-                                                <input type="file" name="cover" id="coverInput" onchange="previewCover(event)" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 border border-dashed border-slate-300 rounded-2xl py-3 px-4 hover:border-blue-400 transition-all cursor-pointer bg-white shadow-sm"/>
-                                            </div>
-                                            <img id="coverPreview" class="hidden mt-3 rounded-xl border border-slate-200 object-cover" style="max-height: 160px;" alt="Cover Preview" />
-                                            @error('cover') <p class="text-rose-500 text-xs font-bold mt-1 ml-1">{{ $message }}</p> @enderror
-                                        </div>
-
-                                        {{-- Ebook File --}}
-                                        <div class="pt-4 border-t border-slate-200">
-                                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1 flex justify-between">
-                                                <span>File E-Book (PDF)</span>
-                                                <span class="text-rose-500 bg-rose-50 px-2 py-0.5 rounded text-[10px]">Opsional</span>
-                                            </label>
-                                            <div class="relative group">
-                                                <i class="ph-bold ph-file-pdf absolute left-4 top-1/2 -translate-y-1/2 text-rose-400 z-10"></i>
-                                                <input type="file" name="ebook_file" accept="application/pdf" class="block w-full text-xs text-slate-500 pl-11 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-rose-50 file:text-rose-600 hover:file:bg-rose-100 border border-dashed border-slate-300 rounded-2xl py-3 px-4 hover:border-rose-400 transition-all cursor-pointer bg-white shadow-sm"/>
-                                            </div>
-                                            @error('ebook_file')
-                                                <p class="text-rose-500 text-xs font-bold mt-1 ml-1">{{ $message }}</p>
-                                            @else
-                                                <p class="text-[10px] text-slate-400 mt-1 ml-1 font-medium">*Hanya file PDF, Maksimal 50MB.</p>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Sinopsis --}}
-                        <div class="border-t border-slate-100 pt-6">
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Sinopsis</label>
-                            <textarea name="description" rows="3" placeholder="Ringkasan cerita..." class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 font-medium text-slate-700 transition-all shadow-inner">{{ old('description') }}</textarea>
-                        </div>
-
-                        {{-- Button --}}
-                       <div class="pt-4 flex justify-end gap-4 border-t border-slate-100">
-                            <a href="{{ route('library.books.index') }}" class="px-6 py-3.5 rounded-2xl text-slate-500 font-bold text-sm hover:bg-slate-50 hover:text-slate-700 transition-colors">Batal</a>
-                            <button type="submit" class="px-8 py-3.5 bg-blue-900 text-white font-bold rounded-2xl hover:bg-blue-800 shadow-lg shadow-blue-900/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
-                                <i class="ph-bold ph-floppy-disk text-lg"></i>
-                                Simpan Buku
-                            </button>
-                        </div>
-                    </form>
+                <div class="relative z-10">
+                    <h1 class="text-3xl font-black tracking-tight mb-2">Tambah Buku Baru</h1>
+                    <p class="text-blue-200 text-sm max-w-xl leading-relaxed">
+                        Masukkan identitas buku induk. Sistem akan otomatis memproduksi barcode untuk masing-masing fisik buku sesuai jumlah yang Anda tentukan.
+                    </p>
                 </div>
             </div>
+
+            {{-- FORM UTAMA --}}
+            <form action="{{ route('library.books.store') }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-[2.5rem] p-8 sm:p-10 shadow-xl shadow-slate-200/50 border border-slate-100">
+                @csrf
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    
+                    {{-- KOLOM KIRI (7 Kolom) --}}
+                    <div class="lg:col-span-7 space-y-6">
+                        <div class="bg-indigo-50/50 p-6 rounded-[2rem] border border-indigo-100">
+                            <h3 class="text-xs font-black text-indigo-900 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-indigo-200 text-indigo-700 flex items-center justify-center text-[10px]">1</span>
+                                Identitas Buku Induk
+                            </h3>
+                            
+                            <div class="space-y-5">
+                                {{-- Kode Buku / ISBN Induk --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Kode Buku / ISBN (Induk) <span class="text-rose-500">*</span></label>
+                                    <div class="flex gap-2">
+                                        <div class="relative flex-1 group">
+                                            <i class="ph-bold ph-barcode absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors"></i>
+                                            <input type="text" name="book_code" id="book_code" required value="{{ old('book_code') }}"
+                                                class="w-full pl-11 pr-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-500 font-mono font-bold text-slate-700 shadow-sm" placeholder="Misal: 9786022828">
+                                        </div>
+                                        <button type="button" onclick="startScanner()" class="px-4 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition tooltip" title="Scan pakai Kamera">
+                                            <i class="ph-bold ph-camera text-xl"></i>
+                                        </button>
+                                    </div>
+                                    <p class="text-[10px] text-slate-500 mt-2 ml-1 font-medium"><i class="ph-bold ph-info text-blue-500"></i> Ketik manual atau scan barcode dari sampul buku. Sistem akan men-generate kode eksemplar tambahan (-01, -02).</p>
+                                </div>
+
+                                {{-- Judul Buku --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Judul Buku <span class="text-rose-500">*</span></label>
+                                    <input type="text" name="title" required value="{{ old('title') }}" placeholder="Contoh: Laskar Pelangi"
+                                        class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-500 font-bold text-slate-700 transition-all shadow-sm">
+                                </div>
+
+                                {{-- Kategori Buku --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Kategori / DDC <span class="text-rose-500">*</span></label>
+                                    <select name="category_id" required class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-500 font-bold text-slate-700 transition-all shadow-sm">
+                                        <option value="">-- Pilih Kategori --</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                                {{ $category->code }} - {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                {{-- Pengarang & Penerbit --}}
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pengarang</label>
+                                        <input type="text" name="author" value="{{ old('author') }}" placeholder="Nama Penulis"
+                                            class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-500 font-bold text-slate-700 transition-all shadow-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Penerbit</label>
+                                        <input type="text" name="publisher" value="{{ old('publisher') }}" placeholder="Nama Penerbit"
+                                            class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-500 font-bold text-slate-700 transition-all shadow-sm">
+                                    </div>
+                                </div>
+
+                                {{-- Tahun --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tahun Terbit</label>
+                                    <input type="number" name="year" value="{{ old('year') }}" placeholder="YYYY" min="1900" max="{{ date('Y') + 1 }}"
+                                        class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-indigo-500 focus:ring-indigo-500 font-bold text-slate-700 transition-all shadow-sm">
+                                </div>
+
+                                {{-- Buku Paket Checkbox --}}
+                                <div class="mt-4">
+                                    <label class="flex items-center gap-3 p-4 border border-indigo-200 bg-white rounded-xl cursor-pointer hover:bg-indigo-50 transition">
+                                        <input type="checkbox" name="is_textbook" value="1" {{ old('is_textbook') ? 'checked' : '' }} class="w-5 h-5 text-indigo-600 border-indigo-300 rounded focus:ring-indigo-500">
+                                        <div>
+                                            <span class="block text-sm font-bold text-indigo-800">Ini Buku Paket / Pelajaran</span>
+                                            <span class="block text-xs text-indigo-600 mt-0.5">Buku paket bisa dipinjam massal selama 1 tahun.</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- KOLOM KANAN (5 Kolom) --}}
+                    <div class="lg:col-span-5 space-y-6">
+                        
+                        {{-- Blok Eksemplar Fisik --}}
+                        <div class="bg-blue-50/50 p-6 rounded-[2rem] border border-blue-100">
+                            <h3 class="text-xs font-black text-blue-900 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-blue-200 text-blue-700 flex items-center justify-center text-[10px]">2</span>
+                                Fisik & Eksemplar
+                            </h3>
+                            
+                            <div class="space-y-5">
+                                {{-- JUMLAH BUKU (Otomatis Generate Barcode Fisik) --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-blue-700 uppercase mb-2 ml-1">Jumlah Fisik Buku / Eksemplar <span class="text-rose-500">*</span></label>
+                                    <div class="relative">
+                                        <i class="ph-bold ph-stack absolute left-4 top-1/2 -translate-y-1/2 text-blue-400"></i>
+                                        <input type="number" name="jumlah_buku" required min="1" max="500" value="{{ old('jumlah_buku', 1) }}"
+                                            class="w-full pl-11 pr-4 py-3 rounded-2xl border-blue-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-blue-700 shadow-sm transition-all" placeholder="Misal: 32">
+                                    </div>
+                                    <p class="text-[10px] text-blue-500 mt-2 ml-1"><i class="ph-bold ph-info"></i> Sistem akan otomatis memproduksi barcode tambahan sebanyak ini untuk dicetak sebagai stiker label buku.</p>
+                                </div>
+
+                                {{-- Lokasi Rak --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-blue-700 uppercase mb-2 ml-1">Lokasi Rak <span class="text-rose-500">*</span></label>
+                                    <div class="relative group">
+                                        <i class="ph-bold ph-bookshelf absolute left-4 top-1/2 -translate-y-1/2 text-blue-400 group-focus-within:text-blue-500 transition-colors"></i>
+                                        <input type="text" name="shelf_location" required value="{{ old('shelf_location') }}" placeholder="Misal: Rak A1 / Fiksi 2"
+                                            class="w-full pl-11 pr-4 py-3 rounded-2xl border-blue-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700 transition-all shadow-sm">
+                                    </div>
+                                </div>
+                                
+                                {{-- Sinopsis / Deskripsi --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-blue-700 uppercase mb-2 ml-1">Sinopsis / Ringkasan</label>
+                                    <textarea name="description" rows="3" placeholder="Tuliskan deskripsi singkat tentang isi buku..."
+                                        class="w-full px-4 py-3 rounded-2xl border-blue-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-medium text-slate-600 transition-all shadow-sm custom-scrollbar text-sm resize-none">{{ old('description') }}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Blok Media (Cover & E-book) --}}
+                        <div class="bg-emerald-50/50 p-6 rounded-[2rem] border border-emerald-100">
+                            <h3 class="text-xs font-black text-emerald-900 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-emerald-200 text-emerald-700 flex items-center justify-center text-[10px]">3</span>
+                                Media & Digital
+                            </h3>
+                            
+                            <div class="space-y-5">
+                                {{-- Upload Cover --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-emerald-700 uppercase mb-2 ml-1">Foto Sampul (Maks 5MB)</label>
+                                    <div class="relative border-2 border-dashed border-emerald-200 rounded-2xl bg-white hover:bg-emerald-50/50 transition-colors group">
+                                        <input type="file" name="cover" id="cover" accept="image/*" onchange="previewCover(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                        <div class="p-6 text-center" id="coverUploadArea">
+                                            <i class="ph-duotone ph-image text-3xl text-emerald-400 mb-2 group-hover:scale-110 transition-transform"></i>
+                                            <p class="text-xs font-bold text-emerald-600">Klik atau Drag foto kesini</p>
+                                        </div>
+                                        <div id="coverPreviewArea" class="hidden relative p-2">
+                                            <img id="coverImg" src="" class="w-full h-32 object-contain rounded-xl">
+                                            <div class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-xl opacity-0 hover:opacity-100 transition-opacity">
+                                                <span class="text-white text-xs font-bold bg-black/50 px-3 py-1 rounded-full"><i class="ph-bold ph-arrows-clockwise"></i> Ganti</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Upload E-Book --}}
+                                <div>
+                                    <label class="block text-xs font-bold text-emerald-700 uppercase mb-2 ml-1">File E-Book PDF (Opsional)</label>
+                                    <div class="relative">
+                                        <i class="ph-bold ph-file-pdf absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400"></i>
+                                        <input type="file" name="ebook_file" accept=".pdf"
+                                            class="w-full pl-11 pr-4 py-2.5 rounded-2xl border-emerald-200 bg-white focus:border-emerald-500 focus:ring-emerald-500 font-medium text-slate-600 transition-all shadow-sm file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="mt-10 pt-6 border-t border-slate-100 flex justify-end gap-3">
+                    <a href="{{ route('library.books.index') }}" class="px-6 py-3 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 transition-colors">Batal</a>
+                    <button type="submit" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 shadow-xl shadow-blue-600/20 transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
+                        <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan ke Katalog
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
-     {{-- MODAL SCANNER BARCODE --}}
-    <div id="scannerModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-        <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm" onclick="stopScanner()"></div>
-        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden relative z-10 p-6">
+    {{-- MODAL SCANNER BARCODE --}}
+    <div id="scannerModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="stopScanner()"></div>
+        <div class="bg-white rounded-[2rem] shadow-2xl p-6 w-full max-w-sm relative z-10 animate-fade-in-down border border-slate-100">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-black text-slate-800">Scan Barcode Buku</h3>
-                <button onclick="stopScanner()" class="text-slate-400 hover:text-rose-500 transition-colors">
-                    <i class="ph-bold ph-x text-xl"></i>
+                <h3 class="font-black text-slate-800 text-lg">Scan Barcode Buku</h3>
+                <button onclick="stopScanner()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-600 flex items-center justify-center transition-colors">
+                    <i class="ph-bold ph-x"></i>
                 </button>
             </div>
-            <div id="reader" class="w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200"></div>
-            <p class="text-xs text-slate-500 text-center mt-4">Arahkan kamera ke barcode buku.</p>
+            <div id="reader" class="rounded-2xl overflow-hidden border-2 border-indigo-100"></div>
+            <p class="text-xs text-center text-slate-500 mt-4 font-medium"><i class="ph-bold ph-info"></i> Arahkan kamera ke barcode (ISBN) pada sampul belakang buku.</p>
         </div>
     </div>
 
     {{-- SCRIPT JAVASCRIPT --}}
-   <script>
-        // --- LOGIKA TOGGLE MODE EKSEMPLAR ---
-        function toggleMode() {
-            const mode = document.querySelector('input[name="generation_mode"]:checked').value;
-            const manualArea = document.getElementById('manualArea');
-            const autoArea = document.getElementById('autoArea');
-            const bookCodeInput = document.getElementById('book_code');
-            const jumlahBukuInput = document.querySelector('input[name="jumlah_buku"]');
-
-            if (mode === 'manual') {
-                manualArea.classList.remove('hidden');
-                manualArea.classList.add('block');
-                autoArea.classList.add('hidden');
-                autoArea.classList.remove('block');
-                
-                // Wajibkan scan barcode jika manual
-                bookCodeInput.setAttribute('required', 'required');
-                jumlahBukuInput.removeAttribute('required');
-            } else {
-                manualArea.classList.add('hidden');
-                manualArea.classList.remove('block');
-                autoArea.classList.remove('hidden');
-                autoArea.classList.add('block');
-                
-                // Wajibkan input angka jika auto
-                bookCodeInput.removeAttribute('required');
-                jumlahBukuInput.setAttribute('required', 'required');
-            }
-        }
-
-        // Pastikan tampilan sinkron saat pertama dimuat (terutama jika ada error validasi backend)
-        document.addEventListener('DOMContentLoaded', function() {
-            toggleMode();
-        });
-
-         // --- LOGIKA PREVIEW GAMBAR ---
+    <script>
+        // --- LOGIKA PREVIEW GAMBAR COVER ---
         function previewCover(event) {
             const input = event.target;
-            const preview = document.getElementById('coverPreview');
-            
+            const previewArea = document.getElementById('coverPreviewArea');
+            const uploadArea = document.getElementById('coverUploadArea');
+            const img = document.getElementById('coverImg');
+
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.classList.remove('hidden');
+                    img.src = e.target.result;
+                    previewArea.classList.remove('hidden');
+                    uploadArea.classList.add('hidden');
                 }
                 reader.readAsDataURL(input.files[0]);
-            } else {
-                preview.src = '';
-                preview.classList.add('hidden');
-            }
-        }
-        // --- LOGIKA TAMBAH KATEGORI (AJAX REAL) ---
-        async function addNewCategory() {
-            const { value: newCategory } = await Swal.fire({
-                title: 'Tambah Kategori Baru',
-                input: 'text',
-                inputPlaceholder: 'Contoh: Novel, Biografi, Sains',
-                confirmButtonText: 'Simpan',
-                confirmButtonColor: '#1e3a8a',
-                showCancelButton: true,
-                cancelButtonText: 'Batal',
-                customClass: {
-                    popup: 'rounded-[2rem]',
-                    confirmButton: 'rounded-xl px-6 py-2.5 font-bold',
-                    cancelButton: 'rounded-xl px-6 py-2.5 font-bold',
-                    input: 'rounded-xl border-slate-200 focus:ring-blue-900 focus:border-blue-900'
-                },
-                inputValidator: (value) => {
-                    if (!value) return 'Nama kategori tidak boleh kosong!'
-                }
-            });
-
-            if (newCategory) {
-                Swal.fire({
-                    title: 'Menyimpan...',
-                    allowOutsideClick: false,
-                    didOpen: () => Swal.showLoading(),
-                    customClass: { popup: 'rounded-[2rem]' }
-                });
-
-                try {
-                    const response = await fetch("{{ route('library.books.categories.ajax') }}", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                        },
-                        body: JSON.stringify({ name: newCategory })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        const select = document.getElementById('category_id');
-                        const option = new Option(data.name, data.id, true, true);
-                        select.add(option);
-                        
-                        Swal.fire({
-                            icon: 'success', title: 'Berhasil!', text: data.message,
-                            timer: 1500, showConfirmButton: false, customClass: { popup: 'rounded-[2rem]' }
-                        });
-                    } else {
-                        Swal.fire({ icon: 'error', title: 'Gagal', text: data.message || 'Terjadi kesalahan.', customClass: { popup: 'rounded-[2rem]' } });
-                    }
-                } catch (error) {
-                    console.error(error);
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Gagal menghubungi server.', customClass: { popup: 'rounded-[2rem]' } });
-                }
             }
         }
 
-        // --- LOGIKA SCANNER ---
+        // --- LOGIKA SCANNER KAMERA ---
         let html5QrcodeScanner = null;
 
         function startScanner() {
@@ -358,6 +262,10 @@
             const config = { fps: 10, qrbox: { width: 250, height: 150 }, aspectRatio: 1.0 };
             html5QrcodeScanner.start({ facingMode: "environment" }, config, (decodedText) => {
                 document.getElementById('book_code').value = decodedText;
+                // Highlight input untuk indikasi sukses
+                document.getElementById('book_code').classList.add('ring-2', 'ring-indigo-500');
+                setTimeout(() => document.getElementById('book_code').classList.remove('ring-2', 'ring-indigo-500'), 1000);
+                
                 stopScanner();
             }).catch(err => console.error(err));
         }

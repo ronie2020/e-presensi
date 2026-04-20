@@ -42,45 +42,29 @@ class BookController extends Controller
    public function create()
     {
         $categories = BookCategory::orderBy('name')->get();
-        $autoCode = 'BK-' . time(); 
-        
-        return view('books.create', compact('categories', 'autoCode'));
+        return view('books.create', compact('categories'));
     }
 
     public function store(Request $request)    
     {
-        // 1. Tentukan Mode: Manual atau Auto
-        $mode = $request->input('generation_mode', 'manual');
-
-        // 2. Validasi Dinamis Tergantung Mode
-        $rules = [
+        // 1. Validasi Lurus (Tanpa if/else mode)
+        $request->validate([
+            'book_code' => 'required|unique:books,book_code|max:50',
+            'jumlah_buku' => 'required|integer|min:1|max:500',
             'title' => 'required|string|max:255',
             'category_id' => 'nullable|exists:book_categories,id',
             'author' => 'nullable|string|max:255',
             'year' => 'nullable|integer|min:1900|max:' . (date('Y') + 1),       
             'cover' => 'nullable|image|max:5120',        
             'ebook_file' => 'nullable|mimes:pdf|max:51200', 
-        ];
+        ]);
 
-        if ($mode === 'manual') {
-            $rules['book_code'] = 'required|unique:books,book_code|max:50';
-            // Pada mode manual, stok dianggap 1
-        } else {
-            $rules['jumlah_buku'] = 'required|integer|min:1|max:500';
-            // book_code akan di-generate otomatis
-        }
-
-        $request->validate($rules);
-
-        // 3. Simpan Data Menggunakan DB Transaction
         DB::beginTransaction();
         try {
-            $data = $request->except(['cover', 'ebook_file', 'generation_mode', 'jumlah_buku']);
-
-            // Handle is_textbook (karena checkbox tidak terkirim jika tidak dicentang)
+            $data = $request->except(['cover', 'ebook_file', 'jumlah_buku']);
             $data['is_textbook'] = $request->boolean('is_textbook');
+            $data['stock'] = $request->jumlah_buku; // Stok awal = jumlah buku yang digenerate
 
-            // Handle Upload File
             if ($request->hasFile('cover')) {
                 $data['cover_path'] = $request->file('cover')->store('covers', 'public');
             }
@@ -88,47 +72,25 @@ class BookController extends Controller
                 $data['ebook_path'] = $request->file('ebook_file')->store('ebooks', 'public');
             }
 
-            // 4. Proses Eksemplar & Stok Induk
-            $jumlahBuku = 1;
-            if ($mode === 'auto') {
-                $data['book_code'] = 'BK-' . time() . '-' . rand(100, 999); // Generate kode induk unik
-                $jumlahBuku = $request->input('jumlah_buku');
-            }
-            
-            $data['stock'] = $jumlahBuku; // Set stok di buku induk
-
-            // Buat Induk Buku
+            // 2. Buat Induk Buku
             $book = Book::create($data);
 
-            // 5. Generate Fisik Buku (BookCopy / Eksemplar)
+            // 3. Generate Fisik Buku (Otomatis ditambahkan -01, -02, dst)
             $copiesData = [];
-            if ($mode === 'manual') {
+            for ($i = 1; $i <= $request->jumlah_buku; $i++) {
                 $copiesData[] = [
                     'book_id' => $book->id,
-                    'copy_code' => $request->book_code, // Gunakan barcode scan
+                    'copy_code' => $book->book_code . '-' . str_pad($i, 2, '0', STR_PAD_LEFT), // Format: ISBN-01
                     'status' => 'available',
                     'created_at' => now(),
                     'updated_at' => now()
                 ];
-            } else {
-                for ($i = 1; $i <= $jumlahBuku; $i++) {
-                    $copiesData[] = [
-                        'book_id' => $book->id,
-                        'copy_code' => $book->book_code . '-' . str_pad($i, 3, '0', STR_PAD_LEFT), // Misal: BK-170123-123-001
-                        'status' => 'available',
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ];
-                }
             }
 
-            // Insert massal ke tabel BookCopy
-            if (count($copiesData) > 0) {
-                BookCopy::insert($copiesData);
-            }
+            BookCopy::insert($copiesData);
 
             DB::commit();
-            return redirect()->route('library.books.index')->with('success', 'Buku dan eksemplar fisik berhasil ditambahkan.');
+            return redirect()->route('library.books.index')->with('success', 'Buku dan ' . $request->jumlah_buku . ' eksemplar fisik berhasil ditambahkan.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -136,7 +98,7 @@ class BookController extends Controller
         }
     }
 
-    public function edit(Book $book)
+   public function edit(Book $book)
     {
         $categories = BookCategory::orderBy('name')->get();
         return view('books.edit', compact('book', 'categories'));
@@ -150,10 +112,8 @@ class BookController extends Controller
             'ebook_file' => 'nullable|mimes:pdf|max:51200',
         ]);
 
-        // Abaikan book_code dan stock agar tidak bisa ditembus via Inspect Element
-        $data = $request->except(['cover', 'ebook_file', 'book_code', 'stock']);
-        
-        // Simpan status buku paket
+        // Abaikan book_code dan stock agar tidak dirubah manual
+        $data = $request->except(['cover', 'ebook_file', 'book_code', 'stock']); 
         $data['is_textbook'] = $request->boolean('is_textbook');
 
         if ($request->hasFile('cover')) {
@@ -174,7 +134,6 @@ class BookController extends Controller
 
         return redirect()->route('library.books.index')->with('success', 'Data buku diperbarui.');
     }
-
 
     public function destroy(Book $book)
     {

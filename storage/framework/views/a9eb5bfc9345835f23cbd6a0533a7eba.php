@@ -148,29 +148,46 @@
                     </div>
 
                     <div class="p-8 pt-0 mt-auto relative z-10">
-                        <form action="<?php echo e(route('library.tools.print-book-label')); ?>" method="GET" target="_blank" class="space-y-4" x-data="{ mode: 'latest' }">
+                        <form action="<?php echo e(route('library.tools.print-book-label')); ?>" method="GET" target="_blank" class="space-y-4" x-data="{ mode: 'by_book' }">
                             
                             
                             <div class="flex bg-slate-100 p-1 rounded-xl mb-4 border border-slate-200">
-                                <button type="button" @click="mode = 'latest'" :class="mode === 'latest' ? 'bg-white text-purple-700 shadow-sm font-black' : 'text-slate-500 font-bold hover:text-slate-700'" class="flex-1 py-2 text-xs rounded-lg transition-all">Buku Terbaru</button>
-                                <button type="button" @click="mode = 'manual'" :class="mode === 'manual' ? 'bg-white text-purple-700 shadow-sm font-black' : 'text-slate-500 font-bold hover:text-slate-700'" class="flex-1 py-2 text-xs rounded-lg transition-all">Pilih Manual</button>
+                                <button type="button" @click="mode = 'by_book'" :class="mode === 'by_book' ? 'bg-white text-purple-700 shadow-sm font-black' : 'text-slate-500 font-bold hover:text-slate-700'" class="flex-1 py-2 text-[10px] sm:text-xs rounded-lg transition-all">Per Buku</button>
+                                <button type="button" @click="mode = 'latest'" :class="mode === 'latest' ? 'bg-white text-purple-700 shadow-sm font-black' : 'text-slate-500 font-bold hover:text-slate-700'" class="flex-1 py-2 text-[10px] sm:text-xs rounded-lg transition-all">Terbaru</button>
+                                <button type="button" @click="mode = 'manual'" :class="mode === 'manual' ? 'bg-white text-purple-700 shadow-sm font-black' : 'text-slate-500 font-bold hover:text-slate-700'" class="flex-1 py-2 text-[10px] sm:text-xs rounded-lg transition-all">Manual</button>
                             </div>
 
-                            <div x-show="mode === 'latest'" x-transition>
-                                <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Jumlah Terakhir</label>
+                            
+                            <div x-show="mode === 'by_book'" x-transition>
+                                <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Pilih Judul Buku</label>
+                                <div class="relative">
+                                    <select name="book_id" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 font-bold text-slate-700 text-sm focus:ring-0 focus:border-purple-500 focus:bg-white focus:shadow-md transition-all appearance-none cursor-pointer">
+                                        <option value="" disabled selected>-- Pilih Buku --</option>
+                                        <?php $__currentLoopData = $books; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($book->id); ?>"><?php echo e($book->title); ?> (<?php echo e($book->stock); ?> Eksemplar)</option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    </select>
+                                    <i class="ph-bold ph-caret-down absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-1 italic ml-1">*Akan mencetak seluruh eksemplar dari buku ini.</p>
+                            </div>
+
+                            
+                            <div x-show="mode === 'latest'" style="display: none;" x-transition>
+                                <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Jumlah Terakhir Ditambahkan</label>
                                 <div class="flex items-center px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus-within:border-purple-500 focus-within:bg-white focus-within:shadow-md transition-all">
                                     <i class="ph-bold ph-stack text-slate-400 mr-3"></i>
                                     <input type="number" name="limit" value="10" min="1" max="100" class="w-full bg-transparent border-none focus:ring-0 text-slate-800 font-bold text-sm">
                                 </div>
                             </div>
 
+                            
                             <div x-show="mode === 'manual'" style="display: none;" x-transition>
-                                <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Kode Buku (Pisahkan koma)</label>
+                                <label class="block text-xs font-black text-slate-400 uppercase tracking-wider mb-2 ml-1">Kode Fisik (Pisahkan koma)</label>
                                 <div class="flex items-center px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus-within:border-purple-500 focus-within:bg-white focus-within:shadow-md transition-all">
                                     <i class="ph-bold ph-keyboard text-slate-400 mr-3"></i>
-                                    <input type="text" name="book_codes" class="w-full bg-transparent border-none focus:ring-0 text-slate-800 font-bold text-sm placeholder-slate-400" placeholder="B001, B002, B003">
+                                    <input type="text" name="book_codes" class="w-full bg-transparent border-none focus:ring-0 text-slate-800 font-bold text-sm placeholder-slate-400" placeholder="BK-01, BK-02">
                                 </div>
-                                <p class="text-[10px] text-slate-400 mt-1 italic ml-1">*Contoh: BK-001, BK-002</p>
                             </div>
                             
                             <button type="submit" class="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl shadow-lg shadow-purple-600/30 transition-all transform active:scale-95 flex items-center justify-center gap-2 group/btn">
@@ -207,9 +224,7 @@
                                 <div class="relative">
                                     <select name="type" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 font-bold text-slate-700 text-sm focus:ring-0 focus:border-emerald-500 focus:bg-white focus:shadow-md transition-all appearance-none cursor-pointer">
                                         <option value="monthly">Sirkulasi Bulanan</option>
-                                        
                                         <option value="top_books">Buku Terpopuler</option>
-                                        
                                     </select>
                                     <i class="ph-bold ph-caret-down absolute right-4 top-3.5 text-slate-400 pointer-events-none"></i>
                                 </div>

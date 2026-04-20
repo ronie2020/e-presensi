@@ -16,10 +16,11 @@ class LibraryToolsController extends Controller
      */
     public function index()
     {
-        // 1: Ambil data kelas untuk mengisi dropdown "Pilih Kelas" di halaman Index
         $classes = SchoolClass::orderBy('name', 'asc')->get();
+        // TAMBAHAN: Ambil data buku untuk dropdown opsi cetak label per buku
+        $books = Book::orderBy('title', 'asc')->get(['id', 'title', 'book_code', 'stock']);
         
-        return view('library.tools.index', compact('classes'));
+        return view('library.tools.index', compact('classes', 'books'));
     }
 
     /**
@@ -28,9 +29,8 @@ class LibraryToolsController extends Controller
     public function printCard(Request $request)
     {
         $mode = $request->input('mode', 'single'); 
-        $students = collect(); // Koleksi kosong untuk menampung hasil
+        $students = collect(); 
 
-        // LOGIKA 1: CETAK SATUAN
         if ($mode === 'single') {
             $request->validate(['nisn' => 'required']);
             
@@ -43,7 +43,6 @@ class LibraryToolsController extends Controller
                 $students->push($student); 
             }
         } 
-        // 2: LOGIKA CETAK SATU KELAS
         elseif ($mode === 'class') {
             $request->validate(['class_id' => 'required']);
             
@@ -53,67 +52,57 @@ class LibraryToolsController extends Controller
                         ->get();
         }
 
-        // JIKA DATA KOSONG (Tampilkan SweetAlert Error)
         if ($students->isEmpty()) {
             return response()->stream(function() use ($mode) {
                 $msg = $mode === 'class' ? 'Kelas ini belum memiliki data siswa.' : 'NISN/NIS tidak ditemukan.';
-                echo '
-                <!DOCTYPE html>
-                <html lang="id">
-                <head>
-                    <title>Data Tidak Ditemukan</title>
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                    <style>body { font-family: "Segoe UI", sans-serif; background: #f1f5f9; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }</style>
-                </head>
-                <body>
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function() {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Data Kosong",
-                                text: "'.$msg.'",
-                                confirmButtonText: "Tutup",
-                                confirmButtonColor: "#ef4444",
-                                allowOutsideClick: false
-                            }).then((result) => {
-                                window.close();
-                            });
-                        });
-                    </script>
-                </body>
-                </html>
-                ';
+                echo '<!DOCTYPE html><html lang="id"><head><title>Data Tidak Ditemukan</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script><style>body { font-family: "Segoe UI", sans-serif; background: #f1f5f9; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }</style></head><body><script>document.addEventListener("DOMContentLoaded", function() {Swal.fire({icon: "error",title: "Data Kosong",text: "'.$msg.'",confirmButtonText: "Tutup",confirmButtonColor: "#ef4444",allowOutsideClick: false}).then((result) => {window.close();});});</script></body></html>';
             });
         }
 
-        // Kirim variable $students (jamak) ke view print-card
         return view('library.tools.print-card', compact('students'));
     }
 
     /**
-     * Cetak Label Buku (Barcode & Punggung)
+     * Cetak Label Buku (Barcode & Punggung Eksemplar Unik)
      */
     public function printBookLabel(Request $request)
     {
-        $books = collect();
+        $copies = collect();
 
         // Opsi 1: Berdasarkan Kode Buku Manual (dipisah koma)
         if ($request->filled('book_codes')) {
             $codes = array_map('trim', explode(',', $request->book_codes));
-            $books = Book::with('category')->whereIn('book_code', $codes)->get();
+            $copies = \App\Models\BookCopy::with(['book.category'])
+                        ->whereIn('copy_code', $codes)
+                        ->get()
+                        ->sortBy('copy_code');
         } 
-        // Opsi 2: Berdasarkan Jumlah Buku Terakhir (Default)
+        // Opsi 2: Berdasarkan Judul Buku (Sangat berguna untuk Buku Paket)
+        elseif ($request->filled('book_id')) {
+            $copies = \App\Models\BookCopy::with(['book.category'])
+                        ->where('book_id', $request->book_id)
+                        ->get()
+                        ->sortBy('copy_code'); // Mengurutkan barcode 01, 02, 03...
+        }
+        // Opsi 3: Berdasarkan Jumlah Eksemplar Terakhir yang Dibuat (Default)
         elseif ($request->filled('limit')) {
-            $books = Book::with('category')->latest()->take($request->limit)->get();
+            $copies = \App\Models\BookCopy::with(['book.category'])
+                        ->latest()
+                        ->take($request->limit)
+                        ->get()
+                        ->reverse(); 
         }
         else {
             // Default fallback
-            $books = Book::with('category')->latest()->take(10)->get();
+            $copies = \App\Models\BookCopy::with(['book.category'])
+                        ->latest()
+                        ->take(10)
+                        ->get()
+                        ->reverse(); 
         }
         
         // --- LOGIKA PENANGANAN DATA KOSONG ---
-        if ($books->isEmpty()) {
+        if ($copies->isEmpty()) {
             return response()->stream(function() {
                 echo '
                 <!DOCTYPE html>
@@ -127,8 +116,8 @@ class LibraryToolsController extends Controller
                     <script>
                         Swal.fire({
                             icon: "warning",
-                            title: "Buku Tidak Ditemukan",
-                            text: "Cek kembali kode buku yang Anda masukkan.",
+                            title: "Eksemplar Tidak Ditemukan",
+                            text: "Cek kembali data buku yang Anda masukkan atau pastikan Anda sudah men-generate fisik buku.",
                             confirmButtonText: "Tutup",
                             confirmButtonColor: "#f59e0b"
                         }).then(() => { window.close(); });
@@ -139,9 +128,8 @@ class LibraryToolsController extends Controller
             });
         }
 
-        return view('library.tools.print-book-label', compact('books'));
+        return view('library.tools.print-book-label', compact('copies'));
     }
-
     /**
      * Generate Laporan PDF
      */
@@ -154,7 +142,6 @@ class LibraryToolsController extends Controller
         $data = [];
         $title = "";
 
-        // PERBAIKAN 3: Gunakan Model Borrowing dan kolom borrow_date
         if ($type == 'monthly') {
             $monthName = date('F', mktime(0, 0, 0, $month, 10));
             $title = "Laporan Sirkulasi - " . $monthName . " " . $year;
@@ -174,11 +161,8 @@ class LibraryToolsController extends Controller
         }
 
         $pdf = Pdf::loadView('library.reports.pdf-template', compact('data', 'title', 'type'));
-        
         return $pdf->download('Laporan_' . $type . '_' . date('Ymd_His') . '.pdf');
     }
-
-    
     
     /**
      * API Ambil Siswa Berdasarkan Kelas (Untuk Bulk Borrow)
@@ -200,7 +184,7 @@ class LibraryToolsController extends Controller
     }
 
     /**
-     * 1. Halaman Utama Surat Bebas Pustaka (Form Pencarian)
+     * 1. Halaman Utama Surat Bebas Pustaka
      */
     public function bebasPustaka()
     {
@@ -208,13 +192,12 @@ class LibraryToolsController extends Controller
     }
 
     /**
-     * 2. API Cek Kelayakan Bebas Pustaka (Dipanggil oleh Javascript via fetch)
+     * 2. API Cek Kelayakan Bebas Pustaka
      */
     public function checkClearanceApi(Request $request)
     {
         $query = $request->q;
         
-        // Cari Siswa berdasarkan NISN, NIS, ID, atau Nama
         $student = Student::with('schoolClass')
                     ->where('student_id', $query)
                     ->orWhere('nis', $query)
@@ -226,7 +209,6 @@ class LibraryToolsController extends Controller
             return response()->json(['success' => false, 'message' => 'Data Siswa tidak ditemukan.']);
         }
 
-        // Cari pinjaman buku siswa ini yang statusnya masih 'borrowed'
         $activeLoans = Borrowing::with('book')
                         ->where('student_id', $student->id)
                         ->where('status', 'borrowed')
@@ -253,18 +235,15 @@ class LibraryToolsController extends Controller
     {
         $student = Student::with('schoolClass')->findOrFail($id);
 
-        // Validasi Ekstra Keamanan: Pastikan siswa benar-benar tidak punya pinjaman
         $hasLoans = Borrowing::where('student_id', $student->id)
                         ->where('status', 'borrowed')
                         ->exists();
 
         if ($hasLoans) {
-            // PERBAIKAN: Redirect kembali dengan pesan error alih-alih menampilkan halaman error 403 statis
             return redirect()->route('library.tools.bebas_pustaka')
                              ->with('error', 'Akses Ditolak: ' . $student->name . ' masih memiliki tanggungan peminjaman buku!');
         }
 
-        // Arahkan ke file Blade cetak yang telah disesuaikan dengan format SPPD
-        return view('library.reports.print-bebas-pustaka', compact('student'));
+        return view('library.tools.print-bebas-pustaka', compact('student'));
     }
 }
