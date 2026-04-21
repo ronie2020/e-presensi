@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <!-- PERBAIKAN: Kunci lebar maksimal tepat pada 100% viewport (layar) -->
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth overflow-x-hidden w-full max-w-[100vw]">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>" class="scroll-smooth overflow-x-hidden w-full max-w-[100vw]">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     <meta name="description" content="Website Resmi SMP Negeri 3 Lakbok. Informasi akademik, kesiswaan, dan prestasi sekolah terkini.">
-    <meta property="og:title" content="{{ config('app.name', 'SMP Negeri 3 Lakbok') }}">
+    <meta property="og:title" content="<?php echo e(config('app.name', 'SMP Negeri 3 Lakbok')); ?>">
     <meta property="og:description" content="Website Resmi SMP Negeri 3 Lakbok. Informasi akademik, kesiswaan, dan prestasi sekolah terkini.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:image" content="{{ asset('images/netila.jpg') }}"> 
+    <meta property="og:url" content="<?php echo e(url()->current()); ?>">
+    <meta property="og:image" content="<?php echo e(asset('images/netila.jpg')); ?>"> 
     
-    <title>{{ config('app.name', 'SMP Negeri 3 Lakbok') }}</title>
+    <title><?php echo e(config('app.name', 'SMP Negeri 3 Lakbok')); ?></title>
     
-    @include('landing.styles')
+    <?php echo $__env->make('landing.styles', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <style>
         [x-cloak] { display: none !important; }
@@ -25,7 +25,7 @@
         [x-cloak] { display: none !important; }
     </style>
 
-    @php
+    <?php
         $infoPopup = [
             'active' => true, 
             'id' => 'Inovasi daerah', 
@@ -44,7 +44,7 @@
             'rose' => ['badge_bg' => 'bg-rose-50', 'badge_text' => 'text-rose-700', 'badge_ring' => 'ring-rose-600/20', 'btn_bg' => 'bg-rose-600', 'btn_hover' => 'hover:bg-rose-500', 'btn_ring' => 'focus-visible:outline-rose-600'],
             default => ['badge_bg' => 'bg-emerald-50', 'badge_text' => 'text-emerald-700', 'badge_ring' => 'ring-emerald-600/20', 'btn_bg' => 'bg-emerald-600', 'btn_hover' => 'hover:bg-emerald-500', 'btn_ring' => 'focus-visible:outline-emerald-600'],
         };
-    @endphp
+    ?>
 </head>
 <!-- PERBAIKAN: Tambahkan overflow-x-hidden dan w-full pada tag body -->
 <body class="antialiased text-slate-800 bg-slate-50 overflow-x-hidden w-full selection:bg-cyan-500 selection:text-white" 
@@ -56,8 +56,8 @@
         infoPopupOpen: false,
         
         initPopup() {
-            const isActive = {{ $infoPopup['active'] ? 'true' : 'false' }};
-            const popupId = '{{ $infoPopup['id'] }}';
+            const isActive = <?php echo e($infoPopup['active'] ? 'true' : 'false'); ?>;
+            const popupId = '<?php echo e($infoPopup['id']); ?>';
             if (isActive) {
                 const hasSeen = localStorage.getItem('seen_' + popupId);
                 if (!hasSeen) {
@@ -71,7 +71,7 @@
             this.infoPopupOpen = false;
             document.body.style.overflow = ''; 
             if (dontShowAgain) {
-                localStorage.setItem('seen_{{ $infoPopup['id'] }}', 'true');
+                localStorage.setItem('seen_<?php echo e($infoPopup['id']); ?>', 'true');
             }
         },
 
@@ -130,17 +130,17 @@
                 <button @click="closeInfoPopup(false)" class="absolute top-3 right-3 z-20 text-slate-500 hover:text-slate-800 transition-colors bg-white/90 backdrop-blur shadow-sm rounded-full p-1.5"><i class="ph-bold ph-x text-xl"></i></button>
                 <div class="flex flex-col md:flex-row w-full">
                     <div class="md:w-5/12 h-48 sm:h-56 md:h-auto shrink-0 relative bg-slate-200">
-                        <img src="{{ $infoPopup['image'] }}" alt="Info Sekolah" class="absolute inset-0 w-full h-full object-cover">
+                        <img src="<?php echo e($infoPopup['image']); ?>" alt="Info Sekolah" class="absolute inset-0 w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-black/10"></div>
                     </div>
                     <div class="md:w-7/12 p-6 md:p-8 flex flex-col justify-center bg-white relative">
                         <div class="mb-4">
-                            <span class="inline-flex items-center rounded-md {{ $colorTheme['badge_bg'] }} px-2 py-1 text-xs font-medium {{ $colorTheme['badge_text'] }} ring-1 ring-inset {{ $colorTheme['badge_ring'] }} mb-3">Informasi Terbaru</span>
-                            <h3 id="modal-title" class="text-xl font-black text-slate-900 leading-tight">{{ $infoPopup['title'] }}</h3>
+                            <span class="inline-flex items-center rounded-md <?php echo e($colorTheme['badge_bg']); ?> px-2 py-1 text-xs font-medium <?php echo e($colorTheme['badge_text']); ?> ring-1 ring-inset <?php echo e($colorTheme['badge_ring']); ?> mb-3">Informasi Terbaru</span>
+                            <h3 id="modal-title" class="text-xl font-black text-slate-900 leading-tight"><?php echo e($infoPopup['title']); ?></h3>
                         </div>
-                        <div class="prose prose-sm text-slate-500 mb-6 leading-relaxed"><p>{{ $infoPopup['message'] }}</p></div>
+                        <div class="prose prose-sm text-slate-500 mb-6 leading-relaxed"><p><?php echo e($infoPopup['message']); ?></p></div>
                         <div class="flex flex-col sm:flex-row gap-3 items-center mt-6">
-                            <a href="{{ $infoPopup['cta_link'] }}" @click="closeInfoPopup(false)" class="w-full sm:w-auto text-center inline-flex justify-center items-center gap-2 rounded-xl {{ $colorTheme['btn_bg'] }} px-5 py-2.5 text-sm font-semibold text-white shadow-sm {{ $colorTheme['btn_hover'] }} transition-all">{{ $infoPopup['cta_text'] }} <i class="ph-bold ph-arrow-right"></i></a>
+                            <a href="<?php echo e($infoPopup['cta_link']); ?>" @click="closeInfoPopup(false)" class="w-full sm:w-auto text-center inline-flex justify-center items-center gap-2 rounded-xl <?php echo e($colorTheme['btn_bg']); ?> px-5 py-2.5 text-sm font-semibold text-white shadow-sm <?php echo e($colorTheme['btn_hover']); ?> transition-all"><?php echo e($infoPopup['cta_text']); ?> <i class="ph-bold ph-arrow-right"></i></a>
                             <button @click="closeInfoPopup(true)" class="text-xs font-semibold text-slate-400 hover:text-slate-600 underline decoration-slate-300 underline-offset-4 transition-colors">Jangan tampilkan lagi</button>
                         </div>
                     </div>
@@ -150,32 +150,32 @@
     </div>
 
     <!-- NAVBAR -->
-    @include('landing.navbar')
+    <?php echo $__env->make('landing.navbar', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <div class="w-full overflow-x-hidden relative">
-        @include('landing.hero')
-        @include('landing.ppdb')
-        @include('landing.character')
-        @include('landing.quick-access')
-        @include('landing.downloads')
-        @include('landing.headmaster')
-        @include('landing.profile')
-        @include('landing.video')
-        @include('landing.teachers')
-        @include('landing.exams')
-        @include('landing.activities')
-        @include('landing.articles')
-        @include('landing.achievements')
-        @include('landing.extracurricular')
-        @include('landing.alumni')
-        @include('landing.guestbook')
-        @include('landing.library')
-        @include('landing.ebooks')
-        @include('landing.footer')
+        <?php echo $__env->make('landing.hero', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.ppdb', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.character', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.quick-access', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.downloads', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.headmaster', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.profile', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.video', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.teachers', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.exams', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.activities', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.articles', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.achievements', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.extracurricular', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.alumni', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.guestbook', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.library', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.ebooks', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('landing.footer', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
     </div>
 
    <!-- MODALS -->
-    @include('landing.modals')
+    <?php echo $__env->make('landing.modals', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <!-- VISITOR COUNTER (PERBAIKAN: Ukuran dikecilkan drastis untuk HP) -->
     <div class="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 bg-white/90 backdrop-blur-sm border border-slate-200 shadow-lg p-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2 sm:gap-3 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 group cursor-default max-w-[calc(100vw-40px)] overflow-hidden" title="Total pengunjung website">
@@ -186,12 +186,12 @@
         <!-- Teks Detail (Hanya muncul di Desktop/Tablet) -->
         <div class="hidden sm:flex flex-col truncate">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-0.5">Pengunjung</span>
-            <span class="text-sm font-black text-slate-800 leading-none">{{ number_format($visitorCount ?? 0, 0, ',', '.') }}</span>
+            <span class="text-sm font-black text-slate-800 leading-none"><?php echo e(number_format($visitorCount ?? 0, 0, ',', '.')); ?></span>
         </div>
         
         <!-- Angka saja (Muncul di Mobile HP) -->
         <div class="flex sm:hidden pr-2 shrink-0">
-            <span class="text-xs font-black text-slate-800 leading-none">{{ number_format($visitorCount ?? 0, 0, ',', '.') }}</span>
+            <span class="text-xs font-black text-slate-800 leading-none"><?php echo e(number_format($visitorCount ?? 0, 0, ',', '.')); ?></span>
         </div>
     </div>
 
@@ -200,8 +200,8 @@
         <i class="ph-bold ph-arrow-up text-base sm:text-xl"></i>
     </button>
 
-    {{-- Scripts JS --}}
-    @include('landing.scripts')
+    
+    <?php echo $__env->make('landing.scripts', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/welcome.blade.php ENDPATH**/ ?>

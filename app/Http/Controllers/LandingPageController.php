@@ -264,13 +264,27 @@ class LandingPageController extends Controller
         $latestBooks = $literacyData['books'];
         $latestArticles = $literacyData['articles'];
 
+         // --- 10. DATA JADWAL UJIAN CBT ---
+        // Menggunakan pencarian langsung tanpa Cache agar saat testing data langsung muncul.
+        // Menyesuaikan dengan kolom is_active di model CbtExam.
+        $publicExams = \App\Models\CbtExam::where('is_active', true)
+            ->where(function($query) {
+                $now = \Carbon\Carbon::now();
+                $query->whereNull('end_time')
+                      ->orWhere('end_time', '>=', $now);
+            })
+            ->orderBy('start_time', 'asc')
+            ->take(6)
+            ->get();
+
         return view('welcome', compact(
             'stats', 'barChartData', 'libraryStats', 'libraryChartData', 
             'announcements', 'achievements', 'activities', 'teachers',
             'guestbooks', 'allGuestbooks', 'extracurriculars', 'agendas', 'schoolStats',
             'alumniStats', 'alumniTestimonials', 'habitLabels', 'habitData', 'habitStats',
             'latestBooks', 'latestArticles',
-            'visitorCount' // <-- Pastikan variabel ini dipassing ke view
+            'visitorCount', // <-- Pastikan ini ada
+            'publicExams'   // <-- WAJIB ADA: Variabel ujian yang dilempar ke view
         ));
     }
 
