@@ -1,29 +1,30 @@
 {{-- SECTION: KOLEKSI DIGITAL TERBARU (BARU) --}}
-    <section class="py-24 bg-slate-900 relative overflow-hidden">
+    <!-- PERBAIKAN: Background diubah menjadi terang di light mode -->
+    <section class="py-24 bg-slate-50 dark:bg-slate-900 relative overflow-hidden transition-colors duration-300">
         {{-- Background FX --}}
-        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none"></div>
-        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-cyan-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 dark:opacity-10 pointer-events-none"></div>
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-400/10 dark:bg-blue-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-[500px] h-[500px] bg-cyan-400/10 dark:bg-cyan-500/20 rounded-full blur-[120px] pointer-events-none"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
             {{-- Header Section --}}
             <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6" data-aos="fade-up">
                 <div class="max-w-2xl">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-xs font-bold uppercase tracking-widest mb-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 dark:bg-cyan-500/20 border border-cyan-200 dark:border-cyan-400/30 text-cyan-700 dark:text-cyan-300 text-xs font-bold uppercase tracking-widest mb-4">
                         <i class="ph-fill ph-books"></i> E-Library
                     </div>
-                    <h2 class="text-3xl md:text-4xl font-black text-white leading-tight">
+                    <h2 class="text-3xl md:text-4xl font-black text-slate-900 dark:text-white leading-tight">
                         Jelajahi Dunia Pengetahuan <br>
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-300">Tanpa Batas Ruang</span>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-300">Tanpa Batas Ruang</span>
                     </h2>
-                    <p class="text-slate-400 mt-4 text-lg leading-relaxed">
+                    <p class="text-slate-500 dark:text-slate-400 mt-4 text-lg leading-relaxed">
                         Akses koleksi buku digital terbaru SMPN 3 Lakbok kapan saja dan di mana saja.
                     </p>
                 </div>
                 
                 {{-- Tombol Lihat Semua --}}
-                <a href="{{ route('library.catalogue') }}" class="group flex items-center gap-2 px-6 py-3 bg-white text-slate-900 font-bold rounded-full hover:bg-cyan-50 transition-all shadow-xl shadow-cyan-900/20">
+                <a href="{{ route('library.catalogue') }}" class="group flex items-center gap-2 px-6 py-3 bg-cyan-600 dark:bg-white text-white dark:text-slate-900 font-bold rounded-full hover:bg-cyan-500 dark:hover:bg-cyan-50 transition-all shadow-xl shadow-cyan-500/20 dark:shadow-cyan-900/20">
                     <span>Lihat Katalog Lengkap</span>
                     <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                 </a>
@@ -33,16 +34,17 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                 @forelse($latestBooks as $book)
                     <div class="group relative" data-aos="fade-up" data-aos-delay="{{ $loop->iteration * 100 }}">
-                        <div class="book-glass rounded-2xl p-3 h-full flex flex-col hover:-translate-y-2 transition-transform duration-300 shadow-2xl">
+                        <!-- PERBAIKAN: book-glass dihapus dan diganti utility tailwind dark mode -->
+                        <div class="bg-white dark:bg-slate-800/50 backdrop-blur-md border border-slate-100 dark:border-slate-700/50 rounded-2xl p-3 h-full flex flex-col hover:-translate-y-2 transition-all duration-300 shadow-lg dark:shadow-2xl">
                             
                             {{-- Cover --}}
-                            <div class="relative aspect-[2/3] rounded-xl overflow-hidden mb-4 bg-slate-800 shadow-inner">
+                            <div class="relative aspect-[2/3] rounded-xl overflow-hidden mb-4 bg-slate-100 dark:bg-slate-800 shadow-inner">
                                 @if($book->cover_path)
                                     <img src="{{ asset('storage/' . $book->cover_path) }}" 
                                          alt="{{ $book->title }}" 
                                          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                                 @else
-                                    <div class="w-full h-full flex flex-col items-center justify-center text-slate-600">
+                                    <div class="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-600">
                                         <i class="ph-duotone ph-book-open text-4xl mb-2"></i>
                                         <span class="text-[10px] font-bold uppercase">No Cover</span>
                                     </div>
@@ -58,19 +60,19 @@
 
                             {{-- Info --}}
                             <div class="mt-auto">
-                                <h3 class="text-white font-bold text-sm line-clamp-2 leading-snug mb-1 group-hover:text-cyan-400 transition-colors" title="{{ $book->title }}">
+                                <h3 class="text-slate-800 dark:text-white font-bold text-sm line-clamp-2 leading-snug mb-1 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors" title="{{ $book->title }}">
                                     {{ $book->title }}
                                 </h3>
-                                <p class="text-xs text-slate-400 flex items-center gap-1">
+                                <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                                     <i class="ph-fill ph-pen-nib"></i> {{ $book->author ?? 'Anonim' }}
                                 </p>
                             </div>
                         </div>
                     </div>
                 @empty
-                    <div class="col-span-full py-12 text-center book-glass rounded-3xl">
-                        <i class="ph-duotone ph-books text-5xl text-slate-600 mb-4"></i>
-                        <p class="text-slate-400 font-bold">Belum ada koleksi E-Book terbaru.</p>
+                    <div class="col-span-full py-12 text-center bg-white dark:bg-slate-800/50 backdrop-blur-md border border-slate-100 dark:border-slate-700 rounded-3xl">
+                        <i class="ph-duotone ph-books text-5xl text-slate-300 dark:text-slate-600 mb-4"></i>
+                        <p class="text-slate-500 dark:text-slate-400 font-bold">Belum ada koleksi E-Book terbaru.</p>
                     </div>
                 @endforelse
             </div>

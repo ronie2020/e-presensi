@@ -43,16 +43,16 @@
                 </div>
             </div>
 
-            <!-- SLIDER TESTIMONI ALUMNI -->
+         <!-- SLIDER TESTIMONI ALUMNI -->
             @if(isset($alumniTestimonials) && count($alumniTestimonials) > 0)
                 <div class="flex overflow-x-auto gap-6 pb-8 custom-scrollbar hide-scroll snap-x snap-mandatory">
                     @foreach($alumniTestimonials as $testi)
-                        <div class="min-w-[300px] md:min-w-[400px] bg-white rounded-3xl p-8 shadow-xl relative snap-center group hover:-translate-y-2 transition-transform duration-300">
-                            <i class="ph-fill ph-quotes text-5xl text-blue-50 absolute top-6 right-6 group-hover:text-blue-100 transition-colors"></i>
+                        <div class="min-w-[300px] md:min-w-[400px] bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl relative snap-center group hover:-translate-y-2 transition-transform duration-300 border border-transparent dark:border-slate-700">
+                            <i class="ph-fill ph-quotes text-5xl text-blue-50 dark:text-slate-700 absolute top-6 right-6 group-hover:text-blue-100 dark:group-hover:text-slate-600 transition-colors"></i>
                             
                             <div class="relative z-10 h-full flex flex-col">
                                 <div class="flex items-center gap-4 mb-6">
-                                    <div class="w-14 h-14 rounded-full bg-slate-100 border-2 border-blue-100 overflow-hidden shrink-0">
+                                    <div class="w-14 h-14 rounded-full bg-slate-100 dark:bg-slate-700 border-2 border-blue-100 dark:border-slate-600 overflow-hidden shrink-0">
                                         @if($testi->student && $testi->student->photo_path)
                                             <img src="{{ asset('storage/' . $testi->student->photo_path) }}" class="w-full h-full object-cover">
                                         @else
@@ -60,8 +60,8 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <h4 class="font-bold text-slate-900 text-base line-clamp-1">{{ $testi->student->name ?? 'Alumni' }}</h4>
-                                        <p class="text-xs text-blue-600 font-bold uppercase mt-0.5">
+                                        <h4 class="font-bold text-slate-900 dark:text-white text-base line-clamp-1">{{ $testi->student->name ?? 'Alumni' }}</h4>
+                                        <p class="text-xs text-blue-600 dark:text-cyan-400 font-bold uppercase mt-0.5">
                                             {{ $testi->activity_status }} 
                                             @if($testi->campus_name || $testi->company_name)
                                                 @ {{ Str::limit($testi->campus_name ?? $testi->company_name, 20) }}
@@ -71,12 +71,12 @@
                                 </div>
                                 
                                 <div class="flex-1">
-                                    <p class="text-slate-600 text-sm italic leading-relaxed line-clamp-4">
+                                    <p class="text-slate-600 dark:text-slate-300 text-sm italic leading-relaxed line-clamp-4">
                                         "{{ $testi->testimony }}"
                                     </p>
                                 </div>
 
-                                <div class="mt-6 pt-4 border-t border-slate-100 flex items-center gap-1 text-yellow-400 text-sm">
+                                 <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700 flex items-center gap-1 text-yellow-400 text-sm">
                                     @for($i=0; $i < ($testi->rating ?? 5); $i++) <i class="ph-fill ph-star"></i> @endfor
                                 </div>
                             </div>

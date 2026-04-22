@@ -1,5 +1,33 @@
 <!-- NAVBAR SECTION -->
-<nav :class="{ 'bg-blue-950/90 backdrop-blur-md shadow-xl border-b border-blue-900/50': scrolled, 'bg-transparent border-transparent': !scrolled }" class="fixed top-0 w-full z-50 transition-all duration-300">
+<!-- PERBAIKAN: Menambahkan x-data lokal untuk mengontrol Search Modal dan status Dark Mode -->
+<nav x-data="{
+        searchOpen: false,
+        isDark: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+        toggleTheme() {
+            this.isDark = !this.isDark;
+            if (this.isDark) {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+    }"
+    x-init="
+        if(isDark) document.documentElement.classList.add('dark');
+        $watch('searchOpen', value => {
+            if(value) {
+                setTimeout(() => $refs.searchInput.focus(), 100);
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        });
+    "
+    :class="{ 'bg-blue-950/90 backdrop-blur-md shadow-xl border-b border-blue-900/50': scrolled, 'bg-transparent border-transparent': !scrolled }" 
+    class="fixed top-0 w-full z-50 transition-all duration-300">
+    
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20 items-center">
             
@@ -50,12 +78,32 @@
                         <i class="ph-bold ph-lock-key"></i> Staff
                     </a>
                 @endif
+
+                <!-- Divider Tools -->
+                <div class="h-6 w-px bg-blue-800/50 ml-2"></div>
+
+                <!-- Tools (Search & Dark Mode) -->
+                <div class="flex items-center gap-1">
+                    <button @click="searchOpen = true" class="p-2 text-cyan-200 hover:text-white hover:bg-white/10 rounded-full transition-colors focus:outline-none" title="Pencarian Global">
+                        <i class="ph-bold ph-magnifying-glass text-xl"></i>
+                    </button>
+                    <button @click="toggleTheme()" class="p-2 text-cyan-200 hover:text-white hover:bg-white/10 rounded-full transition-colors focus:outline-none" title="Mode Gelap / Terang">
+                        <!-- Mengganti icon Matahari/Bulan secara dinamis -->
+                        <i class="ph-bold text-xl" :class="isDark ? 'ph-sun' : 'ph-moon'"></i>
+                    </button>
+                </div>
             </div>
 
-            <!-- Mobile Menu Button -->
-            <div class="flex md:hidden items-center z-50">
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 text-blue-100 hover:text-white bg-white/10 rounded-lg transition-colors focus:outline-none backdrop-blur-sm">
-                    <i class="ph-bold text-2xl" :class="mobileMenuOpen ? 'ph-x' : 'ph-list'"></i>
+            <!-- Mobile Menu Button & Tools -->
+            <div class="flex md:hidden items-center gap-1 z-50">
+                <button @click="searchOpen = true" class="p-2 text-blue-100 hover:text-white bg-white/10 rounded-lg transition-colors focus:outline-none backdrop-blur-sm">
+                    <i class="ph-bold ph-magnifying-glass text-[22px]"></i>
+                </button>
+                <button @click="toggleTheme()" class="p-2 text-blue-100 hover:text-white bg-white/10 rounded-lg transition-colors focus:outline-none backdrop-blur-sm">
+                    <i class="ph-bold text-[22px]" :class="isDark ? 'ph-sun' : 'ph-moon'"></i>
+                </button>
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 text-blue-100 hover:text-white bg-white/10 rounded-lg transition-colors focus:outline-none backdrop-blur-sm ml-1">
+                    <i class="ph-bold text-[22px]" :class="mobileMenuOpen ? 'ph-x' : 'ph-list'"></i>
                 </button>
             </div>
         </div>
@@ -94,5 +142,47 @@
                 @endif
             </div>
         </nav>
+    </div>
+
+    <!-- MODAL PENCARIAN GLOBAL (COMMAND PALETTE) -->
+    <div x-show="searchOpen" x-cloak
+         class="fixed inset-0 z-[70] flex items-start justify-center pt-16 sm:pt-24 px-4"
+         @keydown.escape.window="searchOpen = false">
+
+        <!-- Overlay Backdrop -->
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+             @click="searchOpen = false"
+             x-show="searchOpen"
+             x-transition.opacity></div>
+
+        <!-- Panel Modal -->
+        <div x-show="searchOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95 -translate-y-4"
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+             x-transition:leave-end="opacity-0 scale-95 -translate-y-4"
+             class="relative bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col"
+             @click.stop>
+
+            <!-- Area Input Pencarian -->
+            <!-- Form dummy: Nantinya Anda bisa mengarahkan action form ini ke Controller pencarian -->
+            <form action="#" method="GET" class="flex items-center px-4 py-4 border-b border-slate-100 dark:border-slate-800">
+                <i class="ph-bold ph-magnifying-glass text-xl text-slate-400 dark:text-slate-500"></i>
+                <input x-ref="searchInput" type="text" name="q" class="w-full bg-transparent border-0 focus:ring-0 text-slate-900 dark:text-white px-4 text-lg placeholder-slate-400 dark:placeholder-slate-500 outline-none" placeholder="Cari guru, e-book, atau informasi...">
+                <button type="button" @click="searchOpen = false" class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider px-2 transition-colors">ESC</button>
+            </form>
+
+            <!-- Area Pintasan (Quick Links) -->
+            <div class="p-5 bg-slate-50 dark:bg-slate-800/30">
+                <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Pencarian Populer & Cepat</h4>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ route('ppdb.create') }}" class="px-3 py-1.5 bg-white dark:bg-slate-800 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-cyan-500 dark:hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition shadow-sm">🎓 Pendaftaran PPDB</a>
+                    <a href="{{ route('library.catalogue') }}" class="px-3 py-1.5 bg-white dark:bg-slate-800 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-cyan-500 dark:hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition shadow-sm">📚 Katalog E-Book</a>
+                    <a href="#guru" @click="searchOpen = false" class="px-3 py-1.5 bg-white dark:bg-slate-800 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-cyan-500 dark:hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition shadow-sm">👨‍🏫 Direktori Guru</a>
+                </div>
+            </div>
+        </div>
     </div>
 </nav>

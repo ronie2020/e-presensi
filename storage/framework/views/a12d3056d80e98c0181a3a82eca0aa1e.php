@@ -1,8 +1,8 @@
  <!-- PROFIL SEKOLAH -->
-    <div id="profil" class="py-24 bg-white relative overflow-hidden border-y border-slate-100">
-        <div class="absolute right-0 top-0 opacity-5 pointer-events-none">
+    <div id="profil" class="py-24 bg-white dark:bg-slate-900 relative overflow-hidden border-y border-slate-100 dark:border-slate-800 transition-colors duration-300">
+        <div class="absolute right-0 top-0 opacity-5 dark:opacity-10 pointer-events-none">
             <svg width="400" height="400" fill="none" viewBox="0 0 200 200">
-                <defs><pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="2" class="text-slate-900" fill="currentColor"></circle></pattern></defs>
+                <defs><pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="2" class="text-slate-900 dark:text-white" fill="currentColor"></circle></pattern></defs>
                 <rect width="200" height="200" fill="url(#dots)"></rect>
             </svg>
         </div>
@@ -12,38 +12,38 @@
                 <div class="space-y-8" data-aos="fade-right">
                     <div class="space-y-2">
                         <!-- PERBAIKAN: Badge dan teks diubah menjadi nuansa Cyan/Blue -->
-                        <span class="px-3 py-1 bg-cyan-50 text-cyan-600 rounded-full text-xs font-bold uppercase tracking-widest border border-cyan-100">Tentang Kami</span>
-                        <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 leading-tight">Mewujudkan Generasi <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600">Cerdas & Berkarakter</span></h2>
+                        <span class="px-3 py-1 bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 rounded-full text-xs font-bold uppercase tracking-widest border border-cyan-100 dark:border-cyan-500/20">Tentang Kami</span>
+                        <h2 class="text-3xl md:text-5xl font-extrabold text-slate-900 dark:text-white leading-tight">Mewujudkan Generasi <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-400">Cerdas & Berkarakter</span></h2>
                     </div>
-                    <p class="text-lg text-slate-600 leading-relaxed text-justify lg:text-left">
+                    <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed text-justify lg:text-left">
                         SMP Negeri 3 Lakbok berkomitmen untuk memberikan layanan pendidikan terbaik yang mengintegrasikan kecerdasan akademik dengan nilai-nilai karakter luhur. Kami hadir untuk mencetak pemimpin masa depan yang kompetitif dan berakhlak mulia.
                     </p>
                     
                     <!-- PERBAIKAN: Menyatukan tema kartu statistik menjadi seragam (Hover Cyan/Blue) -->
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        <div class="p-5 bg-white rounded-2xl border border-slate-100 text-center hover:border-cyan-300 hover:shadow-xl hover:shadow-cyan-500/10 hover:-translate-y-1 transition-all duration-300 group">
-                            <p class="text-3xl font-black text-slate-800 group-hover:text-cyan-600 transition-colors"><?php echo e($schoolStats['siswa'] ?? '-'); ?></p>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Siswa</p>
+                        <div class="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 text-center hover:border-cyan-300 dark:hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/10 hover:-translate-y-1 transition-all duration-300 group">
+                            <p class="text-3xl font-black text-slate-800 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors"><?php echo e($schoolStats['siswa'] ?? '-'); ?></p>
+                            <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mt-1 tracking-wider">Siswa</p>
                         </div>
-                        <div class="p-5 bg-white rounded-2xl border border-slate-100 text-center hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300 group">
-                            <p class="text-3xl font-black text-slate-800 group-hover:text-blue-600 transition-colors"><?php echo e($schoolStats['guru'] ?? '-'); ?></p>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Guru</p>
+                        <div class="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 text-center hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300 group">
+                            <p class="text-3xl font-black text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"><?php echo e($schoolStats['guru'] ?? '-'); ?></p>
+                            <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mt-1 tracking-wider">Guru</p>
                         </div>
-                        <div class="p-5 bg-white rounded-2xl border border-slate-100 text-center hover:border-cyan-300 hover:shadow-xl hover:shadow-cyan-500/10 hover:-translate-y-1 transition-all duration-300 group">
-                            <p class="text-3xl font-black text-slate-800 group-hover:text-cyan-600 transition-colors"><?php echo e($schoolStats['rombel'] ?? '-'); ?></p>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Rombel</p>
+                        <div class="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 text-center hover:border-cyan-300 dark:hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/10 hover:-translate-y-1 transition-all duration-300 group">
+                            <p class="text-3xl font-black text-slate-800 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors"><?php echo e($schoolStats['rombel'] ?? '-'); ?></p>
+                            <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mt-1 tracking-wider">Rombel</p>
                         </div>
-                        <div class="p-5 bg-white rounded-2xl border border-slate-100 text-center hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300 group">
-                            <p class="text-3xl font-black text-slate-800 group-hover:text-blue-600 transition-colors"><?php echo e($schoolStats['materi'] ?? 0); ?></p>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Materi Digital</p>
+                        <div class="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 text-center hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-300 group">
+                            <p class="text-3xl font-black text-slate-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"><?php echo e($schoolStats['materi'] ?? 0); ?></p>
+                            <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mt-1 tracking-wider">Materi Digital</p>
                         </div>
-                        <div class="p-5 bg-white rounded-2xl border border-slate-100 text-center hover:border-cyan-300 hover:shadow-xl hover:shadow-cyan-500/10 hover:-translate-y-1 transition-all duration-300 group sm:col-span-2">
-                            <p class="text-3xl font-black text-slate-800 group-hover:text-cyan-600 transition-colors"><?php echo e($schoolStats['tugas'] ?? 0); ?></p>
-                            <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-wider">Tugas & Kuis Online</p>
+                        <div class="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 text-center hover:border-cyan-300 dark:hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/10 hover:-translate-y-1 transition-all duration-300 group sm:col-span-2">
+                            <p class="text-3xl font-black text-slate-800 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors"><?php echo e($schoolStats['tugas'] ?? 0); ?></p>
+                            <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase mt-1 tracking-wider">Tugas & Kuis Online</p>
                         </div>
                     </div>
                 </div>
-
+                
                 <div class="relative group" data-aos="fade-left"
                     x-data="{ 
                         currentSlide: 0, 

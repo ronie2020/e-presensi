@@ -85,22 +85,23 @@
                     <div class="absolute -bottom-6 -left-4 sm:-bottom-10 sm:-left-8 w-24 h-32 sm:w-36 sm:h-40 bg-blue-500/30 backdrop-blur-lg blur-[3px] rounded-[2rem] shadow-2xl transform rotate-12 z-0 pointer-events-none"></div>
 
                     
-                    <div class="relative z-10 w-full rounded-[2rem] overflow-hidden border-[4px] sm:border-[6px] border-white/80 shadow-2xl bg-white/95 backdrop-blur-xl flex flex-col p-4 sm:p-6 lg:p-8 transform hover:scale-[1.02] transition duration-500 max-w-full">
+                    <!-- PERBAIKAN: Tambahkan dark:bg-slate-800/95 dan dark:border-slate-700/80 agar kotak grafik ikut gelap -->
+                    <div class="relative z-10 w-full rounded-[2rem] overflow-hidden border-[4px] sm:border-[6px] border-white/80 dark:border-slate-700/80 shadow-2xl bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl flex flex-col p-4 sm:p-6 lg:p-8 transform hover:scale-[1.02] transition duration-500 max-w-full">
                         
                         
                         <div class="absolute inset-0 flex flex-col items-center justify-center opacity-5 pointer-events-none z-0 select-none">
-                            <i class="ph-fill ph-shield-check text-[5rem] sm:text-[7rem] text-blue-900 mb-1"></i>
-                            <span class="text-xl sm:text-2xl font-black text-blue-900 tracking-widest uppercase text-center leading-tight">Sistem<br>Terintegrasi</span>
+                            <i class="ph-fill ph-shield-check text-[5rem] sm:text-[7rem] text-blue-900 dark:text-slate-100 mb-1"></i>
+                            <span class="text-xl sm:text-2xl font-black text-blue-900 dark:text-slate-100 tracking-widest uppercase text-center leading-tight">Sistem<br>Terintegrasi</span>
                         </div>
 
-                        <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3 shrink-0 gap-2 relative z-10">
-                            <h3 class="font-bold text-sm sm:text-base lg:text-lg text-slate-800 flex items-center gap-2 min-w-0">
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                        <div class="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-700 pb-3 shrink-0 gap-2 relative z-10">
+                            <h3 class="font-bold text-sm sm:text-base lg:text-lg text-slate-800 dark:text-white flex items-center gap-2 min-w-0">
+                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-blue-50 dark:bg-slate-700 flex items-center justify-center text-blue-600 dark:text-cyan-400 shrink-0">
                                     <i class="ph-fill ph-chart-bar text-base sm:text-xl"></i>
                                 </div>
                                 <span class="truncate">Statistik Kehadiran</span>
                             </h3>
-                            <span class="text-[8px] sm:text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-600 px-2 py-1 rounded-full border border-emerald-100 flex items-center gap-1 shrink-0">
+                            <span class="text-[8px] sm:text-[10px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-full border border-emerald-100 dark:border-emerald-500/20 flex items-center gap-1 shrink-0">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live
                             </span>
                         </div>
@@ -119,7 +120,8 @@
     
     <!-- Wave Separator -->
     <div class="absolute bottom-0 left-0 right-0 pointer-events-none translate-y-[1px] z-20">
-         <svg class="w-full h-12 sm:h-16 lg:h-24 text-slate-50 fill-current" viewBox="0 0 1440 320" preserveAspectRatio="none">
+         <!-- PERBAIKAN PENTING: text-slate-50 diubah dengan menambahkan dark:text-slate-900 agar ombak menyatu dengan background hitam di bawahnya -->
+         <svg class="w-full h-12 sm:h-16 lg:h-24 text-slate-50 dark:text-slate-900 fill-current" viewBox="0 0 1440 320" preserveAspectRatio="none">
              <path d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
          </svg>
     </div>

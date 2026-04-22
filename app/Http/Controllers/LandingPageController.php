@@ -37,14 +37,19 @@ class LandingPageController extends Controller
         // ==============================================================
         // Cek apakah pengunjung (session ini) sudah dihitung sebelumnya
         if (!session()->has('has_visited_landing_page')) {
-            // Jika belum, tambahkan 1 ke total pengunjung
-            Cache::increment('total_landing_visitors');
-            // Tandai session ini agar tidak dihitung lagi saat direfresh
+            // PERBAIKAN: Cek apakah key cache sudah ada
+            if (!Cache::has('total_landing_visitors')) {               
+                Cache::forever('total_landing_visitors', 1);
+            } else {                
+                Cache::increment('total_landing_visitors');
+            }
+                        
             session()->put('has_visited_landing_page', true);
         }
         
-        // Ambil total pengunjung, jika kosong setel ke 1
+        // Ambil total pengunjung, jika masih error/kosong setel ke 1 sebagai fallback
         $visitorCount = Cache::get('total_landing_visitors', 1);
+
 
 
         // --- DEFINISI STATUS (Case Insensitive handling) ---

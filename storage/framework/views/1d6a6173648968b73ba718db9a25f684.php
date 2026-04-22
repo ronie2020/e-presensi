@@ -1,8 +1,8 @@
 <!-- KEPALA SEKOLAH SECTION -->
-    <div class="bg-white py-20 border-b border-slate-100">
+    <div class="bg-white dark:bg-slate-900 py-20 border-b border-slate-100 dark:border-slate-800 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- PERBAIKAN: Menggunakan background gradien Cyan ke Deep Blue -->
-            <div class="bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 rounded-3xl p-8 md:p-12 relative overflow-hidden flex flex-col md:flex-row items-center gap-10 shadow-2xl">
+            <div class="bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 dark:from-cyan-900 dark:via-blue-900 dark:to-slate-900 rounded-3xl p-8 md:p-12 relative overflow-hidden flex flex-col md:flex-row items-center gap-10 shadow-2xl border border-transparent dark:border-slate-800">
                 <!-- Background Decoration -->
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
                 

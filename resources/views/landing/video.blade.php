@@ -13,10 +13,10 @@
             </span>
             <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-8 tracking-tight">Kenali Kami Lebih Dekat</h2>
             
-            <!-- PERBAIKAN: Bingkai iframe diberi gaya kaca (Glassmorphism) -->
-            <div class="relative aspect-video rounded-[2rem] overflow-hidden shadow-[0_0_40px_rgba(34,211,238,0.15)] border border-white/10 group cursor-pointer bg-slate-800/50 backdrop-blur-md p-1 sm:p-2">
+            <!-- PERBAIKAN: Bingkai iframe diberi kelas transisi untuk mode gelap (dark:border-slate-700/50 dan dark:bg-slate-900/80) -->
+            <div class="relative aspect-video rounded-[2rem] overflow-hidden shadow-[0_0_40px_rgba(34,211,238,0.15)] border border-white/10 dark:border-slate-700/50 group cursor-pointer bg-slate-800/50 dark:bg-slate-900/80 backdrop-blur-md p-1 sm:p-2 transition-colors duration-300">
                 <div class="w-full h-full rounded-2xl overflow-hidden relative">
-                    @php
+                    @php   
                         $rawVideoUrl = 'https://www.youtube.com/watch?v=Ryc_cLLWef4'; 
                         $embedUrl = $rawVideoUrl;
                         if(str_contains($rawVideoUrl, 'watch?v=')) {

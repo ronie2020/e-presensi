@@ -46,8 +46,8 @@
         };
     @endphp
 </head>
-<!-- PERBAIKAN: Tambahkan overflow-x-hidden dan w-full pada tag body -->
-<body class="antialiased text-slate-800 bg-slate-50 overflow-x-hidden w-full selection:bg-cyan-500 selection:text-white" 
+<!-- PERBAIKAN: Tambahkan overflow-x-hidden, w-full, dan class Dark Mode (dark:bg-slate-900 dark:text-slate-100) pada tag body -->
+<body class="antialiased text-slate-800 bg-slate-50 dark:bg-slate-900 dark:text-slate-100 overflow-x-hidden w-full selection:bg-cyan-500 selection:text-white" 
     x-data="{ 
         mobileMenuOpen: false,
         modalOpen: false, 
@@ -177,7 +177,7 @@
    <!-- MODALS -->
     @include('landing.modals')
 
-    <!-- VISITOR COUNTER (PERBAIKAN: Ukuran dikecilkan drastis untuk HP) -->
+    <!-- VISITOR COUNTER -->
     <div class="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 bg-white/90 backdrop-blur-sm border border-slate-200 shadow-lg p-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2 sm:gap-3 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 group cursor-default max-w-[calc(100vw-40px)] overflow-hidden" title="Total pengunjung website">
         <div class="bg-cyan-50 text-cyan-600 p-1.5 sm:p-2 rounded-full shrink-0 group-hover:bg-cyan-600 group-hover:text-white transition-colors duration-300">
             <i class="ph-fill ph-users text-sm sm:text-lg"></i>
@@ -195,7 +195,7 @@
         </div>
     </div>
 
-    <!-- BACK TO TOP (PERBAIKAN: Disesuaikan proporsinya untuk HP) -->
+    <!-- BACK TO TOP -->
     <button x-cloak x-show="showBackToTop" x-transition @click="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Kembali ke atas" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 bg-cyan-600 text-white p-2 sm:p-3 rounded-full shadow-lg hover:bg-cyan-700 hover:-translate-y-1 transition-all duration-300 focus:outline-none">
         <i class="ph-bold ph-arrow-up text-base sm:text-xl"></i>
     </button>
