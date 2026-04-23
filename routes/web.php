@@ -739,23 +739,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/education', [\App\Http\Controllers\TeacherPortfolioController::class, 'storeEducation'])->name('edu.store');
         Route::put('/education/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'updateEducation'])->name('edu.update');
         Route::delete('/education/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyEducation'])->name('edu.destroy');
-    });
-
-    Route::get('/cbt-rescue', function() {
-        // 1. Buat folder penampungan jika belum ada
-        $event = \App\Models\CbtEvent::firstOrCreate(
-            ['name' => 'Arsip Ujian Lama'],
-            ['description' => 'Kumpulan ujian yang dibuat sebelum sistem folder diterapkan.', 'is_active' => true]
-        );
-
-        // 2. Cari semua ujian yang foldernya masih kosong (null), lalu masukkan ke folder Arsip
-        $updatedCount = \App\Models\CbtExam::whereNull('cbt_event_id')->update([
-            'cbt_event_id' => $event->id
-        ]);
-
-        return redirect()->route('cbt.index')->with('success', $updatedCount . ' Ujian lama berhasil dimasukkan ke Folder Arsip!');
-    });
-
+    });    
 
 });
 
