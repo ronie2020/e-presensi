@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\CbtExam;
 use App\Models\CbtQuestion;
 use App\Models\Student;
+use App\Models\CbtEvent; 
 use Illuminate\Support\Facades\Storage; 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\QuestionsImport;
@@ -30,9 +31,52 @@ class CbtController extends Controller
             'students_working' => DB::table('cbt_student_exams')->where('status', 'ongoing')->count(),
             'avg_score' => DB::table('cbt_student_exams')->whereNotNull('total_score')->avg('total_score') ?? 0,
         ];
+        
+        $query = CbtEvent::withCount('exams'); 
 
-         // 1. PENCARIAN & FILTER SERVER-SIDE
-        $query = CbtExam::query();
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $events = $query->latest()->paginate(12)->withQueryString();
+
+        return view('cbt.index', compact('stats', 'events'));
+    }
+
+    // --- SIMPAN KEGIATAN/FOLDER ---
+    public function storeEvent(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        CbtEvent::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'is_active' => true
+        ]);
+
+        return back()->with('success', 'Kegiatan / Folder Ujian berhasil dibuat!');
+    }
+
+    // --- TAMPILKAN ISI KARTU UJIAN DALAM SATU KEGIATAN ---
+    public function showEvent(Request $request, $id)
+    {
+        $event = CbtEvent::findOrFail($id);
+        
+        $stats = [
+            'active_exams' => CbtExam::where('cbt_event_id', $id)->where('is_active', true)->count(),
+            'total_questions' => DB::table('cbt_questions')->whereIn('cbt_exam_id', CbtExam::where('cbt_event_id', $id)->pluck('id'))->count(),
+            'students_working' => DB::table('cbt_student_exams')
+                                    ->whereIn('cbt_exam_id', CbtExam::where('cbt_event_id', $id)->pluck('id'))
+                                    ->where('status', 'ongoing')->count(),
+            'avg_score' => DB::table('cbt_student_exams')
+                            ->whereIn('cbt_exam_id', CbtExam::where('cbt_event_id', $id)->pluck('id'))
+                            ->whereNotNull('total_score')->avg('total_score') ?? 0,
+        ];
+
+        $query = CbtExam::where('cbt_event_id', $id);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -48,7 +92,8 @@ class CbtController extends Controller
        
         $exams = $query->latest()->paginate(12)->withQueryString();
 
-        return view('cbt.index', compact('stats', 'exams'));
+        // Melempar ke halaman detail kegiatan
+        return view('cbt.show_event', compact('stats', 'exams', 'event'));
     }
 
      // --- 3. FITUR QUICK TOGGLE STATUS ---
@@ -111,23 +156,26 @@ class CbtController extends Controller
         }
     }
 
-    public function create()
+     public function create(Request $request)
     {
         $subjects = Subject::orderBy('name')->get();
-        return view('cbt.create', compact('subjects'));
+        $events = CbtEvent::orderBy('created_at', 'desc')->get(); // Ambil data Kegiatan
+        $selectedEventId = $request->event_id; // Agar pre-selected jika dari halaman showEvent
+
+        return view('cbt.create', compact('subjects', 'events', 'selectedEventId'));
     }
 
     public function store(Request $request)
     {
-        // 1. Validasi Dasar
         $request->validate([
+            'cbt_event_id' => 'required|exists:cbt_events,id', // Wajib pilih kegiatan
             'title' => 'required|string|max:255',
             'exam_type' => 'required|in:cbt,google_form',
             'subject_name' => 'required|string',
         ]);
 
-        // 2. TANGKAP DATA SECARA EKSPLISIT 
         $data = [
+            'cbt_event_id' => $request->cbt_event_id,
             'title' => $request->title,
             'exam_type' => $request->exam_type,
             'google_form_url' => $request->exam_type === 'google_form' ? $request->google_form_url : null,
@@ -142,20 +190,21 @@ class CbtController extends Controller
             'is_active' => $request->has('is_active'),
             'randomize_questions' => $request->exam_type === 'google_form' ? false : $request->has('randomize_questions'),
             'randomize_options' => $request->exam_type === 'google_form' ? false : $request->has('randomize_options'),
-
         ];
 
-        // 3. Simpan ke Database
         CbtExam::create($data);
 
-        return redirect()->route('cbt.index')->with('success', 'Jadwal ujian berhasil dibuat!');
+        // Kembali ke halaman detail kegiatan agar langsung terlihat ujian yang baru dibuat
+        return redirect()->route('cbt.events.show', $request->cbt_event_id)->with('success', 'Jadwal ujian berhasil dibuat!');
     }
 
     public function edit($id)
     {
         $exam = CbtExam::findOrFail($id);
         $subjects = Subject::orderBy('name')->get(); 
-        return view('cbt.edit', compact('exam', 'subjects'));
+        $events = CbtEvent::orderBy('created_at', 'desc')->get(); // Ambil data Kegiatan
+        
+        return view('cbt.edit', compact('exam', 'subjects', 'events'));
     }
 
     public function update(Request $request, $id)
@@ -163,12 +212,14 @@ class CbtController extends Controller
         $exam = CbtExam::findOrFail($id);
 
         $request->validate([
+            'cbt_event_id' => 'required|exists:cbt_events,id', // Validasi Event
             'title' => 'required|string|max:255',
             'exam_type' => 'required|in:cbt,google_form',
             'subject_name' => 'required|string',
         ]);
        
         $data = [
+            'cbt_event_id' => $request->cbt_event_id,
             'title' => $request->title,
             'exam_type' => $request->exam_type,
             'google_form_url' => $request->exam_type === 'google_form' ? $request->google_form_url : null,
@@ -190,12 +241,13 @@ class CbtController extends Controller
 
         $exam->update($data);
 
-        return redirect()->route('cbt.index')->with('success', 'Jadwal ujian berhasil diperbarui!');
+        return redirect()->route('cbt.events.show', $request->cbt_event_id)->with('success', 'Jadwal ujian berhasil diperbarui!');
     }
 
     public function destroy($id)
     {
         $exam = CbtExam::with('questions')->findOrFail($id);
+        $eventId = $exam->cbt_event_id; // Simpan ID event untuk diredirect
 
         foreach ($exam->questions as $question) {
             if ($question->question_image && Storage::exists('public/' . $question->question_image)) {
@@ -222,7 +274,7 @@ class CbtController extends Controller
         
        $exam->delete();
 
-        return redirect()->route('cbt.index')->with('success', 'Data ujian berhasil dihapus.');
+        return redirect()->route('cbt.events.show', $eventId)->with('success', 'Data ujian berhasil dihapus.');
     }
 
     public function manageQuestions($id)

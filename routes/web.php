@@ -358,6 +358,10 @@ Route::middleware('auth')->group(function () {
     // =========================================================================
     Route::prefix('cbt')->name('cbt.')->group(function () {    
         
+        // --- ROUTE EVENT/KEGIATAN ---
+        Route::post('/events', [CbtController::class, 'storeEvent'])->name('events.store');
+        Route::get('/events/{id}', [CbtController::class, 'showEvent'])->name('events.show');
+
         // 1. CETAK KARTU PESERTA
         Route::get('/cards', [CbtController::class, 'cardIndex'])->name('cards.index');
         Route::get('/cards/print', [CbtController::class, 'printCards'])->name('cards.print');
@@ -736,6 +740,22 @@ Route::middleware('auth')->group(function () {
         Route::put('/education/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'updateEducation'])->name('edu.update');
         Route::delete('/education/{id}', [\App\Http\Controllers\TeacherPortfolioController::class, 'destroyEducation'])->name('edu.destroy');
     });
+
+    Route::get('/cbt-rescue', function() {
+        // 1. Buat folder penampungan jika belum ada
+        $event = \App\Models\CbtEvent::firstOrCreate(
+            ['name' => 'Arsip Ujian Lama'],
+            ['description' => 'Kumpulan ujian yang dibuat sebelum sistem folder diterapkan.', 'is_active' => true]
+        );
+
+        // 2. Cari semua ujian yang foldernya masih kosong (null), lalu masukkan ke folder Arsip
+        $updatedCount = \App\Models\CbtExam::whereNull('cbt_event_id')->update([
+            'cbt_event_id' => $event->id
+        ]);
+
+        return redirect()->route('cbt.index')->with('success', $updatedCount . ' Ujian lama berhasil dimasukkan ke Folder Arsip!');
+    });
+
 
 });
 

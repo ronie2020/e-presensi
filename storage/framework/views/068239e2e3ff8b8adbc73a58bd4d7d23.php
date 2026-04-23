@@ -1,24 +1,34 @@
-<x-app-layout>
-    <x-slot name="header">
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+     <?php $__env->slot('header', null, []); ?> 
         <h2 class="font-semibold text-xl text-slate-800 leading-tight">
-            {{ __('CBT Dashboard - Kategori Kegiatan') }}
+            <?php echo e(__('CBT Dashboard - Kategori Kegiatan')); ?>
+
         </h2>
-    </x-slot>
+     <?php $__env->endSlot(); ?>
 
     <div class="py-8 sm:py-10 font-sans text-slate-800" x-data="{ openModal: false }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            {{-- NOTIFIKASI --}}
-            @if(session('success'))
-                <div id="flash-success" data-message="{{ session('success') }}"></div>
-            @endif
-            @if(session('error'))
-                <div id="flash-error" data-message="{{ session('error') }}"></div>
-            @endif
+            
+            <?php if(session('success')): ?>
+                <div id="flash-success" data-message="<?php echo e(session('success')); ?>"></div>
+            <?php endif; ?>
+            <?php if(session('error')): ?>
+                <div id="flash-error" data-message="<?php echo e(session('error')); ?>"></div>
+            <?php endif; ?>
 
-            {{-- HERO SECTION --}}
+            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                {{-- Kartu Info (Dark Blue Premium) --}}
+                
                 <div class="bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 rounded-[2rem] p-8 text-white shadow-xl shadow-blue-900/30 relative overflow-hidden group border border-white/10">
                     <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                     <div class="absolute right-0 top-0 opacity-10 transform translate-x-8 -translate-y-8 group-hover:scale-110 transition-transform duration-500">
@@ -27,28 +37,28 @@
                     
                     <div class="relative z-10 h-full flex flex-col justify-between">
                         <div>
-                            <a href="{{ route('dashboard') }}" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
+                            <a href="<?php echo e(route('dashboard')); ?>" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
                                 <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
                                 <span>Kembali ke Dashboard</span>
                             </a>
                             <p class="text-blue-300 font-bold text-sm mb-1 flex items-center gap-2"><i class="ph-bold ph-calendar-blank"></i> Hari Ini</p>
-                            <h3 class="text-3xl font-black tracking-tight leading-tight">{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</h3>
+                            <h3 class="text-3xl font-black tracking-tight leading-tight"><?php echo e(\Carbon\Carbon::now()->translatedFormat('l, d F Y')); ?></h3>
                         </div>
                         <div class="mt-6">
                             <span class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-xl text-sm font-bold border border-white/10 shadow-sm inline-flex items-center gap-2">
                                 <span class="bg-emerald-400 w-2 h-2 rounded-full animate-pulse"></span>
-                                {{ method_exists($events, 'total') ? $events->total() : $events->count() }} Kegiatan/Folder Ujian
+                                <?php echo e(method_exists($events, 'total') ? $events->total() : $events->count()); ?> Kegiatan/Folder Ujian
                             </span>
                         </div>
                     </div>
                 </div>
                 
-                {{-- Kartu Welcome & Action --}}
+                
                 <div class="md:col-span-2 bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex flex-col md:flex-row items-center justify-between relative overflow-hidden">
                     <div class="absolute inset-0 bg-slate-50/50 opacity-0 md:opacity-100 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px]"></div>
                     
                     <div class="relative z-10 max-w-lg mb-6 md:mb-0 text-center md:text-left">
-                        <h3 class="font-black text-slate-800 text-2xl mb-2">Halo, {{ Auth::user()->name }}! </h3>
+                        <h3 class="font-black text-slate-800 text-2xl mb-2">Halo, <?php echo e(Auth::user()->name); ?>! </h3>
                         <p class="text-slate-500 leading-relaxed font-medium text-sm">
                             Kelola jadwal CBT berdasarkan kelompok kegiatan besar seperti PSAT, Ulangan Harian, atau Penilaian Akhir Jenjang agar lebih terstruktur.
                         </p>
@@ -65,29 +75,29 @@
                 </div>
             </div>
 
-            {{-- 1. HEADER LIST & FILTER --}}
-            <form id="filterForm" action="{{ route('cbt.index') }}" method="GET" class="flex flex-col md:flex-row items-center justify-between mb-6 px-2 gap-4">
+            
+            <form id="filterForm" action="<?php echo e(route('cbt.index')); ?>" method="GET" class="flex flex-col md:flex-row items-center justify-between mb-6 px-2 gap-4">
                 <h3 class="font-bold text-slate-800 text-xl flex items-center gap-2 shrink-0 w-full md:w-auto">
                     <div class="w-1.5 h-6 bg-blue-600 rounded-full"></div>
                     Daftar Kegiatan CBT (Folder)
                 </h3>
 
                 <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                    {{-- Search Input --}}
+                    
                     <div class="relative w-full sm:w-64 group">
                         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-500 transition-colors">
                             <i class="ph-bold ph-magnifying-glass"></i>
                         </div>
-                        <input name="search" value="{{ request('search') }}" type="text" class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-white text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-medium placeholder-slate-400 shadow-sm" placeholder="Cari Kegiatan...">
+                        <input name="search" value="<?php echo e(request('search')); ?>" type="text" class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-white text-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-medium placeholder-slate-400 shadow-sm" placeholder="Cari Kegiatan...">
                         <button type="submit" class="hidden"></button>
                     </div>
                 </div>
             </form>
 
-            {{-- GRID CARD EVENT/FOLDER --}}
+            
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @forelse($events as $event)
-                    <a href="{{ route('cbt.events.show', $event->id) }}" class="bg-white border border-slate-200 rounded-[2rem] p-6 hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-300 transition-all duration-300 group relative block overflow-hidden">
+                <?php $__empty_1 = true; $__currentLoopData = $events; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $event): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <a href="<?php echo e(route('cbt.events.show', $event->id)); ?>" class="bg-white border border-slate-200 rounded-[2rem] p-6 hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-300 transition-all duration-300 group relative block overflow-hidden">
                         
                         <!-- Pattern Background on Hover -->
                         <div class="absolute inset-0 bg-blue-50/0 group-hover:bg-blue-50/50 transition-colors pointer-events-none"></div>
@@ -101,20 +111,23 @@
                                     <i class="ph-duotone ph-folder-open"></i>
                                 </div>
                                 <span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">
-                                    {{ $event->created_at->format('M Y') }}
+                                    <?php echo e($event->created_at->format('M Y')); ?>
+
                                 </span>
                             </div>
 
                             <h4 class="font-black text-2xl text-slate-800 leading-tight mb-2 group-hover:text-blue-700 transition-colors">
-                                {{ $event->name }}
+                                <?php echo e($event->name); ?>
+
                             </h4>
                             <p class="text-slate-500 text-sm font-medium line-clamp-2 mb-4">
-                                {{ $event->description ?? 'Tidak ada deskripsi kegiatan.' }}
+                                <?php echo e($event->description ?? 'Tidak ada deskripsi kegiatan.'); ?>
+
                             </p>
 
                             <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
                                 <div class="flex items-center gap-2 text-blue-600 font-bold text-sm bg-blue-50 px-3 py-1.5 rounded-lg">
-                                    <i class="ph-bold ph-files"></i> {{ $event->exams_count }} Jadwal Ujian
+                                    <i class="ph-bold ph-files"></i> <?php echo e($event->exams_count); ?> Jadwal Ujian
                                 </div>
                                 <div class="text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all">
                                     <i class="ph-bold ph-arrow-right text-xl"></i>
@@ -122,7 +135,7 @@
                             </div>
                         </div>
                     </a>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-20 bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200 mt-4">
                         <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
                             <i class="ph-duotone ph-folder-dashed text-5xl"></i>
@@ -133,18 +146,19 @@
                             <i class="ph-bold ph-plus"></i> Buat Kegiatan Baru
                         </button>
                     </div>
-                @endforelse
+                <?php endif; ?>
             </div>
 
-            {{-- PAGINATION --}}
-            @if(method_exists($events, 'links'))
+            
+            <?php if(method_exists($events, 'links')): ?>
                 <div class="mt-8">
-                    {{ $events->links() }}
+                    <?php echo e($events->links()); ?>
+
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
 
-        {{-- MODAL TAMBAH KEGIATAN --}}
+        
         <div x-show="openModal" class="fixed inset-0 z-50 overflow-y-auto" style="display: none;">
             <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
                 <div x-show="openModal" x-transition.opacity class="fixed inset-0 transition-opacity bg-slate-900/60 backdrop-blur-sm" @click="openModal = false"></div>
@@ -168,8 +182,8 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('cbt.events.store') }}" method="POST">
-                        @csrf
+                    <form action="<?php echo e(route('cbt.events.store')); ?>" method="POST">
+                        <?php echo csrf_field(); ?>
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Kegiatan <span class="text-rose-500">*</span></label>
@@ -205,4 +219,13 @@
             }
         });
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/cbt/index.blade.php ENDPATH**/ ?>

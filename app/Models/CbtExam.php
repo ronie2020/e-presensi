@@ -28,4 +28,9 @@ class CbtExam extends Model
     public function studentExams() {
         return $this->hasMany(CbtStudentExam::class);
     }
+   
+    public function event()
+    {
+        return $this->belongsTo(CbtEvent::class, 'cbt_event_id');
+    }
 }
