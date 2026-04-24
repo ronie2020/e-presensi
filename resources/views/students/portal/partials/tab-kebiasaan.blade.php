@@ -34,186 +34,201 @@
         }
 
         $progressPercent = ($completedHabits / $totalHabits) * 100;
+        
+        // Penentuan Warna Progress
+        $progressColor = 'from-rose-400 to-rose-600';
+        $iconColor = 'text-rose-500';
+        $statusText = 'Belum Maksimal';
+        if ($progressPercent == 100) { 
+            $progressColor = 'from-emerald-400 to-emerald-600'; 
+            $iconColor = 'text-emerald-500';
+            $statusText = 'Luar Biasa!';
+        }
+        elseif ($progressPercent >= 50) { 
+            $progressColor = 'from-amber-400 to-amber-600'; 
+            $iconColor = 'text-amber-500';
+            $statusText = 'Cukup Baik';
+        }
     @endphp
 
-    <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden mb-8">
-        {{-- Background Effects --}}
-        <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-[80px] -mr-32 -mt-32"></div>
-        <div class="absolute bottom-0 left-0 w-40 h-40 bg-purple-500/20 rounded-full blur-[60px] -ml-20 -mb-20"></div>
-
-        <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
-            {{-- Circular Progress --}}
-            <div class="relative w-32 h-32 shrink-0">
-                <svg class="w-full h-full transform -rotate-90">
-                    <circle cx="64" cy="64" r="56" stroke="currentColor" stroke-width="12" fill="transparent" class="text-slate-800"></circle>
-                    <circle cx="64" cy="64" r="56" stroke="currentColor" stroke-width="12" fill="transparent" 
-                            class="text-emerald-400 transition-all duration-1000 ease-out"
-                            stroke-dasharray="351.8"
-                            stroke-dashoffset="{{ 351.8 - (351.8 * $progressPercent / 100) }}"></circle>
-                </svg>
-                <div class="absolute inset-0 flex flex-col items-center justify-center">
-                    <span class="text-2xl font-black text-white">{{ round($progressPercent) }}%</span>
-                    <span class="text-[10px] uppercase text-slate-400 font-bold tracking-widest">Selesai</span>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {{-- Status Card --}}
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800/80 p-6 sm:p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700/50 flex flex-col justify-center relative overflow-hidden group">
+            <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition transform group-hover:scale-110">
+                <i class="ph-fill ph-check-square-offset text-9xl text-cyan-500"></i>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 relative z-10">
+                <div>
+                    <h3 class="text-2xl font-black text-slate-800 dark:text-slate-100">Jurnal Hari Ini</h3>
+                    <p class="text-sm font-bold text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-1">
+                        <i class="ph-bold ph-calendar-blank"></i> {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
+                    </p>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-700/50 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-600 flex items-center gap-3">
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Status</p>
+                        <p class="font-black {{ $iconColor }}">{{ $statusText }}</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center text-xl border border-slate-100 dark:border-slate-700">
+                        <i class="ph-fill ph-target {{ $iconColor }}"></i>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex-1 text-center md:text-left">
-                 <a href="{{ route('student.habits.dashboard') }}" class="inline-flex items-center gap-2 text-blue-300 hover:text-white transition-colors mb-4 text-[10px] font-bold uppercase tracking-[0.2em]">
-                    <i class="ph-bold ph-arrow-left"></i> Pantau Dashboard Siswa
-                </a>
-                <h2 class="text-2xl font-black mb-2">Pantauan Karakter Hari Ini</h2>
-                <p class="text-blue-200 text-sm leading-relaxed mb-4">
-                    Lihat perkembangan kebiasaan baik siswa secara real-time. Data ini disinkronkan langsung dari dashboard siswa.
-                </p>
-                
-                {{-- Status Badges --}}
-                <div class="flex flex-wrap justify-center md:justify-start gap-2 mb-5">
-                    <span class="px-3 py-1 rounded-full text-xs font-bold border {{ $completedHabits == 7 ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200' : 'bg-slate-700 border-slate-600 text-slate-300' }}">
-                        {{ $completedHabits }}/7 Misi Tuntas
-                    </span>
-                    @if(isset($todayEntry) && $todayEntry->habit_photo)
-                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 border border-blue-500/50 text-blue-200 flex items-center gap-1">
-                            <i class="ph-fill ph-camera"></i> Ada Dokumentasi
-                        </span>
-                    @endif
+            <div class="relative z-10 mt-2">
+                <div class="flex justify-between items-end mb-2">
+                    <span class="text-sm font-bold text-slate-600 dark:text-slate-300">Progress Penyelesaian</span>
+                    <span class="text-lg font-black text-slate-800 dark:text-slate-100">{{ $completedHabits }} <span class="text-sm text-slate-400 dark:text-slate-500">/ 7 Selesai</span></span>
                 </div>
-
-                {{-- [BARU] Tombol Aksi Cepat --}}
-                @if($completedHabits < 7)
-                    <div class="pt-5 border-t border-white/10 flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
-                        <div class="flex items-center gap-2 text-orange-300 animate-pulse">
-                            <i class="ph-fill ph-warning-circle"></i>
-                            <span class="text-xs font-bold">Data Belum Lengkap</span>
-                        </div>
-                        <a href="{{ route('student.habits.index') }}" class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-white text-slate-900 hover:bg-blue-50 hover:text-blue-700 font-black rounded-xl transition-all shadow-lg shadow-white/10 ring-2 ring-white/50 hover:ring-blue-400">
-                            <span>Lengkapi Formulir Sekarang</span>
-                            <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </a>
+                <div class="w-full h-4 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden shadow-inner">
+                    <div class="h-full rounded-full bg-gradient-to-r {{ $progressColor }} transition-all duration-1000 relative" style="width: {{ $progressPercent }}%">
+                        <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
                     </div>
-                @else
-                    <div class="pt-4 border-t border-white/10">
-                        <span class="inline-flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                            <i class="ph-fill ph-seal-check text-xl"></i> Luar Biasa! Semua misi hari ini sudah tercatat.
-                        </span>                        
-                    </div>
-                @endif
-            </div>
-        </div>
-    </div>
-
-    {{-- 2. THE GRID (SAMA PERSIS DENGAN DASHBOARD) --}}
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
-        @php
-            $habits = [
-                // 1. Bangun & Mandi (Habit 1 & 2)
-                ['label' => 'Bangun & Mandi', 'icon' => 'sun-horizon', 'color' => 'blue', 'done' => ($todayEntry && $todayEntry->habit_1 && $todayEntry->habit_2), 'detail' => $todayEntry->habit_1_time ?? null],
-                
-                // 2. Shalat (Cek detail prayer)
-                ['label' => 'Shalat Tepat Waktu', 'icon' => 'mosque', 'color' => 'emerald', 'done' => ($todayEntry && ($todayEntry->prayer_subuh || $todayEntry->prayer_dzuhur || $todayEntry->prayer_ashar || $todayEntry->prayer_maghrib || $todayEntry->prayer_isya || $todayEntry->prayer_dhuha)), 'detail' => 'Cek Detail'],
-                
-                // 3. Olahraga (Habit 3)
-                ['label' => 'Berolahraga', 'icon' => 'sneaker-move', 'color' => 'indigo', 'done' => ($todayEntry && $todayEntry->habit_3), 'detail' => $todayEntry->habit_3_activity ?? null],
-                
-                // 4. Makan Bergizi (Habit 5 - Orange)
-                ['label' => 'Makan Bergizi', 'icon' => 'carrot', 'color' => 'orange', 'done' => ($todayEntry && $todayEntry->habit_5), 'detail' => $todayEntry->habit_5_menu ?? null],
-                
-                // 5. Belajar (Habit 4 - Blue)
-                ['label' => 'Gemar Belajar', 'icon' => 'book-open-text', 'color' => 'blue', 'done' => ($todayEntry && $todayEntry->habit_4), 'detail' => $todayEntry->habit_4_subject ?? null],
-                
-                // 6. Sosial (Habit 6 - Purple)
-                ['label' => 'Bantu Orang Tua', 'icon' => 'users-three', 'color' => 'purple', 'done' => ($todayEntry && $todayEntry->habit_6), 'detail' => $todayEntry->habit_6_activity ?? null],
-            ];
-        @endphp
-
-        @foreach($habits as $h)
-            @php
-                $bgColor = $h['done'] ? "bg-{$h['color']}-50" : "bg-slate-50";
-                $borderColor = $h['done'] ? "border-{$h['color']}-200" : "border-slate-100";
-                $iconColor = $h['done'] ? "text-{$h['color']}-500" : "text-slate-300";
-                $textColor = $h['done'] ? "text-slate-800" : "text-slate-400";
-            @endphp
-            <div class="p-5 rounded-2xl border {{ $bgColor }} {{ $borderColor }} flex flex-col items-center text-center justify-center relative group transition-all hover:shadow-md">
-                @if($h['done'])
-                    <div class="absolute top-2 right-2 text-emerald-500 bg-white rounded-full p-0.5 shadow-sm">
-                        <i class="ph-bold ph-check-circle text-lg"></i>
-                    </div>
-                @endif
-
-                <i class="ph-duotone ph-{{ $h['icon'] }} text-3xl mb-3 {{ $iconColor }}"></i>
-                <h4 class="font-bold text-xs md:text-sm {{ $textColor }} mb-1">{{ $h['label'] }}</h4>
-                
-                @if($h['done'] && $h['detail'] && $h['detail'] !== 'Cek Detail')
-                    <p class="text-[10px] text-slate-500 truncate max-w-full px-2">"{{ Str::limit($h['detail'], 15) }}"</p>
-                @elseif(!$h['done'])
-                    <span class="text-[10px] text-slate-400 italic">Belum tercatat</span>
-                @endif
-            </div>
-        @endforeach
-    </div>
-
-    {{-- 7. Tidur (Full Width) --}}
-    @php $isTidurDone = $todayEntry && $todayEntry->habit_7; @endphp
-    <div class="mb-8 p-5 rounded-2xl border {{ $isTidurDone ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-white border-slate-100 text-slate-400' }} flex items-center gap-5 shadow-sm relative overflow-hidden">
-        @if($isTidurDone)
-            <div class="absolute right-0 top-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-        @endif
-        
-        <div class="w-12 h-12 rounded-2xl {{ $isTidurDone ? 'bg-white/20 text-white' : 'bg-slate-50 text-slate-300' }} flex items-center justify-center text-2xl shrink-0">
-            <i class="ph-duotone ph-moon-stars"></i>
-        </div>
-        <div>
-            <h4 class="font-bold text-sm md:text-base {{ $isTidurDone ? 'text-white' : 'text-slate-700' }}">7. Tidur Cepat</h4>
-            <p class="text-xs {{ $isTidurDone ? 'text-indigo-100' : 'text-slate-400' }} mt-0.5">
-                {{ $isTidurDone ? 'Tercatat tidur pukul ' . ($todayEntry->habit_7_time ?? '--:--') : 'Belum ada data tidur.' }}
-            </p>
-        </div>
-        @if($isTidurDone)
-            <div class="absolute top-1/2 -translate-y-1/2 right-6 bg-white/20 p-2 rounded-full"><i class="ph-bold ph-check text-white"></i></div>
-        @endif
-    </div>
-
-    {{-- 3. EVIDENCE & TEACHER FEEDBACK --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {{-- Foto Dokumentasi --}}
-        <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
-            <h3 class="font-bold text-slate-700 text-sm mb-3 px-2 flex items-center gap-2">
-                <i class="ph-fill ph-image text-blue-500"></i> Dokumentasi Hari Ini
-            </h3>
-            <div class="aspect-video w-full rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden relative">
-                @if(isset($todayEntry) && $todayEntry->photo_path)
-                    <img src="{{ asset('storage/' . $todayEntry->photo_path) }}" class="w-full h-full object-cover transition-transform hover:scale-105 duration-500 cursor-pointer" onclick="window.open(this.src)">
-                    <div class="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm">Klik untuk perbesar</div>
-                @else
-                    <div class="text-center text-slate-400">
-                        <i class="ph-duotone ph-camera-slash text-3xl mb-2"></i>
-                        <p class="text-xs">Belum ada foto</p>
-                    </div>
-                @endif
+                </div>
             </div>
         </div>
 
         {{-- Feedback Guru --}}
-        <div class="bg-indigo-50 p-6 rounded-3xl border border-indigo-100 flex flex-col justify-center relative overflow-hidden">
-            <div class="absolute top-0 right-0 p-4 opacity-5"><i class="ph-fill ph-chat-centered-text text-8xl text-indigo-600"></i></div>
-            <h3 class="font-bold text-indigo-800 text-sm mb-3 relative z-10 flex items-center gap-2">
+        <div class="bg-indigo-50 dark:bg-indigo-900/20 p-6 rounded-[2.5rem] border border-indigo-100 dark:border-indigo-800/50 flex flex-col justify-center relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-5"><i class="ph-fill ph-chat-centered-text text-8xl text-indigo-600 dark:text-indigo-400"></i></div>
+            <h3 class="font-bold text-indigo-800 dark:text-indigo-300 text-sm mb-3 relative z-10 flex items-center gap-2">
                 <i class="ph-fill ph-chalkboard-teacher"></i> Catatan Guru Wali
             </h3>
             
             @if(isset($todayEntry) && $todayEntry->teacher_feedback)
                 <div class="relative z-10">
-                    <i class="ph-fill ph-quotes text-indigo-200 text-3xl absolute -top-2 -left-2"></i>
-                    <p class="text-sm text-indigo-700 italic leading-relaxed pl-6 relative z-10">
+                    <i class="ph-fill ph-quotes text-indigo-200 dark:text-indigo-700 text-3xl absolute -top-2 -left-2"></i>
+                    <p class="text-sm text-indigo-700 dark:text-indigo-200 italic leading-relaxed pl-6 relative z-10">
                         "{{ $todayEntry->teacher_feedback }}"
                     </p>
-                    <p class="text-[10px] font-bold text-indigo-400 uppercase mt-3 text-right">
+                    <p class="text-[10px] font-bold text-indigo-400 dark:text-indigo-500 uppercase mt-3 text-right">
                         — {{ \Carbon\Carbon::parse($todayEntry->report_date)->translatedFormat('d F Y') }}
                     </p>
                 </div>
             @else
-                <div class="text-center text-indigo-300 relative z-10 py-4">
-                    <p class="text-xs italic">Belum ada catatan dari guru untuk hari ini.</p>
+                <div class="text-center text-indigo-300 dark:text-indigo-600 relative z-10 py-4">
+                    <p class="text-xs font-medium">Belum ada catatan dari guru wali untuk hari ini.</p>
                 </div>
             @endif
+        </div>
+    </div>
+
+    {{-- 2. GRID 7 KEBIASAAN --}}
+    <div class="bg-white dark:bg-slate-800/80 rounded-[2.5rem] border border-slate-100 dark:border-slate-700/50 shadow-sm p-6 sm:p-8">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-lg font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <i class="ph-fill ph-list-checks text-cyan-500"></i> Detail Kebiasaan
+            </h3>
+            
+            <a href="{{ route('student.habits.index') }}" class="px-5 py-2 bg-slate-800 dark:bg-cyan-600 text-white rounded-xl text-xs font-bold hover:bg-slate-900 dark:hover:bg-cyan-700 transition shadow-lg flex items-center gap-2">
+                <i class="ph-bold ph-pencil-simple"></i> <span class="hidden sm:inline">Isi Jurnal Sekarang</span><span class="sm:hidden">Isi</span>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            
+            {{-- HABIT 1: Bangun & Mandi --}}
+            @php $isDone = isset($todayEntry) && $todayEntry->habit_1 && $todayEntry->habit_2; @endphp
+            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700' }}">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 {{ $isDone ? 'bg-emerald-500 text-white shadow-md' : 'bg-white dark:bg-slate-700 text-slate-300 dark:text-slate-500 border border-slate-200 dark:border-slate-600' }}">
+                    <i class="ph-fill ph-sun-horizon"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-sm truncate {{ $isDone ? 'text-emerald-900 dark:text-emerald-100' : 'text-slate-700 dark:text-slate-300' }}">Bangun Awal & Mandi</h4>
+                    <p class="text-[10px] font-bold uppercase tracking-wider {{ $isDone ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500' }}">
+                        {{ $isDone ? 'Selesai' : 'Belum' }}
+                    </p>
+                </div>
+            </div>
+
+            {{-- HABIT 2: Shalat Wajib --}}
+            @php 
+                $shalatCount = 0;
+                if(isset($todayEntry)) {
+                    if($todayEntry->prayer_subuh) $shalatCount++;
+                    if($todayEntry->prayer_dzuhur) $shalatCount++;
+                    if($todayEntry->prayer_ashar) $shalatCount++;
+                    if($todayEntry->prayer_maghrib) $shalatCount++;
+                    if($todayEntry->prayer_isya) $shalatCount++;
+                }
+                $isDone = $shalatCount > 0;
+            @endphp
+            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700' }}">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 {{ $isDone ? 'bg-emerald-500 text-white shadow-md' : 'bg-white dark:bg-slate-700 text-slate-300 dark:text-slate-500 border border-slate-200 dark:border-slate-600' }}">
+                    <i class="ph-fill ph-hands-praying"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-sm truncate {{ $isDone ? 'text-emerald-900 dark:text-emerald-100' : 'text-slate-700 dark:text-slate-300' }}">Shalat Wajib</h4>
+                    <p class="text-[10px] font-bold uppercase tracking-wider {{ $isDone ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500' }}">
+                        {{ $shalatCount }} Waktu Terisi
+                    </p>
+                </div>
+            </div>
+
+            {{-- HABIT 3: Olahraga --}}
+            @php $isDone = isset($todayEntry) && $todayEntry->habit_3; @endphp
+            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700' }}">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 {{ $isDone ? 'bg-emerald-500 text-white shadow-md' : 'bg-white dark:bg-slate-700 text-slate-300 dark:text-slate-500 border border-slate-200 dark:border-slate-600' }}">
+                    <i class="ph-fill ph-sneaker"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-sm truncate {{ $isDone ? 'text-emerald-900 dark:text-emerald-100' : 'text-slate-700 dark:text-slate-300' }}">Olahraga 15 Menit</h4>
+                    <p class="text-[10px] font-bold uppercase tracking-wider {{ $isDone ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500' }}">
+                        {{ $isDone ? 'Selesai' : 'Belum' }}
+                    </p>
+                </div>
+            </div>
+
+            {{-- HABIT 4: Makan Bersama Keluarga --}}
+            @php $isDone = isset($todayEntry) && $todayEntry->habit_5; @endphp
+            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700' }}">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 {{ $isDone ? 'bg-emerald-500 text-white shadow-md' : 'bg-white dark:bg-slate-700 text-slate-300 dark:text-slate-500 border border-slate-200 dark:border-slate-600' }}">
+                    <i class="ph-fill ph-fork-knife"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-sm truncate {{ $isDone ? 'text-emerald-900 dark:text-emerald-100' : 'text-slate-700 dark:text-slate-300' }}">Makan Bersama Keluarga</h4>
+                    <p class="text-[10px] font-bold uppercase tracking-wider {{ $isDone ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500' }}">
+                        {{ $isDone ? 'Selesai' : 'Belum' }}
+                    </p>
+                </div>
+            </div>
+
+            {{-- HABIT 5: Mengulang Pelajaran --}}
+            @php $isDone = isset($todayEntry) && $todayEntry->habit_4; @endphp
+            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700' }}">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 {{ $isDone ? 'bg-emerald-500 text-white shadow-md' : 'bg-white dark:bg-slate-700 text-slate-300 dark:text-slate-500 border border-slate-200 dark:border-slate-600' }}">
+                    <i class="ph-fill ph-books"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-sm truncate {{ $isDone ? 'text-emerald-900 dark:text-emerald-100' : 'text-slate-700 dark:text-slate-300' }}">Mengulang Pelajaran</h4>
+                    <p class="text-[10px] font-bold uppercase tracking-wider {{ $isDone ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500' }}">
+                        {{ $isDone ? 'Selesai' : 'Belum' }}
+                    </p>
+                </div>
+            </div>
+
+            {{-- HABIT 6 & 7: Sosialisasi & Tidur Cepat --}}
+            <div class="grid grid-rows-2 gap-4">
+                @php $isSocialDone = isset($todayEntry) && $todayEntry->habit_6; @endphp
+                <div class="p-3 rounded-2xl border transition-all flex items-center gap-3 {{ $isSocialDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700' }}">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 {{ $isSocialDone ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-slate-700 text-slate-300 dark:text-slate-500 border border-slate-200 dark:border-slate-600' }}">
+                        <i class="ph-fill ph-users"></i>
+                    </div>
+                    <h4 class="font-bold text-xs flex-1 truncate {{ $isSocialDone ? 'text-emerald-900 dark:text-emerald-100' : 'text-slate-700 dark:text-slate-300' }}">Batasi Gadget</h4>
+                    @if($isSocialDone) <i class="ph-bold ph-check text-emerald-500"></i> @endif
+                </div>
+
+                @php $isSleepDone = isset($todayEntry) && $todayEntry->habit_7; @endphp
+                <div class="p-3 rounded-2xl border transition-all flex items-center gap-3 {{ $isSleepDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700' }}">
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 {{ $isSleepDone ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-slate-700 text-slate-300 dark:text-slate-500 border border-slate-200 dark:border-slate-600' }}">
+                        <i class="ph-fill ph-moon-stars"></i>
+                    </div>
+                    <h4 class="font-bold text-xs flex-1 truncate {{ $isSleepDone ? 'text-emerald-900 dark:text-emerald-100' : 'text-slate-700 dark:text-slate-300' }}">Tidur Maks 21:30</h4>
+                    @if($isSleepDone) <i class="ph-bold ph-check text-emerald-500"></i> @endif
+                </div>
+            </div>
+            
         </div>
     </div>
 </div>
