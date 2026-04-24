@@ -58,20 +58,25 @@
                 @forelse($exams as $exam)
                     <div class="bg-white border border-slate-100 rounded-[2rem] p-6 hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-200 transition-all duration-300 group relative flex flex-col h-full">
                         
-                       <div class="absolute top-6 right-6 z-10">
+                       {{-- SWITCH TOGGLE STATUS --}}
+                       <div class="absolute top-6 right-6 z-10" title="Aktifkan / Nonaktifkan Ujian">
                             <label class="relative inline-flex items-center cursor-pointer group/toggle">
-                                <input type="checkbox" class="sr-only peer" {{ $exam->is_active ? 'checked' : '' }} onchange="toggleStatus('{{ $exam->id }}', this)">
+                                <input type="checkbox" class="sr-only peer" 
+                                       {{ $exam->is_active ? 'checked' : '' }} 
+                                       data-url="{{ route('cbt.toggle_status', $exam->id) }}" 
+                                       data-id="{{ $exam->id }}"
+                                       onchange="toggleStatus(this)">
                                 <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 shadow-inner"></div>
                             </label>
                         </div>
 
                         <div class="mb-4 pr-16">
-                            <div class="flex flex-wrap gap-2 mb-3">
+                            <div class="flex flex-wrap items-center gap-2 mb-3">
                                 <span class="inline-block px-3 py-1 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-lg text-[10px] font-black uppercase tracking-wide">
                                     {{ $exam->subject_name }}
                                 </span>
                                 @if(isset($exam->exam_type) && $exam->exam_type == 'google_form')
-                                    <span class="inline-block px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[10px] font-black uppercase tracking-wide">
+                                    <span class="inline-block px-3 py-1 bg-teal-50 text-teal-600 border border-teal-100 rounded-lg text-[10px] font-black uppercase tracking-wide">
                                         <i class="ph-bold ph-google-logo"></i> G-Form
                                     </span>
                                 @else
@@ -79,20 +84,30 @@
                                         <i class="ph-bold ph-desktop"></i> CBT
                                     </span>
                                 @endif
+
+                                {{-- BADGE LABEL STATUS AKTIF/TIDAK AKTIF --}}
+                                <span id="status-badge-{{ $exam->id }}" class="inline-block px-3 py-1 border rounded-lg text-[10px] font-black uppercase tracking-wide transition-colors {{ $exam->is_active ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100' }}">
+                                    @if($exam->is_active)
+                                        <i class="ph-bold ph-check-circle"></i> Aktif
+                                    @else
+                                        <i class="ph-bold ph-x-circle"></i> Tidak Aktif
+                                    @endif
+                                </span>
                             </div>
                             <h4 class="font-black text-xl text-slate-800 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">{{ $exam->title }}</h4>
                         </div>
 
+                        {{-- WAKTU MULAI DAN AKHIR DENGAN NAMA HARI (BAHASA INDONESIA) --}}
                         <div class="mb-4 p-3 bg-slate-50 border border-slate-100 rounded-xl space-y-2">
-                            <div class="flex items-center text-xs font-bold text-slate-600">
-                                <i class="ph-fill ph-play-circle text-emerald-500 text-base mr-2"></i>
-                                <span class="w-12 text-slate-400">Mulai</span>
-                                <span>: {{ $exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->format('d M Y, H:i') : 'Belum diatur' }}</span>
+                            <div class="flex items-start text-xs font-bold text-slate-600">
+                                <i class="ph-fill ph-play-circle text-emerald-500 text-base mr-2 mt-0.5 shrink-0"></i>
+                                <span class="w-12 text-slate-400 shrink-0">Mulai</span>
+                                <span class="leading-tight">: {{ $exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->locale('id')->isoFormat('dddd, D MMMM Y - HH:mm') : 'Belum diatur' }}</span>
                             </div>
-                            <div class="flex items-center text-xs font-bold text-slate-600">
-                                <i class="ph-fill ph-stop-circle text-rose-500 text-base mr-2"></i>
-                                <span class="w-12 text-slate-400">Akhir</span>
-                                <span>: {{ $exam->end_time ? \Carbon\Carbon::parse($exam->end_time)->format('d M Y, H:i') : 'Belum diatur' }}</span>
+                            <div class="flex items-start text-xs font-bold text-slate-600">
+                                <i class="ph-fill ph-stop-circle text-rose-500 text-base mr-2 mt-0.5 shrink-0"></i>
+                                <span class="w-12 text-slate-400 shrink-0">Akhir</span>
+                                <span class="leading-tight">: {{ $exam->end_time ? \Carbon\Carbon::parse($exam->end_time)->locale('id')->isoFormat('dddd, D MMMM Y - HH:mm') : 'Belum diatur' }}</span>
                             </div>
                         </div>
                         
@@ -114,7 +129,7 @@
                         <div class="mt-5 pt-4 border-t border-slate-50 grid grid-cols-2 gap-2">
                             <!-- Baris 1: Soal & Monitor -->
                             @if(isset($exam->exam_type) && $exam->exam_type == 'google_form')
-                                <a href="{{ $exam->google_form_url }}" target="_blank" class="flex items-center justify-center p-2.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-xl text-xs font-bold hover:bg-emerald-600 hover:text-white transition-all group/btn" title="Buka Link Google Form">
+                                <a href="{{ $exam->google_form_url }}" target="_blank" class="flex items-center justify-center p-2.5 bg-teal-50 text-teal-600 border border-teal-100 rounded-xl text-xs font-bold hover:bg-teal-600 hover:text-white transition-all group/btn" title="Buka Link Google Form">
                                     <i class="ph-bold ph-google-logo text-lg mr-2"></i> Form
                                 </a>
                             @else
@@ -154,7 +169,7 @@
                                 @csrf @method('DELETE')
                             </form>
                             
-                            <!-- Baris 5: Cetak Dokumen (SUDAH DITAMBAHKAN KEMBALI) -->
+                            <!-- Baris 5: Cetak Dokumen -->
                             <a href="{{ route('cbt.attendance', $exam->id) }}" target="_blank" class="col-span-1 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 hover:text-blue-600 transition-all">
                                 <i class="ph-bold ph-users-three text-lg mr-2"></i> Absensi
                             </a>
@@ -187,25 +202,53 @@
     {{-- Script Validasi & Notifikasi --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function toggleStatus(id, element) {
-            fetch(`/cbt/exams/${id}/toggle-status`, {
+        function toggleStatus(element) {
+            const url = element.getAttribute('data-url');
+            const id = element.getAttribute('data-id');
+            const isChecked = element.checked;
+
+            fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
             }).then(res => res.json()).then(data => {
                 if (data.success) {
                     Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: data.message, showConfirmButton: false, timer: 2000, customClass: { popup: 'rounded-xl' }});
-                } else element.checked = !element.checked;
+                    
+                    // DOM: Update Badge Teks secara dinamis
+                    const badge = document.getElementById('status-badge-' + id);
+                    if (badge) {
+                        if (data.is_active) {
+                            badge.className = 'inline-block px-3 py-1 border rounded-lg text-[10px] font-black uppercase tracking-wide transition-colors bg-emerald-50 text-emerald-600 border-emerald-100';
+                            badge.innerHTML = '<i class="ph-bold ph-check-circle"></i> Aktif';
+                        } else {
+                            badge.className = 'inline-block px-3 py-1 border rounded-lg text-[10px] font-black uppercase tracking-wide transition-colors bg-rose-50 text-rose-600 border-rose-100';
+                            badge.innerHTML = '<i class="ph-bold ph-x-circle"></i> Tidak Aktif';
+                        }
+                    }
+                } else {
+                    element.checked = !isChecked; // Kembalikan ke posisi awal jika gagal
+                }
+            }).catch(error => {
+                element.checked = !isChecked; // Kembalikan ke posisi awal jika error jaringan
+                console.error('Error:', error);
             });
         }
+        
         function copyToken(token) {
             navigator.clipboard.writeText(token).then(() => {
                 Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Token disalin!', showConfirmButton: false, timer: 2000, customClass: { popup: 'rounded-xl' }});
             });
         }
+        
         function confirmDelete(id) {
             Swal.fire({ title: 'Hapus Ujian?', text: "Data ujian, jawaban, dan nilai dihapus permanen!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', cancelButtonColor: '#64748b', confirmButtonText: 'Hapus!', cancelButtonText: 'Batal', customClass: { popup: 'rounded-[2rem]' }
             }).then((result) => { if (result.isConfirmed) document.getElementById('delete-form-' + id).submit(); })
         }
+        
         document.addEventListener("DOMContentLoaded", function() {
             const flash = document.getElementById('flash-success');
             if (flash) Swal.fire({ icon: 'success', title: 'Berhasil!', text: flash.getAttribute('data-message'), timer: 3000, showConfirmButton: false, customClass: { popup: 'rounded-[2rem]' }});

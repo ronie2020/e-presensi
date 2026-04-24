@@ -60,6 +60,23 @@ class CbtController extends Controller
         return back()->with('success', 'Kegiatan / Folder Ujian berhasil dibuat!');
     }
 
+    // --- UPDATE KEGIATAN/FOLDER (BARU DITAMBAHKAN) ---
+    public function updateEvent(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string'
+        ]);
+
+        $event = CbtEvent::findOrFail($id);
+        $event->update([
+            'name' => $request->name,
+            'description' => $request->description,
+        ]);
+
+        return back()->with('success', 'Kegiatan / Folder berhasil diperbarui!');
+    }
+
     // --- TAMPILKAN ISI KARTU UJIAN DALAM SATU KEGIATAN ---
     public function showEvent(Request $request, $id)
     {

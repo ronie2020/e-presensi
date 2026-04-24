@@ -361,6 +361,8 @@ Route::middleware('auth')->group(function () {
         // --- ROUTE EVENT/KEGIATAN ---
         Route::post('/events', [CbtController::class, 'storeEvent'])->name('events.store');
         Route::get('/events/{id}', [CbtController::class, 'showEvent'])->name('events.show');
+        //-- UPDATE FOLDER:
+        Route::put('/events/{id}', [CbtController::class, 'updateEvent'])->name('events.update'); 
 
         // 1. CETAK KARTU PESERTA
         Route::get('/cards', [CbtController::class, 'cardIndex'])->name('cards.index');
@@ -425,9 +427,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/attendance', [\App\Http\Controllers\CbtController::class, 'attendanceList'])->name('attendance');
         Route::get('/{id}/minutes', [\App\Http\Controllers\CbtController::class, 'minutes'])->name('minutes');
     });
-
-
-
 
      // === BANK SOAL TERPUSAT (Gudang Soal) ===
     Route::prefix('bank-soal')->name('bank.')->group(function() {
