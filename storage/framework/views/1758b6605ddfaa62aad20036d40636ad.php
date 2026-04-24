@@ -1,4 +1,4 @@
- <!-- VIDEO PROFIL -->
+<!-- VIDEO PROFIL -->
     <div class="py-24 bg-slate-900 relative overflow-hidden">
         <!-- PERBAIKAN: Latar belakang digelapkan, dan ditambahkan efek glow Cyan -->
         <div class="absolute inset-0 bg-cover bg-center opacity-20 mix-blend-luminosity" style="background-image: url('<?php echo e(asset('images/netila.jpg')); ?>');"></div>
@@ -17,7 +17,16 @@
             <div class="relative aspect-video rounded-[2rem] overflow-hidden shadow-[0_0_40px_rgba(34,211,238,0.15)] border border-white/10 dark:border-slate-700/50 group cursor-pointer bg-slate-800/50 dark:bg-slate-900/80 backdrop-blur-md p-1 sm:p-2 transition-colors duration-300">
                 <div class="w-full h-full rounded-2xl overflow-hidden relative">
                     <?php   
+                        // 1. Set Video Default (Video profil lama Anda)
                         $rawVideoUrl = 'https://www.youtube.com/watch?v=7TMXpAZbE1s&list=PLQwMxsqb0Ozu5sbEFRf5nQNrqyU0XFznH'; 
+                        
+                        // 2. Cek apakah ada data video dari kegiatan sekolah terbaru
+                        if(isset($latestVideoActivity) && !empty($latestVideoActivity->video_url)) {
+                            // Jika ada, timpa video default dengan video dari kegiatan terbaru
+                            $rawVideoUrl = $latestVideoActivity->video_url;
+                        }
+
+                        // 3. Logika untuk mengubah link youtube biasa menjadi link embed
                         $embedUrl = $rawVideoUrl;
                         if(str_contains($rawVideoUrl, 'watch?v=')) {
                             $embedUrl = str_replace('watch?v=', 'embed/', $rawVideoUrl);
@@ -29,5 +38,13 @@
                      <iframe class="w-full h-full bg-slate-900" src="<?php echo e($embedUrl); ?>" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
                 </div>
             </div>
+
+            
+            <?php if(isset($latestVideoActivity) && !empty($latestVideoActivity->video_url)): ?>
+                <div class="mt-6">
+                    <p class="text-cyan-400 font-medium text-sm">Sedang memutar:</p>
+                    <p class="text-white font-bold text-lg"><?php echo e($latestVideoActivity->title); ?></p>
+                </div>
+            <?php endif; ?>
         </div>
     </div><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/landing/video.blade.php ENDPATH**/ ?>
