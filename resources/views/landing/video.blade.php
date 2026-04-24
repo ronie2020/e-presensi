@@ -17,7 +17,7 @@
             <div class="relative aspect-video rounded-[2rem] overflow-hidden shadow-[0_0_40px_rgba(34,211,238,0.15)] border border-white/10 dark:border-slate-700/50 group cursor-pointer bg-slate-800/50 dark:bg-slate-900/80 backdrop-blur-md p-1 sm:p-2 transition-colors duration-300">
                 <div class="w-full h-full rounded-2xl overflow-hidden relative">
                     @php   
-                        $rawVideoUrl = 'https://www.youtube.com/watch?v=Ryc_cLLWef4'; 
+                        $rawVideoUrl = 'https://www.youtube.com/watch?v=7TMXpAZbE1s&list=PLQwMxsqb0Ozu5sbEFRf5nQNrqyU0XFznH'; 
                         $embedUrl = $rawVideoUrl;
                         if(str_contains($rawVideoUrl, 'watch?v=')) {
                             $embedUrl = str_replace('watch?v=', 'embed/', $rawVideoUrl);
