@@ -47,8 +47,13 @@ use App\Http\Controllers\StudentQuizController;
 
 // CBT & Ujian
 use App\Http\Controllers\CbtController;
+use App\Http\Controllers\CbtEventController;
+use App\Http\Controllers\CbtQuestionController;
+use App\Http\Controllers\CbtMonitoringController; 
+use App\Http\Controllers\CbtAnalysisController; 
 use App\Http\Controllers\SebController;
 use App\Http\Controllers\CbtBankController;
+
 
 // Portal Siswa
 use App\Http\Controllers\StudentPortalController;
@@ -353,79 +358,73 @@ Route::middleware('auth')->group(function () {
     Route::post('/schedules/special', [ScheduleController::class, 'storeSpecial'])->name('schedules.special.store');
     Route::delete('/schedules/special/{schedule}', [ScheduleController::class, 'destroySpecial'])->name('schedules.special.destroy');
 
-     // =========================================================================
-    //  CBT & UJIAN (ADMIN/GURU)
+   
+    // =========================================================================
+    //  CBT & UJIAN (ADMIN/GURU) - REFACTORED ROUTES
     // =========================================================================
     Route::prefix('cbt')->name('cbt.')->group(function () {    
         
-        // --- ROUTE EVENT/KEGIATAN ---
-        Route::post('/events', [CbtController::class, 'storeEvent'])->name('events.store');
-        Route::get('/events/{id}', [CbtController::class, 'showEvent'])->name('events.show');
-        //-- UPDATE FOLDER:
-        Route::put('/events/{id}', [CbtController::class, 'updateEvent'])->name('events.update'); 
+        // --- 1. EVENT / FOLDER (Ditangani oleh CbtEventController) ---
+        Route::get('/', [CbtEventController::class, 'index'])->name('index');
+        Route::post('/events', [CbtEventController::class, 'store'])->name('events.store');
+        Route::get('/events/{id}', [CbtEventController::class, 'show'])->name('events.show');
+        Route::put('/events/{id}', [CbtEventController::class, 'update'])->name('events.update'); 
 
-        // 1. CETAK KARTU PESERTA
+        // --- 2. UJIAN UTAMA (CRUD & Status) ---
+        Route::get('/exam/create', [CbtController::class, 'create'])->name('create');
+        Route::post('/exam', [CbtController::class, 'store'])->name('store');
+        Route::get('/exam/{exam}/edit', [CbtController::class, 'edit'])->name('edit');
+        Route::put('/exam/{exam}', [CbtController::class, 'update'])->name('update');
+        Route::delete('/exam/{exam}', [CbtController::class, 'destroy'])->name('destroy');
+        Route::post('/exams/{id}/toggle-status', [CbtController::class, 'toggleStatus'])->name('toggle_status');
+        Route::post('/exams/{id}/clone', [CbtController::class, 'cloneExam'])->name('clone');
+
+        // --- 3. KARTU & HASIL GLOBAL ---
         Route::get('/cards', [CbtController::class, 'cardIndex'])->name('cards.index');
         Route::get('/cards/print', [CbtController::class, 'printCards'])->name('cards.print');
-        
-        // 2. HASIL GLOBAL
         Route::get('/results', [CbtController::class, 'results'])->name('results');     
 
-        // 3. RESOURCE UTAMA (CRUD UJIAN)
-        Route::resource('/', CbtController::class)->parameters(['' => 'exam']);
+        // --- 4. REKAP & ANALISIS ---
+        Route::get('/recap/{id}', [CbtAnalysisController::class, 'recap'])->name('recap');
+        Route::get('/analysis/{id}', [CbtAnalysisController::class, 'analysis'])->name('analysis');
+        Route::get('/analysis/{id}/print', [CbtAnalysisController::class, 'printAnalysis'])->name('analysis.print');        
+        Route::get('/recap/{exam}/{student}/detail', [CbtAnalysisController::class, 'resultDetail'])->name('result.detail');
+        Route::post('/recap/{exam}/retake/{student}', [CbtMonitoringController::class, 'allowRetake'])->name('student.retake'); // Menggunakan Monitoring Controller karena ini aksi proctoring       
+        Route::post('/recap/{id}/sync', [CbtAnalysisController::class, 'syncToGradebook'])->name('sync_grades');
+        Route::get('/export/{id}/{type}', [CbtAnalysisController::class, 'export'])->name('export');
+        Route::post('/grade-essay', [CbtAnalysisController::class, 'gradeEssay'])->name('grade_essay');
         
-        // 4. REKAP & ANALISIS
-        Route::get('/recap/{id}', [CbtController::class, 'recap'])->name('recap');
-        Route::get('/analysis/{id}', [CbtController::class, 'analysis'])->name('analysis');
-        Route::get('/analysis/{id}/print', [CbtController::class, 'printAnalysis'])->name('analysis.print');        
-        Route::get('/recap/{exam}/{student}/detail', [CbtController::class, 'resultDetail'])->name('result.detail');
-        Route::post('/recap/{exam}/retake/{student}', [CbtController::class, 'allowRetake'])->name('student.retake');        
-        Route::post('/recap/{id}/sync', [CbtController::class, 'syncToGradebook'])->name('sync_grades');
-        Route::get('/export/{id}/{type}', [CbtController::class, 'export'])->name('export');
-        
-        // 5. MANAJEMEN SOAL
-        Route::get('/exam/{exam}/questions', [CbtController::class, 'manageQuestions'])->name('questions.manage');
-        Route::post('/exam/{exam}/questions', [CbtController::class, 'storeQuestion'])->name('questions.store');
-        Route::put('/questions/{question}/update', [CbtController::class, 'updateQuestion'])->name('questions.update');
-        Route::delete('/questions/{id}', [CbtController::class, 'destroyQuestion'])->name('questions.destroy');
+        // --- 5. MANAJEMEN SOAL ---
+        Route::get('/exam/{exam}/questions', [CbtQuestionController::class, 'manageQuestions'])->name('questions.manage');
+        Route::post('/exam/{exam}/questions', [CbtQuestionController::class, 'storeQuestion'])->name('questions.store');
+        Route::put('/questions/{question}/update', [CbtQuestionController::class, 'updateQuestion'])->name('questions.update');
+        Route::delete('/questions/{id}', [CbtQuestionController::class, 'destroyQuestion'])->name('questions.destroy');
+        Route::get('/exam/{exam}/questions/print', [CbtQuestionController::class, 'printQuestions'])->name('questions.print');
+        Route::get('/exam/{exam}/export-questions', [CbtQuestionController::class, 'exportQuestions'])->name('questions.export_excel');
+        Route::post('/exam/{exam}/import', [CbtQuestionController::class, 'importQuestions'])->name('questions.import');
+        Route::get('/questions/template', [CbtQuestionController::class, 'downloadTemplate'])->name('questions.template');
+        Route::post('/exam/{exam}/refresh-token', [CbtController::class, 'refresh_token'])->name('refresh_token');
+        Route::delete('/exam/{exam}/questions/bulk-delete', [CbtQuestionController::class, 'bulkDelete'])->name('questions.bulk_delete');
+        Route::put('/exam/{exam}/questions/bulk-weight', [CbtQuestionController::class, 'bulkWeight'])->name('questions.bulk_weight');
 
-        Route::get('/exam/{exam}/questions/print', [CbtController::class, 'printQuestions'])->name('questions.print');
-        Route::get('/exam/{exam}/export-questions', [CbtController::class, 'exportQuestions'])->name('questions.export_excel');
-
-          // --- PREVIEW DAN EXPORT WORD CBT ---
+        // --- 6. PREVIEW & WORD ---
         Route::get('/exam/{exam}/preview', [CbtController::class, 'preview'])->name('preview');
         Route::get('/exam/{exam}/export-word', [CbtController::class, 'exportWord'])->name('export_word');
         
-        Route::post('/exam/{exam}/import', [CbtController::class, 'importQuestions'])->name('questions.import');
-        Route::get('/questions/template', [CbtController::class, 'downloadTemplate'])->name('questions.template');
-        Route::post('/exam/{exam}/refresh-token', [CbtController::class, 'refresh_token'])->name('refresh_token');
-        
-         // Bulk Actions 
-        Route::delete('/exam/{exam}/questions/bulk-delete', [CbtController::class, 'bulkDelete'])->name('questions.bulk_delete');
-        Route::put('/exam/{exam}/questions/bulk-weight', [CbtController::class, 'bulkWeight'])->name('questions.bulk_weight');
-
-        // 6. MONITORING & RESET
+        // --- 7. MONITORING ---
         Route::get('/monitoring/{exam_id}', [CbtController::class, 'monitoring'])->name('monitoring');
         Route::post('/reset/{exam}/{student}', [CbtController::class, 'resetExam'])->name('reset');
         Route::get('/monitoring/{id}/data', [CbtController::class, 'getMonitoringData'])->name('monitoring_data');
         Route::post('/monitoring/{id}/auto-token', [CbtController::class, 'autoRotateToken'])->name('auto_token');
-        
-        // 7. FOTO PENGAWASAN (PROCTORING)
         Route::get('/monitoring/{exam}/{student}/photos', [CbtController::class, 'getStudentPhotos'])->name('monitoring.photos');
 
-        // 8. ROUTE UNTUK MENILAI ESSAI MANUAL
-        Route::post('/grade-essay', [CbtController::class, 'gradeEssay'])->name('grade_essay');
-
-        // 9. INTEGRASI BANK SOAL (TARIK & SIMPAN)        
+        // --- 8. BANK SOAL INTEGRASI ---        
         Route::post('/exam/{exam}/pull-from-bank', [CbtBankController::class, 'importToExam'])->name('import_from_bank');
         Route::post('/exam/{exam}/export-to-bank', [CbtBankController::class, 'storeFromExam'])->name('export_to_bank');
     
-          Route::post('/exams/{id}/toggle-status', [\App\Http\Controllers\CbtController::class, 'toggleStatus'])->name('toggle_status');
-        Route::post('/exams/{id}/clone', [\App\Http\Controllers\CbtController::class, 'cloneExam'])->name('clone');
-        
-        // Rute untuk Cetak Administrasi Ujian
-        Route::get('/{id}/attendance', [\App\Http\Controllers\CbtController::class, 'attendanceList'])->name('attendance');
-        Route::get('/{id}/minutes', [\App\Http\Controllers\CbtController::class, 'minutes'])->name('minutes');
+        // --- 9. ADMINISTRASI (CETAK HADIR & BERITA ACARA) ---
+        Route::get('/{id}/attendance', [CbtController::class, 'attendanceList'])->name('attendance');
+        Route::get('/{id}/minutes', [CbtController::class, 'minutes'])->name('minutes');
     });
 
      // === BANK SOAL TERPUSAT (Gudang Soal) ===
