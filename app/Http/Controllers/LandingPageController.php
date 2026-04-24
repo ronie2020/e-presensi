@@ -282,20 +282,24 @@ class LandingPageController extends Controller
             ->take(6)
             ->get();
 
-             $latestVideoActivity = \App\Models\SchoolActivity::whereNotNull('video_url')
+        $latestVideoActivity = \App\Models\SchoolActivity::whereNotNull('video_url')
             ->where('video_url', '!=', '')
             ->latest()
             ->first();
 
-        return view('welcome', compact(
+             // TAMBAHAN: Ambil 1 Pengumuman Terbaru untuk dijadikan Pop-up
+        $popupAnnouncement = \App\Models\Announcement::latest()->first();
+
+         return view('welcome', compact(
             'stats', 'barChartData', 'libraryStats', 'libraryChartData', 
             'announcements', 'achievements', 'activities', 'teachers',
             'guestbooks', 'allGuestbooks', 'extracurriculars', 'agendas', 'schoolStats',
             'alumniStats', 'alumniTestimonials', 'habitLabels', 'habitData', 'habitStats',
             'latestBooks', 'latestArticles',
-            'visitorCount', // <-- Pastikan ini ada
-            'publicExams',   // <-- WAJIB ADA: Variabel ujian yang dilempar ke view
-            'latestVideoActivity' // <-- TAMBAHKAN VARIABEL INI KE COMPACT
+            'visitorCount',
+            'publicExams',
+            'latestVideoActivity',
+            'popupAnnouncement' 
         ));
     }
 

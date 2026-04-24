@@ -54,18 +54,26 @@ class AnnouncementController extends Controller
     }
 
     // -- LOGIKA PENGUMUMAN --
-    public function store(Request $request)
+   public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // TAMBAHAN: Validasi file gambar maksimal 2MB
         ]);
 
-        Announcement::create([
+        $data = [
             'title' => $request->title,
             'content' => $request->content,
             'user_id' => Auth::id(),
-        ]);
+        ];
+
+        // TAMBAHAN: Proses penyimpanan file gambar jika ada
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('announcements', 'public');
+        }
+
+        Announcement::create($data);
 
         // HAPUS CACHE LANDING PAGE AGAR DATA BARU MUNCUL
         Cache::forget('landing_general_data');
@@ -73,16 +81,24 @@ class AnnouncementController extends Controller
         return back()->with('success', 'Pengumuman berhasil dipublikasikan.');
     }
 
+
     public function destroy($id)
     {
-        Announcement::findOrFail($id)->delete();
+        $announcement = Announcement::findOrFail($id);
+        
+        // TAMBAHAN: Hapus file gambar dari storage sebelum datanya dihapus
+        if ($announcement->image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($announcement->image);
+        }
+
+        $announcement->delete();
         
         // HAPUS CACHE LANDING PAGE AGAR DATA BARU MUNCUL
         Cache::forget('landing_general_data');
 
         return back()->with('success', 'Pengumuman dihapus.');
     }
-
+    
     // -- LOGIKA AGENDA --
     public function storeAgenda(Request $request)
     {

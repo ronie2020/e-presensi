@@ -20,30 +20,32 @@
         [x-cloak] { display: none !important; }
     </style>
 
-
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
-
     @php
-        $infoPopup = [
-            'active' => true, 
-            'id' => 'Inovasi daerah', 
-            'image' => asset('images/simadu.jpg'),
-            'title' => 'Inovasi Daerah Kab. Ciamis 2026',
-            'message' => 'SELAMAT MENGIKUTI INOVASI DAERAH 2026. Untuk informasi lebih lanjut, silakan klik tombol di bawah.',
-            'cta_text' => 'Info Simadu',
-            'cta_link' => 'https://e-presensi.smpn3lakbok.sch.id/portal', 
-            'color' => 'cyan'
-        ];
+        // PERBAIKAN: Logika Pop-up Dinamis
+        $hasPopup = isset($popupAnnouncement) && !empty($popupAnnouncement);
 
-        $colorTheme = match($infoPopup['color']) {
-            'cyan' => ['badge_bg' => 'bg-cyan-50', 'badge_text' => 'text-cyan-700', 'badge_ring' => 'ring-cyan-600/20', 'btn_bg' => 'bg-cyan-600', 'btn_hover' => 'hover:bg-cyan-500', 'btn_ring' => 'focus-visible:outline-cyan-600'],
-            'blue' => ['badge_bg' => 'bg-blue-50', 'badge_text' => 'text-blue-700', 'badge_ring' => 'ring-blue-600/20', 'btn_bg' => 'bg-blue-600', 'btn_hover' => 'hover:bg-blue-500', 'btn_ring' => 'focus-visible:outline-blue-600'],
-            'amber' => ['badge_bg' => 'bg-amber-50', 'badge_text' => 'text-amber-700', 'badge_ring' => 'ring-amber-600/20', 'btn_bg' => 'bg-amber-600', 'btn_hover' => 'hover:bg-amber-500', 'btn_ring' => 'focus-visible:outline-amber-600'],
-            'rose' => ['badge_bg' => 'bg-rose-50', 'badge_text' => 'text-rose-700', 'badge_ring' => 'ring-rose-600/20', 'btn_bg' => 'bg-rose-600', 'btn_hover' => 'hover:bg-rose-500', 'btn_ring' => 'focus-visible:outline-rose-600'],
-            default => ['badge_bg' => 'bg-emerald-50', 'badge_text' => 'text-emerald-700', 'badge_ring' => 'ring-emerald-600/20', 'btn_bg' => 'bg-emerald-600', 'btn_hover' => 'hover:bg-emerald-500', 'btn_ring' => 'focus-visible:outline-emerald-600'],
-        };
+        if ($hasPopup) {
+            // Gunakan ID pengumuman agar cache di browser spesifik per pengumuman
+            $popupId = 'pengumuman_' . $popupAnnouncement->id;
+            
+            // Cek apakah pengumuman memiliki gambar, jika tidak gunakan gambar default/logo sekolah
+            $popupImage = !empty($popupAnnouncement->image) ? asset('storage/' . $popupAnnouncement->image) : asset('images/simadu.jpg');
+            
+            $popupTitle = $popupAnnouncement->title;
+            
+            // Buang tag HTML dan batasi teks agar tidak kepanjangan di dalam Pop-up
+            $popupMessage = Str::limit(strip_tags($popupAnnouncement->content), 200);
+        }
+
+        // Tema warna default (Cyan)
+        $colorTheme = [
+            'badge_bg' => 'bg-cyan-50', 
+            'badge_text' => 'text-cyan-700', 
+            'badge_ring' => 'ring-cyan-600/20', 
+            'btn_bg' => 'bg-cyan-600', 
+            'btn_hover' => 'hover:bg-cyan-500', 
+            'btn_ring' => 'focus-visible:outline-cyan-600'
+        ];
     @endphp
 </head>
 <!-- PERBAIKAN: Tambahkan overflow-x-hidden, w-full, dan class Dark Mode (dark:bg-slate-900 dark:text-slate-100) pada tag body -->
@@ -56,22 +58,29 @@
         infoPopupOpen: false,
         
         initPopup() {
-            const isActive = {{ $infoPopup['active'] ? 'true' : 'false' }};
-            const popupId = '{{ $infoPopup['id'] }}';
-            if (isActive) {
+            @if($hasPopup)
+                const popupId = '{{ $popupId }}';
+                // Cek localStorage apakah user sudah pernah klik 'Jangan tampilkan lagi'
                 const hasSeen = localStorage.getItem('seen_' + popupId);
+                
                 if (!hasSeen) {
-                    this.infoPopupOpen = true;
-                    document.body.style.overflow = 'hidden'; 
+                    // Beri jeda 1 detik agar website selesai memuat sebelum pop-up muncul
+                    setTimeout(() => {
+                        this.infoPopupOpen = true;
+                        document.body.style.overflow = 'hidden'; 
+                    }, 1000);
                 }
-            }
+            @endif
         },
 
         closeInfoPopup(dontShowAgain) {
             this.infoPopupOpen = false;
             document.body.style.overflow = ''; 
+            
             if (dontShowAgain) {
-                localStorage.setItem('seen_{{ $infoPopup['id'] }}', 'true');
+                @if($hasPopup)
+                    localStorage.setItem('seen_{{ $popupId }}', 'true');
+                @endif
             }
         },
 
@@ -122,7 +131,8 @@
         </div>
     </div>
 
-    <!-- INFO POPUP MODAL -->
+    <!-- INFO POPUP MODAL (Hanya dirender jika ada data pengumuman) -->
+    @if($hasPopup)
     <div x-cloak x-show="infoPopupOpen" @keydown.escape.window="if(infoPopupOpen) closeInfoPopup(false)" class="fixed inset-0 z-[100] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div x-show="infoPopupOpen" x-transition.opacity class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" @click="closeInfoPopup(false)"></div>
         <div class="flex min-h-full p-4 sm:p-6">
@@ -130,17 +140,17 @@
                 <button @click="closeInfoPopup(false)" class="absolute top-3 right-3 z-20 text-slate-500 hover:text-slate-800 transition-colors bg-white/90 backdrop-blur shadow-sm rounded-full p-1.5"><i class="ph-bold ph-x text-xl"></i></button>
                 <div class="flex flex-col md:flex-row w-full">
                     <div class="md:w-5/12 h-48 sm:h-56 md:h-auto shrink-0 relative bg-slate-200">
-                        <img src="{{ $infoPopup['image'] }}" alt="Info Sekolah" class="absolute inset-0 w-full h-full object-cover">
+                        <img src="{{ $popupImage }}" alt="Info Sekolah" class="absolute inset-0 w-full h-full object-cover">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-black/10"></div>
                     </div>
                     <div class="md:w-7/12 p-6 md:p-8 flex flex-col justify-center bg-white relative">
                         <div class="mb-4">
-                            <span class="inline-flex items-center rounded-md {{ $colorTheme['badge_bg'] }} px-2 py-1 text-xs font-medium {{ $colorTheme['badge_text'] }} ring-1 ring-inset {{ $colorTheme['badge_ring'] }} mb-3">Informasi Terbaru</span>
-                            <h3 id="modal-title" class="text-xl font-black text-slate-900 leading-tight">{{ $infoPopup['title'] }}</h3>
+                            <span class="inline-flex items-center rounded-md {{ $colorTheme['badge_bg'] }} px-2 py-1 text-xs font-medium {{ $colorTheme['badge_text'] }} ring-1 ring-inset {{ $colorTheme['badge_ring'] }} mb-3">Pengumuman Terbaru</span>
+                            <h3 id="modal-title" class="text-xl font-black text-slate-900 leading-tight">{{ $popupTitle }}</h3>
                         </div>
-                        <div class="prose prose-sm text-slate-500 mb-6 leading-relaxed"><p>{{ $infoPopup['message'] }}</p></div>
+                        <div class="prose prose-sm text-slate-500 mb-6 leading-relaxed"><p>{{ $popupMessage }}</p></div>
                         <div class="flex flex-col sm:flex-row gap-3 items-center mt-6">
-                            <a href="{{ $infoPopup['cta_link'] }}" @click="closeInfoPopup(false)" class="w-full sm:w-auto text-center inline-flex justify-center items-center gap-2 rounded-xl {{ $colorTheme['btn_bg'] }} px-5 py-2.5 text-sm font-semibold text-white shadow-sm {{ $colorTheme['btn_hover'] }} transition-all">{{ $infoPopup['cta_text'] }} <i class="ph-bold ph-arrow-right"></i></a>
+                            <button @click="closeInfoPopup(false)" class="w-full sm:w-auto text-center inline-flex justify-center items-center gap-2 rounded-xl {{ $colorTheme['btn_bg'] }} px-5 py-2.5 text-sm font-semibold text-white shadow-sm {{ $colorTheme['btn_hover'] }} transition-all">Tutup Pengumuman</button>
                             <button @click="closeInfoPopup(true)" class="text-xs font-semibold text-slate-400 hover:text-slate-600 underline decoration-slate-300 underline-offset-4 transition-colors">Jangan tampilkan lagi</button>
                         </div>
                     </div>
@@ -148,6 +158,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- NAVBAR -->
     @include('landing.navbar')
