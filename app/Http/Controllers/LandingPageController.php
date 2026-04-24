@@ -293,8 +293,9 @@ class LandingPageController extends Controller
             'guestbooks', 'allGuestbooks', 'extracurriculars', 'agendas', 'schoolStats',
             'alumniStats', 'alumniTestimonials', 'habitLabels', 'habitData', 'habitStats',
             'latestBooks', 'latestArticles',
-            'visitorCount', 
-            'publicExams'   
+            'visitorCount', // <-- Pastikan ini ada
+            'publicExams',   // <-- WAJIB ADA: Variabel ujian yang dilempar ke view
+            'latestVideoActivity' // <-- TAMBAHKAN VARIABEL INI KE COMPACT
         ));
     }
 
