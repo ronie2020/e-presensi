@@ -17,18 +17,18 @@
             <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100">
                 <div>
                     <div class="flex items-center gap-2 text-slate-400 text-sm font-bold mb-1">
-                        <a href="{{ route('cbt.index') }}" class="hover:text-blue-600 transition flex items-center gap-1">
+                        <a href="{{ route('cbt.index') }}" class="hover:text-cyan-600 transition flex items-center gap-1">
                             <i class="ph-bold ph-folders"></i> Dashboard Folder
                         </a>
                         <span>/</span>
-                        <span class="text-blue-600">{{ $event->name }}</span>
+                        <span class="text-cyan-600">{{ $event->name }}</span>
                     </div>
                     <h1 class="text-2xl font-black text-slate-800 flex items-center gap-2">
-                        <i class="ph-fill ph-folder-open text-blue-500"></i> {{ $event->name }}
+                        <i class="ph-fill ph-folder-open text-cyan-500"></i> {{ $event->name }}
                     </h1>
                 </div>
 
-                <a href="{{ route('cbt.create', ['event_id' => $event->id]) }}" class="group flex items-center gap-3 px-6 py-3.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-500/30">
+                <a href="{{ route('cbt.create', ['event_id' => $event->id]) }}" class="group flex items-center gap-3 px-6 py-3.5 bg-cyan-600 text-white rounded-xl font-bold hover:bg-cyan-500 active:scale-95 transition-all shadow-lg shadow-cyan-500/30">
                     <i class="ph-bold ph-plus text-lg"></i> Tambah Ujian Mapel
                 </a>
             </div>
@@ -36,11 +36,11 @@
             {{-- STATISTIK --}}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <div class="bg-white rounded-[1.5rem] p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-xl shrink-0"><i class="ph-bold ph-check-circle"></i></div>
+                    <div class="w-12 h-12 bg-cyan-50 text-cyan-600 rounded-full flex items-center justify-center text-xl shrink-0"><i class="ph-bold ph-check-circle"></i></div>
                     <div><p class="text-[10px] text-slate-400 font-bold uppercase mb-0.5 tracking-wider">Ujian Aktif</p><h4 class="text-2xl font-black text-slate-800">{{ $stats['active_exams'] }}</h4></div>
                 </div>
                 <div class="bg-white rounded-[1.5rem] p-5 border border-slate-100 shadow-sm flex items-center gap-4">
-                    <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center text-xl shrink-0"><i class="ph-bold ph-list-numbers"></i></div>
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center text-xl shrink-0"><i class="ph-bold ph-list-numbers"></i></div>
                     <div><p class="text-[10px] text-slate-400 font-bold uppercase mb-0.5 tracking-wider">Total Soal</p><h4 class="text-2xl font-black text-slate-800">{{ number_format($stats['total_questions']) }}</h4></div>
                 </div>
                 <div class="bg-white rounded-[1.5rem] p-5 border border-slate-100 shadow-sm flex items-center gap-4">
@@ -78,7 +78,7 @@
                     <div class="col-span-full mb-2 mt-4 first:mt-0">
                         <div class="flex items-center gap-4">
                             <div class="bg-white border border-slate-200 rounded-[1rem] p-3 pr-5 flex items-center gap-3 shadow-sm w-max">
-                                <div class="w-10 h-10 rounded-[0.75rem] flex items-center justify-center shadow-sm border {{ $dateLabel === 'Belum Dijadwalkan' ? 'bg-rose-50 border-rose-100 text-rose-500' : 'bg-blue-50 border-blue-100 text-blue-600' }}">
+                                <div class="w-10 h-10 rounded-[0.75rem] flex items-center justify-center shadow-sm border {{ $dateLabel === 'Belum Dijadwalkan' ? 'bg-rose-50 border-rose-100 text-rose-500' : 'bg-cyan-50 border-cyan-100 text-cyan-600' }}">
                                     @if($dateLabel === 'Belum Dijadwalkan')
                                         <i class="ph-bold ph-calendar-slash text-xl"></i>
                                     @else
@@ -96,7 +96,7 @@
 
                     {{-- KARTU UJIAN UNTUK HARI TERSEBUT --}}
                     @foreach($dailyExams as $exam)
-                        <div class="bg-white border border-slate-100 rounded-[2rem] p-6 hover:shadow-xl hover:shadow-blue-900/5 hover:border-blue-200 transition-all duration-300 group relative flex flex-col h-full">
+                        <div class="bg-white border border-slate-100 rounded-[2rem] p-6 hover:shadow-xl hover:shadow-cyan-900/5 hover:border-cyan-200 transition-all duration-300 group relative flex flex-col h-full">
                             
                            {{-- SWITCH TOGGLE STATUS --}}
                            <div class="absolute top-6 right-6 z-10" title="Aktifkan / Nonaktifkan Ujian">
@@ -120,7 +120,7 @@
                                             <i class="ph-bold ph-google-logo"></i> G-Form
                                         </span>
                                     @else
-                                        <span class="inline-block px-3 py-1 bg-blue-50 text-blue-600 border border-blue-100 rounded-lg text-[10px] font-black uppercase tracking-wide">
+                                        <span class="inline-block px-3 py-1 bg-cyan-50 text-cyan-600 border border-cyan-100 rounded-lg text-[10px] font-black uppercase tracking-wide">
                                             <i class="ph-bold ph-desktop"></i> CBT
                                         </span>
                                     @endif
@@ -134,7 +134,7 @@
                                         @endif
                                     </span>
                                 </div>
-                                <h4 class="font-black text-xl text-slate-800 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">{{ $exam->title }}</h4>
+                                <h4 class="font-black text-xl text-slate-800 leading-tight group-hover:text-cyan-600 transition-colors line-clamp-2">{{ $exam->title }}</h4>
                             </div>
 
                             {{-- WAKTU MULAI DAN AKHIR DENGAN NAMA HARI (BAHASA INDONESIA) --}}
@@ -152,16 +152,16 @@
                             </div>
                             
                             <div class="flex-1 space-y-4">
-                                <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between group/token cursor-pointer hover:bg-blue-50 hover:border-blue-200 transition shadow-sm" onclick="copyToken('{{ $exam->token }}')">
+                                <div class="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between group/token cursor-pointer hover:bg-cyan-50 hover:border-cyan-200 transition shadow-sm" onclick="copyToken('{{ $exam->token }}')">
                                     <div>
                                         <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block mb-0.5">Token Ujian</span>
-                                        <span class="font-mono font-black text-xl text-slate-700 tracking-widest group-hover/token:text-blue-600">{{ $exam->token }}</span>
+                                        <span class="font-mono font-black text-xl text-slate-700 tracking-widest group-hover/token:text-cyan-600">{{ $exam->token }}</span>
                                     </div>
-                                    <div class="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 group-hover/token:text-blue-500 transition"><i class="ph-bold ph-copy"></i></div>
+                                    <div class="w-8 h-8 bg-slate-50 rounded-full flex items-center justify-center text-slate-400 shadow-sm border border-slate-100 group-hover/token:text-cyan-500 transition"><i class="ph-bold ph-copy"></i></div>
                                 </div>
                                 <div class="flex items-center gap-4 text-xs text-slate-500 font-bold">
                                     <span class="flex items-center gap-1.5"><i class="ph-bold ph-users text-purple-500"></i> Kelas {{ $exam->class_level }}</span>
-                                    <span class="flex items-center gap-1.5"><i class="ph-bold ph-clock text-blue-500"></i> {{ $exam->duration_minutes }} Menit</span>
+                                    <span class="flex items-center gap-1.5"><i class="ph-bold ph-clock text-cyan-500"></i> {{ $exam->duration_minutes }} Menit</span>
                                 </div>
                             </div>
 
@@ -173,7 +173,7 @@
                                         <i class="ph-bold ph-google-logo text-lg mr-2"></i> Form
                                     </a>
                                 @else
-                                    <a href="{{ route('cbt.questions.manage', $exam->id) }}" class="flex items-center justify-center p-2.5 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-800 hover:text-white transition-all group/btn" title="Kelola Soal Ujian">
+                                    <a href="{{ route('cbt.questions.manage', $exam->id) }}" class="flex items-center justify-center p-2.5 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold hover:bg-cyan-600 hover:text-white transition-all group/btn" title="Kelola Soal Ujian">
                                         <i class="ph-bold ph-list-numbers text-lg mr-2"></i> Soal
                                     </a>
                                 @endif
@@ -187,10 +187,10 @@
                                 </a>
 
                                 <!-- Baris 3: SEB & Edit -->
-                                <a href="{{ route('cbt.download_seb', $exam->id) }}" class="col-span-1 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 hover:text-blue-600 transition-all">
+                                <a href="{{ route('cbt.download_seb', $exam->id) }}" class="col-span-1 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 hover:text-cyan-600 transition-all">
                                     <i class="ph-bold ph-file-lock text-lg mr-2"></i> SEB
                                 </a>
-                                <a href="{{ route('cbt.edit', $exam->id) }}" class="col-span-1 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 hover:text-blue-600 transition-all">
+                                <a href="{{ route('cbt.edit', $exam->id) }}" class="col-span-1 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 hover:text-cyan-600 transition-all">
                                     <i class="ph-bold ph-pencil-simple text-lg mr-2"></i> Edit
                                 </a>
 
@@ -210,10 +210,10 @@
                                 </form>
                                 
                                 <!-- Baris 5: Cetak Dokumen -->
-                                <a href="{{ route('cbt.attendance', $exam->id) }}" target="_blank" class="col-span-1 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 hover:text-blue-600 transition-all">
+                                <a href="{{ route('cbt.attendance', $exam->id) }}" target="_blank" class="col-span-1 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 hover:text-cyan-600 transition-all">
                                     <i class="ph-bold ph-users-three text-lg mr-2"></i> Absensi
                                 </a>
-                                <a href="{{ route('cbt.minutes', $exam->id) }}" target="_blank" class="col-span-1 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 hover:text-blue-600 transition-all">
+                                <a href="{{ route('cbt.minutes', $exam->id) }}" target="_blank" class="col-span-1 flex items-center justify-center p-2.5 bg-white border border-slate-200 text-slate-600 rounded-xl text-xs font-bold hover:bg-slate-100 hover:text-cyan-600 transition-all">
                                     <i class="ph-bold ph-file-text text-lg mr-2"></i> Berita Acara
                                 </a>
                             </div>
@@ -228,7 +228,7 @@
                         </div>
                         <h3 class="text-slate-800 font-bold text-xl mb-2">Folder Ini Masih Kosong</h3>
                         <p class="text-slate-500 max-w-xs mx-auto mb-8 text-sm">Silakan buat jadwal ujian baru yang akan dimasukkan ke dalam kegiatan <b>{{ $event->name }}</b>.</p>
-                        <a href="{{ route('cbt.create', ['event_id' => $event->id]) }}" class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-500/30 text-sm">
+                        <a href="{{ route('cbt.create', ['event_id' => $event->id]) }}" class="inline-flex items-center gap-2 px-6 py-3 bg-cyan-600 text-white rounded-xl font-bold hover:bg-cyan-500 transition shadow-lg shadow-cyan-500/30 text-sm">
                             <i class="ph-bold ph-plus"></i> Tambah Ujian Mapel
                         </a>
                     </div>

@@ -130,22 +130,22 @@
                                 // -------------------------------------------------------------
                             ?>
 
-                            <li class="relative">
+                             <li class="relative">
                                 <a href="<?php echo e(isset($item['route']) ? route($item['route']) : '#'); ?>" 
                                    class="group flex items-center py-3 rounded-xl transition-all duration-200 outline-none relative
                                           <?php echo e($isActive 
-                                             ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-900/50' 
+                                             ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-900/50' 
                                              : 'text-slate-400 hover:text-white hover:bg-white/5'); ?>"
                                    :class="sidebarExpanded ? 'px-4 justify-start' : 'justify-center px-0 w-full'">
                                     
                                     <!-- Active Marker -->
                                     <?php if($isActive): ?>
-                                        <div x-show="sidebarExpanded" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-yellow-400 rounded-r-full shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div>
+                                        <div x-show="sidebarExpanded" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-cyan-300 rounded-r-full shadow-[0_0_10px_rgba(103,232,249,0.5)]"></div>
                                     <?php endif; ?>
 
                                     <!-- Icon -->
                                     <i class="ph-bold <?php echo e($item['icon'] ?? 'ph-circle'); ?> shrink-0 transition-all duration-200 relative z-10
-                                              <?php echo e($isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-300 group-hover:scale-110'); ?>"
+                                              <?php echo e($isActive ? 'text-white' : 'text-slate-400 group-hover:text-cyan-300 group-hover:scale-110'); ?>"
                                        :class="sidebarExpanded ? 'text-xl mr-3' : 'text-2xl mr-0'"></i>
                                     
                                     <!-- Text -->
