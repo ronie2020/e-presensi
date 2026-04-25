@@ -94,41 +94,40 @@
             </div>
         </div>
 
-        
-        <div class="animate-enter relative rounded-[2.5rem] bg-slate-900 p-6 md:p-10 mb-6 text-white shadow-2xl shadow-cyan-900/10 overflow-hidden group border border-white/10 card-print">
+         
+        <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-6 md:p-10 mb-6 text-white shadow-2xl shadow-cyan-900/30 overflow-hidden group border border-white/20 card-print">
             
             
-            <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-blue-900/80 to-slate-900 z-0"></div>
-            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none no-print"></div>
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none no-print mix-blend-overlay"></div>
             
             
-            <div class="absolute top-0 right-0 w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] bg-cyan-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 no-print animate-blob -mr-10 -mt-10"></div>
-            <div class="absolute bottom-0 left-0 w-[200px] sm:w-[300px] h-[200px] sm:h-[300px] bg-blue-600 rounded-full mix-blend-overlay filter blur-[80px] opacity-20 no-print animate-blob" style="animation-delay: 2s;"></div>
+            <div class="absolute top-0 left-0 w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] bg-cyan-300/30 rounded-full blur-[100px] group-hover:opacity-70 transition-opacity duration-1000 no-print animate-blob -ml-20 -mt-20"></div>
+            <div class="absolute bottom-0 right-0 w-[200px] sm:w-[300px] h-[200px] sm:h-[300px] bg-indigo-900/40 rounded-full blur-[120px] no-print animate-blob" style="animation-delay: 2s;"></div>
             
             <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
                 <div>
                     
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-cyan-100 text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm no-print">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 border border-white/30 text-white text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm no-print">
                         <span class="relative flex h-2 w-2">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75"></span>
                           <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
                         </span>
                         System Online                        
                     </div>
                     
                     <h1 class="text-2xl md:text-5xl font-extrabold text-white tracking-tight mb-3">
-                        Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white"><?php echo e(Auth::user()->name ?? 'Administrator'); ?></span> 
+                        Halo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-cyan-200"><?php echo e(Auth::user()->name ?? 'Administrator'); ?></span> 
                     </h1>
-                    <p class="text-blue-100/80 text-sm md:text-base max-w-xl leading-relaxed">
+                    <p class="text-cyan-50 text-sm md:text-base max-w-xl leading-relaxed">
                         Berikut adalah ringkasan aktivitas akademik dan kehadiran siswa untuk periode 
-                        <span class="text-white font-bold bg-white/10 px-2 py-0.5 rounded shadow-sm border border-white/10" x-text="period === 'today' ? 'Hari Ini' : (period === 'week' ? 'Minggu Ini' : 'Bulan Ini')"></span>.
+                        <span class="text-blue-900 font-bold bg-cyan-100 px-2 py-0.5 rounded shadow-sm border border-cyan-200" x-text="period === 'today' ? 'Hari Ini' : (period === 'week' ? 'Minggu Ini' : 'Bulan Ini')"></span>.
                     </p>
                 </div>
                 
                 
                 <div class="flex flex-col gap-3 w-full md:w-auto md:min-w-[320px] filter-group no-print">
-                    <div class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-xl p-1 border border-white/10 mb-1 relative shadow-sm">
-                        <div x-show="loadingTarget === 'date'" class="absolute inset-0 bg-slate-900/50 rounded-lg flex items-center justify-center z-10">
+                    <div class="flex items-center justify-between bg-white/10 backdrop-blur-md rounded-xl p-1 border border-white/20 mb-1 relative shadow-sm">
+                        <div x-show="loadingTarget === 'date'" class="absolute inset-0 bg-blue-900/50 rounded-lg flex items-center justify-center z-10">
                             <i class="ph-bold ph-spinner animate-spin text-cyan-400"></i>
                         </div>
 
@@ -137,7 +136,7 @@
                         </button>
                         <div class="relative group/date flex-1 mx-2">
                              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i class="ph-bold ph-calendar text-cyan-300 group-hover/date:text-white transition-colors"></i>
+                                <i class="ph-bold ph-calendar text-cyan-200 group-hover/date:text-white transition-colors"></i>
                             </div>
                             <input type="date" x-model="date" @change="loading = true; loadingTarget = 'date'; updateFilter(period)" 
                                 class="w-full bg-transparent border-none text-white text-xs font-bold text-center focus:ring-0 cursor-pointer placeholder-cyan-200">
@@ -147,30 +146,30 @@
                         </button>
                     </div>
 
-                    <div class="bg-slate-900/50 backdrop-blur-md p-1.5 rounded-xl flex border border-white/10 shadow-lg overflow-x-auto">
+                    <div class="bg-blue-950/40 backdrop-blur-md p-1.5 rounded-xl flex border border-white/20 shadow-lg overflow-x-auto">
                         <button @click="updateFilter('today')" :disabled="loading"
-                            :class="period === 'today' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-900/50 ring-1 ring-cyan-500' : 'text-blue-100 hover:text-white hover:bg-white/5'" 
+                            :class="period === 'today' ? 'bg-white text-blue-700 shadow-lg shadow-blue-900/20' : 'text-blue-50 hover:text-white hover:bg-white/10'" 
                             class="flex-1 py-2.5 px-3 md:px-4 text-[10px] md:text-xs font-bold rounded-lg transition-all duration-300 flex justify-center items-center gap-1 md:gap-2 whitespace-nowrap">
                             <i x-show="loading && loadingTarget === 'today'" class="ph-bold ph-spinner animate-spin"></i>
                             <span x-text="(loading && loadingTarget === 'today') ? '' : 'Harian'"></span>
                         </button>
 
                         <button @click="updateFilter('week')" :disabled="loading"
-                            :class="period === 'week' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-900/50 ring-1 ring-cyan-500' : 'text-blue-100 hover:text-white hover:bg-white/5'" 
+                            :class="period === 'week' ? 'bg-white text-blue-700 shadow-lg shadow-blue-900/20' : 'text-blue-50 hover:text-white hover:bg-white/10'" 
                             class="flex-1 py-2.5 px-3 md:px-4 text-[10px] md:text-xs font-bold rounded-lg transition-all duration-300 flex justify-center items-center gap-1 md:gap-2 whitespace-nowrap">
                             <i x-show="loading && loadingTarget === 'week'" class="ph-bold ph-spinner animate-spin"></i>
                             <span x-text="(loading && loadingTarget === 'week') ? '' : 'Mingguan'"></span>
                         </button>
 
                         <button @click="updateFilter('month')" :disabled="loading"
-                            :class="period === 'month' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-900/50 ring-1 ring-cyan-500' : 'text-blue-100 hover:text-white hover:bg-white/5'" 
+                            :class="period === 'month' ? 'bg-white text-blue-700 shadow-lg shadow-blue-900/20' : 'text-blue-50 hover:text-white hover:bg-white/10'" 
                             class="flex-1 py-2.5 px-3 md:px-4 text-[10px] md:text-xs font-bold rounded-lg transition-all duration-300 flex justify-center items-center gap-1 md:gap-2 whitespace-nowrap">
                             <i x-show="loading && loadingTarget === 'month'" class="ph-bold ph-spinner animate-spin"></i>
                             <span x-text="(loading && loadingTarget === 'month') ? '' : 'Bulanan'"></span>
                         </button>
                         
                         
-                        <a href="<?php echo e(route('reports.printDaily', ['date' => request('date')])); ?>" target="_blank" class="ml-2 bg-white/10 text-white p-2.5 rounded-lg hover:bg-white/20 hover:scale-105 active:scale-95 transition-all shadow-sm border border-white/10 shrink-0 flex items-center gap-2" title="Cetak Laporan Harian">
+                        <a href="<?php echo e(route('reports.printDaily', ['date' => request('date')])); ?>" target="_blank" class="ml-2 bg-white/10 text-white p-2.5 rounded-lg hover:bg-white/20 hover:scale-105 active:scale-95 transition-all shadow-sm border border-white/20 shrink-0 flex items-center gap-2" title="Cetak Laporan Harian">
                             <i class="ph-bold ph-printer text-lg"></i>
                         </a>
                     </div>

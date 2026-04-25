@@ -26,21 +26,24 @@
 @endpush
 
 @section('content')
-    <!-- HEADER SECTION -->
-    <div class="bg-slate-900 pt-32 pb-32 relative overflow-hidden -mt-24">
-        <div class="absolute inset-0 bg-indigo-600/10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
-        <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-900"></div>
+    <!-- HEADER SECTION (Tema Diselaraskan: Cyan to Blue) -->
+    <div class="pt-32 pb-32 relative overflow-hidden -mt-24 bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.05] mix-blend-overlay"></div>
 
         <!-- Animated Blobs -->
-        <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-600 rounded-full mix-blend-overlay filter blur-[80px] opacity-30 animate-blob"></div>
-        <div class="absolute bottom-0 left-0 w-96 h-96 bg-blue-600 rounded-full mix-blend-overlay filter blur-[80px] opacity-30 animate-blob" style="animation-delay: 2s;"></div>
+        <div class="absolute top-0 left-0 w-full md:w-[60%] h-full bg-cyan-300/20 rounded-full blur-[100px] -translate-x-1/4 -translate-y-1/4 pointer-events-none animate-blob"></div>
+        <div class="absolute bottom-0 right-0 w-full md:w-[50%] h-[80%] bg-indigo-900/30 rounded-full blur-[120px] translate-x-1/4 translate-y-1/4 pointer-events-none animate-blob" style="animation-delay: 2s;"></div>
         
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center animate-enter">
-            <span class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-sm">
+            <span class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-white/10 border border-white/20 text-cyan-100 text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-sm shadow-sm">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-300 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-400"></span>
+                </span>
                 <i class="ph-fill ph-image"></i> Dokumentasi Sekolah
             </span>
             <h1 class="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">Galeri Kegiatan</h1>
-            <p class="text-slate-400 text-lg max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
+            <p class="text-blue-50 text-lg max-w-2xl mx-auto mb-12 leading-relaxed font-medium opacity-90">
                 Kumpulan momen, aktivitas, dan dokumentasi inspiratif dari siswa serta guru SMP Negeri 3 Lakbok.
             </p>
         </div>
@@ -70,7 +73,7 @@
 
                 <!-- Card dengan Alpine.js Data -->
                 <div x-data="{ activeImg: '{{ $coverImage ? asset('storage/' . $coverImage) : '' }}' }" 
-                     class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-slate-100 flex flex-col h-full animate-enter" 
+                     class="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-cyan-900/10 hover:border-cyan-200 hover:-translate-y-2 transition-all duration-300 border border-slate-100 flex flex-col h-full animate-enter" 
                      style="animation-delay: {{ ($index % 6) * 100 }}ms">
                     
                     <!-- Area Gambar Utama -->
@@ -78,7 +81,7 @@
                         @if($coverImage)
                             <img :src="activeImg" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="{{ $activity->title }}">
                         @else
-                            <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-50">
+                            <div class="w-full h-full flex flex-col items-center justify-center text-cyan-300 bg-cyan-50/50">
                                 <i class="ph-duotone ph-image text-5xl mb-2 opacity-50"></i>
                             </div>
                         @endif
@@ -105,7 +108,7 @@
 
                     <!-- Area Teks -->
                     <div class="p-6 flex-1 flex flex-col">
-                        <h4 class="text-xl font-black text-slate-800 mb-3 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-tight">
+                        <h4 class="text-xl font-black text-slate-800 mb-3 group-hover:text-cyan-600 transition-colors line-clamp-2 leading-tight">
                             {{ $activity->title }}
                         </h4>
                         <p class="text-sm text-slate-500 leading-relaxed line-clamp-3 mb-4 flex-1 font-medium">
@@ -115,12 +118,12 @@
                         <!-- MINI GALLERY THUMBNAILS (Hanya Muncul Jika Foto > 1) -->
                         @if($totalImages > 1)
                             <div class="mb-4 pt-4 border-t border-slate-100">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="ph-fill ph-images text-indigo-500"></i> {{ $totalImages }} Foto Tersedia</p>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2"><i class="ph-fill ph-images text-cyan-500"></i> {{ $totalImages }} Foto Tersedia</p>
                                 <div class="flex gap-2 overflow-x-auto pb-2 mini-scroll">
                                     @foreach($images as $img)
                                         <button @click="activeImg = '{{ asset('storage/' . $img) }}'" 
                                                 class="w-14 h-14 shrink-0 rounded-xl overflow-hidden border-2 transition-all"
-                                                :class="activeImg === '{{ asset('storage/' . $img) }}' ? 'border-indigo-600 opacity-100 shadow-md' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'">
+                                                :class="activeImg === '{{ asset('storage/' . $img) }}' ? 'border-cyan-500 opacity-100 shadow-md' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'">
                                             <img src="{{ asset('storage/' . $img) }}" class="w-full h-full object-cover">
                                         </button>
                                     @endforeach
@@ -130,9 +133,9 @@
 
                         <!-- Area Tombol Aksi -->
                         <div class="mt-auto pt-4 border-t border-slate-100 flex gap-2">
-                            <!-- Tombol Lihat Foto Full (Mengambil dari activeImg agar zoom sesuai gambar yang dipilih) -->
+                            <!-- Tombol Lihat Foto Full -->
                             @if($coverImage)
-                                <a :href="activeImg" target="_blank" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-indigo-600 rounded-xl text-sm font-bold transition-colors">
+                                <a :href="activeImg" target="_blank" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 text-slate-600 hover:bg-cyan-50 hover:text-cyan-600 rounded-xl text-sm font-bold transition-colors">
                                     <i class="ph-bold ph-arrows-out text-lg"></i>
                                     <span>Zoom Foto</span>
                                 </a>

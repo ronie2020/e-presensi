@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>CV - {{ $teacher->name }}</title>
+    <title>CV - <?php echo e($teacher->name); ?></title>
     <style>
         /* Reset Margin Page agar background full ke ujung kertas */
         @page {
@@ -175,7 +175,7 @@
 </head>
 <body>
 
-    @php
+    <?php
         // LOGIKA GAMBAR UNTUK DOMPDF (Ubah gambar ke Base64 agar pasti terbaca oleh PDF)
         $photoData = null;
         if($teacher->photo_path && file_exists(public_path('storage/' . $teacher->photo_path))) {
@@ -193,7 +193,7 @@
             $decodedRoles = is_string($teacher->role) ? json_decode($teacher->role, true) : $teacher->role;
             $displayRole = is_array($decodedRoles) ? implode(', ', $decodedRoles) : $teacher->role;
         }
-    @endphp
+    ?>
 
     <table class="main-layout">
         <tr>
@@ -201,50 +201,50 @@
             <td class="sidebar">
                 
                 <div class="profile-img-container">
-                    <img src="{{ $photoData }}" class="profile-img" alt="Foto Profil">
+                    <img src="<?php echo e($photoData); ?>" class="profile-img" alt="Foto Profil">
                 </div>
 
-                <div class="name">{{ $teacher->name }}</div>
-                <div class="job-title">{{ $displayRole ?? 'Guru' }}</div>
+                <div class="name"><?php echo e($teacher->name); ?></div>
+                <div class="job-title"><?php echo e($displayRole ?? 'Guru'); ?></div>
                 
                 <div class="bio">
-                    "{{ $teacher->bio ?? 'Terus belajar dan menginspirasi generasi bangsa.' }}"
+                    "<?php echo e($teacher->bio ?? 'Terus belajar dan menginspirasi generasi bangsa.'); ?>"
                 </div>
 
                 <div class="sidebar-title">Keahlian</div>
                 <ul class="sidebar-list">
-                    @if(!empty($teacher->keahlian))
-                        @foreach(array_map('trim', explode(',', $teacher->keahlian)) as $keahlian)
-                            @if(!empty($keahlian))
-                                <li>{{ $keahlian }}</li>
-                            @endif
-                        @endforeach
-                    @else
+                    <?php if(!empty($teacher->keahlian)): ?>
+                        <?php $__currentLoopData = array_map('trim', explode(',', $teacher->keahlian)); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $keahlian): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php if(!empty($keahlian)): ?>
+                                <li><?php echo e($keahlian); ?></li>
+                            <?php endif; ?>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <?php else: ?>
                         <li style="color:#94a3b8; font-style:italic;">Belum ada data keahlian.</li>
-                    @endif
+                    <?php endif; ?>
                 </ul>
 
                 <div class="sidebar-title">Kontak</div>
                 <div class="contact-info">
-                    @if($teacher->phone)
+                    <?php if($teacher->phone): ?>
                         <strong>Tlp/WA:</strong> <br>
-                        {{ $teacher->phone }}<br><br>
-                    @endif
+                        <?php echo e($teacher->phone); ?><br><br>
+                    <?php endif; ?>
                     <strong>Email:</strong> <br>
-                    {{ $teacher->email }}<br>
+                    <?php echo e($teacher->email); ?><br>
                 </div>
 
                 <div class="sidebar-title">Hobi</div>
                 <ul class="sidebar-list">
-                    @if(!empty($teacher->hobi))
-                        @foreach(array_map('trim', explode(',', $teacher->hobi)) as $hobi)
-                            @if(!empty($hobi))
-                                <li>{{ $hobi }}</li>
-                            @endif
-                        @endforeach
-                    @else
+                    <?php if(!empty($teacher->hobi)): ?>
+                        <?php $__currentLoopData = array_map('trim', explode(',', $teacher->hobi)); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $hobi): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php if(!empty($hobi)): ?>
+                                <li><?php echo e($hobi); ?></li>
+                            <?php endif; ?>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <?php else: ?>
                         <li style="color:#94a3b8; font-style:italic;">Belum ada data hobi.</li>
-                    @endif
+                    <?php endif; ?>
                 </ul>
 
                 <div class="sidebar-title">Data Pribadi</div>
@@ -252,11 +252,11 @@
                     <table>
                         <tr>
                             <td class="pd-label">NIP</td>
-                            <td>: {{ $teacher->nip ?? '-' }}</td>
+                            <td>: <?php echo e($teacher->nip ?? '-'); ?></td>
                         </tr>
                         <tr>
                             <td class="pd-label">Pangkat</td>
-                            <td>: {{ $teacher->pangkat ?? '-' }}</td>
+                            <td>: <?php echo e($teacher->pangkat ?? '-'); ?></td>
                         </tr>
                         <tr>
                             <td class="pd-label">Status</td>
@@ -272,87 +272,88 @@
 
                 <!-- PENDIDIKAN -->
                 <div class="content-title">Pendidikan</div>
-                @if($teacher->educations && $teacher->educations->count() > 0)
+                <?php if($teacher->educations && $teacher->educations->count() > 0): ?>
                     <table class="timeline-table">
-                        @foreach($teacher->educations as $edu)
+                        <?php $__currentLoopData = $teacher->educations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $edu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
-                            <td class="time-col">{{ $edu->start_year ?? '-' }} - {{ $edu->end_year ?? 'Sekarang' }}</td>
+                            <td class="time-col"><?php echo e($edu->start_year ?? '-'); ?> - <?php echo e($edu->end_year ?? 'Sekarang'); ?></td>
                             <td class="desc-col">
-                                <h4>{{ $edu->institution }}</h4>
-                                <p>{{ $edu->degree }}</p>
+                                <h4><?php echo e($edu->institution); ?></h4>
+                                <p><?php echo e($edu->degree); ?></p>
                             </td>
                         </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </table>
-                @else
+                <?php else: ?>
                     <p style="color:#94a3b8; font-style:italic;">Belum ada riwayat pendidikan ditambahkan.</p>
-                @endif
+                <?php endif; ?>
 
                 <br>
                  <!-- PENGALAMAN & PELATIHAN -->
                 <div class="content-title">Pengalaman & Pelatihan</div>
-                @if($teacher->experiences->count() > 0)
+                <?php if($teacher->experiences->count() > 0): ?>
                     <table class="timeline-table">
-                        @foreach($teacher->experiences as $exp)
+                        <?php $__currentLoopData = $teacher->experiences; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $exp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
-                            <td class="time-col">{{ $exp->year ?? '-' }}</td>
+                            <td class="time-col"><?php echo e($exp->year ?? '-'); ?></td>
                             <td class="desc-col">
-                                <h4>{{ $exp->title }}</h4>
+                                <h4><?php echo e($exp->title); ?></h4>
                                 <p>
-                                    {{ $exp->organizer ?? 'Instansi/Penyelenggara' }}
-                                    {{-- TAMBAHAN: Indikator Sertifikat di PDF (Warna dirubah ke Cyan) --}}
-                                    @if(!empty($exp->certificate_path))
+                                    <?php echo e($exp->organizer ?? 'Instansi/Penyelenggara'); ?>
+
+                                    
+                                    <?php if(!empty($exp->certificate_path)): ?>
                                         <span style="color:#06b6d4; font-size:10px; font-weight:bold; margin-left: 5px;">[Tersedia Sertifikat]</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </p>
                             </td>
                         </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </table>
-                @else
+                <?php else: ?>
                     <p style="color:#94a3b8; font-style:italic;">Belum ada riwayat pengalaman ditambahkan.</p>
-                @endif
+                <?php endif; ?>
 
                 <br>
 
                 <!-- KARYA & ARTIKEL (Sebagai Tambahan Portofolio) -->
                 <div class="content-title">Karya Tulis & Artikel</div>
-                @if($teacher->articles->count() > 0)
+                <?php if($teacher->articles->count() > 0): ?>
                     <table class="timeline-table">
-                        @foreach($teacher->articles as $art)
+                        <?php $__currentLoopData = $teacher->articles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $art): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
-                            <td class="time-col">{{ \Carbon\Carbon::parse($art->published_at)->format('Y') }}</td>
+                            <td class="time-col"><?php echo e(\Carbon\Carbon::parse($art->published_at)->format('Y')); ?></td>
                             <td class="desc-col">
-                                <h4>{{ $art->title }}</h4>
-                                <p><strong>{{ $art->category ?? 'Umum' }}</strong> - {{ $art->excerpt }}</p>
+                                <h4><?php echo e($art->title); ?></h4>
+                                <p><strong><?php echo e($art->category ?? 'Umum'); ?></strong> - <?php echo e($art->excerpt); ?></p>
                             </td>
                         </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </table>
-                @else
+                <?php else: ?>
                     <p style="color:#94a3b8; font-style:italic;">Belum ada karya tulis dipublikasikan.</p>
-                @endif
+                <?php endif; ?>
 
                 <br>
 
                 <!-- PRESTASI / PENGHARGAAN -->
-                @if($teacher->portfolios->count() > 0)
+                <?php if($teacher->portfolios->count() > 0): ?>
                 <div class="content-title">Prestasi & Penghargaan</div>
                     <table class="timeline-table">
-                        @foreach($teacher->portfolios as $port)
+                        <?php $__currentLoopData = $teacher->portfolios; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $port): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
-                            <td class="time-col">{{ $port->year ?? '-' }}</td>
+                            <td class="time-col"><?php echo e($port->year ?? '-'); ?></td>
                             <td class="desc-col">
-                                <h4>{{ $port->title }}</h4>
+                                <h4><?php echo e($port->title); ?></h4>
                             </td>
                         </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </table>
-                @endif
+                <?php endif; ?>
 
             </td>
         </tr>
     </table>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/teacher-cv.blade.php ENDPATH**/ ?>

@@ -14,42 +14,36 @@
 @endpush
 
 @section('content')
-    {{-- HEADER SECTION --}}
-    {{-- Menggunakan -mt-24 agar menyatu dengan navbar, dan pt-32 agar konten turun --}}
-    <div class="relative bg-slate-900 pt-32 pb-24 rounded-b-[3rem] shadow-2xl overflow-hidden -mt-24 mb-12">
+    {{-- HEADER SECTION (Tema Diselaraskan: Cyan to Blue, ditumpuk di atas Image) --}}
+    <div class="relative pt-32 pb-24 rounded-b-[3rem] shadow-2xl overflow-hidden -mt-24 mb-12">
         
         {{-- 1. BACKGROUND IMAGE --}}
         <div class="absolute inset-0 z-0">
-            {{-- 
-                TIPS: Pastikan gambar ini ada. Jika tidak, ganti dengan warna solid atau pattern.
-                Fallback ke pattern jika gambar gagal load bisa ditangani dengan CSS atau JS,
-                tapi di sini kita gunakan gradient yang kuat sebagai backup visual.
-            --}}
             <img src="{{ asset('images/netila.jpg') }}" 
                  alt="Background Sekolah" 
-                 class="w-full h-full object-cover opacity-60 transform hover:scale-105 transition-transform duration-[20s]"
-                 onerror="this.style.opacity='0'"> {{-- Hide image if broken so gradient takes over --}}
+                 class="w-full h-full object-cover opacity-90 transform hover:scale-105 transition-transform duration-[70s]"
+                 onerror="this.style.opacity='0'">
             
-            {{-- 2. OVERLAY GELAP --}}
-            <div class="absolute inset-0 bg-gradient-to-b from-slate-900/95 via-slate-900/80 to-slate-900/95"></div>
+            {{-- 2. OVERLAY GRADIENT (Diubah ke Netila Elevate Cyan-Blue) --}}
+            <div class="absolute inset-0 bg-gradient-to-br from-cyan-600/95 via-blue-700/90 to-blue-900/95"></div>
             
             {{-- 3. Pattern Halus --}}
-            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20 mix-blend-overlay"></div>
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
         </div>
 
         {{-- Dekorasi Blur --}}
-        <div class="absolute top-0 right-0 w-96 h-96 bg-indigo-600/30 rounded-full blur-[80px] pointer-events-none translate-x-1/2 -translate-y-1/2 mix-blend-screen animate-float"></div>
-        <div class="absolute bottom-0 left-0 w-80 h-80 bg-blue-600/20 rounded-full blur-[80px] pointer-events-none -translate-x-1/2 translate-y-1/2 mix-blend-screen animate-float" style="animation-delay: 2s"></div>
+        <div class="absolute top-0 right-0 w-96 h-96 bg-cyan-300/30 rounded-full blur-[80px] pointer-events-none translate-x-1/2 -translate-y-1/2 mix-blend-screen animate-float"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-blue-400/20 rounded-full blur-[80px] pointer-events-none -translate-x-1/2 translate-y-1/2 mix-blend-screen animate-float" style="animation-delay: 2s"></div>
         
         {{-- KONTEN HEADER --}}
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center animate-enter">
-            <span class="px-4 py-1.5 bg-white/10 text-indigo-200 rounded-full text-xs font-bold uppercase tracking-widest border border-white/10 mb-6 inline-block backdrop-blur-md shadow-lg">
+            <span class="px-4 py-1.5 bg-white/10 text-cyan-100 rounded-full text-xs font-bold uppercase tracking-widest border border-white/20 mb-6 inline-block backdrop-blur-md shadow-sm">
                 <i class="ph-fill ph-chats-circle mr-1"></i> Kata Alumni
             </span>
             <h1 class="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight drop-shadow-lg leading-tight">
-                Jejak Langkah <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Alumni</span>
+                Jejak Langkah <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 to-white">Alumni</span>
             </h1>
-            <p class="text-slate-300 text-lg max-w-2xl mx-auto font-medium leading-relaxed">
+            <p class="text-blue-50 text-lg max-w-2xl mx-auto font-medium leading-relaxed opacity-90">
                 Kumpulan kisah sukses, kenangan manis, dan inspirasi dari para alumni selama menempuh pendidikan di SMP Negeri 3 Lakbok.
             </p>
         </div>
@@ -61,12 +55,12 @@
         {{-- GRID TESTIMONI --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
             @forelse($testimonials as $index => $testi)
-                <div class="animate-enter bg-white rounded-[2rem] p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] border border-slate-100 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-2 transition-all duration-500 flex flex-col h-full relative group overflow-hidden"
+                <div class="animate-enter bg-white rounded-[2rem] p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] border border-slate-100 hover:shadow-2xl hover:shadow-cyan-900/10 hover:border-cyan-200 hover:-translate-y-2 transition-all duration-500 flex flex-col h-full relative group overflow-hidden"
                      style="animation-delay: {{ $index * 100 }}ms">
                     
                     {{-- Decor Corner --}}
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-slate-50 to-indigo-50/50 rounded-bl-[100%] -mr-8 -mt-8 transition-colors group-hover:from-indigo-50 group-hover:to-blue-50"></div>
-                    <i class="ph-fill ph-quotes text-6xl text-slate-100 absolute top-4 right-4 group-hover:text-indigo-100 transition-colors duration-500 transform group-hover:rotate-12"></i>
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-slate-50 to-cyan-50/50 rounded-bl-[100%] -mr-8 -mt-8 transition-colors group-hover:from-cyan-50 group-hover:to-blue-50"></div>
+                    <i class="ph-fill ph-quotes text-6xl text-slate-100 absolute top-4 right-4 group-hover:text-cyan-100 transition-colors duration-500 transform group-hover:rotate-12"></i>
 
                     {{-- User Info --}}
                     <div class="flex items-center gap-4 mb-6 relative z-10">
@@ -74,20 +68,20 @@
                             @if($testi->student && $testi->student->photo_path)
                                 <img src="{{ asset('storage/' . $testi->student->photo_path) }}" class="w-full h-full object-cover">
                             @else
-                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-blue-600 text-white font-bold text-xl">
+                                <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-bold text-xl">
                                     {{ substr($testi->student->name ?? 'A', 0, 1) }}
                                 </div>
                             @endif
                         </div>
                         <div class="min-w-0">
-                            <h4 class="font-bold text-slate-900 text-base truncate group-hover:text-indigo-600 transition-colors" title="{{ $testi->student->name ?? 'Alumni' }}">
+                            <h4 class="font-bold text-slate-900 text-base truncate group-hover:text-cyan-600 transition-colors" title="{{ $testi->student->name ?? 'Alumni' }}">
                                 {{ $testi->student->name ?? 'Alumni' }}
                             </h4>
                             <div class="flex flex-col">
                                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
                                     Lulusan {{ $testi->student->graduation_year ?? '-' }}
                                 </span>
-                                <span class="text-xs text-indigo-600 font-bold truncate max-w-[150px] bg-indigo-50 px-2 py-0.5 rounded-md mt-1 w-fit">
+                                <span class="text-xs text-cyan-700 font-bold truncate max-w-[150px] bg-cyan-50 border border-cyan-100 px-2 py-0.5 rounded-md mt-1 w-fit">
                                     {{ $testi->activity_status }} 
                                     @if($testi->campus_name || $testi->company_name)
                                         @ {{ $testi->campus_name ?? $testi->company_name }}
@@ -129,27 +123,26 @@
         </div>
 
         {{-- CTA SECTION --}}
-        <div class="animate-enter relative bg-slate-900 rounded-[2.5rem] p-8 md:p-16 text-center shadow-2xl overflow-hidden group">
+        <div class="animate-enter relative bg-gradient-to-br from-cyan-600 via-blue-600 to-blue-900 rounded-[2.5rem] p-8 md:p-16 text-center shadow-2xl overflow-hidden group border border-white/10">
             <!-- Decorative Background -->
-            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-            <div class="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
             
             <!-- Blob Decor -->
-            <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/30 rounded-full blur-[60px] translate-x-1/2 -translate-y-1/2"></div>
-            <div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/30 rounded-full blur-[60px] -translate-x-1/2 translate-y-1/2"></div>
+            <div class="absolute top-0 right-0 w-64 h-64 bg-cyan-300/30 rounded-full blur-[60px] translate-x-1/2 -translate-y-1/2 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-indigo-900/30 rounded-full blur-[60px] -translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
 
             <div class="relative z-10 max-w-2xl mx-auto">
                 <h3 class="text-3xl font-black text-white mb-4 tracking-tight">Kamu Alumni Sekolah Ini?</h3>
-                <p class="text-slate-300 mb-8 font-medium leading-relaxed">
+                <p class="text-blue-50 mb-8 font-medium leading-relaxed opacity-90">
                     Mari berbagi pengalaman dan inspirasi untuk adik-adik kelasmu. Partisipasi Anda sangat berarti untuk kemajuan sekolah dan update data tracer study.
                 </p>
                 
                 @auth('student')
-                    <a href="{{ route('alumni.tracer') }}" class="inline-flex items-center justify-center px-8 py-4 text-sm font-bold text-white bg-indigo-600 rounded-full hover:bg-indigo-500 hover:scale-105 transition-all shadow-lg shadow-indigo-600/30 group">
+                    <a href="{{ route('alumni.tracer') }}" class="inline-flex items-center justify-center px-8 py-4 text-sm font-bold text-blue-700 bg-white rounded-full hover:bg-slate-50 hover:-translate-y-1 transition-all shadow-lg shadow-black/20 group">
                         <i class="ph-bold ph-pencil-simple mr-2 text-lg"></i> Tulis Testimoni
                     </a>
                 @else
-                    <a href="{{ route('student.login') }}" class="inline-flex items-center justify-center px-8 py-4 text-sm font-bold text-slate-900 bg-white rounded-full hover:bg-slate-100 hover:scale-105 transition-all shadow-lg shadow-white/10">
+                    <a href="{{ route('student.login') }}" class="inline-flex items-center justify-center px-8 py-4 text-sm font-bold text-blue-700 bg-white rounded-full hover:bg-slate-50 hover:-translate-y-1 transition-all shadow-lg shadow-black/20">
                         <i class="ph-bold ph-sign-in mr-2 text-lg"></i> Login Alumni
                     </a>
                 @endauth
