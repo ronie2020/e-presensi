@@ -205,8 +205,10 @@
             <div style="float: right; width: 250px; text-align: center;">
                 <p>Pengawas Ujian,</p>
                 <div style="height: 70px;"></div>
-                <p style="font-weight: bold; text-decoration: underline;">(..............................................)</p>
-                <p>NIP. </p>
+                <div style="display: inline-block; text-align: left;">
+                    <p style="font-weight: bold; text-decoration: underline;">(..............................................)</p>
+                    <p>NIP. </p>
+                </div>
             </div>
 
             <div style="clear: both;"></div>

@@ -101,9 +101,8 @@
         </div>
         <div class="double-line"></div>
 
-         <div class="judul-surat">
-            <h2>BERITA ACARA </h2>
-            <p style="font-weight: bold; margin-top: 5px; font-size: 12pt;"><?php echo e(strtoupper($exam->title)); ?></p>
+        <div class="judul-surat">
+            <h2>BERITA ACARA PELAKSANAAN UJIAN</h2>
             <?php
                 // Mengambil tahun ajaran yang sedang aktif dari database
                 $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();
@@ -111,7 +110,6 @@
             ?>
             <p>Tahun Pelajaran <?php echo e($tahunPelajaran); ?></p>
         </div>
-
 
         <div class="content-text">
             <p class="mb-5">
@@ -158,14 +156,18 @@
             <div class="ttd-box" style="float: left;">
                 <p>Proktor / Teknisi,</p>
                 <div style="height: 70px;"></div>
-                <p style="font-weight: bold; text-decoration: underline;">(..............................................)</p>
-                <p>NIP. </p>
+                <div style="display: inline-block; text-align: left;">
+                    <p style="font-weight: bold; text-decoration: underline;">(..............................................)</p>
+                    <p>NIP. </p>
+                </div>
             </div>
             <div class="ttd-box" style="float: right;">
                 <p>Pengawas Ujian,</p>
                 <div style="height: 70px;"></div>
-                <p style="font-weight: bold; text-decoration: underline;">(..............................................)</p>
-                <p>NIP. </p>
+                <div style="display: inline-block; text-align: left;">
+                    <p style="font-weight: bold; text-decoration: underline;">(..............................................)</p>
+                    <p>NIP. </p>
+                </div>
             </div>
             <div class="clear"></div>
         </div>
