@@ -78,14 +78,14 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
            
-            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-6 md:p-10 text-white shadow-xl shadow-blue-900/30 overflow-hidden group border border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-6 md:p-10 text-white shadow-xl shadow-cyan-900/30 overflow-hidden group border border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 
                 
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
 
                 <div class="relative z-10 flex items-center gap-5">
                     <div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner shrink-0">
-                        <i class="ph-duotone ph-chart-polar text-4xl text-blue-300"></i>
+                        <i class="ph-duotone ph-chart-polar text-4xl text-cyan-200"></i>
                     </div>
                     <div>
                         
@@ -101,7 +101,7 @@
 
                         <div class="flex flex-wrap gap-2 mb-2">
                             <?php $__currentLoopData = $userRoles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $role): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-blue-200 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-cyan-100 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">
                                     <i class="ph-bold ph-check-circle"></i> <?php echo e($role); ?>
 
                                 </span>
@@ -116,11 +116,11 @@
                         </div>
 
                         <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-white">
-                            <i class="ph-duotone ph-medal text-blue-300"></i> 
+                            <i class="ph-duotone ph-medal text-cyan-300"></i> 
                             Kelola Portofolio <?php echo e(isset($targetUser) && $targetUser->id !== auth()->id() ? '- ' . $targetUser->name : ''); ?>
 
                         </h2>
-                        <p class="text-blue-100/80 text-sm mt-1">Tambahkan karya, materi, dan pengalaman untuk ditampilkan di direktori publik.</p>
+                        <p class="text-cyan-50/80 text-sm mt-1">Tambahkan karya, materi, dan pengalaman untuk ditampilkan di direktori publik.</p>
                     </div>
                 </div>
                 <div class="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full md:w-auto">
@@ -159,7 +159,7 @@
                                     </ul>
                                 </div>
                             `,
-                            confirmButtonColor: '#3b82f6', confirmButtonText: 'Tutup & Perbaiki', customClass: { popup: 'rounded-3xl' }
+                            confirmButtonColor: '#0891b2', confirmButtonText: 'Tutup & Perbaiki', customClass: { popup: 'rounded-3xl' }
                         });
                     });
                 </script>
@@ -170,19 +170,19 @@
                 
                 <div class="md:w-64 bg-slate-50 border-r border-slate-100 p-6 shrink-0 z-10">
                     <nav class="flex md:flex-col gap-2 overflow-x-auto custom-scrollbar pb-2 md:pb-0 hide-scroll-mobile">
-                        <button @click="activeTab = 'pendidikan'" :class="activeTab === 'pendidikan' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/20' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-700'" class="w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap">
+                        <button @click="activeTab = 'pendidikan'" :class="activeTab === 'pendidikan' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-700'" class="w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap">
                             <i class="ph-bold ph-graduation-cap text-lg"></i> Pendidikan
                         </button>
-                        <button @click="activeTab = 'pengalaman'" :class="activeTab === 'pengalaman' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-700'" class="w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap">
+                        <button @click="activeTab = 'pengalaman'" :class="activeTab === 'pengalaman' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-700'" class="w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap">
                             <i class="ph-bold ph-student text-lg"></i> Pengalaman
                         </button>
-                        <button @click="activeTab = 'materi'" :class="activeTab === 'materi' ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-700'" class="w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap">
+                        <button @click="activeTab = 'materi'" :class="activeTab === 'materi' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-700'" class="w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap">
                             <i class="ph-bold ph-presentation-chart text-lg"></i> Materi & Media
                         </button>
-                        <button @click="activeTab = 'portofolio'" :class="activeTab === 'portofolio' ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-700'" class="w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap">
+                        <button @click="activeTab = 'portofolio'" :class="activeTab === 'portofolio' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-700'" class="w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap">
                             <i class="ph-bold ph-trophy text-lg"></i> Prestasi / Galeri
                         </button>
-                        <button @click="activeTab = 'artikel'" :class="activeTab === 'artikel' ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-700'" class="w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap">
+                        <button @click="activeTab = 'artikel'" :class="activeTab === 'artikel' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-600/30' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-700'" class="w-full text-left px-4 py-3.5 rounded-2xl font-bold text-sm transition-all flex items-center gap-3 whitespace-nowrap">
                             <i class="ph-bold ph-article text-lg"></i> Artikel Tulisan
                         </button>
                     </nav>
@@ -194,7 +194,7 @@
                     
                     <div x-show="activeTab === 'pengalaman'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
                         <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
-                            <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><i class="ph-bold ph-student"></i></div>
+                            <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center"><i class="ph-bold ph-student"></i></div>
                             <h3 class="text-lg font-black text-slate-800">Riwayat Pelatihan & Sertifikasi</h3>
                         </div>
                         
@@ -203,25 +203,25 @@
                         <?php if(request('user_id')): ?> <input type="hidden" name="user_id" value="<?php echo e(request('user_id')); ?>"> <?php endif; ?>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tahun</label>
-                            <input type="number" name="year" value="<?php echo e(old('year')); ?>" placeholder="2023" class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700" required>
+                            <input type="number" name="year" value="<?php echo e(old('year')); ?>" placeholder="2023" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700" required>
                         </div>
                         <div class="md:col-span-3">
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Pelatihan / Sertifikasi</label>
-                            <input type="text" name="title" value="<?php echo e(old('title')); ?>" placeholder="Cth: Diklat Guru Penggerak..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700" required>
+                            <input type="text" name="title" value="<?php echo e(old('title')); ?>" placeholder="Cth: Diklat Guru Penggerak..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700" required>
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Penyelenggara</label>
-                            <input type="text" name="organizer" value="<?php echo e(old('organizer')); ?>" placeholder="Cth: Kemdikbud..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700">
+                            <input type="text" name="organizer" value="<?php echo e(old('organizer')); ?>" placeholder="Cth: Kemdikbud..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
                         </div>
                         
                         
                         <div class="md:col-span-2">
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Upload Sertifikat (PDF/Gambar)</label>
-                            <input type="file" name="certificate" accept=".pdf,image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-blue-50 file:text-blue-700 bg-white rounded-2xl border border-slate-200">
+                            <input type="file" name="certificate" accept=".pdf,image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-cyan-50 file:text-cyan-700 bg-white rounded-2xl border border-slate-200">
                         </div>
 
                         <div class="md:col-span-4 flex justify-end">
-                            <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="w-full md:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all flex justify-center items-center gap-2">
+                            <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="w-full md:w-auto px-8 py-3 bg-cyan-600 text-white font-bold rounded-2xl hover:bg-cyan-700 shadow-lg shadow-cyan-500/30 transition-all flex justify-center items-center gap-2">
                                 <span x-show="!isSubmitting"><i class="ph-bold ph-plus"></i> Tambah</span>
                                 <span x-show="isSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Loading...</span>
                             </button>
@@ -230,16 +230,16 @@
 
                         <div class="space-y-3">
                             <?php $__empty_1 = true; $__currentLoopData = $experiences ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $exp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                                <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-slate-200 rounded-2xl hover:bg-blue-50/50 transition-colors group gap-3 sm:gap-0">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-slate-200 rounded-2xl hover:bg-cyan-50/50 transition-colors group gap-3 sm:gap-0">
                                     <div class="flex items-start gap-4 pr-4">
-                                        <div class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-black mt-1"><?php echo e($exp->year); ?></div>
+                                        <div class="px-3 py-1 bg-cyan-100 text-cyan-700 rounded-lg text-xs font-black mt-1"><?php echo e($exp->year); ?></div>
                                         <div>
                                             <h4 class="font-bold text-slate-800"><?php echo e($exp->title); ?></h4>
                                             <p class="text-sm text-slate-500 mt-0.5"><?php echo e($exp->organizer); ?></p>
                                             
                                             
                                             <?php if($exp->certificate_path): ?>
-                                                <a href="<?php echo e(asset('storage/' . $exp->certificate_path)); ?>" target="_blank" class="inline-flex items-center gap-1 mt-2 text-[10px] uppercase tracking-wider font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg hover:bg-blue-100 transition-colors">
+                                                <a href="<?php echo e(asset('storage/' . $exp->certificate_path)); ?>" target="_blank" class="inline-flex items-center gap-1 mt-2 text-[10px] uppercase tracking-wider font-black text-cyan-600 bg-cyan-50 px-2 py-1 rounded-lg hover:bg-cyan-100 transition-colors">
                                                     <i class="ph-bold ph-certificate"></i> Lihat Sertifikat
                                                 </a>
                                             <?php endif; ?>
@@ -269,7 +269,7 @@
                     
                     <div x-show="activeTab === 'materi'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
                         <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
-                            <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center"><i class="ph-bold ph-presentation-chart"></i></div>
+                            <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center"><i class="ph-bold ph-presentation-chart"></i></div>
                             <h3 class="text-lg font-black text-slate-800">Materi & Media Pembelajaran</h3>
                         </div>
                         
@@ -278,24 +278,24 @@
                             <?php if(request('user_id')): ?> <input type="hidden" name="user_id" value="<?php echo e(request('user_id')); ?>"> <?php endif; ?>
                             <div class="md:col-span-2">
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Judul Materi</label>
-                                <input type="text" name="title" value="<?php echo e(old('title')); ?>" class="w-full rounded-2xl border-slate-200 bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700" required>
+                                <input type="text" name="title" value="<?php echo e(old('title')); ?>" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700" required>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tipe (Misal: Modul PDF, Slide PPT)</label>
-                                <input type="text" name="type" value="<?php echo e(old('type')); ?>" class="w-full rounded-2xl border-slate-200 bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700">
+                                <input type="text" name="type" value="<?php echo e(old('type')); ?>" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Link URL (Jika File di GDrive/Youtube)</label>
-                                <input type="url" name="file_url" value="<?php echo e(old('file_url')); ?>" placeholder="https://..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700">
+                                <input type="url" name="file_url" value="<?php echo e(old('file_url')); ?>" placeholder="https://..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
                             </div>
                             <div class="md:col-span-2 p-4 bg-white border-2 border-dashed border-slate-200 rounded-2xl">
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Atau Upload File Langsung (Opsional)</label>
                                 <div class="flex items-center gap-3">
-                                    <input type="file" name="file" @change="fileName = $event.target.files[0].name" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                                    <input type="file" name="file" @change="fileName = $event.target.files[0].name" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100">
                                 </div>
                             </div>
                             <div class="md:col-span-2 flex justify-end">
-                                <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="w-full md:w-auto px-8 py-3 bg-purple-600 text-white font-bold rounded-2xl hover:bg-purple-700 shadow-lg shadow-purple-500/20 transition-all flex justify-center items-center gap-2">
+                                <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="w-full md:w-auto px-8 py-3 bg-cyan-600 text-white font-bold rounded-2xl hover:bg-cyan-700 shadow-lg shadow-cyan-500/30 transition-all flex justify-center items-center gap-2">
                                     <span x-show="!isSubmitting"><i class="ph-bold ph-upload-simple"></i> Simpan Materi</span>
                                     <span x-show="isSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Mengunggah...</span>
                                 </button>
@@ -313,9 +313,9 @@
                                             <h4 class="font-bold text-sm text-slate-800 line-clamp-2 leading-tight"><?php echo e($mat->title); ?></h4>
                                             <p class="text-xs font-medium text-slate-500 mt-1 mb-2"><?php echo e($mat->type); ?></p>
                                             <?php if($mat->file_url): ?> 
-                                                <a href="<?php echo e($mat->file_url); ?>" target="_blank" class="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-black text-purple-600 bg-purple-50 px-2 py-1 rounded-lg hover:bg-purple-100"><i class="ph-bold ph-link"></i> Buka Link</a>
+                                                <a href="<?php echo e($mat->file_url); ?>" target="_blank" class="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-black text-cyan-600 bg-cyan-50 px-2 py-1 rounded-lg hover:bg-cyan-100"><i class="ph-bold ph-link"></i> Buka Link</a>
                                             <?php elseif($mat->file_path): ?>
-                                                <a href="<?php echo e(asset('storage/'.$mat->file_path)); ?>" target="_blank" class="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-lg hover:bg-blue-100"><i class="ph-bold ph-download-simple"></i> Download</a>
+                                                <a href="<?php echo e(asset('storage/'.$mat->file_path)); ?>" target="_blank" class="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-black text-cyan-600 bg-cyan-50 px-2 py-1 rounded-lg hover:bg-cyan-100"><i class="ph-bold ph-download-simple"></i> Download</a>
                                             <?php endif; ?>
                                         </div>
                                     </div>
@@ -338,7 +338,7 @@
                     
                     <div x-show="activeTab === 'portofolio'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
                         <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
-                            <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="ph-bold ph-trophy"></i></div>
+                            <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center"><i class="ph-bold ph-trophy"></i></div>
                             <h3 class="text-lg font-black text-slate-800">Galeri Portofolio & Pencapaian</h3>
                         </div>
                         
@@ -355,11 +355,11 @@
                                   }
                                   
                                   if(overSize) {
-                                      Swal.fire({ icon: 'warning', title: 'Foto Terlalu Besar', text: 'Ukuran maksimal 1 foto adalah 2MB. Silakan kompres foto Anda terlebih dahulu.', confirmButtonColor: '#10b981', customClass: { popup: 'rounded-3xl' } });
+                                      Swal.fire({ icon: 'warning', title: 'Foto Terlalu Besar', text: 'Ukuran maksimal 1 foto adalah 2MB. Silakan kompres foto Anda terlebih dahulu.', confirmButtonColor: '#0891b2', customClass: { popup: 'rounded-3xl' } });
                                       return;
                                   }
                                   if(totalSize > 8388608) { // 8MB
-                                      Swal.fire({ icon: 'warning', title: 'Kapasitas Penuh', text: 'Total keseluruhan foto melebihi kapasitas memori server (8MB). Silakan kurangi jumlah foto yang diupload bersamaan.', confirmButtonColor: '#10b981', customClass: { popup: 'rounded-3xl' } });
+                                      Swal.fire({ icon: 'warning', title: 'Kapasitas Penuh', text: 'Total keseluruhan foto melebihi kapasitas memori server (8MB). Silakan kurangi jumlah foto yang diupload bersamaan.', confirmButtonColor: '#0891b2', customClass: { popup: 'rounded-3xl' } });
                                       return;
                                   }
                                   
@@ -372,16 +372,16 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
                                 <div class="md:col-span-2">
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Judul Kegiatan / Prestasi</label>
-                                    <input type="text" name="title" value="<?php echo e(old('title')); ?>" class="w-full rounded-2xl border-slate-200 bg-white focus:border-emerald-500 focus:ring-emerald-500 font-bold text-slate-700" required>
+                                    <input type="text" name="title" value="<?php echo e(old('title')); ?>" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700" required>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tahun</label>
-                                    <input type="text" name="year" value="<?php echo e(old('year')); ?>" class="w-full rounded-2xl border-slate-200 bg-white focus:border-emerald-500 focus:ring-emerald-500 font-bold text-slate-700">
+                                    <input type="text" name="year" value="<?php echo e(old('year')); ?>" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
                                 </div>
                                 <div class="md:col-span-3 p-4 bg-white border-2 border-dashed border-slate-200 rounded-2xl flex flex-col md:flex-row gap-4 items-center justify-between">
                                     <div class="flex-1 w-full">
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Upload Foto Dokumentasi (Bisa Pilih Lebih Dari Satu)</label>
-                                        <input type="file" name="images[]" accept="image/*" multiple @change="imagePreviews = Array.from($event.target.files).map(file => URL.createObjectURL(file))" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-emerald-50 file:text-emerald-700" required>
+                                        <input type="file" name="images[]" accept="image/*" multiple @change="imagePreviews = Array.from($event.target.files).map(file => URL.createObjectURL(file))" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-cyan-50 file:text-cyan-700" required>
                                     </div>
                                     
                                     
@@ -395,7 +395,7 @@
                                         </div>
                                     </template>
 
-                                    <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="px-8 py-3 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all shrink-0 w-full md:w-auto flex justify-center items-center gap-2">
+                                    <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="px-8 py-3 bg-cyan-600 text-white font-bold rounded-2xl hover:bg-cyan-700 shadow-lg shadow-cyan-500/30 transition-all shrink-0 w-full md:w-auto flex justify-center items-center gap-2">
                                         <span x-show="!isSubmitting"><i class="ph-bold ph-upload-simple"></i> Simpan</span>
                                         <span x-show="isSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Uploading...</span>
                                     </button>
@@ -436,7 +436,7 @@
                                             </form>
                                         </div>
                                         <div>
-                                            <span class="inline-block px-2 py-1 bg-emerald-500 text-white text-[10px] font-black rounded-lg mb-1"><?php echo e($port->year); ?></span>
+                                            <span class="inline-block px-2 py-1 bg-cyan-500 text-white text-[10px] font-black rounded-lg mb-1"><?php echo e($port->year); ?></span>
                                             <h4 class="text-white font-bold text-sm leading-tight line-clamp-2"><?php echo e($port->title); ?></h4>
                                         </div>
                                     </div>
@@ -452,7 +452,7 @@
                     
                     <div x-show="activeTab === 'artikel'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
                         <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
-                            <div class="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center"><i class="ph-bold ph-article"></i></div>
+                            <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center"><i class="ph-bold ph-article"></i></div>
                             <h3 class="text-lg font-black text-slate-800">Artikel & Tulisan Terpublikasi</h3>
                         </div>
                         
@@ -461,29 +461,29 @@
                             <?php if(request('user_id')): ?> <input type="hidden" name="user_id" value="<?php echo e(request('user_id')); ?>"> <?php endif; ?>
                             <div class="md:col-span-2">
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Judul Artikel / Opini</label>
-                                <input type="text" name="title" value="<?php echo e(old('title')); ?>" class="w-full rounded-2xl border-slate-200 bg-white focus:border-orange-500 focus:ring-orange-500 font-bold text-slate-700" required>
+                                <input type="text" name="title" value="<?php echo e(old('title')); ?>" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700" required>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Kategori Topik</label>
-                                <input type="text" name="category" value="<?php echo e(old('category')); ?>" placeholder="Pendidikan, Opini..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-orange-500 focus:ring-orange-500 font-bold text-slate-700">
+                                <input type="text" name="category" value="<?php echo e(old('category')); ?>" placeholder="Pendidikan, Opini..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tanggal Publikasi</label>
-                                <input type="date" name="published_at" value="<?php echo e(old('published_at')); ?>" class="w-full rounded-2xl border-slate-200 bg-white focus:border-orange-500 focus:ring-orange-500 font-bold text-slate-700 text-sm">
+                                <input type="date" name="published_at" value="<?php echo e(old('published_at')); ?>" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 text-sm">
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Ringkasan / Excerpt</label>
-                                <textarea name="excerpt" rows="2" class="w-full rounded-2xl border-slate-200 bg-white focus:border-orange-500 focus:ring-orange-500 font-medium text-slate-700"><?php echo e(old('excerpt')); ?></textarea>
+                                <textarea name="excerpt" rows="2" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-medium text-slate-700"><?php echo e(old('excerpt')); ?></textarea>
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Link URL Artikel Asli (Opsional)</label>
-                                <input type="url" name="url" value="<?php echo e(old('url')); ?>" placeholder="https://..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-orange-500 focus:ring-orange-500 font-bold text-slate-700">
+                                <input type="url" name="url" value="<?php echo e(old('url')); ?>" placeholder="https://..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
                             </div>
                             
                             <div class="flex items-center gap-4">
                                 <div class="flex-1">
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Thumbnail Cover (Opsional)</label>
-                                    <input type="file" name="image" accept="image/*" @change="imagePreview = URL.createObjectURL($event.target.files[0])" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-orange-50 file:text-orange-600 bg-white rounded-2xl border border-slate-200 overflow-hidden">
+                                    <input type="file" name="image" accept="image/*" @change="imagePreview = URL.createObjectURL($event.target.files[0])" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:font-bold file:bg-cyan-50 file:text-cyan-600 bg-white rounded-2xl border border-slate-200 overflow-hidden">
                                 </div>
                                 <template x-if="imagePreview">
                                     <img :src="imagePreview" class="w-12 h-12 rounded-xl object-cover border border-slate-200 mt-5 shadow-sm">
@@ -491,7 +491,7 @@
                             </div>
 
                             <div class="md:col-span-2 flex justify-end mt-2">
-                                <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="w-full md:w-auto px-8 py-3 bg-orange-500 text-white font-bold rounded-2xl hover:bg-orange-600 shadow-lg shadow-orange-500/20 transition-all flex justify-center items-center gap-2">
+                                <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="w-full md:w-auto px-8 py-3 bg-cyan-600 text-white font-bold rounded-2xl hover:bg-cyan-700 shadow-lg shadow-cyan-500/30 transition-all flex justify-center items-center gap-2">
                                     <span x-show="!isSubmitting"><i class="ph-bold ph-floppy-disk"></i> Simpan Artikel</span>
                                     <span x-show="isSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...</span>
                                 </button>
@@ -508,11 +508,11 @@
                                             </div>
                                         <?php endif; ?>
                                         <div class="flex-1 py-1 sm:pr-16">
-                                            <span class="inline-block px-2 py-1 bg-orange-100 text-orange-700 text-[10px] font-black rounded-lg uppercase tracking-wider mb-1"><?php echo e($art->category ?? 'Umum'); ?></span>
+                                            <span class="inline-block px-2 py-1 bg-cyan-100 text-cyan-700 text-[10px] font-black rounded-lg uppercase tracking-wider mb-1"><?php echo e($art->category ?? 'Umum'); ?></span>
                                             <h4 class="font-bold text-slate-800 text-base leading-tight"><?php echo e($art->title); ?></h4>
                                             <p class="text-xs font-medium text-slate-500 mt-1 line-clamp-2"><?php echo e($art->excerpt); ?></p>
                                             <?php if($art->url): ?> 
-                                                <a href="<?php echo e($art->url); ?>" target="_blank" class="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-black text-blue-600 hover:text-blue-800 mt-2"><i class="ph-bold ph-link"></i> Baca di Web Asli</a> 
+                                                <a href="<?php echo e($art->url); ?>" target="_blank" class="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider font-black text-cyan-600 hover:text-cyan-800 mt-2"><i class="ph-bold ph-link"></i> Baca di Web Asli</a> 
                                             <?php endif; ?>
                                         </div>
                                     </div>
@@ -559,7 +559,7 @@
                                 <input type="number" name="end_year" value="<?php echo e(old('end_year')); ?>" placeholder="Cth: 2014" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
                             </div>
                             <div class="md:col-span-2 flex items-end justify-end">
-                                <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="w-full md:w-auto px-8 py-3 bg-cyan-600 text-white font-bold rounded-2xl hover:bg-cyan-700 shadow-lg shadow-cyan-500/20 transition-all flex justify-center items-center gap-2">
+                                <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="w-full md:w-auto px-8 py-3 bg-cyan-600 text-white font-bold rounded-2xl hover:bg-cyan-700 shadow-lg shadow-cyan-500/30 transition-all flex justify-center items-center gap-2">
                                     <span x-show="!isSubmitting"><i class="ph-bold ph-plus"></i> Tambah Riwayat</span>
                                     <span x-show="isSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...</span>
                                 </button>
@@ -615,7 +615,7 @@
                     <!-- Modal Header -->
                     <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
                         <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
-                            <i class="ph-bold ph-pencil-simple text-blue-600"></i> Edit Data
+                            <i class="ph-bold ph-pencil-simple text-cyan-600"></i> Edit Data
                         </h3>
                         <button @click="closeEditModal()" type="button" class="text-slate-400 hover:text-slate-600 bg-white hover:bg-slate-100 p-2 rounded-full transition-colors border border-slate-200">
                             <i class="ph-bold ph-x"></i>
@@ -637,11 +637,11 @@
                                   }
                               });
                               if(overSize) {
-                                  Swal.fire({ icon: 'warning', title: 'File Terlalu Besar', text: 'Ukuran maksimal per file adalah 2MB.', confirmButtonColor: '#3b82f6', customClass: { popup: 'rounded-3xl' } });
+                                  Swal.fire({ icon: 'warning', title: 'File Terlalu Besar', text: 'Ukuran maksimal per file adalah 2MB.', confirmButtonColor: '#0891b2', customClass: { popup: 'rounded-3xl' } });
                                   return;
                               }
                               if(totalSize > 8388608) { // 8MB
-                                  Swal.fire({ icon: 'warning', title: 'Kapasitas Penuh', text: 'Total file melampaui batas server (8MB).', confirmButtonColor: '#3b82f6', customClass: { popup: 'rounded-3xl' } });
+                                  Swal.fire({ icon: 'warning', title: 'Kapasitas Penuh', text: 'Total file melampaui batas server (8MB).', confirmButtonColor: '#0891b2', customClass: { popup: 'rounded-3xl' } });
                                   return;
                               }
                               isModalSubmitting = true; 
@@ -656,25 +656,25 @@
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tahun</label>
-                                    <input type="number" name="year" x-model="editData.year" class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700" required>
+                                    <input type="number" name="year" x-model="editData.year" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700" required>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Pelatihan / Sertifikasi</label>
-                                    <input type="text" name="title" x-model="editData.title" class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700" required>
+                                    <input type="text" name="title" x-model="editData.title" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700" required>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Penyelenggara</label>
-                                    <input type="text" name="organizer" x-model="editData.organizer" class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 font-bold text-slate-700">
+                                    <input type="text" name="organizer" x-model="editData.organizer" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
                                 </div>
                                 
                                 
                                 <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ganti Sertifikat (Opsional)</label>
                                     <p class="text-xs text-slate-500 mb-2">Biarkan kosong jika tidak ingin mengubah sertifikat.</p>
-                                    <input type="file" name="certificate" accept=".pdf,image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-100 file:text-blue-700">
+                                    <input type="file" name="certificate" accept=".pdf,image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-cyan-100 file:text-cyan-700">
                                     
                                     <template x-if="editData.certificate_path">
-                                        <a :href="'<?php echo e(asset('storage')); ?>/' + editData.certificate_path" target="_blank" class="inline-flex items-center gap-1 mt-2 text-xs font-bold text-blue-600 hover:text-blue-800">
+                                        <a :href="'<?php echo e(asset('storage')); ?>/' + editData.certificate_path" target="_blank" class="inline-flex items-center gap-1 mt-2 text-xs font-bold text-cyan-600 hover:text-cyan-800">
                                             <i class="ph-bold ph-link"></i> Lihat Sertifikat Saat Ini
                                         </a>
                                     </template>
@@ -687,20 +687,20 @@
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Judul Materi</label>
-                                    <input type="text" name="title" x-model="editData.title" class="w-full rounded-2xl border-slate-200 bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700" required>
+                                    <input type="text" name="title" x-model="editData.title" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700" required>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tipe</label>
-                                    <input type="text" name="type" x-model="editData.type" class="w-full rounded-2xl border-slate-200 bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700">
+                                    <input type="text" name="type" x-model="editData.type" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Link URL</label>
-                                    <input type="url" name="file_url" x-model="editData.file_url" class="w-full rounded-2xl border-slate-200 bg-white focus:border-purple-500 focus:ring-purple-500 font-bold text-slate-700">
+                                    <input type="url" name="file_url" x-model="editData.file_url" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
                                 </div>
                                 <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ganti File (Opsional)</label>
                                     <p class="text-xs text-slate-500 mb-2">Biarkan kosong jika tidak ingin mengubah file.</p>
-                                    <input type="file" name="file" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-purple-100 file:text-purple-700">
+                                    <input type="file" name="file" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-cyan-100 file:text-cyan-700">
                                 </div>
                             </div>
                         </template>
@@ -710,17 +710,17 @@
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Judul Kegiatan</label>
-                                    <input type="text" name="title" x-model="editData.title" class="w-full rounded-2xl border-slate-200 bg-white focus:border-emerald-500 focus:ring-emerald-500 font-bold text-slate-700" required>
+                                    <input type="text" name="title" x-model="editData.title" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700" required>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tahun</label>
-                                    <input type="text" name="year" x-model="editData.year" class="w-full rounded-2xl border-slate-200 bg-white focus:border-emerald-500 focus:ring-emerald-500 font-bold text-slate-700">
+                                    <input type="text" name="year" x-model="editData.year" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
                                 </div>
                                 <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-3">
                                     <div class="flex-1">
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ganti Foto (Opsional, Bisa Lebih Dari Satu)</label>
                                         <p class="text-xs text-slate-500 mb-2">Pilih beberapa foto sekaligus. Biarkan kosong jika tidak ingin mengubah foto lama.</p>
-                                        <input type="file" name="images[]" multiple accept="image/*" @change="editImagePreviews = Array.from($event.target.files).map(file => URL.createObjectURL(file))" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-emerald-100 file:text-emerald-700">
+                                        <input type="file" name="images[]" multiple accept="image/*" @change="editImagePreviews = Array.from($event.target.files).map(file => URL.createObjectURL(file))" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-cyan-100 file:text-cyan-700">
                                     </div>
                                     
                                     <!-- Preview Foto Baru -->
@@ -749,31 +749,31 @@
                             <div class="space-y-4">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Judul Artikel</label>
-                                    <input type="text" name="title" x-model="editData.title" class="w-full rounded-2xl border-slate-200 bg-white focus:border-orange-500 focus:ring-orange-500 font-bold text-slate-700" required>
+                                    <input type="text" name="title" x-model="editData.title" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700" required>
                                 </div>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Kategori</label>
-                                        <input type="text" name="category" x-model="editData.category" class="w-full rounded-2xl border-slate-200 bg-white focus:border-orange-500 focus:ring-orange-500 font-bold text-slate-700">
+                                        <input type="text" name="category" x-model="editData.category" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tanggal Publikasi</label>
-                                        <input type="date" name="published_at" x-model="editData.published_at" class="w-full rounded-2xl border-slate-200 bg-white focus:border-orange-500 focus:ring-orange-500 font-bold text-slate-700 text-sm">
+                                        <input type="date" name="published_at" x-model="editData.published_at" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 text-sm">
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Ringkasan</label>
-                                    <textarea name="excerpt" x-model="editData.excerpt" rows="2" class="w-full rounded-2xl border-slate-200 bg-white focus:border-orange-500 focus:ring-orange-500 font-medium text-slate-700"></textarea>
+                                    <textarea name="excerpt" x-model="editData.excerpt" rows="2" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-medium text-slate-700"></textarea>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Link URL Artikel</label>
-                                    <input type="url" name="url" x-model="editData.url" class="w-full rounded-2xl border-slate-200 bg-white focus:border-orange-500 focus:ring-orange-500 font-bold text-slate-700">
+                                    <input type="url" name="url" x-model="editData.url" class="w-full rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700">
                                 </div>
                                 <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-4">
                                     <div class="flex-1">
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ganti Thumbnail (Opsional)</label>
                                         <p class="text-xs text-slate-500 mb-2">Biarkan kosong jika tidak ingin mengubah thumbnail.</p>
-                                        <input type="file" name="image" accept="image/*" @change="editImagePreview = URL.createObjectURL($event.target.files[0])" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-orange-100 file:text-orange-700">
+                                        <input type="file" name="image" accept="image/*" @change="editImagePreview = URL.createObjectURL($event.target.files[0])" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-cyan-100 file:text-cyan-700">
                                     </div>
                                     <template x-if="editImagePreview">
                                         <img :src="editImagePreview" class="w-16 h-16 rounded-lg object-cover border border-slate-200">
@@ -809,7 +809,7 @@
                         <!-- Submit Button -->
                         <div class="mt-8 pt-4 border-t border-slate-100 flex justify-end gap-3 shrink-0">
                             <button type="button" @click="closeEditModal()" class="px-6 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors">Batal</button>
-                            <button type="submit" :disabled="isModalSubmitting" :class="{'opacity-70 cursor-wait': isModalSubmitting}" class="px-6 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2">
+                            <button type="submit" :disabled="isModalSubmitting" :class="{'opacity-70 cursor-wait': isModalSubmitting}" class="px-6 py-2.5 rounded-xl font-bold text-white bg-cyan-600 hover:bg-cyan-700 shadow-lg shadow-cyan-500/30 transition-all flex items-center gap-2">
                                 <span x-show="!isModalSubmitting"><i class="ph-bold ph-check"></i> Simpan Perubahan</span>
                                 <span x-show="isModalSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...</span>
                             </button>

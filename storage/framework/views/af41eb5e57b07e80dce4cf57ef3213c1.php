@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pratinjau - {{ $bank->title }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <title>Pratinjau - <?php echo e($bank->title); ?></title>
+    <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
-    {{-- MathJax Config --}}
+    
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -23,7 +23,7 @@
 </head>
 <body class="bg-slate-50 font-sans text-slate-800 selection:bg-cyan-100 selection:text-cyan-900">
 
-    {{-- HEADER --}}
+    
     <div class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
         <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -31,8 +31,8 @@
                     <i class="ph-bold ph-desktop text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="font-black text-lg text-slate-800 leading-tight">{{ $bank->title }}</h1>
-                    <p class="text-[10px] font-bold text-cyan-600 uppercase tracking-wide">Mode Pratinjau Siswa • {{ $bank->subject_name }}</p>
+                    <h1 class="font-black text-lg text-slate-800 leading-tight"><?php echo e($bank->title); ?></h1>
+                    <p class="text-[10px] font-bold text-cyan-600 uppercase tracking-wide">Mode Pratinjau Siswa • <?php echo e($bank->subject_name); ?></p>
                 </div>
             </div>
             <button onclick="window.close()" class="px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-rose-50 hover:text-rose-600 transition-colors border border-transparent hover:border-rose-200">
@@ -41,103 +41,106 @@
         </div>
     </div>
 
-    {{-- CONTENT --}}
+    
     <div class="max-w-4xl mx-auto px-4 py-8 space-y-6">
-        @foreach($bank->questions as $index => $q)
-            @php $qType = $q->question_type ?? 'choice'; @endphp
+        <?php $__currentLoopData = $bank->questions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $q): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php $qType = $q->question_type ?? 'choice'; ?>
             
             <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-[0_2px_10px_-3px_rgba(6,182,212,0.1)] border border-slate-100 flex flex-col md:flex-row gap-4 md:gap-6 transition-all hover:border-cyan-200">
                 
-                {{-- Nomer Soal --}}
+                
                 <div class="w-12 h-12 shrink-0 bg-cyan-50 rounded-2xl flex items-center justify-center font-black text-cyan-600 border border-cyan-100 shadow-sm">
-                    {{ $index + 1 }}
+                    <?php echo e($index + 1); ?>
+
                 </div>
 
-                {{-- Isi Soal --}}
+                
                 <div class="flex-1 overflow-hidden">
                     
-                    {{-- Gambar Soal Jika Ada --}}
-                    @if($q->question_image)
+                    
+                    <?php if($q->question_image): ?>
                         <div class="mb-5">
-                            <img src="{{ asset('storage/' . $q->question_image) }}" class="max-h-64 rounded-2xl border border-slate-200 shadow-sm object-contain bg-slate-50">
+                            <img src="<?php echo e(asset('storage/' . $q->question_image)); ?>" class="max-h-64 rounded-2xl border border-slate-200 shadow-sm object-contain bg-slate-50">
                         </div>
-                    @endif
+                    <?php endif; ?>
 
-                    {{-- Teks Soal --}}
+                    
                     <div class="prose prose-slate max-w-none mb-6 text-base leading-relaxed trix-content text-slate-700">
-                        {!! $q->question_text !!}
+                        <?php echo $q->question_text; ?>
+
                     </div>
 
-                    {{-- Opsi Jawaban Berdasarkan Tipe --}}
-                    @if($qType == 'choice')
+                    
+                    <?php if($qType == 'choice'): ?>
                         <div class="space-y-3">
-                            @foreach(['A','B','C','D', 'E'] as $opt)
-                                @php 
+                            <?php $__currentLoopData = ['A','B','C','D', 'E']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $opt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php 
                                     $val = isset($q->{'option_'.$opt}) ? $q->{'option_'.$opt} : ($q->options[$opt] ?? ''); 
                                     $imgVal = isset($q->{'image_'.$opt}) ? $q->{'image_'.$opt} : ($q->options['image_'.$opt] ?? null);
-                                @endphp
-                                @if($val !== '' || $imgVal)
+                                ?>
+                                <?php if($val !== '' || $imgVal): ?>
                                     <label class="flex items-start gap-4 p-4 rounded-2xl border-2 border-slate-100 hover:border-cyan-300 hover:bg-cyan-50/50 cursor-pointer transition-all group">
-                                        <input type="radio" name="preview_ans_{{ $q->id }}" class="mt-1 w-5 h-5 border-slate-300 text-cyan-600 focus:ring-cyan-500">
+                                        <input type="radio" name="preview_ans_<?php echo e($q->id); ?>" class="mt-1 w-5 h-5 border-slate-300 text-cyan-600 focus:ring-cyan-500">
                                         <div class="flex-1">
-                                            <span class="font-black text-slate-400 group-hover:text-cyan-600 transition-colors mr-2">{{ $opt }}.</span>
-                                            <span class="font-medium text-slate-700">{!! $val !!}</span>
-                                            @if($imgVal)
-                                                <img src="{{ asset('storage/' . $imgVal) }}" class="mt-3 max-h-32 rounded-xl border border-slate-200 object-contain bg-white shadow-sm">
-                                            @endif
+                                            <span class="font-black text-slate-400 group-hover:text-cyan-600 transition-colors mr-2"><?php echo e($opt); ?>.</span>
+                                            <span class="font-medium text-slate-700"><?php echo $val; ?></span>
+                                            <?php if($imgVal): ?>
+                                                <img src="<?php echo e(asset('storage/' . $imgVal)); ?>" class="mt-3 max-h-32 rounded-xl border border-slate-200 object-contain bg-white shadow-sm">
+                                            <?php endif; ?>
                                         </div>
                                     </label>
-                                @endif
-                            @endforeach
+                                <?php endif; ?>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
 
-                    @elseif($qType == 'true_false')
+                    <?php elseif($qType == 'true_false'): ?>
                         <div class="flex flex-col sm:flex-row gap-4">
                             <label class="flex-1 flex items-center justify-center p-4 rounded-2xl border-2 border-slate-100 hover:border-emerald-300 hover:bg-emerald-50 cursor-pointer transition-all text-emerald-700 font-bold group shadow-sm">
-                                <input type="radio" name="preview_ans_{{ $q->id }}" class="mr-3 w-5 h-5 text-emerald-500 focus:ring-emerald-500"> BENAR
+                                <input type="radio" name="preview_ans_<?php echo e($q->id); ?>" class="mr-3 w-5 h-5 text-emerald-500 focus:ring-emerald-500"> BENAR
                             </label>
                             <label class="flex-1 flex items-center justify-center p-4 rounded-2xl border-2 border-slate-100 hover:border-rose-300 hover:bg-rose-50 cursor-pointer transition-all text-rose-700 font-bold group shadow-sm">
-                                <input type="radio" name="preview_ans_{{ $q->id }}" class="mr-3 w-5 h-5 text-rose-500 focus:ring-rose-500"> SALAH
+                                <input type="radio" name="preview_ans_<?php echo e($q->id); ?>" class="mr-3 w-5 h-5 text-rose-500 focus:ring-rose-500"> SALAH
                             </label>
                         </div>
 
-                    @elseif($qType == 'matching')
+                    <?php elseif($qType == 'matching'): ?>
                         <div class="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 shadow-inner">
                             <p class="text-xs font-bold text-slate-500 mb-5 uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-arrows-left-right text-cyan-500"></i> Pasangkan Jawaban Berikut:</p>
-                            @php 
+                            <?php 
                                 $pairs = is_string($q->options) ? json_decode($q->options, true)['pairs'] ?? [] : $q->options['pairs'] ?? [];
-                            @endphp
+                            ?>
                             <div class="space-y-4">
-                                @foreach($pairs as $p)
+                                <?php $__currentLoopData = $pairs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <div class="flex flex-col sm:flex-row items-center gap-4">
-                                        {{-- Kiri --}}
+                                        
                                         <div class="flex-1 w-full bg-white p-4 rounded-2xl border border-slate-200 text-center font-medium shadow-sm">
-                                            @if(isset($p['left_image']) && $p['left_image'])
-                                                <img src="{{ asset('storage/' . $p['left_image']) }}" class="h-20 mx-auto mb-3 rounded-lg object-contain border border-slate-100">
-                                            @endif
-                                            {{ $p['left'] }}
+                                            <?php if(isset($p['left_image']) && $p['left_image']): ?>
+                                                <img src="<?php echo e(asset('storage/' . $p['left_image'])); ?>" class="h-20 mx-auto mb-3 rounded-lg object-contain border border-slate-100">
+                                            <?php endif; ?>
+                                            <?php echo e($p['left']); ?>
+
                                         </div>
                                         <div class="shrink-0 text-cyan-300 rotate-90 sm:rotate-0"><i class="ph-bold ph-arrow-right text-2xl"></i></div>
-                                        {{-- Kanan (Dropdown Mockup) --}}
+                                        
                                         <div class="flex-1 w-full relative group">
                                             <select class="w-full bg-white p-4 rounded-2xl border-2 border-dashed border-slate-300 text-center font-bold text-slate-500 appearance-none cursor-pointer hover:border-cyan-400 hover:text-cyan-600 transition-colors shadow-sm outline-none">
                                                 <option>-- Pilih Pasangan --</option>
-                                                <option>{{ $p['right'] }}</option>
+                                                <option><?php echo e($p['right']); ?></option>
                                             </select>
                                             <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-cyan-500 transition-colors"></i>
                                         </div>
                                     </div>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
                         </div>
 
-                    @elseif($qType == 'essay')
+                    <?php elseif($qType == 'essay'): ?>
                         <textarea rows="5" class="w-full p-5 rounded-[1.5rem] border-2 border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 text-slate-700 transition-all font-medium placeholder-slate-400 shadow-inner" placeholder="Ketik jawaban urain di sini..."></textarea>
-                    @endif
+                    <?php endif; ?>
 
                 </div>
             </div>
-        @endforeach
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
         <div class="text-center py-12">
             <div class="w-16 h-1 bg-slate-200 rounded-full mx-auto mb-4"></div>
@@ -146,4 +149,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/cbt/bank/preview.blade.php ENDPATH**/ ?>

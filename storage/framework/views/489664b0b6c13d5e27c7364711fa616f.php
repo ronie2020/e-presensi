@@ -11,7 +11,6 @@
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    
 
     
     <?php $__env->startPush('styles'); ?>
@@ -109,45 +108,42 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             
             
-            <div class="animate-enter relative rounded-[2.5rem] bg-slate-900 p-6 md:p-8 text-white shadow-2xl shadow-cyan-900/20 overflow-hidden group border border-white/10">
+            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-6 md:p-8 text-white shadow-2xl shadow-cyan-900/30 overflow-hidden group border border-white/10">
                 
                 
-                <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-blue-900/80 to-slate-900 z-0"></div>
-                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none z-0"></div>
-                
-                <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-cyan-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 pointer-events-none z-0"></div>
-                <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-600 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 pointer-events-none z-0"></div>
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+                <div class="absolute top-0 right-0 w-80 h-80 bg-cyan-300/30 rounded-full blur-[80px] translate-x-1/2 -translate-y-1/2 pointer-events-none group-hover:bg-cyan-300/40 transition-all duration-700"></div>
 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div class="flex items-center gap-5 w-full md:w-auto">
                         <div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner flex-shrink-0">
-                            <i class="ph-duotone ph-scan text-4xl text-cyan-300"></i>
+                            <i class="ph-duotone ph-scan text-4xl text-cyan-200"></i>
                         </div>
                         <div>
                             <div class="flex items-center gap-2 mb-1">
                                 <?php if(isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false)): ?>
-                                    <span class="px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-200 border border-rose-500/30 text-[10px] font-bold uppercase tracking-wider">Libur: <?php echo e($scheduleConfig['description']); ?></span>
+                                    <span class="px-2.5 py-0.5 rounded-full bg-rose-500/90 text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">Libur: <?php echo e($scheduleConfig['description']); ?></span>
                                 <?php else: ?>
-                                    <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-200 border border-cyan-500/30 text-[10px] font-bold uppercase tracking-wider">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-white/10 text-cyan-100 border border-white/20 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">
                                         <?php echo e(\Carbon\Carbon::now()->translatedFormat('l, d F Y')); ?>
 
                                     </span>
                                 <?php endif; ?>
                             </div>
-                            <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight leading-none">
-                                Scanner <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white">Aktivitas</span>
+                            <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight leading-none text-white">
+                                Scanner <span class="text-cyan-200">Aktivitas</span>
                             </h2>
-                            <p class="text-blue-100/70 text-sm mt-1">Monitoring kehadiran, makan siang, dan ibadah.</p>
+                            <p class="text-cyan-50/80 text-sm mt-1">Monitoring kehadiran, makan siang, dan ibadah.</p>
                         </div>
                     </div>
                     
                     
-                    <div class="glass-panel px-6 py-3 rounded-2xl flex items-center gap-4 shadow-lg w-full md:w-auto justify-between md:justify-start">
+                    <div class="bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 rounded-2xl flex items-center gap-4 shadow-lg w-full md:w-auto justify-between md:justify-start">
                         <div class="text-right">
                             <p class="text-[10px] font-bold text-cyan-200 uppercase tracking-widest mb-0.5">Waktu Server</p>
                             <div id="clock" class="text-3xl font-black text-white font-mono leading-none tracking-widest digital-clock">00:00:00</div>
                         </div>
-                        <div class="w-10 h-10 rounded-xl bg-cyan-500 flex items-center justify-center text-white shadow-lg shadow-cyan-500/40 animate-pulse">
+                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white shadow-inner animate-pulse">
                             <i class="ph-bold ph-clock text-xl"></i>
                         </div>
                     </div>
@@ -205,18 +201,18 @@
                         
                         <div class="mt-4 flex flex-wrap gap-2 sm:gap-3">
                             <!-- 1. Tombol Ketik NISN -->
-                            <button onclick="showManualInput()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
+                            <button onclick="showManualInput()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-cyan-50 hover:text-cyan-600 hover:border-cyan-200 transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
                                 <i class="ph-bold ph-keyboard text-lg"></i> NISN
                             </button>
                             
                             <!-- 2. Tombol Upload Gambar -->
-                            <button onclick="document.getElementById('qr-upload').click()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
+                            <button onclick="document.getElementById('qr-upload').click()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-cyan-50 hover:text-cyan-600 hover:border-cyan-200 transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
                                 <i class="ph-bold ph-image text-lg"></i> Gambar
                             </button>
                             <input type="file" id="qr-upload" class="hidden" accept="image/*">
 
                             <!-- 3. Tombol Balik Kamera -->
-                            <button onclick="switchCamera()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
+                            <button onclick="switchCamera()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-cyan-50 hover:text-cyan-600 hover:border-cyan-200 transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
                                 <i class="ph-bold ph-camera-rotate text-lg"></i> Kamera
                             </button>
 
@@ -225,7 +221,7 @@
                                 <i class="ph-bold ph-arrows-clockwise animate-spin-slow"></i> Kembali Auto
                             </button>
 
-                            <!-- 5. Tombol Izin / Sakit (BARU) -->
+                            <!-- 5. Tombol Izin / Sakit -->
                             <button onclick="document.getElementById('absen-manual-modal').classList.remove('hidden');" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
                                 <i class="ph-bold ph-user-focus text-lg"></i> Izin/Sakit
                             </button>
@@ -257,7 +253,7 @@
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             <?php $__currentLoopData = [
-                                ['id'=>'harian', 'label'=>'Absen Harian', 'sub'=>'Masuk/Pulang', 'icon'=>'calendar-check', 'color'=>'blue', 'type'=>'Harian'],
+                                ['id'=>'harian', 'label'=>'Absen Harian', 'sub'=>'Masuk/Pulang', 'icon'=>'calendar-check', 'color'=>'cyan', 'type'=>'Harian'],
                                 ['id'=>'makan', 'label'=>'Makan Siang', 'sub'=>'Scan Gizi', 'icon'=>'bowl-food', 'color'=>'orange', 'type'=>'Makan'],
                                 ['id'=>'dhuha', 'label'=>'Sholat Dhuha', 'sub'=>'Ibadah Pagi', 'icon'=>'sun-horizon', 'color'=>'emerald', 'type'=>'Dhuha'],
                                 ['id'=>'dhuhur', 'label'=>'Sholat Dhuhur', 'sub'=>'Ibadah Siang', 'icon'=>'moon-stars', 'color'=>'amber', 'type'=>'Dhuhur'],
@@ -307,8 +303,8 @@
                         <div class="p-6 md:p-8 border-b border-slate-50 bg-white/80 backdrop-blur-md sticky top-0 z-20 flex justify-between items-center">
                             <div>
                                 <h3 class="font-bold text-slate-800 text-xl flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center">
-                                        <i class="ph-duotone ph-list-dashes text-lg"></i>
+                                    <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center border border-cyan-100 shadow-sm">
+                                        <i class="ph-bold ph-list-dashes text-lg"></i>
                                     </div>
                                     Log Aktivitas
                                 </h3>
@@ -398,11 +394,12 @@
         
         
         <div id="absen-manual-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-[100] transition-opacity" x-data="manualAbsen">
-            <div class="relative top-10 md:top-20 mx-auto p-0 border-0 w-full max-w-md shadow-2xl rounded-[2rem] bg-white overflow-hidden">
+            <div class="relative top-10 md:top-20 mx-auto p-0 border-0 w-full max-w-md shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
                 
-                <div class="bg-blue-950 px-6 py-4 flex justify-between items-center">
-                    <h3 class="font-bold text-white text-lg">Input Manual & Izin</h3>
-                    <button type="button" @click="closeManualModal()" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>
+                
+                <div class="bg-gradient-to-r from-cyan-600 to-blue-700 px-6 py-5 flex justify-between items-center">
+                    <h3 class="font-black text-white text-lg flex items-center gap-2"><i class="ph-bold ph-keyboard"></i> Input Manual & Izin</h3>
+                    <button type="button" @click="closeManualModal()" class="text-cyan-100 hover:text-white transition-colors bg-white/10 hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center"><i class="ph-bold ph-x text-lg"></i></button>
                 </div>
 
                 <form action="<?php echo e(route('reports.storeManual')); ?>" method="POST" class="p-6 space-y-4" @submit="submitForm">
@@ -466,7 +463,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Status</label>
-                            <select name="status" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 font-bold text-slate-700 text-sm">
+                            <select name="status" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 font-bold text-slate-700 text-sm cursor-pointer">
                                 <option value="Sakit">Sakit</option>
                                 <option value="Izin">Izin</option>
                                 <option value="Alfa">Alfa</option>
@@ -490,10 +487,10 @@
                     
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Keterangan (Opsional)</label>
-                        <textarea name="notes" rows="2" placeholder="Contoh: Surat dokter menyusul..." class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 text-sm font-medium"></textarea>
+                        <textarea name="notes" rows="2" placeholder="Contoh: Surat dokter menyusul..." class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 text-sm font-medium resize-none"></textarea>
                     </div>
 
-                    <button type="submit" class="w-full mt-2 py-3 bg-cyan-600 text-white font-bold rounded-xl hover:bg-cyan-700 shadow-lg shadow-cyan-900/30 transition-transform active:scale-95 flex items-center justify-center gap-2">
+                    <button type="submit" class="w-full mt-2 py-3 bg-cyan-600 text-white font-bold rounded-xl hover:bg-cyan-700 shadow-lg shadow-cyan-600/30 transition-transform active:scale-95 flex items-center justify-center gap-2">
                         <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Data
                     </button>
                 </form>
@@ -638,8 +635,8 @@
                 document.querySelectorAll('.scan-type-btn').forEach(btn => {
                     const isActive = btn.dataset.type === mode;
                     btn.classList.toggle('ring-2', isActive);
-                    btn.classList.toggle('ring-cyan-500', isActive); // Elevate Theme
-                    btn.classList.toggle('border-cyan-500', isActive); // Elevate Theme
+                    btn.classList.toggle('ring-cyan-500', isActive); 
+                    btn.classList.toggle('border-cyan-500', isActive); 
                     
                     const dot = btn.querySelector('.indicator-dot');
                     if(dot) {
@@ -933,7 +930,7 @@
         });
 
         // ==============================================================
-        // LOGIKA ALPINE JS UNTUK MODAL PENCARIAN SISWA (DIPERBARUI)
+        // LOGIKA ALPINE JS UNTUK MODAL PENCARIAN SISWA
         // ==============================================================
         document.addEventListener('alpine:init', () => {
             Alpine.data('manualAbsen', () => ({

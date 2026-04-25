@@ -20,11 +20,11 @@
             
             
             <?php if($isAdmin): ?>
-                <a href="<?php echo e(route('users.index')); ?>" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 mb-6 transition-colors group">
+                <a href="<?php echo e(route('users.index')); ?>" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-cyan-600 mb-6 transition-colors group">
                     <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar Pengguna
                 </a>
             <?php else: ?>
-                <a href="<?php echo e(route('dashboard')); ?>" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-blue-600 mb-6 transition-colors group">
+                <a href="<?php echo e(route('dashboard')); ?>" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-cyan-600 mb-6 transition-colors group">
                     <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Dashboard
                 </a>
             <?php endif; ?>
@@ -33,7 +33,8 @@
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
                 
                 
-                <div class="bg-gradient-to-r from-blue-900 to-blue-800 p-8 text-white relative overflow-hidden">
+                <div class="bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-8 text-white relative overflow-hidden">
+                    <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                     <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
                         <i class="ph-fill <?php echo e($isOwnProfile ? 'ph-user-circle' : 'ph-user-gear'); ?>"></i>
                     </div>
@@ -54,19 +55,19 @@
                         </div>
                         <div class="text-center md:text-left">
                             <h2 class="text-2xl font-black tracking-tight"><?php echo e($isOwnProfile ? 'Profil Saya' : $user->name); ?></h2>
-                            <p class="text-blue-200 text-sm font-medium mt-1"><?php echo e($user->email); ?></p>
+                            <p class="text-cyan-100 text-sm font-medium mt-1"><?php echo e($user->email); ?></p>
                             
                             
                             <div class="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-3">
                                 <?php $__currentLoopData = $user->roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $role): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <span class="inline-flex px-3 py-1 rounded-lg bg-white/10 text-white text-[10px] font-black uppercase tracking-wider border border-white/20">
+                                    <span class="inline-flex px-3 py-1 rounded-lg bg-white/10 text-white text-[10px] font-black uppercase tracking-wider border border-white/20 backdrop-blur-sm">
                                         <?php echo e($role->name); ?>
 
                                     </span>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                                 <?php if($user->nip): ?>
-                                    <span class="inline-flex px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-100 text-[10px] font-bold uppercase tracking-wider border border-emerald-400/20">
+                                    <span class="inline-flex px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-100 text-[10px] font-bold uppercase tracking-wider border border-emerald-400/20 backdrop-blur-sm">
                                         NIP. <?php echo e($user->nip); ?>
 
                                     </span>
@@ -119,7 +120,7 @@
                         <!-- 1. DATA AKUN UTAMA -->
                         <div>
                             <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100">
-                                <div class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+                                <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center">
                                     <i class="ph-bold ph-identification-card"></i>
                                 </div>
                                 <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">Data Akun & Login</h4>
@@ -129,12 +130,12 @@
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Lengkap</label>
                                     <input type="text" name="name" value="<?php echo e(old('name', $user->name)); ?>" required
-                                           class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 px-4 transition-colors">
+                                           class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 py-3 px-4 transition-colors">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Email Login</label>
                                     <input type="email" name="email" value="<?php echo e(old('email', $user->email)); ?>" required
-                                           class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-700 py-3 px-4 transition-colors">
+                                           class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 py-3 px-4 transition-colors">
                                 </div>
                                 
                                 
@@ -147,13 +148,13 @@
                                             ?>
 
                                             <?php $__currentLoopData = $availableRoles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $option): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <label class="relative flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all hover:bg-blue-50
-                                                    <?php echo e($user->hasRole($option) ? 'border-blue-500 bg-blue-50/50' : 'border-slate-100 bg-slate-50'); ?>">
+                                                <label class="relative flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all hover:bg-cyan-50
+                                                    <?php echo e($user->hasRole($option) ? 'border-cyan-500 bg-cyan-50/50' : 'border-slate-100 bg-slate-50'); ?>">
                                                     <input type="checkbox" name="role[]" value="<?php echo e($option); ?>" 
-                                                           class="w-5 h-5 rounded-md text-blue-600 border-slate-300 focus:ring-blue-500 mt-0.5"
+                                                           class="w-5 h-5 rounded-md text-cyan-600 border-slate-300 focus:ring-cyan-500 mt-0.5"
                                                            <?php echo e($user->hasRole($option) ? 'checked' : ''); ?>>
                                                     <div>
-                                                        <span class="block text-sm font-bold <?php echo e($user->hasRole($option) ? 'text-blue-700' : 'text-slate-600'); ?>">
+                                                        <span class="block text-sm font-bold <?php echo e($user->hasRole($option) ? 'text-cyan-700' : 'text-slate-600'); ?>">
                                                             <?php echo e($option); ?>
 
                                                         </span>
@@ -177,7 +178,7 @@ unset($__errorArgs, $__bag); ?>
                         <!-- 2. DATA PROFIL GURU -->
                         <div x-data="{ isTeacher: <?php echo e($user->hasAnyRole(['Guru', 'Wali Kelas', 'Guru Mata Pelajaran', 'Kepala Sekolah']) ? 'true' : 'false'); ?> }">
                             <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 mt-6">
-                                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center">
                                     <i class="ph-bold ph-chalkboard-teacher"></i>
                                 </div>
                                 <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">Data Kepegawaian</h4>
@@ -186,30 +187,30 @@ unset($__errorArgs, $__bag); ?>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">NIP</label>
-                                    <input type="text" name="nip" value="<?php echo e(old('nip', $user->nip)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-emerald-500 focus:border-emerald-500">
+                                    <input type="text" name="nip" value="<?php echo e(old('nip', $user->nip)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-cyan-500 focus:border-cyan-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Pangkat/Golongan</label>
-                                    <input type="text" name="pangkat" value="<?php echo e(old('pangkat', $user->pangkat)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-emerald-500 focus:border-emerald-500">
+                                    <input type="text" name="pangkat" value="<?php echo e(old('pangkat', $user->pangkat)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-cyan-500 focus:border-cyan-500">
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Jabatan / Mapel</label>
-                                    <input type="text" name="position" value="<?php echo e(old('position', $user->position)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-emerald-500 focus:border-emerald-500">
+                                    <input type="text" name="position" value="<?php echo e(old('position', $user->position)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-cyan-500 focus:border-cyan-500">
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Bio Singkat</label>
-                                    <textarea name="bio" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-medium text-slate-700 py-3 px-4 focus:ring-emerald-500 focus:border-emerald-500"><?php echo e(old('bio', $user->bio)); ?></textarea>
+                                    <textarea name="bio" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-medium text-slate-700 py-3 px-4 focus:ring-cyan-500 focus:border-cyan-500"><?php echo e(old('bio', $user->bio)); ?></textarea>
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Foto Profil</label>
-                                    <input type="file" name="photo" class="block w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:bg-emerald-50 file:text-emerald-700 file:font-bold">
+                                    <input type="file" name="photo" class="block w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:bg-cyan-50 file:text-cyan-700 file:font-bold border border-slate-200">
                                 </div>
                             </div>
                         
                             <!-- 2.5 DATA PRIBADI & CV -->
-                            <div x-show="isTeacher">
+                            <div x-show="isTeacher" style="display: none;">
                                 <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 mt-6">
-                                    <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
+                                    <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center">
                                         <i class="ph-bold ph-address-book"></i>
                                     </div>
                                     <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">Data Pribadi (Untuk CV)</h4>
@@ -218,15 +219,15 @@ unset($__errorArgs, $__bag); ?>
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tempat Lahir</label>
-                                        <input type="text" name="tempat_lahir" value="<?php echo e(old('tempat_lahir', $user->tempat_lahir)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500">
+                                        <input type="text" name="tempat_lahir" value="<?php echo e(old('tempat_lahir', $user->tempat_lahir)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-cyan-500 focus:border-cyan-500">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tanggal Lahir</label>
-                                        <input type="date" name="tanggal_lahir" value="<?php echo e(old('tanggal_lahir', $user->tanggal_lahir)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500">
+                                        <input type="date" name="tanggal_lahir" value="<?php echo e(old('tanggal_lahir', $user->tanggal_lahir)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-cyan-500 focus:border-cyan-500">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Jenis Kelamin</label>
-                                        <select name="jenis_kelamin" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500">
+                                        <select name="jenis_kelamin" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-cyan-500 focus:border-cyan-500">
                                             <option value="">Pilih...</option>
                                             <option value="Laki-laki" <?php echo e(old('jenis_kelamin', $user->jenis_kelamin) == 'Laki-laki' ? 'selected' : ''); ?>>Laki-laki</option>
                                             <option value="Perempuan" <?php echo e(old('jenis_kelamin', $user->jenis_kelamin) == 'Perempuan' ? 'selected' : ''); ?>>Perempuan</option>
@@ -234,22 +235,22 @@ unset($__errorArgs, $__bag); ?>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Agama</label>
-                                        <input type="text" name="agama" value="<?php echo e(old('agama', $user->agama)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500">
+                                        <input type="text" name="agama" value="<?php echo e(old('agama', $user->agama)); ?>" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-cyan-500 focus:border-cyan-500">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Status Pernikahan</label>
-                                        <input type="text" name="status_pernikahan" value="<?php echo e(old('status_pernikahan', $user->status_pernikahan)); ?>" placeholder="Belum Menikah / Menikah" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500">
+                                        <input type="text" name="status_pernikahan" value="<?php echo e(old('status_pernikahan', $user->status_pernikahan)); ?>" placeholder="Belum Menikah / Menikah" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-bold text-slate-700 py-3 px-4 focus:ring-cyan-500 focus:border-cyan-500">
                                     </div>
                                     <div class="md:col-span-2">
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Alamat Lengkap</label>
-                                        <textarea name="alamat" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-medium text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500"><?php echo e(old('alamat', $user->alamat)); ?></textarea>
+                                        <textarea name="alamat" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 font-medium text-slate-700 py-3 px-4 focus:ring-cyan-500 focus:border-cyan-500"><?php echo e(old('alamat', $user->alamat)); ?></textarea>
                                     </div>
-                                    <div class="md:col-span-2 bg-amber-50/50 p-4 rounded-2xl border border-amber-100">
+                                    <div class="md:col-span-2 bg-cyan-50/50 p-4 rounded-2xl border border-cyan-100">
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Keahlian (Pisahkan dengan koma)</label>
-                                        <input type="text" name="keahlian" value="<?php echo e(old('keahlian', $user->keahlian)); ?>" placeholder="Cth: Desain Grafis, Microsoft Office, Mengajar Matematika" class="w-full rounded-2xl border-slate-200 bg-white font-bold text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500 mb-4">
+                                        <input type="text" name="keahlian" value="<?php echo e(old('keahlian', $user->keahlian)); ?>" placeholder="Cth: Desain Grafis, Microsoft Office, Mengajar Matematika" class="w-full rounded-2xl border-slate-200 bg-white font-bold text-slate-700 py-3 px-4 focus:ring-cyan-500 focus:border-cyan-500 mb-4">
                                         
                                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Hobi (Pisahkan dengan koma)</label>
-                                        <input type="text" name="hobi" value="<?php echo e(old('hobi', $user->hobi)); ?>" placeholder="Cth: Membaca Buku, Traveling, Menulis" class="w-full rounded-2xl border-slate-200 bg-white font-bold text-slate-700 py-3 px-4 focus:ring-amber-500 focus:border-amber-500">
+                                        <input type="text" name="hobi" value="<?php echo e(old('hobi', $user->hobi)); ?>" placeholder="Cth: Membaca Buku, Traveling, Menulis" class="w-full rounded-2xl border-slate-200 bg-white font-bold text-slate-700 py-3 px-4 focus:ring-cyan-500 focus:border-cyan-500">
                                     </div>
                                 </div>
                             </div>
@@ -258,7 +259,7 @@ unset($__errorArgs, $__bag); ?>
                         <!-- 3. KONTAK -->
                         <div>
                             <div class="flex items-center gap-3 mb-6 pb-2 border-b border-slate-100 mt-6">
-                                <div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center">
+                                <div class="w-8 h-8 rounded-lg bg-cyan-100 text-cyan-600 flex items-center justify-center">
                                     <i class="ph-bold ph-share-network"></i>
                                 </div>
                                 <h4 class="text-sm font-black text-slate-800 uppercase tracking-wider">Kontak</h4>
@@ -266,19 +267,19 @@ unset($__errorArgs, $__bag); ?>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50 p-6 rounded-[2rem] border border-slate-200">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">WhatsApp</label>
-                                    <input type="text" name="phone" value="<?php echo e(old('phone', $user->phone)); ?>" class="w-full rounded-2xl border-slate-200 bg-white font-bold text-slate-700 py-3 px-4">
+                                    <input type="text" name="phone" value="<?php echo e(old('phone', $user->phone)); ?>" class="w-full rounded-2xl border-slate-200 bg-white font-bold text-slate-700 py-3 px-4 focus:border-cyan-500 focus:ring-cyan-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Instagram</label>
-                                    <input type="text" name="instagram" value="<?php echo e(old('instagram', $user->instagram)); ?>" class="w-full rounded-2xl border-slate-200 bg-white font-bold text-slate-700 py-3 px-4">
+                                    <input type="text" name="instagram" value="<?php echo e(old('instagram', $user->instagram)); ?>" class="w-full rounded-2xl border-slate-200 bg-white font-bold text-slate-700 py-3 px-4 focus:border-cyan-500 focus:ring-cyan-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">TikTok</label>
-                                    <input type="text" name="tiktok" value="<?php echo e(old('tiktok', $user->tiktok)); ?>" class="w-full rounded-2xl border-slate-200 bg-white font-bold text-slate-700 py-3 px-4">
+                                    <input type="text" name="tiktok" value="<?php echo e(old('tiktok', $user->tiktok)); ?>" class="w-full rounded-2xl border-slate-200 bg-white font-bold text-slate-700 py-3 px-4 focus:border-cyan-500 focus:ring-cyan-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Facebook</label>
-                                    <input type="text" name="facebook" value="<?php echo e(old('facebook', $user->facebook)); ?>" class="w-full rounded-2xl border-slate-200 bg-white font-bold text-slate-700 py-3 px-4">
+                                    <input type="text" name="facebook" value="<?php echo e(old('facebook', $user->facebook)); ?>" class="w-full rounded-2xl border-slate-200 bg-white font-bold text-slate-700 py-3 px-4 focus:border-cyan-500 focus:ring-cyan-500">
                                 </div>
                             </div>
                         </div>
@@ -295,7 +296,7 @@ unset($__errorArgs, $__bag); ?>
                                 <i class="ph-bold ph-caret-down text-rose-400 transition-transform duration-300" :class="{'rotate-180': showPassword}"></i>
                             </div>
                             
-                            <div x-show="showPassword" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                            <div x-show="showPassword" style="display: none;" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Password Baru</label>
                                     <input type="password" name="password" class="w-full rounded-2xl border-slate-200 bg-white focus:border-rose-500 focus:ring-rose-500 font-bold text-slate-700 py-3 px-4 transition-colors">
@@ -309,9 +310,9 @@ unset($__errorArgs, $__bag); ?>
 
                          <!-- 5. KELOLA PORTOFOLIO GURU -->
                         <?php if($user->hasAnyRole(['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Mata Pelajaran'])): ?>
-                        <div class="mt-8 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-[2rem] border border-blue-100 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+                        <div class="mt-8 bg-gradient-to-br from-cyan-50 to-blue-50 p-6 rounded-[2rem] border border-cyan-100 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
                             <div class="flex items-start gap-4">
-                                <div class="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-blue-600/30">
+                                <div class="w-12 h-12 bg-cyan-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-cyan-600/30">
                                     <i class="ph-fill ph-medal text-2xl"></i>
                                 </div>
                                 <div>
@@ -320,13 +321,12 @@ unset($__errorArgs, $__bag); ?>
                                         <?php if($isOwnProfile): ?>
                                             Kelola riwayat pendidikan, pelatihan, materi ajar, dan galeri prestasi milik <b>Anda sendiri</b>.
                                         <?php else: ?>
-                                            Kelola riwayat pendidikan, pelatihan, materi ajar, dan galeri prestasi milik <b class="text-blue-700"><?php echo e($user->name); ?></b>.
+                                            Kelola riwayat pendidikan, pelatihan, materi ajar, dan galeri prestasi milik <b class="text-cyan-700"><?php echo e($user->name); ?></b>.
                                         <?php endif; ?>
                                     </p>
                                 </div>
                             </div>
-                            
-                            <a href="<?php echo e(route('portfolio.index', $isOwnProfile ? [] : ['user_id' => $user->id])); ?>" class="shrink-0 w-full md:w-auto px-6 py-3.5 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2 group">
+                            <a href="<?php echo e(route('portfolio.index', $isOwnProfile ? [] : ['user_id' => $user->id])); ?>" class="shrink-0 w-full md:w-auto px-6 py-3.5 bg-cyan-600 text-white font-bold rounded-2xl hover:bg-cyan-700 shadow-lg shadow-cyan-600/20 transition-all flex items-center justify-center gap-2 group">
                                 Buka Panel Portofolio <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                             </a>
                         </div>
@@ -339,7 +339,7 @@ unset($__errorArgs, $__bag); ?>
                             <?php else: ?>
                                 <a href="<?php echo e(route('dashboard')); ?>" class="px-6 py-3.5 rounded-2xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 text-sm">Batal</a>
                             <?php endif; ?>
-                            <button type="submit" class="px-8 py-3.5 rounded-2xl bg-blue-900 text-white font-bold hover:bg-blue-800 shadow-lg shadow-blue-900/20 text-sm flex items-center gap-2">
+                            <button type="submit" class="px-8 py-3.5 rounded-2xl bg-cyan-600 text-white font-bold hover:bg-cyan-700 shadow-lg shadow-cyan-600/30 text-sm flex items-center gap-2">
                                 <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Perubahan
                             </button>
                         </div>

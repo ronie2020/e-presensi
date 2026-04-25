@@ -31,23 +31,22 @@
     <div class="py-6 font-sans text-slate-800 bg-slate-50/50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
-            {{-- HERO SECTION --}}
-            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-r from-blue-900 via-slate-800 to-slate-900 p-6 md:p-10 text-white shadow-2xl shadow-blue-900/20 overflow-hidden group border border-white/10">
+            {{-- HERO SECTION (ELEVATED THEME) --}}
+            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-6 md:p-10 text-white shadow-xl shadow-cyan-900/30 overflow-hidden group border border-white/10">
                 
                 {{-- Background Decorations --}}
-                <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 pointer-events-none"></div>
-                <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 pointer-events-none"></div>
-                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none"></div>
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+                <div class="absolute top-0 right-0 w-80 h-80 bg-cyan-300/30 rounded-full blur-[80px] translate-x-1/2 -translate-y-1/2 pointer-events-none group-hover:bg-cyan-300/40 transition-all duration-700"></div>
 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-blue-200 text-[10px] font-bold uppercase tracking-wider mb-3 backdrop-blur-sm shadow-sm">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-cyan-100 text-[10px] font-bold uppercase tracking-wider mb-3 backdrop-blur-sm shadow-sm">
                             <i class="ph-bold ph-archive"></i> Arsip Digital
                         </div>
                         <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 leading-tight">
-                            Riwayat <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">Perizinan</span>
+                            Riwayat <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 to-white">Perizinan</span>
                         </h2>
-                        <p class="text-blue-100/80 text-sm max-w-xl leading-relaxed">
+                        <p class="text-cyan-50/80 text-sm max-w-xl leading-relaxed">
                             Pantau jejak aktivitas keluar-masuk siswa secara lengkap dan terperinci.
                         </p>
                     </div>
@@ -69,10 +68,10 @@
             {{-- STATISTIK RINGKAS --}}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 animate-enter delay-100">
                 <!-- Card 1 -->
-                <div class="group bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-100/50 transition-all duration-300">
+                <div class="group bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 hover:border-cyan-200 hover:shadow-xl hover:shadow-cyan-100/50 transition-all duration-300">
                     <div class="flex justify-between items-start mb-3">
-                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest group-hover:text-indigo-600 transition-colors">Total Izin</div>
-                        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest group-hover:text-cyan-600 transition-colors">Total Izin</div>
+                        <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                             <i class="ph-duotone ph-files text-xl animate-wiggle"></i>
                         </div>
                     </div>
@@ -105,10 +104,10 @@
                 </div>
 
                 <!-- Card 4 -->
-                <div class="group bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300">
+                <div class="group bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 hover:border-cyan-200 hover:shadow-xl hover:shadow-cyan-100/50 transition-all duration-300">
                     <div class="flex justify-between items-start mb-3">
-                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest group-hover:text-blue-600 transition-colors">Tanggal Data</div>
-                        <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest group-hover:text-cyan-600 transition-colors">Tanggal Data</div>
+                        <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                             <i class="ph-duotone ph-calendar-blank text-xl animate-wiggle"></i>
                         </div>
                     </div>
@@ -131,9 +130,9 @@
                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2 ml-1">Cari Siswa</label>
                             <div class="relative">
                                 <input type="text" name="search" value="{{ request('search') }}" 
-                                    class="w-full pl-11 pr-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-indigo-500 focus:ring-0 text-sm font-bold placeholder:text-slate-300 shadow-sm group-hover:border-indigo-300 transition-colors" 
+                                    class="w-full pl-11 pr-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-0 text-sm font-bold placeholder:text-slate-300 shadow-sm group-hover:border-cyan-300 transition-colors" 
                                     placeholder="Nama atau NIS...">
-                                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-500 transition-colors">
                                     <i class="ph-bold ph-magnifying-glass text-lg"></i>
                                 </div>
                             </div>
@@ -145,11 +144,11 @@
                             <div class="flex flex-col sm:flex-row gap-2">
                                 <div class="relative flex-1 group">
                                     <input type="date" name="date" id="dateInput" value="{{ request('date', date('Y-m-d')) }}" 
-                                        class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-indigo-500 focus:ring-0 text-sm font-bold text-slate-600 shadow-sm group-hover:border-indigo-300 transition-colors cursor-pointer">
+                                        class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-0 text-sm font-bold text-slate-600 shadow-sm group-hover:border-cyan-300 transition-colors cursor-pointer">
                                 </div>
                                 <div class="flex gap-1.5">
-                                    <button type="button" onclick="setDate('{{ date('Y-m-d') }}')" class="px-4 py-2 bg-slate-100 hover:bg-indigo-100 text-slate-500 hover:text-indigo-600 border border-slate-200 hover:border-indigo-200 rounded-xl text-xs font-bold transition-all shadow-sm">Hari Ini</button>
-                                    <button type="button" onclick="setDate('{{ date('Y-m-d', strtotime('-1 days')) }}')" class="px-4 py-2 bg-slate-100 hover:bg-indigo-100 text-slate-500 hover:text-indigo-600 border border-slate-200 hover:border-indigo-200 rounded-xl text-xs font-bold transition-all shadow-sm">Kemarin</button>
+                                    <button type="button" onclick="setDate('{{ date('Y-m-d') }}')" class="px-4 py-2 bg-slate-100 hover:bg-cyan-100 text-slate-500 hover:text-cyan-600 border border-slate-200 hover:border-cyan-200 rounded-xl text-xs font-bold transition-all shadow-sm">Hari Ini</button>
+                                    <button type="button" onclick="setDate('{{ date('Y-m-d', strtotime('-1 days')) }}')" class="px-4 py-2 bg-slate-100 hover:bg-cyan-100 text-slate-500 hover:text-cyan-600 border border-slate-200 hover:border-cyan-200 rounded-xl text-xs font-bold transition-all shadow-sm">Kemarin</button>
                                 </div>
                             </div>
                         </div>
@@ -159,7 +158,7 @@
                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2 ml-1">Status</label>
                             <div class="flex gap-2">
                                 <div class="relative flex-1">
-                                    <select name="status" class="w-full appearance-none px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-indigo-500 focus:ring-0 text-sm font-bold text-slate-600 shadow-sm cursor-pointer">
+                                    <select name="status" class="w-full appearance-none px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-0 text-sm font-bold text-slate-600 shadow-sm cursor-pointer">
                                         <option value="">Semua Status</option>
                                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Di Luar</option>
                                         <option value="returned" {{ request('status') == 'returned' ? 'selected' : '' }}>Kembali</option>
@@ -168,7 +167,7 @@
                                         <i class="ph-bold ph-caret-down"></i>
                                     </div>
                                 </div>
-                                <button type="submit" class="bg-indigo-600 text-white px-4 rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95 flex items-center justify-center">
+                                <button type="submit" class="bg-cyan-600 text-white px-4 rounded-2xl hover:bg-cyan-700 transition-all shadow-lg shadow-cyan-200 active:scale-95 flex items-center justify-center">
                                     <i class="ph-bold ph-funnel text-xl"></i>
                                 </button>
                             </div>
@@ -216,7 +215,7 @@
                                             {{ substr($permit->student->name, 0, 1) }}
                                         </div>
                                         <div>
-                                            <div class="font-bold text-slate-700 text-sm group-hover:text-indigo-600 transition-colors">{{ $permit->student->name }}</div>
+                                            <div class="font-bold text-slate-700 text-sm group-hover:text-cyan-600 transition-colors">{{ $permit->student->name }}</div>
                                             <div class="text-xs text-slate-500 font-medium flex items-center gap-1">
                                                 <span>{{ $permit->student->schoolClass->name ?? '-' }}</span>
                                                 <span class="text-slate-300">•</span> 

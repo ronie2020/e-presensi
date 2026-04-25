@@ -26,7 +26,7 @@
         #reader { width: 100%; border-radius: 1.5rem; overflow: hidden; position: relative; }
         #reader video { object-fit: cover; border-radius: 1.5rem; }
         
-        .input-glow:focus { box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2); }
+        .input-glow:focus { box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.2); } /* Ubah ring cyan */
         .digital-clock { font-feature-settings: "tnum"; font-variant-numeric: tabular-nums; }
     </style>
     @endpush
@@ -46,10 +46,10 @@
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-8">
             
-            {{-- HERO SECTION --}}
-            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-6 md:p-10 text-white shadow-xl shadow-blue-900/30 overflow-hidden group border border-white/10">
+            {{-- HERO SECTION (ELEVATED THEME) --}}
+            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-6 md:p-10 text-white shadow-xl shadow-cyan-900/30 overflow-hidden group border border-white/10">
                 
-                {{-- Background Texture (Religious Style) --}}
+                {{-- Background Texture --}}
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
 
                 <div class="relative z-10 flex flex-col lg:flex-row gap-8 items-start lg:items-center justify-between">
@@ -57,20 +57,20 @@
                     {{-- KIRI: Judul & Intro --}}
                     <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5 w-full lg:w-auto">
                         <div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner shrink-0">
-                            <i class="ph-duotone ph-shield-check text-4xl text-blue-300"></i>
+                            <i class="ph-duotone ph-shield-check text-4xl text-cyan-200"></i>
                         </div>
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-blue-200 text-[10px] font-bold uppercase tracking-wider mb-2 backdrop-blur-sm shadow-sm">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-cyan-100 text-[10px] font-bold uppercase tracking-wider mb-2 backdrop-blur-sm shadow-sm">
                                 <span class="relative flex h-2 w-2">
-                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                  <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-400"></span>
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-300 opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-300"></span>
                                 </span>
                                 Sistem Monitoring Realtime
                             </div>
                             <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-none">
-                                Pos Guru <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-white">Piket</span>
+                                Pos Guru <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 to-white">Piket</span>
                             </h1>
-                            <p class="text-blue-100/80 text-sm mt-2 max-w-md">
+                            <p class="text-cyan-100/80 text-sm mt-2 max-w-md">
                                 Kelola izin keluar masuk siswa dengan cepat dan akurat.
                             </p>
                         </div>
@@ -83,7 +83,7 @@
                         </div>
 
                         <div>
-                            <h3 class="text-xs font-bold text-blue-200 uppercase tracking-widest mb-1 flex items-center gap-2 relative z-10">
+                            <h3 class="text-xs font-bold text-cyan-200 uppercase tracking-widest mb-1 flex items-center gap-2 relative z-10">
                                 <i class="ph-bold ph-calendar-blank"></i> Waktu Sekarang
                             </h3>
                             <div id="clockDate" class="text-white text-sm font-medium relative z-10 opacity-90">...</div>
@@ -104,11 +104,11 @@
                 <div class="lg:col-span-5 space-y-6 md:space-y-8 lg:sticky lg:top-6">
                     
                     {{-- SCANNER CARD --}}
-                    <div class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden animate-enter delay-100 group hover:shadow-2xl hover:shadow-indigo-100/50 transition-all duration-500">
+                    <div class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden animate-enter delay-100 group hover:shadow-2xl hover:shadow-cyan-100/50 transition-all duration-500">
                         
                         <div class="flex justify-between items-center mb-6">
                             <h3 class="font-bold text-slate-800 flex items-center gap-3 text-lg">
-                                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center">
                                     <i class="ph-bold ph-qr-code"></i>
                                 </div>
                                 Scan / Input
@@ -118,7 +118,7 @@
                             <div class="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100 shadow-inner" title="Auto Focus RFID">
                                 <label class="flex items-center cursor-pointer relative">
                                     <input type="checkbox" id="kioskModeToggle" class="sr-only peer" checked>
-                                    <div class="w-7 h-4 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
+                                    <div class="w-7 h-4 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-cyan-600"></div>
                                     <span class="ml-2 text-[10px] font-black text-slate-500 uppercase tracking-wide">RFID Mode</span>
                                 </label>
                             </div>
@@ -134,34 +134,34 @@
                                     </span>
                                 </div>
                                 <!-- Scan line animation -->
-                                <div class="absolute top-0 left-0 w-full h-1 bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.8)] animate-[scan_2s_infinite] z-0 opacity-50"></div>
+                                <div class="absolute top-0 left-0 w-full h-1 bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.8)] animate-[scan_2s_infinite] z-0 opacity-50"></div>
                             </div>
 
                             {{-- INPUT FIELD --}}
                             <div class="relative group/input">
                                 <input type="text" id="scannerInput" 
-                                    class="w-full pl-14 pr-12 py-4 md:py-5 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-0 font-mono text-lg md:text-xl font-bold text-slate-800 transition-all placeholder:text-slate-400 placeholder:font-sans placeholder:font-medium input-glow shadow-sm group-hover/input:border-slate-200" 
+                                    class="w-full pl-14 pr-12 py-4 md:py-5 rounded-2xl border-2 border-slate-100 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-0 font-mono text-lg md:text-xl font-bold text-slate-800 transition-all placeholder:text-slate-400 placeholder:font-sans placeholder:font-medium input-glow shadow-sm group-hover/input:border-slate-200" 
                                     placeholder="Tempel Kartu / NIS..." autofocus autocomplete="off">
                                 
-                                <div class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within/input:text-indigo-600 transition-colors">
+                                <div class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within/input:text-cyan-600 transition-colors">
                                     <i class="ph-duotone ph-barcode text-2xl"></i>
                                 </div>
                                 
-                                <div id="inputSpinner" class="hidden absolute right-5 top-1/2 -translate-y-1/2 text-indigo-500">
+                                <div id="inputSpinner" class="hidden absolute right-5 top-1/2 -translate-y-1/2 text-cyan-500">
                                     <i class="ph-bold ph-spinner animate-spin text-xl"></i>
                                 </div>
                                 
-                                <button id="btnSearch" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white shadow-sm border border-slate-200 text-indigo-600 p-2 md:p-2.5 rounded-xl hover:bg-indigo-50 transition cursor-pointer active:scale-95">
+                                <button id="btnSearch" class="absolute right-3 top-1/2 -translate-y-1/2 bg-white shadow-sm border border-slate-200 text-cyan-600 p-2 md:p-2.5 rounded-xl hover:bg-cyan-50 transition cursor-pointer active:scale-95">
                                     <i class="ph-bold ph-arrow-right"></i>
                                 </button>
                             </div>
 
                             {{-- ACTION BUTTONS --}}
                             <div class="grid grid-cols-2 gap-3">
-                                <button onclick="PiketApp.toggleCamera()" id="btnCamera" class="col-span-1 text-xs font-bold px-4 py-3.5 bg-white hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 rounded-xl transition flex items-center justify-center gap-2 border border-slate-200 shadow-sm active:translate-y-0.5">
+                                <button onclick="PiketApp.toggleCamera()" id="btnCamera" class="col-span-1 text-xs font-bold px-4 py-3.5 bg-white hover:bg-cyan-50 text-slate-600 hover:text-cyan-600 rounded-xl transition flex items-center justify-center gap-2 border border-slate-200 shadow-sm active:translate-y-0.5">
                                     <i class="ph-bold ph-camera text-lg"></i> <span id="cameraText">Buka Kamera</span>
                                 </button>
-                                <button onclick="PiketApp.openModalManual()" class="col-span-1 text-xs font-bold px-4 py-3.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 hover:text-indigo-700 rounded-xl transition flex items-center justify-center gap-2 border border-indigo-100 shadow-sm active:translate-y-0.5">
+                                <button onclick="PiketApp.openModalManual()" class="col-span-1 text-xs font-bold px-4 py-3.5 bg-cyan-50 hover:bg-cyan-100 text-cyan-600 hover:text-cyan-700 rounded-xl transition flex items-center justify-center gap-2 border border-cyan-100 shadow-sm active:translate-y-0.5">
                                     <i class="ph-bold ph-keyboard text-lg"></i> Input Manual
                                 </button>
                             </div>
@@ -183,7 +183,7 @@
                     {{-- RECENT HISTORY (Compact List) --}}
                     <div class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 animate-enter delay-200">
                         <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-                            <i class="ph-duotone ph-clock-counter-clockwise text-indigo-500 text-lg"></i> Baru Saja Kembali
+                            <i class="ph-duotone ph-clock-counter-clockwise text-cyan-500 text-lg"></i> Baru Saja Kembali
                         </h3>
                         
                         <div id="historyContainer" class="space-y-3 max-h-[250px] overflow-y-auto custom-scrollbar pr-2">
@@ -247,7 +247,7 @@
                                     <div class="permit-card group relative bg-white p-5 rounded-3xl border transition-all duration-300 flex flex-col justify-between hover:scale-[1.02]
                                         {{ $permit->is_overdue 
                                             ? 'border-rose-100 shadow-[0_4px_20px_-4px_rgba(244,63,94,0.15)] hover:border-rose-300' 
-                                            : 'border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:border-blue-300 hover:shadow-blue-100/50' 
+                                            : 'border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:border-cyan-300 hover:shadow-cyan-100/50' 
                                         }}">
                                         
                                         @if($permit->is_overdue)
@@ -258,7 +258,7 @@
 
                                         <div class="flex items-start gap-4 mb-4">
                                             <div class="w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center text-lg font-bold shadow-sm transition-colors
-                                                {{ $permit->is_overdue ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white' }}">
+                                                {{ $permit->is_overdue ? 'bg-rose-50 text-rose-600' : 'bg-cyan-50 text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white' }}">
                                                 {{ substr($permit->student->name, 0, 1) }}
                                             </div>
                                             <div class="min-w-0 pr-2">
@@ -327,12 +327,12 @@
             
             <div class="overflow-y-auto custom-scrollbar p-6 sm:p-8 flex-1">
                 <div class="text-center mb-6 sm:mb-8 mt-2">
-                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-50 to-blue-100 text-indigo-600 rounded-2xl rotate-3 flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg shadow-indigo-100/50 border border-white">
+                    <div class="w-16 h-16 bg-gradient-to-br from-cyan-50 to-cyan-100 text-cyan-600 rounded-2xl rotate-3 flex items-center justify-center mx-auto mb-4 text-3xl shadow-lg shadow-cyan-100/50 border border-white">
                         <i class="ph-duotone ph-door-open"></i>
                     </div>
                     <h3 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">Izin Keluar Kelas</h3>
                     <div class="mt-4 bg-slate-50 rounded-2xl p-4 border border-slate-100 inline-block w-full">
-                        <p id="modalStudentName" class="text-indigo-600 font-black text-lg sm:text-xl leading-tight">Nama Siswa</p>
+                        <p id="modalStudentName" class="text-cyan-600 font-black text-lg sm:text-xl leading-tight">Nama Siswa</p>
                         <p id="modalStudentClass" class="text-xs text-slate-500 font-mono mt-1 font-bold uppercase tracking-wider">Kelas Siswa</p>
                     </div>
                 </div>
@@ -346,11 +346,11 @@
                             <input type="radio" name="reason_category" value="{{ $reason }}" class="peer sr-only">
                             <div class="p-3.5 rounded-2xl border-2 border-slate-100 text-center text-xs font-bold text-slate-600 
                                         group-hover:bg-slate-50 group-hover:border-slate-300
-                                        peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 
+                                        peer-checked:border-cyan-500 peer-checked:bg-cyan-50 peer-checked:text-cyan-700 
                                         transition-all duration-200 shadow-sm flex items-center justify-center h-full">
                                 {{ $reason }}
                             </div>
-                            <div class="absolute -top-2 -right-2 bg-indigo-600 text-white rounded-full p-1 opacity-0 peer-checked:opacity-100 transition-all scale-0 peer-checked:scale-100 transform duration-200 shadow-md ring-2 ring-white">
+                            <div class="absolute -top-2 -right-2 bg-cyan-600 text-white rounded-full p-1 opacity-0 peer-checked:opacity-100 transition-all scale-0 peer-checked:scale-100 transform duration-200 shadow-md ring-2 ring-white">
                                 <i class="ph-bold ph-check text-xs"></i>
                             </div>
                         </label>
@@ -359,10 +359,10 @@
                     
                     <div class="mb-6">
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-2 ml-1">Catatan Tambahan</label>
-                        <input type="text" name="notes" class="w-full rounded-xl border-slate-200 focus:border-indigo-500 focus:ring-0 text-sm py-3 px-4 bg-slate-50 focus:bg-white transition-colors placeholder:text-slate-300 font-medium" placeholder="Contoh: Sakit perut, dipanggil Bu Ani...">
+                        <input type="text" name="notes" class="w-full rounded-xl border-slate-200 focus:border-cyan-500 focus:ring-0 text-sm py-3 px-4 bg-slate-50 focus:bg-white transition-colors placeholder:text-slate-300 font-medium" placeholder="Contoh: Sakit perut, dipanggil Bu Ani...">
                     </div>
                     
-                    <button type="submit" id="btnSubmitPermit" class="w-full py-4 rounded-xl bg-indigo-600 text-white font-bold text-lg hover:bg-indigo-700 active:scale-95 transition-all shadow-lg shadow-indigo-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button type="submit" id="btnSubmitPermit" class="w-full py-4 rounded-xl bg-cyan-600 text-white font-bold text-lg hover:bg-cyan-700 active:scale-95 transition-all shadow-lg shadow-cyan-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                         <span>Berikan Izin</span>
                         <i class="ph-bold ph-arrow-right"></i>
                     </button>
@@ -382,13 +382,13 @@
             <p class="text-sm text-slate-500 mb-6 leading-relaxed">Masukkan NIS atau Nama siswa jika kartu tertinggal atau rusak.</p>
             
             <div class="relative mb-6">
-                <input type="text" id="manualInputBox" class="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-slate-200 focus:border-indigo-500 focus:ring-0 font-bold text-slate-700 bg-slate-50 focus:bg-white transition-colors" placeholder="Ketik Nama / NIS...">
+                <input type="text" id="manualInputBox" class="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-slate-200 focus:border-cyan-500 focus:ring-0 font-bold text-slate-700 bg-slate-50 focus:bg-white transition-colors" placeholder="Ketik Nama / NIS...">
                 <i class="ph-bold ph-keyboard absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xl"></i>
             </div>
             
             <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-4">
                 <button onclick="document.getElementById('manualSearchModal').classList.add('hidden')" class="w-full sm:w-auto px-5 py-3 sm:py-2.5 rounded-xl text-slate-500 font-bold hover:bg-slate-100 transition-colors">Batal</button>
-                <button onclick="PiketApp.submitManualSearch()" class="w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all active:scale-95 text-center">Cari Data</button>
+                <button onclick="PiketApp.submitManualSearch()" class="w-full sm:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-cyan-600 text-white font-bold hover:bg-cyan-700 shadow-lg shadow-cyan-200 transition-all active:scale-95 text-center">Cari Data</button>
             </div>
         </div>
     </div>
@@ -467,7 +467,7 @@
                 const el = this.elements.scanFeedback;
                 el.className = 'mt-4 p-4 rounded-xl text-center text-sm font-bold animate-pulse transition-all shadow-sm ' + 
                     (type === 'success' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 
-                    (type === 'error' ? 'bg-rose-100 text-rose-700 border border-rose-200' : 'bg-blue-100 text-blue-700 border border-blue-200'));
+                    (type === 'error' ? 'bg-rose-100 text-rose-700 border border-rose-200' : 'bg-cyan-100 text-cyan-700 border border-cyan-200'));
                 el.innerHTML = msg; el.classList.remove('hidden');
                 setTimeout(() => el.classList.add('hidden'), 3000);
             },
@@ -516,7 +516,7 @@
                 }
             },
 
-            // --- CORE LOGIC (TERMASUK RED ZONE) ---
+            // --- CORE LOGIC ---
             async handleScan(code) {
                 if(!code || this.isProcessing) return;
                 this.setProcessingState(true);

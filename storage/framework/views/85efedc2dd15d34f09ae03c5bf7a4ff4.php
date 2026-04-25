@@ -1,8 +1,17 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- CUSTOM STYLES --}}
+    
     <style>
         /* Animasi standar tetap dipertahankan */
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -26,7 +35,7 @@
 
     <div class="py-6 sm:py-8 font-sans text-slate-800">
         
-        {{-- HERO SECTION (ELEVATED THEME) --}}
+        
          <div class="animate-enter max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
             <div class="relative rounded-[2.5rem] bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-8 sm:p-10 text-white shadow-2xl shadow-cyan-900/30 overflow-hidden border border-white/10 group">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
@@ -34,7 +43,7 @@
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     <div class="max-w-2xl">
-                        <a href="{{ route('dashboard') }}" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
+                        <a href="<?php echo e(route('dashboard')); ?>" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
                             <i class="ph-bold ph-arrow-left text-sm group-hover:-translate-x-1 transition-transform"></i>
                             <span>Kembali ke Dashboard Utama</span>
                         </a>
@@ -50,11 +59,11 @@
                     <div class="w-full md:w-auto grid grid-cols-2 gap-4">
                         <div class="bg-white/10 backdrop-blur-md px-5 py-5 rounded-2xl border border-white/20 hover:bg-white/15 transition-all hover:scale-105 duration-300">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-200">Koleksi Buku</span>
-                            <span class="block text-3xl font-black text-shimmer count-up" data-target="{{ $totalBooks }}">0</span>
+                            <span class="block text-3xl font-black text-shimmer count-up" data-target="<?php echo e($totalBooks); ?>">0</span>
                         </div>
                         <div class="bg-orange-500/20 backdrop-blur-md px-5 py-5 rounded-2xl border border-orange-400/30 hover:bg-orange-500/30 transition-all hover:scale-105 duration-300">
                             <span class="text-[10px] font-bold uppercase tracking-wider text-orange-300">Pengunjung</span>
-                            <span class="block text-3xl font-black text-shimmer count-up" data-target="{{ $todayVisits }}">0</span>
+                            <span class="block text-3xl font-black text-shimmer count-up" data-target="<?php echo e($todayVisits); ?>">0</span>
                         </div>
                     </div>
                 </div>
@@ -73,7 +82,7 @@
                             <i class="ph-fill ph-lightning text-yellow-500 text-xl"></i> Akses Cepat
                         </h2>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <a href="{{ route('library.circulation.index') }}" class="flex flex-col items-center justify-center p-4 bg-cyan-50/50 hover:bg-cyan-600 border border-cyan-100 hover:border-cyan-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
+                            <a href="<?php echo e(route('library.circulation.index')); ?>" class="flex flex-col items-center justify-center p-4 bg-cyan-50/50 hover:bg-cyan-600 border border-cyan-100 hover:border-cyan-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
                                 <i class="ph-duotone ph-arrows-left-right text-3xl text-cyan-600 group-hover:text-white mb-2 transition-colors"></i>
                                 <span class="font-bold text-slate-600 text-xs group-hover:text-white transition-colors">Sirkulasi</span>
                             </a>
@@ -81,11 +90,11 @@
                                 <i class="ph-duotone ph-user-focus text-3xl text-purple-600 group-hover:text-white mb-2 transition-colors"></i>
                                 <span class="font-bold text-slate-600 text-xs group-hover:text-white transition-colors">Cari Siswa</span>
                             </button>
-                            <a href="{{ route('library.books.create') }}" class="flex flex-col items-center justify-center p-4 bg-emerald-50/50 hover:bg-emerald-600 border border-emerald-100 hover:border-emerald-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
+                            <a href="<?php echo e(route('library.books.create')); ?>" class="flex flex-col items-center justify-center p-4 bg-emerald-50/50 hover:bg-emerald-600 border border-emerald-100 hover:border-emerald-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
                                 <i class="ph-duotone ph-plus-circle text-3xl text-emerald-600 group-hover:text-white mb-2 transition-colors"></i>
                                 <span class="font-bold text-slate-600 text-xs group-hover:text-white transition-colors">Input Buku</span>
                             </a>
-                            <a href="{{ route('library.kiosk.index') }}" target="_blank" class="flex flex-col items-center justify-center p-4 bg-orange-50/50 hover:bg-orange-600 border border-orange-100 hover:border-orange-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
+                            <a href="<?php echo e(route('library.kiosk.index')); ?>" target="_blank" class="flex flex-col items-center justify-center p-4 bg-orange-50/50 hover:bg-orange-600 border border-orange-100 hover:border-orange-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
                                 <i class="ph-duotone ph-desktop text-3xl text-orange-600 group-hover:text-white mb-2 transition-colors"></i>
                                 <span class="font-bold text-slate-600 text-xs group-hover:text-white transition-colors">Mode Kiosk</span>
                             </a>
@@ -100,7 +109,7 @@
                                     <i class="ph-fill ph-read-cv-logo"></i>
                                     <span class="text-[10px] font-bold uppercase tracking-wider">Literasi Digital</span>
                                 </div>
-                                <h2 class="text-4xl font-black mb-1 count-up" data-target="{{ $ebookReadsThisMonth ?? 0 }}">0</h2>
+                                <h2 class="text-4xl font-black mb-1 count-up" data-target="<?php echo e($ebookReadsThisMonth ?? 0); ?>">0</h2>
                                 <p class="text-xs text-indigo-200">Total baca E-Book bulan ini</p>
                             </div>
                         </div>
@@ -109,21 +118,21 @@
                             <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
                                 <i class="ph-fill ph-crown text-amber-500"></i> Top E-Book
                             </h3>
-                            @if(isset($popularEbooks) && count($popularEbooks) > 0)
+                            <?php if(isset($popularEbooks) && count($popularEbooks) > 0): ?>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    @foreach($popularEbooks as $index => $book)
+                                    <?php $__currentLoopData = $popularEbooks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-default">
-                                            <div class="w-5 h-5 flex items-center justify-center text-xs font-black bg-slate-100 rounded text-slate-500">{{ $index + 1 }}</div>
+                                            <div class="w-5 h-5 flex items-center justify-center text-xs font-black bg-slate-100 rounded text-slate-500"><?php echo e($index + 1); ?></div>
                                             <div class="flex-1 min-w-0">
-                                                <h4 class="font-bold text-slate-700 text-xs truncate">{{ $book->title }}</h4>
-                                                <span class="text-[10px] text-slate-400">{{ $book->ebook_reads_count }}x Baca</span>
+                                                <h4 class="font-bold text-slate-700 text-xs truncate"><?php echo e($book->title); ?></h4>
+                                                <span class="text-[10px] text-slate-400"><?php echo e($book->ebook_reads_count); ?>x Baca</span>
                                             </div>
                                         </div>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
-                            @else
+                            <?php else: ?>
                                 <p class="text-xs text-slate-400 text-center py-4">Belum ada data bacaan digital.</p>
-                            @endif
+                            <?php endif; ?>
                         </div>
                     </div>  
 
@@ -171,12 +180,12 @@
                         <div class="grid grid-cols-2 gap-4 mb-4">
                             <div class="p-4 bg-indigo-50 rounded-2xl text-center border border-indigo-100">
                                 <i class="ph-duotone ph-book-open-text text-2xl text-indigo-600 mb-1 block"></i>
-                                <p class="text-2xl font-black text-slate-800 count-up" data-target="{{ $borrowedBooks }}">0</p>
+                                <p class="text-2xl font-black text-slate-800 count-up" data-target="<?php echo e($borrowedBooks); ?>">0</p>
                                 <p class="text-[10px] font-bold text-slate-400 uppercase">Dipinjam</p>
                             </div>
                             <div class="p-4 bg-rose-50 rounded-2xl text-center border border-rose-100">
                                 <i class="ph-duotone ph-warning-circle text-2xl text-rose-600 mb-1 block"></i>
-                                <p class="text-2xl font-black text-slate-800 count-up" data-target="{{ $overdueBooks }}">0</p>
+                                <p class="text-2xl font-black text-slate-800 count-up" data-target="<?php echo e($overdueBooks); ?>">0</p>
                                 <p class="text-[10px] font-bold text-slate-400 uppercase">Terlambat</p>
                             </div>
                         </div>
@@ -187,23 +196,23 @@
                         <h3 class="font-black text-slate-800 text-lg mb-4 flex items-center gap-2">
                             <i class="ph-fill ph-warning text-amber-500"></i> Stok Menipis
                         </h3>
-                        @if(isset($attentionBooks) && $attentionBooks->count() > 0)
+                        <?php if(isset($attentionBooks) && $attentionBooks->count() > 0): ?>
                             <div class="space-y-3">
-                                @foreach($attentionBooks as $book)
+                                <?php $__currentLoopData = $attentionBooks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-xl border border-amber-100">
                                     <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-amber-500 shadow-sm">
                                         <i class="ph-bold ph-book"></i>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-bold text-slate-800 truncate">{{ $book->title }}</p>
-                                        <p class="text-[10px] text-amber-600 font-bold">Stok: {{ $book->stock }}</p>
+                                        <p class="text-xs font-bold text-slate-800 truncate"><?php echo e($book->title); ?></p>
+                                        <p class="text-[10px] text-amber-600 font-bold">Stok: <?php echo e($book->stock); ?></p>
                                     </div>
                                 </div>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
-                        @else
+                        <?php else: ?>
                             <div class="text-center py-4 text-slate-400 text-xs">Semua stok buku aman.</div>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
                     <!-- Log Aktivitas -->
@@ -216,30 +225,30 @@
                         </div>
                         <div class="overflow-y-auto flex-1 p-0 custom-scrollbar">
                             <div class="divide-y divide-slate-50">
-                                @forelse($recentActivities as $activity)
+                                <?php $__empty_1 = true; $__currentLoopData = $recentActivities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $activity): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                     <div class="p-4 hover:bg-slate-50 transition-colors flex gap-3 items-start">
                                         <div class="shrink-0 mt-1">
-                                            @if($activity->type == 'visit')
+                                            <?php if($activity->type == 'visit'): ?>
                                                 <div class="w-8 h-8 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-sm">
                                                     <i class="ph-duotone ph-door-open"></i>
                                                 </div>
-                                            @else
-                                                <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm {{ $activity->status == 'returned' ? 'bg-emerald-100 text-emerald-600' : 'bg-cyan-100 text-cyan-600' }}">
-                                                    <i class="{{ $activity->status == 'returned' ? 'ph-duotone ph-arrow-u-down-left' : 'ph-duotone ph-arrow-u-right-up' }}"></i>
+                                            <?php else: ?>
+                                                <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm <?php echo e($activity->status == 'returned' ? 'bg-emerald-100 text-emerald-600' : 'bg-cyan-100 text-cyan-600'); ?>">
+                                                    <i class="<?php echo e($activity->status == 'returned' ? 'ph-duotone ph-arrow-u-down-left' : 'ph-duotone ph-arrow-u-right-up'); ?>"></i>
                                                 </div>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-xs font-bold text-slate-800 truncate">{{ $activity->student->name ?? 'Siswa' }}</p>
-                                            <p class="text-[10px] text-slate-500 truncate">{{ $activity->type == 'visit' ? 'Absensi Masuk' : ($activity->book->title ?? '-') }}</p>
-                                            <p class="text-[9px] font-bold text-slate-400 mt-1">{{ $activity->updated_at->diffForHumans() }}</p>
+                                            <p class="text-xs font-bold text-slate-800 truncate"><?php echo e($activity->student->name ?? 'Siswa'); ?></p>
+                                            <p class="text-[10px] text-slate-500 truncate"><?php echo e($activity->type == 'visit' ? 'Absensi Masuk' : ($activity->book->title ?? '-')); ?></p>
+                                            <p class="text-[9px] font-bold text-slate-400 mt-1"><?php echo e($activity->updated_at->diffForHumans()); ?></p>
                                         </div>
                                     </div>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                     <div class="text-center py-10 text-slate-400">
                                         <p class="text-xs">Belum ada aktivitas.</p>
                                     </div>
-                                @endforelse
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -248,12 +257,12 @@
             </div>
         </div> 
 
-        {{-- BAGIAN BAWAH: ANALITIK KELAS & POPULER --}}
+        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-8 animate-enter delay-300">
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 
-                {{-- Grafik Peminjaman per Kelas --}}
+                
                 <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                     <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i class="ph-fill ph-chart-pie-slice text-purple-500"></i> Distribusi Kelas
@@ -263,32 +272,32 @@
                     </div>
                 </div>
 
-                {{-- Buku Fisik Terpopuler --}}
+                
                 <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                     <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
                         <i class="ph-fill ph-trophy text-yellow-500"></i> Buku Fisik Terpopuler
                     </h3>
                     <div class="space-y-3">
-                        @forelse($popularBooks as $index => $book)
+                        <?php $__empty_1 = true; $__currentLoopData = $popularBooks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $book): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <div class="flex items-center gap-4 p-2 hover:bg-slate-50 rounded-xl transition-colors">
-                                <span class="font-black text-slate-300 text-lg w-6 text-center">{{ $index + 1 }}</span>
+                                <span class="font-black text-slate-300 text-lg w-6 text-center"><?php echo e($index + 1); ?></span>
                                 <div class="flex-1 min-w-0">
-                                    <h4 class="text-sm font-bold text-slate-800 truncate" title="{{ $book->title }}">{{ $book->title }}</h4>
-                                    <p class="text-xs text-slate-500">{{ $book->borrowings_count }}x Dipinjam</p>
+                                    <h4 class="text-sm font-bold text-slate-800 truncate" title="<?php echo e($book->title); ?>"><?php echo e($book->title); ?></h4>
+                                    <p class="text-xs text-slate-500"><?php echo e($book->borrowings_count); ?>x Dipinjam</p>
                                 </div>
                             </div>
-                        @empty
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <div class="flex flex-col items-center justify-center h-40 text-slate-400">
                                 <i class="ph-duotone ph-books text-3xl mb-2 opacity-50"></i>
                                 <p class="text-xs font-bold">Belum ada data peminjaman.</p>
                             </div>
-                        @endforelse
+                        <?php endif; ?>
                     </div>
                 </div>
 
             </div>
 
-            {{-- SEARCH SISWA KIOSK --}}
+            
             <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8 text-center flex flex-col justify-center">
                 <i class="ph-duotone ph-barcode text-5xl text-cyan-200 mb-4 block mx-auto"></i>
                 <h3 class="text-xl font-black text-slate-800 mb-2">Cek Status Siswa</h3>
@@ -306,7 +315,7 @@
         </div>
     </div>
 
-    {{-- Script JavaScript --}}
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             
@@ -337,11 +346,11 @@
             new Chart(ctx, {
                 type: 'line', 
                 data: {
-                    labels: @json($visitChartLabels ?? []),
+                    labels: <?php echo json_encode($visitChartLabels ?? [], 15, 512) ?>,
                     datasets: [
                         {
                             label: 'Kunjungan',
-                            data: @json($visitChartData ?? []),
+                            data: <?php echo json_encode($visitChartData ?? [], 15, 512) ?>,
                             backgroundColor: bgGradient,
                             borderColor: '#0891b2', // Cyan 600
                             borderWidth: 3,
@@ -352,7 +361,7 @@
                         },
                         {
                             label: 'Peminjaman',
-                            data: @json($loanChartData ?? []),
+                            data: <?php echo json_encode($loanChartData ?? [], 15, 512) ?>,
                             borderColor: '#8b5cf6', // Violet 500 (Contrasting color)
                             borderWidth: 2,
                             borderDash: [5, 5],
@@ -374,8 +383,8 @@
             });
 
             // 3. CLASS CHART LOGIC
-            const classLabels = @json($classChartLabels ?? []);
-            const classData = @json($classChartData ?? []);
+            const classLabels = <?php echo json_encode($classChartLabels ?? [], 15, 512) ?>;
+            const classData = <?php echo json_encode($classChartData ?? [], 15, 512) ?>;
             
             if(document.getElementById('classChart')) {
                 const ctxClass = document.getElementById('classChart').getContext('2d');
@@ -403,8 +412,8 @@
             }
 
             // 4. BUSY HOURS CHART
-            const busyHoursLabels = @json($busyHoursLabels ?? []);
-            const busyHoursData = @json($busyHoursData ?? []);
+            const busyHoursLabels = <?php echo json_encode($busyHoursLabels ?? [], 15, 512) ?>;
+            const busyHoursData = <?php echo json_encode($busyHoursData ?? [], 15, 512) ?>;
 
             if(document.getElementById('busyHoursChart')) {
                 const ctxBusy = document.getElementById('busyHoursChart').getContext('2d');
@@ -448,9 +457,9 @@
                 if(!query) return;
                 loadingIndicator.classList.remove('hidden');
                 try {
-                    const res = await fetch('{{ route("library.dashboard.checkStudent") }}', {
+                    const res = await fetch('<?php echo e(route("library.dashboard.checkStudent")); ?>', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                         body: JSON.stringify({ q: query })
                     });
                     const data = await res.json();
@@ -524,4 +533,13 @@
             }
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/library/dashboard.blade.php ENDPATH**/ ?>

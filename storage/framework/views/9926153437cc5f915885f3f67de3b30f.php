@@ -1,23 +1,33 @@
-<x-app-layout>
-    {{-- Tambahkan SweetAlert via CDN jika belum ada di layout utama --}}
-    @push('scripts')
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
+    <?php $__env->startPush('scripts'); ?>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                @if(session('success'))
-                    Swal.fire({ icon: 'success', title: 'Berhasil!', text: "{{ session('success') }}", toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, customClass: { popup: 'rounded-xl' } });
-                @endif
+                <?php if(session('success')): ?>
+                    Swal.fire({ icon: 'success', title: 'Berhasil!', text: "<?php echo e(session('success')); ?>", toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, customClass: { popup: 'rounded-xl' } });
+                <?php endif; ?>
             });
         </script>
-    @endpush
+    <?php $__env->stopPush(); ?>
 
-    <x-slot name="header">
+     <?php $__env->slot('header', null, []); ?> 
         <h2 class="font-semibold text-xl text-slate-800 leading-tight">
-            {{ __('Bank Soal Terpusat') }}
-        </h2>
-    </x-slot>
+            <?php echo e(__('Bank Soal Terpusat')); ?>
 
-    {{-- Root Alpine Data untuk Search & Modal --}}
+        </h2>
+     <?php $__env->endSlot(); ?>
+
+    
     <div class="py-8 sm:py-10 font-sans text-slate-800" 
          x-data="{ 
             search: '',
@@ -73,7 +83,7 @@
          
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-            {{-- HERO SECTION (Tema Netila Elevate) --}}
+            
             <div class="relative rounded-[2rem] bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-8 text-white shadow-xl shadow-cyan-900/30 overflow-hidden border border-white/10">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 
@@ -83,7 +93,7 @@
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
                         <div class="flex items-center gap-2 mb-2">
-                            <a href="{{ route('cbt.index') }}" class="text-xs font-bold text-cyan-200 hover:text-white transition flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full border border-white/20 backdrop-blur-sm">
+                            <a href="<?php echo e(route('cbt.index')); ?>" class="text-xs font-bold text-cyan-200 hover:text-white transition flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full border border-white/20 backdrop-blur-sm">
                                 <i class="ph-bold ph-arrow-left"></i> Dashboard Ujian
                             </a>
                             <span class="text-white/30 text-xs">•</span>
@@ -93,7 +103,7 @@
                         <p class="text-cyan-50 text-sm font-medium">Kelola repositori soal berdasarkan folder mata pelajaran.</p>
                     </div>
                     
-                    {{-- Tombol Buat Bank Baru --}}
+                    
                     <div>
                         <button @click="createModalOpen = true" class="group flex items-center gap-3 px-6 py-4 bg-white text-cyan-700 rounded-2xl font-bold hover:bg-slate-50 transition shadow-lg shadow-black/10 active:scale-95">
                             <div class="w-8 h-8 rounded-full bg-cyan-50 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -104,7 +114,7 @@
                     </div>
                 </div>
 
-                {{-- Input Pencarian dalam Hero --}}
+                
                 <div class="mt-8 relative max-w-lg">
                     <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-cyan-200 text-lg"></i>
                     <input type="text" x-model="search" placeholder="Cari nama mapel, judul paket soal, atau kode..." 
@@ -112,7 +122,7 @@
                 </div>
             </div>
 
-            {{-- MODAL BUAT BANK --}}
+            
             <div x-show="createModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" 
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0"
@@ -132,8 +142,8 @@
                             <div class="w-10 h-10 bg-cyan-50 text-cyan-600 rounded-full flex items-center justify-center shrink-0"><i class="ph-fill ph-folder-plus text-xl"></i></div>
                             Bank Soal Baru
                         </h3>
-                        <form action="{{ route('bank.store') }}" method="POST" class="space-y-4">
-                            @csrf
+                        <form action="<?php echo e(route('bank.store')); ?>" method="POST" class="space-y-4">
+                            <?php echo csrf_field(); ?>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Judul Paket Soal</label>
                                 <input type="text" name="title" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-slate-700 py-3.5 px-4 focus:ring-cyan-500 focus:border-cyan-500 transition-colors" placeholder="Contoh: PTS Ganjil Tahun Ini">
@@ -144,19 +154,19 @@
                                 <div class="relative">
                                     <select name="subject_name" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-slate-700 py-3.5 px-4 focus:ring-cyan-500 focus:border-cyan-500 appearance-none cursor-pointer transition-colors">
                                         <option value="" disabled selected>Pilih Mapel...</option>
-                                        @if(isset($subjects) && $subjects->count() > 0)
-                                            @foreach($subjects as $subject)
-                                                <option value="{{ $subject->name }}">{{ $subject->name }} ({{ $subject->code ?? '-' }})</option>
-                                            @endforeach
-                                        @else
+                                        <?php if(isset($subjects) && $subjects->count() > 0): ?>
+                                            <?php $__currentLoopData = $subjects; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $subject): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($subject->name); ?>"><?php echo e($subject->name); ?> (<?php echo e($subject->code ?? '-'); ?>)</option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        <?php else: ?>
                                             <option value="" disabled>Belum ada data mapel</option>
-                                        @endif
+                                        <?php endif; ?>
                                     </select>
                                     <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
                                 </div>
-                                @if(!isset($subjects) || $subjects->count() == 0)
+                                <?php if(!isset($subjects) || $subjects->count() == 0): ?>
                                     <p class="text-[10px] text-rose-500 mt-1 font-bold">* Tambahkan data Mata Pelajaran di menu Pengaturan terlebih dahulu.</p>
-                                @endif
+                                <?php endif; ?>
                             </div>
 
                             <div>
@@ -181,7 +191,7 @@
                 </div>
             </div>
 
-            {{-- MODAL EDIT BANK --}}
+            
             <div x-show="editModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" 
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0"
@@ -202,8 +212,8 @@
                             Edit Bank Soal
                         </h3>
                         <form :action="editUrl" method="POST" class="space-y-4">
-                            @csrf
-                            @method('PUT')
+                            <?php echo csrf_field(); ?>
+                            <?php echo method_field('PUT'); ?>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Judul Paket Soal</label>
                                 <input type="text" name="title" x-model="editData.title" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-slate-700 py-3.5 px-4 focus:ring-cyan-500 focus:border-cyan-500 transition-colors">
@@ -214,13 +224,13 @@
                                 <div class="relative">
                                     <select name="subject_name" x-model="editData.subject_name" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-slate-700 py-3.5 px-4 focus:ring-cyan-500 focus:border-cyan-500 appearance-none cursor-pointer transition-colors">
                                         <option value="" disabled>Pilih Mapel...</option>
-                                        @if(isset($subjects) && $subjects->count() > 0)
-                                            @foreach($subjects as $subject)
-                                                <option value="{{ $subject->name }}">{{ $subject->name }} ({{ $subject->code ?? '-' }})</option>
-                                            @endforeach
-                                        @else
+                                        <?php if(isset($subjects) && $subjects->count() > 0): ?>
+                                            <?php $__currentLoopData = $subjects; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $subject): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($subject->name); ?>"><?php echo e($subject->name); ?> (<?php echo e($subject->code ?? '-'); ?>)</option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        <?php else: ?>
                                             <option value="" disabled>Belum ada data mapel</option>
-                                        @endif
+                                        <?php endif; ?>
                                     </select>
                                     <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
                                 </div>
@@ -248,22 +258,22 @@
                 </div>
             </div>
 
-            {{-- LOGIKA PENGELOMPOKAN FOLDER --}}
-            @php
+            
+            <?php
                 // Kita ekstrak koleksinya, lalu kelompokkan berdasarkan subject_name
                 $bankItems = method_exists($banks, 'items') ? collect($banks->items()) : collect($banks);
                 // Grouping, lalu sort by nama mata pelajaran agar alfabetis
                 $groupedBanks = $bankItems->sortBy('subject_name')->groupBy('subject_name');
-            @endphp
+            ?>
 
-            {{-- LIST FOLDER & BANK SOAL --}}
+            
             <div class="space-y-10">
-                @forelse($groupedBanks as $subjectName => $subjectBanks)
+                <?php $__empty_1 = true; $__currentLoopData = $groupedBanks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $subjectName => $subjectBanks): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     
-                    {{-- WRAPPER FOLDER --}}
-                    <div class="folder-group" data-folder-name="{{ $subjectName }}" x-show="folderHasVisibleCards($el)" x-transition.duration.300ms>
+                    
+                    <div class="folder-group" data-folder-name="<?php echo e($subjectName); ?>" x-show="folderHasVisibleCards($el)" x-transition.duration.300ms>
                         
-                        {{-- HEADER FOLDER --}}
+                        
                         <div class="flex items-center gap-4 mb-5">
                             <div class="bg-white border border-slate-200 rounded-[1rem] p-3 pr-5 flex items-center gap-3 shadow-sm w-max hover:shadow-md transition-shadow cursor-default group/folder">
                                 <div class="w-10 h-10 rounded-[0.75rem] flex items-center justify-center shadow-sm border bg-cyan-50 border-cyan-100 text-cyan-600 group-hover/folder:bg-cyan-600 group-hover/folder:text-white transition-colors">
@@ -272,68 +282,70 @@
                                 <div>
                                     <p class="text-[10px] uppercase font-black tracking-wider text-slate-400 mb-0.5">Folder Mata Pelajaran</p>
                                     <div class="flex items-center gap-2">
-                                        <h3 class="text-sm font-black text-slate-700">{{ $subjectName }}</h3>
-                                        <span class="text-[10px] bg-slate-100 text-slate-500 font-bold px-1.5 py-0.5 rounded-md">{{ count($subjectBanks) }} File</span>
+                                        <h3 class="text-sm font-black text-slate-700"><?php echo e($subjectName); ?></h3>
+                                        <span class="text-[10px] bg-slate-100 text-slate-500 font-bold px-1.5 py-0.5 rounded-md"><?php echo e(count($subjectBanks)); ?> File</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="flex-1 h-px bg-gradient-to-r from-slate-200 to-transparent"></div>
                         </div>
 
-                        {{-- GRID KARTU DALAM FOLDER --}}
+                        
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            @foreach($subjectBanks as $bank)
+                            <?php $__currentLoopData = $subjectBanks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $bank): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="bank-card bg-white border border-slate-100 rounded-[2rem] p-6 hover:shadow-xl hover:shadow-cyan-900/5 hover:border-cyan-300 transition-all duration-300 group relative flex flex-col h-full"
-                                     data-search="{{ strtolower($bank->title . ' ' . $bank->subject_name . ' ' . $bank->code) }}"
+                                     data-search="<?php echo e(strtolower($bank->title . ' ' . $bank->subject_name . ' ' . $bank->code)); ?>"
                                      x-show="search === '' || $el.dataset.search.includes(search.toLowerCase()) || $el.closest('.folder-group').dataset.folderName.toLowerCase().includes(search.toLowerCase())"
                                      x-transition.duration.300ms>
                                     
-                                    {{-- Info Atas (Kelas & Kode) --}}
+                                    
                                     <div class="mb-4">
                                         <div class="flex justify-between items-start mb-3">
                                             <span class="inline-block px-3 py-1 bg-cyan-50 text-cyan-700 border border-cyan-100 rounded-lg text-[10px] font-black uppercase tracking-wide">
-                                                Kelas {{ $bank->class_level }}
+                                                Kelas <?php echo e($bank->class_level); ?>
+
                                             </span>
-                                            <span class="text-[10px] bg-slate-50 px-2 py-0.5 rounded border border-slate-100 font-mono text-slate-400 group-hover:text-cyan-600 transition" title="Kode Bank Soal">#{{ $bank->code }}</span>
+                                            <span class="text-[10px] bg-slate-50 px-2 py-0.5 rounded border border-slate-100 font-mono text-slate-400 group-hover:text-cyan-600 transition" title="Kode Bank Soal">#<?php echo e($bank->code); ?></span>
                                         </div>
                                         <h4 class="font-black text-xl text-slate-800 leading-tight group-hover:text-cyan-600 transition-colors line-clamp-2">
-                                            {{ $bank->title }}
+                                            <?php echo e($bank->title); ?>
+
                                         </h4>
                                     </div>
                                     
-                                    {{-- File Tally --}}
+                                    
                                     <div class="flex-1 flex items-end mb-5">
                                         <div class="flex items-center gap-2 text-slate-500 text-xs font-bold bg-slate-50 group-hover:bg-cyan-50/50 px-4 py-2.5 rounded-xl w-full border border-slate-100 transition-colors">
                                             <i class="ph-duotone ph-files text-cyan-500 text-lg shrink-0"></i>
-                                            <span class="text-slate-700 text-sm">{{ $bank->questions_count }}</span> Soal Tersedia
+                                            <span class="text-slate-700 text-sm"><?php echo e($bank->questions_count); ?></span> Soal Tersedia
                                         </div>
                                     </div>
 
-                                    {{-- Footer Actions --}}
+                                    
                                     <div class="pt-4 border-t border-slate-50 flex gap-2">
-                                        <a href="{{ route('bank.manage', $bank->id) }}" class="flex-1 flex items-center justify-center p-2.5 bg-cyan-600 text-white rounded-xl text-xs font-bold hover:bg-cyan-500 transition-all shadow-lg shadow-cyan-500/20 active:scale-95" title="Kelola Soal">
+                                        <a href="<?php echo e(route('bank.manage', $bank->id)); ?>" class="flex-1 flex items-center justify-center p-2.5 bg-cyan-600 text-white rounded-xl text-xs font-bold hover:bg-cyan-500 transition-all shadow-lg shadow-cyan-500/20 active:scale-95" title="Kelola Soal">
                                             <i class="ph-bold ph-list-plus text-lg mr-2"></i> Isi Soal
                                         </a>
                                         
-                                        {{-- Button Edit --}}
-                                        <button type="button" @click="openEditModal({{ json_encode(['id' => $bank->id, 'title' => $bank->title, 'subject_name' => $bank->subject_name, 'class_level' => $bank->class_level]) }}, '{{ route('bank.update', $bank->id) }}')" class="w-10 h-10 flex items-center justify-center bg-white border border-amber-200 text-amber-500 rounded-xl hover:bg-amber-50 hover:border-amber-300 hover:text-amber-600 transition-all active:scale-95" title="Edit Identitas Bank Soal">
+                                        
+                                        <button type="button" @click="openEditModal(<?php echo e(json_encode(['id' => $bank->id, 'title' => $bank->title, 'subject_name' => $bank->subject_name, 'class_level' => $bank->class_level])); ?>, '<?php echo e(route('bank.update', $bank->id)); ?>')" class="w-10 h-10 flex items-center justify-center bg-white border border-amber-200 text-amber-500 rounded-xl hover:bg-amber-50 hover:border-amber-300 hover:text-amber-600 transition-all active:scale-95" title="Edit Identitas Bank Soal">
                                             <i class="ph-bold ph-pencil-simple text-lg"></i>
                                         </button>
 
-                                        {{-- Form Delete dengan SweetAlert Trigger --}}
-                                        <form id="delete-form-{{ $bank->id }}" action="{{ route('bank.destroy', $bank->id) }}" method="POST">
-                                            @csrf @method('DELETE')
-                                            <button type="button" @click="confirmDelete({{ $bank->id }})" class="w-10 h-10 flex items-center justify-center bg-white border border-rose-200 text-rose-500 rounded-xl hover:bg-rose-50 hover:border-rose-300 hover:text-rose-600 transition-all active:scale-95" title="Hapus Bank Soal">
+                                        
+                                        <form id="delete-form-<?php echo e($bank->id); ?>" action="<?php echo e(route('bank.destroy', $bank->id)); ?>" method="POST">
+                                            <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
+                                            <button type="button" @click="confirmDelete(<?php echo e($bank->id); ?>)" class="w-10 h-10 flex items-center justify-center bg-white border border-rose-200 text-rose-500 rounded-xl hover:bg-rose-50 hover:border-rose-300 hover:text-rose-600 transition-all active:scale-95" title="Hapus Bank Soal">
                                                 <i class="ph-bold ph-trash text-lg"></i>
                                             </button>
                                         </form>
                                     </div>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                     </div>
-                @empty
-                    {{-- EMPTY STATE JIKA SAMA SEKALI BELUM ADA BANK SOAL --}}
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    
                     <div class="col-span-full text-center py-20 bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200">
                         <div class="w-24 h-24 bg-cyan-50 text-cyan-600 rounded-full flex items-center justify-center mx-auto mb-6">
                             <i class="ph-duotone ph-folder-dashed text-5xl"></i>
@@ -344,9 +356,9 @@
                             <i class="ph-bold ph-plus"></i> Buat Bank Soal
                         </button>
                     </div>
-                @endforelse
+                <?php endif; ?>
                 
-                {{-- State Kosong saat Pencarian tidak ketemu --}}
+                
                 <div x-show="search !== '' && document.querySelectorAll('.bank-card[style*=\'display: none\']').length === document.querySelectorAll('.bank-card').length" 
                      class="col-span-full text-center py-16" style="display: none;">
                     <div class="w-20 h-20 bg-slate-100 text-slate-300 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -358,4 +370,13 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/cbt/bank/index.blade.php ENDPATH**/ ?>

@@ -27,34 +27,34 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             
-            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-r from-blue-900 via-slate-800 to-slate-900 p-6 md:p-10 text-white shadow-2xl shadow-purple-900/20 overflow-hidden group border border-white/10 flex justify-between items-center">
+            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-6 md:p-10 text-white shadow-xl shadow-cyan-900/30 overflow-hidden group border border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 
-                <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-overlay filter blur-[120px] opacity-20 group-hover:opacity-30 transition-opacity duration-1000 no-print"></div>
-                <div class="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-500 rounded-full mix-blend-overlay filter blur-[100px] opacity-20 no-print"></div>
-                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none no-print"></div>
+                
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none no-print"></div>
+                <div class="absolute top-0 right-0 w-80 h-80 bg-cyan-300/30 rounded-full blur-[80px] translate-x-1/2 -translate-y-1/2 pointer-events-none group-hover:bg-cyan-300/40 transition-all duration-700 no-print"></div>
             
                 <div class="relative z-10 flex items-center gap-5">
-                    <div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
-                        <i class="ph-duotone ph-chart-polar text-4xl text-purple-300"></i>
+                    <div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner shrink-0">
+                        <i class="ph-duotone ph-chart-polar text-4xl text-cyan-200"></i>
                     </div>
                     <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-purple-200 text-[10px] font-bold uppercase tracking-wider mb-2 backdrop-blur-sm shadow-sm">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-cyan-100 text-[10px] font-bold uppercase tracking-wider mb-2 backdrop-blur-sm shadow-sm">
                             <i class="ph-bold ph-trend-up"></i> Evaluasi Kedisiplinan
                         </div>
                         <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
-                            Statistik & <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-white">Analitik</span>
+                            Statistik & <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 to-white">Analitik</span>
                         </h2>
                     </div>
                 </div>
 
                 
-                <div class="relative z-10 hidden md:block">
-                    <form action="<?php echo e(route('permit.analytics')); ?>" method="GET" id="monthFilterForm" class="flex items-center gap-3">
-                        <label for="monthFilter" class="text-white text-sm font-bold opacity-80">Pilih Bulan:</label>
-                        <div class="relative">
+                <div class="relative z-10 w-full md:w-auto mt-4 md:mt-0">
+                    <form action="<?php echo e(route('permit.analytics')); ?>" method="GET" id="monthFilterForm" class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                        <label for="monthFilter" class="text-cyan-100 text-sm font-bold opacity-90 hidden sm:block">Pilih Bulan:</label>
+                        <div class="relative w-full sm:w-auto">
                             <input type="month" name="month" id="monthFilter" value="<?php echo e($selectedMonth); ?>" 
                                 onchange="document.getElementById('monthFilterForm').submit()"
-                                class="bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-xl px-4 py-2.5 focus:ring-0 focus:border-white/50 backdrop-blur-sm cursor-pointer transition-all shadow-sm font-bold [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-70 [&::-webkit-calendar-picker-indicator]:hover:opacity-100">
+                                class="w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm rounded-xl px-4 py-2.5 focus:ring-0 focus:border-white/50 backdrop-blur-sm cursor-pointer transition-all shadow-sm font-bold [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-70 [&::-webkit-calendar-picker-indicator]:hover:opacity-100">
                         </div>
                     </form>
                 </div>
@@ -62,29 +62,29 @@
 
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 animate-enter delay-100">
-                <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl"><i class="ph-bold ph-door-open"></i></div>
+                <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 hover:border-cyan-200 hover:shadow-xl hover:shadow-cyan-100/50 transition-all duration-300 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-xl shrink-0"><i class="ph-bold ph-door-open"></i></div>
                     <div>
                         <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Total Izin</div>
                         <div class="text-2xl font-black text-slate-800"><?php echo e($kpiTotalMonth ?? 0); ?></div>
                     </div>
                 </div>
-                <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center text-xl"><i class="ph-bold ph-timer"></i></div>
+                <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 hover:border-orange-200 hover:shadow-xl hover:shadow-orange-100/50 transition-all duration-300 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center text-xl shrink-0"><i class="ph-bold ph-timer"></i></div>
                     <div>
                         <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Rata-rata Durasi</div>
                         <div class="text-2xl font-black text-slate-800"><?php echo e($kpiAvgDuration ?? 0); ?><span class="text-sm text-slate-400 font-medium ml-1">mnt</span></div>
                     </div>
                 </div>
-                <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl"><i class="ph-bold ph-warning"></i></div>
+                <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 hover:border-rose-200 hover:shadow-xl hover:shadow-rose-100/50 transition-all duration-300 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl shrink-0"><i class="ph-bold ph-warning"></i></div>
                     <div>
                         <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Siswa Telat</div>
                         <div class="text-2xl font-black text-slate-800"><?php echo e($kpiOverdue ?? 0); ?></div>
                     </div>
                 </div>
-                <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl"><i class="ph-bold ph-check-circle"></i></div>
+                <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-100/50 transition-all duration-300 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0"><i class="ph-bold ph-check-circle"></i></div>
                     <div>
                         <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Penyelesaian</div>
                         <div class="text-2xl font-black text-slate-800"><?php echo e($kpiCompletionRate ?? 100); ?><span class="text-sm text-slate-400 font-medium ml-1">%</span></div>
@@ -96,11 +96,11 @@
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 
                 
-                <div class="lg:col-span-8 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl border border-slate-100 animate-enter delay-200">
+                <div class="lg:col-span-8 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 animate-enter delay-200">
                     <div class="flex justify-between items-start mb-6">
                         <div>
                             <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center"><i class="ph-bold ph-clock"></i></div>
+                                <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center"><i class="ph-bold ph-clock"></i></div>
                                 Jam Keluar Paling Sibuk
                             </h3>
                             <p class="text-xs text-slate-500 mt-1 ml-10">Distribusi frekuensi izin siswa (Akumulasi Bulan <?php echo e($parsedDate->translatedFormat('F Y')); ?>).</p>
@@ -112,7 +112,7 @@
                 </div>
 
                 
-                <div class="lg:col-span-4 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl border border-slate-100 animate-enter delay-200 flex flex-col">
+                <div class="lg:col-span-4 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 animate-enter delay-200 flex flex-col">
                     <div class="mb-4">
                         <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
                             <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center"><i class="ph-bold ph-siren"></i></div>
@@ -150,7 +150,7 @@
                 </div>
 
                 
-                <div class="lg:col-span-4 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl border border-slate-100 animate-enter delay-300">
+                <div class="lg:col-span-4 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 animate-enter delay-300">
                     <div class="mb-6">
                         <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
                             <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><i class="ph-bold ph-question"></i></div>
@@ -163,7 +163,7 @@
                 </div>
 
                 
-                <div class="lg:col-span-8 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl border border-slate-100 animate-enter delay-300">
+                <div class="lg:col-span-8 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 animate-enter delay-300">
                     <div class="mb-6">
                         <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
                             <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="ph-bold ph-users-three"></i></div>
@@ -201,13 +201,13 @@
                         datasets: [{
                             label: 'Jumlah Izin',
                             data: timeData,
-                            borderColor: '#6366f1', 
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderColor: '#06b6d4', // Cyan-500
+                            backgroundColor: 'rgba(6, 182, 212, 0.1)', // Cyan-500 dengan opacity
                             borderWidth: 3,
                             tension: 0.4, 
                             fill: true,
                             pointBackgroundColor: '#ffffff',
-                            pointBorderColor: '#6366f1',
+                            pointBorderColor: '#06b6d4',
                             pointBorderWidth: 2,
                             pointRadius: 4,
                             pointHoverRadius: 6
@@ -232,7 +232,8 @@
                         labels: reasonLabels,
                         datasets: [{
                             data: reasonData,
-                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#64748b', '#ec4899', '#8b5cf6'], 
+                            // Sedikit disesuaikan agar lebih sejuk
+                            backgroundColor: ['#0ea5e9', '#10b981', '#f59e0b', '#64748b', '#f43f5e', '#8b5cf6'], 
                             borderWidth: 0,
                             hoverOffset: 4
                         }]
@@ -256,7 +257,8 @@
                         datasets: [{
                             label: 'Total Izin',
                             data: classData,
-                            backgroundColor: classData.map(val => val > 20 ? '#f43f5e' : '#38bdf8'), 
+                            // Warna merah jika terlalu banyak, sisanya warna cyan/sky blue
+                            backgroundColor: classData.map(val => val > 20 ? '#f43f5e' : '#06b6d4'), 
                             borderRadius: 6,
                             barThickness: 30
                         }]

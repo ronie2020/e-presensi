@@ -1,11 +1,20 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION (ELEVATED THEME) --}}
+            
             <div class="relative rounded-[2rem] bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-8 mb-10 text-white shadow-xl shadow-cyan-900/30 overflow-hidden border border-white/10">
                 <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
                 <div class="absolute top-0 right-0 w-64 h-64 bg-cyan-300/30 rounded-full blur-[60px] translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
@@ -13,7 +22,7 @@
                 <div class="relative z-10 flex items-center justify-between">
                     <div>
                         <div class="flex items-center gap-3 mb-2">
-                            <a href="{{ route('library.dashboard') }}" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-full text-xs font-bold text-cyan-100 transition flex items-center gap-2 border border-white/20 backdrop-blur-sm">
+                            <a href="<?php echo e(route('library.dashboard')); ?>" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-full text-xs font-bold text-cyan-100 transition flex items-center gap-2 border border-white/20 backdrop-blur-sm">
                                 <i class="ph-bold ph-arrow-left"></i> Dashboard
                             </a>
                             <span class="text-white/30 text-xs">•</span>
@@ -39,7 +48,7 @@
                 <!-- PANEL PEMINJAMAN (KIRI - TEMA CYAN) -->
                 <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 h-full flex flex-col relative overflow-hidden group hover:shadow-2xl hover:shadow-cyan-900/10 transition-all duration-300">
                     
-                    {{-- Header --}}
+                    
                     <div class="p-8 pb-0">
                         <div class="flex items-center gap-4 mb-6">
                             <div class="w-14 h-14 bg-cyan-50 text-cyan-600 rounded-[1.2rem] flex items-center justify-center text-2xl shadow-sm border border-cyan-100">
@@ -173,49 +182,53 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            @forelse($recentActiveLoans as $loan)
+                            <?php $__empty_1 = true; $__currentLoopData = $recentActiveLoans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $loan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <tr class="group hover:bg-slate-50 transition-colors">
                                 <td class="px-8 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-500">
-                                            {{ substr(optional($loan->student)->name ?? '?', 0, 1) }}
+                                            <?php echo e(substr(optional($loan->student)->name ?? '?', 0, 1)); ?>
+
                                         </div>
                                         <div>
-                                            <p class="font-bold text-sm text-slate-700">{{ optional($loan->student)->name ?? 'Siswa Terhapus' }}</p>
-                                            <p class="text-xs text-slate-400 font-mono">{{ optional($loan->student)->student_id ?? '-' }}</p>
+                                            <p class="font-bold text-sm text-slate-700"><?php echo e(optional($loan->student)->name ?? 'Siswa Terhapus'); ?></p>
+                                            <p class="text-xs text-slate-400 font-mono"><?php echo e(optional($loan->student)->student_id ?? '-'); ?></p>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-8 py-4">
                                     <div class="flex items-center gap-2">
                                         <i class="ph-fill ph-book text-slate-300"></i>
-                                        <span class="text-sm font-medium text-slate-600 truncate max-w-[200px] block" title="{{ optional($loan->book)->title }}">
-                                            {{ optional($loan->book)->title ?? 'Buku Terhapus' }}
+                                        <span class="text-sm font-medium text-slate-600 truncate max-w-[200px] block" title="<?php echo e(optional($loan->book)->title); ?>">
+                                            <?php echo e(optional($loan->book)->title ?? 'Buku Terhapus'); ?>
+
                                         </span>
                                     </div>
                                 </td>
                                 <td class="px-8 py-4 text-sm font-bold text-slate-500">
-                                    {{ \Carbon\Carbon::parse($loan->borrow_date)->format('d M Y') }}
+                                    <?php echo e(\Carbon\Carbon::parse($loan->borrow_date)->format('d M Y')); ?>
+
                                 </td>
                                 <td class="px-8 py-4 text-sm font-bold text-slate-500">
-                                    {{ \Carbon\Carbon::parse($loan->due_date)->format('d M Y') }}
+                                    <?php echo e(\Carbon\Carbon::parse($loan->due_date)->format('d M Y')); ?>
+
                                 </td>
                                 <td class="px-8 py-4 text-center">
-                                    @php
+                                    <?php
                                         $isOverdue = \Carbon\Carbon::now()->gt($loan->due_date);
-                                    @endphp
-                                    @if($isOverdue)
+                                    ?>
+                                    <?php if($isOverdue): ?>
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100 uppercase tracking-wide">
                                             Late
                                         </span>
-                                    @else
+                                    <?php else: ?>
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100 uppercase tracking-wide">
                                             Active
                                         </span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                             </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <tr>
                                 <td colspan="5" class="px-8 py-10 text-center text-slate-400">
                                     <div class="flex flex-col items-center justify-center gap-2">
@@ -224,7 +237,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            @endforelse
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -233,7 +246,7 @@
         </div>
     </div>
 
-    {{-- MODAL SCANNER --}}
+    
     <div id="scannerModal" class="fixed inset-0 z-[60] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-md transition-opacity" onclick="stopScanner()"></div>
         <div class="flex min-h-screen items-center justify-center p-4">
@@ -242,7 +255,7 @@
                     <h3 class="text-xl font-black text-slate-800 text-center mb-6">Pindai Kode</h3>
                     <div class="relative bg-black rounded-3xl overflow-hidden aspect-square border-4 border-slate-100 shadow-inner">
                         <div id="reader" class="w-full h-full"></div>
-                        {{-- Overlay Frame Scanner --}}
+                        
                         <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
                             <div class="w-64 h-64 border-2 border-white/30 rounded-2xl relative">
                                 <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-cyan-500 rounded-tl-xl -mt-1 -ml-1"></div>
@@ -258,7 +271,7 @@
         </div>
     </div>
 
-    {{-- Script JavaScript --}}
+    
     <script>
         // --- SETUP AUDIO ---
         const audioSuccess = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
@@ -327,9 +340,9 @@
             try {
                 wrapper.classList.add('opacity-50');
 
-                const res = await fetch('{{ route("library.circulation.searchStudent") }}', {
+                const res = await fetch('<?php echo e(route("library.circulation.searchStudent")); ?>', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ q: query })
                 });
                 
@@ -416,9 +429,9 @@
             try {
                 wrapper.classList.add('opacity-50');
 
-                const res = await fetch('{{ route("library.circulation.searchBook") }}', {
+                const res = await fetch('<?php echo e(route("library.circulation.searchBook")); ?>', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ q: query })
                 });
 
@@ -460,9 +473,9 @@
             if(!currentMember || !currentBook) return;
              
              try {
-                const res = await fetch('{{ route("library.circulation.store") }}', {
+                const res = await fetch('<?php echo e(route("library.circulation.store")); ?>', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ student_id: currentMember.id, book_id: currentBook.id })
                 });
                 
@@ -515,9 +528,9 @@
             infoBox.innerHTML = '<div class="text-center py-8"><div class="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div></div>';
 
             try {
-                const res = await fetch('{{ route("library.circulation.return") }}?check_only=1', {
+                const res = await fetch('<?php echo e(route("library.circulation.return")); ?>?check_only=1', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ book_code: query })
                 });
                 
@@ -562,9 +575,9 @@
         // --- 5. LOGIC KONFIRMASI PENGEMBALIAN ---
         async function confirmReturn(bookCode) {
             try {
-                const res = await fetch('{{ route("library.circulation.return") }}', {
+                const res = await fetch('<?php echo e(route("library.circulation.return")); ?>', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>' },
                     body: JSON.stringify({ book_code: bookCode })
                 });
                 
@@ -589,4 +602,13 @@
             }
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/library/circulation.blade.php ENDPATH**/ ?>
