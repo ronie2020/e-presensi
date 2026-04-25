@@ -103,9 +103,14 @@
         <div class="double-line"></div>
 
         <div class="judul-surat">
-            <h2>DAFTAR HADIR PESERTA UJIAN</h2>
+            <h2>DAFTAR HADIR</h2>
             <p style="font-weight: bold; margin-top: 5px; font-size: 12pt;"><?php echo e(strtoupper($exam->title)); ?></p>
-            <p>Tahun Pelajaran <?php echo e(date('Y')); ?>/<?php echo e(date('Y', strtotime('+1 year'))); ?></p>
+            <?php
+                // Mengambil tahun ajaran yang sedang aktif dari database
+                $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();
+                $tahunPelajaran = $activeYear ? $activeYear->name : date('Y') . '/' . date('Y', strtotime('+1 year'));
+            ?>
+            <p>Tahun Pelajaran <?php echo e($tahunPelajaran); ?></p>
         </div>
 
         <!-- Info Ujian -->

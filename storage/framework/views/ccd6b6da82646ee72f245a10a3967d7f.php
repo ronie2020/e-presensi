@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak Berita Acara - {{ $exam->title }}</title>
+    <title>Cetak Berita Acara - <?php echo e($exam->title); ?></title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    {{-- Phosphor Icons --}}
+    
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
@@ -73,11 +73,11 @@
             </div>
             <div>
                 <h1 class="font-black text-slate-800 text-sm md:text-base font-sans">Pratinjau Berita Acara</h1>
-                <p class="text-xs text-slate-500 font-sans font-bold">{{ $exam->title }}</p>
+                <p class="text-xs text-slate-500 font-sans font-bold"><?php echo e($exam->title); ?></p>
             </div>
         </div>
         <div class="flex gap-3">
-            <a href="{{ route('cbt.index') }}" class="px-5 py-2.5 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-800 transition shadow-sm font-sans flex items-center gap-2">
+            <a href="<?php echo e(route('cbt.index')); ?>" class="px-5 py-2.5 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-800 transition shadow-sm font-sans flex items-center gap-2">
                 <i class="ph-bold ph-arrow-left"></i> Kembali
             </a>
             <button onclick="window.print()" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-900 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/30 font-sans flex items-center gap-2">
@@ -90,48 +90,48 @@
     <div class="sheet">
          <!-- KOP SURAT -->
         <div class="relative py-2">
-            <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="absolute left-0 top-1 w-16 h-auto object-contain" onerror="this.style.display='none'"> 
+            <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo Ciamis" class="absolute left-0 top-1 w-16 h-auto object-contain" onerror="this.style.display='none'"> 
             <div class="text-center header-text mx-auto w-3/4">
                 <h3>PEMERINTAH KABUPATEN CIAMIS</h3>
                 <h3>DINAS PENDIDIKAN</h3>
                 <h4>SMP NEGERI 3 LAKBOK</h4>
                 <p>Jalan Mekarjaya No. 199 Sidaharja Kecamatan Lakbok Kabupaten Ciamis</p>
             </div>
-            <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="absolute right-0 top-1 w-20 h-auto object-contain" onerror="this.style.display='none'">
+            <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo Sekolah" class="absolute right-0 top-1 w-20 h-auto object-contain" onerror="this.style.display='none'">
         </div>
         <div class="double-line"></div>
 
          <div class="judul-surat">
             <h2>BERITA ACARA </h2>
-            <p style="font-weight: bold; margin-top: 5px; font-size: 12pt;">{{ strtoupper($exam->title) }}</p>
-            @php
+            <p style="font-weight: bold; margin-top: 5px; font-size: 12pt;"><?php echo e(strtoupper($exam->title)); ?></p>
+            <?php
                 // Mengambil tahun ajaran yang sedang aktif dari database
                 $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();
                 $tahunPelajaran = $activeYear ? $activeYear->name : date('Y') . '/' . date('Y', strtotime('+1 year'));
-            @endphp
-            <p>Tahun Pelajaran {{ $tahunPelajaran }}</p>
+            ?>
+            <p>Tahun Pelajaran <?php echo e($tahunPelajaran); ?></p>
         </div>
 
 
         <div class="content-text">
             <p class="mb-5">
-                Pada hari ini <span class="font-bold">{{ $exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->locale('id')->isoFormat('dddd') : '.......' }}</span> 
-                tanggal <span class="font-bold">{{ $exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->format('d') : '.......' }}</span> 
-                bulan <span class="font-bold">{{ $exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->locale('id')->isoFormat('MMMM') : '.......' }}</span> 
-                tahun <span class="font-bold">{{ $exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->format('Y') : '.......' }}</span>,
-                telah diselenggarakan <span class="font-bold">{{ $exam->title }}</span> dengan rincian sebagai berikut:
+                Pada hari ini <span class="font-bold"><?php echo e($exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->locale('id')->isoFormat('dddd') : '.......'); ?></span> 
+                tanggal <span class="font-bold"><?php echo e($exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->format('d') : '.......'); ?></span> 
+                bulan <span class="font-bold"><?php echo e($exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->locale('id')->isoFormat('MMMM') : '.......'); ?></span> 
+                tahun <span class="font-bold"><?php echo e($exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->format('Y') : '.......'); ?></span>,
+                telah diselenggarakan <span class="font-bold"><?php echo e($exam->title); ?></span> dengan rincian sebagai berikut:
             </p>
 
             <table class="detail">
-                <tr><td style="width: 30px;">1.</td><td style="width: 250px;">Mata Pelajaran</td><td style="width: 15px;">:</td><td class="font-bold">{{ $exam->subject_name }}</td></tr>
-                <tr><td>2.</td><td>Tingkat / Kelas</td><td>:</td><td class="font-bold">{{ $exam->class_level }}</td></tr>
-                <tr><td>3.</td><td>Waktu Ujian</td><td>:</td><td>{{ $exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->format('H:i') : '-' }} s.d {{ $exam->end_time ? \Carbon\Carbon::parse($exam->end_time)->format('H:i') : '-' }} WIB</td></tr>
+                <tr><td style="width: 30px;">1.</td><td style="width: 250px;">Mata Pelajaran</td><td style="width: 15px;">:</td><td class="font-bold"><?php echo e($exam->subject_name); ?></td></tr>
+                <tr><td>2.</td><td>Tingkat / Kelas</td><td>:</td><td class="font-bold"><?php echo e($exam->class_level); ?></td></tr>
+                <tr><td>3.</td><td>Waktu Ujian</td><td>:</td><td><?php echo e($exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->format('H:i') : '-'); ?> s.d <?php echo e($exam->end_time ? \Carbon\Carbon::parse($exam->end_time)->format('H:i') : '-'); ?> WIB</td></tr>
             </table>
 
             <table class="detail mt-4">
-                <tr><td style="width: 30px;">4.</td><td style="width: 250px;">Jumlah Peserta Seharusnya</td><td style="width: 15px;">:</td><td class="font-bold">{{ $totalStudents }} Orang</td></tr>
-                <tr><td>5.</td><td>Jumlah Peserta Hadir</td><td>:</td><td class="font-bold">{{ $presentStudents }} Orang</td></tr>
-                <tr><td>6.</td><td>Jumlah Peserta Tidak Hadir</td><td>:</td><td class="font-bold">{{ $absentStudents }} Orang</td></tr>
+                <tr><td style="width: 30px;">4.</td><td style="width: 250px;">Jumlah Peserta Seharusnya</td><td style="width: 15px;">:</td><td class="font-bold"><?php echo e($totalStudents); ?> Orang</td></tr>
+                <tr><td>5.</td><td>Jumlah Peserta Hadir</td><td>:</td><td class="font-bold"><?php echo e($presentStudents); ?> Orang</td></tr>
+                <tr><td>6.</td><td>Jumlah Peserta Tidak Hadir</td><td>:</td><td class="font-bold"><?php echo e($absentStudents); ?> Orang</td></tr>
                 <tr>
                     <td>7.</td>
                     <td>Nomor/Nama Peserta Absen</td>
@@ -173,4 +173,4 @@
     </div>
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/cbt/berita_acara.blade.php ENDPATH**/ ?>
