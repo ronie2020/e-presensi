@@ -149,15 +149,14 @@
                     <td style="font-weight: bold;">{{ $student->name }}</td>
                     <td style="text-align: center;">{{ $student->schoolClass->name ?? '-' }}</td>
                     
-                    <!-- Kolom Tanda Tangan Zig-Zag -->
-                    <td style="border-right: none; position: relative; height: 35px; width: 80px;">
+                   <!-- Kolom Tanda Tangan Zig-Zag -->
+                    <td colspan="2" style="position: relative; height: 35px; width: 160px; padding: 0;">
                         @if($index % 2 == 0)
-                            <span style="position: absolute; top: 4px; left: 6px; font-size: 10px; color: #666;">{{ $index + 1 }}.</span>
-                        @endif
-                    </td>
-                    <td style="border-left: none; position: relative; height: 35px; width: 80px;">
-                        @if($index % 2 != 0)
-                            <span style="position: absolute; top: 4px; left: 6px; font-size: 10px; color: #666;">{{ $index + 1 }}.</span>
+                            <!-- Ganjil: Di kiri -->
+                            <span style="position: absolute; top: 4px; left: 8px; font-size: 10px; color: #555;">{{ $index + 1 }}.</span>
+                        @else
+                            <!-- Genap: Di tengah (50% dari lebar kolom) -->
+                            <span style="position: absolute; top: 4px; left: 50%; font-size: 10px; color: #555;">{{ $index + 1 }}.</span>
                         @endif
                     </td>
                     
