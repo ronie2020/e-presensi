@@ -18,44 +18,53 @@
         /* --- PERBAIKAN KAMERA RESPONSIVE & ANTI GEPENG --- */
         #qr-reader { 
             width: 100% !important; 
-            min-height: 300px !important; 
+            min-height: 350px !important; 
             border: none !important; 
-            border-radius: 1.5rem; 
+            border-radius: 0.75rem; 
             overflow: hidden; 
             background: #0f172a; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: relative;
         }
         
-        #qr-reader video { 
+        #qr-reader__scan_region { 
             width: 100% !important; 
-            height: auto !important; 
+            min-height: 350px !important;
+            background: transparent !important; 
+        }
+
+        #qr-reader video, 
+        #qr-reader canvas { 
+            width: 100% !important; 
+            height: 100% !important; 
+            min-height: 350px !important;
+            object-fit: cover !important; /* Memaksa kamera memenuhi container tanpa gepeng */
             display: block !important;
-            border-radius: 1.5rem;
+            border-radius: 0.75rem;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
         }
         
-        #qr-reader__scan_region { background: transparent !important; width: 100% !important; }
         #qr-reader__dashboard_section_csr span, #qr-reader__dashboard_section_swaplink { display: none !important; }
         
         /* Scanner Styles */
-        .scanner-container { position: relative; overflow: hidden; border-radius: 1.5rem; transform: translateZ(0); }
+        .scanner-container { position: relative; overflow: hidden; border-radius: 0.75rem; transform: translateZ(0); }
         .scanner-overlay {
             position: absolute; inset: 0; pointer-events: none;
-            border: 0px solid transparent; border-radius: 1.5rem;
+            border: 0px solid transparent; border-radius: 0.75rem;
             transition: all 0.3s ease; z-index: 20;
         }
         
-        /* Scan Effects (Glow borders) */
-        .scan-success-effect { box-shadow: inset 0 0 40px rgba(34, 197, 94, 0.5); border: 2px solid #22c55e; }
-        .scan-warning-effect { box-shadow: inset 0 0 40px rgba(245, 158, 11, 0.5); border: 2px solid #f59e0b; }
-        .scan-error-effect { box-shadow: inset 0 0 40px rgba(239, 68, 68, 0.5); border: 2px solid #ef4444; }
-        .scan-makan-effect { box-shadow: inset 0 0 40px rgba(249, 115, 22, 0.5); border: 2px solid #f97316; }
+        /* Scan Effects (Microsoft Semantic Colors) */
+        .scan-success-effect { box-shadow: inset 0 0 40px rgba(16, 124, 16, 0.5); border: 2px solid #107C10; }
+        .scan-warning-effect { box-shadow: inset 0 0 40px rgba(216, 59, 1, 0.5); border: 2px solid #D83B01; }
+        .scan-error-effect { box-shadow: inset 0 0 40px rgba(209, 52, 56, 0.5); border: 2px solid #D13438; }
+        .scan-makan-effect { box-shadow: inset 0 0 40px rgba(216, 59, 1, 0.5); border: 2px solid #D83B01; }
 
-        /* TEMA ELEVATE: Garis Scan diubah menjadi warna Cyan (06b6d4) */
+        /* TEMA ELEVATE: Garis Scan diubah menjadi warna Elevate Blue (#5295FF) */
         .scanner-line {
             position: absolute; width: 100%; height: 3px;
-            background: #06b6d4; box-shadow: 0 0 15px #06b6d4;
+            background: #5295FF; box-shadow: 0 0 15px #5295FF;
             top: 0; animation: scanMove 2.5s infinite linear;
             z-index: 10; opacity: 0.8;
         }
@@ -67,10 +76,9 @@
         .hidden-col { display: none !important; }
         .hidden-row { display: none !important; }
         
-        @keyframes highlightRow { 0% { background-color: #cffafe; } 100% { background-color: transparent; } } /* Efek highlight cyan */
+        @keyframes highlightRow { 0% { background-color: #F3F9FD; } 100% { background-color: transparent; } } /* Efek highlight biru muda */
         .new-row-entry { animation: highlightRow 2s ease-out; }
         
-        .glass-panel { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .scan-type-btn.ring-2 .indicator-dot { transform: scale(1.2); background-color: currentColor; }
     </style>
     @endpush
@@ -95,45 +103,45 @@
             })->toArray();
     @endphp
 
-    <div class="py-6 font-sans text-slate-800 bg-slate-50/50 min-h-screen selection:bg-cyan-100 selection:text-cyan-700">
+    <div class="py-6 font-sans text-slate-800 bg-slate-50/50 min-h-screen selection:bg-[#F3F9FD] selection:text-[#5295FF]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             
             {{-- HERO SECTION (TEMA MICROSOFT ELEVATED) --}}
-            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-6 md:p-8 text-white shadow-2xl shadow-cyan-900/30 overflow-hidden group border border-white/10">
+            <div class="animate-enter relative rounded-xl bg-gradient-to-br from-[#25D0FF] via-[#5295FF] to-[#FFC9B9] p-6 md:p-8 text-[#2A3B52] shadow-[0_10px_40px_-10px_rgba(37,208,255,0.4)] overflow-hidden group border border-white/40">
                 
                 {{-- Background Decorations --}}
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                <div class="absolute top-0 right-0 w-80 h-80 bg-cyan-300/30 rounded-full blur-[80px] translate-x-1/2 -translate-y-1/2 pointer-events-none group-hover:bg-cyan-300/40 transition-all duration-700"></div>
+                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
+                <div class="absolute top-0 right-0 w-80 h-80 bg-white/30 rounded-full blur-[80px] translate-x-1/2 -translate-y-1/2 pointer-events-none group-hover:bg-white/40 transition-all duration-700"></div>
 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div class="flex items-center gap-5 w-full md:w-auto">
-                        <div class="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner flex-shrink-0">
-                            <i class="ph-duotone ph-scan text-4xl text-cyan-200"></i>
+                        <div class="w-16 h-16 rounded-xl bg-white/40 backdrop-blur-md flex items-center justify-center border border-white/50 shadow-sm flex-shrink-0">
+                            <i class="ph-duotone ph-scan text-4xl text-[#2A3B52]"></i>
                         </div>
                         <div>
                             <div class="flex items-center gap-2 mb-1">
                                 @if(isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false))
-                                    <span class="px-2.5 py-0.5 rounded-full bg-rose-500/90 text-white border border-white/20 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">Libur: {{ $scheduleConfig['description'] }}</span>
+                                    <span class="px-2.5 py-0.5 rounded-md bg-[#D13438] text-white border border-[#D13438] text-[10px] font-bold uppercase tracking-wider shadow-sm">Libur: {{ $scheduleConfig['description'] }}</span>
                                 @else
-                                    <span class="px-2.5 py-0.5 rounded-full bg-white/10 text-cyan-100 border border-white/20 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">
+                                    <span class="px-2.5 py-0.5 rounded-md bg-white/40 text-[#2A3B52] border border-white/50 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">
                                         {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
                                     </span>
                                 @endif
                             </div>
-                            <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight leading-none text-white">
-                                Scanner <span class="text-cyan-200">Aktivitas</span>
+                            <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight leading-none text-[#2A3B52]">
+                                Scanner <span class="text-white drop-shadow-sm">Aktivitas</span>
                             </h2>
-                            <p class="text-cyan-50/80 text-sm mt-1">Monitoring kehadiran, makan siang, dan ibadah.</p>
+                            <p class="text-[#2A3B52]/80 text-sm mt-1 font-medium">Monitoring kehadiran, makan siang, dan ibadah.</p>
                         </div>
                     </div>
                     
                     {{-- CLOCK WIDGET --}}
-                    <div class="bg-white/10 backdrop-blur-md border border-white/20 px-6 py-3 rounded-2xl flex items-center gap-4 shadow-lg w-full md:w-auto justify-between md:justify-start">
+                    <div class="bg-white/40 backdrop-blur-md border border-white/50 px-6 py-3 rounded-xl flex items-center gap-4 shadow-sm w-full md:w-auto justify-between md:justify-start">
                         <div class="text-right">
-                            <p class="text-[10px] font-bold text-cyan-200 uppercase tracking-widest mb-0.5">Waktu Server</p>
-                            <div id="clock" class="text-3xl font-black text-white font-mono leading-none tracking-widest digital-clock">00:00:00</div>
+                            <p class="text-[10px] font-bold text-[#2A3B52] uppercase tracking-widest mb-0.5">Waktu Server</p>
+                            <div id="clock" class="text-3xl font-black text-[#2A3B52] font-mono leading-none tracking-widest digital-clock">00:00:00</div>
                         </div>
-                        <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white shadow-inner animate-pulse">
+                        <div class="w-10 h-10 rounded-lg bg-[#2A3B52] flex items-center justify-center text-white shadow-inner animate-pulse shrink-0">
                             <i class="ph-bold ph-clock text-xl"></i>
                         </div>
                     </div>
@@ -146,22 +154,22 @@
                 <div class="lg:col-span-5 flex flex-col gap-6 animate-enter delay-100">
                     
                     {{-- SCANNER CARD --}}
-                    <div class="bg-white rounded-[2.5rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group">
+                    <div class="bg-white rounded-xl p-6 fluent-card relative overflow-hidden group">
                         <div class="flex justify-between items-center mb-5 px-1">
-                            <h3 class="font-bold text-slate-700 flex items-center gap-2 text-lg">
+                            <h3 class="font-bold text-[#2A3B52] flex items-center gap-2 text-lg">
                                 <span class="relative flex h-3 w-3">
-                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                                  <span class="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#5295FF] opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-3 w-3 bg-[#5295FF]"></span>
                                 </span>
                                 Kamera Aktif
                             </h3>
                             <div class="flex items-center gap-2">
                                 {{-- GPS Badge Indicator --}}
-                                <div id="gps-badge" class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-amber-50 text-amber-500 border border-amber-200 flex items-center gap-1 transition-all" title="Mencari Lokasi">
+                                <div id="gps-badge" class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide bg-[#FFEFD6] text-[#D83B01] border border-[#FFD8A8] flex items-center gap-1 transition-all" title="Mencari Lokasi">
                                     <i class="ph-bold ph-map-pin animate-pulse"></i> <span class="hidden sm:inline">Mencari GPS</span>
                                 </div>
 
-                                <div id="mode-badge" class="pl-2 pr-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-2 transition-all">
+                                <div id="mode-badge" class="pl-2 pr-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-2 transition-all">
                                     <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                                     <span id="mode-text">Standby</span>
                                 </div>
@@ -169,7 +177,7 @@
                         </div>
 
                         {{-- SCANNER ELEMENT --}}
-                        <div class="scanner-container relative bg-slate-900 w-full rounded-[1.5rem] border-4 border-slate-900 shadow-inner overflow-hidden min-h-[300px]">
+                        <div class="scanner-container relative bg-slate-900 w-full rounded-xl border-4 border-slate-900 shadow-inner overflow-hidden min-h-[300px]">
                             <div id="qr-reader" class="w-full"></div>
                             
                             {{-- Overlay Lines --}}
@@ -179,40 +187,40 @@
 
                             {{-- Status Text Overlay --}}
                             <div class="absolute top-4 inset-x-0 flex justify-center z-30 pointer-events-none">
-                                <div id="scan-status" class="bg-black/60 backdrop-blur-md text-white text-xs py-2 px-5 rounded-full font-bold border border-white/20 shadow-lg flex items-center gap-2 transition-all">
-                                    <i class="ph-bold ph-circle-notch animate-spin text-cyan-300"></i> Memuat Kamera...
+                                <div id="scan-status" class="bg-[#2A3B52]/80 backdrop-blur-md text-white text-xs py-2 px-5 rounded-lg font-bold border border-[#2A3B52] shadow-sm flex items-center gap-2 transition-all">
+                                    <i class="ph-bold ph-circle-notch animate-spin text-[#5295FF]"></i> Memuat Kamera...
                                 </div>
                             </div>
                         </div>
 
                         {{-- Result Feedback --}}
-                        <div id="scan-result" class="mt-4 p-4 rounded-2xl font-bold text-sm text-center hidden transition-all duration-300 transform scale-95 opacity-0 border border-transparent shadow-sm"></div>
+                        <div id="scan-result" class="mt-4 p-4 rounded-xl font-bold text-sm text-center hidden transition-all duration-300 transform scale-95 opacity-0 border border-transparent shadow-sm"></div>
                         
-                        {{-- Tombol Aksi Bawah Scanner (DIUBAH HOVER MENJADI CYAN) --}}
+                        {{-- Tombol Aksi Bawah Scanner --}}
                         <div class="mt-4 flex flex-wrap gap-2 sm:gap-3">
                             <!-- 1. Tombol Ketik NISN -->
-                            <button onclick="showManualInput()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-cyan-50 hover:text-cyan-600 hover:border-cyan-200 transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
+                            <button onclick="showManualInput()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-[#F3F9FD] hover:text-[#5295FF] hover:border-[#D0E7F8] transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
                                 <i class="ph-bold ph-keyboard text-lg"></i> NISN
                             </button>
                             
                             <!-- 2. Tombol Upload Gambar -->
-                            <button onclick="document.getElementById('qr-upload').click()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-cyan-50 hover:text-cyan-600 hover:border-cyan-200 transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
+                            <button onclick="document.getElementById('qr-upload').click()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-[#F3F9FD] hover:text-[#5295FF] hover:border-[#D0E7F8] transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
                                 <i class="ph-bold ph-image text-lg"></i> Gambar
                             </button>
                             <input type="file" id="qr-upload" class="hidden" accept="image/*">
 
                             <!-- 3. Tombol Balik Kamera -->
-                            <button onclick="switchCamera()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-cyan-50 hover:text-cyan-600 hover:border-cyan-200 transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
+                            <button onclick="switchCamera()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-[#F3F9FD] hover:text-[#5295FF] hover:border-[#D0E7F8] transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
                                 <i class="ph-bold ph-camera-rotate text-lg"></i> Kamera
                             </button>
 
                             <!-- 4. Tombol Auto Mode -->
-                            <button id="btn-reset-auto" class="hidden w-full py-3 rounded-xl border-2 border-dashed border-cyan-200 text-cyan-600 font-bold text-[10px] uppercase tracking-wider hover:bg-cyan-50 hover:border-cyan-300 transition-all flex items-center justify-center gap-2 bg-white active:scale-95" onclick="resetAutoMode()">
+                            <button id="btn-reset-auto" class="hidden w-full py-3 rounded-xl border-2 border-dashed border-[#D0E7F8] text-[#5295FF] font-bold text-[10px] uppercase tracking-wider hover:bg-[#F3F9FD] hover:border-[#5295FF] transition-all flex items-center justify-center gap-2 bg-white active:scale-95" onclick="resetAutoMode()">
                                 <i class="ph-bold ph-arrows-clockwise animate-spin-slow"></i> Kembali Auto
                             </button>
 
                             <!-- 5. Tombol Izin / Sakit -->
-                            <button onclick="document.getElementById('absen-manual-modal').classList.remove('hidden');" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
+                            <button onclick="document.getElementById('absen-manual-modal').classList.remove('hidden');" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-[#FDE7E9] hover:text-[#D13438] hover:border-[#F4C3C9] transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
                                 <i class="ph-bold ph-user-focus text-lg"></i> Izin/Sakit
                             </button>
                         </div>
@@ -220,19 +228,19 @@
 
                     {{-- STATISTIK MAKAN --}}
                     <div id="makan-stats-panel" class="hidden grid-cols-2 gap-4">
-                        <div class="bg-gradient-to-br from-orange-500 to-orange-600 p-6 rounded-[2rem] text-white shadow-lg shadow-orange-500/20 relative overflow-hidden group">
+                        <div class="bg-[#D83B01] p-6 rounded-xl text-white shadow-sm relative overflow-hidden group">
                             <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                 <i class="ph-fill ph-check-circle text-6xl"></i>
                             </div>
-                            <p class="text-[10px] font-bold text-orange-100 uppercase tracking-widest mb-1">Sudah Ambil</p>
+                            <p class="text-[10px] font-bold text-[#FFEFD6] uppercase tracking-widest mb-1">Sudah Ambil</p>
                             <h3 class="text-4xl font-black tracking-tight" id="stat-taken">{{ $currentTaken }}</h3>
                         </div>
-                        <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden group">
+                        <div class="bg-white p-6 rounded-xl fluent-card relative overflow-hidden group">
                             <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                <i class="ph-duotone ph-users text-6xl"></i>
+                                <i class="ph-duotone ph-users text-6xl text-[#2A3B52]"></i>
                             </div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Belum Ambil</p>
-                            <h3 class="text-4xl font-black text-slate-800 tracking-tight" id="stat-remaining">{{ $totalTarget - $currentTaken }}</h3>
+                            <h3 class="text-4xl font-black text-[#2A3B52] tracking-tight" id="stat-remaining">{{ $totalTarget - $currentTaken }}</h3>
                         </div>
                     </div>
 
@@ -243,17 +251,17 @@
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             @foreach([
-                                ['id'=>'harian', 'label'=>'Absen Harian', 'sub'=>'Masuk/Pulang', 'icon'=>'calendar-check', 'color'=>'cyan', 'type'=>'Harian'],
-                                ['id'=>'makan', 'label'=>'Makan Siang', 'sub'=>'Scan Gizi', 'icon'=>'bowl-food', 'color'=>'orange', 'type'=>'Makan'],
-                                ['id'=>'dhuha', 'label'=>'Sholat Dhuha', 'sub'=>'Ibadah Pagi', 'icon'=>'sun-horizon', 'color'=>'emerald', 'type'=>'Dhuha'],
-                                ['id'=>'dhuhur', 'label'=>'Sholat Dhuhur', 'sub'=>'Ibadah Siang', 'icon'=>'moon-stars', 'color'=>'amber', 'type'=>'Dhuhur'],
-                                ['id'=>'ekskul', 'label'=>'Ekstrakurikuler', 'sub'=>'Kegiatan Sore', 'icon'=>'basketball', 'color'=>'purple', 'type'=>'Ekstrakurikuler']
+                                ['id'=>'harian', 'label'=>'Absen Harian', 'sub'=>'Masuk/Pulang', 'icon'=>'calendar-check', 'color_text'=>'text-[#5295FF]', 'color_bg'=>'bg-[#F3F9FD]', 'border_class'=>'border-[#D0E7F8]', 'hover_border'=>'hover:border-[#5295FF]', 'type'=>'Harian'],
+                                ['id'=>'makan', 'label'=>'Makan Siang', 'sub'=>'Scan Gizi', 'icon'=>'bowl-food', 'color_text'=>'text-[#D83B01]', 'color_bg'=>'bg-[#FFEFD6]', 'border_class'=>'border-[#FFD8A8]', 'hover_border'=>'hover:border-[#D83B01]', 'type'=>'Makan'],
+                                ['id'=>'dhuha', 'label'=>'Sholat Dhuha', 'sub'=>'Ibadah Pagi', 'icon'=>'sun-horizon', 'color_text'=>'text-[#107C10]', 'color_bg'=>'bg-[#DFF6DD]', 'border_class'=>'border-[#B7DFB9]', 'hover_border'=>'hover:border-[#107C10]', 'type'=>'Dhuha'],
+                                ['id'=>'dhuhur', 'label'=>'Sholat Dhuhur', 'sub'=>'Ibadah Siang', 'icon'=>'moon-stars', 'color_text'=>'text-[#2A3B52]', 'color_bg'=>'bg-slate-100', 'border_class'=>'border-slate-200', 'hover_border'=>'hover:border-[#2A3B52]', 'type'=>'Dhuhur'],
+                                ['id'=>'ekskul', 'label'=>'Ekstrakurikuler', 'sub'=>'Kegiatan Sore', 'icon'=>'basketball', 'color_text'=>'text-[#D13438]', 'color_bg'=>'bg-[#FDE7E9]', 'border_class'=>'border-[#F4C3C9]', 'hover_border'=>'hover:border-[#D13438]', 'type'=>'Ekstrakurikuler']
                             ] as $mode)
-                            <button id="btn-{{ $mode['id'] }}" data-type="{{ $mode['type'] }}" class="scan-type-btn bg-white p-4 rounded-[1.5rem] shadow-sm border border-slate-100 hover:shadow-lg hover:shadow-{{ $mode['color'] }}-100/50 hover:border-{{ $mode['color'] }}-200 transition-all duration-300 text-left group active:scale-95 relative overflow-hidden">
+                            <button id="btn-{{ $mode['id'] }}" data-type="{{ $mode['type'] }}" data-color-class="{{ $mode['color_text'] }}" data-border-class="{{ str_replace('hover:', '', $mode['hover_border']) }}" class="scan-type-btn bg-white p-4 rounded-xl fluent-card {{ $mode['hover_border'] }} hover:shadow-md transition-all duration-300 text-left group active:scale-95 relative overflow-hidden">
                                 <div class="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-10 transition-opacity">
-                                    <i class="ph-fill ph-{{ $mode['icon'] }} text-4xl text-{{ $mode['color'] }}-500"></i>
+                                    <i class="ph-fill ph-{{ $mode['icon'] }} text-4xl {{ $mode['color_text'] }}"></i>
                                 </div>
-                                <div class="w-10 h-10 rounded-xl bg-{{ $mode['color'] }}-50 text-{{ $mode['color'] }}-600 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
+                                <div class="w-10 h-10 rounded-lg {{ $mode['color_bg'] }} {{ $mode['color_text'] }} flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
                                     <i class="ph-bold ph-{{ $mode['icon'] }}"></i>
                                 </div>
                                 <h3 class="font-bold text-slate-700 text-xs leading-tight mb-1">{{ $mode['label'] }}</h3>
@@ -267,10 +275,10 @@
                     </div>
 
                     {{-- EKSKUL DROPDOWN --}}
-                    <div id="extra-selector-container" class="hidden bg-white p-5 rounded-[2rem] border border-slate-100 shadow-lg shadow-purple-100/50">
+                    <div id="extra-selector-container" class="hidden bg-white p-5 rounded-xl border border-slate-100 fluent-card mt-3">
                         <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-2 px-1">Pilih Kegiatan Ekskul</label>
                         <div class="relative">
-                            <select id="extra-activity-select" class="w-full rounded-2xl border-slate-200 focus:border-cyan-500 focus:ring-0 font-bold text-slate-700 py-3 pl-4 pr-10 text-sm bg-slate-50 cursor-pointer hover:bg-white transition-colors">
+                            <select id="extra-activity-select" class="w-full rounded-xl border-slate-200 focus:border-[#5295FF] focus:ring-0 font-bold text-[#2A3B52] py-3 pl-4 pr-10 text-sm bg-slate-50 cursor-pointer hover:bg-white transition-colors">
                                 <option value="">-- Pilih Ekstrakurikuler --</option>
                                 @if(isset($extracurriculars))
                                     @foreach($extracurriculars as $ekskul)
@@ -287,73 +295,73 @@
 
                 {{-- KOLOM KANAN: LOG RIWAYAT --}}
                 <div class="lg:col-span-7 flex flex-col h-full animate-enter delay-200">
-                    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col min-h-[600px] overflow-hidden">
+                    <div class="bg-white rounded-xl fluent-card flex flex-col min-h-[600px] overflow-hidden">
                         
                         {{-- Log Header --}}
-                        <div class="p-6 md:p-8 border-b border-slate-50 bg-white/80 backdrop-blur-md sticky top-0 z-20 flex justify-between items-center">
+                        <div class="p-6 md:p-8 border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-20 flex justify-between items-center">
                             <div>
-                                <h3 class="font-bold text-slate-800 text-xl flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center border border-cyan-100 shadow-sm">
+                                <h3 class="font-bold text-[#2A3B52] text-xl flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-lg bg-[#F3F9FD] text-[#5295FF] flex items-center justify-center border border-[#D0E7F8] shadow-sm">
                                         <i class="ph-bold ph-list-dashes text-lg"></i>
                                     </div>
                                     Log Aktivitas
                                 </h3>
                                 <p class="text-xs text-slate-500 font-medium mt-1 ml-10">Monitoring kehadiran realtime</p>
                             </div>
-                            <div class="flex items-center gap-2 px-3 py-1.5 bg-cyan-50 border border-cyan-100 rounded-full shadow-sm">
-                                <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span></span>
-                                <span class="text-[10px] font-black uppercase tracking-wider text-cyan-600">Live</span>
+                            <div class="flex items-center gap-2 px-3 py-1.5 bg-[#F3F9FD] border border-[#D0E7F8] rounded-md shadow-sm">
+                                <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#5295FF] opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-[#5295FF]"></span></span>
+                                <span class="text-[10px] font-black uppercase tracking-wider text-[#5295FF]">Live</span>
                             </div>
                         </div>
                         
                         {{-- Log Table --}}
-                        <div class="flex-1 overflow-hidden relative bg-slate-50/30">
-                            <div class="absolute inset-0 overflow-auto custom-scrollbar p-2">
+                        <div class="flex-1 overflow-hidden relative bg-slate-50/50">
+                            <div class="absolute inset-0 overflow-auto custom-scrollbar p-4">
                                 <table class="w-full text-left border-collapse">
                                     <thead class="sticky top-0 z-10">
                                         <tr>
-                                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/90 backdrop-blur rounded-l-xl">Siswa</th>
-                                            <th class="col-harian px-4 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/90 backdrop-blur">Masuk</th>
-                                            <th class="col-harian px-4 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/90 backdrop-blur">Pulang</th>
-                                            <th class="col-waktu hidden-col px-4 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/90 backdrop-blur">Waktu</th>
-                                            <th class="col-kegiatan hidden-col px-4 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/90 backdrop-blur">Kegiatan</th>
-                                            <th class="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50/90 backdrop-blur rounded-r-xl">Status</th>
+                                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/90 backdrop-blur rounded-l-lg">Siswa</th>
+                                            <th class="col-harian px-4 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/90 backdrop-blur">Masuk</th>
+                                            <th class="col-harian px-4 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/90 backdrop-blur">Pulang</th>
+                                            <th class="col-waktu hidden-col px-4 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/90 backdrop-blur">Waktu</th>
+                                            <th class="col-kegiatan hidden-col px-4 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/90 backdrop-blur">Kegiatan</th>
+                                            <th class="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/90 backdrop-blur rounded-r-lg">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody id="scan-log" class="text-sm">
                                         @if(isset($recentScans))
                                             @foreach($recentScans as $scan)
-                                                <tr class="log-entry group hover:bg-white transition-all duration-300 rounded-xl border-b border-slate-50 last:border-0"
+                                                <tr class="log-entry group hover:bg-white transition-all duration-300 rounded-xl border-b border-slate-100 last:border-0"
                                                     data-type-raw="{{ $scan['type_raw'] }}">
                                                     
                                                     <td class="px-6 py-4 rounded-l-xl">
-                                                        <div class="font-bold text-slate-800 group-hover:text-cyan-600 transition-colors">{{ $scan['student_name'] }}</div>
+                                                        <div class="font-bold text-[#2A3B52] group-hover:text-[#5295FF] transition-colors">{{ $scan['student_name'] }}</div>
                                                         <div class="text-[10px] text-slate-400 font-mono font-bold">{{ $scan['student_id'] }}</div>
                                                     </td>
                                                     
                                                     {{-- Kolom Harian --}}
                                                     <td class="col-harian px-4 py-4 text-center">
-                                                        @if($scan['time_in']) <span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm">{{ $scan['time_in'] }}</span>
+                                                        @if($scan['time_in']) <span class="font-mono font-bold text-slate-600 bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">{{ $scan['time_in'] }}</span>
                                                         @else <span class="text-slate-300 font-bold">-</span> @endif
                                                     </td>
                                                     <td class="col-harian px-4 py-4 text-center">
-                                                        @if($scan['time_out']) <span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm">{{ $scan['time_out'] }}</span>
+                                                        @if($scan['time_out']) <span class="font-mono font-bold text-slate-600 bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">{{ $scan['time_out'] }}</span>
                                                         @else <span class="text-slate-300 font-bold">-</span> @endif
                                                     </td>
 
                                                     {{-- Kolom Waktu Generic --}}
                                                     <td class="col-waktu hidden-col px-4 py-4 text-center">
-                                                         <span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm">{{ $scan['time_in'] ?? now()->format('H:i') }}</span>
+                                                         <span class="font-mono font-bold text-slate-600 bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">{{ $scan['time_in'] ?? now()->format('H:i') }}</span>
                                                     </td>
 
                                                     {{-- Kolom Nama Kegiatan --}}
-                                                    <td class="col-kegiatan hidden-col px-4 py-4 text-center text-slate-600 font-bold text-xs">
+                                                    <td class="col-kegiatan hidden-col px-4 py-4 text-center text-[#2A3B52] font-bold text-xs">
                                                         {{ $scan['ekskul_name'] ?? $scan['type_raw'] }}
                                                     </td>
 
                                                     <td class="px-6 py-4 text-right rounded-r-xl">
-                                                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border shadow-sm
-                                                            {{ Str::contains($scan['status'], 'Terlambat') ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100' }}">
+                                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wide border shadow-sm
+                                                            {{ Str::contains($scan['status'], 'Terlambat') ? 'bg-[#FFEFD6] text-[#D83B01] border-[#FFD8A8]' : 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9]' }}">
                                                             {{ $scan['status'] }}
                                                         </span>
                                                     </td>
@@ -365,10 +373,10 @@
                                 
                                 {{-- Empty State --}}
                                 <div id="no-log-entry" class="{{ count($recentScans ?? []) > 0 ? 'hidden' : '' }} flex flex-col items-center justify-center py-20 text-center">
-                                    <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100 shadow-inner">
+                                    <div class="w-24 h-24 bg-white rounded-xl flex items-center justify-center mb-4 border border-slate-100 shadow-sm">
                                         <i class="ph-duotone ph-qr-code text-4xl text-slate-300"></i>
                                     </div>
-                                    <p class="text-slate-500 font-bold text-sm">Belum ada data scan hari ini.</p>
+                                    <p class="text-[#2A3B52] font-bold text-sm">Belum ada data scan hari ini.</p>
                                     <p class="text-[10px] text-slate-400 mt-1">Data akan muncul otomatis setelah scan berhasil.</p>
                                 </div>
                             </div>
@@ -382,12 +390,12 @@
         {{-- MODAL PENCARIAN SISWA & INPUT MANUAL (Sakit/Izin/Alfa)        --}}
         {{-- ============================================================= --}}
         <div id="absen-manual-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-[100] transition-opacity" x-data="manualAbsen">
-            <div class="relative top-10 md:top-20 mx-auto p-0 border-0 w-full max-w-md shadow-2xl rounded-[2.5rem] bg-white overflow-hidden">
+            <div class="relative top-10 md:top-20 mx-auto p-0 border-0 w-full max-w-md fluent-modal rounded-xl bg-white overflow-hidden">
                 
                 {{-- Header Modal Input Manual --}}
-                <div class="bg-gradient-to-r from-cyan-600 to-blue-700 px-6 py-5 flex justify-between items-center">
+                <div class="bg-[#2A3B52] px-6 py-5 flex justify-between items-center">
                     <h3 class="font-black text-white text-lg flex items-center gap-2"><i class="ph-bold ph-keyboard"></i> Input Manual & Izin</h3>
-                    <button type="button" @click="closeManualModal()" class="text-cyan-100 hover:text-white transition-colors bg-white/10 hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center"><i class="ph-bold ph-x text-lg"></i></button>
+                    <button type="button" @click="closeManualModal()" class="text-slate-300 hover:text-white transition-colors bg-white/10 hover:bg-white/20 w-8 h-8 rounded-lg flex items-center justify-center"><i class="ph-bold ph-x text-lg"></i></button>
                 </div>
 
                 <form action="{{ route('reports.storeManual') }}" method="POST" class="p-6 space-y-4" @submit="submitForm">
@@ -404,7 +412,7 @@
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <i class="ph-bold ph-magnifying-glass text-slate-400"></i>
                                 </div>
-                                <input type="text" x-model="searchQuery" @input="searchStudents" @focus="showDropdown = true" @click.away="showDropdown = false" class="w-full pl-10 pr-4 py-3 rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 font-bold text-slate-700 text-sm" placeholder="Ketik Nama, NISN, atau Kelas...">
+                                <input type="text" x-model="searchQuery" @input="searchStudents" @focus="showDropdown = true" @click.away="showDropdown = false" class="w-full pl-10 pr-4 py-3 rounded-xl border-slate-200 bg-slate-50 focus:ring-[#5295FF] focus:border-[#5295FF] font-bold text-slate-700 text-sm" placeholder="Ketik Nama, NISN, atau Kelas...">
                             </div>
                             
                             <!-- Dropdown Hasil Pencarian -->
@@ -413,7 +421,7 @@
                                     <ul class="py-1 text-sm text-slate-700 divide-y divide-slate-50">
                                         <template x-for="student in filteredStudents" :key="student.id">
                                             <li>
-                                                <button type="button" @click="selectStudent(student)" class="w-full text-left px-4 py-2 hover:bg-cyan-50 hover:text-cyan-700 focus:bg-cyan-50 transition-colors flex flex-col">
+                                                <button type="button" @click="selectStudent(student)" class="w-full text-left px-4 py-2 hover:bg-[#F3F9FD] hover:text-[#5295FF] focus:bg-[#F3F9FD] transition-colors flex flex-col">
                                                     <span class="font-bold" x-text="student.name"></span>
                                                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mt-0.5" x-text="student.nisn + ' • ' + student.class_name"></span>
                                                 </button>
@@ -428,13 +436,13 @@
                         </div>
 
                         <!-- Card Info Siswa Terpilih -->
-                        <div x-show="selectedStudent" class="p-3 bg-cyan-50 border border-cyan-100 rounded-xl flex justify-between items-center" style="display: none;">
+                        <div x-show="selectedStudent" class="p-3 bg-[#F3F9FD] border border-[#D0E7F8] rounded-xl flex justify-between items-center" style="display: none;">
                             <div>
-                                <p class="text-[10px] font-bold text-cyan-500 uppercase tracking-wider mb-0.5">Siswa Terpilih</p>
-                                <p class="font-bold text-cyan-900 leading-tight" x-text="selectedStudent?.name"></p>
-                                <p class="text-xs text-cyan-600 font-medium mt-0.5" x-text="selectedStudent?.nisn + ' • ' + selectedStudent?.class_name"></p>
+                                <p class="text-[10px] font-bold text-[#5295FF] uppercase tracking-wider mb-0.5">Siswa Terpilih</p>
+                                <p class="font-bold text-[#2A3B52] leading-tight" x-text="selectedStudent?.name"></p>
+                                <p class="text-xs text-slate-500 font-medium mt-0.5" x-text="selectedStudent?.nisn + ' • ' + selectedStudent?.class_name"></p>
                             </div>
-                            <button type="button" @click="clearStudent()" class="w-8 h-8 rounded-full bg-cyan-200/50 text-cyan-600 flex items-center justify-center hover:bg-cyan-200 transition-colors shrink-0" title="Ganti Siswa">
+                            <button type="button" @click="clearStudent()" class="w-8 h-8 rounded-lg bg-white border border-[#D0E7F8] text-[#5295FF] flex items-center justify-center hover:bg-[#5295FF] hover:text-white transition-colors shrink-0" title="Ganti Siswa">
                                 <i class="ph-bold ph-x"></i>
                             </button>
                         </div>
@@ -447,11 +455,11 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Tanggal</label>
-                            <input type="date" name="date" required value="{{ date('Y-m-d') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 font-bold text-slate-700 text-sm">
+                            <input type="date" name="date" required value="{{ date('Y-m-d') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-[#5295FF] focus:border-[#5295FF] font-bold text-slate-700 text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Status</label>
-                            <select name="status" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 font-bold text-slate-700 text-sm cursor-pointer">
+                            <select name="status" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-[#5295FF] focus:border-[#5295FF] font-bold text-slate-700 text-sm cursor-pointer">
                                 <option value="Sakit">Sakit</option>
                                 <option value="Izin">Izin</option>
                                 <option value="Alfa">Alfa</option>
@@ -465,20 +473,20 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Masuk</label>
-                            <input type="time" name="time_in" value="{{ now()->format('H:i') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 text-center font-mono font-bold text-slate-700">
+                            <input type="time" name="time_in" value="{{ now()->format('H:i') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-[#5295FF] focus:border-[#5295FF] text-center font-mono font-bold text-slate-700">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Pulang</label>
-                            <input type="time" name="time_out" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 text-center font-mono font-bold text-slate-700">
+                            <input type="time" name="time_out" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-[#5295FF] focus:border-[#5295FF] text-center font-mono font-bold text-slate-700">
                         </div>
                     </div>
                     
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Keterangan (Opsional)</label>
-                        <textarea name="notes" rows="2" placeholder="Contoh: Surat dokter menyusul..." class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-cyan-600 focus:border-cyan-600 text-sm font-medium resize-none"></textarea>
+                        <textarea name="notes" rows="2" placeholder="Contoh: Surat dokter menyusul..." class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-[#5295FF] focus:border-[#5295FF] text-sm font-medium resize-none"></textarea>
                     </div>
 
-                    <button type="submit" class="w-full mt-2 py-3 bg-cyan-600 text-white font-bold rounded-xl hover:bg-cyan-700 shadow-lg shadow-cyan-600/30 transition-transform active:scale-95 flex items-center justify-center gap-2">
+                    <button type="submit" class="w-full mt-2 py-3 bg-[#2A3B52] text-white font-bold rounded-xl hover:bg-[#182436] shadow-md transition-transform active:scale-95 flex items-center justify-center gap-2 border border-transparent">
                         <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Data
                     </button>
                 </form>
@@ -570,14 +578,14 @@
                         state.long = position.coords.longitude;
                         state.gpsActive = true;
                         if(dom.gpsBadge) {
-                            dom.gpsBadge.className = "px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center gap-1 transition-all";
+                            dom.gpsBadge.className = "px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide bg-[#DFF6DD] text-[#107C10] border border-[#B7DFB9] flex items-center gap-1 transition-all";
                             dom.gpsBadge.innerHTML = `<i class="ph-fill ph-map-pin"></i> <span class="hidden sm:inline">GPS Aktif</span>`;
                         }
                     },
                     (error) => {
                         state.gpsActive = false;
                         if(dom.gpsBadge) {
-                            dom.gpsBadge.className = "px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-rose-50 text-rose-500 border border-rose-200 flex items-center gap-1 transition-all";
+                            dom.gpsBadge.className = "px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide bg-[#FDE7E9] text-[#D13438] border border-[#F4C3C9] flex items-center gap-1 transition-all";
                             dom.gpsBadge.innerHTML = `<i class="ph-bold ph-map-pin-line"></i> <span class="hidden sm:inline">GPS Nonaktif</span>`;
                         }
                         console.warn("Kamera GPS Alert:", error.message);
@@ -622,21 +630,35 @@
                 
                 document.querySelectorAll('.scan-type-btn').forEach(btn => {
                     const isActive = btn.dataset.type === mode;
-                    btn.classList.toggle('ring-2', isActive);
-                    btn.classList.toggle('ring-cyan-500', isActive); 
-                    btn.classList.toggle('border-cyan-500', isActive); 
+                    const colorText = btn.dataset.colorClass; // e.g., text-[#5295FF]
+                    const borderClass = btn.dataset.borderClass; // e.g., border-[#D0E7F8]
+                    
+                    if (isActive) {
+                        btn.classList.add('ring-2', 'ring-slate-200');
+                        btn.classList.replace('border-slate-100', borderClass);
+                    } else {
+                        btn.classList.remove('ring-2', 'ring-slate-200');
+                        // revert border
+                        btn.className = btn.className.replace(/border-\[[^\]]+\]/, 'border-slate-100');
+                    }
                     
                     const dot = btn.querySelector('.indicator-dot');
                     if(dot) {
-                        dot.className = `w-1.5 h-1.5 rounded-full indicator-dot transition-all ${isActive ? 'bg-cyan-500 scale-125' : 'border border-slate-300'}`;
+                        if (isActive) {
+                            dot.className = `w-1.5 h-1.5 rounded-full indicator-dot transition-all scale-125`;
+                            dot.style.backgroundColor = 'currentColor'; // Inherit from text color
+                        } else {
+                            dot.className = `w-1.5 h-1.5 rounded-full indicator-dot transition-all border border-slate-300`;
+                            dot.style.backgroundColor = 'transparent';
+                        }
                     }
                 });
 
                 const labels = { Harian: 'Absen Harian', Makan: 'Makan Siang', Dhuha: 'Sholat Dhuha', Dhuhur: 'Sholat Dhuhur', Ekstrakurikuler: 'Ekstrakurikuler' };
                 dom.modeText.innerText = isAuto ? `Auto: ${labels[mode]}` : labels[mode];
                 dom.scanStatus.innerHTML = mode === 'Ekstrakurikuler' 
-                    ? `<i class="ph-bold ph-warning text-amber-400"></i> Pilih Kegiatan Dulu` 
-                    : `<i class="ph-bold ph-qr-code text-cyan-300"></i> Siap Scan ${labels[mode]}`;
+                    ? `<i class="ph-bold ph-warning text-[#D83B01]"></i> Pilih Kegiatan Dulu` 
+                    : `<i class="ph-bold ph-qr-code text-[#5295FF]"></i> Siap Scan ${labels[mode]}`;
                 
                 filterLogTable(mode);
             };
@@ -657,8 +679,8 @@
                 state.extraId = e.target.value;
                 const text = e.target.options[e.target.selectedIndex].text;
                 dom.scanStatus.innerHTML = state.extraId 
-                    ? `<i class="ph-bold ph-check text-emerald-400"></i> Siap: ${text}` 
-                    : `<i class="ph-bold ph-warning text-amber-400"></i> Pilih Kegiatan Dulu`;
+                    ? `<i class="ph-bold ph-check text-[#107C10]"></i> Siap: ${text}` 
+                    : `<i class="ph-bold ph-warning text-[#D83B01]"></i> Pilih Kegiatan Dulu`;
             });
 
             function filterLogTable(mode) {
@@ -697,13 +719,13 @@
 
                 if (state.mode === 'Ekstrakurikuler' && !state.extraId) {
                     playBeep('warning');
-                    Swal.fire({ toast: true, position: 'top', icon: 'warning', title: 'Pilih Ekskul dulu!', showConfirmButton: false, timer: 1500, customClass: { popup: 'rounded-[2rem]' } });
+                    Swal.fire({ toast: true, position: 'top', icon: 'warning', title: 'Pilih Ekskul dulu!', showConfirmButton: false, timer: 1500, customClass: { popup: 'rounded-xl fluent-modal' } });
                     return;
                 }
 
                 state.isProcessing = true;
                 state.processedQr.add(studentId);
-                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-cyan-300"></i> Memproses...`;
+                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-[#5295FF]"></i> Memproses...`;
 
                 try {
                     let finalType = state.mode;
@@ -767,10 +789,10 @@
                     cancelButtonText: 'Batal',
                     showLoaderOnConfirm: true,
                     customClass: {
-                        popup: 'rounded-[2rem] font-sans border-0 shadow-2xl',
-                        confirmButton: 'bg-cyan-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-cyan-700 transition-colors mx-2 shadow-lg shadow-cyan-900/20 flex items-center gap-2',
-                        cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2',
-                        input: 'rounded-xl border-slate-200 focus:border-cyan-500 focus:ring-cyan-500 text-center text-lg font-mono font-bold w-4/5 mx-auto py-3'
+                        popup: 'rounded-xl fluent-modal font-sans border-0 shadow-2xl',
+                        confirmButton: 'bg-[#2A3B52] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#182436] transition-colors mx-2 shadow-sm border border-transparent flex items-center gap-2',
+                        cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 border border-transparent transition-colors mx-2',
+                        input: 'rounded-xl border-slate-200 focus:border-[#5295FF] focus:ring-[#5295FF] text-center text-lg font-mono font-bold w-4/5 mx-auto py-3'
                     },
                     buttonsStyling: false,
                     preConfirm: (inputValue) => {
@@ -790,9 +812,9 @@
                 playBeep(type === 'Makan' ? 'makan' : (isLate ? 'warning' : 'success'));
                 triggerOverlay(type === 'Makan' ? 'makan' : (isLate ? 'warning' : 'success'));
                 
-                dom.scanResult.innerHTML = `<span class="${isLate ? 'text-amber-600' : 'text-emerald-600'} flex items-center justify-center gap-2"><i class="ph-fill ph-check-circle"></i> ${data.message}</span>`;
+                dom.scanResult.innerHTML = `<span class="${isLate ? 'text-[#D83B01]' : 'text-[#107C10]'} flex items-center justify-center gap-2"><i class="ph-fill ph-check-circle"></i> ${data.message}</span>`;
                 dom.scanResult.classList.remove('hidden', 'opacity-0', 'scale-95');
-                dom.scanResult.className = `mt-4 p-4 rounded-2xl font-bold text-sm text-center transition-all duration-300 transform scale-100 border ${isLate ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200'} shadow-sm`;
+                dom.scanResult.className = `mt-4 p-4 rounded-xl font-bold text-sm text-center transition-all duration-300 transform scale-100 border ${isLate ? 'bg-[#FFEFD6] border-[#FFD8A8]' : 'bg-[#DFF6DD] border-[#B7DFB9]'} shadow-sm`;
                 
                 setTimeout(() => {
                     dom.scanResult.classList.add('opacity-0', 'scale-95');
@@ -809,8 +831,8 @@
             function handleError(msg) {
                 playBeep('error');
                 triggerOverlay('error');
-                dom.scanResult.innerHTML = `<span class="text-rose-600 flex items-center justify-center gap-2"><i class="ph-fill ph-x-circle"></i> ${msg}</span>`;
-                dom.scanResult.className = `mt-4 p-4 rounded-2xl font-bold text-sm text-center transition-all duration-300 transform scale-100 border bg-rose-50 border-rose-200 shadow-sm`;
+                dom.scanResult.innerHTML = `<span class="text-[#D13438] flex items-center justify-center gap-2"><i class="ph-fill ph-x-circle"></i> ${msg}</span>`;
+                dom.scanResult.className = `mt-4 p-4 rounded-xl font-bold text-sm text-center transition-all duration-300 transform scale-100 border bg-[#FDE7E9] border-[#F4C3C9] shadow-sm`;
                 dom.scanResult.classList.remove('hidden', 'opacity-0', 'scale-95');
                 setTimeout(() => dom.scanResult.classList.add('opacity-0', 'scale-95'), 3000);
             }
@@ -828,21 +850,21 @@
                 row.dataset.typeRaw = scan.type_raw;
 
                 row.innerHTML = `
-                    <td class="px-6 py-4 rounded-l-xl">
-                        <div class="font-bold text-slate-800 group-hover:text-cyan-600 transition-colors">${scan.student_name}</div>
+                    <td class="px-6 py-4 rounded-l-lg">
+                        <div class="font-bold text-[#2A3B52] group-hover:text-[#5295FF] transition-colors">${scan.student_name}</div>
                         <div class="text-[10px] text-slate-400 font-mono font-bold">${scan.student_id || '-'}</div>
                     </td>
                     <td class="col-harian px-4 py-4 text-center">
-                        ${(scan.type_raw === 'Masuk' || scan.type_raw === 'Harian' || scan.time_in) ? `<span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm">${scan.time_in || '-'}</span>` : '<span class="text-slate-300 font-bold">-</span>'}
+                        ${(scan.type_raw === 'Masuk' || scan.type_raw === 'Harian' || scan.time_in) ? `<span class="font-mono font-bold text-slate-600 bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">${scan.time_in || '-'}</span>` : '<span class="text-slate-300 font-bold">-</span>'}
                     </td>
                     <td class="col-harian px-4 py-4 text-center">
-                        ${(scan.type_raw === 'Pulang' || scan.time_out) ? `<span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm">${scan.time_out || scan.time_in}</span>` : '<span class="text-slate-300 font-bold">-</span>'}
+                        ${(scan.type_raw === 'Pulang' || scan.time_out) ? `<span class="font-mono font-bold text-slate-600 bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">${scan.time_out || scan.time_in}</span>` : '<span class="text-slate-300 font-bold">-</span>'}
                     </td>
                     <td class="col-waktu hidden-col px-4 py-4 text-center">
-                         <span class="font-mono font-bold text-slate-600 bg-white border border-slate-100 px-2 py-1 rounded-lg text-xs shadow-sm">${scan.time_in || '-'}</span>
+                         <span class="font-mono font-bold text-slate-600 bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">${scan.time_in || '-'}</span>
                     </td>
-                    <td class="col-kegiatan hidden-col px-4 py-4 text-center text-slate-600 font-bold text-xs">${scan.ekskul_name || '-'}</td>
-                    <td class="px-6 py-4 text-right rounded-r-xl"><span class="bg-emerald-50 text-emerald-600 border border-emerald-100 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide shadow-sm">${scan.status}</span></td>
+                    <td class="col-kegiatan hidden-col px-4 py-4 text-center text-[#2A3B52] font-bold text-xs">${scan.ekskul_name || '-'}</td>
+                    <td class="px-6 py-4 text-right rounded-r-lg"><span class="${scan.status.includes('Terlambat') ? 'bg-[#FFEFD6] text-[#D83B01] border-[#FFD8A8]' : 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9]'} border px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wide shadow-sm">${scan.status}</span></td>
                 `;
 
                 dom.tableBody.prepend(row);
@@ -865,10 +887,10 @@
 
             qrScanner.start(cameraConstraints, config, onScanSuccess)
                 .then(() => {
-                    dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-cyan-300"></i> Siap Scan`;
+                    dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-[#5295FF]"></i> Siap Scan`;
                 })
                 .catch(err => {
-                    dom.scanStatus.innerHTML = `<span class="text-rose-300"><i class="ph-bold ph-warning"></i> Kamera Ditolak / Error</span>`;
+                    dom.scanStatus.innerHTML = `<span class="text-[#D13438]"><i class="ph-bold ph-warning"></i> Kamera Ditolak / Error</span>`;
                     console.warn(err);
                 });
 
@@ -877,14 +899,14 @@
                 const file = e.target.files[0];
                 
                 initAudio();
-                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-cyan-300"></i> Membaca Gambar...`;
+                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-[#5295FF]"></i> Membaca Gambar...`;
 
                 try {
                     const decodedText = await qrScanner.scanFile(file, true);
                     onScanSuccess(decodedText);
                 } catch (err) {
                     handleError('QR Code tidak valid / tidak terbaca di gambar ini.');
-                    dom.scanStatus.innerHTML = `<i class="ph-bold ph-warning text-amber-400"></i> Gagal Membaca QR`;
+                    dom.scanStatus.innerHTML = `<i class="ph-bold ph-warning text-[#D83B01]"></i> Gagal Membaca QR`;
                     setTimeout(() => setMode(state.mode, !state.manualOverride), 2000);
                 } finally {
                     e.target.value = ''; 
@@ -896,7 +918,7 @@
             window.switchCamera = () => {
                 initAudio();
                 currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
-                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-cyan-300"></i> Memutar Kamera...`;
+                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-[#5295FF]"></i> Memutar Kamera...`;
 
                 qrScanner.stop().then(() => {
                     qrScanner.start(
@@ -904,7 +926,7 @@
                         config, 
                         onScanSuccess
                     ).then(() => {
-                        dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-cyan-300"></i> Siap Scan`;
+                        dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-[#5295FF]"></i> Siap Scan`;
                     }).catch(err => {
                         handleError('Gagal memuat kamera tujuan.');
                         console.warn(err);
@@ -970,7 +992,7 @@
                             toast: true, position: 'top', icon: 'warning', 
                             title: 'Pilih siswa terlebih dahulu!', 
                             showConfirmButton: false, timer: 2500, 
-                            customClass: { popup: 'rounded-[2rem] font-sans border-0 shadow-2xl' }
+                            customClass: { popup: 'rounded-xl fluent-modal font-sans border-0' }
                         });
                     } else {
                         const btn = e.target.querySelector('button[type="submit"]');

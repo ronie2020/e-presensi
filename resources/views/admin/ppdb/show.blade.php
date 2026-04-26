@@ -1,106 +1,116 @@
 <x-app-layout>
-    {{-- CUSTOM STYLES & ANIMATIONS (Konsisten dengan Index) --}}
+    {{-- CUSTOM STYLES & MICROSOFT FLUENT ELEVATION --}}
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         .delay-100 { animation-delay: 100ms; }
         .delay-200 { animation-delay: 200ms; }
+        
+        .fluent-card {
+            box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.132), 0 0.3px 0.9px 0 rgba(0, 0, 0, 0.108);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .fluent-modal {
+            box-shadow: 0 25.6px 57.6px 0 rgba(0, 0, 0, 0.22), 0 4.8px 14.4px 0 rgba(0, 0, 0, 0.18);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
     </style>
 
-    <div class="py-8 sm:py-12 font-sans text-slate-800 bg-slate-50 min-h-screen">
+    <div class="py-8 sm:py-12 font-sans text-[#2A3B52] bg-[#f8fafc] min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {{-- Navigasi Top --}}
-            <div class="animate-enter flex items-center justify-between mb-8">
-                <a href="{{ route('admin.ppdb.index') }}" class="group inline-flex items-center gap-2 text-slate-500 font-bold text-sm hover:text-blue-600 transition-colors">
-                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm group-hover:border-blue-200 group-hover:bg-blue-600 group-hover:text-white transition-all">
+            <div class="animate-enter flex items-center justify-between mb-6">
+                <a href="{{ route('admin.ppdb.index') }}" class="group inline-flex items-center gap-3 text-slate-500 font-bold text-sm hover:text-[#5295FF] transition-colors">
+                    <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center shadow-sm group-hover:border-[#D0E7F8] group-hover:bg-[#F3F9FD] group-hover:text-[#5295FF] transition-all">
                         <i class="ph-bold ph-arrow-left"></i>
                     </div>
-                    Kembali ke Daftar
+                    Kembali
                 </a>
                 
                 <div class="flex gap-3">
-                    <a href="{{ route('admin.ppdb.print', $registrant->id) }}" target="_blank" class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl text-sm hover:bg-slate-50 hover:border-slate-300 transition shadow-sm flex items-center gap-2">
+                    <a href="{{ route('admin.ppdb.print', $registrant->id) }}" target="_blank" class="px-5 py-2.5 bg-white border border-slate-200 text-[#2A3B52] font-bold rounded-lg text-sm hover:bg-slate-50 transition shadow-sm flex items-center gap-2">
                         <i class="ph-bold ph-printer"></i> Cetak Bukti
                     </a>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 {{-- KOLOM KIRI: Profile & Control --}}
                 <div class="space-y-6 animate-enter delay-100">
                     
                     {{-- PROFILE CARD --}}
-                    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative group">
-                        <div class="h-28 bg-gradient-to-r from-blue-900 to-slate-900 relative">
-                             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                    <div class="bg-white rounded-xl fluent-card overflow-hidden relative group">
+                        {{-- Banner Header --}}
+                        <div class="h-28 bg-gradient-to-r from-[#25D0FF] via-[#5295FF] to-[#FFC9B9] relative overflow-hidden">
+                             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
+                             <div class="absolute -right-10 top-0 w-32 h-32 bg-white/30 rounded-full blur-2xl"></div>
                         </div>
                         <div class="px-6 pb-8 text-center relative">
-                            <div class="w-32 h-32 mx-auto rounded-full bg-white p-1.5 shadow-xl -mt-16 mb-4 relative z-10">
-                                <div class="w-full h-full rounded-full bg-slate-100 overflow-hidden flex items-center justify-center relative border border-slate-100">
+                            <div class="w-28 h-28 mx-auto rounded-full bg-white p-1.5 shadow-md -mt-14 mb-4 relative z-10">
+                                <div class="w-full h-full rounded-full bg-slate-50 overflow-hidden flex items-center justify-center border border-slate-200">
                                     @if($registrant->file_photo)
                                         <img src="{{ asset('storage/' . $registrant->file_photo) }}" class="w-full h-full object-cover">
                                     @else
-                                        <div class="bg-gradient-to-br from-slate-100 to-slate-300 w-full h-full flex items-center justify-center">
+                                        <div class="bg-gradient-to-br from-slate-100 to-slate-200 w-full h-full flex items-center justify-center">
                                             <span class="text-4xl font-black text-slate-400">{{ substr($registrant->full_name, 0, 1) }}</span>
                                         </div>
                                     @endif
                                 </div>
                             </div>
                             
-                            <h2 class="text-xl font-black text-slate-800 leading-tight mb-1">{{ $registrant->full_name }}</h2>
-                            <p class="text-sm font-bold text-slate-500 mb-4">{{ $registrant->school_origin }}</p>
+                            <h2 class="text-xl font-black text-[#2A3B52] leading-tight mb-1">{{ $registrant->full_name }}</h2>
+                            <p class="text-xs font-bold text-slate-500 mb-4">{{ $registrant->school_origin }}</p>
                             
-                            <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-600">
-                                <i class="ph-bold ph-barcode"></i> {{ $registrant->registration_number }}
+                            <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs font-bold text-slate-600 shadow-sm">
+                                <i class="ph-bold ph-identification-card"></i> {{ $registrant->registration_number }}
                             </div>
                         </div>
                     </div>
 
                     {{-- CONTROL PANEL (Status) --}}
-                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-8">
-                        <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                             <i class="ph-fill ph-sliders-horizontal"></i> Panel Kelulusan
+                    <div class="bg-white rounded-xl fluent-card p-6">
+                        <h3 class="text-sm font-bold text-[#2A3B52] mb-5 flex items-center gap-2">
+                             <i class="ph-fill ph-sliders-horizontal text-[#5295FF]"></i> Panel Kelulusan
                         </h3>
                         
-                        <form action="{{ route('admin.ppdb.update_status', $registrant->id) }}" method="POST" class="space-y-5">
+                        <form action="{{ route('admin.ppdb.update_status', $registrant->id) }}" method="POST" class="space-y-4">
                             @csrf @method('PATCH')
                             
                             <div>
-                                <label class="text-xs font-bold text-slate-700 mb-2 block ml-1">Status Seleksi</label>
-                                <div class="relative">
-                                    <select name="status" class="w-full px-4 py-3 rounded-xl border-slate-200 bg-slate-50 text-sm font-bold focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer hover:bg-white hover:shadow-sm">
-                                        <option value="pending" {{ $registrant->status == 'pending' ? 'selected' : '' }}>⏳ Menunggu (Pending)</option>
-                                        <option value="verified" {{ $registrant->status == 'verified' ? 'selected' : '' }}>✅ Terverifikasi</option>
-                                        <option value="accepted" {{ $registrant->status == 'accepted' ? 'selected' : '' }}>🏆 DITERIMA</option>
-                                        <option value="rejected" {{ $registrant->status == 'rejected' ? 'selected' : '' }}>❌ Ditolak</option>
-                                    </select>
-                                </div>
+                                <label class="text-xs font-bold text-slate-500 mb-2 block">Status Seleksi</label>
+                                <select name="status" class="w-full px-4 py-2.5 rounded-lg border-slate-200 bg-slate-50 text-sm font-bold focus:ring-[#5295FF] focus:border-[#5295FF] transition-all cursor-pointer">
+                                    <option value="pending" {{ $registrant->status == 'pending' ? 'selected' : '' }}>⏳ Menunggu (Pending)</option>
+                                    <option value="verified" {{ $registrant->status == 'verified' ? 'selected' : '' }}>✅ Terverifikasi</option>
+                                    <option value="accepted" {{ $registrant->status == 'accepted' ? 'selected' : '' }}>🏆 DITERIMA</option>
+                                    <option value="rejected" {{ $registrant->status == 'rejected' ? 'selected' : '' }}>❌ Ditolak</option>
+                                </select>
                             </div>
                             
                             <div>
-                                <label class="text-xs font-bold text-slate-700 mb-2 block ml-1">Catatan Panitia</label>
-                                <textarea name="admin_note" rows="3" class="w-full px-4 py-3 rounded-xl border-slate-200 bg-white text-sm focus:ring-blue-500 focus:border-blue-500 placeholder:text-slate-400 placeholder:font-normal font-bold shadow-sm" placeholder="Contoh: Lulus jalur prestasi...">{{ $registrant->admin_note }}</textarea>
+                                <label class="text-xs font-bold text-slate-500 mb-2 block">Catatan Panitia</label>
+                                <textarea name="admin_note" rows="3" class="w-full px-4 py-2.5 rounded-lg border-slate-200 bg-white text-sm focus:ring-[#5295FF] focus:border-[#5295FF] placeholder:text-slate-400 placeholder:font-normal font-bold" placeholder="Contoh: Lulus jalur prestasi...">{{ $registrant->admin_note }}</textarea>
                             </div>
 
-                            <button type="submit" class="w-full py-3 bg-slate-900 text-white font-bold rounded-xl text-sm hover:bg-slate-800 transition shadow-lg shadow-slate-900/20 flex items-center justify-center gap-2">
+                            <button type="submit" class="w-full py-2.5 bg-[#2A3B52] text-white font-bold rounded-lg text-sm hover:bg-[#182436] transition shadow-sm flex items-center justify-center gap-2">
                                 <i class="ph-bold ph-floppy-disk"></i> Simpan Perubahan
                             </button>
                         </form>
 
                         @if($registrant->status === 'accepted')
-                            <div class="mt-6 pt-6 border-t border-slate-100">
+                            <div class="mt-5 pt-5 border-t border-slate-100">
                                 @if(!$isPromoted)
                                     <form id="promoteForm" action="{{ route('admin.ppdb.promote', $registrant->id) }}" method="POST">
                                         @csrf
-                                        <button type="button" onclick="confirmPromote()" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 group">
+                                        <button type="button" onclick="confirmPromote()" class="w-full py-2.5 bg-[#107C10] text-white font-bold rounded-lg text-sm hover:bg-[#0c5e0c] transition shadow-sm flex items-center justify-center gap-2 group">
                                             <i class="ph-bold ph-user-plus text-lg group-hover:scale-110 transition-transform"></i> Pindahkan ke Siswa Aktif
                                         </button>
                                     </form>
                                 @else
-                                    <div class="w-full py-3 bg-emerald-50 text-emerald-600 font-bold rounded-xl text-sm border border-emerald-100 flex items-center justify-center gap-2">
-                                        <i class="ph-fill ph-check-circle text-lg"></i> Data Sudah Dipindahkan
+                                    <div class="w-full py-2.5 bg-[#DFF6DD] text-[#107C10] font-bold rounded-lg text-sm border border-[#B7DFB9] flex items-center justify-center gap-2">
+                                        <i class="ph-fill ph-check-circle text-lg"></i> Sudah Dipindahkan
                                     </div>
                                 @endif
                             </div>
@@ -108,19 +118,19 @@
                     </div>
 
                     {{-- INFO JALUR --}}
-                    <div class="bg-blue-50 rounded-[2.5rem] p-8 border border-blue-100">
+                    <div class="bg-[#F3F9FD] rounded-xl p-6 border border-[#D0E7F8] fluent-card">
                         <div class="flex items-start justify-between mb-6">
                             <div>
-                                <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">Jalur Masuk</p>
-                                <p class="text-2xl font-black text-blue-900 capitalize tracking-tight">{{ $registrant->track }}</p>
+                                <p class="text-[10px] font-bold text-[#5295FF] uppercase tracking-widest mb-1">Jalur Masuk</p>
+                                <p class="text-2xl font-black text-[#2A3B52] capitalize">{{ $registrant->track }}</p>
                             </div>
-                            <div class="w-12 h-12 rounded-2xl bg-white text-blue-600 flex items-center justify-center shadow-sm">
+                            <div class="w-12 h-12 rounded-lg bg-white text-[#5295FF] border border-[#D0E7F8] flex items-center justify-center shadow-sm">
                                 <i class="ph-fill ph-path text-2xl"></i>
                             </div>
                         </div>
-                        <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-4 border border-blue-100 flex items-center justify-between">
-                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Nilai Rapor</span>
-                            <span class="text-2xl font-black text-slate-800">{{ $registrant->average_grade }}</span>
+                        <div class="bg-white rounded-lg p-4 border border-[#D0E7F8] flex items-center justify-between shadow-sm">
+                            <span class="text-xs font-bold text-slate-500 uppercase">Nilai Rapor</span>
+                            <span class="text-xl font-black text-[#2A3B52]">{{ $registrant->average_grade }}</span>
                         </div>
                     </div>
                 </div>
@@ -129,18 +139,14 @@
                 <div class="lg:col-span-2 space-y-6 animate-enter delay-200">
                     
                     {{-- BIODATA --}}
-                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-8 sm:p-10 relative overflow-hidden group">
-                         <div class="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <i class="ph-fill ph-identification-card text-9xl text-slate-900"></i>
-                        </div>
-
-                        <h3 class="text-lg font-black text-slate-800 mb-8 flex items-center gap-3 relative z-10">
-                            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
-                                <i class="ph-duotone ph-identification-card"></i>
+                    <div class="bg-white rounded-xl fluent-card p-6 md:p-8 relative overflow-hidden group">
+                        <h3 class="text-lg font-bold text-[#2A3B52] mb-6 flex items-center gap-3 relative z-10 border-b border-slate-100 pb-4">
+                            <div class="w-10 h-10 rounded-lg bg-[#F3F9FD] text-[#5295FF] flex items-center justify-center text-xl border border-[#D0E7F8]">
+                                <i class="ph-duotone ph-identification-badge"></i>
                             </div>
                             Identitas Siswa
                         </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12 relative z-10">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8 relative z-10">
                             @foreach([
                                 'NISN' => $registrant->nisn,
                                 'NIK' => $registrant->nik,
@@ -150,53 +156,49 @@
                                 'Agama' => $registrant->religion,
                                 'No. HP' => $registrant->student_phone ?? '-'
                             ] as $label => $val)
-                            <div class="border-l-2 border-slate-100 pl-4">
+                            <div class="border-l-2 border-[#D0E7F8] pl-3">
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{{ $label }}</p>
-                                <p class="font-bold text-slate-700 text-base">{{ $val }}</p>
+                                <p class="font-bold text-[#2A3B52] text-sm">{{ $val }}</p>
                             </div>
                             @endforeach
-                            <div class="sm:col-span-2 border-l-2 border-slate-100 pl-4">
+                            <div class="sm:col-span-2 border-l-2 border-[#D0E7F8] pl-3">
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Alamat Lengkap</p>
-                                <p class="font-bold text-slate-700 leading-relaxed">{{ $registrant->address }}</p>
+                                <p class="font-bold text-[#2A3B52] text-sm leading-relaxed">{{ $registrant->address }}</p>
                             </div>
                         </div>
                     </div>
 
                     {{-- ORANG TUA --}}
-                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-8 sm:p-10 relative overflow-hidden group">
-                        <div class="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-                            <i class="ph-fill ph-users-three text-9xl text-purple-900"></i>
-                        </div>
-
-                        <h3 class="text-lg font-black text-slate-800 mb-8 flex items-center gap-3 relative z-10">
-                             <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+                    <div class="bg-white rounded-xl fluent-card p-6 md:p-8 relative overflow-hidden group">
+                        <h3 class="text-lg font-bold text-[#2A3B52] mb-6 flex items-center gap-3 relative z-10 border-b border-slate-100 pb-4">
+                             <div class="w-10 h-10 rounded-lg bg-[#FFEFD6] text-[#D83B01] flex items-center justify-center text-xl border border-[#FFD8A8]">
                                 <i class="ph-duotone ph-users-three"></i>
                             </div>
-                            Data Orang Tua
+                            Data Orang Tua / Wali
                         </h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-12 relative z-10">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8 relative z-10">
                             @foreach([
                                 'Ayah' => $registrant->father_name,
                                 'Ibu' => $registrant->mother_name,
                                 'Pekerjaan' => $registrant->parent_job ?? '-',
                                 'Penghasilan' => $registrant->parent_income ?? '-',
-                                'No. WA Ortu' => $registrant->parent_phone
+                                'No. WhatsApp' => $registrant->parent_phone
                             ] as $label => $val)
-                            <div class="border-l-2 border-slate-100 pl-4">
+                            <div class="border-l-2 border-[#FFD8A8] pl-3">
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{{ $label }}</p>
-                                <p class="font-bold text-slate-700 text-base">{{ $val }}</p>
+                                <p class="font-bold text-[#2A3B52] text-sm">{{ $val }}</p>
                             </div>
                             @endforeach
                         </div>
                     </div>
 
                     {{-- DOKUMEN --}}
-                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-8 sm:p-10">
-                        <h3 class="text-lg font-black text-slate-800 mb-8 flex items-center gap-3">
-                             <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center text-xl">
+                    <div class="bg-white rounded-xl fluent-card p-6 md:p-8">
+                        <h3 class="text-lg font-bold text-[#2A3B52] mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
+                             <div class="w-10 h-10 rounded-lg bg-slate-100 text-[#2A3B52] flex items-center justify-center text-xl border border-slate-200">
                                 <i class="ph-duotone ph-files"></i>
                             </div>
-                            Berkas Lampiran
+                            Berkas Lampiran Dokumen
                         </h3>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             @foreach([
@@ -207,14 +209,14 @@
                                 'file_achievement' => 'Sertifikat Prestasi'
                             ] as $field => $label)
                                 @if($registrant->$field)
-                                    <a href="{{ asset('storage/' . $registrant->$field) }}" target="_blank" class="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-white hover:border-blue-200 hover:shadow-xl hover:shadow-blue-100/50 transition-all duration-300 group">
-                                        <div class="w-12 h-12 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 group-hover:border-blue-100 transition-colors">
-                                            <i class="ph-fill ph-file-text text-2xl"></i>
+                                    <a href="{{ asset('storage/' . $registrant->$field) }}" target="_blank" class="flex items-center gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50 hover:bg-white hover:border-[#5295FF] hover:shadow-md transition-all duration-300 group">
+                                        <div class="w-10 h-10 rounded-md bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-[#F3F9FD] group-hover:text-[#5295FF] group-hover:border-[#D0E7F8] transition-colors shadow-sm">
+                                            <i class="ph-fill ph-file-text text-xl"></i>
                                         </div>
                                         <div>
-                                            <p class="font-bold text-slate-700 group-hover:text-blue-700 transition-colors">{{ $label }}</p>
-                                            <p class="text-[10px] text-slate-400 font-bold uppercase mt-1 flex items-center gap-1 group-hover:text-blue-400">
-                                                <i class="ph-bold ph-eye"></i> Lihat File
+                                            <p class="font-bold text-[#2A3B52] group-hover:text-[#5295FF] transition-colors text-sm">{{ $label }}</p>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5 flex items-center gap-1 group-hover:text-[#5295FF]">
+                                                <i class="ph-bold ph-eye"></i> Lihat Berkas
                                             </p>
                                         </div>
                                     </a>
@@ -228,7 +230,6 @@
         </div>
     </div>
     
-    {{-- JS SweetAlert --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function confirmPromote() {
@@ -238,9 +239,9 @@
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Pindahkan',
-                confirmButtonColor: '#059669',
-                cancelButtonColor: '#64748b',
-                customClass: { popup: 'rounded-[2rem] font-sans' }
+                confirmButtonColor: '#107C10',
+                cancelButtonColor: '#2A3B52',
+                customClass: { popup: 'fluent-modal rounded-xl', confirmButton: 'rounded-lg font-bold', cancelButton: 'rounded-lg font-bold' }
             }).then((res) => { if(res.isConfirmed) document.getElementById('promoteForm').submit(); });
         }
     </script>

@@ -7,81 +7,24 @@
         $schoolName = "SMP NEGERI 3 LAKBOK";
         $schoolAddress = "Jl. Raya Lakbok, Kecamatan Lakbok, Kabupaten Ciamis - Jawa Barat";
         $principalName = "TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.";
-        $principalNIP  = "19800101 200501 1 001";
+        $principalNIP  = "19820928201101 1002";
         $printDate     = \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y');
     @endphp
 
-    @push('styles')
+   @push('styles')
     <style>
-        /* --- LOGIKA PRINT OPTIMIZED --- */
+        .fluent-card { box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.132), 0 0.3px 0.9px 0 rgba(0, 0, 0, 0.108); border: 1px solid rgba(0, 0, 0, 0.05); }
         @media print {
-            /* Sembunyikan semua elemen body */
             body * { visibility: hidden; }
-            
-            /* Tampilkan hanya container print & isinya */
-            .print-container, .print-container * { 
-                visibility: visible; 
-            }
-            
-            /* Reset posisi container agar pas di kertas A4 */
-            .print-container {
-                position: absolute !important; 
-                left: 0 !important; 
-                top: 0 !important;
-                width: 100% !important; 
-                margin: 0 !important; 
-                padding: 20px !important; /* Tambah padding kertas */
-                background: white !important; 
-                z-index: 99999;
-                box-shadow: none !important; 
-                border: none !important; 
-                border-radius: 0 !important;
-            }
-
-            /* Styling Tabel Cetak */
-            table {
-                width: 100% !important; 
-                border-collapse: collapse !important;
-                font-family: 'Times New Roman', Times, serif !important; 
-                font-size: 11px !important;
-            }
-            thead th {
-                background-color: #f3f4f6 !important; /* gray-100 */
-                color: #000 !important;
-                font-weight: bold !important; 
-                border: 1px solid #000 !important;
-                padding: 8px !important;
-                -webkit-print-color-adjust: exact; /* Paksa cetak background */
-                print-color-adjust: exact;
-            }
-            td {
-                border: 1px solid #000 !important; 
-                padding: 6px 8px !important;
-                color: #000 !important; 
-                vertical-align: top !important;
-            }
-
-            /* Utilities Cetak */
+            .print-container, .print-container * { visibility: visible; }
+            .print-container { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 20px !important; background: white !important; z-index: 99999; box-shadow: none !important; border: none !important; border-radius: 0 !important;}
+            table { width: 100% !important; border-collapse: collapse !important; font-family: 'Times New Roman', Times, serif !important; font-size: 11px !important; }
+            thead th { background-color: #f3f4f6 !important; color: #000 !important; font-weight: bold !important; border: 1px solid #000 !important; padding: 8px !important; }
+            td { border: 1px solid #000 !important; padding: 6px 8px !important; color: #000 !important; vertical-align: top !important; }
             .print-header, .print-footer { display: block !important; width: 100%; }
             .no-print, .pagination-container, a[href] { display: none !important; }
-            a { text-decoration: none !important; color: #000 !important; pointer-events: none; }
-            
-            /* Hapus background warna-warni saat print agar hemat tinta & bersih */
-            .bg-slate-100, .bg-blue-50, .bg-emerald-50, .bg-rose-50 {
-                background-color: transparent !important;
-                border: none !important;
-            }
-            .text-emerald-600, .text-rose-600, .text-blue-600 {
-                color: #000 !important; /* Paksa hitam saat print */
-                font-weight: normal !important;
-            }
-            
-            /* Page Break handling */
             tr { page-break-inside: avoid; }
-            .avoid-break { page-break-inside: avoid; }
         }
-
-        /* Tampilan Layar (Screen) */
         .print-header, .print-footer { display: none; }
     </style>
     @endpush
@@ -89,22 +32,21 @@
     <div class="py-8 sm:py-10 font-sans text-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION --}}
-            <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 mb-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10 no-print">
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            {{-- HERO SECTION ELEVATE --}}
+            <div class="relative rounded-xl bg-gradient-to-br from-[#25D0FF] via-[#5295FF] to-[#FFC9B9] p-8 mb-8 text-[#2A3B52] shadow-[0_10px_40px_-10px_rgba(37,208,255,0.4)] overflow-hidden border border-white/40 no-print">
+                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
+                <div class="absolute -top-24 -right-24 w-64 h-64 bg-white/30 rounded-full blur-3xl pointer-events-none"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div class="text-center md:text-left">
                         <h1 class="text-3xl font-extrabold tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3">
                             <span class="text-4xl">📊</span> Monitoring Jurnal
                         </h1>
-                        <p class="text-blue-300 text-sm font-medium leading-relaxed max-w-lg">
+                        <p class="text-[#2A3B52]/80 text-sm font-medium leading-relaxed max-w-lg">
                             Rekapitulasi aktivitas belajar mengajar (KBM) guru beserta kehadiran siswa secara terperinci.
                         </p>
                     </div>
-                    
-                    <button onclick="window.print()" class="group bg-white text-slate-900 px-6 py-3.5 rounded-2xl font-bold text-sm shadow-lg hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 flex items-center gap-2 transform active:scale-95">
+                    <button onclick="window.print()" class="group bg-white/40 border border-white/50 backdrop-blur-md text-[#2A3B52] px-6 py-3.5 rounded-xl font-bold text-sm shadow-sm hover:bg-white/60 transition-all flex items-center gap-2 transform active:scale-95">
                         <i class="ph-bold ph-printer text-xl group-hover:scale-110 transition-transform"></i>
                         <span>Cetak Laporan</span>
                     </button>
@@ -112,55 +54,45 @@
             </div>
 
             {{-- FILTER CARD --}}
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 mb-8 no-print relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-bl-full -mr-8 -mt-8 pointer-events-none"></div>
-                
+            <div class="bg-white p-6 rounded-xl fluent-card mb-8 no-print relative overflow-hidden">
                 <div class="relative z-10">
-                    <h3 class="font-bold text-slate-800 flex items-center gap-2 mb-5">
-                        <span class="bg-blue-100 text-blue-600 w-8 h-8 rounded-lg flex items-center justify-center"><i class="ph-bold ph-faders"></i></span>
+                    <h3 class="font-bold text-[#2A3B52] flex items-center gap-2 mb-5">
+                        <span class="bg-[#F3F9FD] text-[#5295FF] border border-[#D0E7F8] w-8 h-8 rounded-lg flex items-center justify-center"><i class="ph-bold ph-faders"></i></span>
                         Filter Data
                     </h3>
 
                     <form method="GET" action="{{ route('reports.teaching_journal') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 items-end">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Dari Tanggal</label>
-                            <input type="date" name="start_date" value="{{ $startDate }}" class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-700 focus:ring-blue-500 focus:border-blue-500 h-11 px-4 shadow-sm transition-all">
+                            <input type="date" name="start_date" value="{{ $startDate }}" class="w-full rounded-lg border-slate-200 bg-slate-50 font-bold text-[#2A3B52] focus:ring-[#5295FF] h-11 px-4">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Sampai Tanggal</label>
-                            <input type="date" name="end_date" value="{{ $endDate }}" class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-700 focus:ring-blue-500 focus:border-blue-500 h-11 px-4 shadow-sm transition-all">
+                            <input type="date" name="end_date" value="{{ $endDate }}" class="w-full rounded-lg border-slate-200 bg-slate-50 font-bold text-[#2A3B52] focus:ring-[#5295FF] h-11 px-4">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Guru</label>
-                            <div class="relative">
-                                <select name="teacher_id" class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-slate-700 focus:ring-blue-500 focus:border-blue-500 h-11 px-4 appearance-none shadow-sm transition-all">
-                                    <option value="">Semua Guru</option>
-                                    @foreach($teachers as $t) <option value="{{ $t->id }}" {{ $teacherId == $t->id ? 'selected' : '' }}>{{ $t->name }}</option> @endforeach
-                                </select>
-                                <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
-                            </div>
+                            <select name="teacher_id" class="w-full rounded-lg border-slate-200 bg-slate-50 text-sm font-bold text-[#2A3B52] focus:ring-[#5295FF] h-11 px-4">
+                                <option value="">Semua Guru</option>
+                                @foreach($teachers as $t) <option value="{{ $t->id }}" {{ $teacherId == $t->id ? 'selected' : '' }}>{{ $t->name }}</option> @endforeach
+                            </select>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Kelas</label>
-                            <div class="relative">
-                                <select name="class_id" class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-slate-700 focus:ring-blue-500 focus:border-blue-500 h-11 px-4 appearance-none shadow-sm transition-all">
-                                    <option value="">Semua Kelas</option>
-                                    @foreach($classes as $c) <option value="{{ $c->id }}" {{ $classId == $c->id ? 'selected' : '' }}>{{ $c->name }}</option> @endforeach
-                                </select>
-                                <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
-                            </div>
+                            <select name="class_id" class="w-full rounded-lg border-slate-200 bg-slate-50 text-sm font-bold text-[#2A3B52] focus:ring-[#5295FF] h-11 px-4">
+                                <option value="">Semua Kelas</option>
+                                @foreach($classes as $c) <option value="{{ $c->id }}" {{ $classId == $c->id ? 'selected' : '' }}>{{ $c->name }}</option> @endforeach
+                            </select>
                         </div>
-                        <button type="submit" class="w-full h-11 bg-blue-900 hover:bg-slate-900 text-white font-bold rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 group">
-                            <i class="ph-bold ph-magnifying-glass text-lg group-hover:scale-110 transition-transform"></i> Terapkan
+                        <button type="submit" class="w-full h-11 bg-[#2A3B52] hover:bg-[#182436] text-white font-bold rounded-lg transition-all shadow-md flex items-center justify-center gap-2 group">
+                            <i class="ph-bold ph-magnifying-glass text-lg"></i> Terapkan
                         </button>
                     </form>
                 </div>
             </div>
 
             {{-- === CONTAINER PRINT === --}}
-            <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden print-container p-0 md:p-0">
-                
-                {{-- KOP SURAT --}}
+            <div class="bg-white rounded-xl fluent-card overflow-hidden print-container p-0 md:p-0">
                 <div class="print-header px-8 pt-6 mb-4 text-center">
                     <div style="border-bottom: 2px solid black; padding-bottom: 10px;">
                         <h2 class="text-xl font-bold uppercase" style="margin:0;">PEMERINTAH KABUPATEN CIAMIS</h2>
@@ -173,7 +105,6 @@
                     </div>
                 </div>
 
-                {{-- TABEL --}}
                 <div class="overflow-x-auto px-0 md:px-0">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-50 border-b border-slate-100 text-slate-500">
@@ -188,117 +119,45 @@
                         </thead>
                         <tbody class="divide-y divide-slate-50">
                             @forelse($sessions as $session)
-                                @php
-                                    // Logika perhitungan hadir dipindah ke variabel agar bersih
-                                    // Pastikan di Controller sudah di-load withCount('attendances as ...')
-                                    $hadirTotal = ($session->hadir_count ?? 0) + ($session->late_count ?? 0);
-                                    $alphaTotal = $session->alpha_count ?? 0;
-                                @endphp
-                                <tr class="hover:bg-blue-50/20 transition-colors group">
-                                    {{-- Tanggal --}}
+                                @php $hadirTotal = ($session->hadir_count ?? 0) + ($session->late_count ?? 0); $alphaTotal = $session->alpha_count ?? 0; @endphp
+                                <tr class="hover:bg-slate-50 transition-colors group">
                                     <td class="px-6 py-4 text-center border-b border-slate-100 align-top">
-                                        <div class="font-bold text-slate-700 bg-slate-100 rounded-lg py-1 px-2 inline-block print:bg-transparent print:border-none">
-                                            {{ \Carbon\Carbon::parse($session->date)->format('d/m') }}
-                                        </div>
-                                        <div class="text-[10px] text-slate-400 font-mono mt-1 font-bold">
-                                            {{ $session->started_at ? \Carbon\Carbon::parse($session->started_at)->format('H:i') : '-' }}
-                                        </div>
+                                        <div class="font-bold text-[#2A3B52] bg-slate-100 rounded-lg py-1 px-2 inline-block">{{ \Carbon\Carbon::parse($session->date)->format('d/m') }}</div>
+                                        <div class="text-[10px] text-slate-400 font-mono mt-1 font-bold">{{ $session->started_at ? \Carbon\Carbon::parse($session->started_at)->format('H:i') : '-' }}</div>
                                     </td>
-                                    
-                                    {{-- Guru --}}
                                     <td class="px-6 py-4 border-b border-slate-100 align-top">
-                                        <div class="font-bold text-slate-800 text-sm">{{ $session->teacher->name ?? '-' }}</div>
-                                        <div class="text-xs font-bold text-blue-600 mt-0.5 flex items-center gap-1">
-                                            <i class="ph-bold ph-book-open"></i> {{ $session->schedule->subject->name ?? '-' }}
-                                        </div>
+                                        <div class="font-bold text-[#2A3B52] text-sm">{{ $session->teacher->name ?? '-' }}</div>
+                                        <div class="text-xs font-bold text-[#5295FF] mt-0.5 flex items-center gap-1"><i class="ph-bold ph-book-open"></i> {{ $session->schedule->subject->name ?? '-' }}</div>
                                     </td>
-
-                                    {{-- Kelas --}}
                                     <td class="px-6 py-4 text-center border-b border-slate-100 align-top">
-                                        <span class="inline-block px-2.5 py-1 rounded-lg border border-slate-200 font-bold text-xs bg-white text-slate-600 shadow-sm print:shadow-none print:border-none">
-                                            {{ $session->schedule->schoolClass->name ?? '-' }}
-                                        </span>
+                                        <span class="inline-block px-2.5 py-1 rounded-md border border-slate-200 font-bold text-xs bg-white text-slate-600 shadow-sm">{{ $session->schedule->schoolClass->name ?? '-' }}</span>
                                     </td>
-
-                                    {{-- Materi --}}
                                     <td class="px-6 py-4 border-b border-slate-100 align-top">
-                                        <p class="font-bold text-slate-800 text-sm mb-1">
-                                            {{ $session->topic ?? 'Tanpa Topik' }}
-                                        </p>
-                                        <p class="text-xs text-slate-500 text-justify leading-relaxed">
-                                            {{ $session->activities ?? '-' }}
-                                        </p>
+                                        <p class="font-bold text-[#2A3B52] text-sm mb-1">{{ $session->topic ?? 'Tanpa Topik' }}</p>
+                                        <p class="text-xs text-slate-500 text-justify leading-relaxed">{{ $session->activities ?? '-' }}</p>
                                     </td>
-
-                                    {{-- Kehadiran --}}
                                     <td class="px-6 py-4 text-center border-b border-slate-100 align-top">
                                         <div class="flex flex-col items-center gap-1.5">
-                                            <span class="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide bg-emerald-50 text-emerald-600 px-2 py-1 rounded border border-emerald-100">
-                                                {{ $hadirTotal }} Hadir
-                                            </span>
-                                            @if($alphaTotal > 0)
-                                                <span class="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide bg-rose-50 text-rose-600 px-2 py-1 rounded border border-rose-100">
-                                                    {{ $alphaTotal }} Alpha
-                                                </span>
-                                            @endif
+                                            <span class="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide bg-[#DFF6DD] text-[#107C10] px-2 py-1 rounded border border-[#B7DFB9]">{{ $hadirTotal }} Hadir</span>
+                                            @if($alphaTotal > 0)<span class="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wide bg-[#FDE7E9] text-[#D13438] px-2 py-1 rounded border border-[#F4C3C9]">{{ $alphaTotal }} Alpha</span>@endif
                                         </div>
                                     </td>
-
-                                    {{-- Bukti (No Print) --}}
                                     <td class="px-6 py-4 text-center border-b border-slate-100 align-top no-print">
                                         <div class="flex gap-2 justify-center">
-                                            @if($session->photo_proof)
-                                                <a href="{{ asset('storage/' . $session->photo_proof) }}" target="_blank" class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center hover:bg-purple-600 hover:text-white transition-all shadow-sm border border-purple-100" title="Lihat Foto">
-                                                    <i class="ph-bold ph-image text-lg"></i>
-                                                </a>
-                                            @endif
-                                            @if($session->reference_link || $session->video_link)
-                                                <a href="{{ $session->reference_link ?? $session->video_link }}" target="_blank" class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-sm border border-blue-100" title="Buka Link">
-                                                    <i class="ph-bold ph-link text-lg"></i>
-                                                </a>
-                                            @endif
+                                            @if($session->photo_proof)<a href="{{ asset('storage/' . $session->photo_proof) }}" target="_blank" class="w-9 h-9 rounded-lg bg-slate-100 text-[#2A3B52] flex items-center justify-center hover:bg-[#2A3B52] hover:text-white transition-all shadow-sm"><i class="ph-bold ph-image text-lg"></i></a>@endif
+                                            @if($session->reference_link || $session->video_link)<a href="{{ $session->reference_link ?? $session->video_link }}" target="_blank" class="w-9 h-9 rounded-lg bg-[#F3F9FD] text-[#5295FF] flex items-center justify-center hover:bg-[#5295FF] hover:text-white transition-all shadow-sm border border-[#D0E7F8]"><i class="ph-bold ph-link text-lg"></i></a>@endif
                                         </div>
                                     </td>
                                 </tr>
                             @empty
-                                <tr>
-                                    <td colspan="6" class="px-6 py-20 text-center text-slate-400">
-                                        <div class="flex flex-col items-center justify-center">
-                                            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4 no-print">
-                                                <i class="ph-duotone ph-folder-dashed text-4xl text-slate-300"></i>
-                                            </div>
-                                            <p class="font-bold text-slate-600">Tidak ada data jurnal ditemukan.</p>
-                                            <p class="text-xs mt-1 no-print">Coba ubah filter tanggal atau guru.</p>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <tr><td colspan="6" class="px-6 py-20 text-center text-slate-400">Tidak ada data jurnal ditemukan.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
 
-                {{-- FOOTER TTD --}}
-                <div class="print-footer mt-8 px-8 pb-8 avoid-break">
-                    <table style="width: 100%; border: none !important;">
-                        <tr style="border: none !important;">
-                            <td style="width: 70%; border: none !important;"></td>
-                            <td style="width: 30%; text-align: center; border: none !important; vertical-align: top;">
-                                <p class="text-sm">Lakbok, {{ $printDate }}</p>
-                                <p class="text-sm font-bold mt-1">Kepala Sekolah</p>
-                                <br><br><br><br>
-                                <p class="font-bold underline text-sm">{{ $principalName }}</p>
-                                <p class="text-xs">NIP. {{ $principalNIP }}</p>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-
-                {{-- Pagination (Hilang saat Print) --}}
-                <div class="p-6 border-t border-slate-50 no-print">
-                    {{ $sessions->links() }}
-                </div>
+                <div class="p-6 border-t border-slate-50 no-print">{{ $sessions->links() }}</div>
             </div>
-
         </div>
     </div>
 </x-app-layout>

@@ -15,49 +15,49 @@
         /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        
-        /* Table Styles */
+
+          /* --- FLUENT UI SHADOWS --- */
+        .fluent-card { box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.132), 0 0.3px 0.9px 0 rgba(0, 0, 0, 0.108); border: 1px solid rgba(0, 0, 0, 0.05); }
+                
+       /* Table Styles */
         .table-row-hover:hover td { background-color: #f8fafc; }
         .status-border-left { border-left: 3px solid transparent; transition: border-color 0.2s; }
-        .tr-active:hover .status-border-left { border-left-color: #f97316; } 
-        .tr-returned:hover .status-border-left { border-left-color: #10b981; } 
-        .tr-overdue:hover .status-border-left { border-left-color: #f43f5e; } 
-
+        .tr-active:hover .status-border-left { border-left-color: #D83B01; } 
+        .tr-returned:hover .status-border-left { border-left-color: #107C10; } 
+        .tr-overdue:hover .status-border-left { border-left-color: #D13438; } 
         /* Glass Utility */
         .glass-panel { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
     @endpush
 
-    <div class="py-6 font-sans text-slate-800 bg-slate-50/50 min-h-screen">
+ <div class="py-6 font-sans text-slate-800 bg-slate-50/50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             {{-- HERO SECTION (ELEVATED THEME) --}}
-            <div class="animate-enter relative rounded-[2.5rem] bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-6 md:p-10 text-white shadow-xl shadow-cyan-900/30 overflow-hidden group border border-white/10">
+            <div class="animate-enter relative rounded-xl bg-gradient-to-br from-[#25D0FF] via-[#5295FF] to-[#FFC9B9] p-6 md:p-10 text-[#2A3B52] shadow-[0_10px_40px_-10px_rgba(37,208,255,0.4)] overflow-hidden group border border-white/40">
                 
-                {{-- Background Decorations --}}
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                <div class="absolute top-0 right-0 w-80 h-80 bg-cyan-300/30 rounded-full blur-[80px] translate-x-1/2 -translate-y-1/2 pointer-events-none group-hover:bg-cyan-300/40 transition-all duration-700"></div>
-
+                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
+                
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 text-cyan-100 text-[10px] font-bold uppercase tracking-wider mb-3 backdrop-blur-sm shadow-sm">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 border border-white/50 text-[#2A3B52] text-[10px] font-bold uppercase tracking-wider mb-3 backdrop-blur-sm shadow-sm">
                             <i class="ph-bold ph-archive"></i> Arsip Digital
                         </div>
                         <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2 leading-tight">
-                            Riwayat <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 to-white">Perizinan</span>
+                            Riwayat Perizinan
                         </h2>
-                        <p class="text-cyan-50/80 text-sm max-w-xl leading-relaxed">
+                        <p class="text-[#2A3B52]/80 text-sm max-w-xl leading-relaxed font-medium">
                             Pantau jejak aktivitas keluar-masuk siswa secara lengkap dan terperinci.
                         </p>
                     </div>
                     
-                    {{-- TOMBOL EXPORT (Glass Style) --}}
-                    <div class="glass-panel p-2 rounded-2xl flex gap-2 w-full md:w-auto">
-                        <a href="{{ route('permit.export', request()->all()) }}" target="_blank" class="flex-1 md:flex-none justify-center group flex items-center gap-2 px-5 py-3 bg-emerald-500/20 hover:bg-emerald-500 border border-emerald-400/30 rounded-xl text-sm font-bold transition-all cursor-pointer text-emerald-300 hover:text-white hover:shadow-lg hover:shadow-emerald-500/30">
+                    {{-- TOMBOL EXPORT --}}
+                    <div class="bg-white/40 backdrop-blur-md p-2 rounded-xl border border-white/50 shadow-sm flex gap-2 w-full md:w-auto">
+                        <a href="{{ route('permit.export', request()->all()) }}" target="_blank" class="flex-1 md:flex-none justify-center group flex items-center gap-2 px-5 py-3 bg-[#DFF6DD] hover:bg-[#107C10] border border-[#B7DFB9] rounded-lg text-sm font-bold transition-all cursor-pointer text-[#107C10] hover:text-white shadow-sm border border-transparent">
                             <i class="ph-bold ph-microsoft-excel-logo text-lg"></i>
                             <span>Excel</span>
                         </a>
-                        <a href="{{ route('permit.print', request()->all()) }}" target="_blank" class="flex-1 md:flex-none justify-center group flex items-center gap-2 px-5 py-3 bg-white/10 hover:bg-white border border-white/20 rounded-xl text-sm font-bold transition-all cursor-pointer text-white hover:text-slate-900 hover:shadow-lg hover:shadow-white/20">
+                        <a href="{{ route('permit.print', request()->all()) }}" target="_blank" class="flex-1 md:flex-none justify-center group flex items-center gap-2 px-5 py-3 bg-white hover:bg-[#2A3B52] border border-white/50 rounded-lg text-sm font-bold transition-all cursor-pointer text-[#2A3B52] hover:text-white shadow-sm border border-transparent">
                             <i class="ph-bold ph-printer text-lg"></i>
                             <span>Print</span>
                         </a>
@@ -67,11 +67,10 @@
 
             {{-- STATISTIK RINGKAS --}}
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 animate-enter delay-100">
-                <!-- Card 1 -->
-                <div class="group bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 hover:border-cyan-200 hover:shadow-xl hover:shadow-cyan-100/50 transition-all duration-300">
+                <div class="group bg-white p-5 rounded-xl fluent-card transition-all duration-300">
                     <div class="flex justify-between items-start mb-3">
-                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest group-hover:text-cyan-600 transition-colors">Total Izin</div>
-                        <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest group-hover:text-[#5295FF] transition-colors">Total Izin</div>
+                        <div class="w-10 h-10 rounded-lg bg-[#F3F9FD] text-[#5295FF] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform border border-[#D0E7F8]">
                             <i class="ph-duotone ph-files text-xl animate-wiggle"></i>
                         </div>
                     </div>
@@ -79,11 +78,10 @@
                     <div class="text-[10px] text-slate-400 mt-1 font-medium">Data sesuai filter</div>
                 </div>
 
-                <!-- Card 2 -->
-                <div class="group bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 hover:border-orange-200 hover:shadow-xl hover:shadow-orange-100/50 transition-all duration-300">
+                <div class="group bg-white p-5 rounded-xl fluent-card transition-all duration-300">
                     <div class="flex justify-between items-start mb-3">
-                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest group-hover:text-orange-600 transition-colors">Sedang Keluar</div>
-                        <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest group-hover:text-[#D83B01] transition-colors">Sedang Keluar</div>
+                        <div class="w-10 h-10 rounded-lg bg-[#FFEFD6] text-[#D83B01] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform border border-[#FFD8A8]">
                             <i class="ph-duotone ph-timer text-xl animate-wiggle"></i>
                         </div>
                     </div>
@@ -91,11 +89,10 @@
                     <div class="text-[10px] text-slate-400 mt-1 font-medium">Siswa belum kembali</div>
                 </div>
 
-                <!-- Card 3 -->
-                <div class="group bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-100/50 transition-all duration-300">
+                <div class="group bg-white p-5 rounded-xl fluent-card transition-all duration-300">
                     <div class="flex justify-between items-start mb-3">
-                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest group-hover:text-emerald-600 transition-colors">Sudah Kembali</div>
-                        <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest group-hover:text-[#107C10] transition-colors">Sudah Kembali</div>
+                        <div class="w-10 h-10 rounded-lg bg-[#DFF6DD] text-[#107C10] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform border border-[#B7DFB9]">
                             <i class="ph-duotone ph-check-circle text-xl animate-wiggle"></i>
                         </div>
                     </div>
@@ -103,11 +100,10 @@
                     <div class="text-[10px] text-slate-400 mt-1 font-medium">Proses selesai</div>
                 </div>
 
-                <!-- Card 4 -->
-                <div class="group bg-white p-5 rounded-[2rem] shadow-sm border border-slate-100 hover:border-cyan-200 hover:shadow-xl hover:shadow-cyan-100/50 transition-all duration-300">
+                <div class="group bg-white p-5 rounded-xl fluent-card transition-all duration-300">
                     <div class="flex justify-between items-start mb-3">
-                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest group-hover:text-cyan-600 transition-colors">Tanggal Data</div>
-                        <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest group-hover:text-[#5295FF] transition-colors">Tanggal Data</div>
+                        <div class="w-10 h-10 rounded-lg bg-[#F3F9FD] text-[#5295FF] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform border border-[#D0E7F8]">
                             <i class="ph-duotone ph-calendar-blank text-xl animate-wiggle"></i>
                         </div>
                     </div>
@@ -119,9 +115,9 @@
             </div>
 
             {{-- MAIN CONTENT: FILTER & TABLE --}}
-            <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden animate-enter delay-200">
+            <div class="bg-white rounded-xl fluent-card overflow-hidden animate-enter delay-200">
                 
-                {{-- FILTER SECTION (Toolbar Style) --}}
+                {{-- FILTER SECTION --}}
                 <div class="p-6 md:p-8 border-b border-slate-50 bg-slate-50/30">
                     <form action="{{ route('permit.history') }}" method="GET" id="filterForm" class="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
                         
@@ -130,9 +126,9 @@
                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2 ml-1">Cari Siswa</label>
                             <div class="relative">
                                 <input type="text" name="search" value="{{ request('search') }}" 
-                                    class="w-full pl-11 pr-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-0 text-sm font-bold placeholder:text-slate-300 shadow-sm group-hover:border-cyan-300 transition-colors" 
+                                    class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white focus:border-[#5295FF] focus:ring-0 text-sm font-bold placeholder:text-slate-300 shadow-sm transition-colors" 
                                     placeholder="Nama atau NIS...">
-                                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-500 transition-colors">
+                                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors">
                                     <i class="ph-bold ph-magnifying-glass text-lg"></i>
                                 </div>
                             </div>
@@ -144,11 +140,11 @@
                             <div class="flex flex-col sm:flex-row gap-2">
                                 <div class="relative flex-1 group">
                                     <input type="date" name="date" id="dateInput" value="{{ request('date', date('Y-m-d')) }}" 
-                                        class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-0 text-sm font-bold text-slate-600 shadow-sm group-hover:border-cyan-300 transition-colors cursor-pointer">
+                                        class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:border-[#5295FF] focus:ring-0 text-sm font-bold text-slate-600 shadow-sm transition-colors cursor-pointer">
                                 </div>
                                 <div class="flex gap-1.5">
-                                    <button type="button" onclick="setDate('{{ date('Y-m-d') }}')" class="px-4 py-2 bg-slate-100 hover:bg-cyan-100 text-slate-500 hover:text-cyan-600 border border-slate-200 hover:border-cyan-200 rounded-xl text-xs font-bold transition-all shadow-sm">Hari Ini</button>
-                                    <button type="button" onclick="setDate('{{ date('Y-m-d', strtotime('-1 days')) }}')" class="px-4 py-2 bg-slate-100 hover:bg-cyan-100 text-slate-500 hover:text-cyan-600 border border-slate-200 hover:border-cyan-200 rounded-xl text-xs font-bold transition-all shadow-sm">Kemarin</button>
+                                    <button type="button" onclick="setDate('{{ date('Y-m-d') }}')" class="px-4 py-2 bg-slate-100 hover:bg-[#F3F9FD] text-slate-500 hover:text-[#5295FF] border border-slate-200 hover:border-[#D0E7F8] rounded-xl text-xs font-bold transition-all shadow-sm">Hari Ini</button>
+                                    <button type="button" onclick="setDate('{{ date('Y-m-d', strtotime('-1 days')) }}')" class="px-4 py-2 bg-slate-100 hover:bg-[#F3F9FD] text-slate-500 hover:text-[#5295FF] border border-slate-200 hover:border-[#D0E7F8] rounded-xl text-xs font-bold transition-all shadow-sm">Kemarin</button>
                                 </div>
                             </div>
                         </div>
@@ -158,7 +154,7 @@
                             <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2 ml-1">Status</label>
                             <div class="flex gap-2">
                                 <div class="relative flex-1">
-                                    <select name="status" class="w-full appearance-none px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-0 text-sm font-bold text-slate-600 shadow-sm cursor-pointer">
+                                    <select name="status" class="w-full appearance-none px-4 py-3 rounded-xl border border-slate-200 bg-white focus:border-[#5295FF] focus:ring-0 text-sm font-bold text-slate-600 shadow-sm cursor-pointer">
                                         <option value="">Semua Status</option>
                                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Di Luar</option>
                                         <option value="returned" {{ request('status') == 'returned' ? 'selected' : '' }}>Kembali</option>
@@ -167,7 +163,7 @@
                                         <i class="ph-bold ph-caret-down"></i>
                                     </div>
                                 </div>
-                                <button type="submit" class="bg-cyan-600 text-white px-4 rounded-2xl hover:bg-cyan-700 transition-all shadow-lg shadow-cyan-200 active:scale-95 flex items-center justify-center">
+                                <button type="submit" class="bg-[#2A3B52] hover:bg-[#182436] text-white px-4 rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center border border-transparent">
                                     <i class="ph-bold ph-funnel text-xl"></i>
                                 </button>
                             </div>
@@ -195,7 +191,6 @@
                                     $duration = $isReturned ? $permit->duration_minutes : \Carbon\Carbon::parse($permit->time_out)->diffInMinutes(now());
                                     $isOverdue = $duration > 15 && !$isReturned;
                                     
-                                    // Tentukan class baris berdasarkan status untuk styling border kiri
                                     $rowClass = $isReturned ? 'tr-returned' : ($isOverdue ? 'tr-overdue' : 'tr-active');
                                 @endphp
                             <tr class="table-row-hover transition-colors group {{ $rowClass }} status-border-left hover:bg-slate-50">
@@ -210,12 +205,12 @@
                                 {{-- SISWA --}}
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-4">
-                                        <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm border shadow-sm transition-transform group-hover:scale-105
-                                            {{ $isOverdue ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-gradient-to-br from-slate-100 to-slate-200 text-slate-600 border-slate-200' }}">
+                                        <div class="w-10 h-10 rounded-lg flex items-center justify-center font-black text-sm border shadow-sm transition-transform group-hover:scale-105
+                                            {{ $isOverdue ? 'bg-[#FDE7E9] text-[#D13438] border-[#F4C3C9]' : 'bg-slate-100 text-[#2A3B52] border-slate-200' }}">
                                             {{ substr($permit->student->name, 0, 1) }}
                                         </div>
                                         <div>
-                                            <div class="font-bold text-slate-700 text-sm group-hover:text-cyan-600 transition-colors">{{ $permit->student->name }}</div>
+                                            <div class="font-bold text-[#2A3B52] text-sm group-hover:text-[#5295FF] transition-colors">{{ $permit->student->name }}</div>
                                             <div class="text-xs text-slate-500 font-medium flex items-center gap-1">
                                                 <span>{{ $permit->student->schoolClass->name ?? '-' }}</span>
                                                 <span class="text-slate-300">•</span> 
@@ -228,7 +223,7 @@
                                 {{-- ALASAN --}}
                                 <td class="px-6 py-4">
                                     <div class="flex flex-col items-start gap-1">
-                                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide bg-white text-slate-600 border border-slate-200 shadow-sm">
+                                        <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wide bg-white text-slate-600 border border-slate-200 shadow-sm">
                                             {{ $permit->reason_category }}
                                         </span>
                                         @if($permit->notes)
@@ -241,7 +236,7 @@
 
                                 {{-- DURASI --}}
                                 <td class="px-6 py-4">
-                                    <div class="font-mono font-bold text-base {{ $isOverdue ? 'text-rose-500 animate-pulse' : 'text-slate-600' }}">
+                                    <div class="font-mono font-bold text-base {{ $isOverdue ? 'text-[#D13438] animate-pulse' : 'text-slate-600' }}">
                                         {{ $duration }}<span class="text-[10px] text-slate-400 ml-0.5 font-sans font-bold">m</span>
                                     </div>
                                 </td>
@@ -249,16 +244,16 @@
                                 {{-- STATUS --}}
                                 <td class="px-6 py-4">
                                     @if($isReturned)
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase bg-[#DFF6DD] text-[#107C10] border border-[#B7DFB9] shadow-sm">
                                             <i class="ph-bold ph-check"></i> Kembali
                                         </span>
                                     @else
                                         @if($isOverdue)
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase bg-rose-50 text-rose-600 border border-rose-200 shadow-sm animate-pulse">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase bg-[#FDE7E9] text-[#D13438] border border-[#F4C3C9] shadow-sm animate-pulse">
                                                 <i class="ph-bold ph-warning"></i> Telat
                                             </span>
                                         @else
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase bg-orange-50 text-orange-600 border border-orange-200 shadow-sm">
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase bg-[#FFEFD6] text-[#D83B01] border border-[#FFD8A8] shadow-sm">
                                                 <i class="ph-bold ph-timer"></i> Di Luar
                                             </span>
                                         @endif
@@ -268,7 +263,7 @@
                                 {{-- WAKTU KEMBALI --}}
                                 <td class="px-6 py-4 text-right">
                                     @if($permit->time_in)
-                                        <span class="font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded-lg border border-slate-200">{{ \Carbon\Carbon::parse($permit->time_in)->format('H:i') }}</span>
+                                        <span class="font-bold text-[#2A3B52] bg-slate-100 px-2 py-1 rounded-md border border-slate-200">{{ \Carbon\Carbon::parse($permit->time_in)->format('H:i') }}</span>
                                     @else
                                         <span class="text-slate-300 italic text-xl px-2">...</span>
                                     @endif
@@ -278,10 +273,10 @@
                             <tr>
                                 <td colspan="6" class="px-6 py-20 text-center">
                                     <div class="flex flex-col items-center justify-center text-slate-400">
-                                        <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4 border border-slate-100">
+                                        <div class="w-20 h-20 bg-slate-50 rounded-xl flex items-center justify-center mb-4 border border-slate-100">
                                             <i class="ph-duotone ph-magnifying-glass text-4xl opacity-50"></i>
                                         </div>
-                                        <p class="font-bold text-slate-600 text-lg">Data tidak ditemukan</p>
+                                        <p class="font-bold text-[#2A3B52] text-lg">Data tidak ditemukan</p>
                                         <p class="text-sm opacity-70 mt-1">Coba sesuaikan filter tanggal atau kata kunci.</p>
                                     </div>
                                 </td>
@@ -296,6 +291,7 @@
                     {{ $permits->withQueryString()->links() }}
                 </div>
             </div>
+
 
             {{-- MOBILE VIEW (Cards) - Optimized --}}
             <div class="md:hidden space-y-4">

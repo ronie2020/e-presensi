@@ -13,19 +13,28 @@
             opacity: 0; 
             animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
         }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
 
+         /* Microsoft Fluent Elevation Shadows */
+        .fluent-card {
+            box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.132), 0 0.3px 0.9px 0 rgba(0, 0, 0, 0.108);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .fluent-card:hover {
+            box-shadow: 0 6.4px 14.4px 0 rgba(0, 0, 0, 0.132), 0 1.2px 3.6px 0 rgba(0, 0, 0, 0.108);
+            transform: translateY(-2px);
+        }
+        .fluent-modal {
+            box-shadow: 0 25.6px 57.6px 0 rgba(0, 0, 0, 0.22), 0 4.8px 14.4px 0 rgba(0, 0, 0, 0.18);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
-        @media print {
+         @media print {
             @page { size: landscape; margin: 10mm; }
             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white !important; }
             .no-print, header, nav, footer, form, .shadow-sm, .modal-backdrop, .hero-decoration { display: none !important; }
@@ -86,67 +95,66 @@
             document.body.style.overflow = 'auto';
         },
         setScore(value) { this.currentScore = value; }
-    }" class="page-container p-4 md:p-8 space-y-8 min-h-screen bg-slate-50 font-jakarta print-container">
+    }" class="page-container p-4 md:p-8 space-y-6 md:space-y-8 min-h-screen bg-[#f8fafc] font-jakarta print-container">
         
        {{-- HERO SECTION (TEMA MICROSOFT ELEVATE) --}}
-        <div class="animate-enter relative rounded-[3rem] bg-slate-900 p-8 md:p-12 text-white shadow-2xl shadow-cyan-900/30 overflow-hidden group border border-white/10 no-print">
-            <div class="absolute inset-0 bg-gradient-to-r from-slate-900 via-blue-900/80 to-slate-900 z-0"></div>
-            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 pointer-events-none no-print z-0"></div>
+       <div class="animate-enter relative rounded-[2rem] md:rounded-[3rem] bg-gradient-to-br from-[#25D0FF] via-[#5295FF] to-[#FFC9B9] p-8 md:p-12 text-[#2A3B52] shadow-[0_10px_40px_-10px_rgba(37,208,255,0.4)] overflow-hidden group border border-white/40 no-print">
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none no-print z-0"></div>
             
-            <div class="absolute top-0 right-0 -mt-20 -mr-20 w-[500px] h-[500px] bg-cyan-500/20 rounded-full blur-[100px] group-hover:opacity-40 transition-opacity duration-1000 hero-decoration z-0"></div>
-            <div class="absolute bottom-0 left-0 -mb-20 -ml-20 w-[400px] h-[400px] bg-blue-600/20 rounded-full blur-[80px] hero-decoration z-0"></div>
+            <div class="absolute top-0 right-0 -mt-20 -mr-20 w-[500px] h-[500px] bg-white/30 rounded-full blur-[100px] group-hover:opacity-60 transition-opacity duration-1000 hero-decoration z-0"></div>
+            <div class="absolute bottom-0 left-0 -mb-20 -ml-20 w-[400px] h-[400px] bg-white/20 rounded-full blur-[80px] hero-decoration z-0"></div>
             
             <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
                 <div class="flex-1 min-w-0">
-                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 text-cyan-200 text-[10px] font-black uppercase tracking-[0.2em] mb-6 backdrop-blur-md shadow-inner">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/40 border border-white/50 text-[#2A3B52] text-[10px] font-black uppercase tracking-[0.2em] mb-6 backdrop-blur-md shadow-sm">
                         <i class="ph-fill ph-moon-stars"></i> Program Ramadhan
                     </div>
-                    <h1 class="text-4xl md:text-5xl font-black text-white tracking-tighter mb-4 leading-none">
-                        Rekap <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-white">Mutabaah</span> Siswa
+                    <h1 class="text-4xl md:text-5xl font-black text-[#2A3B52] tracking-tighter mb-4 leading-none">
+                        Rekap <span class="text-[#2A3B52]">Mutabaah</span> Siswa
                     </h1>
-                    <p class="text-blue-100/80 text-sm md:text-lg max-w-xl leading-relaxed font-medium">
+                    <p class="text-[#2A3B52]/80 text-sm md:text-lg max-w-xl leading-relaxed font-medium">
                         Monitoring ibadah harian dan kegiatan Ramadhan.
-                        <br><span class="text-white font-bold">{{ \Carbon\Carbon::parse($date)->locale('id')->isoFormat('dddd, D MMMM Y') }}</span>
+                        <br><span class="text-[#2A3B52] font-black">{{ \Carbon\Carbon::parse($date)->locale('id')->isoFormat('dddd, D MMMM Y') }}</span>
                     </p>
                 </div>
 
                 {{-- FILTER FORM --}}
                 <div class="w-full lg:w-[450px] xl:w-[500px] shrink-0 flex flex-col gap-4">
-                    <form action="{{ route('admin.ramadan.reports') }}" method="GET" class="bg-white/5 backdrop-blur-xl p-6 rounded-[2rem] border border-white/10 shadow-2xl flex flex-col gap-5">
+                    <form action="{{ route('admin.ramadan.reports') }}" method="GET" class="bg-white/30 backdrop-blur-md p-6 rounded-[2rem] border border-white/40 shadow-sm flex flex-col gap-5">
                         
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="space-y-2">
-                                <label class="text-[10px] font-black text-cyan-200 uppercase tracking-widest ml-1 block">Tanggal</label>
+                                <label class="text-[10px] font-black text-[#2A3B52] uppercase tracking-widest ml-1 block">Tanggal</label>
                                 <div class="relative group">
-                                    <i class="ph-bold ph-calendar absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"></i>
+                                    <i class="ph-bold ph-calendar absolute left-4 top-1/2 -translate-y-1/2 text-[#5295FF]"></i>
                                     <input type="date" name="date" value="{{ $date }}" onchange="this.form.submit()" 
-                                        class="block w-full pl-11 pr-4 py-3 bg-white/10 border-white/10 rounded-2xl text-xs font-bold text-white focus:ring-cyan-500 focus:border-cyan-500 transition-all uppercase placeholder-cyan-200/50">
+                                        class="block w-full pl-11 pr-4 py-3 bg-white/60 border-white/50 rounded-2xl text-xs font-bold text-[#2A3B52] focus:ring-[#5295FF] focus:border-[#5295FF] transition-all uppercase shadow-sm">
                                 </div>
                             </div>
 
                             <div class="space-y-2">
-                                <label class="text-[10px] font-black text-cyan-200 uppercase tracking-widest ml-1 block">Kelas</label>
+                                <label class="text-[10px] font-black text-[#2A3B52] uppercase tracking-widest ml-1 block">Kelas</label>
                                 <div class="relative group">
-                                    <i class="ph-bold ph-chalkboard absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"></i>
+                                    <i class="ph-bold ph-chalkboard absolute left-4 top-1/2 -translate-y-1/2 text-[#5295FF]"></i>
                                     <select name="class_id" onchange="this.form.submit()" 
-                                        class="block w-full pl-11 pr-10 py-3 bg-white/10 border-white/10 rounded-2xl text-xs font-bold text-white focus:ring-cyan-500 focus:border-cyan-500 transition-all appearance-none">
-                                        <option value="" class="bg-slate-900 text-white">Semua Kelas</option>
+                                        class="block w-full pl-11 pr-10 py-3 bg-white/60 border-white/50 rounded-2xl text-xs font-bold text-[#2A3B52] focus:ring-[#5295FF] focus:border-[#5295FF] transition-all appearance-none shadow-sm cursor-pointer">
+                                        <option value="">Semua Kelas</option>
                                         @foreach($classes as $c)
-                                            <option value="{{ $c->id }}" {{ $selectedClass == $c->id ? 'selected' : '' }} class="bg-slate-900 text-white">{{ $c->name }}</option>
+                                            <option value="{{ $c->id }}" {{ $selectedClass == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
 
                             <div class="space-y-2 sm:col-span-2">
-                                <label class="text-[10px] font-black text-cyan-200 uppercase tracking-widest ml-1 block">Cari Siswa</label>
+                                <label class="text-[10px] font-black text-[#2A3B52] uppercase tracking-widest ml-1 block">Cari Siswa</label>
                                 <div class="relative group flex items-center gap-2">
                                     <div class="relative w-full">
-                                        <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-cyan-400"></i>
-                                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik nama..." 
-                                            class="block w-full pl-11 pr-4 py-3 bg-white/10 border-white/10 rounded-2xl text-xs font-bold text-white focus:ring-cyan-500 focus:border-cyan-500 transition-all placeholder-cyan-200/50">
+                                        <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-[#5295FF]"></i>
+                                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Ketik nama siswa..." 
+                                            class="block w-full pl-11 pr-4 py-3 bg-white/60 border-white/50 rounded-2xl text-xs font-bold text-[#2A3B52] focus:ring-[#5295FF] focus:border-[#5295FF] transition-all shadow-sm placeholder:font-medium placeholder-[#2A3B52]/50">
                                     </div>
-                                    <button type="submit" class="p-3 rounded-2xl bg-cyan-600 text-white hover:bg-cyan-500 transition"><i class="ph-bold ph-caret-right"></i></button>
+                                    <button type="submit" class="p-3 rounded-2xl bg-[#5295FF] text-white hover:bg-[#3b7ee6] transition shadow-md"><i class="ph-bold ph-caret-right"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -155,17 +163,17 @@
                     {{-- Tombol Export --}}
                     @if($selectedClass)
                         <div class="flex items-center gap-2 mt-2">
-                            <button onclick="window.print()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-bold shadow-lg flex flex-col items-center justify-center gap-1 transition-all active:scale-95 border border-white/10">
+                            <button onclick="window.print()" class="flex-1 py-3 bg-white hover:bg-slate-50 text-[#2A3B52] rounded-xl font-bold shadow-sm flex flex-col items-center justify-center gap-1 transition-all active:scale-95 border border-slate-200">
                                 <i class="ph-bold ph-printer text-xl"></i>
                                 <span class="uppercase tracking-wider text-[9px]">Cetak Harian</span>
                             </button>
-                            <a href="{{ route('admin.ramadan.exportPdf', ['class_id' => $selectedClass]) }}" target="_blank" class="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-bold shadow-lg flex flex-col items-center justify-center gap-1 transition-all active:scale-95 border border-white/10">
+                            <a href="{{ route('admin.ramadan.exportPdf', ['class_id' => $selectedClass]) }}" target="_blank" class="flex-1 py-3 bg-[#D13438] hover:bg-[#b02a2d] text-white rounded-xl font-bold shadow-sm flex flex-col items-center justify-center gap-1 transition-all active:scale-95 border border-transparent">
                                 <i class="ph-bold ph-file-pdf text-xl"></i>
-                                <span class="uppercase tracking-wider text-[9px]">Rekap Full</span>
+                                <span class="uppercase tracking-wider text-[9px]">Rekap Full PDF</span>
                             </a>
-                            <a href="{{ route('admin.ramadan.exportExcel', ['class_id' => $selectedClass]) }}" class="flex-1 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold shadow-lg flex flex-col items-center justify-center gap-1 transition-all active:scale-95 border border-white/10">
+                            <a href="{{ route('admin.ramadan.exportExcel', ['class_id' => $selectedClass]) }}" class="flex-1 py-3 bg-[#107C10] hover:bg-[#0c5e0c] text-white rounded-xl font-bold shadow-sm flex flex-col items-center justify-center gap-1 transition-all active:scale-95 border border-transparent">
                                 <i class="ph-bold ph-file-csv text-xl"></i>
-                                <span class="uppercase tracking-wider text-[9px]">Excel (CSV)</span>
+                                <span class="uppercase tracking-wider text-[9px]">Export Excel</span>
                             </a>
                         </div>
                     @endif
@@ -174,133 +182,115 @@
         </div>
 
         {{-- BENTO GRID STATS --}}
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 animate-enter no-print" style="animation-delay: 100ms">
-            <div class="glass-card p-6 rounded-[2rem] flex items-center gap-4 group">
-                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="ph-fill ph-student"></i></div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-5 animate-enter no-print" style="animation-delay: 100ms">
+            <div class="bg-white fluent-card p-6 rounded-[1.5rem] flex items-center gap-4 group hover:border-[#5295FF]">
+                <div class="w-12 h-12 rounded-xl bg-[#F3F9FD] text-[#5295FF] border border-[#D0E7F8] flex items-center justify-center text-xl shadow-sm group-hover:scale-110 group-hover:bg-[#5295FF] group-hover:text-white transition-all"><i class="ph-fill ph-student"></i></div>
                 <div>
-                    <div class="text-2xl font-black text-slate-800 tracking-tight">{{ $stats['total_students'] }}</div>
-                    <div class="text-[9px] uppercase font-black text-slate-400 tracking-widest">
+                    <div class="text-2xl font-black text-[#2A3B52] tracking-tight">{{ $stats['total_students'] }}</div>
+                    <div class="text-[9px] uppercase font-bold text-slate-400 tracking-widest">
                         {{ $selectedClass ? 'Siswa Kelas' : 'Total Siswa' }}
                     </div>
                 </div>
             </div>
             
-            <div class="glass-card p-6 rounded-[2rem] flex items-center gap-4 group">
-                <div class="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform shrink-0"><i class="ph-fill ph-bowl-food"></i></div>
+             <div class="bg-white fluent-card p-6 rounded-[1.5rem] flex items-center gap-4 group hover:border-[#107C10]">
+                <div class="w-12 h-12 rounded-xl bg-[#DFF6DD] text-[#107C10] border border-[#B7DFB9] flex items-center justify-center text-xl shadow-sm group-hover:scale-110 group-hover:bg-[#107C10] group-hover:text-white transition-all shrink-0"><i class="ph-fill ph-bowl-food"></i></div>
                 <div class="flex-1 w-full">
-                    <div class="text-2xl font-black text-slate-800 tracking-tight">{{ $stats['fasting_count'] }} <span class="text-xs text-cyan-500 font-bold">({{ $stats['percentage_fasting'] }}%)</span></div>
-                    <div class="text-[9px] uppercase font-black text-slate-400 tracking-widest mb-1">Berpuasa</div>
-                    {{-- TAMBAHAN: Progress Bar Visual --}}
+                    <div class="text-2xl font-black text-[#2A3B52] tracking-tight">{{ $stats['fasting_count'] }} <span class="text-xs text-[#107C10] font-bold">({{ $stats['percentage_fasting'] }}%)</span></div>
+                    <div class="text-[9px] uppercase font-bold text-slate-400 tracking-widest mb-1.5">Berpuasa</div>
                     <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                        <div class="bg-cyan-500 h-1.5 rounded-full transition-all duration-1000" style="width: {{ $stats['percentage_fasting'] }}%"></div>
+                        <div class="bg-[#107C10] h-1.5 rounded-full transition-all duration-1000" style="width: {{ $stats['percentage_fasting'] }}%"></div>
                     </div>
                 </div>
             </div>
             
-            <div class="glass-card p-6 rounded-[2rem] flex items-center gap-4 group">
-                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shadow-inner group-hover:scale-110 transition-transform"><i class="ph-fill ph-hands-praying"></i></div>
+            <div class="bg-white fluent-card p-6 rounded-[1.5rem] flex items-center gap-4 group hover:border-[#D83B01]">
+                <div class="w-12 h-12 rounded-xl bg-[#FFEFD6] text-[#D83B01] border border-[#FFD8A8] flex items-center justify-center text-xl shadow-sm group-hover:scale-110 group-hover:bg-[#D83B01] group-hover:text-white transition-all"><i class="ph-fill ph-hands-praying"></i></div>
                 <div>
-                    <div class="text-2xl font-black text-slate-800 tracking-tight">{{ $stats['prayer_complete_count'] }}</div>
-                    <div class="text-[9px] uppercase font-black text-slate-400 tracking-widest">Shalat 5W</div>
+                    <div class="text-2xl font-black text-[#2A3B52] tracking-tight">{{ $stats['prayer_complete_count'] }}</div>
+                    <div class="text-[9px] uppercase font-bold text-slate-400 tracking-widest">Shalat Lengkap (5W)</div>
                 </div>
             </div>
-
-            @if($isFriday)
-            <div class="bg-cyan-600 p-6 rounded-[2rem] flex items-center gap-4 group text-white shadow-xl shadow-cyan-500/20 relative overflow-hidden">
-                <div class="absolute -right-4 -top-4 text-cyan-500/30"><i class="ph-fill ph-mosque text-6xl"></i></div>
-                <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-xl backdrop-blur-sm"><i class="ph-fill ph-mosque"></i></div>
+  @if($isFriday)
+            <div class="bg-white fluent-card p-6 rounded-[1.5rem] flex items-center gap-4 group hover:border-[#5295FF] relative overflow-hidden">
+                <div class="w-12 h-12 rounded-xl bg-[#F3F9FD] text-[#5295FF] border border-[#D0E7F8] flex items-center justify-center text-xl shadow-sm group-hover:scale-110 group-hover:bg-[#5295FF] group-hover:text-white transition-all"><i class="ph-fill ph-mosque"></i></div>
                 <div class="relative z-10">
-                    <div class="text-2xl font-black tracking-tight">{{ $stats['friday_log_count'] }}</div>
-                    <div class="text-[9px] uppercase font-black text-cyan-100 tracking-widest">Jurnal Jumat</div>
+                    <div class="text-2xl font-black text-[#2A3B52] tracking-tight">{{ $stats['friday_log_count'] }}</div>
+                    <div class="text-[9px] uppercase font-bold text-slate-400 tracking-widest">Jurnal Jumat</div>
                 </div>
             </div>
             @else
-            <div class="bg-slate-100 p-6 rounded-[2rem] flex items-center gap-4 group border border-slate-200">
-                <div class="w-12 h-12 rounded-2xl bg-white text-slate-400 flex items-center justify-center text-xl"><i class="ph-bold ph-calendar-x"></i></div>
+            <div class="bg-slate-50 p-6 rounded-[1.5rem] flex items-center gap-4 group border border-slate-200">
+                <div class="w-12 h-12 rounded-xl bg-white text-slate-400 border border-slate-200 flex items-center justify-center text-xl"><i class="ph-bold ph-calendar-x"></i></div>
                 <div>
-                    <div class="text-xs font-bold text-slate-500">Bukan Hari Jumat</div>
-                    <div class="text-[9px] uppercase font-black text-slate-400 tracking-widest">Fitur Non-aktif</div>
+                    <div class="text-sm font-bold text-slate-500 mb-0.5">Bukan Hari Jumat</div>
+                    <div class="text-[9px] uppercase font-bold text-slate-400 tracking-widest">Fitur Non-aktif</div>
                 </div>
             </div>
             @endif
         </div>
 
-        {{-- ======================================================= --}}
-        {{-- BAGIAN BARU: LEADERBOARD SISWA PALING RAJIN --}}
+         {{-- ======================================================= --}}
+        {{-- LEADERBOARD SISWA PALING RAJIN --}}
         {{-- ======================================================= --}}
         @if(isset($topStudents) && $topStudents->count() > 0)
-        <div class="animate-enter bg-white rounded-[3rem] shadow-sm border border-slate-100 p-6 md:p-8 no-print" style="animation-delay: 150ms">
+        <div class="animate-enter bg-white rounded-[2rem] fluent-card p-6 md:p-8 no-print" style="animation-delay: 150ms">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h3 class="text-xl font-black text-slate-800 flex items-center gap-2">
-                        <i class="ph-fill ph-crown text-amber-500 text-2xl"></i> Siswa Paling Rajin
+                    <h3 class="text-xl font-black text-[#2A3B52] flex items-center gap-2">
+                        <i class="ph-fill ph-crown text-[#D83B01] text-2xl"></i> Siswa Paling Rajin
                     </h3>
                     <p class="text-slate-500 text-xs font-medium mt-1">
                         Berdasarkan konsistensi pengisian mutabaah terbanyak selama bulan Ramadhan ini.
                     </p>
                 </div>
-                <div class="shrink-0 flex items-center gap-2">
-                    <span class="px-4 py-1.5 rounded-xl bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-wider border border-amber-100 hidden sm:inline-block">
+                <div class="shrink-0 flex items-center gap-3">
+                    <span class="px-4 py-2 rounded-xl bg-[#FFEFD6] text-[#D83B01] text-[10px] font-bold uppercase tracking-wider border border-[#FFD8A8] hidden sm:inline-block">
                         Top {{ $topStudents->count() }} Leaderboard
                     </span>
-                    {{-- TAMBAHAN: Tombol Link ke Halaman Papan Peringkat Full --}}
-                    <a href="{{ route('admin.ramadan.leaderboard') }}" class="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black uppercase tracking-wider transition-colors shadow-md flex items-center gap-1">
+                    <a href="{{ route('admin.ramadan.leaderboard') }}" class="px-5 py-2 rounded-xl bg-[#2A3B52] hover:bg-[#182436] text-white text-xs font-bold uppercase tracking-wider transition-colors shadow-sm flex items-center gap-2">
                         Lihat Semua <i class="ph-bold ph-arrow-right"></i>
                     </a>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 @foreach($topStudents as $index => $topStudent)
-                    @php
-                        // Styling dinamis berdasarkan ranking (1, 2, 3)
-                        $bgClass = $index == 0 ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-lg shadow-amber-500/10' : 
-                                  ($index == 1 ? 'bg-gradient-to-br from-slate-50 to-gray-100 border-slate-200' : 
-                                                 'bg-gradient-to-br from-orange-50 to-rose-50 border-orange-200');
-                                                 
-                        $avatarClass = $index == 0 ? 'border-amber-300 shadow-amber-500/30' : 
-                                      ($index == 1 ? 'border-slate-300 shadow-slate-500/30' : 
-                                                     'border-orange-300 shadow-orange-500/30');
-                                                     
-                        $badgeClass = $index == 0 ? 'bg-amber-500 text-white' : 
-                                     ($index == 1 ? 'bg-slate-500 text-white' : 
-                                                    'bg-orange-500 text-white');
-                                                    
-                        $textColor = $index == 0 ? 'text-amber-700' : ($index == 1 ? 'text-slate-700' : 'text-orange-700');
-                    @endphp
-
-                    <div class="flex items-center gap-4 p-4 rounded-[2rem] border transition-all hover:-translate-y-1 hover:shadow-xl {{ $bgClass }}">
+                    <div class="flex items-center gap-4 p-5 rounded-[1.5rem] bg-white border border-slate-100 hover:border-[#5295FF] transition-all hover:-translate-y-1 hover:shadow-lg hover:shadow-[#5295FF]/10 fluent-card">
                         
                         {{-- Avatar & Ranking Badge --}}
                         <div class="relative shrink-0">
-                            {{-- PERBAIKAN: Menggunakan UI-Avatars agar lebih cantik seperti di leaderboard siswa --}}
-                            <div class="w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl shadow-lg border-2 overflow-hidden bg-white {{ $avatarClass }}">
+                            <div class="w-14 h-14 rounded-full flex items-center justify-center font-black text-xl shadow-sm border border-slate-200 overflow-hidden bg-slate-50">
                                 @php
-                                    $avatarBg = $index == 0 ? 'f59e0b' : ($index == 1 ? '64748b' : 'f97316');
+                                    // Menggunakan warna semantik Elevate untuk background avatar
+                                    $avatarBg = $index == 0 ? 'D83B01' : ($index == 1 ? '5295FF' : '107C10');
                                 @endphp
                                 <img src="https://ui-avatars.com/api/?name={{ urlencode($topStudent->name) }}&background={{ $avatarBg }}&color=fff&bold=true" alt="Avatar" class="w-full h-full object-cover">
                             </div>
-                            <div class="absolute -top-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black border-2 border-white shadow-sm {{ $badgeClass }}">
+                            @php
+                                $badgeColor = $index == 0 ? 'bg-[#D83B01] border-[#FFD8A8]' : ($index == 1 ? 'bg-[#5295FF] border-[#D0E7F8]' : 'bg-[#107C10] border-[#B7DFB9]');
+                            @endphp
+                            <div class="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white shadow-sm border border-white {{ $badgeColor }}">
                                 #{{ $index + 1 }}
                             </div>
                         </div>
 
                         {{-- Nama & Kelas --}}
                         <div class="flex-1 min-w-0">
-                            <h4 class="font-black text-slate-800 text-sm truncate" title="{{ $topStudent->name }}">
+                            <h4 class="font-bold text-[#2A3B52] text-sm truncate" title="{{ $topStudent->name }}">
                                 {{ $topStudent->name }}
                             </h4>
-                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-0.5 flex items-center gap-1">
+                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1 flex items-center gap-1.5">
                                 <i class="ph-fill ph-chalkboard text-slate-400"></i> {{ $topStudent->schoolClass->name ?? 'N/A' }}
                             </div>
                         </div>
 
                         {{-- Total Hari --}}
-                        <div class="text-right shrink-0 bg-white/50 px-3 py-2 rounded-xl backdrop-blur-sm border border-white/50">
-                            <div class="text-xl font-black leading-none {{ $textColor }}">
+                        <div class="text-right shrink-0 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
+                            <div class="text-lg font-black leading-none text-[#2A3B52]">
                                 {{ $topStudent->total_logs_count ?? $topStudent->total_logs ?? 0 }}
                             </div>
-                            <div class="text-[8px] uppercase font-black {{ $textColor }} opacity-70 tracking-widest mt-1">Hari</div>
+                            <div class="text-[8px] uppercase font-bold text-slate-400 tracking-widest mt-1">Hari</div>
                         </div>
                     </div>
                 @endforeach
@@ -309,8 +299,7 @@
         @endif
         {{-- ======================================================= --}}
 
-
-        {{-- HEADER PRINT --}}
+           {{-- HEADER PRINT --}}
         <div class="print-header">
             <h2 class="text-xl font-bold uppercase">Laporan Harian Mutabaah Ramadhan</h2>
             <p class="text-sm">{{ $classes->find($selectedClass)->name ?? 'Semua Kelas' }} &bull; {{ \Carbon\Carbon::parse($date)->isoFormat('dddd, D MMMM Y') }}</p>
@@ -318,70 +307,70 @@
         
         {{-- KONTEN UTAMA --}}
         @if($selectedClass)
-            {{-- === TAMPILAN TABEL KELAS (JIKA KELAS DIPILIH) === --}}
-            <div class="animate-enter bg-white rounded-[3rem] shadow-sm border border-slate-100 overflow-hidden mb-12 print-container" style="animation-delay: 200ms">
-                <div class="px-8 py-6 border-b border-slate-50 flex items-center justify-between no-print">
-                    <h2 class="text-xl font-black text-slate-800 flex items-center gap-3">
-                        <i class="ph-bold ph-list-checks text-blue-600"></i> Data Mutabaah Kelas
+            {{-- === TAMPILAN TABEL KELAS === --}}
+            <div class="animate-enter bg-white rounded-[2rem] fluent-card overflow-hidden mb-12 print-container" style="animation-delay: 200ms">
+                <div class="px-6 md:px-8 py-6 border-b border-slate-100 flex items-center justify-between no-print bg-white">
+                    <h2 class="text-xl font-black text-[#2A3B52] flex items-center gap-3">
+                        <i class="ph-bold ph-list-checks text-[#5295FF]"></i> Data Mutabaah Kelas
                     </h2>
-                    <span class="px-4 py-1.5 rounded-xl bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-wider">
+                    <span class="px-4 py-2 rounded-xl bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider border border-slate-200">
                         {{ \Carbon\Carbon::parse($date)->translatedFormat('d F Y') }}
                     </span>
                 </div>
 
                 <div class="overflow-x-auto overflow-y-auto custom-scrollbar max-h-[600px] relative">
-                    <table class="w-full text-left print-table">
-                        <thead class="bg-slate-50/90 backdrop-blur-md text-slate-400 uppercase text-[9px] font-black tracking-[0.2em] border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+                    <table class="w-full text-left print-table text-[#2A3B52]">
+                        <thead class="bg-slate-50/90 backdrop-blur-md text-slate-500 uppercase text-[10px] font-bold tracking-wider border-b border-slate-200 sticky top-0 z-20 shadow-sm">
                             <tr>
-                                <th class="px-8 py-6 text-center w-16">No</th>
-                                <th class="px-6 py-6">Profil Siswa</th>
-                                <th class="px-6 py-6 text-center">Puasa</th>
-                                <th class="px-6 py-6 text-center">Shalat 5W</th>
-                                <th class="px-6 py-6 text-center no-print">Detail</th>
+                                <th class="px-6 py-5 text-center w-16">No</th>
+                                <th class="px-6 py-5">Profil Siswa</th>
+                                <th class="px-6 py-5 text-center">Puasa</th>
+                                <th class="px-6 py-5 text-center">Shalat 5W</th>
+                                <th class="px-6 py-5 text-center no-print">Detail</th>
                                 
                                 @if($isFriday)
-                                <th class="px-6 py-6 text-center text-cyan-600 bg-cyan-50/30">Jumat</th>
+                                <th class="px-6 py-5 text-center text-[#5295FF] bg-[#F3F9FD]">Jumat</th>
                                 @endif
 
-                                <th class="px-6 py-6">Tilawah</th>
-                                <th class="px-8 py-6 text-center bg-slate-50/50">Aksi</th>
+                                <th class="px-6 py-5">Tilawah</th>
+                                <th class="px-6 py-5 text-center bg-white border-l border-slate-100">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-50">
+                        <tbody class="divide-y divide-slate-100">
                             @forelse($reports as $index => $student)
                             @php 
                                 $log = $student->ramadanLogs->first();
                                 $prayerCount = $log ? count(array_filter($log->prayers ?? [])) : 0;
                             @endphp
-                            <tr class="hover:bg-blue-50/30 transition-all group">
-                                <td class="px-8 py-5 text-center text-xs font-bold text-slate-400">{{ $index + 1 }}</td>
-                                <td class="px-6 py-5">
-                                    <div class="font-black text-slate-800 text-sm group-hover:text-blue-600 transition-colors">{{ $student->name }}</div>
-                                    <div class="text-[10px] font-bold text-slate-400 mt-0.5 tracking-wider">{{ $student->student_id }}</div>
+                            <tr class="hover:bg-slate-50/50 transition-colors group">
+                                <td class="px-6 py-4 text-center text-xs font-bold text-slate-400">{{ $index + 1 }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-[#2A3B52] text-sm group-hover:text-[#5295FF] transition-colors">{{ $student->name }}</div>
+                                    <div class="text-[10px] font-bold text-slate-400 mt-0.5 font-mono">{{ $student->student_id }}</div>
                                 </td>
-                                <td class="px-6 py-5 text-center">
+                                <td class="px-6 py-4 text-center">
                                     @if($log && $log->is_fasting)
-                                        <div class="w-8 h-8 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center mx-auto shadow-sm"><i class="ph-fill ph-check"></i></div>
+                                        <div class="w-8 h-8 rounded-lg bg-[#DFF6DD] text-[#107C10] border border-[#B7DFB9] flex items-center justify-center mx-auto shadow-sm"><i class="ph-fill ph-check"></i></div>
                                     @elseif($log)
-                                        <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center mx-auto shadow-sm"><i class="ph-bold ph-x"></i></div>
+                                        <div class="w-8 h-8 rounded-lg bg-[#FDE7E9] text-[#D13438] border border-[#F4C3C9] flex items-center justify-center mx-auto shadow-sm"><i class="ph-bold ph-x"></i></div>
                                     @else
                                         <span class="text-slate-300 font-bold">-</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-5 text-center">
+                                <td class="px-6 py-4 text-center">
                                     @if($log)
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-black {{ $prayerCount == 5 ? 'bg-cyan-50 text-cyan-600' : 'bg-amber-50 text-amber-600' }}">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold border {{ $prayerCount == 5 ? 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9]' : 'bg-[#FFEFD6] text-[#D83B01] border-[#FFD8A8]' }}">
                                             {{ $prayerCount }}/5
                                         </span>
                                     @else
                                         <span class="text-slate-300 font-bold">-</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-5 text-center no-print">
+                                <td class="px-6 py-4 text-center no-print">
                                     @if($log && is_array($log->prayers))
                                         <div class="flex justify-center gap-1.5">
                                             @foreach(['subuh','dzuhur','ashar','maghrib','isya'] as $p)
-                                                <div title="{{ ucfirst($p) }}" class="w-2.5 h-2.5 rounded-full {{ ($log->prayers[$p] ?? false) ? 'bg-cyan-500' : 'bg-slate-200' }}"></div>
+                                                <div title="{{ ucfirst($p) }}" class="w-2.5 h-2.5 rounded-full border border-white {{ ($log->prayers[$p] ?? false) ? 'bg-[#5295FF]' : 'bg-slate-200' }}"></div>
                                             @endforeach
                                         </div>
                                     @else
@@ -390,75 +379,75 @@
                                 </td>
 
                                 @if($isFriday)
-                                <td class="px-6 py-5 text-center">
+                                <td class="px-6 py-4 text-center bg-[#F3F9FD]/30">
                                     @if($log && $log->friday_khotib)
-                                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-cyan-100 text-cyan-700 text-[10px] font-black border border-cyan-200 shadow-sm" title="{{ Str::limit($log->friday_summary, 50) }}">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#F3F9FD] text-[#5295FF] text-[10px] font-bold border border-[#D0E7F8] shadow-sm" title="{{ Str::limit($log->friday_summary, 50) }}">
                                             <i class="ph-bold ph-check-circle"></i> Ada
                                         </span>
                                     @else
-                                        <span class="text-slate-300 text-[10px] italic font-medium">Kosong</span>
+                                        <span class="text-slate-400 text-[10px] font-medium">Kosong</span>
                                     @endif
                                 </td>
                                 @endif
 
-                                <td class="px-6 py-5">
+                                <td class="px-6 py-4">
                                     @if($log && $log->tadarus_surah)
                                         <div class="flex items-center gap-2">
-                                            <i class="ph-bold ph-book-open-text text-blue-500"></i>
-                                            <span class="text-xs font-bold text-slate-700">{{ Str::limit($log->tadarus_surah, 12) }} : {{ $log->tadarus_ayah }}</span>
+                                            <i class="ph-bold ph-book-open-text text-[#5295FF]"></i>
+                                            <span class="text-xs font-bold text-[#2A3B52]">{{ Str::limit($log->tadarus_surah, 12) }} <span class="text-slate-400 font-normal ml-1">Ayat {{ $log->tadarus_ayah }}</span></span>
                                         </div>
                                     @else
                                         <span class="text-slate-300 text-[10px] font-bold">-</span>
                                     @endif
                                 </td>
                                 
-                                <td class="px-8 py-5 text-center bg-slate-50/50">
+                                <td class="px-6 py-4 text-center bg-white border-l border-slate-100">
                                     @if($log)
                                         <button type="button" 
                                             @click="openFeedback({{ $log->id }}, {{ json_encode($log) }}, {{ json_encode($student->name) }})"
-                                            class="w-full inline-flex justify-center items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-sm hover:shadow-md active:scale-95
-                                            {{ $log->teacher_verified_at ? 'bg-cyan-100 text-cyan-700 border border-cyan-200' : 'bg-white border border-slate-200 text-slate-500 hover:bg-cyan-600 hover:text-white hover:border-cyan-600' }}">
+                                            class="w-full inline-flex justify-center items-center gap-2 px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all shadow-sm active:scale-95 border
+                                            {{ $log->teacher_verified_at ? 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9] hover:bg-[#c2f0c1]' : 'bg-white border-slate-200 text-slate-500 hover:bg-[#5295FF] hover:text-white hover:border-[#5295FF]' }}">
                                             @if($log->teacher_verified_at)
-                                                <i class="ph-bold ph-check-circle text-lg"></i> {{ $log->teacher_score }}
+                                                <i class="ph-bold ph-check-circle text-sm"></i> {{ $log->teacher_score }}
                                             @else
-                                                <i class="ph-bold ph-pencil-simple text-lg"></i> Nilai
+                                                <i class="ph-bold ph-pencil-simple text-sm"></i> Nilai
                                             @endif
                                         </button>
                                     @else
-                                        <span class="text-slate-300 text-[10px] italic font-bold">Belum Ada</span>
+                                        <span class="text-slate-400 text-[10px] font-bold bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">Belum Ada</span>
                                     @endif
                                 </td>
                             </tr>
                             @empty
-                            <tr><td colspan="{{ $isFriday ? 8 : 7 }}" class="text-center py-20 text-slate-400 font-medium italic">Data siswa tidak ditemukan untuk kelas ini.</td></tr>
+                            <tr><td colspan="{{ $isFriday ? 8 : 7 }}" class="text-center py-20 text-slate-400 font-medium">Data siswa tidak ditemukan untuk kelas ini.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
         @else
-            {{-- === TAMPILAN FEED DASHBOARD DENGAN TAB FILTER DAN PAGINATION === --}}
+            {{-- === TAMPILAN FEED DASHBOARD (JIKA BELUM PILIH KELAS) === --}}
             <div class="animate-enter space-y-6 no-print" style="animation-delay: 100ms">
                 
                 {{-- HEADER FEED & TABS --}}
                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
                     <div>
-                        <h3 class="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-                            <i class="ph-duotone ph-lightning text-amber-500"></i>
+                        <h3 class="text-2xl font-black text-[#2A3B52] tracking-tight flex items-center gap-2">
+                            <i class="ph-duotone ph-lightning text-[#D83B01]"></i>
                             Aktivitas Ramadhan Global
                         </h3>
-                        <p class="text-slate-500 text-sm font-medium mt-1">Pantau seluruh aktivitas siswa pada hari ini.</p>
+                        <p class="text-slate-500 text-sm font-medium mt-1">Pantau seluruh aktivitas mutabaah siswa hari ini.</p>
                     </div>
 
                     {{-- TABS FILTER STATUS --}}
-                    <div class="flex items-center gap-2 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200 shadow-sm">
                         <a href="{{ request()->fullUrlWithQuery(['status' => null, 'page' => 1]) }}" 
-                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all {{ !request('status') ? 'bg-slate-800 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50' }}">
+                           class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all {{ !request('status') ? 'bg-white text-[#5295FF] shadow-sm border border-slate-200' : 'text-slate-500 hover:text-[#2A3B52] hover:bg-slate-100' }}">
                             <i class="ph-bold ph-list-dashes"></i> Semua
                         </a>
                         <a href="{{ request()->fullUrlWithQuery(['status' => 'pending', 'page' => 1]) }}" 
-                           class="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 {{ request('status') == 'pending' ? 'bg-amber-100 text-amber-700 shadow-sm border border-amber-200' : 'text-slate-500 hover:bg-slate-50' }}">
-                            <i class="ph-bold ph-clock-countdown"></i> Antrean Penilaian
+                           class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 {{ request('status') == 'pending' ? 'bg-[#FFEFD6] text-[#D83B01] shadow-sm border border-[#FFD8A8]' : 'text-slate-500 hover:text-[#2A3B52] hover:bg-slate-100' }}">
+                            <i class="ph-bold ph-clock-countdown"></i> Menunggu Penilaian
                         </a>
                     </div>
                 </div>
@@ -468,18 +457,18 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         @foreach($latestLogs as $log)
                         @php $prayerCount = count(array_filter($log->prayers ?? [])); @endphp
-                        <div class="group bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-cyan-900/5 hover:border-cyan-200 transition-all duration-300 relative overflow-hidden">
-                            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-50 to-slate-50 rounded-bl-[4rem] -mr-6 -mt-6 transition-transform group-hover:scale-110 opacity-50"></div>
+                        <div class="group bg-white rounded-[2rem] p-6 fluent-card hover:border-[#5295FF] transition-all duration-300 relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-[#F3F9FD] rounded-bl-[4rem] -mr-6 -mt-6 transition-transform group-hover:scale-110 opacity-50"></div>
                             <div class="relative z-10">
                                 {{-- Profil Siswa --}}
                                 <div class="flex items-center gap-4 mb-6">
-                                    <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 font-black text-lg shadow-inner group-hover:bg-cyan-600 group-hover:text-white group-hover:border-cyan-500 transition-all duration-300">
+                                    <div class="w-14 h-14 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 font-black text-lg group-hover:bg-[#5295FF] group-hover:text-white group-hover:border-[#5295FF] transition-all duration-300 shadow-sm">
                                         {{ substr($log->student->name, 0, 1) }}
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <h4 class="font-black text-slate-800 text-sm truncate group-hover:text-cyan-600 transition-colors">{{ $log->student->name }}</h4>
+                                        <h4 class="font-bold text-[#2A3B52] text-sm truncate group-hover:text-[#5295FF] transition-colors">{{ $log->student->name }}</h4>
                                         <div class="flex items-center gap-2 mt-1.5">
-                                            <span class="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-[9px] font-bold text-slate-500 uppercase truncate max-w-[80px]">
+                                            <span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-[9px] font-bold text-slate-500 uppercase truncate max-w-[80px]">
                                                 {{ $log->student->schoolClass->name ?? 'N/A' }}
                                             </span>
                                             <span class="text-[9px] text-slate-400 font-bold flex items-center gap-1 shrink-0"><i class="ph-bold ph-clock"></i> {{ $log->updated_at->format('H:i') }}</span>
@@ -488,35 +477,35 @@
                                 </div>
                                 {{-- Quick Stats Ramadhan --}}
                                 <div class="flex gap-2 mb-6">
-                                    <div class="flex-1 py-2.5 px-1 rounded-2xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm" title="Status Puasa">
-                                        <i class="ph-fill ph-bowl-food text-xl {{ $log->is_fasting ? 'text-cyan-500' : 'text-rose-400' }} mb-1.5 block"></i>
-                                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-wide">Puasa</span>
+                                    <div class="flex-1 py-3 px-1 rounded-xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm">
+                                        <i class="ph-fill ph-bowl-food text-xl {{ $log->is_fasting ? 'text-[#107C10]' : 'text-[#D13438]' }} mb-1.5 block"></i>
+                                        <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wide">Puasa</span>
                                     </div>
-                                    <div class="flex-1 py-2.5 px-1 rounded-2xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm" title="Shalat Wajib">
-                                        <div class="flex items-center justify-center gap-0.5 text-xl font-black {{ $prayerCount == 5 ? 'text-cyan-500' : 'text-amber-500' }} mb-1.5">
+                                    <div class="flex-1 py-3 px-1 rounded-xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm">
+                                        <div class="flex items-center justify-center gap-0.5 text-xl font-black {{ $prayerCount == 5 ? 'text-[#107C10]' : 'text-[#D83B01]' }} mb-1.5">
                                             {{ $prayerCount }}<span class="text-[10px] text-slate-400">/5</span>
                                         </div>
-                                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-wide">Wajib</span>
+                                        <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wide">Wajib</span>
                                     </div>
-                                    <div class="flex-1 py-2.5 px-1 rounded-2xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm" title="Tilawah">
-                                        <i class="ph-fill ph-book-open-text text-xl {{ $log->tadarus_surah ? 'text-blue-500' : 'text-slate-300' }} mb-1.5 block"></i>
-                                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-wide">Qur'an</span>
+                                    <div class="flex-1 py-3 px-1 rounded-xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm">
+                                        <i class="ph-fill ph-book-open-text text-xl {{ $log->tadarus_surah ? 'text-[#5295FF]' : 'text-slate-300' }} mb-1.5 block"></i>
+                                        <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wide">Qur'an</span>
                                     </div>
                                 </div>
                                 {{-- Tombol Action --}}
-                                <div class="flex items-center justify-between gap-3 pt-5 border-t border-slate-50">
+                                <div class="flex items-center justify-between gap-3 pt-5 border-t border-slate-100">
                                     @if($log->teacher_verified_at)
-                                        <div class="flex items-center gap-1.5 text-cyan-600 text-[10px] font-black uppercase tracking-wide bg-cyan-50 px-2 py-1 rounded-lg">
+                                        <div class="flex items-center gap-1.5 text-[#107C10] text-[10px] font-bold uppercase tracking-wide bg-[#DFF6DD] border border-[#B7DFB9] px-2.5 py-1.5 rounded-lg shadow-sm">
                                             <i class="ph-bold ph-check-circle"></i> Nilai: {{ $log->teacher_score }}
                                         </div>
                                     @else
-                                        <div class="flex items-center gap-1.5 text-amber-500 text-[10px] font-black uppercase tracking-wide bg-amber-50 px-2 py-1 rounded-lg animate-pulse">
+                                        <div class="flex items-center gap-1.5 text-[#D83B01] text-[10px] font-bold uppercase tracking-wide bg-[#FFEFD6] border border-[#FFD8A8] px-2.5 py-1.5 rounded-lg shadow-sm">
                                             <i class="ph-bold ph-clock"></i> Menunggu
                                         </div>
                                     @endif
 
                                     <button @click="openFeedback({{ $log->id }}, {{ json_encode($log) }}, {{ json_encode($log->student->name) }})" 
-                                        class="pl-4 pr-3 py-2 bg-slate-900 hover:bg-cyan-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-200 hover:shadow-cyan-200 transition-all active:scale-95 flex items-center gap-2 group-hover:translate-x-1">
+                                        class="pl-4 pr-3 py-2 bg-[#2A3B52] hover:bg-[#5295FF] text-white rounded-lg text-[10px] font-bold uppercase tracking-widest shadow-sm transition-all active:scale-95 flex items-center gap-2 group-hover:translate-x-1">
                                         Tinjau <i class="ph-bold ph-caret-right"></i>
                                     </button>
                                 </div>
@@ -526,126 +515,126 @@
                     </div>
                     
                     {{-- PAGINATION --}}
-                    <div class="mt-10">
+                    <div class="mt-8">
                         {{ $latestLogs->links() }}
                     </div>
                 @else
                     {{-- EMPTY STATE --}}
-                    <div class="text-center py-32 bg-white rounded-[2.5rem] border border-slate-100 border-dashed shadow-sm">
-                        <div class="w-24 h-24 bg-slate-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-slate-300 rotate-3 transition-transform hover:rotate-0">
-                            <i class="ph-duotone ph-moon-stars text-5xl"></i>
+                    <div class="text-center py-24 bg-white fluent-card rounded-[2.5rem]">
+                        <div class="w-20 h-20 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-5 text-slate-400 rotate-3 transition-transform hover:rotate-0 shadow-sm">
+                            <i class="ph-duotone ph-moon-stars text-4xl"></i>
                         </div>
-                        <h3 class="text-xl font-black text-slate-800 tracking-tight">
-                            {{ request('status') == 'pending' ? 'Hore! Antrean Kosong' : 'Belum Ada Aktivitas' }}
+                        <h3 class="text-lg font-bold text-[#2A3B52] tracking-tight">
+                            {{ request('status') == 'pending' ? 'Semua Jurnal Telah Dinilai' : 'Belum Ada Aktivitas' }}
                         </h3>
                         <p class="text-slate-500 text-sm mt-2 max-w-sm mx-auto">
-                            {{ request('status') == 'pending' ? 'Semua mutabaah untuk hari ini sudah kamu nilai.' : 'Tampaknya belum ada siswa yang mengisi mutabaah sesuai pencarianmu.' }}
+                            {{ request('status') == 'pending' ? 'Bagus! Antrean mutabaah yang perlu verifikasi sudah kosong.' : 'Belum ada data jurnal siswa yang cocok dengan filter saat ini.' }}
                         </p>
                         @if(request('status') || request('search'))
-                            <a href="{{ route('admin.ramadan.reports') }}" class="inline-block mt-6 px-6 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-slate-200 transition-colors">Reset Filter</a>
+                            <a href="{{ route('admin.ramadan.reports') }}" class="inline-block mt-6 px-5 py-2.5 bg-slate-100 border border-slate-200 text-slate-600 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-slate-200 hover:text-[#2A3B52] transition-colors shadow-sm">Reset Filter</a>
                         @endif
                     </div>
                 @endif
             </div>
         @endif
 
-        {{-- MODAL FEEDBACK & MOTIVASI --}}
+        {{-- MODAL FEEDBACK & MOTIVASI (FLUENT MODAL) --}}
         <div x-cloak x-show="isModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center px-4 modal-backdrop">
             {{-- Backdrop --}}
             <div x-show="isModalOpen" 
                 x-transition.opacity.duration.300ms
                 @click="closeModal()"
-                class="absolute inset-0 bg-slate-900/80 backdrop-blur-xl"></div>
+                class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
 
             {{-- Modal Content --}}
             <div x-show="isModalOpen" 
                 x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 scale-95 translate-y-8"
                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                class="relative bg-white rounded-[2.5rem] shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh] border border-white/20">
+                class="relative bg-[#f8fafc] rounded-[2rem] fluent-modal w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh] border border-white">
                 
                 {{-- Header Modal --}}
-                <div class="relative bg-gradient-to-r from-slate-900 to-blue-900 p-8 text-white shrink-0 overflow-hidden">
-                    <div class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/20 rounded-full blur-2xl"></div>
+                <div class="relative bg-gradient-to-r from-[#25D0FF] via-[#5295FF] to-[#FFC9B9] p-8 text-[#2A3B52] shrink-0 overflow-hidden">
+                    <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/30 rounded-full blur-2xl"></div>
                     <div class="relative z-10">
                         <h3 class="font-black text-2xl tracking-tight">Detail Mutabaah Siswa</h3>
-                        <p class="text-cyan-100 text-sm font-medium mt-1 flex items-center gap-2">
+                        <p class="text-[#2A3B52]/80 text-sm font-bold mt-1 flex items-center gap-2">
                             <i class="ph-bold ph-student"></i> <span x-text="studentName"></span>
                         </p>
                     </div>
-                    <button @click="closeModal()" class="absolute top-6 right-6 p-2 bg-white/20 hover:bg-white/30 rounded-xl transition text-white backdrop-blur-md"><i class="ph-bold ph-x text-lg"></i></button>
+                    <button @click="closeModal()" class="absolute top-6 right-6 w-10 h-10 bg-white/30 hover:bg-white/50 border border-white/40 flex items-center justify-center rounded-xl transition text-[#2A3B52] backdrop-blur-md shadow-sm"><i class="ph-bold ph-x text-lg"></i></button>
                 </div>
 
                 {{-- Body (GRID LAYOUT) --}}
-                <div class="p-8 overflow-y-auto custom-scrollbar space-y-6 bg-slate-50/50">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-6 md:p-8 overflow-y-auto custom-scrollbar space-y-6 bg-[#f8fafc]">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
                         {{-- KOLOM KIRI: WAJIB --}}
-                        <div class="space-y-6">
+                        <div class="space-y-5 md:space-y-6">
                             {{-- 1. Status Puasa --}}
-                            <div class="bg-white p-5 rounded-[1.5rem] border border-slate-100 shadow-sm flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-lg" :class="details.fasting ? 'bg-cyan-100 text-cyan-600' : 'bg-rose-100 text-rose-500'">
+                            <div class="bg-white p-5 rounded-2xl border border-slate-100 fluent-card flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-sm border" :class="details.fasting ? 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9]' : 'bg-[#FDE7E9] text-[#D13438] border-[#F4C3C9]'">
                                         <i class="ph-fill" :class="details.fasting ? 'ph-check-circle' : 'ph-x-circle'"></i>
                                     </div>
                                     <div>
-                                        <h4 class="font-bold text-slate-800 text-sm">Puasa Hari Ini</h4>
-                                        <p class="text-[10px] text-slate-400 font-medium" x-text="details.fasting ? 'Melaksanakan' : 'Tidak / Berhalangan'"></p>
+                                        <h4 class="font-bold text-[#2A3B52] text-sm">Puasa Hari Ini</h4>
+                                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5" x-text="details.fasting ? 'Melaksanakan' : 'Tidak / Berhalangan'"></p>
                                     </div>
                                 </div>
                             </div>
 
                             {{-- 2. Shalat 5 Waktu --}}
-                            <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100">
-                                <h4 class="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
-                                    <i class="ph-fill ph-clock text-cyan-500"></i> Shalat Wajib
+                            <div class="bg-white p-6 rounded-2xl fluent-card border border-slate-100">
+                                <h4 class="font-bold text-[#2A3B52] text-sm mb-4 flex items-center gap-2">
+                                    <i class="ph-fill ph-clock text-[#5295FF]"></i> Shalat Wajib
                                 </h4>
                                 <div class="grid grid-cols-5 gap-2">
                                     <template x-for="p in ['subuh', 'dzuhur', 'ashar', 'maghrib', 'isya']">
                                         <div class="flex flex-col items-center gap-2">
-                                            <div class="w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all"
-                                                :class="details.prayers[p] ? 'bg-cyan-50 border-cyan-200 text-cyan-600' : 'bg-slate-50 border-slate-100 text-slate-300'">
-                                                <i class="ph-fill text-lg" :class="details.prayers[p] ? 'ph-check-circle' : 'ph-circle'"></i>
+                                            <div class="w-10 h-10 rounded-full flex items-center justify-center border shadow-sm transition-all"
+                                                :class="details.prayers[p] ? 'bg-[#DFF6DD] border-[#B7DFB9] text-[#107C10]' : 'bg-slate-50 border-slate-200 text-slate-300'">
+                                                <i class="ph-fill text-xl" :class="details.prayers[p] ? 'ph-check-circle' : 'ph-circle'"></i>
                                             </div>
-                                            <span class="text-[9px] font-bold uppercase text-slate-400" x-text="p"></span>
+                                            <span class="text-[9px] font-bold uppercase text-slate-500 tracking-wider" x-text="p"></span>
                                         </div>
                                     </template>
                                 </div>
                             </div>
 
                             {{-- 3. Quran (Tilawah) --}}
-                            <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100">
-                                <h4 class="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
-                                    <i class="ph-fill ph-book-open text-blue-500"></i> Tilawah & Murojaah
+                            <div class="bg-white p-6 rounded-2xl fluent-card border border-slate-100">
+                                <h4 class="font-bold text-[#2A3B52] text-sm mb-4 flex items-center gap-2">
+                                    <i class="ph-fill ph-book-open text-[#5295FF]"></i> Tilawah & Murojaah
                                 </h4>
                                 <div class="space-y-3">
-                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wide mb-1">Tadarus</p>
-                                        <p class="text-sm font-bold text-slate-700">
+                                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Tadarus</p>
+                                        <p class="text-sm font-bold text-[#2A3B52]">
                                             <span x-text="details.tadarus_surah || '-'"></span> 
-                                            <span x-show="details.tadarus_ayah" class="text-slate-400 font-medium"> : Ayat <span x-text="details.tadarus_ayah"></span></span>
+                                            <span x-show="details.tadarus_ayah" class="text-[#5295FF] ml-1">Ayat <span x-text="details.tadarus_ayah"></span></span>
                                         </p>
                                     </div>
-                                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wide mb-1">Murojaah</p>
-                                        <p class="text-sm font-medium text-slate-700" x-text="details.murojaah || '-'"></p>
+                                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1">Murojaah</p>
+                                        <p class="text-sm font-bold text-[#2A3B52]" x-text="details.murojaah || '-'"></p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         {{-- KOLOM KANAN: SUNNAH & LAINNYA --}}
-                        <div class="space-y-6">
+                        <div class="space-y-5 md:space-y-6">
                             {{-- 4. Amalan Sunnah --}}
-                            <div class="bg-white p-6 rounded-[1.5rem] shadow-sm border border-slate-100 h-full">
-                                <h4 class="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
-                                    <i class="ph-fill ph-star text-amber-500"></i> Amalan Sunnah
+                            <div class="bg-white p-6 rounded-2xl fluent-card border border-slate-100 h-full">
+                                <h4 class="font-bold text-[#2A3B52] text-sm mb-4 flex items-center gap-2">
+                                    <i class="ph-fill ph-star text-[#D83B01]"></i> Amalan Sunnah
                                 </h4>
                                 <div class="space-y-3">
                                     <template x-for="s in ['tarawih', 'witir', 'dhuha', 'rawatib', 'sedekah']">
-                                        <div class="flex items-center justify-between p-3 rounded-xl border transition-all"
-                                            :class="details.sunnahs[s] ? 'bg-cyan-50/50 border-cyan-100' : 'bg-slate-50 border-slate-50 opacity-60'">
-                                            <span class="text-xs font-bold text-slate-600 capitalize" x-text="s"></span>
-                                            <i class="ph-fill text-lg" :class="details.sunnahs[s] ? 'ph-check-circle text-cyan-600' : 'ph-circle text-slate-300'"></i>
+                                        <div class="flex items-center justify-between p-3.5 rounded-xl border shadow-sm transition-all"
+                                            :class="details.sunnahs[s] ? 'bg-[#F3F9FD] border-[#D0E7F8]' : 'bg-slate-50 border-slate-200 opacity-70'">
+                                            <span class="text-xs font-bold text-[#2A3B52] capitalize" x-text="s"></span>
+                                            <i class="ph-fill text-xl" :class="details.sunnahs[s] ? 'ph-check-circle text-[#5295FF]' : 'ph-circle text-slate-300'"></i>
                                         </div>
                                     </template>
                                 </div>
@@ -655,64 +644,64 @@
 
                     {{-- 5. Laporan Jumat --}}
                     <template x-if="details.khotib">
-                        <div class="bg-cyan-50/50 p-6 rounded-[1.5rem] border border-cyan-100">
-                            <h4 class="font-bold text-cyan-800 text-sm mb-3 flex items-center gap-2">
-                                <i class="ph-fill ph-mosque text-cyan-600"></i> Laporan Jumat
+                        <div class="bg-white p-6 rounded-2xl border border-[#D0E7F8] fluent-card">
+                            <h4 class="font-bold text-[#5295FF] text-sm mb-4 flex items-center gap-2">
+                                <i class="ph-fill ph-mosque text-[#5295FF]"></i> Laporan Jumat
                             </h4>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                    <p class="text-[10px] text-cyan-600 font-bold uppercase tracking-wide mb-1">Khotib</p>
-                                    <p class="text-sm font-bold text-slate-700 bg-white p-2 rounded-lg border border-cyan-100" x-text="details.khotib"></p>
+                                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1.5">Khotib</p>
+                                    <p class="text-sm font-bold text-[#2A3B52] bg-slate-50 p-3 rounded-xl border border-slate-200" x-text="details.khotib"></p>
                                 </div>
                                 <div class="md:col-span-2">
-                                    <p class="text-[10px] text-cyan-600 font-bold uppercase tracking-wide mb-1">Ringkasan</p>
-                                    <p class="text-sm text-slate-600 italic bg-white p-3 rounded-lg border border-cyan-100 leading-relaxed" x-text="details.summary"></p>
+                                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1.5">Ringkasan</p>
+                                    <p class="text-sm text-[#2A3B52] font-medium bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed" x-text="details.summary"></p>
                                 </div>
                             </div>
                         </div>
                     </template>
 
-                    {{-- 6. LAPORAN KULTUM (BARU) --}}
+                    {{-- 6. LAPORAN KULTUM --}}
                     <template x-if="details.kultum_summary || details.kultum_penceramah">
-                        <div class="bg-purple-50/50 p-6 rounded-[1.5rem] border border-purple-100">
-                            <h4 class="font-bold text-purple-800 text-sm mb-3 flex items-center gap-2">
+                        <div class="bg-white p-6 rounded-2xl border border-purple-200 fluent-card">
+                            <h4 class="font-bold text-purple-600 text-sm mb-4 flex items-center gap-2">
                                 <i class="ph-fill ph-microphone-stage text-purple-600"></i> Laporan Kultum
                             </h4>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
-                                    <p class="text-[10px] text-purple-600 font-bold uppercase tracking-wide mb-1">Penceramah</p>
-                                    <p class="text-sm font-bold text-slate-700 bg-white p-2 rounded-lg border border-purple-100" x-text="details.kultum_penceramah || '-'"></p>
+                                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1.5">Penceramah</p>
+                                    <p class="text-sm font-bold text-[#2A3B52] bg-slate-50 p-3 rounded-xl border border-slate-200" x-text="details.kultum_penceramah || '-'"></p>
                                 </div>
                                 <div class="md:col-span-2">
-                                    <p class="text-[10px] text-purple-600 font-bold uppercase tracking-wide mb-1">Ringkasan Materi</p>
-                                    <p class="text-sm text-slate-600 italic bg-white p-3 rounded-lg border border-purple-100 leading-relaxed" x-text="details.kultum_summary || '-'"></p>
+                                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1.5">Ringkasan Materi</p>
+                                    <p class="text-sm text-[#2A3B52] font-medium bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed" x-text="details.kultum_summary || '-'"></p>
                                 </div>
                             </div>
                         </div>
                     </template>
 
                     {{-- FORM INPUT GURU --}}
-                    <form :action="formAction" method="POST" id="gradingForm" class="space-y-5 pt-4 border-t border-slate-200 border-dashed">
+                    <form :action="formAction" method="POST" id="gradingForm" class="space-y-5 pt-6 border-t border-slate-200">
                         @csrf
-                        <div class="flex flex-col md:flex-row gap-5">
+                        <div class="flex flex-col md:flex-row gap-6">
                             <div class="w-full md:w-1/3">
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Nilai (0-100)</label>
-                                <div class="flex items-center gap-2">
-                                    <input type="number" name="teacher_score" x-model="currentScore" min="0" max="100" class="w-full pl-4 pr-2 py-3 rounded-2xl border-slate-200 font-bold focus:ring-cyan-500 focus:border-cyan-500 text-xl text-slate-800 shadow-sm text-center" placeholder="0">
-                                    <div class="flex flex-col gap-1">
-                                        <button type="button" @click="setScore(100)" class="px-2 py-1 rounded-lg bg-cyan-100 text-cyan-700 text-[10px] font-bold hover:bg-cyan-200">100</button>
-                                        <button type="button" @click="setScore(80)" class="px-2 py-1 rounded-lg bg-slate-100 text-slate-600 text-[10px] font-bold hover:bg-slate-200">80</button>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Nilai (0-100)</label>
+                                <div class="flex items-center gap-3">
+                                    <input type="number" name="teacher_score" x-model="currentScore" min="0" max="100" class="w-full pl-4 pr-2 py-3.5 rounded-xl border-slate-200 font-black focus:ring-[#5295FF] focus:border-[#5295FF] text-2xl text-[#5295FF] shadow-sm text-center bg-white" placeholder="0">
+                                    <div class="flex flex-col gap-1.5 shrink-0">
+                                        <button type="button" @click="setScore(100)" class="px-3 py-1.5 rounded-lg bg-[#DFF6DD] border border-[#B7DFB9] text-[#107C10] text-[10px] font-bold hover:bg-[#c2f0c1] transition-colors shadow-sm">100</button>
+                                        <button type="button" @click="setScore(80)" class="px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-[#2A3B52] text-[10px] font-bold hover:bg-slate-200 transition-colors shadow-sm">80</button>
                                     </div>
                                 </div>
                                 @error('teacher_score')
-                                    <p class="text-rose-500 text-[10px] mt-1 font-bold">{{ $message }}</p>
+                                    <p class="text-[#D13438] text-[10px] mt-1.5 font-bold">{{ $message }}</p>
                                 @enderror
                             </div>
                             <div class="w-full md:w-2/3">
-                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Catatan / Motivasi</label>
-                                <textarea name="teacher_note" x-model="currentNote" rows="2" class="w-full p-3 rounded-2xl border-slate-200 text-sm font-medium focus:ring-cyan-500 focus:border-cyan-500 leading-relaxed shadow-sm placeholder:text-slate-300 resize-none" placeholder="Berikan semangat..."></textarea>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Catatan / Motivasi Guru</label>
+                                <textarea name="teacher_note" x-model="currentNote" rows="2" class="w-full p-4 rounded-xl border-slate-200 text-sm font-medium text-[#2A3B52] focus:ring-[#5295FF] focus:border-[#5295FF] leading-relaxed shadow-sm placeholder:text-slate-400 placeholder:font-normal resize-none bg-white" placeholder="Berikan ucapan penyemangat..."></textarea>
                                 @error('teacher_note')
-                                    <p class="text-rose-500 text-[10px] mt-1 font-bold">{{ $message }}</p>
+                                    <p class="text-[#D13438] text-[10px] mt-1.5 font-bold">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>
@@ -720,10 +709,10 @@
                 </div>
 
                 {{-- Footer Modal --}}
-                <div class="p-6 border-t border-slate-100 bg-white flex justify-end gap-3 shrink-0">
-                    <button @click="closeModal()" class="px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition text-xs uppercase tracking-widest">Batal</button>
-                    <button type="submit" form="gradingForm" class="px-8 py-3 rounded-xl font-black text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 transition text-xs uppercase tracking-widest shadow-lg shadow-cyan-500/20 flex items-center gap-2 transform active:scale-95">
-                        <i class="ph-bold ph-paper-plane-right text-lg"></i> Simpan Penilaian
+                <div class="p-6 border-t border-slate-200 bg-white flex flex-col-reverse md:flex-row justify-end gap-3 shrink-0">
+                    <button @click="closeModal()" class="w-full md:w-auto px-6 py-3 rounded-lg font-bold text-slate-600 bg-slate-100 border border-slate-200 hover:bg-slate-200 transition text-xs uppercase tracking-widest shadow-sm">Batal</button>
+                    <button type="submit" form="gradingForm" class="w-full md:w-auto px-8 py-3 rounded-lg font-bold text-white bg-[#5295FF] hover:bg-[#3b7ee6] transition text-xs uppercase tracking-widest shadow-md flex items-center justify-center gap-2 transform active:scale-95">
+                        <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Penilaian
                     </button>
                 </div>
             </div>

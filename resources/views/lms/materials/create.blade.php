@@ -9,23 +9,25 @@
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        .fluent-card { box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.132), 0 0.3px 0.9px 0 rgba(0, 0, 0, 0.108); border: 1px solid rgba(0, 0, 0, 0.05); }
+        .fluent-modal { box-shadow: 0 25.6px 57.6px 0 rgba(0, 0, 0, 0.22), 0 4.8px 14.4px 0 rgba(0, 0, 0, 0.18); border: 1px solid rgba(0, 0, 0, 0.05); }
     </style>
 
     <div class="py-6 md:py-8 font-sans text-slate-800 pb-20">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {{-- HERO HEADER --}}
-            <div class="animate-enter relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-6 md:p-8 mb-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10 group">
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-blue-500/30 transition-all duration-700"></div>
+            <div class="animate-enter relative rounded-xl bg-gradient-to-br from-[#25D0FF] via-[#5295FF] to-[#FFC9B9] p-6 md:p-8 mb-8 text-[#2A3B52] shadow-[0_10px_40px_-10px_rgba(37,208,255,0.4)] overflow-hidden border border-white/40 group">
+                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
+                <div class="absolute -top-24 -right-24 w-64 h-64 bg-white/30 rounded-full blur-[80px] pointer-events-none group-hover:bg-white/40 transition-all duration-700"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 class="text-2xl font-extrabold mb-1 tracking-tight">Upload Materi Baru</h1>
-                        <p class="text-blue-300 text-sm font-medium">Lengkapi formulir di bawah ini untuk membagikan materi.</p>
+                        <p class="text-[#2A3B52]/80 text-sm font-medium">Lengkapi formulir di bawah ini untuk membagikan materi.</p>
                     </div>
-                    {{-- Tombol Kembali: Sekarang terlihat di mobile dengan lebar penuh/sesuai konten --}}
-                    <a href="{{ route('lms.materials.index') }}" class="flex items-center justify-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold backdrop-blur-sm transition text-white border border-white/10 btn-cancel-confirm active:scale-95 w-full md:w-auto">
+                    <a href="{{ route('lms.materials.index') }}" class="flex items-center justify-center gap-2 px-4 py-2 bg-white/40 hover:bg-white/60 rounded-xl text-sm font-bold backdrop-blur-sm transition text-[#2A3B52] border border-white/50 btn-cancel-confirm active:scale-95 w-full md:w-auto shadow-sm">
                         <i class="ph-bold ph-arrow-left"></i> Kembali
                     </a>
                 </div>
@@ -33,13 +35,13 @@
 
             {{-- ERROR BLOCK (Jika validasi server gagal) --}}
             @if ($errors->any())
-                <div class="animate-enter mb-8 bg-rose-50 border border-rose-100 p-5 rounded-[1.5rem] flex items-start gap-4 shadow-sm">
-                    <div class="p-2 bg-rose-100 text-rose-600 rounded-xl shrink-0">
+                <div class="animate-enter mb-8 bg-[#FDE7E9] border border-[#F4C3C9] p-5 rounded-xl flex items-start gap-4 shadow-sm fluent-card">
+                    <div class="p-2 bg-white text-[#D13438] rounded-lg shrink-0 shadow-sm border border-[#F4C3C9]">
                         <i class="ph-bold ph-warning-octagon text-xl"></i>
                     </div>
                     <div>
-                        <h3 class="text-sm font-black text-rose-800 uppercase tracking-wide mb-1">Gagal Mengupload</h3>
-                        <ul class="list-disc list-inside text-sm text-rose-700 space-y-1 font-medium">
+                        <h3 class="text-sm font-black text-[#D13438] uppercase tracking-wide mb-1">Gagal Mengupload</h3>
+                        <ul class="list-disc list-inside text-sm text-[#D13438] space-y-1 font-medium">
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
@@ -49,18 +51,14 @@
             @endif
 
             {{-- LOGIKA PENGAMAN STATE ALPINE.JS --}}
-            @php
-                // Menyimpan input lampiran dari percobaan sebelumnya (jika validasi gagal)
-                $oldAttachments = old('attachments', [['id' => time(), 'type' => 'file', 'link' => '', 'name' => '']]);
-                
-                // Pastikan setiap baris punya ID unik agar Alpine loop tidak error
+            @php               
+                $oldAttachments = old('attachments', [['id' => time(), 'type' => 'file', 'link' => '', 'name' => '']]);   
                 foreach($oldAttachments as $k => &$att) {
                     if(!isset($att['id'])) $att['id'] = time() + $k;
                 }
             @endphp
-            
             {{-- FORM CARD --}}
-            <div class="animate-enter bg-white shadow-xl shadow-slate-200/50 rounded-[2rem] border border-slate-100 overflow-hidden" style="animation-delay: 100ms">
+            <div class="animate-enter bg-white rounded-xl fluent-card overflow-hidden" style="animation-delay: 100ms">
                 <form action="{{ route('lms.materials.store') }}" method="POST" enctype="multipart/form-data" 
                       x-data="{ 
                           targetType: '{{ old('target_type', 'class') }}', 
@@ -74,22 +72,22 @@
                         <!-- BAGIAN 1: INFORMASI UTAMA -->
                         <div>
                             <div class="flex items-center gap-3 mb-6">
-                                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="ph-bold ph-info"></i></div>
-                                <h3 class="text-lg font-black text-slate-800">Informasi Dasar</h3>
+                                <div class="w-10 h-10 rounded-xl bg-[#F3F9FD] text-[#5295FF] flex items-center justify-center text-xl border border-[#D0E7F8] shadow-sm"><i class="ph-bold ph-info"></i></div>
+                                <h3 class="text-lg font-black text-[#2A3B52]">Informasi Dasar</h3>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div class="col-span-1 md:col-span-2">
-                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Judul Materi <span class="text-rose-500">*</span></label>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Judul Materi <span class="text-[#D13438]">*</span></label>
                                     <input type="text" name="title" value="{{ old('title') }}" required 
-                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 placeholder:font-normal placeholder:text-slate-400 transition-colors focus:bg-white" 
+                                           class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-[#2A3B52] focus:ring-[#5295FF] focus:border-[#5295FF] h-12 px-4 placeholder:font-normal placeholder:text-slate-400 transition-colors focus:bg-white" 
                                            placeholder="Contoh: Bab 1 - Ekosistem">
                                 </div>
                                 
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Mata Pelajaran <span class="text-rose-500">*</span></label>
+                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Mata Pelajaran <span class="text-[#D13438]">*</span></label>
                                     <div class="relative">
-                                        <select name="subject_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-slate-800 focus:ring-blue-500 focus:border-blue-500 h-12 px-4 appearance-none transition-colors focus:bg-white cursor-pointer">
+                                        <select name="subject_id" required class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-[#2A3B52] focus:ring-[#5295FF] focus:border-[#5295FF] h-12 px-4 appearance-none transition-colors focus:bg-white cursor-pointer">
                                             <option value="">-- Pilih Mapel --</option>
                                             @foreach($subjects as $subject)
                                                 <option value="{{ $subject->id }}" {{ old('subject_id') == $subject->id ? 'selected' : '' }}>{{ $subject->name }}</option>
@@ -100,34 +98,34 @@
                                 </div>
 
                                 {{-- Pilihan Target Siswa --}}
-                                <div class="bg-blue-50/50 p-5 rounded-2xl border border-blue-100/50">
-                                    <label class="block text-xs font-black text-blue-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+                                <div class="bg-[#F3F9FD] p-5 rounded-xl border border-[#D0E7F8]">
+                                    <label class="block text-xs font-black text-[#5295FF] uppercase tracking-wider mb-3 flex items-center gap-2">
                                         <i class="ph-fill ph-users-three"></i> Bagikan Kepada:
                                     </label>
                                     <div class="space-y-4">
                                         <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                                            <label class="inline-flex items-center cursor-pointer group p-2 rounded-lg hover:bg-white hover:shadow-sm transition border border-transparent hover:border-blue-100">
+                                            <label class="inline-flex items-center cursor-pointer group p-2 rounded-lg hover:bg-white hover:shadow-sm transition border border-transparent hover:border-[#D0E7F8]">
                                                 <div class="relative flex items-center">
                                                     <input type="radio" name="target_type" value="class" x-model="targetType" class="peer sr-only">
-                                                    <div class="w-5 h-5 border-2 border-slate-300 rounded-full peer-checked:border-blue-600 peer-checked:bg-blue-600 transition shadow-sm"></div>
+                                                    <div class="w-5 h-5 border-2 border-slate-300 rounded-full peer-checked:border-[#5295FF] peer-checked:bg-[#5295FF] transition shadow-sm"></div>
                                                 </div>
-                                                <span class="ml-2 text-sm font-bold text-slate-600 group-hover:text-blue-700 transition">Satu Kelas</span>
+                                                <span class="ml-2 text-sm font-bold text-slate-600 group-hover:text-[#5295FF] transition">Satu Kelas</span>
                                             </label>
-                                            <label class="inline-flex items-center cursor-pointer group p-2 rounded-lg hover:bg-white hover:shadow-sm transition border border-transparent hover:border-blue-100">
+                                            <label class="inline-flex items-center cursor-pointer group p-2 rounded-lg hover:bg-white hover:shadow-sm transition border border-transparent hover:border-[#D0E7F8]">
                                                 <div class="relative flex items-center">
                                                     <input type="radio" name="target_type" value="grade" x-model="targetType" class="peer sr-only">
-                                                    <div class="w-5 h-5 border-2 border-slate-300 rounded-full peer-checked:border-blue-600 peer-checked:bg-blue-600 transition shadow-sm"></div>
+                                                    <div class="w-5 h-5 border-2 border-slate-300 rounded-full peer-checked:border-[#5295FF] peer-checked:bg-[#5295FF] transition shadow-sm"></div>
                                                 </div>
-                                                <span class="ml-2 text-sm font-bold text-slate-600 group-hover:text-blue-700 transition">Satu Jenjang</span>
+                                                <span class="ml-2 text-sm font-bold text-slate-600 group-hover:text-[#5295FF] transition">Satu Jenjang</span>
                                             </label>
                                         </div>
                                         
-                                        <!-- SELECT KELAS (Dinamis Required) -->
+                                        <!-- SELECT KELAS -->
                                         <div x-show="targetType === 'class'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                                             <div class="relative">
                                                 <select name="class_id" 
                                                         :required="targetType === 'class'"
-                                                        class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-blue-500 h-11 px-3 appearance-none shadow-sm cursor-pointer">
+                                                        class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-[#5295FF] h-11 px-3 appearance-none shadow-sm cursor-pointer text-[#2A3B52]">
                                                     <option value="">-- Pilih Kelas Spesifik --</option>
                                                     @foreach($classes as $class)
                                                         <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
@@ -137,12 +135,12 @@
                                             </div>
                                         </div>
 
-                                        <!-- SELECT JENJANG (Dinamis Required) -->
+                                        <!-- SELECT JENJANG -->
                                         <div x-cloak x-show="targetType === 'grade'" style="display: none;" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
                                             <div class="relative">
                                                 <select name="target_grade" 
                                                         :required="targetType === 'grade'"
-                                                        class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-blue-500 h-11 px-3 appearance-none shadow-sm cursor-pointer">
+                                                        class="w-full text-sm font-bold rounded-xl border-slate-200 bg-white focus:ring-[#5295FF] h-11 px-3 appearance-none shadow-sm cursor-pointer text-[#2A3B52]">
                                                     <option value="7" {{ old('target_grade') == '7' ? 'selected' : '' }}>Semua Kelas 7</option>
                                                     <option value="8" {{ old('target_grade') == '8' ? 'selected' : '' }}>Semua Kelas 8</option>
                                                     <option value="9" {{ old('target_grade') == '9' ? 'selected' : '' }}>Semua Kelas 9</option>
@@ -164,40 +162,40 @@
                                 Pengantar & Resume Materi
                             </label>
                             <div class="relative">
-                                <textarea name="resume" rows="6" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:ring-blue-500 focus:border-blue-500 shadow-sm p-4 text-slate-700 leading-relaxed font-medium placeholder:font-normal placeholder:text-slate-400 transition-colors focus:bg-white" placeholder="Tuliskan rangkuman materi, tujuan pembelajaran, atau instruksi untuk siswa...">{{ old('resume') }}</textarea>
+                                <textarea name="resume" rows="6" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-[#5295FF] focus:border-[#5295FF] shadow-sm p-4 text-[#2A3B52] leading-relaxed font-medium placeholder:font-normal placeholder:text-slate-400 transition-colors focus:bg-white" placeholder="Tuliskan rangkuman materi, tujuan pembelajaran, atau instruksi untuk siswa...">{{ old('resume') }}</textarea>
                                 <div class="absolute bottom-3 right-3 text-slate-300 pointer-events-none"><i class="ph-bold ph-text-aa text-xl"></i></div>
                             </div>
                         </div>
 
                         <div class="h-px bg-slate-100"></div>
 
-                        <!-- BAGIAN 3: LAMPIRAN (DYNAMIC) -->
-                        <div class="bg-slate-50 rounded-2xl border border-slate-100 p-4 md:p-6">
+                         <!-- BAGIAN 3: LAMPIRAN (DYNAMIC) -->
+                        <div class="bg-slate-50 rounded-xl border border-slate-100 p-4 md:p-6">
                             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                                 <div>
-                                    <label class="block text-sm font-black text-slate-800 flex items-center gap-2">
-                                        <i class="ph-fill ph-paperclip text-blue-600"></i> Referensi & Lampiran
+                                    <label class="block text-sm font-black text-[#2A3B52] flex items-center gap-2">
+                                        <i class="ph-fill ph-paperclip text-[#5295FF]"></i> Referensi & Lampiran
                                     </label>
                                     <p class="text-xs text-slate-400 mt-1">Upload file dokumen atau tautkan video pembelajaran.</p>
                                 </div>
                                 <button type="button" @click="attachments.push({id: Date.now(), type: 'file', link: '', name: ''})" 
-                                        class="w-full sm:w-auto text-xs bg-white border border-slate-200 text-blue-700 px-4 py-3 sm:py-2 rounded-xl font-bold hover:bg-blue-50 hover:border-blue-200 transition shadow-sm flex items-center justify-center gap-2 active:scale-95">
+                                        class="w-full sm:w-auto text-xs bg-white border border-slate-200 text-[#5295FF] px-4 py-3 sm:py-2 rounded-lg font-bold hover:bg-[#F3F9FD] hover:border-[#D0E7F8] transition shadow-sm flex items-center justify-center gap-2 active:scale-95">
                                     <i class="ph-bold ph-plus"></i> Tambah Baris
                                 </button>
                             </div>
 
                             <div class="space-y-4">
                                 <template x-for="(att, index) in attachments" :key="att.id">
-                                    <div class="flex flex-col md:flex-row items-start gap-3 p-4 bg-white rounded-xl border border-slate-200 relative group transition-all hover:border-blue-300 hover:shadow-md animate-enter" style="animation-duration: 0.3s">
+                                    <div class="flex flex-col md:flex-row items-start gap-3 p-4 bg-white rounded-xl border border-slate-200 relative group transition-all hover:border-[#5295FF] hover:shadow-md animate-enter" style="animation-duration: 0.3s">
                                         
-                                        <!-- Nomor (Desktop Only) -->
+                                        <!-- Nomor -->
                                         <div class="hidden md:flex w-8 h-8 rounded-lg bg-slate-100 text-slate-500 text-xs font-bold items-center justify-center border border-slate-200 shrink-0 mt-1" x-text="index + 1"></div>
 
                                         <div class="flex-1 w-full grid grid-cols-1 md:grid-cols-12 gap-3">
                                             <!-- Pilihan Tipe -->
                                             <div class="md:col-span-3">
                                                 <div class="relative">
-                                                    <select :name="'attachments['+index+'][type]'" x-model="att.type" class="w-full text-sm font-bold rounded-lg border-slate-200 focus:ring-blue-500 bg-slate-50 cursor-pointer h-10 px-3 appearance-none shadow-sm">
+                                                    <select :name="'attachments['+index+'][type]'" x-model="att.type" class="w-full text-sm font-bold rounded-lg border-slate-200 focus:ring-[#5295FF] bg-slate-50 cursor-pointer h-10 px-3 appearance-none shadow-sm text-[#2A3B52]">
                                                         <option value="file">📄 Dokumen (File)</option>
                                                         <option value="video">📺 Video (YouTube)</option>
                                                         <option value="link">🔗 Link Website</option>
@@ -208,36 +206,31 @@
 
                                             <!-- Input File / Link -->
                                             <div class="md:col-span-5">
-                                                <!-- Jika File -->
-                                                <input x-show="att.type === 'file'" type="file" :name="'attachments['+index+'][file]'" class="block w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition cursor-pointer h-10 border border-slate-100 rounded-lg bg-white">
-                                                
-                                                <!-- Jika Link/Video -->
-                                                <input x-show="att.type !== 'file'" type="text" :name="'attachments['+index+'][link]'" x-model="att.link" class="w-full text-sm font-medium rounded-lg border-slate-200 h-10 placeholder:text-slate-400 focus:ring-blue-500" placeholder="https://...">
+                                                <input x-show="att.type === 'file'" type="file" :name="'attachments['+index+'][file]'" class="block w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#F3F9FD] file:text-[#5295FF] hover:file:bg-[#E0F0FC] transition cursor-pointer h-10 border border-slate-100 rounded-lg bg-white">
+                                                <input x-show="att.type !== 'file'" type="text" :name="'attachments['+index+'][link]'" x-model="att.link" class="w-full text-sm font-medium rounded-lg border-slate-200 h-10 placeholder:text-slate-400 focus:ring-[#5295FF] text-[#2A3B52]" placeholder="https://...">
                                             </div>
 
-                                            <!-- Nama Label (Opsional) -->
+                                            <!-- Nama Label -->
                                             <div class="md:col-span-4">
-                                                <input type="text" :name="'attachments['+index+'][name]'" x-model="att.name" class="w-full text-sm font-medium rounded-lg border-slate-200 h-10 placeholder:text-slate-400 focus:ring-blue-500" placeholder="Label (Opsional)">
+                                                <input type="text" :name="'attachments['+index+'][name]'" x-model="att.name" class="w-full text-sm font-medium rounded-lg border-slate-200 h-10 placeholder:text-slate-400 focus:ring-[#5295FF] text-[#2A3B52]" placeholder="Label (Opsional)">
                                             </div>
                                         </div>
 
                                         <!-- Hapus Baris -->
-                                        <!-- Mobile: Pojok Kanan Atas | Desktop: Sebelah Kanan -->
-                                        <button type="button" @click="attachments = attachments.filter(i => i.id !== att.id)" class="absolute top-2 right-2 md:static md:mt-1 w-8 h-8 flex items-center justify-center rounded-lg bg-rose-50 text-rose-400 hover:bg-rose-500 hover:text-white transition shadow-sm border border-rose-100" title="Hapus Baris">
+                                        <button type="button" @click="attachments = attachments.filter(i => i.id !== att.id)" class="absolute top-2 right-2 md:static md:mt-1 w-8 h-8 flex items-center justify-center rounded-lg bg-white text-[#D13438] hover:bg-[#FDE7E9] border border-[#F4C3C9] transition shadow-sm" title="Hapus Baris">
                                             <i class="ph-bold ph-trash"></i>
                                         </button>
                                     </div>
                                 </template>
                             </div>
                         </div>
+                    </div>             
 
-                    </div>
-
-                    <!-- FOOTER ACTIONS -->
+                     <!-- FOOTER ACTIONS -->
                     <div class="bg-slate-50 px-6 md:px-8 py-6 flex flex-col md:flex-row justify-end gap-3 border-t border-slate-100">
                         <a href="{{ route('lms.materials.index') }}" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition text-center text-sm btn-cancel-confirm active:scale-95">Batal</a>
                         
-                        <button type="submit" class="px-8 py-3 bg-blue-900 text-white font-bold rounded-xl shadow-lg shadow-blue-900/20 hover:bg-blue-800 hover:-translate-y-0.5 transition transform flex items-center justify-center gap-2 text-sm active:scale-95">
+                        <button type="submit" class="px-8 py-3 bg-[#2A3B52] text-white font-bold rounded-xl shadow-md hover:bg-[#182436] transition flex items-center justify-center gap-2 text-sm active:scale-95 border border-transparent">
                             <i class="ph-bold ph-check-circle text-lg"></i>
                             <span>Simpan & Terbitkan</span>
                         </button>
@@ -252,10 +245,9 @@
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            
+        document.addEventListener('DOMContentLoaded', function() {            
             // 1. Proteksi Tombol Batal
-            const cancelButtons = document.querySelectorAll('.btn-cancel-confirm');
+             const cancelButtons = document.querySelectorAll('.btn-cancel-confirm');
             cancelButtons.forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -271,9 +263,9 @@
                         confirmButtonText: 'Ya, Batalkan',
                         cancelButtonText: 'Lanjut Mengisi',
                         customClass: {
-                            popup: 'rounded-[2rem]',
-                            confirmButton: 'rounded-xl px-4 py-2 font-bold',
-                            cancelButton: 'rounded-xl px-4 py-2 font-bold text-slate-600'
+                            popup: 'rounded-xl fluent-modal border-0 font-sans',
+                            confirmButton: 'rounded-lg px-4 py-2.5 font-bold',
+                            cancelButton: 'rounded-lg px-4 py-2.5 font-bold text-slate-600'
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
@@ -284,52 +276,35 @@
             });
 
             // 2. Logic Submit Form yang Lebih Aman
-            const uploadForm = document.getElementById('uploadForm');
+             const uploadForm = document.getElementById('uploadForm');
             if(uploadForm) {
                 uploadForm.addEventListener('submit', function(e) {
-                    // Cegah submit otomatis dulu
                     e.preventDefault();
-
-                    // Cek validitas form (HTML5 standard)
                     if (!this.checkValidity()) {
-                        this.reportValidity(); // Tampilkan bubble error browser
+                        this.reportValidity();
                         return;
                     }
-
-                    // Jika valid, tampilkan Loading
                     Swal.fire({
                         title: 'Sedang Mengupload...',
                         html: 'Mohon jangan tutup halaman ini.<br>Proses upload file sedang berjalan.',
                         allowOutsideClick: false,
                         showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        },
-                        customClass: {
-                            popup: 'rounded-[2rem]',
-                            title: 'text-xl font-bold text-slate-800'
-                        }
+                        didOpen: () => { Swal.showLoading(); },
+                        customClass: { popup: 'rounded-xl fluent-modal border-0 font-sans', title: 'text-xl font-bold text-[#2A3B52]' }
                     });
-
-                    // Submit form secara manual setelah jeda singkat
-                    // (Memberi waktu SweetAlert untuk render)
-                    setTimeout(() => {
-                        this.submit();
-                    }, 300);
+                    setTimeout(() => { this.submit(); }, 300);
                 });
             }
 
             // 3. Notifikasi Error PHP (Jika validasi server gagal)
-            @if($errors->any())
+           @if($errors->any())
                 Swal.fire({
                     icon: 'error',
                     title: 'Gagal Mengupload',
                     text: 'Silakan periksa kembali isian formulir Anda.',
                     confirmButtonText: 'Oke, Saya Perbaiki',
-                    confirmButtonColor: '#e11d48',
-                    customClass: {
-                        popup: 'rounded-[2rem]'
-                    }
+                    confirmButtonColor: '#D13438',
+                    customClass: { popup: 'rounded-xl fluent-modal border-0 font-sans' }
                 });
             @endif
         });
