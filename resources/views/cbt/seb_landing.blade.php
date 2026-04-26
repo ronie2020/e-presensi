@@ -14,29 +14,25 @@
     {{-- FIX SEB: Async scripts agar tidak memblokir render --}}
     <script src="https://unpkg.com/@phosphor-icons/web" async></script>
     
-    {{-- PENGEMBANGAN: Tambahkan SweetAlert2 untuk Alert Fungsional --}}
+    {{-- SweetAlert2 untuk Alert Fungsional --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    {{-- 
-        FIX HOSTING:
-        Pastikan folder 'public/build' sudah ada di hosting (via git pull atau upload manual).
-    --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased bg-slate-50 text-slate-800">
+<body class="font-sans antialiased bg-[#f8fafc] text-[#2c3f61]">
     
-    <!-- NAVBAR (DARK BLUE THEME) -->
-    <nav class="bg-gray-900 bg-gradient-to-r from-slate-900 to-blue-900 border-b border-white/10 fixed w-full z-50 top-0 shadow-lg">
+    <!-- NAVBAR (MICROSOFT ELEVATE THEME - GLASSMORPHISM) -->
+    <nav class="bg-white/80 backdrop-blur-lg border-b border-slate-200/60 fixed w-full z-50 top-0 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20">
                 <!-- Logo & Judul -->
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center text-white border border-white/10 shadow-inner">
+                    <div class="w-11 h-11 bg-gradient-to-br from-[#56bbf1] to-[#0d52a1] rounded-2xl flex items-center justify-center text-white shadow-md shadow-[#56bbf1]/30">
                         <i class="ph-bold ph-student text-2xl"></i>
                     </div>
                     <div class="leading-tight">
-                        <h1 class="font-extrabold text-white text-lg tracking-tight">Portal Ujian</h1>
-                        <p class="text-[10px] font-bold text-blue-200 uppercase tracking-widest">CBT System</p>
+                        <h1 class="font-black text-[#2c3f61] text-lg tracking-tight">Portal Ujian</h1>
+                        <p class="text-[10px] font-bold text-[#0d52a1] uppercase tracking-widest">Siswa</p>
                     </div>
                 </div>
 
@@ -44,16 +40,16 @@
                 <div class="flex items-center gap-4">
                     <div class="hidden md:block text-right mr-2">
                         @if(Auth::guard('student')->check())
-                            <p class="text-sm font-bold text-white">{{ Auth::guard('student')->user()->name }}</p>
-                            <p class="text-xs text-blue-300 font-mono">{{ Auth::guard('student')->user()->student_id }}</p>
+                            <p class="text-sm font-bold text-[#2c3f61]">{{ Auth::guard('student')->user()->name }}</p>
+                            <p class="text-xs text-slate-400 font-mono font-bold">{{ Auth::guard('student')->user()->student_id }}</p>
                         @endif
                     </div>
 
-                    <!-- Tombol Logout (Diubah menggunakan fungsi JS konfirmasi) -->
+                    <!-- Tombol Logout -->
                     <form id="logoutForm" method="POST" action="{{ route('student.logout') }}">
                         @csrf
-                        <button type="button" onclick="confirmLogout()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-lg shadow-rose-900/20 active:scale-95">
-                            <i class="ph-bold ph-sign-out text-lg"></i>
+                        <button type="button" onclick="confirmLogout()" class="px-4 py-2.5 bg-white hover:bg-rose-50 border border-rose-100 hover:border-rose-200 text-rose-500 rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-sm active:scale-95">
+                            <i class="ph-bold ph-power text-lg"></i>
                             <span class="hidden sm:inline">Keluar</span>
                         </button>
                     </form>
@@ -64,14 +60,16 @@
 
     <!-- CONTENT WRAPPER -->
     <div class="pt-28 pb-12 min-h-screen relative overflow-hidden">
-        {{-- Background Decoration --}}
-        <div class="absolute inset-0 z-0 opacity-30 pointer-events-none">
-            <div class="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-blue-100/50 to-transparent"></div>
+        {{-- Background Decoration (Elevate Soft Cyan) --}}
+        <div class="absolute inset-0 z-0 pointer-events-none">
+            <div class="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#e5eff5]/80 to-transparent"></div>
+            <div class="absolute -top-32 -right-32 w-96 h-96 bg-[#56bbf1]/10 rounded-full blur-3xl"></div>
+            <div class="absolute top-40 -left-32 w-80 h-80 bg-[#f4d1c0]/20 rounded-full blur-3xl"></div>
         </div>
 
         @if(isset($header))
             <header class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 relative z-10">
-                <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-slate-200/50 border border-slate-100">
+                <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-[#56bbf1]/5 border border-slate-100">
                     {{ $header }}
                 </div>
             </header>
@@ -85,8 +83,6 @@
     {{-- SCRIPTS UNTUK ALERT FUNGSIONAL --}}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            
-            // 1. Setup SweetAlert Toast untuk Notifikasi Global (Mirip Notifikasi HP)
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'top-end',
@@ -94,7 +90,7 @@
                 timer: 4000,
                 timerProgressBar: true,
                 customClass: {
-                    popup: 'rounded-2xl shadow-xl border border-slate-100 mt-20' // mt-20 agar tidak tertutup navbar fixed
+                    popup: 'rounded-2xl shadow-xl border border-slate-100 mt-20'
                 },
                 didOpen: (toast) => {
                     toast.addEventListener('mouseenter', Swal.stopTimer)
@@ -102,33 +98,20 @@
                 }
             });
 
-            // Tangkap Session Flash dari Laravel Controller lalu ubah jadi Toast Interaktif
-            @if(session('success'))
-                Toast.fire({ icon: 'success', title: '{!! session('success') !!}' });
-            @endif
-
-            @if(session('error'))
-                Toast.fire({ icon: 'error', title: '{!! session('error') !!}' });
-            @endif
-            
-            @if(session('warning'))
-                Toast.fire({ icon: 'warning', title: '{!! session('warning') !!}' });
-            @endif
-            
-            @if(session('info'))
-                Toast.fire({ icon: 'info', title: '{!! session('info') !!}' });
-            @endif
+            @if(session('success')) Toast.fire({ icon: 'success', title: '{!! session('success') !!}' }); @endif
+            @if(session('error')) Toast.fire({ icon: 'error', title: '{!! session('error') !!}' }); @endif
+            @if(session('warning')) Toast.fire({ icon: 'warning', title: '{!! session('warning') !!}' }); @endif
+            @if(session('info')) Toast.fire({ icon: 'info', title: '{!! session('info') !!}' }); @endif
         });
 
-        // 2. Fungsi Konfirmasi Logout Fungsional
         function confirmLogout() {
             Swal.fire({
                 title: 'Akhiri Sesi?',
                 text: "Anda akan keluar dari portal ujian. Pastikan semua ujian Anda telah selesai dikumpulkan.",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#e11d48', // Warna Rose/Merah
-                cancelButtonColor: '#64748b', // Warna Slate/Abu-abu
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
                 confirmButtonText: 'Ya, Keluar',
                 cancelButtonText: 'Batal',
                 customClass: {
@@ -138,20 +121,13 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Tampilkan loading kecil saat memproses logout
                     Swal.fire({
                         title: 'Memproses...',
                         text: 'Sedang mengeluarkan akun Anda',
                         allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading()
-                        },
-                        customClass: {
-                            popup: 'rounded-[2rem]'
-                        }
+                        didOpen: () => { Swal.showLoading() },
+                        customClass: { popup: 'rounded-[2rem]' }
                     });
-                    
-                    // Submit form logout
                     document.getElementById('logoutForm').submit();
                 }
             });

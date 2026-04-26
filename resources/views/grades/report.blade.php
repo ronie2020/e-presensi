@@ -14,7 +14,6 @@
         /* PENGATURAN KERTAS A4 */
         @page { 
             size: A4 portrait; 
-            /* [PERBAIKAN] Margin diset di sini agar BERULANG di setiap lembar halaman (Atas/Bawah 15mm, Kiri/Kanan 20mm) */
             margin: 15mm 20mm; 
         }
         
@@ -53,19 +52,15 @@
             pointer-events: none;
         }
 
-        /* ========================================================= */
-        /* MODIFIKASI SAAT DICETAK (PRINT MODE)                      */
-        /* ========================================================= */
+        /* MODIFIKASI SAAT DICETAK (PRINT MODE) */
         @media print {
             body { background: none; margin: 0; padding: 0; }
             .no-print { display: none !important; }
             
-            /* Lepaskan format kertas agar browser leluasa memotong halaman */
             .sheet { 
                 width: 100% !important; 
                 max-width: 100% !important;
                 margin: 0 !important; 
-                /* [KUNCI] Padding dinolkan saat print karena margin @page sudah mengambil alih tugasnya */
                 padding: 0 !important; 
                 box-shadow: none !important; 
                 border: none !important;
@@ -73,31 +68,24 @@
                 box-sizing: border-box !important;
             }
 
-            /* Watermark dibuat berulang di setiap halaman */
-            .watermark {
-                position: fixed !important;
-            }
+            .watermark { position: fixed !important; }
 
-            /* Matikan efek zoom saat print agar dokumen tidak menjadi gambar beku */
             .zoom-wrapper {
                 transform: none !important;
                 width: 100% !important;
                 margin: 0 !important;
             }
 
-            /* PERBAIKAN FRAGMENTASI TABEL & KOTAK */
             table { page-break-inside: auto !important; width: 100% !important; }
             tr, td, th { page-break-inside: avoid !important; break-inside: avoid !important; }
             thead { display: table-header-group !important; }
             tfoot { display: table-footer-group !important; }
 
-            /* Mencegah Kotak Catatan / Area TTD terpotong pisah halaman */
             div[class*="border"], div[class*="flex"] {
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
             }
             
-            /* Mematikan sifat stretch flexbox yang merusak spasi TTD */
             .h-full, .flex-grow {
                 height: auto !important;
                 flex-grow: 0 !important;
@@ -106,7 +94,6 @@
     </style>
 </head>
 
-{{-- Alpine JS ditempatkan di Body --}}
 <body class="font-sans text-slate-800" 
       x-data="{ 
           scale: 1, 
@@ -114,27 +101,27 @@
           zoomOut() { if(this.scale > 0.5) this.scale -= 0.1 } 
       }">
 
-    <!-- TOOLBAR ATAS (Hanya Tampil di Layar, Mirip desain print.blade.php) -->
+    <!-- TOOLBAR ATAS (Hanya Tampil di Layar) -->
     <div class="no-print fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm p-4 flex flex-col md:flex-row justify-between items-center gap-4 z-50">
         
         <!-- Kiri: Info Siswa -->
         <div class="flex items-center gap-4 w-full md:w-auto">
-            <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-600/20">
+            <div class="bg-[#0d52a1] p-2.5 rounded-xl text-white shadow-lg shadow-[#0d52a1]/20">
                 <i class="ph-bold ph-student text-xl"></i>
             </div>
             <div>
-                <h1 class="font-black text-slate-800 text-sm md:text-base font-sans">Pratinjau E-Rapor</h1>
-                <p class="text-xs text-slate-500 font-sans font-bold">{{ $student->name }} | NISN: {{ $student->student_id }}</p>
+                <h1 class="font-black text-[#2c3f61] text-sm md:text-base font-sans">Pratinjau E-Rapor</h1>
+                <p class="text-xs text-[#2c3f61]/70 font-sans font-bold">{{ $student->name }} | NISN: {{ $student->student_id }}</p>
             </div>
         </div>
 
         <!-- Tengah: Navigasi Prev/Next & Zoom -->
-        <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200 w-full md:w-auto justify-center shadow-inner">
+        <div class="flex items-center gap-2 bg-[#e5eff5]/50 p-1.5 rounded-xl border border-slate-200 w-full md:w-auto justify-center shadow-inner">
             <!-- Navigasi Siswa -->
             <div class="flex items-center mr-2 border-r border-slate-300 pr-2 gap-1">
                 @if(isset($prevStudentId) && $prevStudentId)
                     <a href="{{ route('grades.report', ['student_id' => $prevStudentId, 'year' => $year, 'semester' => $semester]) }}" 
-                       class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 hover:text-blue-600 transition shadow-sm border border-transparent hover:border-slate-200" title="Siswa Sebelumnya">
+                       class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 hover:text-[#0d52a1] transition shadow-sm border border-transparent hover:border-slate-200" title="Siswa Sebelumnya">
                         <i class="ph-bold ph-caret-left"></i>
                     </a>
                 @else
@@ -143,11 +130,11 @@
                     </button>
                 @endif
                 
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mx-1">Navigasi</span>
+                <span class="text-[10px] font-bold text-[#2c3f61]/60 uppercase tracking-wider mx-1">Navigasi</span>
                 
                 @if(isset($nextStudentId) && $nextStudentId)
                     <a href="{{ route('grades.report', ['student_id' => $nextStudentId, 'year' => $year, 'semester' => $semester]) }}" 
-                       class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 hover:text-blue-600 transition shadow-sm border border-transparent hover:border-slate-200" title="Siswa Selanjutnya">
+                       class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 hover:text-[#0d52a1] transition shadow-sm border border-transparent hover:border-slate-200" title="Siswa Selanjutnya">
                         <i class="ph-bold ph-caret-right"></i>
                     </a>
                 @else
@@ -161,7 +148,7 @@
             <button @click="zoomOut()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 transition shadow-sm border border-transparent hover:border-slate-200">
                 <i class="ph-bold ph-minus"></i>
             </button>
-            <span class="text-xs font-mono font-bold text-slate-600 w-12 text-center select-none" x-text="Math.round(scale * 100) + '%'"></span>
+            <span class="text-xs font-mono font-bold text-[#2c3f61] w-12 text-center select-none" x-text="Math.round(scale * 100) + '%'"></span>
             <button @click="zoomIn()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white text-slate-600 transition shadow-sm border border-transparent hover:border-slate-200">
                 <i class="ph-bold ph-plus"></i>
             </button>
@@ -169,25 +156,23 @@
 
         <!-- Kanan: Tombol Aksi -->
         <div class="flex gap-3 w-full md:w-auto justify-end">
-            <a href="{{ route('grades.list', ['class_id' => $student->class_id, 'academic_year' => $year, 'semester' => $semester]) }}" class="px-5 py-2.5 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-800 transition shadow-sm font-sans flex items-center gap-2">
+            <a href="{{ route('grades.list', ['class_id' => $student->class_id, 'academic_year' => $year, 'semester' => $semester]) }}" class="px-5 py-2.5 text-xs font-bold text-[#2c3f61] bg-white border border-[#2c3f61] rounded-xl hover:bg-slate-50 transition shadow-sm font-sans flex items-center gap-2">
                 <i class="ph-bold ph-arrow-left"></i> Kembali
             </a>
-            <button onclick="window.print()" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-600/30 font-sans flex items-center gap-2">
+            <button onclick="window.print()" class="px-5 py-2.5 text-xs font-bold text-white bg-[#2c3f61] rounded-xl hover:bg-[#1c2940] transition shadow-lg shadow-[#2c3f61]/20 font-sans flex items-center gap-2">
                 <i class="ph-bold ph-printer text-lg"></i> Cetak / PDF
             </button>
         </div>
     </div>
 
-    <!-- Spacer untuk memberikan jarak karena toolbar berposisi fixed -->
+    <!-- Spacer -->
     <div class="no-print h-32 md:h-24"></div>
 
     <!-- AREA DOKUMEN / KERTAS -->
     <div class="flex justify-center w-full pb-16">
         
-        <!-- Wrapper AlpineJS untuk memproses Zoom Layar -->
         <div class="zoom-wrapper origin-top transition-transform duration-200" :style="`transform: scale(${scale})`">
             
-            <!-- Elemen Utama Kertas -->
             <div class="sheet font-serif text-slate-900">
                 
                 {{-- Watermark --}}

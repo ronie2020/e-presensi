@@ -21,18 +21,18 @@
         .trix-content ol { list-style-type: decimal; padding-left: 1.5rem; }
     </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800 selection:bg-cyan-100 selection:text-cyan-900">
+<body class="bg-[#e5eff5]/30 font-sans text-[#2c3f61] selection:bg-[#56bbf1]/30 selection:text-[#0d52a1]">
 
-    {{-- HEADER --}}
+    {{-- HEADER MICROSOFT ELEVATE THEME --}}
     <div class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
         <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center text-white shadow-md">
+                <div class="w-10 h-10 bg-gradient-to-br from-[#56bbf1] to-[#0d52a1] rounded-xl flex items-center justify-center text-white shadow-md shadow-[#56bbf1]/20">
                     <i class="ph-bold ph-desktop text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="font-black text-lg text-slate-800 leading-tight">{{ $bank->title }}</h1>
-                    <p class="text-[10px] font-bold text-cyan-600 uppercase tracking-wide">Mode Pratinjau Siswa • {{ $bank->subject_name }}</p>
+                    <h1 class="font-black text-lg text-[#2c3f61] leading-tight">{{ $bank->title }}</h1>
+                    <p class="text-[10px] font-bold text-[#0d52a1] uppercase tracking-wide">Mode Pratinjau Siswa • {{ $bank->subject_name }}</p>
                 </div>
             </div>
             <button onclick="window.close()" class="px-5 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-rose-50 hover:text-rose-600 transition-colors border border-transparent hover:border-rose-200">
@@ -46,10 +46,10 @@
         @foreach($bank->questions as $index => $q)
             @php $qType = $q->question_type ?? 'choice'; @endphp
             
-            <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-[0_2px_10px_-3px_rgba(6,182,212,0.1)] border border-slate-100 flex flex-col md:flex-row gap-4 md:gap-6 transition-all hover:border-cyan-200">
+            <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-[0_2px_10px_-3px_rgba(86,187,241,0.1)] border border-slate-100 flex flex-col md:flex-row gap-4 md:gap-6 transition-all hover:border-[#56bbf1]/40 hover:shadow-[#56bbf1]/10">
                 
                 {{-- Nomer Soal --}}
-                <div class="w-12 h-12 shrink-0 bg-cyan-50 rounded-2xl flex items-center justify-center font-black text-cyan-600 border border-cyan-100 shadow-sm">
+                <div class="w-12 h-12 shrink-0 bg-[#56bbf1]/10 rounded-2xl flex items-center justify-center font-black text-[#0d52a1] border border-[#56bbf1]/20 shadow-sm">
                     {{ $index + 1 }}
                 </div>
 
@@ -64,7 +64,7 @@
                     @endif
 
                     {{-- Teks Soal --}}
-                    <div class="prose prose-slate max-w-none mb-6 text-base leading-relaxed trix-content text-slate-700">
+                    <div class="prose prose-slate max-w-none mb-6 text-base leading-relaxed trix-content text-[#2c3f61]">
                         {!! $q->question_text !!}
                     </div>
 
@@ -77,11 +77,11 @@
                                     $imgVal = isset($q->{'image_'.$opt}) ? $q->{'image_'.$opt} : ($q->options['image_'.$opt] ?? null);
                                 @endphp
                                 @if($val !== '' || $imgVal)
-                                    <label class="flex items-start gap-4 p-4 rounded-2xl border-2 border-slate-100 hover:border-cyan-300 hover:bg-cyan-50/50 cursor-pointer transition-all group">
-                                        <input type="radio" name="preview_ans_{{ $q->id }}" class="mt-1 w-5 h-5 border-slate-300 text-cyan-600 focus:ring-cyan-500">
+                                    <label class="flex items-start gap-4 p-4 rounded-2xl border-2 border-slate-100 hover:border-[#56bbf1] hover:bg-[#e5eff5]/50 cursor-pointer transition-all group">
+                                        <input type="radio" name="preview_ans_{{ $q->id }}" class="mt-1 w-5 h-5 border-slate-300 text-[#0d52a1] focus:ring-[#56bbf1]">
                                         <div class="flex-1">
-                                            <span class="font-black text-slate-400 group-hover:text-cyan-600 transition-colors mr-2">{{ $opt }}.</span>
-                                            <span class="font-medium text-slate-700">{!! $val !!}</span>
+                                            <span class="font-black text-slate-400 group-hover:text-[#0d52a1] transition-colors mr-2">{{ $opt }}.</span>
+                                            <span class="font-medium text-[#2c3f61]">{!! $val !!}</span>
                                             @if($imgVal)
                                                 <img src="{{ asset('storage/' . $imgVal) }}" class="mt-3 max-h-32 rounded-xl border border-slate-200 object-contain bg-white shadow-sm">
                                             @endif
@@ -102,8 +102,8 @@
                         </div>
 
                     @elseif($qType == 'matching')
-                        <div class="bg-slate-50 p-6 rounded-[1.5rem] border border-slate-200 shadow-inner">
-                            <p class="text-xs font-bold text-slate-500 mb-5 uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-arrows-left-right text-cyan-500"></i> Pasangkan Jawaban Berikut:</p>
+                        <div class="bg-[#e5eff5]/40 p-6 rounded-[1.5rem] border border-[#56bbf1]/20 shadow-inner">
+                            <p class="text-xs font-bold text-[#2c3f61]/60 mb-5 uppercase tracking-wide flex items-center gap-2"><i class="ph-bold ph-arrows-left-right text-[#0d52a1]"></i> Pasangkan Jawaban Berikut:</p>
                             @php 
                                 $pairs = is_string($q->options) ? json_decode($q->options, true)['pairs'] ?? [] : $q->options['pairs'] ?? [];
                             @endphp
@@ -111,20 +111,20 @@
                                 @foreach($pairs as $p)
                                     <div class="flex flex-col sm:flex-row items-center gap-4">
                                         {{-- Kiri --}}
-                                        <div class="flex-1 w-full bg-white p-4 rounded-2xl border border-slate-200 text-center font-medium shadow-sm">
+                                        <div class="flex-1 w-full bg-white p-4 rounded-2xl border border-slate-200 text-center font-medium shadow-sm text-[#2c3f61]">
                                             @if(isset($p['left_image']) && $p['left_image'])
                                                 <img src="{{ asset('storage/' . $p['left_image']) }}" class="h-20 mx-auto mb-3 rounded-lg object-contain border border-slate-100">
                                             @endif
                                             {{ $p['left'] }}
                                         </div>
-                                        <div class="shrink-0 text-cyan-300 rotate-90 sm:rotate-0"><i class="ph-bold ph-arrow-right text-2xl"></i></div>
+                                        <div class="shrink-0 text-[#56bbf1] rotate-90 sm:rotate-0"><i class="ph-bold ph-arrow-right text-2xl"></i></div>
                                         {{-- Kanan (Dropdown Mockup) --}}
                                         <div class="flex-1 w-full relative group">
-                                            <select class="w-full bg-white p-4 rounded-2xl border-2 border-dashed border-slate-300 text-center font-bold text-slate-500 appearance-none cursor-pointer hover:border-cyan-400 hover:text-cyan-600 transition-colors shadow-sm outline-none">
+                                            <select class="w-full bg-white p-4 rounded-2xl border-2 border-dashed border-slate-300 text-center font-bold text-[#2c3f61] appearance-none cursor-pointer hover:border-[#56bbf1] hover:text-[#0d52a1] transition-colors shadow-sm outline-none">
                                                 <option>-- Pilih Pasangan --</option>
                                                 <option>{{ $p['right'] }}</option>
                                             </select>
-                                            <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-cyan-500 transition-colors"></i>
+                                            <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-[#0d52a1] transition-colors"></i>
                                         </div>
                                     </div>
                                 @endforeach
@@ -132,7 +132,7 @@
                         </div>
 
                     @elseif($qType == 'essay')
-                        <textarea rows="5" class="w-full p-5 rounded-[1.5rem] border-2 border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 text-slate-700 transition-all font-medium placeholder-slate-400 shadow-inner" placeholder="Ketik jawaban urain di sini..."></textarea>
+                        <textarea rows="5" class="w-full p-5 rounded-[1.5rem] border-2 border-slate-200 bg-slate-50 focus:bg-white focus:border-[#56bbf1] focus:ring-4 focus:ring-[#56bbf1]/10 text-[#2c3f61] transition-all font-medium placeholder-slate-400 shadow-inner" placeholder="Ketik jawaban urain di sini..."></textarea>
                     @endif
 
                 </div>

@@ -4,15 +4,21 @@
     <meta charset="UTF-8">
     <title>Cetak Kartu Peserta Ujian</title>
     <style>
+        /* Import font modern untuk ID Card (Jika internet tersedia saat print) */
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+
         @page { 
             size: A4; 
             margin: 1cm; 
         }
         body { 
-            font-family: 'Arial', sans-serif; 
-            -webkit-print-color-adjust: exact; 
+            font-family: 'Plus Jakarta Sans', 'Arial', sans-serif; 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important;
             margin: 0;
             padding: 0;
+            color: #000;
+            background-color: #fff;
         }
         
         .container {
@@ -23,20 +29,22 @@
         }
 
         .card {
-            border: 1px solid #000;
+            border: 1px solid #64748b; /* Warna border yang lebih halus dari hitam pekat */
+            border-radius: 16px; /* Sisi melengkung modern Elevate */
             position: relative;
-            /* DIPERBAIKI: Tinggi dinaikkan jadi 320px agar muat */
             height: 320px; 
             page-break-inside: avoid;
-            background: #fff;
+            background: #ffffff;
             display: flex;
             flex-direction: column;
+            overflow: hidden; /* Agar sudut background terpotong melengkung */
         }
 
         /* --- HEADER --- */
         .header {
-            padding: 5px 10px; /* Diperkecil sedikit */
-            border-bottom: 3px double #000;
+            padding: 8px 12px;
+            background-color: #f8fafc; /* Latar abu-abu sangat muda */
+            border-bottom: 2px solid #2c3f61; /* Aksen garis Navy Elevate */
             display: flex;
             align-items: center;
             justify-content: space-between; 
@@ -46,250 +54,220 @@
         .logo-box {
             width: 45px;
             height: 45px;
-            display: flex; 
-            align-items: center; 
+            display: flex;
+            align-items: center;
             justify-content: center;
         }
-        .logo-box img { 
-            max-width: 100%; 
-            max-height: 100%; 
-            object-fit: contain; 
+        .logo-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
 
-        .school-info { 
-            flex: 1; 
-            text-align: center; 
-            line-height: 1.2;
+        .kop-text {
+            flex: 1;
+            text-align: center;
+            padding: 0 10px;
         }
-        .school-info h2 { 
-            margin: 0; 
-            font-size: 12pt; 
-            font-weight: 800; 
-            text-transform: uppercase; 
-            color: #000;
+        .kop-title {
+            font-size: 13px;
+            font-weight: 800;
+            margin: 0 0 2px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .school-info p { 
-            margin: 0; 
-            font-size: 8pt; 
-            font-weight: bold;
-            color: #000;
+        .kop-sub {
+            font-size: 9px;
+            margin: 0;
+            font-weight: 600;
         }
-        .school-info .small {
-            font-size: 7pt;
-            font-weight: normal;
+        .kop-address {
+            font-size: 8px;
+            margin: 0;
+            color: #475569;
         }
 
-        /* --- BODY (Foto & Biodata) --- */
-        .body { 
-            padding: 10px 15px; 
-            display: flex; 
-            gap: 15px; 
-            flex: 1; /* Mengisi ruang sisa */
-            align-items: flex-start;
+        .photo-box {
+            width: 45px;
+            height: 55px;
+            border: 1px solid #94a3b8;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: #94a3b8;
+            background-color: #fff;
+            text-align: center;
+        }
+
+        /* --- BODY KARTU --- */
+        .body-card {
+            flex: 1;
+            padding: 12px 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
-        /* Area Foto */
-        .photo-area {
-            width: 75px; 
-            height: 100px; /* Rasio 3x4 */
-            border: 1px solid #999;
-            background: #f0f0f0;
-            overflow: hidden; 
-            position: relative;
-            flex-shrink: 0;
-        }
-        
-        .photo-area img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; 
-            display: block;
-            position: relative; 
-            z-index: 2; 
+        .card-title {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            color: #0f172a;
         }
 
-        .photo-placeholder {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            color: #aaa;
-            z-index: 1;
+        .data-row {
+            display: flex;
+            font-size: 11px;
+            margin-bottom: 6px;
+            line-height: 1.4;
         }
-
-        /* Tabel Biodata */
-        .student-info { 
-            flex: 1; 
-            font-size: 9pt; 
-            color: #000;
+        .data-label {
+            width: 85px;
+            font-weight: 600;
+            color: #475569;
         }
-        .student-info table { 
-            width: 100%; 
-            border-collapse: collapse; 
-        }
-        .student-info td { 
-            padding: 3px 0; /* Sedikit jarak antar baris */
-            vertical-align: top; 
-        }
-        .label { 
-            font-weight: bold; 
-            width: 80px; 
-        }
-        .sep {
+        .data-colon {
             width: 10px;
-            text-align: center;
+            font-weight: 600;
+        }
+        .data-value {
+            flex: 1;
+            font-weight: 800;
+            color: #0f172a;
         }
 
-        /* --- SEPARATOR & FOOTER --- */
-        .separator-line {
-            border-top: 1px dashed #000;
-            margin: 0 10px;
-            opacity: 0.5;
+        .credential-box {
+            margin-top: 5px;
+            background-color: #f1f5f9;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 6px 10px;
+            display: flex;
+            justify-content: space-between;
         }
 
+        /* --- FOOTER (QR & TTD) --- */
         .footer {
-            padding: 8px 15px 12px 15px; /* Padding bawah agak besar agar tidak mepet garis */
-            display: flex; 
-            justify-content: space-between; /* QR Kiri, TTD Kanan */
-            align-items: flex-end; 
-            /* DIPERBAIKI: Hapus height fix, gunakan margin-top auto agar nempel bawah */
-            margin-top: auto; 
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 15px 10px 15px;
+            height: 80px;
         }
 
-        /* QR Code di Kiri */
         .qr-area {
-            width: 60px;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .qr-code {
-            padding: 2px;
+            width: 60px;
+            height: 60px;
+            padding: 4px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
             background: #fff;
-            border: 1px solid #ddd;
-            display: inline-block;
+        }
+        .qr-text {
+            font-size: 7px;
+            margin-top: 3px;
+            font-weight: 700;
+            color: #64748b;
         }
 
-        /* Tanda Tangan di Kanan */
         .signature {
-            font-size: 8pt;
-            text-align: center; 
-            line-height: 1.3;
-            min-width: 140px; 
+            text-align: center;
+            width: 130px;
         }
-        .signature .date { margin-bottom: 2px; }
-        
-        /* Jarak untuk tanda tangan manual */
-        .signature .space { 
-            height: 40px; 
-        } 
-        
-        .signature .name { 
-            font-weight: bold; 
-            text-decoration: underline; 
+        .date {
+            font-size: 9px;
+            margin-bottom: 2px;
         }
-        
-        .signature .nip {
-            font-size: 7pt;
+        .role {
+            font-size: 9px;
+            font-weight: 700;
         }
-
-        @media print {
-            .no-print { display: none; }
-            button { display: none; }
-            body { margin: 0; }
+        .space {
+            height: 35px; /* Ruang untuk TTD atau Stempel */
+        }
+        .name {
+            font-size: 9px;
+            font-weight: 800;
+            text-decoration: underline;
+        }
+        .nip {
+            font-size: 8px;
         }
     </style>
+    
+    <!-- QRCode Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
-    <div class="no-print" style="margin-bottom: 20px; text-align: center; padding: 20px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
-        <h3 style="margin-top: 0; font-family: sans-serif;">Preview Kartu Ujian</h3>
-        <p>Pastikan settingan printer: Paper A4, Margin Default, Scale 100%</p>
-        <button onclick="window.print()" style="padding: 12px 25px; font-weight: bold; background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">
-            🖨️ Cetak Sekarang
-        </button>
-    </div>
-
     <div class="container">
         @foreach($students as $index => $student)
             <div class="card">
-                {{-- HEADER --}}
+                
+                {{-- HEADER KOP --}}
                 <div class="header">
                     <div class="logo-box">
-                        <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Dinas" onerror="this.style.opacity=0">
-                    </div> 
-                    
-                    <div class="school-info">
-                        <h2>KARTU PESERTA UJIAN</h2>
-                        <p>SMP NEGERI 3 LAKBOK</p>
-                        <p class="small">TAHUN AJARAN {{ date('Y') }}/{{ date('Y')+1 }}</p>
+                        {{-- Ganti logo dengan logo sekolah --}}
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo" onerror="this.style.display='none'">
                     </div>
-
-                    <div class="logo-box">
-                        <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" onerror="this.style.opacity=0">
+                    <div class="kop-text">
+                        <div class="kop-title">SMP NEGERI 3 LAKBOK</div>
+                        <div class="kop-sub">KARTU PESERTA UJIAN (CBT)</div>
+                        <div class="kop-address">Tahun Ajaran {{ date('Y') }}/{{ date('Y', strtotime('+1 year')) }}</div>
+                    </div>
+                    <div class="photo-box">
+                        3x4
                     </div>
                 </div>
 
-                {{-- BODY --}}
-                <div class="body">
-                    {{-- FOTO --}}
-                    <div class="photo-area">
-                        @php
-                            $photoPath = null;
-                            if (!empty($student->photo_path)) $photoPath = $student->photo_path; 
-                            elseif (!empty($student->image)) $photoPath = $student->image;
-                            elseif (!empty($student->photo)) $photoPath = $student->photo;
-                        @endphp
+                {{-- BODY DATA --}}
+                <div class="body-card">
+                    <div class="data-row">
+                        <div class="data-label">Nama Lengkap</div>
+                        <div class="data-colon">:</div>
+                        <div class="data-value">{{ $student->name }}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">Kelas</div>
+                        <div class="data-colon">:</div>
+                        <div class="data-value">{{ $student->schoolClass->name ?? '-' }}</div>
+                    </div>
+                    <div class="data-row">
+                        <div class="data-label">NIS / NISN</div>
+                        <div class="data-colon">:</div>
+                        <div class="data-value">{{ $student->nis ?? '-' }} / {{ $student->nisn ?? '-' }}</div>
+                    </div>
 
-                        <div class="photo-placeholder">
-                            <div style="font-size: 20px;">👤</div>
-                            <div style="font-size: 8px;">FOTO</div>
+                    {{-- BOX KREDENSIAL --}}
+                    <div class="credential-box">
+                        <div class="data-row" style="margin-bottom: 0;">
+                            <div class="data-label" style="width: 50px;">Username</div>
+                            <div class="data-colon">:</div>
+                            <div class="data-value" style="font-family: monospace; font-size: 12px;">{{ $student->username ?? $student->student_id }}</div>
                         </div>
-
-                        @if($photoPath)
-                            <img src="{{ asset('storage/' . $photoPath) }}" alt="Foto" onerror="this.style.display='none'">
-                        @endif
-                    </div>
-                    
-                    {{-- BIODATA --}}
-                    <div class="student-info">
-                        <table>
-                            <tr>
-                                <td class="label">Nama</td>
-                                <td class="sep">:</td>
-                                <td><b>{{ strtoupper($student->name) }}</b></td>
-                            </tr>
-                            <tr>
-                                <td class="label">NISN</td>
-                                <td class="sep">:</td>
-                                <td>{{ $student->nisn ?? $student->nis ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="label">Kelas</td>
-                                <td class="sep">:</td>
-                                <td>{{ $student->schoolClass->name ?? '-' }}</td>
-                            </tr>
-                            <tr>
-                                <td class="label">Username</td>
-                                <td class="sep">:</td>
-                                <td><b>{{ $student->student_id }}</b></td>
-                            </tr>
-                            <tr>
-                                <td class="label">Password</td>
-                                <td class="sep">:</td>
-                                <td><b>{{ $student->student_id }}</b></td>
-                            </tr>
-                        </table>
+                        <div class="data-row" style="margin-bottom: 0;">
+                            <div class="data-label" style="width: 50px;">Password</div>
+                            <div class="data-colon">:</div>
+                            <div class="data-value" style="font-family: monospace; font-size: 12px;">{{ $student->plain_password ?? '********' }}</div>
+                        </div>
                     </div>
                 </div>
-
-                {{-- SEPARATOR --}}
-                <div class="separator-line"></div>
 
                 {{-- FOOTER --}}
                 <div class="footer">
                     {{-- KIRI: QR CODE --}}
                     <div class="qr-area">
                         <div id="qr-{{ $index }}" class="qr-code"></div>
+                        <div class="qr-text">Scan for Login</div>
                     </div>
 
                     {{-- KANAN: TANDA TANGAN --}}
@@ -306,13 +284,13 @@
                     </div>
                 </div>
 
-                {{-- Generate QR --}}
+                {{-- Generate QR Script --}}
                 <script>
                     new QRCode(document.getElementById("qr-{{ $index }}"), {
                         text: "{{ $student->login_url ?? 'NoData' }}",
-                        width: 55,
-                        height: 55,
-                        colorDark : "#000000",
+                        width: 52, /* Sedikit diperkecil agar pas dengan box radius */
+                        height: 52,
+                        colorDark : "#0f172a", /* Warna QR sedikit lebih lembut dari hitam murni */
                         colorLight : "#ffffff",
                         correctLevel : QRCode.CorrectLevel.L
                     });

@@ -2,30 +2,34 @@
     <div class="py-8 sm:py-10 font-sans text-slate-800" x-data="{ searchQuery: '' }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HEADER --}}
-            <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 mb-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
+            {{-- HEADER MICROSOFT ELEVATE THEME --}}
+            <div class="relative rounded-[2rem] bg-gradient-to-r from-[#56bbf1] via-[#e5eff5] to-[#f4d1c0] p-8 mb-8 text-[#2c3f61] shadow-xl shadow-[#56bbf1]/10 overflow-hidden border border-white/60">
+                {{-- Abstract Shapes Ornaments --}}
+                <div class="absolute -top-10 -left-10 w-48 h-48 bg-[#0d52a1]/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
+                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-[#f9a282]/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
+                <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
+
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div class="text-center md:text-left">
-                        <div class="flex items-center justify-center md:justify-start gap-2 text-blue-300 text-sm font-bold mb-2">
-                            <a href="{{ route('grades.index') }}" class="hover:text-white transition flex items-center gap-1">
+                        <div class="flex items-center justify-center md:justify-start gap-2 text-[#2c3f61]/70 text-sm font-bold mb-2">
+                            <a href="{{ route('grades.index') }}" class="hover:text-[#0d52a1] transition flex items-center gap-1">
                                 <i class="ph-bold ph-arrow-left"></i> Kembali
                             </a>
                             <span class="opacity-50">/</span>
                             <span>Daftar Siswa</span>
                         </div>
-                        <h1 class="text-3xl font-extrabold tracking-tight leading-none mb-1">Cetak E-Rapor</h1>
-                        <div class="flex items-center justify-center md:justify-start gap-2 mt-2">
-                            <span class="bg-white/10 px-3 py-1 rounded-lg text-xs font-bold border border-white/10">{{ $class->name }}</span>
-                            <span class="text-blue-200 text-xs">●</span>
-                            <span class="text-blue-200 text-sm font-medium">TA {{ $academic_year }} ({{ $semester }})</span>
+                        <h1 class="text-4xl font-extrabold tracking-tight leading-none mb-1">Cetak E-Rapor</h1>
+                        <div class="flex items-center justify-center md:justify-start gap-2 mt-3">
+                            <span class="bg-white/60 px-3 py-1 rounded-lg text-xs font-bold border border-white shadow-sm uppercase">{{ $class->name }}</span>
+                            <span class="text-[#2c3f61]/40 text-xs">●</span>
+                            <span class="text-[#2c3f61]/80 text-sm font-medium">TA {{ $academic_year }} ({{ $semester }})</span>
                         </div>
                     </div>
                     
                     <div class="flex flex-col items-center md:items-end gap-2">
-                        <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/10 text-center shadow-lg">
-                            <span class="block text-2xl font-black text-white">{{ $students->count() }}</span>
-                            <span class="text-[9px] uppercase font-bold text-blue-300 tracking-wider">Total Siswa</span>
+                        <div class="bg-white/70 backdrop-blur-md px-5 py-3 rounded-2xl border border-white text-center shadow-sm">
+                            <span class="block text-2xl font-black text-[#2c3f61]">{{ $students->count() }}</span>
+                            <span class="text-[9px] uppercase font-bold text-[#2c3f61]/60 tracking-wider">Total Siswa</span>
                         </div>
                     </div>
                 </div>
@@ -35,21 +39,21 @@
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
                 
                 {{-- TOOLBAR --}}
-               <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row justify-between gap-4">
+               <div class="p-6 border-b border-slate-100 bg-[#e5eff5]/30 flex flex-col sm:flex-row justify-between gap-4">
                     <div class="relative w-full sm:w-96">
                         <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
                         <input type="text" 
                                x-model="searchQuery" 
-                               class="w-full pl-11 pr-4 py-3.5 rounded-xl border-slate-200 bg-white focus:border-blue-500 focus:ring-blue-500 text-sm font-bold shadow-sm placeholder:font-medium placeholder:text-slate-400"
+                               class="w-full pl-11 pr-4 py-3.5 rounded-xl border-slate-200 bg-white focus:border-[#56bbf1] focus:ring-[#56bbf1] text-sm font-bold shadow-sm placeholder:font-medium placeholder:text-slate-400"
                                placeholder="Cari nama siswa atau NISN...">
                     </div>
                     
                     <div class="flex gap-2">
-                        <a href="{{ route('grades.template_leger', ['class_id' => $class->id]) }}" class="px-5 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 hover:text-blue-600 transition shadow-sm text-sm flex items-center gap-2 whitespace-nowrap">
+                        <a href="{{ route('grades.template_leger', ['class_id' => $class->id]) }}" class="px-5 py-3 bg-white border border-[#2c3f61] text-[#2c3f61] font-bold rounded-xl hover:bg-slate-50 transition shadow-sm text-sm flex items-center gap-2 whitespace-nowrap">
                             <i class="ph-bold ph-file-csv text-lg"></i>
                             <span>Leger Nilai</span>
                         </a>
-                        <a href="{{ route('grades.print_all', ['class_id' => $class->id, 'year' => $academic_year, 'semester' => $semester]) }}" target="_blank" class="px-5 py-3 bg-blue-600 border border-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/20 text-sm flex items-center gap-2 whitespace-nowrap">
+                        <a href="{{ route('grades.print_all', ['class_id' => $class->id, 'year' => $academic_year, 'semester' => $semester]) }}" target="_blank" class="px-5 py-3 bg-[#2c3f61] border border-[#2c3f61] text-white font-bold rounded-xl hover:bg-[#1c2940] transition shadow-lg shadow-[#2c3f61]/20 text-sm flex items-center gap-2 whitespace-nowrap">
                             <i class="ph-bold ph-printer text-lg"></i>
                             <span>Cetak Semua</span>
                         </a>
@@ -71,28 +75,25 @@
                             @forelse($students as $index => $student)
                                 @php 
                                     $completedSubjects = $progress[$student->id] ?? 0; 
-                                    // PERBAIKAN: Sebaiknya $totalSubjects dikirim dari controller.
-                                    // Jika tidak ada, fallback ke 12.
                                     $maxSubjects = $totalSubjects ?? 12; 
                                     $percentage = $maxSubjects > 0 ? min(100, round(($completedSubjects / $maxSubjects) * 100)) : 0;
                                     
-                                    $barColor = $percentage == 100 ? 'bg-emerald-500' : ($percentage > 50 ? 'bg-blue-500' : 'bg-amber-500');
-                                    $textColor = $percentage == 100 ? 'text-emerald-600' : 'text-slate-500';
+                                    $barColor = $percentage == 100 ? 'bg-emerald-500' : ($percentage > 50 ? 'bg-[#56bbf1]' : 'bg-[#f9a282]');
+                                    $textColor = $percentage == 100 ? 'text-emerald-600' : 'text-[#2c3f61]';
                                 @endphp
                                 
-                                {{-- PERBAIKAN: Menggunakan @js() agar nama dengan tanda kutip (misal: Jum'at) tidak merusak script --}}
-                                <tr class="hover:bg-blue-50/20 transition-colors group"
+                                <tr class="hover:bg-[#e5eff5]/40 transition-colors group"
                                     x-show="searchQuery === '' || String(@js(strtolower($student->name))).includes(searchQuery.toLowerCase()) || String(@js($student->student_id)).includes(searchQuery)"
                                     x-transition.opacity>
                                     
                                     <td class="px-6 py-4 text-center text-slate-400 font-bold text-sm">{{ $index + 1 }}</td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-4">
-                                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-blue-500/20 shrink-0">
+                                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#56bbf1] to-[#0d52a1] text-white flex items-center justify-center font-bold text-sm shadow-md shadow-[#56bbf1]/20 shrink-0">
                                                 {{ substr($student->name, 0, 2) }}
                                             </div>
                                             <div>
-                                                <div class="font-bold text-slate-800 text-sm group-hover:text-blue-700 transition-colors">{{ $student->name }}</div>
+                                                <div class="font-bold text-[#2c3f61] text-sm group-hover:text-[#0d52a1] transition-colors">{{ $student->name }}</div>
                                                 <div class="text-xs text-slate-400 font-mono font-medium mt-0.5 tracking-wide">NISN: {{ $student->student_id }}</div>
                                             </div>
                                         </div>
@@ -110,15 +111,15 @@
                                                 <div class="h-full {{ $barColor }} rounded-full transition-all duration-500" style="width: {{ $percentage }}%"></div>
                                             </div>
                                             @if($percentage < 100)
-                                                <p class="text-[10px] text-rose-400 mt-1 italic">Belum Lengkap</p>
+                                                <p class="text-[10px] text-[#f9a282] mt-1 italic">Belum Lengkap</p>
                                             @endif
                                         </div>
                                     </td>
 
                                     <td class="px-6 py-4 text-right">
                                         <a href="{{ route('grades.report', ['student_id' => $student->id, 'year' => $academic_year, 'semester' => $semester]) }}" 
-                                           class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 hover:border-blue-500 hover:text-blue-600 text-sm font-bold rounded-xl shadow-sm transition-all duration-200 transform hover:-translate-y-0.5 group/btn">
-                                            <i class="ph-bold ph-eye text-lg text-slate-400 group-hover/btn:text-blue-500"></i> 
+                                           class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-[#2c3f61] hover:border-[#56bbf1] hover:text-[#0d52a1] text-sm font-bold rounded-xl shadow-sm transition-all duration-200 transform hover:-translate-y-0.5 group/btn">
+                                            <i class="ph-bold ph-eye text-lg text-slate-400 group-hover/btn:text-[#0d52a1]"></i> 
                                             <span>Lihat</span>
                                         </a>
                                     </td>

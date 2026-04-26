@@ -18,83 +18,71 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         html { scroll-behavior: smooth; }
+        /* Custom scrollbar khusus untuk siswa */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #56bbf1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #0d52a1; }
     </style>
 </head>
-<body class="font-sans antialiased bg-slate-50">
+<body class="font-sans antialiased bg-[#f8fafc]">
     
-    {{-- NAVBAR: Gradient Cyan ke Biru (Sesuai Landing Page) --}}
-    <nav class="bg-gradient-to-r from-cyan-600 via-blue-600 to-blue-800 border-b border-blue-700 fixed w-full z-50 top-0 shadow-lg shadow-blue-900/10">
-        {{-- Aksen Garis Atas --}}
-        <div class="h-1 w-full bg-gradient-to-r from-cyan-300 via-blue-300 to-cyan-300"></div>
-        
+    {{-- NAVBAR: Clean White Glassmorphism (Microsoft Elevate) --}}
+    <nav class="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 sticky top-0 z-40 shadow-sm transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                
-                <div class="flex items-center gap-6">
-                    {{-- Logo Area --}}
-                    <div class="flex items-center gap-3 shrink-0">
-                        <div class="w-9 h-9 bg-white/20 backdrop-blur border border-white/30 rounded-lg flex items-center justify-center text-white shadow-inner">
-                            <i class="ph-bold ph-monitor-play text-xl"></i>
-                        </div>
-                        <div class="leading-tight">
-                            <h1 class="font-bold text-white text-lg tracking-tight">Ujian Online</h1>
-                            <div class="flex items-center gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse border border-emerald-200"></span>
-                                <p class="text-[10px] font-bold text-cyan-100 uppercase tracking-widest">Sistem Terhubung</p>
-                            </div>
-                        </div>
+            <div class="flex justify-between h-[72px] items-center">
+                {{-- Logo Kiri --}}
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-[1rem] bg-gradient-to-br from-[#56bbf1] to-[#0d52a1] text-white flex items-center justify-center text-xl shadow-md shadow-[#56bbf1]/30">
+                        <i class="ph-bold ph-student"></i>
                     </div>
-
-                    {{-- Navigation Links --}}
-                    <div class="hidden md:flex ml-8 border-l border-white/20 pl-8">
-                        <a href="{{ route('student.exam.index') }}" 
-                           class="text-cyan-100 text-sm font-bold flex items-center gap-2 hover:text-white transition-colors">
-                            <i class="ph-fill ph-list-checks"></i> Daftar Ujian
-                        </a>
+                    <div class="hidden sm:block">
+                        <h1 class="text-lg font-black text-[#2c3f61] leading-none">Netila</h1>
+                        <p class="text-[10px] font-bold text-[#0d52a1] uppercase tracking-widest">Portal Siswa</p>
                     </div>
                 </div>
 
-                {{-- User Info & Exit Button --}}
-                <div class="flex items-center gap-4">
-                    <div class="text-right hidden sm:block">
-                        <p class="text-xs font-bold text-white">{{ Auth::guard('student')->user()->name }}</p>
-                        <p class="text-[10px] text-cyan-200">{{ Auth::guard('student')->user()->student_id }}</p>
-                    </div>
-                    
-                    <a href="{{ route('portal.index') }}" class="px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-xs font-bold hover:bg-rose-500 hover:border-rose-400 hover:text-white transition-all flex items-center gap-2 group backdrop-blur-sm" title="Kembali ke Portal Utama">
-                        <i class="ph-bold ph-door-open group-hover:-translate-x-1 transition-transform"></i>
-                        <span class="hidden sm:inline">Keluar Mode Ujian</span>
+                {{-- Kanan User --}}
+                <div class="flex items-center gap-3 sm:gap-5">
+                    @if(Auth::guard('student')->check())
+                        <div class="text-right hidden md:block">
+                            <p class="text-sm font-bold text-[#2c3f61]">{{ Auth::guard('student')->user()->name }}</p>
+                            <p class="text-xs text-slate-400 font-mono">{{ Auth::guard('student')->user()->student_id }}</p>
+                        </div>
+                    @endif
+
+                    <a href="{{ route('portal.index') }}" class="px-4 py-2 bg-[#e5eff5] text-[#0d52a1] font-bold text-xs rounded-xl hover:bg-[#56bbf1] hover:text-white transition flex items-center gap-2 border border-[#56bbf1]/20 active:scale-95 hidden md:flex">
+                        <i class="ph-bold ph-door-open text-base"></i> Keluar
                     </a>
                 </div>
             </div>
         </div>
     </nav>
 
-    {{-- MOBILE BOTTOM BAR (Clean Putih agar aplikasi terasa native) --}}
-    <div class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-slate-200 z-50 px-6 py-3 flex justify-between items-center shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+    {{-- MOBILE BOTTOM BAR (Microsoft Elevate Style) --}}
+    <div class="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-lg border-t border-slate-200 z-50 px-6 py-3 flex justify-between items-center shadow-[0_-10px_20px_rgba(0,0,0,0.05)] pb-safe">
         <a href="{{ route('portal.index') }}" class="flex flex-col items-center gap-1 text-slate-400 hover:text-rose-500 transition-colors">
-            <i class="ph-bold ph-door-open text-xl"></i>
+            <i class="ph-bold ph-door-open text-2xl"></i>
             <span class="text-[10px] font-bold">Keluar</span>
         </a>
         
-        <div class="px-6 py-2 bg-cyan-50 border border-cyan-100 rounded-full text-cyan-600 flex items-center gap-2">
-            <i class="ph-fill ph-desktop text-lg"></i>
-            <span class="text-xs font-bold">Mode Ujian</span>
+        <div class="px-6 py-2 bg-gradient-to-r from-[#56bbf1] to-[#0d52a1] shadow-lg shadow-[#56bbf1]/30 rounded-[1rem] text-white flex items-center gap-2 transform -translate-y-2">
+            <i class="ph-fill ph-desktop text-xl"></i>
+            <span class="text-xs font-black tracking-wide">Ujian</span>
         </div>
 
         <div class="w-8"></div> {{-- Spacer agar bar seimbang --}}
     </div>
 
     {{-- MAIN CONTENT --}}
-    <div class="pt-16 min-h-screen flex flex-col bg-slate-50">
-        <main class="flex-1 w-full">
+    <div class="min-h-screen flex flex-col relative z-0">
+        <main class="flex-1 w-full pb-20 md:pb-0">
             {{ $slot ?? '' }}
             @yield('content')
         </main>
 
-        <footer class="text-center py-6 text-slate-400 text-[10px] font-medium pb-24 md:pb-6 flex items-center justify-center gap-1.5">
-            <i class="ph-fill ph-student text-slate-300"></i>
-            <p>Computer Based Test (CBT) System &copy; {{ date('Y') }}</p>
+        <footer class="text-center py-6 text-xs font-bold text-slate-400 hidden md:block">
+            &copy; {{ date('Y') }} Sistem Ujian Terpadu (CBT). All rights reserved.
         </footer>
     </div>
 </body>

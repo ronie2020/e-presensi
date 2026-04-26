@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-slate-800 leading-tight">
+        <h2 class="font-semibold text-xl text-[#2c3f61] leading-tight">
             {{ __('CBT Dashboard - Kategori Kegiatan') }}
         </h2>
     </x-slot>
 
     {{-- Tambahkan state untuk Edit Modal pada x-data --}}
-    <div class="py-8 sm:py-10 font-sans text-slate-800" 
+    <div class="py-8 sm:py-10 font-sans text-[#2c3f61]" 
          x-data="{ 
             openModal: false, 
             editModal: false,
@@ -31,69 +31,50 @@
                 <div id="flash-error" data-message="{{ session('error') }}"></div>
             @endif
 
-            {{-- HERO SECTION --}}
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                {{-- Kartu Info (Cyan to Blue Premium - Mengikuti Tema Landing Page) --}}
-                <div class="bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 rounded-[2rem] p-8 text-white shadow-xl shadow-cyan-900/30 relative overflow-hidden group border border-white/10">
-                    <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                    <div class="absolute right-0 top-0 opacity-10 transform translate-x-8 -translate-y-8 group-hover:scale-110 transition-transform duration-500">
-                        <i class="ph-fill ph-folders text-[10rem]"></i>
-                    </div>
-                    
-                    <div class="relative z-10 h-full flex flex-col justify-between">
-                        <div>
-                            <a href="{{ route('dashboard') }}" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
-                                <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
-                                <span>Kembali ke Dashboard</span>
-                            </a>
-                            <p class="text-cyan-200 font-bold text-sm mb-1 flex items-center gap-2"><i class="ph-bold ph-calendar-blank"></i> Hari Ini</p>
-                            <h3 class="text-3xl font-black tracking-tight leading-tight">{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</h3>
-                        </div>
-                        <div class="mt-6">
-                            <span class="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-xl text-sm font-bold border border-white/20 shadow-sm inline-flex items-center gap-2">
-                                <span class="bg-emerald-400 w-2 h-2 rounded-full animate-pulse"></span>
-                                {{ method_exists($events, 'total') ? $events->total() : $events->count() }} Kegiatan/Folder Ujian
-                            </span>
-                        </div>
-                    </div>
-                </div>
+            {{-- HERO SECTION GRID (Dikembalikan sesuai file asli) --}}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 
-                {{-- Kartu Welcome & Action --}}
-                <div class="md:col-span-2 bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex flex-col md:flex-row items-center justify-between relative overflow-hidden">
-                    <div class="absolute inset-0 bg-slate-50/50 opacity-0 md:opacity-100 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px]"></div>
+                {{-- Kartu Info Utama (Span 2 Kolom) - Microsoft Elevate Theme --}}
+                <div class="md:col-span-2 relative rounded-[2rem] bg-gradient-to-r from-[#56bbf1] via-[#e5eff5] to-[#f4d1c0] p-8 md:p-10 text-[#2c3f61] shadow-xl shadow-[#56bbf1]/10 overflow-hidden border border-white/60">
+                    <div class="absolute -top-10 -left-10 w-48 h-48 bg-[#0d52a1]/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
+                    <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-[#f9a282]/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
+                    <div class="absolute top-10 right-10 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
                     
-                    <div class="relative z-10 max-w-lg mb-6 md:mb-0 text-center md:text-left">
-                        <h3 class="font-black text-slate-800 text-2xl mb-2">Halo, {{ Auth::user()->name }}! </h3>
-                        <p class="text-slate-500 leading-relaxed font-medium text-sm">
-                            Kelola jadwal CBT berdasarkan kelompok kegiatan besar seperti PSAT, Ulangan Harian, atau Penilaian Akhir Jenjang agar lebih terstruktur.
+                    <div class="relative z-10 flex flex-col justify-center h-full">
+                        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3 text-[#2c3f61]">Manajemen Ujian CBT</h1>
+                        <p class="text-[#2c3f61]/80 text-sm font-medium max-w-lg leading-relaxed">
+                            Buat dan kelola folder kegiatan ujian (PTS, PAS, Asesmen Harian). Folder ini digunakan untuk mengelompokkan jadwal ujian siswa.
                         </p>
                     </div>
+                </div>
 
-                    <div class="relative z-10 flex flex-col gap-3">
-                        <button @click="openModal = true" class="group flex items-center gap-3 px-6 py-4 bg-cyan-600 text-white rounded-2xl font-bold hover:bg-cyan-500 active:scale-95 transition-all shadow-lg shadow-cyan-500/30 w-full md:w-auto justify-center">
-                            <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition">
-                                <i class="ph-bold ph-folder-plus text-white"></i>
-                            </div>
-                            <span>Buat Kegiatan Baru</span>
-                        </button>
+                {{-- Kartu Aksi / Tombol Tambah (Span 1 Kolom) --}}
+                <div class="bg-white rounded-[2rem] border border-slate-100 p-8 flex flex-col items-center justify-center text-center shadow-xl shadow-slate-200/50 relative overflow-hidden group">
+                    <div class="w-16 h-16 bg-[#e5eff5] text-[#0d52a1] rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-inner">
+                        <i class="ph-bold ph-folder-plus text-3xl"></i>
                     </div>
+                    <h3 class="text-lg font-black text-[#2c3f61] mb-1">Kategori Baru</h3>
+                    <p class="text-xs text-slate-500 font-medium mb-5">Buat folder ujian baru.</p>
+                    <button @click="openModal = true" class="w-full px-5 py-3.5 bg-[#2c3f61] text-white rounded-xl font-bold hover:bg-[#1c2940] transition shadow-lg shadow-[#2c3f61]/20 active:scale-95">
+                        Buat Sekarang
+                    </button>
                 </div>
             </div>
 
             {{-- 1. HEADER LIST & FILTER --}}
             <form id="filterForm" action="{{ route('cbt.index') }}" method="GET" class="flex flex-col md:flex-row items-center justify-between mb-6 px-2 gap-4">
-                <h3 class="font-bold text-slate-800 text-xl flex items-center gap-2 shrink-0 w-full md:w-auto">
-                    <div class="w-1.5 h-6 bg-cyan-500 rounded-full"></div>
+                <h3 class="font-bold text-[#2c3f61] text-xl flex items-center gap-2 shrink-0 w-full md:w-auto">
+                    <div class="w-1.5 h-6 bg-[#56bbf1] rounded-full"></div>
                     Daftar Kegiatan CBT (Folder)
                 </h3>
 
                 <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                     {{-- Search Input --}}
                     <div class="relative w-full sm:w-64 group">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-cyan-500 transition-colors">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#56bbf1] transition-colors">
                             <i class="ph-bold ph-magnifying-glass"></i>
                         </div>
-                        <input name="search" value="{{ request('search') }}" type="text" class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-white text-sm focus:border-cyan-500 focus:ring-4 focus:ring-cyan-50 transition-all font-medium placeholder-slate-400 shadow-sm" placeholder="Cari Kegiatan...">
+                        <input name="search" value="{{ request('search') }}" type="text" class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-white text-sm focus:border-[#56bbf1] focus:ring-4 focus:ring-[#56bbf1]/20 transition-all font-medium placeholder-slate-400 shadow-sm" placeholder="Cari Kegiatan...">
                         <button type="submit" class="hidden"></button>
                     </div>
                 </div>
@@ -102,11 +83,11 @@
             {{-- GRID CARD EVENT/FOLDER --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse($events as $event)
-                    <div class="bg-white border border-slate-200 rounded-[2rem] hover:shadow-xl hover:shadow-cyan-900/5 hover:border-cyan-300 transition-all duration-300 group relative block overflow-hidden">
+                    <div class="bg-white border border-slate-200 rounded-[2rem] hover:shadow-xl hover:shadow-[#56bbf1]/10 hover:border-[#56bbf1]/50 transition-all duration-300 group relative block overflow-hidden">
                         
                         <!-- Pattern Background on Hover -->
-                        <div class="absolute inset-0 bg-cyan-50/0 group-hover:bg-cyan-50/50 transition-colors pointer-events-none z-0"></div>
-                        <div class="absolute -right-4 -top-4 text-cyan-50 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:scale-110 pointer-events-none z-0">
+                        <div class="absolute inset-0 bg-[#e5eff5]/0 group-hover:bg-[#e5eff5]/40 transition-colors pointer-events-none z-0"></div>
+                        <div class="absolute -right-4 -top-4 text-[#e5eff5] opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:scale-110 pointer-events-none z-0">
                             <i class="ph-fill ph-folder text-[10rem]"></i>
                         </div>
 
@@ -118,7 +99,7 @@
                                     data-desc="{{ $event->description }}"
                                     data-action="{{ route('cbt.events.update', $event->id) }}"
                                     title="Edit Nama/Deskripsi Folder"
-                                    class="w-10 h-10 flex items-center justify-center bg-white/90 backdrop-blur-sm text-cyan-600 rounded-[1rem] hover:bg-cyan-600 hover:text-white shadow-sm border border-cyan-100 transition-all">
+                                    class="w-10 h-10 flex items-center justify-center bg-white/90 backdrop-blur-sm text-[#0d52a1] rounded-[1rem] hover:bg-[#0d52a1] hover:text-white shadow-sm border border-[#56bbf1]/30 transition-all">
                                 <i class="ph-bold ph-pencil-simple text-lg"></i>
                             </button>
                         </div>
@@ -126,7 +107,7 @@
                         <!-- KONTEN UTAMA YANG BISA DI KLIK MENUJU DAFTAR SOAL -->
                         <a href="{{ route('cbt.events.show', $event->id) }}" class="p-6 block relative z-10 h-full">
                             <div class="flex items-start justify-between mb-4">
-                                <div class="w-14 h-14 bg-cyan-50 text-cyan-600 rounded-[1.25rem] flex items-center justify-center text-3xl group-hover:scale-110 group-hover:bg-cyan-600 group-hover:text-white transition-all shadow-sm">
+                                <div class="w-14 h-14 bg-[#e5eff5] text-[#0d52a1] rounded-[1.25rem] flex items-center justify-center text-3xl group-hover:scale-110 group-hover:bg-[#0d52a1] group-hover:text-white transition-all shadow-sm">
                                     <i class="ph-duotone ph-folder-open"></i>
                                 </div>
                                 <!-- Tempat kosong agar layout tidak nabrak tombol edit -->
@@ -134,7 +115,7 @@
                             </div>
 
                             <div class="flex justify-between items-center mb-2">
-                                <h4 class="font-black text-2xl text-slate-800 leading-tight group-hover:text-cyan-700 transition-colors">
+                                <h4 class="font-black text-2xl text-[#2c3f61] leading-tight group-hover:text-[#0d52a1] transition-colors">
                                     {{ $event->name }}
                                 </h4>
                             </div>
@@ -144,10 +125,10 @@
                             </p>
 
                             <div class="pt-4 border-t border-slate-100 flex items-center justify-between mt-auto">
-                                <div class="flex items-center gap-2 text-cyan-600 font-bold text-sm bg-cyan-50 px-3 py-1.5 rounded-lg">
+                                <div class="flex items-center gap-2 text-[#0d52a1] font-bold text-sm bg-[#56bbf1]/10 px-3 py-1.5 rounded-lg border border-[#56bbf1]/20">
                                     <i class="ph-bold ph-files"></i> {{ $event->exams_count ?? 0 }} Jadwal Ujian
                                 </div>
-                                <div class="text-slate-400 group-hover:text-cyan-600 group-hover:translate-x-1 transition-all">
+                                <div class="text-slate-400 group-hover:text-[#0d52a1] group-hover:translate-x-1 transition-all">
                                     <i class="ph-bold ph-arrow-right text-xl"></i>
                                 </div>
                             </div>
@@ -155,12 +136,12 @@
                     </div>
                 @empty
                     <div class="col-span-1 md:col-span-2 lg:col-span-3 text-center py-20 bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200 mt-4">
-                        <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+                        <div class="w-24 h-24 bg-[#56bbf1]/10 rounded-full flex items-center justify-center mx-auto mb-6 text-[#0d52a1]">
                             <i class="ph-duotone ph-folder-dashed text-5xl"></i>
                         </div>
-                        <h3 class="text-slate-800 font-bold text-xl mb-2">Belum Ada Kegiatan CBT</h3>
+                        <h3 class="text-[#2c3f61] font-bold text-xl mb-2">Belum Ada Kegiatan CBT</h3>
                         <p class="text-slate-500 max-w-xs mx-auto mb-8 text-sm">Buat Folder/Kegiatan pertama Anda, seperti "PSAT Genap 2026".</p>
-                        <button @click="openModal = true" class="inline-flex items-center gap-2 px-6 py-3 bg-cyan-600 text-white rounded-xl font-bold hover:bg-cyan-500 transition shadow-lg shadow-cyan-500/30 text-sm">
+                        <button @click="openModal = true" class="inline-flex items-center gap-2 px-6 py-3 bg-[#2c3f61] text-white rounded-xl font-bold hover:bg-[#1c2940] transition shadow-lg shadow-[#2c3f61]/30 text-sm">
                             <i class="ph-bold ph-plus"></i> Buat Kegiatan Baru
                         </button>
                     </div>
@@ -188,11 +169,11 @@
                     </div>
 
                     <div class="sm:flex sm:items-start mb-6">
-                        <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto bg-cyan-50 rounded-full sm:mx-0 sm:h-12 sm:w-12 text-cyan-600">
+                        <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto bg-[#e5eff5] rounded-full sm:mx-0 sm:h-12 sm:w-12 text-[#0d52a1]">
                             <i class="ph-bold ph-folder-plus text-2xl"></i>
                         </div>
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                            <h3 class="text-xl font-black leading-6 text-slate-800" id="modal-title">Buat Kegiatan CBT Baru</h3>
+                            <h3 class="text-xl font-black leading-6 text-[#2c3f61]" id="modal-title">Buat Kegiatan CBT Baru</h3>
                             <div class="mt-2">
                                 <p class="text-sm text-slate-500 font-medium">Contoh: Penilaian Sumatif Akhir Tahun, Try Out UNBK, dll.</p>
                             </div>
@@ -204,17 +185,17 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Kegiatan <span class="text-rose-500">*</span></label>
-                                <input type="text" name="name" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 py-3.5 px-5 transition-all" placeholder="Misal: PSAT Kelas 7, 8, 9">
+                                <input type="text" name="name" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-[#56bbf1] focus:ring-[#56bbf1] font-bold text-[#2c3f61] py-3.5 px-5 transition-all" placeholder="Misal: PSAT Kelas 7, 8, 9">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Deskripsi Singkat (Opsional)</label>
-                                <textarea name="description" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-medium text-slate-700 py-3.5 px-5 transition-all" placeholder="Tahun Ajaran 2025/2026..."></textarea>
+                                <textarea name="description" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-[#56bbf1] focus:ring-[#56bbf1] font-medium text-[#2c3f61] py-3.5 px-5 transition-all" placeholder="Tahun Ajaran 2025/2026..."></textarea>
                             </div>
                         </div>
 
                         <div class="mt-8 flex gap-3">
-                            <button type="button" @click="openModal = false" class="w-full inline-flex justify-center px-4 py-3.5 border border-slate-200 shadow-sm text-sm font-bold rounded-xl text-slate-700 bg-white hover:bg-slate-50">Batal</button>
-                            <button type="submit" class="w-full inline-flex justify-center px-4 py-3.5 border border-transparent shadow-lg shadow-cyan-500/30 text-sm font-bold rounded-xl text-white bg-cyan-600 hover:bg-cyan-700">Simpan Kegiatan</button>
+                            <button type="button" @click="openModal = false" class="w-full inline-flex justify-center px-4 py-3.5 border border-slate-200 shadow-sm text-sm font-bold rounded-xl text-slate-600 bg-white hover:bg-slate-50 transition-colors">Batal</button>
+                            <button type="submit" class="w-full inline-flex justify-center px-4 py-3.5 border border-transparent shadow-lg shadow-[#2c3f61]/20 text-sm font-bold rounded-xl text-white bg-[#2c3f61] hover:bg-[#1c2940] transition-colors">Simpan Kegiatan</button>
                         </div>
                     </form>
                 </div>
@@ -234,11 +215,11 @@
                     </div>
 
                     <div class="sm:flex sm:items-start mb-6">
-                        <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto bg-cyan-50 rounded-full sm:mx-0 sm:h-12 sm:w-12 text-cyan-600">
+                        <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 mx-auto bg-[#f9a282]/20 rounded-full sm:mx-0 sm:h-12 sm:w-12 text-[#c86845]">
                             <i class="ph-bold ph-pencil-simple text-2xl"></i>
                         </div>
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                            <h3 class="text-xl font-black leading-6 text-slate-800">Edit Kegiatan CBT</h3>
+                            <h3 class="text-xl font-black leading-6 text-[#2c3f61]">Edit Kegiatan CBT</h3>
                             <div class="mt-2">
                                 <p class="text-sm text-slate-500 font-medium">Perbarui nama atau deskripsi dari folder kegiatan ini.</p>
                             </div>
@@ -251,17 +232,17 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Kegiatan <span class="text-rose-500">*</span></label>
-                                <input type="text" name="name" x-model="editName" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 py-3.5 px-5 transition-all" placeholder="Misal: PSAT Kelas 7, 8, 9">
+                                <input type="text" name="name" x-model="editName" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-[#56bbf1] focus:ring-[#56bbf1] font-bold text-[#2c3f61] py-3.5 px-5 transition-all" placeholder="Misal: PSAT Kelas 7, 8, 9">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Deskripsi Singkat (Opsional)</label>
-                                <textarea name="description" x-model="editDesc" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-medium text-slate-700 py-3.5 px-5 transition-all" placeholder="Tahun Ajaran 2025/2026..."></textarea>
+                                <textarea name="description" x-model="editDesc" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-[#56bbf1] focus:ring-[#56bbf1] font-medium text-[#2c3f61] py-3.5 px-5 transition-all" placeholder="Tahun Ajaran 2025/2026..."></textarea>
                             </div>
                         </div>
 
                         <div class="mt-8 flex gap-3">
-                            <button type="button" @click="editModal = false" class="w-full inline-flex justify-center px-4 py-3.5 border border-slate-200 shadow-sm text-sm font-bold rounded-xl text-slate-700 bg-white hover:bg-slate-50">Batal</button>
-                            <button type="submit" class="w-full inline-flex justify-center px-4 py-3.5 border border-transparent shadow-lg shadow-cyan-500/30 text-sm font-bold rounded-xl text-white bg-cyan-600 hover:bg-cyan-700">Simpan Perubahan</button>
+                            <button type="button" @click="editModal = false" class="w-full inline-flex justify-center px-4 py-3.5 border border-slate-200 shadow-sm text-sm font-bold rounded-xl text-slate-600 bg-white hover:bg-slate-50 transition-colors">Batal</button>
+                            <button type="submit" class="w-full inline-flex justify-center px-4 py-3.5 border border-transparent shadow-lg shadow-[#2c3f61]/20 text-sm font-bold rounded-xl text-white bg-[#2c3f61] hover:bg-[#1c2940] transition-colors">Simpan Perubahan</button>
                         </div>
                     </form>
                 </div>
@@ -278,6 +259,14 @@
                     icon: 'success', title: 'Berhasil!',
                     text: flashSuccess.getAttribute('data-message'),
                     timer: 3000, showConfirmButton: false,
+                    customClass: { popup: 'rounded-[2rem]' }
+                });
+            }
+            const flashError = document.getElementById('flash-error');
+            if (flashError) {
+                Swal.fire({
+                    icon: 'error', title: 'Gagal!',
+                    text: flashError.getAttribute('data-message'),
                     customClass: { popup: 'rounded-[2rem]' }
                 });
             }

@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between print:hidden">
-            <h2 class="font-semibold text-xl text-slate-800 leading-tight">
+            <h2 class="font-semibold text-xl text-[#2c3f61] leading-tight">
                 {{ __('Analisis Butir Soal') }}
             </h2>
             
             {{-- cetak dokumen formal --}}
-            <a href="{{ route('cbt.analysis.print', $exam->id) }}" target="_blank" class="text-sm font-bold text-slate-500 hover:text-indigo-600 flex items-center gap-2 transition bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm">
+            <a href="{{ route('cbt.analysis.print', $exam->id) }}" target="_blank" class="text-sm font-bold text-[#2c3f61] hover:text-[#0d52a1] flex items-center gap-2 transition bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-sm active:scale-95">
                 <i class="ph-bold ph-printer text-lg"></i> Cetak Laporan Formal
             </a>
         </div>
@@ -31,37 +31,37 @@
         }
     </style>
 
-    <div class="py-8 sm:py-10 font-sans text-slate-800" x-data="{ search: '' }">
+    <div class="py-8 sm:py-10 font-sans text-[#2c3f61]" x-data="{ search: '' }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-            {{-- Header Info --}}
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 print-area print:mb-6 print:p-0">
+            {{-- Header Info (Elevate Card Style) --}}
+            <div class="bg-white p-6 rounded-[2rem] shadow-xl shadow-[#56bbf1]/5 border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 print-area print:mb-6 print:p-0">
                 <div>
                     <div class="flex items-center gap-2 mb-1 print:hidden">
-                        <a href="{{ route('cbt.recap', $exam->id) }}" class="text-xs font-bold text-slate-400 hover:text-indigo-600 transition flex items-center gap-1">
+                        <a href="{{ route('cbt.recap', $exam->id) }}" class="text-xs font-bold text-slate-400 hover:text-[#0d52a1] transition flex items-center gap-1">
                             <i class="ph-bold ph-arrow-left"></i> Kembali ke Rekap
                         </a>
                     </div>
-                    <h3 class="text-2xl font-black text-slate-800">{{ $exam->title }}</h3>
-                    <p class="text-slate-500 text-sm font-medium">Analisis Kualitas Soal • Mapel: {{ $exam->subject_name }} • Sampel: <b>{{ $totalStudents ?? 0 }} Siswa</b></p>
+                    <h3 class="text-2xl font-black text-[#2c3f61]">{{ $exam->title }}</h3>
+                    <p class="text-[#2c3f61]/60 text-sm font-medium">Analisis Kualitas Soal • Mapel: {{ $exam->subject_name }} • Sampel: <b>{{ $totalStudents ?? 0 }} Siswa</b></p>
                 </div>
                 
                 {{-- Legend Tingkat Kesukaran --}}
-                <div class="flex gap-3 text-[10px] uppercase font-bold text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200 print:bg-transparent print:border-none print:p-0">
+                <div class="flex gap-3 text-[10px] uppercase font-bold text-slate-500 bg-[#e5eff5]/50 p-3 rounded-xl border border-slate-200 print:bg-transparent print:border-none print:p-0">
                     <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-400"></span> Mudah (>75%)</div>
-                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-400"></span> Sedang</div>
+                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-[#56bbf1]"></span> Sedang</div>
                     <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-400"></span> Sukar (<30%)</div>
                 </div>
             </div>
 
             {{-- NEW: ANALISIS TAGS / KOMPETENSI DASAR (KD) --}}
             @if(isset($tagAnalysis) && count($tagAnalysis) > 0)
-            <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden print-area print:rounded-none">
-                <div class="p-6 border-b border-slate-100 bg-indigo-50/50 flex items-center gap-3 print:bg-white print:border-b-2 print:border-black print:px-0">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl shadow-sm print:hidden"><i class="ph-fill ph-target"></i></div>
+            <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-[#56bbf1]/10 overflow-hidden print-area print:rounded-none">
+                <div class="p-6 border-b border-slate-100 bg-[#e5eff5]/50 flex items-center gap-3 print:bg-white print:border-b-2 print:border-black print:px-0">
+                    <div class="w-10 h-10 rounded-xl bg-[#56bbf1]/20 text-[#0d52a1] flex items-center justify-center text-xl shadow-sm print:hidden"><i class="ph-fill ph-target"></i></div>
                     <div>
-                        <h4 class="font-bold text-slate-800 text-lg">Analisis Penguasaan Materi (KD)</h4>
-                        <p class="text-xs text-slate-500 font-medium">Berdasarkan tags materi yang dipasang pada soal.</p>
+                        <h4 class="font-bold text-[#2c3f61] text-lg">Analisis Penguasaan Materi (KD)</h4>
+                        <p class="text-xs text-[#2c3f61]/60 font-medium">Berdasarkan tags materi yang dipasang pada soal.</p>
                     </div>
                 </div>
                 <div class="p-8 print:px-0">
@@ -69,13 +69,13 @@
                         @foreach($tagAnalysis as $tag => $data)
                             @php
                                 $percent = $data['total'] > 0 ? round(($data['correct'] / $data['total']) * 100) : 0;
-                                $color = $percent >= 75 ? 'bg-emerald-400' : ($percent >= 40 ? 'bg-blue-400' : 'bg-rose-400');
-                                $textColor = $percent >= 75 ? 'text-emerald-600' : ($percent >= 40 ? 'text-blue-600' : 'text-rose-600');
+                                $color = $percent >= 75 ? 'bg-emerald-400' : ($percent >= 40 ? 'bg-[#56bbf1]' : 'bg-rose-400');
+                                $textColor = $percent >= 75 ? 'text-emerald-600' : ($percent >= 40 ? 'text-[#0d52a1]' : 'text-rose-600');
                                 $message = $percent >= 75 ? 'Sangat Dikuasai' : ($percent >= 40 ? 'Cukup Dikuasai' : 'Perlu Evaluasi (Lemah)');
                             @endphp
                             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 print:border print:border-slate-300 print:bg-transparent">
                                 <div class="flex justify-between items-end mb-2">
-                                    <h5 class="font-bold text-slate-700 text-sm flex items-center gap-2"><i class="ph-fill ph-tag text-slate-400 print:hidden"></i> {{ $tag }}</h5>
+                                    <h5 class="font-bold text-[#2c3f61] text-sm flex items-center gap-2"><i class="ph-fill ph-tag text-slate-400 print:hidden"></i> {{ $tag }}</h5>
                                     <span class="font-black text-xl {{ $textColor }} print:text-black">{{ $percent }}%</span>
                                 </div>
                                 <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden mb-2 print:border print:border-slate-300">
@@ -90,22 +90,22 @@
             @endif
 
             {{-- Tabel Analisis --}}
-            <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden print-area print:rounded-none">
+            <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-[#56bbf1]/10 overflow-hidden print-area print:rounded-none">
                 
                 {{-- Toolbar Pencarian --}}
-                <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
-                    <h4 class="font-bold text-slate-700 flex items-center gap-2 text-lg">
-                        <i class="ph-fill ph-chart-pie-slice text-indigo-500"></i> Detail Analisis per Butir
+                <div class="p-6 border-b border-slate-100 bg-[#e5eff5]/30 flex flex-col md:flex-row justify-between items-center gap-4 print:hidden">
+                    <h4 class="font-bold text-[#2c3f61] flex items-center gap-2 text-lg">
+                        <i class="ph-fill ph-chart-pie-slice text-[#56bbf1]"></i> Detail Analisis per Butir
                     </h4>
                     <div class="relative w-full md:w-72">
-                        <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" x-model="search" placeholder="Cari potongan soal atau tag..." class="w-full pl-10 pr-4 py-2.5 text-sm font-bold border-slate-200 rounded-xl focus:ring-indigo-500 focus:border-indigo-500 bg-white shadow-sm transition-shadow">
+                        <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-[#2c3f61]/40"></i>
+                        <input type="text" x-model="search" placeholder="Cari potongan soal atau tag..." class="w-full pl-10 pr-4 py-2.5 text-sm font-bold border-slate-200 rounded-xl focus:ring-[#56bbf1] focus:border-[#56bbf1] bg-white shadow-sm transition-shadow text-[#2c3f61]">
                     </div>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-slate-600">
-                        <thead class="bg-slate-50 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100 print:bg-white print:text-black">
+                    <table class="w-full text-left text-sm text-[#2c3f61]/80">
+                        <thead class="bg-[#e5eff5]/50 text-[#2c3f61]/60 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100 print:bg-white print:text-black">
                             <tr>
                                 <th class="px-6 py-4 w-12 text-center">No</th>
                                 <th class="px-6 py-4 w-1/3">Cuplikan Soal & Materi</th>
@@ -117,17 +117,17 @@
                         <tbody class="divide-y divide-slate-50 print:divide-gray-300">
                             @forelse($analysis as $index => $item)
                                 <tr x-show="search === '' || '{{ strtolower(addslashes(strip_tags($item->text . ' ' . ($item->tags ?? '')))) }}'.includes(search.toLowerCase())" 
-                                    class="hover:bg-indigo-50/20 transition group print:hover:bg-transparent">
+                                    class="hover:bg-[#56bbf1]/5 transition group print:hover:bg-transparent">
                                     
                                     <td class="px-6 py-4 text-center font-black text-slate-400 print:text-black">{{ $index + 1 }}</td>
                                     
                                     <td class="px-6 py-4">
-                                        <p class="font-medium text-slate-700 line-clamp-3 print:line-clamp-none mb-2" title="{{ $item->text }}">{{ $item->text }}</p>
+                                        <p class="font-medium text-[#2c3f61] line-clamp-3 print:line-clamp-none mb-2" title="{{ $item->text }}">{{ $item->text }}</p>
                                         {{-- Menampilkan Tag di Tabel Analisis --}}
                                         @if(!empty($item->tags))
                                             <div class="flex flex-wrap gap-1 mt-1 print:mt-0">
                                                 @foreach(explode(',', $item->tags) as $tag)
-                                                    <span class="text-[9px] font-bold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded border border-indigo-100 print:border-slate-300 print:text-slate-600 print:bg-transparent">{{ trim($tag) }}</span>
+                                                    <span class="text-[9px] font-bold bg-[#56bbf1]/10 text-[#0d52a1] px-2 py-0.5 rounded border border-[#56bbf1]/20 print:border-slate-300 print:text-[#2c3f61] print:bg-transparent">{{ trim($tag) }}</span>
                                                 @endforeach
                                             </div>
                                         @endif
@@ -137,18 +137,18 @@
                                     <td class="px-6 py-4 text-center">
                                         @if(in_array($item->type, ['choice', 'true_false']))
                                             <span class="inline-block mb-1 text-[9px] font-bold text-slate-400 uppercase">PG / B-S</span><br>
-                                            <span class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 font-black flex items-center justify-center mx-auto border border-slate-200 print:bg-transparent print:border-black">
+                                            <span class="w-8 h-8 rounded-lg bg-slate-50 text-[#2c3f61] font-black flex items-center justify-center mx-auto border border-slate-200 print:bg-transparent print:border-black">
                                                 {{ $item->correct_key }}
                                             </span>
                                         @elseif($item->type == 'essay')
-                                            <span class="inline-block mb-1 text-[9px] font-bold text-indigo-400 uppercase">ESSAI</span><br>
-                                            <button onclick="Swal.fire({title: 'Kunci Jawaban', text: '{{ addslashes($item->correct_key) }}', confirmButtonColor: '#4f46e5'})" 
-                                                    class="text-xs font-bold text-indigo-600 hover:underline cursor-pointer print:hidden">
+                                            <span class="inline-block mb-1 text-[9px] font-bold text-[#56bbf1] uppercase">ESSAI</span><br>
+                                            <button onclick="Swal.fire({title: 'Kunci Jawaban', text: '{{ addslashes($item->correct_key) }}', confirmButtonColor: '#0d52a1', customClass: { popup: 'rounded-[2rem]' }})" 
+                                                    class="text-xs font-bold text-[#0d52a1] hover:underline cursor-pointer print:hidden">
                                                 Lihat Kunci
                                             </button>
-                                            <span class="hidden print:block text-xs text-slate-700">{{ $item->correct_key ?: '-' }}</span>
+                                            <span class="hidden print:block text-xs text-[#2c3f61]">{{ $item->correct_key ?: '-' }}</span>
                                         @elseif($item->type == 'matching')
-                                            <span class="inline-block mb-1 text-[9px] font-bold text-orange-400 uppercase">MATCHING</span><br>
+                                            <span class="inline-block mb-1 text-[9px] font-bold text-[#c86845] uppercase">MATCHING</span><br>
                                             <span class="text-xs text-slate-400">-</span>
                                         @endif
                                     </td>
@@ -161,7 +161,7 @@
                                         
                                         {{-- Progress Bar Kesukaran --}}
                                         <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex print:h-2 print:border print:border-black">
-                                            <div class="h-full {{ str_contains($item->difficulty_badge, 'emerald') ? 'bg-emerald-400' : (str_contains($item->difficulty_badge, 'rose') ? 'bg-rose-400' : 'bg-blue-400') }}" 
+                                            <div class="h-full {{ str_contains($item->difficulty_badge, 'emerald') ? 'bg-emerald-400' : (str_contains($item->difficulty_badge, 'rose') ? 'bg-rose-400' : 'bg-[#56bbf1]') }}" 
                                                  style="width: {{ $item->difficulty_index }}%"></div>
                                         </div>
                                         <p class="text-[10px] font-bold text-slate-400 mt-1 print:text-black">{{ $item->difficulty_index }}% Siswa Benar</p>
@@ -181,9 +181,9 @@
                                                             $color = $isKey ? 'bg-emerald-400' : 'bg-slate-300';
                                                             if(!$isKey && $percent > 20) $color = 'bg-amber-400'; // Distractor yang kuat (Kuning)
                                                         @endphp
-                                                        <div class="flex-1 flex flex-col justify-end items-center group relative">
+                                                        <div class="flex-1 flex flex-col justify-end items-center group/bar relative">
                                                             {{-- Tooltip (Hover) --}}
-                                                            <div class="absolute bottom-full mb-1 opacity-0 group-hover:opacity-100 transition text-[10px] font-bold bg-slate-800 text-white px-2 py-1 rounded whitespace-nowrap z-10 print:hidden pointer-events-none">
+                                                            <div class="absolute bottom-full mb-1 opacity-0 group-hover/bar:opacity-100 transition text-[10px] font-bold bg-[#2c3f61] text-white px-2 py-1 rounded whitespace-nowrap z-10 print:hidden pointer-events-none">
                                                                 {{ $count }} Siswa ({{ round($percent) }}%)
                                                             </div>
                                                             
@@ -217,7 +217,7 @@
                             @empty
                                 <tr>
                                     <td colspan="5" class="px-6 py-12 text-center text-slate-400">
-                                        <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                        <div class="w-16 h-16 bg-[#e5eff5] rounded-full flex items-center justify-center mx-auto mb-3 text-[#0d52a1]/50">
                                             <i class="ph-duotone ph-chart-bar text-3xl"></i>
                                         </div>
                                         Belum ada data analisis. Pastikan ujian sudah dikerjakan siswa.
@@ -228,7 +228,7 @@
                             {{-- State Empty Search --}}
                             <tr x-show="search !== '' && document.querySelectorAll('tbody tr[x-show]:not([style*=\'display: none\'])').length === 0" style="display: none;">
                                 <td colspan="5" class="px-6 py-8 text-center text-slate-500">
-                                    <p class="font-medium">Tidak ada data yang cocok dengan pencarian "<span x-text="search" class="font-bold text-slate-800"></span>"</p>
+                                    <p class="font-medium">Tidak ada data yang cocok dengan pencarian "<span x-text="search" class="font-bold text-[#2c3f61]"></span>"</p>
                                 </td>
                             </tr>
                         </tbody>

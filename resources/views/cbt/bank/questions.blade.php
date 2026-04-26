@@ -84,7 +84,7 @@
         },
         // --- END BULK ACTION ---
 
-        // State untuk Input Soal Baru (Diisi dengan old() dari Laravel untuk mencegah hilang saat error validasi)
+        // State untuk Input Soal Baru
         createType: '{{ old('question_type', 'choice') }}',
         createQuestionText: {{ json_encode(old('question_text', '')) }},
         matchPairs: {{ json_encode(old('matches', [['left' => '', 'right' => '']])) }}, 
@@ -109,11 +109,9 @@
         newImagePreview: null,
         deleteImage: false,
         
-        // Helper Matching (Create)
         addPair() { this.matchPairs.push({left: '', right: ''}); },
         removePair(index) { if(this.matchPairs.length > 1) this.matchPairs.splice(index, 1); },
 
-        // Helper Tags
         addTag(tag, mode) {
             let clean = tag.trim();
             if(clean === '') return;
@@ -126,16 +124,13 @@
             }
         },
 
-        // Helper Matching (Edit)
         addEditPair() { this.editMatchPairs.push({left: '', right: ''}); },
         removeEditPair(index) { if(this.editMatchPairs.length > 1) this.editMatchPairs.splice(index, 1); },
 
-        // Fungsi Buka Modal Edit
         openEdit(data, url) {
             this.newImagePreview = null;
             this.deleteImage = false;
             
-            // Populate data dasar
             this.editState = { 
                 ...this.editState, 
                 ...data, 
@@ -145,7 +140,6 @@
 
             this.editTags = data.tags ? data.tags.split(',').map(t => t.trim()).filter(t => t) : [];
 
-            // Populate data khusus Matching
             if (this.editState.question_type === 'matching') {
                 let pairs = [];
                 if (data.options && data.options.pairs) {
@@ -161,13 +155,10 @@
 
             this.showEditModal = true;
             
-            // Reset Trix Editor & MathJax
             this.$nextTick(() => {
                 const trix = document.getElementById('edit-trix-editor');
                 if(trix) {
-                    // Update value hidden input
                     document.getElementById('q_input_edit').value = this.editState.question_text;
-                    // Update visual editor
                     trix.editor.loadHTML(this.editState.question_text);
                 }
                 if (window.renderMath) window.renderMath();
@@ -184,24 +175,25 @@
         }
     }">
         <x-slot name="header">
-            <h2 class="font-semibold text-xl text-slate-800 leading-tight">{{ __('Kelola Bank Soal') }}</h2>
+            <h2 class="font-semibold text-xl text-[#2c3f61] leading-tight">{{ __('Kelola Bank Soal') }}</h2>
         </x-slot>
 
-        <div class="py-8 sm:py-10 font-sans text-slate-800">
+        <div class="py-8 sm:py-10 font-sans text-[#2c3f61]">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
                 
-                {{-- HERO INFO --}}
-                <div class="relative rounded-[2rem] bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-8 text-white shadow-xl shadow-cyan-900/30 overflow-hidden border border-white/10">
-                    <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-cyan-300/30 rounded-full blur-[60px] translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+                {{-- HERO INFO MICROSOFT ELEVATE THEME --}}
+                <div class="relative rounded-[2rem] bg-gradient-to-r from-[#56bbf1] via-[#e5eff5] to-[#f4d1c0] p-8 text-[#2c3f61] shadow-xl shadow-[#56bbf1]/10 overflow-hidden border border-white/60">
+                    <div class="absolute -top-10 -left-10 w-48 h-48 bg-[#0d52a1]/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
+                    <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-[#f9a282]/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
+                    <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
                     <div class="relative z-10">
                         <div class="flex items-center gap-2 mb-2">
-                                <a href="{{ route('bank.index') }}" class="text-xs font-bold text-cyan-200 hover:text-white transition flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full border border-white/20 backdrop-blur-sm"><i class="ph-bold ph-arrow-left"></i> Kembali</a>
-                                <span class="text-white/30 text-xs">•</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wide bg-white/10 text-cyan-100 border border-white/10">{{ $bank->subject_name }}</span>
+                                <a href="{{ route('bank.index') }}" class="text-xs font-bold text-[#0d52a1] hover:text-[#2c3f61] transition flex items-center gap-1 bg-white/60 px-3 py-1 rounded-full border border-white backdrop-blur-sm shadow-sm"><i class="ph-bold ph-arrow-left"></i> Kembali</a>
+                                <span class="text-[#2c3f61]/30 text-xs">•</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wide bg-white/60 text-[#2c3f61] border border-white shadow-sm">{{ $bank->subject_name }}</span>
                             </div>
-                        <h1 class="text-3xl font-black tracking-tight leading-none text-white mb-2">{{ $bank->title }}</h1>
-                        <p class="text-cyan-50 text-sm font-medium">Total: {{ $bank->questions->count() }} Soal • Kode: {{ $bank->code }}</p>
+                        <h1 class="text-4xl font-extrabold tracking-tight leading-none text-[#2c3f61] mb-2">{{ $bank->title }}</h1>
+                        <p class="text-[#2c3f61]/80 text-sm font-medium">Total: {{ $bank->questions->count() }} Soal • Kode: {{ $bank->code }}</p>
                     </div>
                 </div>
 
@@ -211,9 +203,9 @@
                     <div class="w-full lg:w-2/5 order-2 lg:order-1">
                         <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 lg:sticky lg:top-8">
                             <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-50">
-                                <div class="w-10 h-10 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-lg shadow-sm border border-cyan-100"><i class="ph-fill ph-plus-circle"></i></div>
+                                <div class="w-10 h-10 rounded-2xl bg-[#56bbf1]/10 text-[#0d52a1] flex items-center justify-center text-lg shadow-sm border border-[#56bbf1]/20"><i class="ph-fill ph-plus-circle"></i></div>
                                 <div>
-                                    <h3 class="font-black text-slate-800 text-lg leading-none">Tambah Soal</h3>
+                                    <h3 class="font-black text-[#2c3f61] text-lg leading-none">Tambah Soal</h3>
                                     <p class="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wider">Ke Bank Soal</p>
                                 </div>
                             </div>
@@ -225,7 +217,7 @@
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tipe Soal</label>
                                     <div class="relative">
-                                        <select name="question_type" x-model="createType" class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-slate-700 py-3 px-4 focus:ring-cyan-500 cursor-pointer">
+                                        <select name="question_type" x-model="createType" class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-[#2c3f61] py-3 px-4 focus:ring-[#56bbf1] focus:border-[#56bbf1] cursor-pointer">
                                             <option value="choice">Pilihan Ganda</option>
                                             <option value="true_false">Benar / Salah</option>
                                             <option value="matching">Menjodohkan (Matching)</option>
@@ -236,19 +228,19 @@
                                 </div>
 
                                 {{-- NEW: INPUT TAGS / KD --}}
-                                <div class="bg-cyan-50/50 p-4 rounded-2xl border border-cyan-100">
-                                    <label class="block text-xs font-bold text-cyan-400 uppercase mb-2 ml-1"><i class="ph-fill ph-tag"></i> Materi / KD (Opsional)</label>
+                                <div class="bg-[#e5eff5]/50 p-4 rounded-2xl border border-[#56bbf1]/20">
+                                    <label class="block text-xs font-bold text-[#0d52a1] uppercase mb-2 ml-1"><i class="ph-fill ph-tag"></i> Materi / KD (Opsional)</label>
                                     <div class="flex flex-wrap gap-2 mb-2">
                                         <template x-for="(tag, index) in createTags" :key="index">
-                                            <span class="inline-flex items-center gap-1 px-3 py-1 bg-cyan-100 text-cyan-700 rounded-lg text-xs font-bold border border-cyan-200">
+                                            <span class="inline-flex items-center gap-1 px-3 py-1 bg-[#56bbf1]/20 text-[#0d52a1] rounded-lg text-xs font-bold border border-[#56bbf1]/30">
                                                 <span x-text="tag"></span>
                                                 <button type="button" @click="createTags.splice(index, 1)" class="hover:text-rose-500"><i class="ph-bold ph-x"></i></button>
                                             </span>
                                         </template>
                                     </div>
                                     <div class="flex gap-2">
-                                        <input type="text" x-model="newTag" @keydown.enter.prevent="addTag(newTag, 'create')" placeholder="Ketik lalu Enter..." class="w-full rounded-xl border-slate-200 text-sm py-2 px-3 focus:ring-cyan-500 focus:border-cyan-500">
-                                        <button type="button" @click="addTag(newTag, 'create')" class="px-4 bg-cyan-600 text-white rounded-xl hover:bg-cyan-700 font-bold text-xs">Tambah</button>
+                                        <input type="text" x-model="newTag" @keydown.enter.prevent="addTag(newTag, 'create')" placeholder="Ketik lalu Enter..." class="w-full rounded-xl border-slate-200 text-sm py-2 px-3 focus:ring-[#56bbf1] focus:border-[#56bbf1]">
+                                        <button type="button" @click="addTag(newTag, 'create')" class="px-4 bg-[#2c3f61] text-white rounded-xl hover:bg-[#1c2940] font-bold text-xs shadow-sm">Tambah</button>
                                     </div>
                                     <input type="hidden" name="tags" :value="createTags.join(',')">
                                 </div>
@@ -257,7 +249,7 @@
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pertanyaan / Instruksi</label>
                                     <input id="q_input_create" type="hidden" name="question_text" value="{{ old('question_text') }}">
-                                    <trix-editor id="create-trix-editor" input="q_input_create" @trix-change="createQuestionText = $event.target.value" placeholder="Tulis soal di sini..." class="prose prose-sm max-w-none"></trix-editor>
+                                    <trix-editor id="create-trix-editor" input="q_input_create" @trix-change="createQuestionText = $event.target.value" placeholder="Tulis soal di sini..." class="prose prose-sm max-w-none focus:ring-[#56bbf1] focus:border-[#56bbf1] text-[#2c3f61]"></trix-editor>
                                 </div>
 
                                 {{-- Upload Gambar --}}
@@ -269,7 +261,7 @@
                                             <button type="button" @click="createPreviewImage = null; $refs.fileInput.value = ''" class="absolute top-2 right-2 bg-rose-500 text-white p-1.5 rounded-xl shadow-lg hover:bg-rose-600 transition"><i class="ph-bold ph-trash"></i></button>
                                         </div>
                                     </template>
-                                    <label class="flex flex-col items-center justify-center w-full h-16 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-cyan-50 hover:border-cyan-300 transition-all bg-slate-50">
+                                    <label class="flex flex-col items-center justify-center w-full h-16 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:bg-[#e5eff5] hover:border-[#56bbf1] transition-all bg-slate-50">
                                         <div class="flex items-center gap-2"><i class="ph-duotone ph-image text-xl text-slate-400"></i><span class="text-xs font-bold text-slate-500">Upload Gambar</span></div>
                                         <input type="file" x-ref="fileInput" name="question_image" @change="createPreviewImage = URL.createObjectURL($event.target.files[0])" accept="image/*" class="hidden">
                                     </label>
@@ -287,8 +279,8 @@
                                                 <span class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-500 flex items-center justify-center font-black text-xs shrink-0 mt-1">{{ $opt }}</span>
                                                 <div class="flex-1 space-y-2" x-data="{ optPreview: null }">
                                                     <div class="flex gap-2">
-                                                        <input type="text" name="option_{{ $opt }}" value="{{ old('option_'.$opt) }}" class="flex-1 rounded-xl border-slate-200 bg-white text-sm py-2 px-3 focus:ring-cyan-500" placeholder="Teks Jawaban {{ $opt }}">
-                                                        <label class="w-10 h-10 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 cursor-pointer transition" title="Upload Gambar Opsi {{ $opt }}">
+                                                        <input type="text" name="option_{{ $opt }}" value="{{ old('option_'.$opt) }}" class="flex-1 rounded-xl border-slate-200 bg-white text-sm py-2 px-3 focus:ring-[#56bbf1] focus:border-[#56bbf1]" placeholder="Teks Jawaban {{ $opt }}">
+                                                        <label class="w-10 h-10 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-[#0d52a1] hover:bg-[#e5eff5] cursor-pointer transition" title="Upload Gambar Opsi {{ $opt }}">
                                                             <i class="ph-bold ph-image text-lg"></i>
                                                             <input type="file" name="image_{{ $opt }}" accept="image/*" class="hidden" @change="optPreview = URL.createObjectURL($event.target.files[0])">
                                                         </label>
@@ -304,7 +296,7 @@
                                             @endforeach
                                             <div class="mt-2">
                                                 <label class="text-xs font-bold text-slate-500">Kunci Jawaban:</label>
-                                                <select name="correct_answer" class="ml-2 rounded-lg border-slate-200 text-xs font-bold py-1 px-3 bg-white">
+                                                <select name="correct_answer" class="ml-2 rounded-lg border-slate-200 text-xs font-bold py-1 px-3 bg-white focus:ring-[#56bbf1] focus:border-[#56bbf1]">
                                                     <option value="A" {{ old('correct_answer') == 'A' ? 'selected' : '' }}>A</option>
                                                     <option value="B" {{ old('correct_answer') == 'B' ? 'selected' : '' }}>B</option>
                                                     <option value="C" {{ old('correct_answer') == 'C' ? 'selected' : '' }}>C</option>
@@ -342,8 +334,8 @@
                                                     <div class="flex items-center gap-2">
                                                         <!-- Sisi Kiri -->
                                                         <div class="flex-1 flex items-center gap-2 min-w-0">
-                                                            <input type="text" :name="'matches['+index+'][left]'" x-model="pair.left" class="w-full min-w-0 rounded-lg border-slate-200 text-xs px-3 h-9 focus:ring-cyan-500" placeholder="Teks Kiri">
-                                                            <label class="shrink-0 w-9 h-9 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 cursor-pointer transition" title="Gambar Kiri">
+                                                            <input type="text" :name="'matches['+index+'][left]'" x-model="pair.left" class="w-full min-w-0 rounded-lg border-slate-200 text-xs px-3 h-9 focus:ring-[#56bbf1] focus:border-[#56bbf1]" placeholder="Teks Kiri">
+                                                            <label class="shrink-0 w-9 h-9 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:text-[#0d52a1] hover:bg-[#e5eff5] cursor-pointer transition" title="Gambar Kiri">
                                                                 <i class="ph-bold ph-image text-sm"></i>
                                                                 <input type="file" :name="'matches['+index+'][left_image]'" accept="image/*" class="left-file-input hidden" @change="leftPreview = URL.createObjectURL($event.target.files[0])">
                                                             </label>
@@ -356,8 +348,8 @@
 
                                                         <!-- Sisi Kanan -->
                                                         <div class="flex-1 flex items-center gap-2 min-w-0">
-                                                            <input type="text" :name="'matches['+index+'][right]'" x-model="pair.right" class="w-full min-w-0 rounded-lg border-slate-200 text-xs px-3 h-9 focus:ring-cyan-500" placeholder="Teks Kanan">
-                                                            <label class="shrink-0 w-9 h-9 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 cursor-pointer transition" title="Gambar Kanan">
+                                                            <input type="text" :name="'matches['+index+'][right]'" x-model="pair.right" class="w-full min-w-0 rounded-lg border-slate-200 text-xs px-3 h-9 focus:ring-[#56bbf1] focus:border-[#56bbf1]" placeholder="Teks Kanan">
+                                                            <label class="shrink-0 w-9 h-9 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 hover:text-[#0d52a1] hover:bg-[#e5eff5] cursor-pointer transition" title="Gambar Kanan">
                                                                 <i class="ph-bold ph-image text-sm"></i>
                                                                 <input type="file" :name="'matches['+index+'][right_image]'" accept="image/*" class="right-file-input hidden" @change="rightPreview = URL.createObjectURL($event.target.files[0])">
                                                             </label>
@@ -401,7 +393,7 @@
                                                     </template>
                                                 </div>
                                             </template>
-                                            <button type="button" @click="addPair()" class="text-xs font-bold text-cyan-600 hover:text-cyan-700 flex items-center gap-1 mt-2"><i class="ph-bold ph-plus"></i> Tambah Pasangan</button>
+                                            <button type="button" @click="addPair()" class="text-xs font-bold text-[#0d52a1] hover:text-[#2c3f61] flex items-center gap-1 mt-2"><i class="ph-bold ph-plus"></i> Tambah Pasangan</button>
                                         </div>
                                     </template>
 
@@ -409,7 +401,7 @@
                                     <template x-if="createType === 'essay'">
                                         <div>
                                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Kunci (Opsional)</label>
-                                            <input type="text" name="correct_answer" value="{{ old('correct_answer') }}" class="w-full rounded-xl border-slate-200 text-sm py-2 px-3" placeholder="Jawaban singkat (Auto-grade)">
+                                            <input type="text" name="correct_answer" value="{{ old('correct_answer') }}" class="w-full rounded-xl border-slate-200 text-sm py-2 px-3 focus:ring-[#56bbf1] focus:border-[#56bbf1]" placeholder="Jawaban singkat (Auto-grade)">
                                         </div>
                                     </template>
                                 </div>
@@ -417,10 +409,10 @@
                                 {{-- Bobot --}}
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Bobot Nilai</label>
-                                    <input type="number" name="score_weight" value="{{ old('score_weight', 2) }}" required class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-center h-11 focus:ring-cyan-500">
+                                    <input type="number" name="score_weight" value="{{ old('score_weight', 2) }}" required class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm font-bold text-center h-11 focus:ring-[#56bbf1] focus:border-[#56bbf1]">
                                 </div>
 
-                                <button type="submit" class="w-full py-3.5 bg-cyan-600 text-white font-bold rounded-xl hover:bg-cyan-700 transition shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 transform active:scale-95">
+                                <button type="submit" class="w-full py-3.5 bg-[#2c3f61] text-white font-bold rounded-xl hover:bg-[#1c2940] transition shadow-lg shadow-[#2c3f61]/20 flex items-center justify-center gap-2 transform active:scale-95">
                                     <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan ke Bank
                                 </button>
                             </form>
@@ -443,12 +435,12 @@
 
                         <div class="flex flex-col sm:flex-row justify-between items-center px-2 gap-4">
                             <div class="flex items-center gap-3 flex-wrap">
-                                <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
-                                    <i class="ph-fill ph-list-dashes text-cyan-500"></i> Isi Bank Soal
+                                <h3 class="font-black text-[#2c3f61] text-lg flex items-center gap-2">
+                                    <i class="ph-fill ph-list-dashes text-[#0d52a1]"></i> Isi Bank Soal
                                 </h3>
                                 
                                 {{-- TOMBOL IMPORT --}}
-                                <button @click="showImportModal = true" class="px-3 py-1.5 bg-cyan-600 text-white rounded-lg text-xs font-bold hover:bg-cyan-700 transition shadow-sm flex items-center gap-1.5 ml-2">
+                                <button @click="showImportModal = true" class="px-3 py-1.5 bg-[#2c3f61] text-white rounded-lg text-xs font-bold hover:bg-[#1c2940] transition shadow-sm shadow-[#2c3f61]/20 flex items-center gap-1.5 ml-2">
                                     <i class="ph-bold ph-file-arrow-up text-base"></i> Import
                                 </button>                                  
 
@@ -458,18 +450,18 @@
                                         <i class="ph-bold ph-file-xls text-base"></i> Excel
                                     </a>                                        
 
-                                    {{-- TOMBOL EXPORT WORD (BARU) --}}
-                                    <a href="{{ route('bank.export_word', $bank->id) }}" class="px-3 py-1.5 bg-cyan-600 text-white rounded-lg text-xs font-bold hover:bg-cyan-700 transition shadow-sm flex items-center gap-1.5">
+                                    {{-- TOMBOL EXPORT WORD --}}
+                                    <a href="{{ route('bank.export_word', $bank->id) }}" class="px-3 py-1.5 bg-[#0d52a1] text-white rounded-lg text-xs font-bold hover:bg-blue-800 transition shadow-sm flex items-center gap-1.5">
                                         <i class="ph-bold ph-file-doc text-base"></i> Word
                                     </a>                                        
 
-                                    {{-- TOMBOL PREVIEW (BARU) --}}
+                                    {{-- TOMBOL PREVIEW --}}
                                     <a href="{{ route('bank.preview', $bank->id) }}" target="_blank" class="px-3 py-1.5 bg-slate-800 text-white rounded-lg text-xs font-bold hover:bg-slate-900 transition shadow-sm flex items-center gap-1.5">
                                         <i class="ph-bold ph-desktop text-base"></i> Pratinjau
                                     </a>
 
                                     {{-- TOMBOL CETAK PDF --}}
-                                    <a href="{{ route('bank.questions.print', $bank->id) }}" target="_blank" class="px-3 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-lg text-xs font-bold hover:text-cyan-600 hover:bg-cyan-50 hover:border-cyan-200 transition shadow-sm flex items-center gap-1.5">
+                                    <a href="{{ route('bank.questions.print', $bank->id) }}" target="_blank" class="px-3 py-1.5 bg-white text-slate-600 border border-slate-200 rounded-lg text-xs font-bold hover:text-[#0d52a1] hover:bg-[#e5eff5] hover:border-[#56bbf1]/50 transition shadow-sm flex items-center gap-1.5">
                                         <i class="ph-bold ph-printer text-base"></i> PDF
                                     </a>
                                 @endif
@@ -478,37 +470,37 @@
                         <div class="flex flex-col sm:flex-row justify-between items-center px-2 gap-4">
 
                             {{-- JUMLAH SOAL --}}
-                            <span class="text-xs font-bold text-cyan-600 bg-cyan-50 border border-cyan-100 px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5" title="Total Nilai">
+                            <span class="text-xs font-bold text-[#0d52a1] bg-[#56bbf1]/10 border border-[#56bbf1]/20 px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5" title="Total Nilai">
                                 <i class=" ph-fill ph-book-open-text text-base"></i> Soal {{ $bank->questions->count() }}
                             </span>
 
                             {{-- TOTAL POIN --}}
-                            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5" title="Akumulasi Bobot Nilai">
+                            <span class="text-xs font-bold text-[#c86845] bg-[#f9a282]/10 border border-[#f9a282]/20 px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5" title="Akumulasi Bobot Nilai">
                                 <i class="ph-fill ph-chart-bar text-base"></i> Poin {{ $totalPoints ?? 0 }}
                             </span>
 
                             {{-- CHECKBOX PILIH SEMUA --}}
                             @if($bank->questions->count() > 0)
                                 <label class="flex items-center gap-2 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 transition">
-                                    <input type="checkbox" @change="toggleSelectAll($event)" class="w-4 h-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500">
+                                    <input type="checkbox" @change="toggleSelectAll($event)" class="w-4 h-4 rounded border-slate-300 text-[#0d52a1] focus:ring-[#56bbf1]">
                                     <span class="text-xs font-bold text-slate-600">Pilih Semua</span>
                                 </label>
                             @endif
                             {{-- KOLOM PENCARIAN --}}
                             <div class="relative w-full md:w-80 shrink-0">
                                 <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input type="text" x-model="questionSearch" placeholder="Cari pertanyaan atau tag..." class="w-full pl-10 pr-4 py-2 text-sm font-bold border-slate-200 rounded-xl focus:ring-cyan-500 focus:border-cyan-500 bg-white shadow-sm transition">
+                                <input type="text" x-model="questionSearch" placeholder="Cari pertanyaan atau tag..." class="w-full pl-10 pr-4 py-2 text-sm font-bold border-slate-200 rounded-xl focus:ring-[#56bbf1] focus:border-[#56bbf1] bg-white shadow-sm transition">
                             </div>
                         </div>                      
                         
                         {{-- ACTION BAR MUNCUL SAAT ADA YANG DIPILIH --}}
-                        <div x-show="selectedQuestions.length > 0" x-transition class="bg-cyan-50 border border-cyan-200 rounded-[1.5rem] p-4 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm" style="display: none;">
-                            <div class="text-sm font-bold text-cyan-800 flex items-center gap-2">
-                                <i class="ph-fill ph-check-circle text-cyan-600 text-lg"></i>
+                        <div x-show="selectedQuestions.length > 0" x-transition class="bg-[#e5eff5] border border-[#56bbf1]/30 rounded-[1.5rem] p-4 flex flex-col sm:flex-row justify-between items-center gap-4 shadow-sm" style="display: none;">
+                            <div class="text-sm font-bold text-[#0d52a1] flex items-center gap-2">
+                                <i class="ph-fill ph-check-circle text-[#56bbf1] text-lg"></i>
                                 <span x-text="selectedQuestions.length"></span> Soal Terpilih
                             </div>
                             <div class="flex gap-2 w-full sm:w-auto">
-                                <button type="button" @click="promptBulkWeight()" class="flex-1 sm:flex-none px-4 py-2 bg-white text-cyan-600 border border-cyan-200 rounded-xl text-xs font-bold hover:bg-cyan-600 hover:text-white transition shadow-sm">Ubah Bobot</button>
+                                <button type="button" @click="promptBulkWeight()" class="flex-1 sm:flex-none px-4 py-2 bg-white text-[#0d52a1] border border-[#56bbf1]/50 rounded-xl text-xs font-bold hover:bg-[#56bbf1] hover:text-white transition shadow-sm">Ubah Bobot</button>
                                 <button type="button" @click="confirmBulkDelete()" class="flex-1 sm:flex-none px-4 py-2 bg-white text-rose-600 border border-rose-200 rounded-xl text-xs font-bold hover:bg-rose-600 hover:text-white transition shadow-sm">Hapus</button>
                             </div>
                         </div>
@@ -521,22 +513,22 @@
 
                             <div data-search="{{ $searchableText }}"
                                  x-show="questionSearch === '' || $el.dataset.search.includes(questionSearch.toLowerCase())"
-                                 class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative group hover:border-cyan-200 hover:shadow-lg transition-all duration-300">
+                                 class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative group hover:border-[#56bbf1]/40 hover:shadow-lg transition-all duration-300">
                             
-                            <div class="absolute top-6 left-6 w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center font-black text-slate-500 text-sm group-hover:bg-cyan-600 group-hover:text-white transition-colors shadow-inner">{{ $index + 1 }}</div>
+                            <div class="absolute top-6 left-6 w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center font-black text-slate-500 text-sm group-hover:bg-[#2c3f61] group-hover:text-white transition-colors shadow-inner">{{ $index + 1 }}</div>
                             
                             {{-- CHECKBOX ITEM --}}
                             <div class="absolute top-8 left-[4.5rem] z-10">
-                                <input type="checkbox" value="{{ $q->id }}" x-model="selectedQuestions" class="question-checkbox w-5 h-5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 cursor-pointer shadow-sm">
+                                <input type="checkbox" value="{{ $q->id }}" x-model="selectedQuestions" class="question-checkbox w-5 h-5 rounded border-slate-300 text-[#0d52a1] focus:ring-[#56bbf1] cursor-pointer shadow-sm">
                             </div>
 
                             <div class="pl-20 sm:pl-24">
                                 {{-- Badge Tipe Soal --}}
                                     <div class="mb-2">
-                                        @if($qType == 'choice') <span class="text-[10px] font-bold bg-cyan-50 text-cyan-600 px-2 py-0.5 rounded border border-cyan-100">PILIHAN GANDA</span>
-                                        @elseif($qType == 'true_false') <span class="text-[10px] font-bold bg-purple-50 text-purple-600 px-2 py-0.5 rounded border border-purple-100">BENAR / SALAH</span>
-                                        @elseif($qType == 'matching') <span class="text-[10px] font-bold bg-orange-50 text-orange-600 px-2 py-0.5 rounded border border-orange-100">MENJODOHKAN</span>
-                                        @elseif($qType == 'essay') <span class="text-[10px] font-bold bg-pink-50 text-pink-600 px-2 py-0.5 rounded border border-pink-100">ESSAI</span>
+                                        @if($qType == 'choice') <span class="text-[10px] font-bold bg-[#56bbf1]/10 text-[#0d52a1] px-2 py-0.5 rounded border border-[#56bbf1]/20">PILIHAN GANDA</span>
+                                        @elseif($qType == 'true_false') <span class="text-[10px] font-bold bg-[#f9a282]/10 text-[#c86845] px-2 py-0.5 rounded border border-[#f9a282]/20">BENAR / SALAH</span>
+                                        @elseif($qType == 'matching') <span class="text-[10px] font-bold bg-[#e5eff5] text-[#2c3f61] px-2 py-0.5 rounded border border-slate-200">MENJODOHKAN</span>
+                                        @elseif($qType == 'essay') <span class="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200">ESSAI</span>
                                         @endif
                                     </div>
 
@@ -544,7 +536,7 @@
                                     @if(!empty($q->tags))
                                         <div class="mb-3 flex flex-wrap gap-1">
                                             @foreach(explode(',', $q->tags) as $tag)
-                                                <span class="text-[10px] font-bold bg-cyan-50 text-cyan-600 px-2 py-0.5 rounded border border-cyan-100 flex items-center gap-1">
+                                                <span class="text-[10px] font-bold bg-[#56bbf1]/10 text-[#0d52a1] px-2 py-0.5 rounded border border-[#56bbf1]/20 flex items-center gap-1">
                                                     <i class="ph-fill ph-tag"></i> {{ trim($tag) }}
                                                 </span>
                                             @endforeach
@@ -557,7 +549,7 @@
                                         </div>
                                     @endif
                                     
-                                    <div class="text-slate-800 font-medium text-lg mb-5 leading-relaxed trix-content prose prose-sm max-w-none">{!! $q->question_text !!}</div>
+                                    <div class="text-[#2c3f61] font-medium text-lg mb-5 leading-relaxed trix-content prose prose-sm max-w-none">{!! $q->question_text !!}</div>
                                     
                                     {{-- Preview Jawaban (Read Only) --}}
                                     @if($qType == 'choice')
@@ -594,16 +586,16 @@
                                                                 <img src="{{ asset('storage/' . $p['left_image']) }}" class="w-10 h-10 rounded border border-slate-200 object-cover cursor-zoom-in" onclick="viewImage('{{ asset('storage/' . $p['left_image']) }}')">
                                                             @endif
                                                             @if(isset($p['left']) && $p['left'] !== '')
-                                                                <span class="font-medium text-slate-700 mt-1 sm:mt-0">{{ $p['left'] }}</span>
+                                                                <span class="font-medium text-[#2c3f61] mt-1 sm:mt-0">{{ $p['left'] }}</span>
                                                             @endif
                                                         </div>
-                                                        <i class="ph-bold ph-arrows-left-right text-slate-300"></i>
+                                                        <i class="ph-bold ph-arrows-left-right text-[#56bbf1]"></i>
                                                         <div class="flex-1 flex flex-col sm:flex-row items-center sm:items-start gap-2 text-center sm:text-left">
                                                             @if(isset($p['right_image']) && $p['right_image'])
                                                                 <img src="{{ asset('storage/' . $p['right_image']) }}" class="w-10 h-10 rounded border border-slate-200 object-cover cursor-zoom-in" onclick="viewImage('{{ asset('storage/' . $p['right_image']) }}')">
                                                             @endif
                                                             @if(isset($p['right']) && $p['right'] !== '')
-                                                                <span class="font-medium text-slate-700 mt-1 sm:mt-0">{{ $p['right'] }}</span>
+                                                                <span class="font-medium text-[#2c3f61] mt-1 sm:mt-0">{{ $p['right'] }}</span>
                                                             @endif
                                                         </div>
                                                     </div>
@@ -612,7 +604,7 @@
                                         </div>
                                     @elseif($qType == 'essay')
                                         <div class="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                                            <span class="font-bold">Kunci:</span> {{ $q->correct_answer ?: '(Koreksi Manual)' }}
+                                            <span class="font-bold">Kunci:</span> <span class="text-[#2c3f61] font-medium">{{ $q->correct_answer ?: '(Koreksi Manual)' }}</span>
                                         </div>
                                     @elseif($qType == 'true_false')
                                         <div class="flex gap-2">
@@ -622,7 +614,7 @@
                                     @endif
                                     
                                     <div class="mt-5 pt-3 border-t border-slate-50 flex items-center gap-3">
-                                        <span class="text-[10px] font-bold text-slate-400 uppercase bg-slate-50 px-2 py-1 rounded-md border border-slate-100">Bobot: {{ $q->score_weight }} Poin</span>
+                                        <span class="text-[10px] font-bold text-[#0d52a1] uppercase bg-[#56bbf1]/10 px-2 py-1 rounded-md border border-[#56bbf1]/20">Bobot: {{ $q->score_weight }} Poin</span>
                                     </div>
                                 </div>
 
@@ -646,14 +638,14 @@
                                             score_weight: {{ $q->score_weight }},
                                             tags: '{{ addslashes($q->tags ?? '') }}'
                                         }, '{{ route('bank.questions.update', $q->id) }}')" 
-                                        class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-cyan-600 hover:border-cyan-200 shadow-sm flex items-center justify-center transition-all hover:scale-105">
+                                        class="w-9 h-9 rounded-xl bg-white border border-[#f9a282]/50 text-[#c86845] hover:bg-[#f9a282]/10 shadow-sm flex items-center justify-center transition-all hover:scale-105">
                                         <i class="ph-bold ph-pencil-simple text-lg"></i>
                                     </button>
                                     
                                     {{-- Button Delete --}}
                                     <form action="{{ route('bank.questions.destroy', $q->id) }}" method="POST" class="delete-form">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 shadow-sm flex items-center justify-center transition-all hover:scale-105 btn-delete">
+                                        <button type="submit" class="w-9 h-9 rounded-xl bg-white border border-rose-200 text-rose-400 hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50 shadow-sm flex items-center justify-center transition-all hover:scale-105 btn-delete">
                                             <i class="ph-bold ph-trash text-lg"></i>
                                         </button>
                                     </form>
@@ -661,8 +653,8 @@
                             </div>
                         @empty
                             <div class="text-center py-16 bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                                <div class="w-20 h-20 bg-cyan-50 rounded-full flex items-center justify-center mx-auto mb-4 text-cyan-600 animate-pulse"><i class="ph-duotone ph-folder-dashed text-4xl"></i></div>
-                                <h3 class="text-slate-800 font-black text-xl mb-1">Bank Soal Kosong</h3>
+                                <div class="w-20 h-20 bg-[#56bbf1]/10 rounded-full flex items-center justify-center mx-auto mb-4 text-[#0d52a1] animate-pulse"><i class="ph-duotone ph-folder-dashed text-4xl"></i></div>
+                                <h3 class="text-[#2c3f61] font-black text-xl mb-1">Bank Soal Kosong</h3>
                                 <p class="text-slate-500 text-sm">Isi bank soal ini untuk digunakan di ujian nanti.</p>
                             </div>
                         @endforelse
@@ -685,7 +677,7 @@
                         <input type="hidden" name="delete_image" x-model="deleteImage">
 
                         <div class="bg-white px-8 py-6 border-b border-slate-100 flex justify-between items-center">
-                            <h3 class="text-xl font-black text-slate-800 flex items-center gap-2"><i class="ph-fill ph-pencil-simple text-cyan-600"></i> Edit Soal</h3>
+                            <h3 class="text-xl font-black text-[#2c3f61] flex items-center gap-2"><i class="ph-fill ph-pencil-simple text-[#0d52a1]"></i> Edit Soal</h3>
                             <button type="button" @click="showEditModal = false" class="text-slate-400 hover:text-rose-500 transition bg-slate-50 w-10 h-10 rounded-xl flex items-center justify-center"><i class="ph-bold ph-x text-lg"></i></button>
                         </div>
 
@@ -695,7 +687,7 @@
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tipe Soal</label>
                                 <div class="relative">
-                                    <select name="question_type" x-model="editState.question_type" class="w-full rounded-xl border-slate-200 bg-white text-sm font-bold text-slate-700 py-3 px-4 focus:ring-cyan-500 cursor-pointer">
+                                    <select name="question_type" x-model="editState.question_type" class="w-full rounded-xl border-slate-200 bg-white text-sm font-bold text-[#2c3f61] py-3 px-4 focus:ring-[#56bbf1] focus:border-[#56bbf1] cursor-pointer">
                                         <option value="choice">Pilihan Ganda</option>
                                         <option value="true_false">Benar / Salah</option>
                                         <option value="matching">Menjodohkan</option>
@@ -706,19 +698,19 @@
                             </div>
 
                             {{-- EDIT TAGS / KD --}}
-                            <div class="bg-cyan-50/50 p-4 rounded-2xl border border-cyan-100">
-                                <label class="block text-xs font-bold text-cyan-400 uppercase mb-2 ml-1"><i class="ph-fill ph-tag"></i> Materi / KD (Opsional)</label>
+                            <div class="bg-[#e5eff5]/50 p-4 rounded-2xl border border-[#56bbf1]/20">
+                                <label class="block text-xs font-bold text-[#0d52a1] uppercase mb-2 ml-1"><i class="ph-fill ph-tag"></i> Materi / KD (Opsional)</label>
                                 <div class="flex flex-wrap gap-2 mb-2">
                                     <template x-for="(tag, index) in editTags" :key="index">
-                                        <span class="inline-flex items-center gap-1 px-3 py-1 bg-cyan-100 text-cyan-700 rounded-lg text-xs font-bold border border-cyan-200">
+                                        <span class="inline-flex items-center gap-1 px-3 py-1 bg-[#56bbf1]/20 text-[#0d52a1] rounded-lg text-xs font-bold border border-[#56bbf1]/30">
                                             <span x-text="tag"></span>
                                             <button type="button" @click="editTags.splice(index, 1)" class="hover:text-rose-500"><i class="ph-bold ph-x"></i></button>
                                         </span>
                                     </template>
                                 </div>
                                 <div class="flex gap-2">
-                                    <input type="text" x-model="editNewTag" @keydown.enter.prevent="addTag(editNewTag, 'edit')" placeholder="Ketik lalu Enter..." class="w-full rounded-xl border-slate-200 text-sm py-2 px-3 focus:ring-cyan-500 focus:border-cyan-500">
-                                    <button type="button" @click="addTag(editNewTag, 'edit')" class="px-4 bg-cyan-600 text-white rounded-xl hover:bg-cyan-700 font-bold text-xs">Tambah</button>
+                                    <input type="text" x-model="editNewTag" @keydown.enter.prevent="addTag(editNewTag, 'edit')" placeholder="Ketik lalu Enter..." class="w-full rounded-xl border-slate-200 text-sm py-2 px-3 focus:ring-[#56bbf1] focus:border-[#56bbf1]">
+                                    <button type="button" @click="addTag(editNewTag, 'edit')" class="px-4 bg-[#2c3f61] text-white rounded-xl hover:bg-[#1c2940] font-bold text-xs">Tambah</button>
                                 </div>
                                 <input type="hidden" name="tags" :value="editTags.join(',')">
                             </div>
@@ -727,7 +719,7 @@
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pertanyaan</label>
                                 <input id="q_input_edit" type="hidden" name="question_text" x-model="editState.question_text">
-                                <trix-editor id="edit-trix-editor" input="q_input_edit" @trix-change="editState.question_text = $event.target.value" class="prose prose-sm max-w-none bg-white"></trix-editor>
+                                <trix-editor id="edit-trix-editor" input="q_input_edit" @trix-change="editState.question_text = $event.target.value" class="prose prose-sm max-w-none bg-white text-[#2c3f61] focus:ring-[#56bbf1] focus:border-[#56bbf1]"></trix-editor>
                             </div>
 
                             {{-- Gambar --}}
@@ -749,7 +741,7 @@
                                         </div>
                                     </template>
                                     <div class="flex-1">
-                                        <input type="file" x-ref="editFileInput" name="question_image" @change="handleEditImage" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-white file:text-cyan-600 hover:file:bg-cyan-50 cursor-pointer border border-slate-200 rounded-xl bg-slate-50">
+                                        <input type="file" x-ref="editFileInput" name="question_image" @change="handleEditImage" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-white file:text-[#0d52a1] hover:file:bg-[#e5eff5] cursor-pointer border border-slate-200 rounded-xl bg-slate-50">
                                     </div>
                                 </div>
                             </div>
@@ -766,8 +758,8 @@
                                             <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center font-black text-sm shrink-0 mt-1">{{ $opt }}</span>
                                             <div class="flex-1 space-y-2" x-data="{ optPreviewEdit: null, deleteOptImage: false }">
                                                 <div class="flex gap-2">
-                                                    <input type="text" name="option_{{ $opt }}" x-model="editState.option_{{ $opt }}" class="flex-1 rounded-xl border-slate-200 text-sm py-2.5 px-4 focus:ring-cyan-500 font-medium" placeholder="Teks opsi {{ $opt }}">
-                                                    <label class="w-11 h-11 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 cursor-pointer transition" title="Ganti Gambar Opsi {{ $opt }}">
+                                                    <input type="text" name="option_{{ $opt }}" x-model="editState.option_{{ $opt }}" class="flex-1 rounded-xl border-slate-200 text-sm py-2.5 px-4 focus:ring-[#56bbf1] focus:border-[#56bbf1] font-medium" placeholder="Teks opsi {{ $opt }}">
+                                                    <label class="w-11 h-11 shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-[#0d52a1] hover:bg-[#e5eff5] cursor-pointer transition" title="Ganti Gambar Opsi {{ $opt }}">
                                                         <i class="ph-bold ph-image text-lg"></i>
                                                         <input type="file" name="image_{{ $opt }}" accept="image/*" class="hidden" @change="optPreviewEdit = URL.createObjectURL($event.target.files[0]); deleteOptImage = false">
                                                     </label>
@@ -795,7 +787,7 @@
                                         @endforeach
                                         <div class="mt-2">
                                             <label class="text-xs font-bold text-slate-500">Kunci:</label>
-                                            <select name="correct_answer" x-model="editState.correct_answer" class="ml-2 rounded-lg border-slate-200 text-xs font-bold py-1 px-3 bg-white">
+                                            <select name="correct_answer" x-model="editState.correct_answer" class="ml-2 rounded-lg border-slate-200 text-xs font-bold py-1 px-3 bg-white focus:ring-[#56bbf1] focus:border-[#56bbf1]">
                                                 <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
                                             </select>
                                         </div>
@@ -830,8 +822,8 @@
                                                 <div class="flex items-center gap-2">
                                                     <!-- Edit Sisi Kiri -->
                                                     <div class="flex-1 flex items-center gap-2 min-w-0">
-                                                        <input type="text" :name="'matches['+index+'][left]'" x-model="pair.left" class="w-full min-w-0 rounded-lg border-slate-200 text-xs px-3 h-9 focus:ring-cyan-500">
-                                                        <label class="shrink-0 w-9 h-9 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 cursor-pointer hover:bg-cyan-50 hover:text-cyan-500 transition" title="Ganti Gambar Kiri">
+                                                        <input type="text" :name="'matches['+index+'][left]'" x-model="pair.left" class="w-full min-w-0 rounded-lg border-slate-200 text-xs px-3 h-9 focus:ring-[#56bbf1] focus:border-[#56bbf1]">
+                                                        <label class="shrink-0 w-9 h-9 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 cursor-pointer hover:bg-[#e5eff5] hover:text-[#0d52a1] transition" title="Ganti Gambar Kiri">
                                                             <i class="ph-bold ph-image text-sm"></i>
                                                             <input type="file" :name="'matches['+index+'][left_image]'" accept="image/*" class="left-file-edit hidden" @change="leftPreviewEdit = URL.createObjectURL($event.target.files[0]); delLeftImg = false">
                                                         </label>
@@ -845,8 +837,8 @@
                                                     
                                                     <!-- Edit Sisi Kanan -->
                                                     <div class="flex-1 flex items-center gap-2 min-w-0">
-                                                        <input type="text" :name="'matches['+index+'][right]'" x-model="pair.right" class="w-full min-w-0 rounded-lg border-slate-200 text-xs px-3 h-9 focus:ring-cyan-500">
-                                                        <label class="shrink-0 w-9 h-9 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 cursor-pointer hover:bg-cyan-50 hover:text-cyan-500 transition" title="Ganti Gambar Kanan">
+                                                        <input type="text" :name="'matches['+index+'][right]'" x-model="pair.right" class="w-full min-w-0 rounded-lg border-slate-200 text-xs px-3 h-9 focus:ring-[#56bbf1] focus:border-[#56bbf1]">
+                                                        <label class="shrink-0 w-9 h-9 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center text-slate-400 cursor-pointer hover:bg-[#e5eff5] hover:text-[#0d52a1] transition" title="Ganti Gambar Kanan">
                                                             <i class="ph-bold ph-image text-sm"></i>
                                                             <input type="file" :name="'matches['+index+'][right_image]'" accept="image/*" class="right-file-edit hidden" @change="rightPreviewEdit = URL.createObjectURL($event.target.files[0]); delRightImg = false">
                                                         </label>
@@ -907,7 +899,7 @@
                                                 </template>
                                             </div>
                                         </template>
-                                        <button type="button" @click="addEditPair()" class="text-xs font-bold text-cyan-600 hover:text-cyan-700 flex items-center gap-1 mt-2"><i class="ph-bold ph-plus"></i> Tambah Pasangan</button>
+                                        <button type="button" @click="addEditPair()" class="text-xs font-bold text-[#0d52a1] hover:text-[#2c3f61] flex items-center gap-1 mt-2"><i class="ph-bold ph-plus"></i> Tambah Pasangan</button>
                                     </div>
                                 </template>
 
@@ -915,7 +907,7 @@
                                 <template x-if="editState.question_type === 'essay'">
                                     <div>
                                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Kunci (Opsional)</label>
-                                        <input type="text" name="correct_answer" x-model="editState.correct_answer" class="w-full rounded-xl border-slate-200 text-sm py-2 px-3">
+                                        <input type="text" name="correct_answer" x-model="editState.correct_answer" class="w-full rounded-xl border-slate-200 text-sm py-2 px-3 focus:ring-[#56bbf1] focus:border-[#56bbf1]">
                                     </div>
                                 </template>
                             </div>
@@ -923,14 +915,14 @@
                             {{-- Bobot Nilai (EDIT) --}}
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Bobot Nilai</label>
-                                <input type="number" name="score_weight" x-model="editState.score_weight" required class="w-full rounded-xl border-slate-200 bg-white text-sm font-bold text-center h-11 focus:ring-cyan-500">
+                                <input type="number" name="score_weight" x-model="editState.score_weight" required class="w-full rounded-xl border-slate-200 bg-white text-sm font-bold text-center h-11 focus:ring-[#56bbf1] focus:border-[#56bbf1]">
                             </div>
 
                             <div class="grid grid-cols-2 gap-4">
                                 {{-- Tombol Simpan --}}
                                 <div class="col-span-2 flex justify-end gap-3 mt-4">
                                     <button type="button" @click="showEditModal = false" class="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition text-sm">Batal</button>
-                                    <button type="submit" class="px-6 py-3 bg-cyan-600 text-white font-bold rounded-xl hover:bg-cyan-700 transition shadow-lg shadow-cyan-500/30 text-sm flex items-center gap-2"><i class="ph-bold ph-floppy-disk text-lg"></i> Simpan</button>
+                                    <button type="submit" class="px-6 py-3 bg-[#2c3f61] text-white font-bold rounded-xl hover:bg-[#1c2940] transition shadow-lg shadow-[#2c3f61]/30 text-sm flex items-center gap-2"><i class="ph-bold ph-floppy-disk text-lg"></i> Simpan</button>
                                 </div>
                             </div>
                         </div>
@@ -945,29 +937,29 @@
             <div class="flex min-h-screen items-center justify-center p-4">
                 <div class="relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all sm:w-full sm:max-w-md border border-slate-100">
                     <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center">
-                        <h3 class="text-xl font-black text-slate-800 flex items-center gap-2"><i class="ph-fill ph-file-arrow-up text-cyan-600"></i> Import dari Excel</h3>
+                        <h3 class="text-xl font-black text-[#2c3f61] flex items-center gap-2"><i class="ph-fill ph-file-arrow-up text-[#0d52a1]"></i> Import dari Excel</h3>
                         <button @click="showImportModal = false" class="text-slate-400 hover:text-rose-500 transition"><i class="ph-bold ph-x text-lg"></i></button>
                     </div>
                     
                     <form action="{{ route('bank.questions.import', $bank->id) }}" method="POST" enctype="multipart/form-data" class="p-8 space-y-6">
                         @csrf
-                        <div class="bg-cyan-50 p-4 rounded-2xl border border-cyan-100 mb-4">
-                            <p class="text-xs text-cyan-700 font-bold leading-relaxed">
+                        <div class="bg-[#e5eff5]/50 p-4 rounded-2xl border border-[#56bbf1]/20 mb-4">
+                            <p class="text-xs text-[#0d52a1] font-bold leading-relaxed">
                                 <i class="ph-bold ph-info"></i> Pastikan format file sesuai dengan template. Kolom 'soal' dan 'kunci' wajib diisi.
                             </p>
-                            <a href="{{ route('bank.questions.template') }}" class="inline-flex items-center gap-1 mt-2 text-xs font-black text-cyan-600 hover:underline">
+                            <a href="{{ route('bank.questions.template') }}" class="inline-flex items-center gap-1 mt-2 text-xs font-black text-[#2c3f61] hover:text-[#0d52a1] hover:underline transition">
                                 <i class="ph-bold ph-download-simple"></i> Download Template Excel
                             </a>
                         </div>
 
                         <div class="space-y-2">
                             <label class="block text-xs font-bold text-slate-400 uppercase ml-1">Pilih File (.xlsx / .xls)</label>
-                            <input type="file" name="file" required class="block w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700 cursor-pointer border border-slate-200 rounded-xl bg-slate-50">
+                            <input type="file" name="file" required class="block w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#2c3f61] file:text-white hover:file:bg-[#1c2940] cursor-pointer border border-slate-200 rounded-xl bg-slate-50">
                         </div>
 
                         <div class="flex gap-3 pt-4">
                             <button type="button" @click="showImportModal = false" class="flex-1 py-3 bg-white border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 transition text-sm">Batal</button>
-                            <button type="submit" class="flex-1 py-3 bg-cyan-600 text-white font-bold rounded-xl hover:bg-cyan-700 transition shadow-lg shadow-cyan-500/30 text-sm">Mulai Import</button>
+                            <button type="submit" class="flex-1 py-3 bg-[#2c3f61] text-white font-bold rounded-xl hover:bg-[#1c2940] transition shadow-lg shadow-[#2c3f61]/30 text-sm">Mulai Import</button>
                         </div>
                     </form>
                 </div>

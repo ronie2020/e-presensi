@@ -44,23 +44,23 @@
     @endpush
 
     {{-- SCREEN AREA --}}
-    <div class="screen-area py-6 bg-slate-200 min-h-screen font-sans text-slate-800 flex flex-col items-center">
+    <div class="screen-area py-6 bg-slate-100 min-h-screen font-sans text-slate-800 flex flex-col items-center">
         <div class="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-4xl">
-            <div class="bg-slate-900/90 backdrop-blur-xl text-white p-4 rounded-2xl shadow-2xl flex flex-col md:flex-row justify-between items-center gap-4 border border-white/10 ring-1 ring-black/5">
+            <div class="bg-white/90 backdrop-blur-xl text-[#2c3f61] p-4 rounded-2xl shadow-xl flex flex-col md:flex-row justify-between items-center gap-4 border border-slate-200">
                 
                 <div class="flex items-center gap-4 w-full md:w-auto">
                     <button onclick="window.close()" 
-                       class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition text-white shrink-0"
+                       class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition text-slate-500 hover:text-rose-500 shrink-0"
                        title="Tutup Tab">
                         <i class="ph-bold ph-x text-lg"></i>
                     </button>
                     <div class="min-w-0">
                         <h2 class="font-bold text-sm md:text-base leading-tight truncate">Cetak Semua Rapor</h2>
-                        <p class="text-[10px] md:text-xs text-blue-200 font-mono">Kelas {{ $class->name }} | {{ count($reportData) }} Siswa</p>
+                        <p class="text-[10px] md:text-xs text-[#2c3f61]/70 font-mono">Kelas {{ $class->name }} | {{ count($reportData) }} Siswa</p>
                     </div>
                 </div>
 
-                <button onclick="window.print()" class="w-full md:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 transition flex items-center justify-center gap-2 text-sm">
+                <button onclick="window.print()" class="w-full md:w-auto px-6 py-2.5 bg-[#2c3f61] hover:bg-[#1c2940] text-white font-bold rounded-xl shadow-lg shadow-[#2c3f61]/20 transition flex items-center justify-center gap-2 text-sm">
                     <i class="ph-bold ph-printer text-lg"></i>
                     <span>Cetak Sekarang</span>
                 </button>
@@ -68,14 +68,13 @@
         </div>
 
         <div class="mt-28 text-center max-w-lg">
-            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500 shadow-lg shadow-blue-500/10">
+            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-[#0d52a1] shadow-lg shadow-[#0d52a1]/10">
                 <i class="ph-duotone ph-files text-4xl"></i>
             </div>
-            <h3 class="text-xl font-black text-slate-800 mb-2">Mode Cetak Massal Aktif</h3>
-            <p class="text-sm text-slate-500 font-medium mb-4">
+            <h3 class="text-xl font-black text-[#2c3f61] mb-2">Mode Cetak Massal Aktif</h3>
+            <p class="text-sm text-[#2c3f61]/70 font-medium mb-4">
                 Memuat data {{ count($reportData) }} siswa. Sistem akan memisahkan rapor masing-masing siswa ke halaman baru.
             </p>
-            {{-- PERBAIKAN: Feedback visual sebelum print --}}
             <div class="inline-flex items-center gap-2 text-xs font-bold text-amber-600 bg-amber-50 px-4 py-2 rounded-lg border border-amber-200">
                 <i class="ph-bold ph-warning-circle"></i> Pastikan pengaturan margin printer diset ke "Default" atau "None".
             </div>
@@ -105,11 +104,9 @@
         @endforeach
     </div>
 
-    {{-- PERBAIKAN: Auto-print dialog saat halaman selesai dimuat --}}
     @push('scripts')
     <script>
         window.addEventListener('load', function() {
-            // Memberikan jeda sedikit untuk memastikan font/gambar termuat
             setTimeout(() => {
                 window.print();
             }, 1000);

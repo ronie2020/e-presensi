@@ -1,6 +1,6 @@
 <x-app-layout>
     {{-- Konfigurasi KKM/Interval --}}
-    <div class="py-8 sm:py-10 font-sans text-slate-800" 
+    <div class="py-8 sm:py-10 font-sans text-[#2c3f61]" 
          x-data="gradeForm({
             kkm: 75,
             intervals: { a: 92, b: 83, c: 75 } 
@@ -8,37 +8,39 @@
          
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION --}}
-            <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 mb-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
+            <div class="relative rounded-[2rem] bg-gradient-to-r from-[#56bbf1] via-[#e5eff5] to-[#f4d1c0] p-8 mb-8 text-[#2c3f61] shadow-xl shadow-[#56bbf1]/10 overflow-hidden border border-white/60">
+                {{-- Abstract Shapes Ornaments --}}
+                <div class="absolute -top-10 -left-10 w-48 h-48 bg-[#0d52a1]/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
+                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-[#f9a282]/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
+                <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                     <div class="flex-1">
-                        <div class="flex items-center gap-2 text-blue-300 text-sm font-bold mb-2">
-                            <a href="{{ route('grades.index') }}" class="hover:text-white transition flex items-center gap-1">
+                        <div class="flex items-center gap-2 text-[#2c3f61]/70 text-sm font-bold mb-2">
+                            <a href="{{ route('grades.index') }}" class="hover:text-[#0d52a1] transition flex items-center gap-1">
                                 <i class="ph-bold ph-arrow-left"></i> Kembali
                             </a>
                             <span class="opacity-50">/</span>
                             <span>Input Per Siswa</span>
                         </div>
-                        <h1 class="text-3xl font-extrabold tracking-tight leading-none text-white mb-2">Nilai Siswa</h1>
-                        <div class="flex items-center gap-2">
-                            <span class="bg-white/10 text-white px-3 py-1 rounded-lg text-xs font-bold border border-white/10 uppercase tracking-wider">{{ $class->name }}</span>
-                            <span class="text-blue-200 text-sm">Semester {{ $semester }}</span>
+                        <h1 class="text-4xl font-extrabold tracking-tight leading-none text-[#2c3f61] mb-2">Nilai Siswa</h1>
+                        <div class="flex items-center gap-2 mt-3">
+                            <span class="bg-white/60 text-[#2c3f61] px-3 py-1 rounded-lg text-xs font-bold border border-white shadow-sm uppercase tracking-wider">{{ $class->name }}</span>
+                            <span class="text-[#2c3f61]/80 font-medium text-sm">Semester {{ $semester }}</span>
                         </div>
                     </div>
 
                     {{-- CARD PILIH SISWA (NAVIGASI) --}}
-                    <div class="w-full md:w-96 bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/20 flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-xl bg-white text-blue-900 flex items-center justify-center font-bold text-lg shadow-sm shrink-0">
+                    <div class="w-full md:w-96 bg-white/60 backdrop-blur-md p-1.5 rounded-2xl border border-white shadow-sm flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-[#2c3f61] text-white flex items-center justify-center font-bold text-lg shadow-sm shrink-0">
                              {{ substr($student->name, 0, 2) }}
                         </div>
                         <div class="flex-1 min-w-0 mr-2">
-                            <label class="text-[9px] uppercase font-bold text-blue-300 tracking-widest block mb-0.5">Sedang Menilai:</label>
+                            <label class="text-[9px] uppercase font-bold text-[#2c3f61]/60 tracking-widest block mb-0.5">Sedang Menilai:</label>
                             <div class="relative">
                                 <select onchange="window.location.href = this.value" 
-                                        class="w-full p-0 border-none text-white font-bold text-sm focus:ring-0 cursor-pointer truncate bg-transparent hover:text-blue-200 transition appearance-none pr-6">
+                                        class="w-full p-0 border-none text-[#2c3f61] font-bold text-sm focus:ring-0 cursor-pointer truncate bg-transparent hover:text-[#0d52a1] transition appearance-none pr-6">
                                     @foreach($students as $s)
                                         <option class="text-slate-800" value="{{ route('grades.create_by_student', ['class_id' => $class->id, 'student_id' => $s->id, 'academic_year' => $academic_year, 'semester' => $semester]) }}" 
                                                 {{ $s->id == $student->id ? 'selected' : '' }}>
@@ -46,7 +48,7 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                <i class="ph-bold ph-caret-down text-blue-300 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                                <i class="ph-bold ph-caret-down text-[#2c3f61]/60 absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none"></i>
                             </div>
                         </div>
                     </div>
@@ -77,13 +79,13 @@
                                         $existingScore = $existingGrades[$subject->id]->score ?? '';
                                         $existingDesc = $existingGrades[$subject->id]->description ?? '';
                                     @endphp
-                                    <tr class="hover:bg-fuchsia-50/20 transition-colors group" 
+                                    <tr class="hover:bg-[#e5eff5]/40 transition-colors group" 
                                         x-data="{ score: '{{ $existingScore }}', predikat: '' }"
                                         x-init="predikat = calculatePredicate(score)">
                                         
                                         <td class="px-6 py-4 text-center font-bold text-slate-400 text-sm">{{ $index + 1 }}</td>
                                         <td class="px-6 py-4">
-                                            <div class="font-bold text-slate-700 text-sm group-hover:text-fuchsia-700 transition-colors">{{ $subject->name }}</div>
+                                            <div class="font-bold text-[#2c3f61] text-sm group-hover:text-[#0d52a1] transition-colors">{{ $subject->name }}</div>
                                         </td>
                                         <td class="px-6 py-4">
                                             <div class="flex items-center justify-center gap-2">
@@ -92,14 +94,14 @@
                                                        x-model="score"
                                                        @input="isDirty = true; predikat = calculatePredicate(score)"
                                                        @keydown="handleKeydown($event, {{ $index }}, 'score')"
-                                                       class="input-score w-20 rounded-xl border-slate-200 bg-slate-50 text-center font-black py-2"
+                                                       class="input-score w-20 rounded-xl border-slate-200 bg-slate-50 text-center font-black py-2 focus:ring-[#56bbf1] focus:border-[#56bbf1]"
                                                        placeholder="-">
                                                 
                                                 <div class="w-8 h-8 flex items-center justify-center rounded-lg font-black text-xs border border-transparent"
                                                      :class="{
                                                         'bg-emerald-100 text-emerald-700': predikat === 'A',
-                                                        'bg-blue-100 text-blue-700': predikat === 'B',
-                                                        'bg-amber-100 text-amber-700': predikat === 'C',
+                                                        'bg-blue-100 text-[#0d52a1]': predikat === 'B',
+                                                        'bg-[#f9a282]/20 text-[#c86845]': predikat === 'C',
                                                         'bg-rose-100 text-rose-700': predikat === 'D',
                                                         'bg-slate-50 text-slate-300': !predikat
                                                      }" x-text="predikat || '-'"></div>
@@ -114,7 +116,7 @@
                                             </div>
                                         </td>
                                         <td class="px-6 py-4">
-                                            <input type="text" name="descriptions[{{ $subject->id }}]" value="{{ $existingDesc }}" @input="isDirty = true" class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm py-2 px-3">
+                                            <input type="text" name="descriptions[{{ $subject->id }}]" value="{{ $existingDesc }}" @input="isDirty = true" class="w-full rounded-xl border-slate-200 bg-slate-50 text-sm py-2 px-3 focus:ring-[#56bbf1] focus:border-[#56bbf1]">
                                         </td>
                                     </tr>
                                 @endforeach
@@ -123,10 +125,10 @@
                     </div>
 
                     <div class="p-6 bg-white border-t border-slate-100 flex justify-between items-center sticky bottom-0 z-20">
-                        <span x-show="isDirty" class="text-amber-500 font-bold text-xs flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Perubahan belum disimpan</span>
+                        <span x-show="isDirty" class="text-[#f9a282] font-bold text-xs flex items-center gap-1"><i class="ph-fill ph-warning-circle"></i> Perubahan belum disimpan</span>
                         <div class="flex gap-3">
-                            <a href="{{ route('grades.index') }}" class="px-6 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm">Batal</a>
-                            <button type="submit" class="px-8 py-3 bg-fuchsia-600 text-white font-bold rounded-xl hover:bg-fuchsia-700 shadow-lg transition">Simpan Nilai</button>
+                            <a href="{{ route('grades.index') }}" class="px-6 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition">Batal</a>
+                            <button type="submit" class="px-8 py-3 bg-[#2c3f61] text-white font-bold rounded-xl hover:bg-[#1c2940] shadow-lg shadow-[#2c3f61]/20 transition">Simpan Nilai</button>
                         </div>
                     </div>
                 </div>
