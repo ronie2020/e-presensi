@@ -1,7 +1,5 @@
-@extends('layouts.public')
-
-@section('content')
-    @php \Carbon\Carbon::setLocale('id'); @endphp
+<?php $__env->startSection('content'); ?>
+    <?php \Carbon\Carbon::setLocale('id'); ?>
 
     <style>
         .fluent-card {
@@ -19,7 +17,7 @@
         
         <div class="space-y-6 md:space-y-8">
             
-            {{-- HEADER SECTION (TEMA MICROSOFT ELEVATE) --}}
+            
             <div class="relative rounded-2xl md:rounded-[2.5rem] bg-gradient-to-br from-[#25D0FF] via-[#5295FF] to-[#FFC9B9] p-8 md:p-10 mb-6 text-[#2A3B52] shadow-[0_10px_40px_-10px_rgba(37,208,255,0.4)] overflow-hidden border border-white/40">
                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
                <div class="absolute -top-24 -right-24 w-64 h-64 bg-white/30 rounded-full blur-[80px] pointer-events-none"></div>
@@ -27,7 +25,7 @@
                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
                         <div class="flex flex-wrap gap-2 mb-4">
-                            <a href="{{ route('student.habits.dashboard') }}" class="inline-flex items-center gap-2 bg-white/40 hover:bg-white/60 text-[#2A3B52] px-4 py-2 rounded-xl transition-colors text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm border border-white/50 shadow-sm">
+                            <a href="<?php echo e(route('student.habits.dashboard')); ?>" class="inline-flex items-center gap-2 bg-white/40 hover:bg-white/60 text-[#2A3B52] px-4 py-2 rounded-xl transition-colors text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm border border-white/50 shadow-sm">
                                 <i class="ph-bold ph-arrow-left"></i> Dashboard
                             </a>
                         </div>
@@ -44,26 +42,26 @@
                </div>
             </div>
 
-            {{-- ERROR HANDLING --}}
-            @if ($errors->any())
+            
+            <?php if($errors->any()): ?>
                 <div class="bg-[#FDE7E9] border border-[#F4C3C9] rounded-xl p-5 mb-6 fluent-card">
                     <div class="flex items-center gap-2 mb-2">
                         <i class="ph-fill ph-warning-circle text-[#D13438] text-lg"></i>
                         <h3 class="font-bold text-[#D13438]">Periksa Kembali Isian Anda</h3>
                     </div>
                     <ul class="list-disc list-inside text-sm text-[#D13438]/80 space-y-1 ml-1 font-medium">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
+                        <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <li><?php echo e($error); ?></li>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </ul>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- FORM JURNAL --}}
-            <form action="{{ route('student.habits.store') }}" method="POST" enctype="multipart/form-data" id="habitForm" 
+            
+            <form action="<?php echo e(route('student.habits.store')); ?>" method="POST" enctype="multipart/form-data" id="habitForm" 
                   x-data="{ isSubmitting: false }" 
                   @submit="isSubmitting = true">
-                @csrf
+                <?php echo csrf_field(); ?>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
 
@@ -78,10 +76,10 @@
                                 <div class="flex flex-col sm:flex-row sm:items-center gap-4">
                                     <div class="relative flex items-center">
                                         <input type="checkbox" name="habit_1" class="w-5 h-5 rounded border-slate-300 text-[#5295FF] focus:ring-[#5295FF]" 
-                                            {{ old('habit_1', $todayEntry->habit_1 ?? false) ? 'checked' : '' }}>
+                                            <?php echo e(old('habit_1', $todayEntry->habit_1 ?? false) ? 'checked' : ''); ?>>
                                         <span class="ml-2 font-bold text-[#2A3B52] text-sm">Ya, bangun pagi</span>
                                     </div>
-                                    <input type="time" name="habit_1_time" value="{{ old('habit_1_time', $todayEntry->habit_1_time ?? '') }}" class="rounded-lg border-slate-200 text-sm font-bold text-[#2A3B52] focus:border-[#5295FF] focus:ring-[#5295FF] shadow-sm bg-slate-50 focus:bg-white">
+                                    <input type="time" name="habit_1_time" value="<?php echo e(old('habit_1_time', $todayEntry->habit_1_time ?? '')); ?>" class="rounded-lg border-slate-200 text-sm font-bold text-[#2A3B52] focus:border-[#5295FF] focus:ring-[#5295FF] shadow-sm bg-slate-50 focus:bg-white">
                                 </div>
                             </div>
                         </div>
@@ -90,7 +88,7 @@
                     <!-- 2. IBADAH HARIAN -->
                     <div class="bg-white p-6 md:p-8 rounded-2xl fluent-card md:row-span-2"
                         x-data="{ 
-                            isUdzur: {{ old('is_udzur_syar_i', $todayEntry->is_udzur_syar_i ?? false) ? 'true' : 'false' }},
+                            isUdzur: <?php echo e(old('is_udzur_syar_i', $todayEntry->is_udzur_syar_i ?? false) ? 'true' : 'false'); ?>,
                             init() {
                                 this.$watch('isUdzur', value => {
                                     if(value) {
@@ -119,7 +117,7 @@
                             </label>
                         </div>
                         
-                        {{-- A. SHALAT --}}
+                        
                         <div class="space-y-2 mb-6 transition-all duration-300" :class="isUdzur ? 'opacity-50 grayscale pointer-events-none' : ''">
                             <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                                 <i class="ph-bold ph-hands-praying"></i> A. Shalat Wajib & Sunnah
@@ -129,7 +127,7 @@
                                 Alhamdulillah, istirahat adalah ibadah bagi yang udzur.
                             </div>
 
-                            @php 
+                            <?php 
                                 $prayers = [
                                     ['key' => 'prayer_subuh', 'label' => 'Subuh'],
                                     ['key' => 'prayer_dhuha', 'label' => 'Dhuha (Sunnah)', 'scan' => true],
@@ -138,42 +136,42 @@
                                     ['key' => 'prayer_maghrib', 'label' => 'Maghrib'],
                                     ['key' => 'prayer_isya', 'label' => 'Isya'],
                                 ]; 
-                            @endphp
+                            ?>
 
-                            @foreach($prayers as $p)
-                                @php
+                            <?php $__currentLoopData = $prayers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $p): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                     $isVerifiedSchool = false;
                                     if($p['key'] == 'prayer_dhuha') $isVerifiedSchool = $schoolDhuha ?? false;
                                     if($p['key'] == 'prayer_dzuhur') $isVerifiedSchool = $schoolDzuhur ?? false;
 
                                     $isChecked = old($p['key'], $todayEntry->{$p['key']} ?? false) || $isVerifiedSchool;
-                                @endphp
+                                ?>
 
                                 <label class="flex items-center justify-between p-3 rounded-lg border transition-all 
-                                    {{ $isVerifiedSchool 
+                                    <?php echo e($isVerifiedSchool 
                                         ? 'bg-[#F3F9FD] border-[#D0E7F8] cursor-not-allowed opacity-90' 
-                                        : ($isChecked ? 'bg-[#DFF6DD] border-[#B7DFB9] cursor-pointer' : 'bg-slate-50 border-slate-200 cursor-pointer hover:bg-white hover:border-[#5295FF]') 
-                                    }}">
+                                        : ($isChecked ? 'bg-[#DFF6DD] border-[#B7DFB9] cursor-pointer' : 'bg-slate-50 border-slate-200 cursor-pointer hover:bg-white hover:border-[#5295FF]')); ?>">
                                     
                                     <div class="flex items-center gap-2">
-                                        <span class="text-sm font-bold {{ $isChecked ? ($isVerifiedSchool ? 'text-[#5295FF]' : 'text-[#107C10]') : 'text-slate-600' }}">
-                                            {{ $p['label'] }}
+                                        <span class="text-sm font-bold <?php echo e($isChecked ? ($isVerifiedSchool ? 'text-[#5295FF]' : 'text-[#107C10]') : 'text-slate-600'); ?>">
+                                            <?php echo e($p['label']); ?>
+
                                         </span>
-                                        @if($isVerifiedSchool)
+                                        <?php if($isVerifiedSchool): ?>
                                             <span class="text-[9px] px-1.5 py-0.5 rounded bg-white text-[#5295FF] font-bold border border-[#D0E7F8]">TERVERIFIKASI</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
 
-                                    <input type="checkbox" name="{{ $p['key'] }}" id="{{ $p['key'] }}" value="1"
-                                        class="w-5 h-5 rounded focus:ring-[#107C10] {{ $isVerifiedSchool ? 'text-[#5295FF] border-[#D0E7F8] bg-white' : 'text-[#107C10] border-slate-300' }}" 
-                                        {{ $isChecked ? 'checked' : '' }} {{ $isVerifiedSchool ? 'disabled' : '' }}>
+                                    <input type="checkbox" name="<?php echo e($p['key']); ?>" id="<?php echo e($p['key']); ?>" value="1"
+                                        class="w-5 h-5 rounded focus:ring-[#107C10] <?php echo e($isVerifiedSchool ? 'text-[#5295FF] border-[#D0E7F8] bg-white' : 'text-[#107C10] border-slate-300'); ?>" 
+                                        <?php echo e($isChecked ? 'checked' : ''); ?> <?php echo e($isVerifiedSchool ? 'disabled' : ''); ?>>
                                     
-                                    @if($isVerifiedSchool) <input type="hidden" name="{{ $p['key'] }}" value="1"> @endif
+                                    <?php if($isVerifiedSchool): ?> <input type="hidden" name="<?php echo e($p['key']); ?>" value="1"> <?php endif; ?>
                                 </label>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
 
-                        {{-- B. ODOA --}}
+                        
                         <div class="pt-6 border-t border-slate-100">
                             <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
                                 <i class="ph-bold ph-microphone-stage text-[#5295FF]"></i> B. One Day One Ayat (ODOA)
@@ -181,25 +179,25 @@
 
                             <div class="grid grid-cols-3 gap-3 mb-4">
                                 <div class="col-span-2">
-                                    <input type="text" name="odoa_surah" value="{{ old('odoa_surah', $todayEntry->odoa_surah ?? '') }}" placeholder="Nama Surat" class="w-full text-sm rounded-lg border-slate-200 focus:border-[#5295FF] focus:ring-[#5295FF] font-medium bg-slate-50 focus:bg-white shadow-sm text-[#2A3B52]">
+                                    <input type="text" name="odoa_surah" value="<?php echo e(old('odoa_surah', $todayEntry->odoa_surah ?? '')); ?>" placeholder="Nama Surat" class="w-full text-sm rounded-lg border-slate-200 focus:border-[#5295FF] focus:ring-[#5295FF] font-medium bg-slate-50 focus:bg-white shadow-sm text-[#2A3B52]">
                                 </div>
                                 <div class="col-span-1">
-                                    <input type="text" name="odoa_ayat" value="{{ old('odoa_ayat', $todayEntry->odoa_ayat ?? '') }}" placeholder="Ayat" class="w-full text-sm rounded-lg border-slate-200 focus:border-[#5295FF] focus:ring-[#5295FF] text-center font-medium bg-slate-50 focus:bg-white shadow-sm text-[#2A3B52]">
+                                    <input type="text" name="odoa_ayat" value="<?php echo e(old('odoa_ayat', $todayEntry->odoa_ayat ?? '')); ?>" placeholder="Ayat" class="w-full text-sm rounded-lg border-slate-200 focus:border-[#5295FF] focus:ring-[#5295FF] text-center font-medium bg-slate-50 focus:bg-white shadow-sm text-[#2A3B52]">
                                 </div>
                             </div>
 
                             <div class="bg-slate-50 rounded-xl border border-slate-200 p-4 text-center relative" x-data="audioRecorder">
-                                @if($todayEntry && $todayEntry->odoa_audio_path)
+                                <?php if($todayEntry && $todayEntry->odoa_audio_path): ?>
                                     <div class="mb-4 bg-white p-3 rounded-lg border border-[#D0E7F8] flex items-center gap-3 shadow-sm" x-show="!isRecording && !audioBlob">
                                         <div class="w-8 h-8 rounded-md bg-[#5295FF] text-white flex items-center justify-center shrink-0">
                                             <i class="ph-fill ph-play"></i>
                                         </div>
                                         <div class="text-left flex-1 overflow-hidden">
                                             <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wide">Rekaman Tersimpan</p>
-                                            <audio controls class="w-full h-8 mt-1"><source src="{{ asset('storage/'.$todayEntry->odoa_audio_path) }}" type="audio/mpeg"></audio>
+                                            <audio controls class="w-full h-8 mt-1"><source src="<?php echo e(asset('storage/'.$todayEntry->odoa_audio_path)); ?>" type="audio/mpeg"></audio>
                                         </div>
                                     </div>
-                                @endif
+                                <?php endif; ?>
 
                                 <div class="flex flex-col items-center gap-3">
                                     <button type="button" @click="toggleRecording" 
@@ -233,7 +231,7 @@
                                 <h3 class="font-bold text-[#2A3B52] text-lg mb-1">3. Mandi & Gosok Gigi</h3>
                                 <div class="flex items-center gap-2 mt-2">
                                     <input type="checkbox" name="habit_2" class="w-5 h-5 rounded border-slate-300 text-[#5295FF] focus:ring-[#5295FF]" 
-                                        {{ old('habit_2', $todayEntry->habit_2 ?? false) ? 'checked' : '' }}>
+                                        <?php echo e(old('habit_2', $todayEntry->habit_2 ?? false) ? 'checked' : ''); ?>>
                                     <span class="font-bold text-slate-600 text-sm">Sudah Mandi</span>
                                 </div>
                             </div>
@@ -248,37 +246,37 @@
                                 <h3 class="font-bold text-[#2A3B52] text-lg mb-1">4. Olahraga</h3>
                                 <div class="flex items-center gap-2">
                                     <input type="checkbox" name="habit_3" class="w-5 h-5 rounded border-slate-300 text-[#5295FF] focus:ring-[#5295FF]" 
-                                        {{ old('habit_3', $todayEntry->habit_3 ?? false) ? 'checked' : '' }}>
+                                        <?php echo e(old('habit_3', $todayEntry->habit_3 ?? false) ? 'checked' : ''); ?>>
                                     <span class="font-bold text-slate-600 text-sm">Aktivitas fisik</span>
                                 </div>
                             </div>
                         </div>
-                        <input type="text" name="habit_3_activity" value="{{ old('habit_3_activity', $todayEntry->habit_3_activity ?? '') }}" placeholder="Contoh: Lari pagi" class="w-full text-sm rounded-lg border-slate-200 focus:border-[#5295FF] focus:ring-[#5295FF] bg-slate-50 focus:bg-white font-medium text-[#2A3B52] shadow-sm">
+                        <input type="text" name="habit_3_activity" value="<?php echo e(old('habit_3_activity', $todayEntry->habit_3_activity ?? '')); ?>" placeholder="Contoh: Lari pagi" class="w-full text-sm rounded-lg border-slate-200 focus:border-[#5295FF] focus:ring-[#5295FF] bg-slate-50 focus:bg-white font-medium text-[#2A3B52] shadow-sm">
                     </div>
 
                     <!-- 5. MAKAN SEHAT -->
-                    @php
+                    <?php
                         $schoolMenu = $schoolMbgMenu ?? null; 
                         $displayValue = $schoolMenu ? $schoolMenu : old('habit_5_menu', $todayEntry->habit_5_menu ?? '');
                         $isLockedMBG = !empty($schoolMenu);
-                    @endphp
-                    <div class="bg-white p-6 rounded-2xl fluent-card relative transition-all {{ $isLockedMBG ? 'border-[#B7DFB9] bg-[#DFF6DD]/30' : 'hover:border-[#5295FF]' }}">
+                    ?>
+                    <div class="bg-white p-6 rounded-2xl fluent-card relative transition-all <?php echo e($isLockedMBG ? 'border-[#B7DFB9] bg-[#DFF6DD]/30' : 'hover:border-[#5295FF]'); ?>">
                         <div class="flex items-start gap-4 mb-3">
                             <div class="w-12 h-12 rounded-lg bg-[#FDE7E9] text-[#D13438] border border-[#F4C3C9] flex items-center justify-center text-2xl shrink-0 shadow-sm"><i class="ph-duotone ph-carrot"></i></div>
                             <div>
                                 <h3 class="font-bold text-[#2A3B52] text-lg mb-1">5. Makan Bergizi</h3>
-                                @if($isLockedMBG)
+                                <?php if($isLockedMBG): ?>
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#107C10] text-white text-[9px] font-bold uppercase"><i class="ph-fill ph-qr-code"></i> AUTO DATA</span>
                                     <input type="hidden" name="habit_5" value="1">
-                                @else
+                                <?php else: ?>
                                     <div class="flex items-center gap-2">
-                                        <input type="checkbox" name="habit_5" class="w-5 h-5 rounded border-slate-300 text-[#5295FF] focus:ring-[#5295FF]" {{ old('habit_5', $todayEntry->habit_5 ?? false) ? 'checked' : '' }}>
+                                        <input type="checkbox" name="habit_5" class="w-5 h-5 rounded border-slate-300 text-[#5295FF] focus:ring-[#5295FF]" <?php echo e(old('habit_5', $todayEntry->habit_5 ?? false) ? 'checked' : ''); ?>>
                                         <span class="font-bold text-slate-600 text-sm">Makan sehat</span>
                                     </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
-                        <input type="text" name="habit_5_menu" value="{{ $displayValue }}" placeholder="Menu..." class="w-full text-sm rounded-lg border-slate-200 focus:border-[#5295FF] focus:ring-[#5295FF] font-medium text-[#2A3B52] shadow-sm {{ $isLockedMBG ? 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9] font-bold cursor-not-allowed' : 'bg-slate-50 focus:bg-white' }}" {{ $isLockedMBG ? 'readonly' : '' }}>
+                        <input type="text" name="habit_5_menu" value="<?php echo e($displayValue); ?>" placeholder="Menu..." class="w-full text-sm rounded-lg border-slate-200 focus:border-[#5295FF] focus:ring-[#5295FF] font-medium text-[#2A3B52] shadow-sm <?php echo e($isLockedMBG ? 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9] font-bold cursor-not-allowed' : 'bg-slate-50 focus:bg-white'); ?>" <?php echo e($isLockedMBG ? 'readonly' : ''); ?>>
                     </div>
 
                     <!-- 6. BELAJAR -->
@@ -288,12 +286,12 @@
                             <div>
                                 <h3 class="font-bold text-[#2A3B52] text-lg mb-1">6. Gemar Belajar</h3>
                                 <div class="flex items-center gap-2">
-                                    <input type="checkbox" name="habit_4" class="w-5 h-5 rounded border-slate-300 text-[#5295FF] focus:ring-[#5295FF]" {{ old('habit_4', $todayEntry->habit_4 ?? false) ? 'checked' : '' }}>
+                                    <input type="checkbox" name="habit_4" class="w-5 h-5 rounded border-slate-300 text-[#5295FF] focus:ring-[#5295FF]" <?php echo e(old('habit_4', $todayEntry->habit_4 ?? false) ? 'checked' : ''); ?>>
                                     <span class="font-bold text-slate-600 text-sm">Belajar di rumah</span>
                                 </div>
                             </div>
                         </div>
-                        <input type="text" name="habit_4_subject" value="{{ old('habit_4_subject', $todayEntry->habit_4_subject ?? '') }}" placeholder="Materi yang dipelajari..." class="w-full text-sm rounded-lg border-slate-200 focus:border-[#5295FF] focus:ring-[#5295FF] bg-slate-50 focus:bg-white font-medium text-[#2A3B52] shadow-sm">
+                        <input type="text" name="habit_4_subject" value="<?php echo e(old('habit_4_subject', $todayEntry->habit_4_subject ?? '')); ?>" placeholder="Materi yang dipelajari..." class="w-full text-sm rounded-lg border-slate-200 focus:border-[#5295FF] focus:ring-[#5295FF] bg-slate-50 focus:bg-white font-medium text-[#2A3B52] shadow-sm">
                     </div>
 
                     <!-- 7. SOSIAL -->
@@ -303,12 +301,12 @@
                             <div>
                                 <h3 class="font-bold text-[#2A3B52] text-lg mb-1">7. Bantu Orang Tua</h3>
                                 <div class="flex items-center gap-2">
-                                    <input type="checkbox" name="habit_6" class="w-5 h-5 rounded border-slate-300 text-[#5295FF] focus:ring-[#5295FF]" {{ old('habit_6', $todayEntry->habit_6 ?? false) ? 'checked' : '' }}>
+                                    <input type="checkbox" name="habit_6" class="w-5 h-5 rounded border-slate-300 text-[#5295FF] focus:ring-[#5295FF]" <?php echo e(old('habit_6', $todayEntry->habit_6 ?? false) ? 'checked' : ''); ?>>
                                     <span class="font-bold text-slate-600 text-sm">Melakukan kebaikan</span>
                                 </div>
                             </div>
                         </div>
-                        <input type="text" name="habit_6_activity" value="{{ old('habit_6_activity', $todayEntry->habit_6_activity ?? '') }}" placeholder="Contoh: Menyapu" class="w-full text-sm rounded-lg border-slate-200 focus:border-[#5295FF] focus:ring-[#5295FF] bg-slate-50 focus:bg-white font-medium text-[#2A3B52] shadow-sm">
+                        <input type="text" name="habit_6_activity" value="<?php echo e(old('habit_6_activity', $todayEntry->habit_6_activity ?? '')); ?>" placeholder="Contoh: Menyapu" class="w-full text-sm rounded-lg border-slate-200 focus:border-[#5295FF] focus:ring-[#5295FF] bg-slate-50 focus:bg-white font-medium text-[#2A3B52] shadow-sm">
                     </div>
 
                     <!-- 8. TIDUR -->
@@ -320,10 +318,10 @@
                                 <p class="text-xs text-slate-500 mb-3 font-medium">Maksimal jam 22.00 malam.</p>
                                 <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                                     <div class="flex items-center">
-                                        <input type="checkbox" name="habit_7" class="w-5 h-5 rounded border-slate-300 text-[#5295FF] focus:ring-[#5295FF]" {{ old('habit_7', $todayEntry->habit_7 ?? false) ? 'checked' : '' }}>
+                                        <input type="checkbox" name="habit_7" class="w-5 h-5 rounded border-slate-300 text-[#5295FF] focus:ring-[#5295FF]" <?php echo e(old('habit_7', $todayEntry->habit_7 ?? false) ? 'checked' : ''); ?>>
                                         <span class="ml-2 font-bold text-[#2A3B52] text-sm">Ya, teratur</span>
                                     </div>
-                                    <input type="time" name="habit_7_time" value="{{ old('habit_7_time', $todayEntry->habit_7_time ?? '') }}" class="rounded-lg border-slate-200 text-sm font-bold text-[#2A3B52] focus:border-[#5295FF] focus:ring-[#5295FF] bg-slate-50 focus:bg-white shadow-sm">
+                                    <input type="time" name="habit_7_time" value="<?php echo e(old('habit_7_time', $todayEntry->habit_7_time ?? '')); ?>" class="rounded-lg border-slate-200 text-sm font-bold text-[#2A3B52] focus:border-[#5295FF] focus:ring-[#5295FF] bg-slate-50 focus:bg-white shadow-sm">
                                 </div>
                             </div>
                         </div>
@@ -350,16 +348,16 @@
                             <img :src="photoPreview" class="h-48 w-full object-contain bg-white rounded-lg border border-slate-200 shadow-sm">
                         </div>
 
-                        @if($todayEntry && $todayEntry->photo_path)
+                        <?php if($todayEntry && $todayEntry->photo_path): ?>
                             <div x-show="!photoPreview" class="mt-5 p-4 border border-slate-200 rounded-xl bg-slate-50">
                                 <p class="text-[10px] font-bold text-slate-500 uppercase mb-2">Foto Tersimpan:</p>
-                                <img src="{{ asset('storage/' . $todayEntry->photo_path) }}" class="h-48 w-full object-contain bg-white rounded-lg border border-slate-200 shadow-sm">
+                                <img src="<?php echo e(asset('storage/' . $todayEntry->photo_path)); ?>" class="h-48 w-full object-contain bg-white rounded-lg border border-slate-200 shadow-sm">
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
 
-                {{-- SUBMIT --}}
+                
                 <div class="mt-8 mb-12">
                     <button type="submit" 
                             :disabled="isSubmitting" 
@@ -373,7 +371,7 @@
         </div>
     </div>
 
-    {{-- SCRIPT AUDIO RECORDING --}}
+    
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('audioRecorder', () => ({
@@ -410,25 +408,26 @@
         });
     </script>
 
-    {{-- SCRIPT SWEETALERT --}}
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            @if(session('success'))
+            <?php if(session('success')): ?>
                 Swal.fire({
-                    icon: 'success', title: 'Berhasil', text: "{{ session('success') }}",
+                    icon: 'success', title: 'Berhasil', text: "<?php echo e(session('success')); ?>",
                     toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
                     customClass: { popup: 'rounded-xl shadow-sm border border-[#B7DFB9] bg-white' }
                 });
-            @endif
+            <?php endif; ?>
 
-            @if(session('error'))
+            <?php if(session('error')): ?>
                 Swal.fire({
-                    icon: 'error', title: 'Oops...', text: "{{ session('error') }}",
+                    icon: 'error', title: 'Oops...', text: "<?php echo e(session('error')); ?>",
                     toast: true, position: 'top-end', showConfirmButton: false, timer: 4000,
                     customClass: { popup: 'rounded-xl shadow-sm border border-[#F4C3C9] bg-white' }
                 });
-            @endif
+            <?php endif; ?>
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.public', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/habits/student_index.blade.php ENDPATH**/ ?>
