@@ -14,7 +14,7 @@
      <!-- PWA META TAGS KHUSUS SISWA (NETILA)            -->
      <!-- ============================================== -->
     <link rel="manifest" href="{{ asset('manifest-siswa.json') }}">
-    <meta name="theme-color" content="#2c3f61"> <!-- Elevate Navy -->
+    <meta name="theme-color" content="#032b5b"> <!-- Elevate Dark -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Netila">
@@ -44,7 +44,7 @@
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #56bbf1; }
+        ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
         
         /* Utility */
         .min-h-content { min-height: calc(100vh - 400px); }
@@ -59,7 +59,7 @@
 
     @stack('styles')
 </head>
-<body class="antialiased text-[#2c3f61] bg-[#f8fafc] overflow-x-hidden flex flex-col min-h-screen selection:bg-[#56bbf1] selection:text-white"
+<body class="antialiased text-elevate-text bg-slate-50 overflow-x-hidden flex flex-col min-h-screen selection:bg-elevate-accent selection:text-white"
     x-data="{ 
         mobileMenuOpen: false,
         scrolled: false
@@ -68,7 +68,7 @@
 
     <!-- === NAVBAR (TEMA: ELEVATE NAVY DARK) === -->
     <nav class="fixed top-0 w-full z-50 transition-all duration-300 border-b border-white/10"
-         :class="{ 'bg-[#2c3f61]/95 backdrop-blur-xl shadow-lg': scrolled, 'bg-[#2c3f61]': !scrolled }">
+         :class="{ 'bg-elevate-dark/95 backdrop-blur-xl shadow-lg': scrolled, 'bg-elevate-dark': !scrolled }">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
                 
@@ -82,8 +82,8 @@
                     
                     <!-- Text Brand -->
                     <div class="flex flex-col leading-tight">
-                        <span class="font-black text-white text-lg tracking-tight group-hover:text-[#56bbf1] transition-colors">SMPN 3 LAKBOK</span>
-                        <span class="text-[10px] font-bold text-[#56bbf1] uppercase tracking-widest group-hover:text-white transition-colors">Unggul & Berkarakter</span>
+                        <span class="font-black text-white text-lg tracking-tight group-hover:text-elevate-accent transition-colors">SMPN 3 LAKBOK</span>
+                        <span class="text-[10px] font-bold text-elevate-accent uppercase tracking-widest group-hover:text-white transition-colors">Unggul & Berkarakter</span>
                     </div>
                 </a>
 
@@ -94,15 +94,15 @@
                     <div class="flex items-center gap-6">
                         <a href="{{ url('/') }}#profil" class="text-sm font-bold text-white/70 hover:text-white transition relative group">
                             Profil
-                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#56bbf1] transition-all group-hover:w-full"></span>
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-elevate-accent transition-all group-hover:w-full"></span>
                         </a>
                         <a href="{{ url('/') }}#guru" class="text-sm font-bold text-white/70 hover:text-white transition relative group">
                             Guru
-                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#56bbf1] transition-all group-hover:w-full"></span>
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-elevate-accent transition-all group-hover:w-full"></span>
                         </a>
                         <a href="{{ url('/') }}#prestasi" class="text-sm font-bold text-white/70 hover:text-white transition relative group">
                             Prestasi
-                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#56bbf1] transition-all group-hover:w-full"></span>
+                            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-elevate-accent transition-all group-hover:w-full"></span>
                         </a>
                     </div>
 
@@ -111,7 +111,7 @@
 
                     <!-- Grup 2: Menu Aplikasi -->
                     <div class="flex items-center gap-4">
-                        <a href="{{ route('portal.index') }}" class="text-sm font-bold {{ request()->routeIs('portal.*') ? 'text-[#56bbf1]' : 'text-white/70 hover:text-white' }} transition flex items-center gap-2">
+                        <a href="{{ route('portal.index') }}" class="text-sm font-bold {{ request()->routeIs('portal.*') ? 'text-elevate-accent' : 'text-white/70 hover:text-white' }} transition flex items-center gap-2">
                             Portal Siswa
                         </a>
 
@@ -119,7 +119,7 @@
                         @if(Auth::guard('student')->check())
                             <!-- Jika Login sebagai SISWA -->
                             <div class="flex items-center gap-3 pl-2">
-                                <a href="{{ route('students.learning.index') }}" class="text-xs font-bold px-5 py-2.5 rounded-full bg-[#56bbf1] text-[#1c2940] hover:bg-white transition shadow-lg shadow-[#56bbf1]/20 flex items-center gap-2 active:scale-95">
+                                <a href="{{ route('students.learning.index') }}" class="text-xs font-bold px-5 py-2.5 rounded-full bg-elevate-accent text-elevate-dark hover:bg-white transition shadow-lg shadow-elevate-accent/20 flex items-center gap-2 active:scale-95">
                                     <i class="ph-bold ph-student"></i> Area Siswa
                                 </a>
                                 <!-- Tombol Logout -->
@@ -133,13 +133,13 @@
 
                         @elseif(Auth::check())
                             <!-- Jika Login sebagai GURU/ADMIN -->
-                            <a href="{{ route('dashboard') }}" class="text-xs font-bold px-5 py-2.5 rounded-full bg-white/10 text-white hover:bg-[#56bbf1] hover:text-[#1c2940] transition shadow-sm border border-white/20 flex items-center gap-2 active:scale-95">
+                            <a href="{{ route('dashboard') }}" class="text-xs font-bold px-5 py-2.5 rounded-full bg-white/10 text-white hover:bg-elevate-accent hover:text-elevate-dark transition shadow-sm border border-white/20 flex items-center gap-2 active:scale-95">
                                 <i class="ph-bold ph-squares-four"></i> Dashboard Guru
                             </a>
 
                         @else
                             <!-- Jika BELUM LOGIN -->
-                            <a href="{{ route('login') }}" class="text-xs font-bold px-5 py-2.5 rounded-full bg-white/10 text-white hover:bg-[#56bbf1] hover:text-[#1c2940] transition shadow-sm border border-white/20 flex items-center gap-2 active:scale-95">
+                            <a href="{{ route('login') }}" class="text-xs font-bold px-5 py-2.5 rounded-full bg-white/10 text-white hover:bg-elevate-accent hover:text-elevate-dark transition shadow-sm border border-white/20 flex items-center gap-2 active:scale-95">
                                 <i class="ph-bold ph-lock-key"></i> Login Staff
                             </a>
                         @endif
@@ -164,18 +164,18 @@
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100 translate-y-0"
              x-transition:leave-end="opacity-0 -translate-y-5"
-             class="absolute top-20 left-0 w-full bg-[#1c2940]/98 backdrop-blur-xl border-b border-[#2c3f61] shadow-2xl md:hidden z-40">
+             class="absolute top-20 left-0 w-full bg-elevate-dark/98 backdrop-blur-xl border-b border-white/10 shadow-2xl md:hidden z-40">
              
             <nav class="flex flex-col p-6 space-y-4">
-                <a href="{{ url('/') }}#profil" class="text-lg font-bold text-white/80 hover:text-[#56bbf1]">Profil Sekolah</a>
-                <a href="{{ url('/') }}#guru" class="text-lg font-bold text-white/80 hover:text-[#56bbf1]">Guru & Staff</a>
-                <a href="{{ url('/') }}#prestasi" class="text-lg font-bold text-white/80 hover:text-[#56bbf1]">Prestasi</a>
-                <a href="{{ route('portal.index') }}" class="text-lg font-bold text-[#56bbf1]">Portal Siswa</a>
+                <a href="{{ url('/') }}#profil" class="text-lg font-bold text-white/80 hover:text-elevate-accent">Profil Sekolah</a>
+                <a href="{{ url('/') }}#guru" class="text-lg font-bold text-white/80 hover:text-elevate-accent">Guru & Staff</a>
+                <a href="{{ url('/') }}#prestasi" class="text-lg font-bold text-white/80 hover:text-elevate-accent">Prestasi</a>
+                <a href="{{ route('portal.index') }}" class="text-lg font-bold text-elevate-accent">Portal Siswa</a>
                 
                 <hr class="border-white/10 my-2">
                 
                 @if(Auth::guard('student')->check())
-                    <a href="{{ route('students.learning.index') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-[#56bbf1] text-[#1c2940] font-bold shadow-lg shadow-[#56bbf1]/20">Dashboard Siswa</a>
+                    <a href="{{ route('students.learning.index') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-elevate-accent text-elevate-dark font-bold shadow-lg shadow-elevate-accent/20">Dashboard Siswa</a>
                     <form method="POST" action="{{ route('student.logout') }}" class="block w-full">
                         @csrf
                         <button type="submit" class="w-full text-center px-6 py-3 rounded-xl border border-rose-500/50 text-rose-400 font-bold hover:bg-rose-500/10 mt-3">Keluar</button>
@@ -183,7 +183,7 @@
                 @elseif(Auth::check())
                     <a href="{{ route('dashboard') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-white/10 text-white font-bold border border-white/20">Dashboard Guru</a>
                 @else
-                    <a href="{{ route('login') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-white/10 text-white font-bold border border-white/20 hover:bg-[#56bbf1] hover:text-[#1c2940] transition-colors">Login Staff</a>
+                    <a href="{{ route('login') }}" class="block w-full text-center px-6 py-3 rounded-xl bg-white/10 text-white font-bold border border-white/20 hover:bg-elevate-accent hover:text-elevate-dark transition-colors">Login Staff</a>
                 @endif
             </nav>
         </div>
@@ -194,8 +194,8 @@
     <main class="flex-grow pt-24 pb-12 relative z-10 min-h-content">
         <!-- Background Dekorasi Halus (Elevate Accents) -->
         <div class="fixed inset-0 z-[-1] pointer-events-none">
-             <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-[#56bbf1]/10 rounded-full blur-[100px] -mr-20 -mt-20"></div>
-             <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#0d52a1]/5 rounded-full blur-[100px] -ml-20 -mb-20"></div>
+             <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-elevate-accent/10 rounded-full blur-[100px] -mr-20 -mt-20"></div>
+             <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-elevate-primary/5 rounded-full blur-[100px] -ml-20 -mb-20"></div>
         </div>
 
         @hasSection('content')
@@ -206,12 +206,12 @@
     </main>
 
     <!-- === FOOTER (ELEVATE NAVY) === -->
-    <footer class="bg-[#1c2940] text-white pt-16 pb-8 border-t border-[#2c3f61] relative z-20 mt-auto">
+    <footer class="bg-elevate-dark text-white pt-16 pb-8 border-t border-white/10 relative z-20 mt-auto">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                 <div class="col-span-1 md:col-span-2 pr-0 md:pr-12">
                     <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 bg-white/10 border border-white/20 rounded-[1rem] flex items-center justify-center text-white backdrop-blur-md shadow-lg shadow-[#56bbf1]/20 overflow-hidden shrink-0">
+                        <div class="w-10 h-10 bg-white/10 border border-white/20 rounded-[1rem] flex items-center justify-center text-white backdrop-blur-md shadow-lg shadow-elevate-accent/20 overflow-hidden shrink-0">
                              <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
                              <i class="ph-bold ph-graduation-cap text-xl hidden"></i>
                         </div>
@@ -224,16 +224,16 @@
                 <div>
                     <h4 class="text-white font-bold mb-6 text-lg">Akses Cepat</h4>
                     <ul class="space-y-3 text-sm text-slate-400">
-                        <li><a href="{{ url('/') }}" class="hover:text-[#56bbf1] transition-colors">Beranda</a></li>
-                        <li><a href="{{ route('portal.index') }}" class="hover:text-[#56bbf1] transition-colors">Portal Siswa</a></li>
-                        <li><a href="{{ route('library.kiosk.index') }}" class="hover:text-[#56bbf1] transition-colors">E-Library</a></li>
+                        <li><a href="{{ url('/') }}" class="hover:text-elevate-accent transition-colors">Beranda</a></li>
+                        <li><a href="{{ route('portal.index') }}" class="hover:text-elevate-accent transition-colors">Portal Siswa</a></li>
+                        <li><a href="{{ route('library.kiosk.index') }}" class="hover:text-elevate-accent transition-colors">E-Library</a></li>
                     </ul>
                 </div>
                 <div>
                     <h4 class="text-white font-bold mb-6 text-lg">Kontak</h4>
                     <ul class="space-y-3 text-sm text-slate-400">
-                        <li class="flex items-center gap-3"><i class="ph-fill ph-phone text-[#56bbf1]"></i> +62 85135961994</li>
-                        <li class="flex items-center gap-3"><i class="ph-fill ph-envelope text-[#56bbf1]"></i> admin@smpn3lakbok.sch.id</li>
+                        <li class="flex items-center gap-3"><i class="ph-fill ph-phone text-elevate-accent"></i> +62 85135961994</li>
+                        <li class="flex items-center gap-3"><i class="ph-fill ph-envelope text-elevate-accent"></i> admin@smpn3lakbok.sch.id</li>
                     </ul>
                 </div>
             </div>

@@ -37,19 +37,19 @@
             $popupMessage = Str::limit(strip_tags($popupAnnouncement->content), 200);
         }
 
-        // Tema warna default (Cyan)
+        // Tema warna default disesuaikan dengan Microsoft Elevate
         $colorTheme = [
-            'badge_bg' => 'bg-cyan-50', 
-            'badge_text' => 'text-cyan-700', 
-            'badge_ring' => 'ring-cyan-600/20', 
-            'btn_bg' => 'bg-cyan-600', 
-            'btn_hover' => 'hover:bg-cyan-500', 
-            'btn_ring' => 'focus-visible:outline-cyan-600'
+            'badge_bg' => 'bg-elevate-accent/10', 
+            'badge_text' => 'text-elevate-primary', 
+            'badge_ring' => 'ring-elevate-accent/30', 
+            'btn_bg' => 'bg-elevate-primary', 
+            'btn_hover' => 'hover:bg-elevate-dark', 
+            'btn_ring' => 'focus-visible:outline-elevate-primary'
         ];
     ?>
 </head>
 <!-- PERBAIKAN: Tambahkan overflow-x-hidden, w-full, dan class Dark Mode (dark:bg-slate-900 dark:text-slate-100) pada tag body -->
-<body class="antialiased text-slate-800 bg-slate-50 dark:bg-slate-900 dark:text-slate-100 overflow-x-hidden w-full selection:bg-cyan-500 selection:text-white" 
+<body class="antialiased text-elevate-text bg-slate-50 dark:bg-slate-900 dark:text-slate-100 overflow-x-hidden w-full selection:bg-elevate-accent selection:text-white" 
     x-data="{ 
         mobileMenuOpen: false,
         modalOpen: false, 
@@ -146,12 +146,12 @@
                     <div class="md:w-7/12 p-6 md:p-8 flex flex-col justify-center bg-white relative">
                         <div class="mb-4">
                             <span class="inline-flex items-center rounded-md <?php echo e($colorTheme['badge_bg']); ?> px-2 py-1 text-xs font-medium <?php echo e($colorTheme['badge_text']); ?> ring-1 ring-inset <?php echo e($colorTheme['badge_ring']); ?> mb-3">Pengumuman Terbaru</span>
-                            <h3 id="modal-title" class="text-xl font-black text-slate-900 leading-tight"><?php echo e($popupTitle); ?></h3>
+                            <h3 id="modal-title" class="text-xl font-black text-elevate-dark leading-tight"><?php echo e($popupTitle); ?></h3>
                         </div>
                         <div class="prose prose-sm text-slate-500 mb-6 leading-relaxed"><p><?php echo e($popupMessage); ?></p></div>
                         <div class="flex flex-col sm:flex-row gap-3 items-center mt-6">
                             <button @click="closeInfoPopup(false)" class="w-full sm:w-auto text-center inline-flex justify-center items-center gap-2 rounded-xl <?php echo e($colorTheme['btn_bg']); ?> px-5 py-2.5 text-sm font-semibold text-white shadow-sm <?php echo e($colorTheme['btn_hover']); ?> transition-all">Tutup Pengumuman</button>
-                            <button @click="closeInfoPopup(true)" class="text-xs font-semibold text-slate-400 hover:text-slate-600 underline decoration-slate-300 underline-offset-4 transition-colors">Jangan tampilkan lagi</button>
+                            <button @click="closeInfoPopup(true)" class="text-xs font-semibold text-slate-400 hover:text-elevate-primary underline decoration-slate-300 underline-offset-4 transition-colors">Jangan tampilkan lagi</button>
                         </div>
                     </div>
                 </div>
@@ -190,24 +190,24 @@
 
     <!-- VISITOR COUNTER -->
     <div class="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 bg-white/90 backdrop-blur-sm border border-slate-200 shadow-lg p-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2 sm:gap-3 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 group cursor-default max-w-[calc(100vw-40px)] overflow-hidden" title="Total pengunjung website">
-        <div class="bg-cyan-50 text-cyan-600 p-1.5 sm:p-2 rounded-full shrink-0 group-hover:bg-cyan-600 group-hover:text-white transition-colors duration-300">
+        <div class="bg-elevate-accent/10 text-elevate-primary p-1.5 sm:p-2 rounded-full shrink-0 group-hover:bg-elevate-primary group-hover:text-white transition-colors duration-300">
             <i class="ph-fill ph-users text-sm sm:text-lg"></i>
         </div>
         
         <!-- Teks Detail (Hanya muncul di Desktop/Tablet) -->
         <div class="hidden sm:flex flex-col truncate">
             <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-0.5">Pengunjung</span>
-            <span class="text-sm font-black text-slate-800 leading-none"><?php echo e(number_format($visitorCount ?? 0, 0, ',', '.')); ?></span>
+            <span class="text-sm font-black text-elevate-dark leading-none"><?php echo e(number_format($visitorCount ?? 0, 0, ',', '.')); ?></span>
         </div>
         
         <!-- Angka saja (Muncul di Mobile HP) -->
         <div class="flex sm:hidden pr-2 shrink-0">
-            <span class="text-xs font-black text-slate-800 leading-none"><?php echo e(number_format($visitorCount ?? 0, 0, ',', '.')); ?></span>
+            <span class="text-xs font-black text-elevate-dark leading-none"><?php echo e(number_format($visitorCount ?? 0, 0, ',', '.')); ?></span>
         </div>
     </div>
 
     <!-- BACK TO TOP -->
-    <button x-cloak x-show="showBackToTop" x-transition @click="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Kembali ke atas" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 bg-cyan-600 text-white p-2 sm:p-3 rounded-full shadow-lg hover:bg-cyan-700 hover:-translate-y-1 transition-all duration-300 focus:outline-none">
+    <button x-cloak x-show="showBackToTop" x-transition @click="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Kembali ke atas" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 bg-elevate-primary text-white p-2 sm:p-3 rounded-full shadow-lg hover:bg-elevate-dark hover:-translate-y-1 transition-all duration-300 focus:outline-none">
         <i class="ph-bold ph-arrow-up text-base sm:text-xl"></i>
     </button>
 

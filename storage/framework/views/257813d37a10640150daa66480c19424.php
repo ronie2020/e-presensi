@@ -1,14 +1,14 @@
 <!-- ARTIKEL & OPINI GURU -->
-<section id="artikel" class="py-20 relative bg-blue-50 dark:bg-slate-900 border-t border-transparent dark:border-slate-800 transition-colors duration-300">
-    <div class="absolute top-0 right-0 w-64 h-64 bg-cyan-100 dark:bg-cyan-900/30 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
-    <div class="absolute bottom-0 left-0 w-80 h-80 bg-blue-100 dark:bg-blue-900/20 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2"></div>
+<section id="artikel" class="py-20 relative bg-slate-50 dark:bg-slate-900 border-t border-transparent dark:border-slate-800 transition-colors duration-300">
+    <div class="absolute top-0 right-0 w-64 h-64 bg-elevate-accent/20 dark:bg-elevate-accent/10 rounded-full mix-blend-multiply filter blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
+    <div class="absolute bottom-0 left-0 w-80 h-80 bg-elevate-primary/10 dark:bg-elevate-primary/20 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="text-center mb-16" data-aos="fade-up">
-            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 text-xs font-bold uppercase tracking-wider mb-4 border border-transparent dark:border-cyan-500/20">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-elevate-accent/10 dark:bg-elevate-accent/20 text-elevate-primary dark:text-elevate-accent text-xs font-bold uppercase tracking-wider mb-4 border border-elevate-accent/20">
                 <i class="ph-bold ph-pen-nib"></i> Pojok Literasi
             </span>
-            <h2 class="text-3xl md:text-5xl font-black text-slate-800 dark:text-white mb-4 tracking-tight">Artikel & Opini Guru</h2>
+            <h2 class="text-3xl md:text-5xl font-black text-elevate-dark dark:text-white mb-4 tracking-tight">Artikel & Opini Guru</h2>
             <p class="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto text-lg">Kumpulan tulisan, gagasan, dan opini inspiratif dari tenaga pendidik SMP Negeri 3 Lakbok.</p>
         </div>
 
@@ -20,10 +20,10 @@
                         <?php if($article->image_path): ?>
                             <img src="<?php echo e(asset('storage/' . $article->image_path)); ?>" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=<?php echo e(urlencode($article->title)); ?>&background=cffafe&color=0891b2&size=500';" alt="<?php echo e($article->title); ?>" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                         <?php else: ?>
-                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-cyan-900/40 dark:to-blue-900/40"><i class="ph-duotone ph-article text-6xl text-cyan-300 dark:text-cyan-600"></i></div>
+                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-elevate-accent/20 to-elevate-primary/20 dark:from-elevate-accent/10 dark:to-elevate-primary/10"><i class="ph-duotone ph-article text-6xl text-elevate-primary dark:text-elevate-accent"></i></div>
                         <?php endif; ?>
                         <div class="absolute top-4 left-4">
-                            <span class="px-3 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-cyan-600 dark:text-cyan-400 text-xs font-black uppercase tracking-wider rounded-lg shadow-sm"><?php echo e($article->category ?? 'Pendidikan'); ?></span>
+                            <span class="px-3 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-elevate-primary dark:text-elevate-accent text-xs font-black uppercase tracking-wider rounded-lg shadow-sm"><?php echo e($article->category ?? 'Pendidikan'); ?></span>
                         </div>
                     </div>
 
@@ -42,14 +42,14 @@
                             </div>
                         </div>
 
-                        <a href="<?php echo e($article->url ?? '#'); ?>" target="<?php echo e($article->url ? '_blank' : '_self'); ?>" class="block group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors">
-                            <h3 class="text-xl font-black text-slate-800 dark:text-white mb-3 leading-tight line-clamp-2"><?php echo e($article->title); ?></h3>
+                        <a href="<?php echo e($article->url ?? '#'); ?>" target="<?php echo e($article->url ? '_blank' : '_self'); ?>" class="block group-hover:text-elevate-primary dark:group-hover:text-elevate-accent transition-colors">
+                            <h3 class="text-xl font-black text-elevate-dark dark:text-white mb-3 leading-tight line-clamp-2"><?php echo e($article->title); ?></h3>
                         </a>
                         
                         <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-3 mb-6 flex-1"><?php echo e(Str::limit(strip_tags($article->excerpt), 150)); ?></p>
 
                         <div class="mt-auto pt-4 border-t border-slate-100 dark:border-slate-700">
-                            <a href="<?php echo e($article->url ?? route('teachers.show', $article->user_id)); ?>" target="<?php echo e($article->url ? '_blank' : '_self'); ?>" aria-label="Baca selengkapnya tentang <?php echo e($article->title); ?>" class="inline-flex items-center gap-2 text-sm font-bold text-cyan-600 dark:text-cyan-400 hover:text-cyan-800 dark:hover:text-cyan-300 group/link focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-4 rounded-lg px-1 -mx-1 transition-all">
+                            <a href="<?php echo e($article->url ?? route('teachers.show', $article->user_id)); ?>" target="<?php echo e($article->url ? '_blank' : '_self'); ?>" aria-label="Baca selengkapnya tentang <?php echo e($article->title); ?>" class="inline-flex items-center gap-2 text-sm font-bold text-elevate-primary dark:text-elevate-accent hover:text-elevate-dark dark:hover:text-white group/link focus:outline-none focus:ring-2 focus:ring-elevate-accent focus:ring-offset-4 rounded-lg px-1 -mx-1 transition-all">
                                 Baca Selengkapnya 
                                 <?php if($article->url): ?>
                                     <i class="ph-bold ph-arrow-up-right group-hover/link:translate-x-1 group-hover/link:-translate-y-1 transition-transform"></i>
@@ -63,7 +63,7 @@
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div class="col-span-1 md:col-span-3 text-center py-16 px-4 bg-white dark:bg-slate-800 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-700 shadow-sm" data-aos="fade-up">
                     <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-50 dark:bg-slate-700 text-slate-300 dark:text-slate-500 mb-4"><i class="ph-duotone ph-pen-nib text-4xl"></i></div>
-                    <h3 class="text-lg font-bold text-slate-700 dark:text-white mb-1">Belum Ada Artikel</h3>
+                    <h3 class="text-lg font-bold text-elevate-dark dark:text-white mb-1">Belum Ada Artikel</h3>
                     <p class="text-sm text-slate-500 dark:text-slate-400">Guru-guru kami sedang menyiapkan tulisan-tulisan inspiratif untuk Anda.</p>
                 </div>
             <?php endif; ?>
@@ -71,7 +71,7 @@
 
         <?php if(isset($latestArticles) && count($latestArticles) > 0): ?>
         <div class="text-center mt-12" data-aos="fade-up">
-            <a href="<?php echo e(route('articles.index')); ?>" class="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-full transition-colors shadow-sm">
+            <a href="<?php echo e(route('articles.index')); ?>" class="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 text-elevate-primary dark:text-slate-300 font-bold rounded-full transition-colors shadow-sm">
                 <i class="ph-bold ph-books"></i> Lihat Semua Tulisan
             </a>
         </div>

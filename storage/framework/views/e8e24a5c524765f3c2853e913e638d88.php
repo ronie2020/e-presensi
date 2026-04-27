@@ -24,37 +24,27 @@
         
         @keyframes scanMove { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         
-        /* --- PERBAIKAN KAMERA RESPONSIVE & ANTI GEPENG --- */
+        /* --- PERBAIKAN KAMERA (MENGATASI GETAR/MELOMPAT DI HP) --- */
         #qr-reader { 
             width: 100% !important; 
-            min-height: 350px !important; 
             border: none !important; 
             border-radius: 0.75rem; 
             overflow: hidden; 
             background: #0f172a; 
             position: relative;
         }
-        
-        #qr-reader__scan_region { 
+
+        #qr-reader video { 
             width: 100% !important; 
-            min-height: 350px !important;
-            background: transparent !important; 
+            object-fit: cover !important; 
+            border-radius: 0.75rem;
+            display: block !important;
         }
 
-        #qr-reader video, 
-        #qr-reader canvas { 
-            width: 100% !important; 
-            height: 100% !important; 
-            min-height: 350px !important;
-            object-fit: cover !important; /* Memaksa kamera memenuhi container tanpa gepeng */
-            display: block !important;
-            border-radius: 0.75rem;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-        }
-        
-        #qr-reader__dashboard_section_csr span, #qr-reader__dashboard_section_swaplink { display: none !important; }
+        /* Sembunyikan elemen bawaan library yang tidak diperlukan */
+        #qr-reader__dashboard_section_csr span, 
+        #qr-reader__dashboard_section_swaplink,
+        #qr-reader__dashboard_section_csr div { display: none !important; }
         
         /* Scanner Styles */
         .scanner-container { position: relative; overflow: hidden; border-radius: 0.75rem; transform: translateZ(0); }
@@ -89,7 +79,7 @@
         .new-row-entry { animation: highlightRow 2s ease-out; }
         
         .scan-type-btn.ring-2 .indicator-dot { transform: scale(1.2); background-color: currentColor; }
-    </style>
+    </style>    
     <?php $__env->stopPush(); ?>
 
     <?php

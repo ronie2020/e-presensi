@@ -8,10 +8,19 @@
         Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
         Chart.defaults.color = '#64748b'; // Teks disesuaikan ke abu-abu medium agar terbaca di background putih
         
+        // Warna Elevate untuk JS/Chart.js
+        const elevateAccent = '#38bdf8'; // Hex elevate-accent
+        const elevatePrimary = '#3b5889'; // Hex elevate-primary
+        const elevateDark = '#032b5b'; // Hex elevate-dark
+        
         // --- 1. CHART ATTENDANCE (HERO SECTION) ---
         const ctx = document.getElementById('publicWeeklyChart');
         if(ctx) {
             const chartData = @json($barChartData ?? ['labels'=>[],'datasets'=>[]]); 
+            
+            // Opsional: Jika datasets membawa warna hardcoded dari backend, kita bisa map/timpa disini
+            // chartData.datasets.forEach(ds => { ds.backgroundColor = elevateAccent; ... });
+
             new Chart(ctx.getContext('2d'), {
                 type: 'bar',
                 data: {
@@ -71,17 +80,17 @@
                     datasets: [{
                         label: 'Kunjungan',
                         data: libData.data,
-                        borderColor: '#0ea5e9', // Diubah ke warna cyan/sky blue
+                        borderColor: elevateAccent, // Menggunakan Elevate Accent
                         backgroundColor: (context) => {
                             const ctx = context.chart.ctx;
                             const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                            gradient.addColorStop(0, 'rgba(14, 165, 233, 0.15)');
-                            gradient.addColorStop(1, 'rgba(14, 165, 233, 0)');
+                            gradient.addColorStop(0, 'rgba(56, 189, 248, 0.15)'); // Elevate Accent (RGB)
+                            gradient.addColorStop(1, 'rgba(56, 189, 248, 0)');
                             return gradient;
                         },
                         borderWidth: 3,
                         pointBackgroundColor: '#ffffff',
-                        pointBorderColor: '#0ea5e9',
+                        pointBorderColor: elevateAccent,
                         pointBorderWidth: 2,
                         pointRadius: 4,
                         pointHoverRadius: 6,
@@ -95,7 +104,7 @@
                     plugins: { 
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#0ea5e9',
+                            backgroundColor: elevatePrimary,
                             titleColor: '#fff',
                             bodyColor: '#fff',
                             padding: 10,
@@ -118,63 +127,62 @@
                 }
             });
         }
-    });
 
-    document.addEventListener('DOMContentLoaded', function() {
-    const habitCtx = document.getElementById('habitWeeklyChart');
-    if (habitCtx) {
-        new Chart(habitCtx.getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: @json($habitLabels ?? []),
-                datasets: [{
-                    label: 'Siswa Melapor',
-                    data: @json($habitData ?? []),
-                    borderColor: '#06b6d4', // Cyan
-                    backgroundColor: (context) => {
-                        const ctx = context.chart.ctx;
-                        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                        gradient.addColorStop(0, 'rgba(6, 182, 212, 0.2)');
-                        gradient.addColorStop(1, 'rgba(6, 182, 212, 0)');
-                        return gradient;
-                    },
-                    borderWidth: 4,
-                    pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#06b6d4',
-                    pointBorderWidth: 3,
-                    pointRadius: 5,
-                    pointHoverRadius: 8,
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#1e293b',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        padding: 12,
-                        cornerRadius: 12,
-                        displayColors: false
-                    }
+        // --- 3. CHART HABITS ---
+        const habitCtx = document.getElementById('habitWeeklyChart');
+        if (habitCtx) {
+            new Chart(habitCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: @json($habitLabels ?? []),
+                    datasets: [{
+                        label: 'Siswa Melapor',
+                        data: @json($habitData ?? []),
+                        borderColor: elevateAccent, // Menggunakan Elevate Accent
+                        backgroundColor: (context) => {
+                            const ctx = context.chart.ctx;
+                            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                            gradient.addColorStop(0, 'rgba(56, 189, 248, 0.2)');
+                            gradient.addColorStop(1, 'rgba(56, 189, 248, 0)');
+                            return gradient;
+                        },
+                        borderWidth: 4,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: elevateAccent,
+                        pointBorderWidth: 3,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        fill: true,
+                        tension: 0.4
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: '#e2e8f0', drawBorder: false }, // Grid disesuaikan ke light
-                        ticks: { color: '#64748b', font: { weight: 'bold' } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: elevateDark,
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            padding: 12,
+                            cornerRadius: 12,
+                            displayColors: false
+                        }
                     },
-                    x: {
-                        grid: { display: false },
-                        ticks: { color: '#64748b', font: { weight: 'bold' } }
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#e2e8f0', drawBorder: false },
+                            ticks: { color: '#64748b', font: { weight: 'bold' } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748b', font: { weight: 'bold' } }
+                        }
                     }
                 }
-            }
-        });
-    }
-});
+            });
+        }
+    });
 </script>

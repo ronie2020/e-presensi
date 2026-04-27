@@ -1,6 +1,6 @@
 <nav 
     x-cloak
-    class="fixed inset-y-0 left-0 z-50 h-screen w-72 flex flex-col transition-all duration-300 ease-in-out shadow-2xl bg-[#1c2940] text-white border-r border-white/5 md:relative"
+    class="fixed inset-y-0 left-0 z-50 h-screen w-72 flex flex-col transition-all duration-300 ease-in-out shadow-2xl bg-elevate-dark text-white border-r border-white/5 md:relative"
     :class="{
         '-translate-x-full': !sidebarOpen,   
         'translate-x-0': sidebarOpen,        
@@ -11,15 +11,15 @@
     
     <!-- BACKGROUND ART ELEVATE -->
     <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div class="absolute -top-[100px] -left-[100px] w-[300px] h-[300px] bg-[#56bbf1]/10 rounded-full blur-[80px]"></div>
-        <div class="absolute bottom-0 right-0 w-[200px] h-[200px] bg-[#0d52a1]/20 rounded-full blur-[60px]"></div>
+        <div class="absolute -top-[100px] -left-[100px] w-[300px] h-[300px] bg-elevate-accent/10 rounded-full blur-[80px]"></div>
+        <div class="absolute bottom-0 right-0 w-[200px] h-[200px] bg-elevate-primary/20 rounded-full blur-[60px]"></div>
         <div class="absolute inset-0 opacity-[0.02]" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
     </div>
 
     <!-- TOMBOL PENGECIL SIDEBAR (TOGGLE BUTTON) - DESKTOP ONLY -->
     <button 
         @click="toggleSidebar()" 
-        class="absolute -right-3 top-20 z-50 hidden md:flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#0d52a1] shadow-md border border-slate-200 hover:scale-110 transition-transform duration-300 focus:outline-none"
+        class="absolute -right-3 top-20 z-50 hidden md:flex h-6 w-6 items-center justify-center rounded-full bg-white text-elevate-primary shadow-md border border-slate-200 hover:scale-110 transition-transform duration-300 focus:outline-none"
         :title="sidebarExpanded ? 'Perkecil Sidebar' : 'Perbesar Sidebar'">
         <i class="ph-bold transition-transform duration-300" :class="sidebarExpanded ? 'ph-caret-left' : 'ph-caret-right'"></i>
     </button>
@@ -39,7 +39,7 @@
            :class="sidebarExpanded ? 'justify-start' : 'justify-center'">
             
             <!-- Logo Icon (Elevate Style) -->
-            <div class="w-10 h-10 rounded-[1rem] bg-gradient-to-br from-[#56bbf1] to-[#0d52a1] flex items-center justify-center shadow-lg shadow-[#56bbf1]/30 border border-white/20 shrink-0 relative overflow-hidden transition-all duration-300"
+            <div class="w-10 h-10 rounded-[1rem] bg-gradient-to-br from-elevate-accent to-elevate-primary flex items-center justify-center shadow-lg shadow-elevate-accent/30 border border-white/20 shrink-0 relative overflow-hidden transition-all duration-300"
                  :class="sidebarExpanded ? 'mx-0' : 'mx-auto group-hover:scale-105'">
                 <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-6 h-6 object-contain z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
                 <i class="ph-bold ph-graduation-cap text-xl hidden z-10 text-white"></i>
@@ -51,8 +51,8 @@
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 scale-90 translate-x-[-10px]"
                  x-transition:enter-end="opacity-100 scale-100 translate-x-0">
-                <span class="font-black text-white text-lg tracking-tight leading-none group-hover:text-[#56bbf1] transition-colors">SMPN 3 LAKBOK</span>
-                <span class="text-[10px] font-bold text-[#56bbf1] uppercase tracking-widest mt-1">Unggul & Berkarakter</span>
+                <span class="font-black text-white text-lg tracking-tight leading-none group-hover:text-elevate-accent transition-colors">SMPN 3 LAKBOK</span>
+                <span class="text-[10px] font-bold text-elevate-accent uppercase tracking-widest mt-1">Unggul & Berkarakter</span>
             </div>
         </a>
     </div>
@@ -84,13 +84,13 @@
                          :class="sidebarExpanded ? 'px-3' : 'px-0 text-center'">
                         
                         <h3 x-show="sidebarExpanded" 
-                            class="text-[10px] font-black text-[#56bbf1]/60 uppercase tracking-widest flex items-center gap-2">
+                            class="text-[10px] font-black text-elevate-accent/60 uppercase tracking-widest flex items-center gap-2">
                             {{ $groupTitle }}
                             <span class="h-px flex-1 bg-white/5"></span>
                         </h3>
                         
                         <!-- Divider saat kecil -->
-                       <div x-show="!sidebarExpanded" class="h-0.5 w-4 bg-white/10 mx-auto rounded-full group-hover:bg-[#56bbf1] transition-colors"></div>
+                       <div x-show="!sidebarExpanded" class="h-0.5 w-4 bg-white/10 mx-auto rounded-full group-hover:bg-elevate-accent transition-colors"></div>
                     </div>
 
                     <!-- Items (Looping $visibleItems yang sudah disaring) -->
@@ -135,17 +135,17 @@
                                 <a href="{{ isset($item['route']) ? route($item['route']) : '#' }}" 
                                    class="group flex items-center gap-3 py-3 rounded-2xl transition-all duration-200 outline-none relative overflow-hidden
                                           {{ $isActive 
-                                             ? 'bg-[#56bbf1]/15 text-white' 
+                                             ? 'bg-elevate-accent/15 text-white' 
                                              : 'text-slate-400 hover:text-white hover:bg-white/5' 
                                           }}"
                                    :class="sidebarExpanded ? 'px-3 justify-start' : 'justify-center px-0 w-full'">
                                     
                                     <!-- Active Marker (Elevate Style) -->
-                                    <div class="absolute left-0 top-0 bottom-0 w-1 rounded-r-full transition-all duration-300 {{ $isActive ? 'bg-[#56bbf1]' : 'bg-transparent' }}"></div>
+                                    <div class="absolute left-0 top-0 bottom-0 w-1 rounded-r-full transition-all duration-300 {{ $isActive ? 'bg-elevate-accent' : 'bg-transparent' }}"></div>
 
                                     <!-- Icon -->
                                     <i class="ph-duotone {{ $item['icon'] ?? 'ph-circle' }} shrink-0 transition-all duration-200 relative z-10
-                                              {{ $isActive ? 'text-[#56bbf1]' : 'text-slate-400 group-hover:text-[#56bbf1]' }}"
+                                              {{ $isActive ? 'text-elevate-accent' : 'text-slate-400 group-hover:text-elevate-accent' }}"
                                        :class="sidebarExpanded ? 'text-2xl mr-0' : 'text-2xl mx-auto'"></i>
                                     
                                     <!-- Text -->
@@ -156,7 +156,7 @@
 
                                     <!-- TOOLTIP (Desktop Only) -->
                                     <div x-show="!sidebarExpanded"
-                                         class="hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2 bg-white text-[#2c3f61] text-xs font-bold rounded-xl shadow-xl shadow-[#56bbf1]/10 border border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-[100]">
+                                         class="hidden md:block absolute left-full top-1/2 -translate-y-1/2 ml-3 px-3 py-2 bg-white text-elevate-dark text-xs font-bold rounded-xl shadow-xl shadow-elevate-accent/10 border border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-[100]">
                                         {{ $item['name'] }}
                                         <div class="absolute top-1/2 -left-1 -mt-1 w-2 h-2 bg-white border-l border-b border-slate-100 transform rotate-45"></div>
                                     </div>
@@ -172,15 +172,15 @@
     </div>
 
     <!-- FOOTER STATUS -->
-    <div class="relative z-10 p-4 border-t border-white/5 bg-[#172236] transition-all duration-300"
+    <div class="relative z-10 p-4 border-t border-white/5 bg-black/20 transition-all duration-300"
          :class="sidebarExpanded ? 'block' : 'flex justify-center p-2'">
         
-        <div class="rounded-xl border border-white/5 bg-white/5 flex items-center gap-3 transition-all hover:border-[#56bbf1]/50 cursor-pointer group"
+        <div class="rounded-xl border border-white/5 bg-white/5 flex items-center gap-3 transition-all hover:border-elevate-accent/50 cursor-pointer group"
              :class="sidebarExpanded ? 'p-3' : 'justify-center p-2 h-10 w-10'"
              title="Status Sistem: Online">
             
             <div x-show="sidebarExpanded" class="flex-1 overflow-hidden">
-                <p class="text-[10px] font-bold text-[#56bbf1]/60 uppercase tracking-widest group-hover:text-[#56bbf1] transition-colors">Status Sistem</p>
+                <p class="text-[10px] font-bold text-elevate-accent/60 uppercase tracking-widest group-hover:text-elevate-accent transition-colors">Status Sistem</p>
                 <div class="flex items-center gap-2 mt-0.5">
                     <div class="relative flex h-2 w-2">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -190,7 +190,7 @@
                 </div>
             </div>
 
-            <i class="ph-bold ph-plugs text-xl text-slate-400 group-hover:text-[#56bbf1] transition-colors" :class="!sidebarExpanded ? 'block' : 'hidden'"></i>
+            <i class="ph-bold ph-plugs text-xl text-slate-400 group-hover:text-elevate-accent transition-colors" :class="!sidebarExpanded ? 'block' : 'hidden'"></i>
         </div>
     </div>
 </nav>

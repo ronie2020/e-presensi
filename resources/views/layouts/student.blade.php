@@ -21,11 +21,11 @@
         /* Custom scrollbar khusus untuk siswa */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #56bbf1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #0d52a1; }
+        ::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b5889; }
     </style>
 </head>
-<body class="font-sans antialiased bg-[#f8fafc]">
+<body class="font-sans antialiased bg-slate-50">
     
     {{-- NAVBAR: Clean White Glassmorphism (Microsoft Elevate) --}}
     <nav class="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 sticky top-0 z-40 shadow-sm transition-all duration-300">
@@ -33,12 +33,12 @@
             <div class="flex justify-between h-[72px] items-center">
                 {{-- Logo Kiri --}}
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-[1rem] bg-gradient-to-br from-[#56bbf1] to-[#0d52a1] text-white flex items-center justify-center text-xl shadow-md shadow-[#56bbf1]/30">
+                    <div class="w-10 h-10 rounded-[1rem] bg-gradient-to-br from-elevate-accent to-elevate-primary text-white flex items-center justify-center text-xl shadow-md shadow-elevate-accent/30">
                         <i class="ph-bold ph-student"></i>
                     </div>
                     <div class="hidden sm:block">
-                        <h1 class="text-lg font-black text-[#2c3f61] leading-none">Netila</h1>
-                        <p class="text-[10px] font-bold text-[#0d52a1] uppercase tracking-widest">Portal Siswa</p>
+                        <h1 class="text-lg font-black text-elevate-dark leading-none">Netila</h1>
+                        <p class="text-[10px] font-bold text-elevate-primary uppercase tracking-widest">Portal Siswa</p>
                     </div>
                 </div>
 
@@ -46,12 +46,12 @@
                 <div class="flex items-center gap-3 sm:gap-5">
                     @if(Auth::guard('student')->check())
                         <div class="text-right hidden md:block">
-                            <p class="text-sm font-bold text-[#2c3f61]">{{ Auth::guard('student')->user()->name }}</p>
+                            <p class="text-sm font-bold text-elevate-dark">{{ Auth::guard('student')->user()->name }}</p>
                             <p class="text-xs text-slate-400 font-mono">{{ Auth::guard('student')->user()->student_id }}</p>
                         </div>
                     @endif
 
-                    <a href="{{ route('portal.index') }}" class="px-4 py-2 bg-[#e5eff5] text-[#0d52a1] font-bold text-xs rounded-xl hover:bg-[#56bbf1] hover:text-white transition flex items-center gap-2 border border-[#56bbf1]/20 active:scale-95 hidden md:flex">
+                    <a href="{{ route('portal.index') }}" class="px-4 py-2 bg-slate-100 text-elevate-primary font-bold text-xs rounded-xl hover:bg-elevate-accent hover:text-white transition flex items-center gap-2 border border-elevate-accent/20 active:scale-95 hidden md:flex">
                         <i class="ph-bold ph-door-open text-base"></i> Keluar
                     </a>
                 </div>
@@ -66,7 +66,7 @@
             <span class="text-[10px] font-bold">Keluar</span>
         </a>
         
-        <div class="px-6 py-2 bg-gradient-to-r from-[#56bbf1] to-[#0d52a1] shadow-lg shadow-[#56bbf1]/30 rounded-[1rem] text-white flex items-center gap-2 transform -translate-y-2">
+        <div class="px-6 py-2 bg-gradient-to-r from-elevate-accent to-elevate-primary shadow-lg shadow-elevate-accent/30 rounded-[1rem] text-white flex items-center gap-2 transform -translate-y-2">
             <i class="ph-fill ph-desktop text-xl"></i>
             <span class="text-xs font-black tracking-wide">Ujian</span>
         </div>

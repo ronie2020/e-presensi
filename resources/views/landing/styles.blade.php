@@ -28,11 +28,13 @@
 <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     
-    /* Custom Scrollbar Diselaraskan Ke Tema Biru/Cyan */
+    /* Custom Scrollbar Diselaraskan Ke Tema Elevate */
     ::-webkit-scrollbar { width: 10px; }
     ::-webkit-scrollbar-track { background: #f8fafc; }
-    ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 5px; border: 2px solid #f8fafc; }
-    ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+    /* Menggunakan elevate-accent (#38bdf8) */
+    ::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 5px; border: 2px solid #f8fafc; }
+    /* Menggunakan elevate-primary (#3b5889) */
+    ::-webkit-scrollbar-thumb:hover { background: #3b5889; }
     
     /* Utility Animations */
     .animate-blob { animation: blob 7s infinite; }
@@ -67,8 +69,9 @@
     .book-glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); }
 
     /* Preloader */
-    #preloader { position: fixed; inset: 0; z-index: 9999; background: #0f172a; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s ease-out; }
-    .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: #0ea5e9; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
+    #preloader { position: fixed; inset: 0; z-index: 9999; background: #032b5b; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s ease-out; }
+    /* Preloader Spinner: Elevate Accent */
+    .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: #38bdf8; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
     @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .hide-preloader { opacity: 0; visibility: hidden; }
 </style>

@@ -5,7 +5,7 @@
             <div x-show="modalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative transform overflow-hidden rounded-2xl bg-white dark:bg-slate-800 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-2xl border border-slate-200 dark:border-slate-700">
                 <div class="bg-white dark:bg-slate-800 px-6 py-6 sm:p-8">
                     <div class="flex justify-between items-start mb-6">
-                        <span class="px-2.5 py-1 rounded-md bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 text-xs font-bold uppercase tracking-wide border border-cyan-100 dark:border-cyan-500/20" x-text="activeAnnouncement?.category || 'Pengumuman'">
+                        <span class="px-2.5 py-1 rounded-md bg-elevate-accent/10 dark:bg-elevate-accent/20 text-elevate-primary dark:text-elevate-accent text-xs font-bold uppercase tracking-wide border border-elevate-accent/20 dark:border-elevate-accent/30" x-text="activeAnnouncement?.category || 'Pengumuman'">
                             
                         </span>
                         <button @click="closeAnnouncement()" class="text-slate-400 hover:text-red-500 transition bg-slate-50 dark:bg-slate-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-1 rounded-full"><i class="ph-bold ph-x text-xl"></i></button>
@@ -39,21 +39,20 @@
                             <button type="button" @click="guestBookModalOpen = false" class="text-slate-400 hover:text-red-500 transition bg-slate-50 dark:bg-slate-700 hover:bg-red-50 dark:hover:bg-red-900/30 p-1 rounded-full"><i class="ph-bold ph-x text-xl"></i></button>
                         </div>
                         
-                        <!-- Ring warna Pink diubah menjadi Blue -->
                         <div class="space-y-4">
                             <div>
                                 <label for="name" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Lengkap</label>
-                                <input type="text" name="name" id="name" required class="w-full rounded-lg bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2.5 px-3" placeholder="Masukkan nama lengkap Anda">
+                                <input type="text" name="name" id="name" required class="w-full rounded-lg bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white shadow-sm focus:border-elevate-accent focus:ring-elevate-accent sm:text-sm py-2.5 px-3" placeholder="Masukkan nama lengkap Anda">
                             </div>
                             
                             <div>
                                 <label for="institution" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Asal Instansi / Umum</label>
-                                <input type="text" name="institution" id="institution" required class="w-full rounded-lg bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2.5 px-3" placeholder="Contoh: Dinas Pendidikan / Wali Murid">
+                                <input type="text" name="institution" id="institution" required class="w-full rounded-lg bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white shadow-sm focus:border-elevate-accent focus:ring-elevate-accent sm:text-sm py-2.5 px-3" placeholder="Contoh: Dinas Pendidikan / Wali Murid">
                             </div>
 
                             <div>
                                 <label for="purpose" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Tujuan Kunjungan</label>
-                                <select name="purpose" id="purpose" class="w-full rounded-lg bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2.5 px-3">
+                                <select name="purpose" id="purpose" class="w-full rounded-lg bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white shadow-sm focus:border-elevate-accent focus:ring-elevate-accent sm:text-sm py-2.5 px-3">
                                     <option value="Dinas">Kunjungan Dinas</option>
                                     <option value="Rapat">Rapat / Pertemuan</option>
                                     <option value="Wali Murid">Urusan Wali Murid</option>
@@ -63,21 +62,20 @@
 
                             <div>
                                 <label for="message" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Pesan & Saran</label>
-                                <textarea name="message" id="message" rows="3" class="w-full rounded-lg bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm py-2.5 px-3" placeholder="Tuliskan pesan atau saran Anda..."></textarea>
+                                <textarea name="message" id="message" rows="3" class="w-full rounded-lg bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white shadow-sm focus:border-elevate-accent focus:ring-elevate-accent sm:text-sm py-2.5 px-3" placeholder="Tuliskan pesan atau saran Anda..."></textarea>
                             </div>
                         </div>
                     </div>
                     <div class="bg-slate-50 dark:bg-slate-900/50 px-6 py-4 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-700">
                         <button type="button" class="inline-flex justify-center rounded-xl bg-white dark:bg-slate-700 px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 shadow-sm ring-1 ring-inset ring-slate-300 dark:ring-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors" @click="guestBookModalOpen = false">Batal</button>
-                        <!-- Tombol submit diubah ke warna biru -->
-                        <button type="submit" class="inline-flex justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-blue-700 transition-colors shadow-blue-500/30">Kirim Data</button>
+                        <button type="submit" class="inline-flex justify-center rounded-xl bg-elevate-primary px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-elevate-dark transition-colors shadow-elevate-primary/30">Kirim Data</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- ALL GUESTS LIST MODAL (NEW) -->
+    <!-- ALL GUESTS LIST MODAL -->
     <div x-show="guestListModalOpen" style="display: none;" class="fixed inset-0 z-[100] overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div x-show="guestListModalOpen" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm transition-opacity" @click="guestListModalOpen = false"></div>
         <div class="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
@@ -108,8 +106,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center gap-3">
-                                        <!-- Avatar disesuaikan ke Cyan -->
-                                        <div class="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-bold text-xs">
+                                        <div class="w-8 h-8 rounded-full bg-elevate-accent/10 dark:bg-elevate-accent/20 text-elevate-primary dark:text-elevate-accent flex items-center justify-center font-bold text-xs border border-elevate-accent/20">
                                             {{ substr($item->name, 0, 1) }}
                                         </div>
                                         <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ $item->name }}</span>
