@@ -222,7 +222,12 @@
                     <div class="school-info">
                         <h2>KARTU PESERTA UJIAN</h2>
                         <p>SMP NEGERI 3 LAKBOK</p>
-                        <p class="small">TAHUN AJARAN {{ date('Y') }}/{{ date('Y')+1 }}</p>
+                         @php
+                            // Mengambil tahun ajaran yang sedang aktif dari database
+                            $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();
+                            $tahunPelajaran = $activeYear ? $activeYear->name : date('Y') . '/' . date('Y', strtotime('+1 year'));
+                        @endphp
+                        <p>Tahun Pelajaran {{ $tahunPelajaran }}</p>
                     </div>
 
                     <div class="logo-box">
@@ -262,7 +267,7 @@
                             <tr>
                                 <td class="label">NISN</td>
                                 <td class="sep">:</td>
-                                <td>{{ $student->nisn ?? $student->nis ?? '-' }}</td>
+                                <td>{{ $student->student_id ?? $student->nis ?? '-' }}</td>
                             </tr>
                             <tr>
                                 <td class="label">Kelas</td>

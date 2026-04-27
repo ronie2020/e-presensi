@@ -222,7 +222,12 @@
                     <div class="school-info">
                         <h2>KARTU PESERTA UJIAN</h2>
                         <p>SMP NEGERI 3 LAKBOK</p>
-                        <p class="small">TAHUN AJARAN <?php echo e(date('Y')); ?>/<?php echo e(date('Y')+1); ?></p>
+                         <?php
+                            // Mengambil tahun ajaran yang sedang aktif dari database
+                            $activeYear = \App\Models\AcademicYear::where('is_active', true)->first();
+                            $tahunPelajaran = $activeYear ? $activeYear->name : date('Y') . '/' . date('Y', strtotime('+1 year'));
+                        ?>
+                        <p>Tahun Pelajaran <?php echo e($tahunPelajaran); ?></p>
                     </div>
 
                     <div class="logo-box">
@@ -262,7 +267,7 @@
                             <tr>
                                 <td class="label">NISN</td>
                                 <td class="sep">:</td>
-                                <td><?php echo e($student->nisn ?? $student->nis ?? '-'); ?></td>
+                                <td><?php echo e($student->student_id ?? $student->nis ?? '-'); ?></td>
                             </tr>
                             <tr>
                                 <td class="label">Kelas</td>
@@ -303,7 +308,7 @@
 
                         
                         <div class="name">Tantan Sutandi N.,S.Pd.,M.Pd</div>
-                        <div class="nip">NIP. 19820000 000000 1 000</div>
+                        <div class="nip">NIP. 19820928 201101 1 002</div>
                     </div>
                 </div>
 
