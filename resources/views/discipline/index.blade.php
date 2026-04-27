@@ -20,39 +20,47 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Customisasi TomSelect agar sesuai dengan tema Tailwind */
-        .ts-control { border-radius: 1rem !important; border: 1px solid #e2e8f0 !important; background-color: #f8fafc !important; padding: 0.875rem 1rem !important; font-size: 0.875rem !important; font-weight: 700 !important; color: #334155 !important;}
+        /* Customisasi TomSelect agar sesuai dengan tema Tailwind (Warna teks disesuaikan ke Elevate) */
+        .ts-control { border-radius: 1rem !important; border: 1px solid #e2e8f0 !important; background-color: #f8fafc !important; padding: 0.875rem 1rem !important; font-size: 0.875rem !important; font-weight: 700 !important; color: #1e293b !important;}
         .ts-control.focus { border-color: #f43f5e !important; box-shadow: none !important; background-color: white !important;} /* Merah untuk pelanggaran */
         #student_select_merit-ts-control.focus { border-color: #10b981 !important; } /* Hijau untuk kebaikan */
         .ts-dropdown { border-radius: 1rem !important; overflow: hidden !important; border: 1px solid #e2e8f0 !important; font-size: 0.875rem !important; font-weight: 500 !important;}
     </style>
 
-    <div class="py-8 sm:py-10 font-sans text-slate-800">
+    <div class="py-8 sm:py-10 font-sans text-elevate-text">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION --}}
-            <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 mb-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+             {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
+            <div class="relative rounded-[2rem] bg-elevate-gradient-main p-8 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/10 overflow-hidden border border-white/60">
+                {{-- Abstract Shapes Ornaments --}}
+                <div class="absolute -top-10 -left-10 w-48 h-48 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
+                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
+                <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
                 
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center md:items-start gap-6">
                     <div class="text-center md:text-left">
-                        <h1 class="text-3xl font-extrabold tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3">
-                            <i class="ph-duotone ph-clipboard-text text-blue-300"></i> Catatan Kedisiplinan
+                        <h1 class="text-3xl font-extrabold tracking-tight mb-2 flex items-center justify-center md:justify-start gap-3 text-elevate-dark">
+                            <div class="w-10 h-10 rounded-xl bg-elevate-accent/20 text-elevate-primary flex items-center justify-center shrink-0">
+                                <i class="ph-bold ph-clipboard-text text-xl"></i>
+                            </div>
+                            Catatan Kedisiplinan
                         </h1>
-                        <p class="text-blue-300 text-sm font-medium leading-relaxed max-w-lg">
+                        <p class="text-elevate-dark/80 text-sm font-medium leading-relaxed max-w-lg ml-0 md:ml-12">
                             Kelola poin siswa, pantau klasemen pelanggaran, dan lihat rekapitulasi per kelas dalam satu dashboard yang terintegrasi.
                         </p>
                     </div>
-                    <div class="flex gap-2">
+                    <div class="flex flex-wrap justify-center gap-3">
                         {{-- TOMBOL ANALITIK --}}
-                        <a href="{{ route('discipline.analytics') }}" class="group bg-indigo-500 hover:bg-indigo-600 text-white px-5 py-3 rounded-2xl font-bold text-sm transition-all flex items-center gap-2 shadow-lg shadow-indigo-900/20">
-                            <i class="ph-bold ph-chart-line-up text-xl"></i>
+                        <a href="{{ route('discipline.analytics') }}" class="group bg-white text-elevate-dark px-5 py-3.5 rounded-2xl font-bold text-sm transition-all hover:bg-slate-50 flex items-center gap-2 shadow-lg shadow-elevate-dark/5 border border-white active:scale-95">
+                            <div class="w-7 h-7 rounded-full bg-elevate-accent/20 text-elevate-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <i class="ph-bold ph-chart-line-up text-sm"></i>
+                            </div>
                             <span>Statistik & Analitik</span>
                         </a>
-                        <a href="{{ route('discipline-types.index') }}" class="group bg-white/10 backdrop-blur-md hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm border border-white/10 transition-all flex items-center gap-2 shadow-lg">
-                            <i class="ph-bold ph-gear text-xl"></i>
-                            <span>Atur Jenis Poin</span>
+                        {{-- TOMBOL PENGATURAN --}}
+                        <a href="{{ route('discipline-types.index') }}" class="group bg-white/60 backdrop-blur-md hover:bg-white text-elevate-dark px-5 py-3.5 rounded-2xl font-bold text-sm border border-white transition-all flex items-center gap-2 shadow-sm active:scale-95">
+                            <i class="ph-bold ph-gear text-lg text-elevate-primary group-hover:rotate-90 transition-transform"></i>
+                            <span>Atur Poin</span>
                         </a>
                     </div>                    
                 </div>
@@ -70,9 +78,10 @@
             @endif
 
             <!-- BAGIAN 1: FORM INPUT (GRID 2 KOLOM) -->
+            <!-- Catatan: Tema warna Merah & Hijau dipertahankan karena merupakan warna semantik untuk UX Poin Kedisiplinan -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
                 
-                <!-- KIRI: Form Pelanggaran (Tema Merah) -->
+                <!-- KIRI: Form Pelanggaran (Tema Merah / Tetap Dipertahankan) -->
                 <div class="bg-white rounded-[2.5rem] shadow-xl shadow-rose-900/5 border border-slate-100 overflow-visible relative group hover:border-rose-100 transition-all duration-300">
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-rose-500 rounded-t-[2.5rem]"></div>
                     <div class="p-8 relative z-10">
@@ -81,7 +90,7 @@
                                 <i class="ph-duotone ph-warning-octagon"></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-black text-slate-800">Input Pelanggaran</h3>
+                                <h3 class="text-lg font-black text-elevate-dark">Input Pelanggaran</h3>
                                 <p class="text-xs font-bold text-rose-400 uppercase tracking-wider">Kurangi Poin (-)</p>
                             </div>
                         </div>
@@ -110,7 +119,7 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <button type="button" onclick="startScanner('student_select_violation')" class="shrink-0 bg-slate-800 text-white w-[52px] h-[52px] rounded-2xl hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center" title="Scan QR Code">
+                                    <button type="button" onclick="startScanner('student_select_violation')" class="shrink-0 bg-elevate-dark text-white w-[52px] h-[52px] rounded-2xl hover:bg-elevate-primary transition-colors shadow-lg flex items-center justify-center" title="Scan QR Code">
                                         <i class="ph-bold ph-qr-code text-xl"></i>
                                     </button>
                                 </div>
@@ -120,7 +129,7 @@
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Jenis Pelanggaran</label>
                                 <div class="relative">
-                                    <select name="discipline_type_id" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-rose-500 focus:ring-rose-500 text-sm font-bold text-slate-700 py-3.5 pl-4 pr-10 appearance-none cursor-pointer">
+                                    <select name="discipline_type_id" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-rose-500 focus:ring-rose-500 text-sm font-bold text-elevate-dark py-3.5 pl-4 pr-10 appearance-none cursor-pointer">
                                         <option value="">-- Pilih Kategori --</option>
                                         @foreach ($violationTypes as $type)
                                             <option value="{{ $type->id }}">{{ $type->name }} (-{{ $type->point_value }} Poin)</option>
@@ -133,7 +142,7 @@
                             {{-- CATATAN --}}
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Kronologi / Catatan</label>
-                                <textarea name="notes" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-rose-500 focus:ring-rose-500 text-sm font-medium p-4" placeholder="Jelaskan singkat kejadiannya..."></textarea>
+                                <textarea name="notes" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-rose-500 focus:ring-rose-500 text-sm font-medium p-4 text-elevate-dark" placeholder="Jelaskan singkat kejadiannya..."></textarea>
                             </div>
 
                             <button type="submit" class="w-full py-3.5 bg-rose-600 text-white font-bold rounded-2xl hover:bg-rose-700 transition-all shadow-lg shadow-rose-200 flex items-center justify-center gap-2 mt-2 transform active:scale-95">
@@ -144,7 +153,7 @@
                     </div>
                 </div>
 
-                <!-- KANAN: Form Kebaikan (Tema Hijau) -->
+                <!-- KANAN: Form Kebaikan (Tema Hijau / Tetap Dipertahankan) -->
                 <div class="bg-white rounded-[2.5rem] shadow-xl shadow-emerald-900/5 border border-slate-100 overflow-visible relative group hover:border-emerald-100 transition-all duration-300">
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-emerald-500 rounded-t-[2.5rem]"></div>
                     <div class="p-8 relative z-10">
@@ -153,7 +162,7 @@
                                 <i class="ph-duotone ph-medal"></i>
                             </div>
                             <div>
-                                <h3 class="text-lg font-black text-slate-800">Input Prestasi</h3>
+                                <h3 class="text-lg font-black text-elevate-dark">Input Prestasi</h3>
                                 <p class="text-xs font-bold text-emerald-500 uppercase tracking-wider">Tambah Poin (+)</p>
                             </div>
                         </div>
@@ -181,7 +190,7 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <button type="button" onclick="startScanner('student_select_merit')" class="shrink-0 bg-slate-800 text-white w-[52px] h-[52px] rounded-2xl hover:bg-slate-700 transition-colors shadow-lg flex items-center justify-center" title="Scan QR Code">
+                                    <button type="button" onclick="startScanner('student_select_merit')" class="shrink-0 bg-elevate-dark text-white w-[52px] h-[52px] rounded-2xl hover:bg-elevate-primary transition-colors shadow-lg flex items-center justify-center" title="Scan QR Code">
                                         <i class="ph-bold ph-qr-code text-xl"></i>
                                     </button>
                                 </div>
@@ -191,7 +200,7 @@
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Jenis Kebaikan</label>
                                 <div class="relative">
-                                    <select name="discipline_type_id" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 text-sm font-bold text-slate-700 py-3.5 pl-4 pr-10 appearance-none cursor-pointer">
+                                    <select name="discipline_type_id" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 text-sm font-bold text-elevate-dark py-3.5 pl-4 pr-10 appearance-none cursor-pointer">
                                         <option value="">-- Pilih Kategori --</option>
                                         @foreach ($meritTypes as $type)
                                             <option value="{{ $type->id }}">{{ $type->name }} (+{{ $type->point_value }} Poin)</option>
@@ -204,7 +213,7 @@
                             {{-- CATATAN --}}
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Detail Tambahan</label>
-                                <textarea name="notes" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 text-sm font-medium p-4" placeholder="Keterangan prestasi..."></textarea>
+                                <textarea name="notes" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-emerald-500 focus:ring-emerald-500 text-sm font-medium p-4 text-elevate-dark" placeholder="Keterangan prestasi..."></textarea>
                             </div>
 
                             <button type="submit" class="w-full py-3.5 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 mt-2 transform active:scale-95">
@@ -221,27 +230,27 @@
             <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden mb-10">
                 <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col lg:flex-row justify-between items-center gap-4">
                     <div>
-                        <h3 class="text-xl font-black text-slate-800">Log Aktivitas</h3>
+                        <h3 class="text-xl font-black text-elevate-dark">Log Aktivitas</h3>
                         <p class="text-sm font-medium text-slate-400 mb-2 lg:mb-0">Riwayat input poin terbaru.</p>
                     </div>
                 
                     <div class="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
                         <form action="{{ route('discipline.index') }}" method="GET" class="flex flex-col sm:flex-row w-full gap-2">
                             <input type="date" name="filter_date" value="{{ request('filter_date') }}" 
-                                class="rounded-xl border-slate-200 text-sm py-2 px-3 text-slate-600 focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto">
+                                class="rounded-xl border-slate-200 text-sm py-2 px-3 text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary w-full sm:w-auto">
                             
                             <div class="relative w-full sm:w-auto">
                                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama siswa..." 
-                                    class="rounded-xl border-slate-200 text-sm py-2 pl-9 pr-3 text-slate-700 focus:ring-blue-500 focus:border-blue-500 w-full">
+                                    class="rounded-xl border-slate-200 text-sm py-2 pl-9 pr-3 text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary w-full">
                                 <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
                             </div>
                             
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition-colors flex items-center justify-center gap-2">
+                            <button type="submit" class="bg-elevate-primary hover:bg-elevate-dark text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition-colors flex items-center justify-center gap-2">
                                 Cari
                             </button>
                             
                             @if(request('search') || request('filter_date'))
-                                <a href="{{ route('discipline.index') }}" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-xl text-sm font-bold transition-colors flex items-center justify-center">
+                                <a href="{{ route('discipline.index') }}" class="bg-slate-200 hover:bg-slate-300 text-elevate-dark px-4 py-2 rounded-xl text-sm font-bold transition-colors flex items-center justify-center">
                                     Reset
                                 </a>
                             @endif
@@ -273,15 +282,15 @@
                                 @endphp
                                 <tr class="hover:bg-slate-50 transition-colors">
                                     <td class="px-6 py-4">
-                                        <div class="text-sm font-bold text-slate-700">{{ $record->created_at->format('d/m H:i') }}</div>
+                                        <div class="text-sm font-bold text-elevate-dark">{{ $record->created_at->format('d/m H:i') }}</div>
                                         <div class="text-[10px] font-bold text-slate-400">{{ $record->created_at->diffForHumans() }}</div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm font-bold text-slate-800">{{ $record->student->name }}</div>
+                                        <div class="text-sm font-bold text-elevate-dark">{{ $record->student->name }}</div>
                                         <div class="text-xs text-slate-500 font-medium">{{ $record->student->schoolClass->name ?? '-' }}</div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm font-bold text-slate-700">{{ $record->disciplineType->name ?? '-' }}</div>
+                                        <div class="text-sm font-bold text-elevate-dark">{{ $record->disciplineType->name ?? '-' }}</div>
                                         @if($record->notes) 
                                             <div class="text-xs text-slate-500 italic mt-0.5 truncate max-w-xs">"{{ $record->notes }}"</div> 
                                         @endif
@@ -350,7 +359,7 @@
                 {{-- A. REKAP PER KELAS --}}
                 <div class="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm xl:col-span-1">
                     <div class="px-6 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-slate-600 uppercase tracking-wider flex items-center gap-2">
+                        <h3 class="text-sm font-bold text-elevate-dark uppercase tracking-wider flex items-center gap-2">
                             <i class="ph-bold ph-chalkboard-teacher"></i> Rekap Per Kelas
                         </h3>
                     </div>
@@ -366,7 +375,7 @@
                             <tbody class="divide-y divide-slate-100">
                                 @foreach ($classSummaries as $summary)
                                     <tr class="hover:bg-slate-50 transition-colors">
-                                        <td class="px-4 py-3 font-bold text-slate-700 text-sm">{{ $summary->class_name }}</td>
+                                        <td class="px-4 py-3 font-bold text-elevate-dark text-sm">{{ $summary->class_name }}</td>
                                         <td class="px-4 py-3 text-center">
                                             @if($summary->total_violation > 0)
                                                 <span class="text-rose-600 text-xs font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100">-{{ $summary->total_violation }}</span>
@@ -405,7 +414,7 @@
                                     <tr class="hover:bg-rose-50/30 transition-colors">
                                         <td class="px-4 py-3 font-bold text-rose-300 text-sm">{{ $loop->iteration }}</td>
                                         <td class="px-4 py-3">
-                                            <span class="font-bold text-slate-700 block text-sm">{{ $summary->name }}</span>
+                                            <span class="font-bold text-elevate-dark block text-sm">{{ $summary->name }}</span>
                                             <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $summary->class_name ?? $summary->class }}</span>
                                         </td>
                                         <td class="px-4 py-3 text-center">
@@ -439,7 +448,7 @@
                                     <tr class="hover:bg-emerald-50/30 transition-colors">
                                         <td class="px-4 py-3 font-bold text-emerald-300 text-sm">{{ $loop->iteration }}</td>
                                         <td class="px-4 py-3">
-                                            <span class="font-bold text-slate-700 block text-sm">{{ $summary->name }}</span>
+                                            <span class="font-bold text-elevate-dark block text-sm">{{ $summary->name }}</span>
                                             <span class="text-[10px] text-slate-400 font-bold uppercase">{{ $summary->class_name ?? $summary->class }}</span>
                                         </td>
                                         <td class="px-4 py-3 text-center">
@@ -465,10 +474,10 @@
             <div class="inline-block align-bottom bg-white rounded-[2rem] text-left overflow-hidden shadow-2xl transform transition-all sm:align-middle sm:max-w-md w-full relative">
                 <div class="bg-white p-6">
                     <div class="text-center">
-                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
-                            <i class="ph-duotone ph-qr-code text-3xl text-blue-600"></i>
+                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-elevate-accent/20 mb-4">
+                            <i class="ph-duotone ph-qr-code text-3xl text-elevate-primary"></i>
                         </div>
-                        <h3 class="text-xl font-black text-slate-800 mb-2">Scan Kartu Siswa</h3>
+                        <h3 class="text-xl font-black text-elevate-dark mb-2">Scan Kartu Siswa</h3>
                         
                         <div class="relative w-full rounded-2xl overflow-hidden aspect-square bg-black border-4 border-slate-900 shadow-inner">
                             <div id="reader" class="w-full h-full object-cover"></div>

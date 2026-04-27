@@ -1,28 +1,30 @@
 <x-app-layout>
-    <div class="py-8 sm:py-10 font-sans text-slate-800">
+    <div class="py-8 sm:py-10 font-sans text-elevate-text">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION --}}
-            <div class="relative rounded-[2rem] bg-gray-900 bg-gradient-to-br from-slate-900 via-blue-900 to-blue-800 p-8 mb-8 text-white shadow-xl shadow-blue-900/30 overflow-hidden border border-white/10">
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
+            <div class="relative rounded-[2rem] bg-elevate-gradient-main p-8 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/10 overflow-hidden border border-white/60">
+                {{-- Abstract Shapes Ornaments --}}
+                <div class="absolute -top-10 -left-10 w-48 h-48 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
+                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
+                <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div class="text-center md:text-left">
                         <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
-                            <a href="{{ route('discipline.index') }}" class="text-xs font-bold text-blue-300 hover:text-white transition flex items-center gap-1">
+                            <a href="{{ route('discipline.index') }}" class="text-xs font-bold text-elevate-primary hover:text-elevate-dark transition flex items-center gap-1 bg-white/60 px-3 py-1 rounded-full border border-white backdrop-blur-sm shadow-sm">
                                 <i class="ph-bold ph-arrow-left"></i> Kembali
                             </a>
-                            <span class="text-white/30 text-xs">•</span>
-                            <span class="text-xs font-bold text-white uppercase tracking-wider">Konfigurasi</span>
+                            <span class="text-elevate-dark/30 text-xs">•</span>
+                            <span class="text-[10px] font-bold text-elevate-dark/70 uppercase tracking-wider">Konfigurasi</span>
                         </div>
-                        <h1 class="text-3xl font-black tracking-tight leading-none mb-1">Master Data Disiplin</h1>
-                        <p class="text-blue-200 text-sm font-medium">Atur jenis pelanggaran dan poin penghargaan.</p>
+                        <h1 class="text-3xl font-black tracking-tight leading-none mb-1 text-elevate-dark">Master Data Disiplin</h1>
+                        <p class="text-elevate-dark/80 text-sm font-medium">Atur jenis pelanggaran dan poin penghargaan.</p>
                     </div>
                     
                     <div class="hidden md:block">
-                        <div class="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl border border-white/20 shadow-inner">
-                            <i class="ph-duotone ph-list-checks text-blue-300"></i>
+                        <div class="w-14 h-14 bg-white/60 backdrop-blur-md rounded-2xl flex items-center justify-center text-2xl border border-white shadow-sm">
+                            <i class="ph-duotone ph-list-checks text-elevate-primary"></i>
                         </div>
                     </div>
                 </div>
@@ -60,14 +62,14 @@
 
             <!-- FORM TAMBAH DATA (CARD MODERN) -->
             <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 p-8 mb-10 relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-elevate-accent to-elevate-primary"></div>
                 <div class="relative z-10">
                     <div class="flex items-center gap-3 mb-6 border-b border-slate-50 pb-4">
-                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl shadow-sm">
+                        <div class="w-10 h-10 bg-elevate-accent/10 text-elevate-primary rounded-xl flex items-center justify-center text-xl shadow-sm">
                             <i class="ph-fill ph-plus-circle"></i>
                         </div>
                         <div>
-                            <h3 class="text-lg font-black text-slate-800 leading-none">Tambah Jenis Baru</h3>
+                            <h3 class="text-lg font-black text-elevate-dark leading-none">Tambah Jenis Baru</h3>
                             <p class="text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">Pelanggaran / Kebaikan</p>
                         </div>
                     </div>
@@ -77,13 +79,13 @@
                         <div class="md:col-span-2">
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Kategori</label>
                             <input type="text" name="name" required placeholder="Contoh: Terlambat, Merapikan Kelas..." 
-                                   class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm py-3 px-4 font-bold text-slate-700 transition-all">
+                                   class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 px-4 font-bold text-elevate-dark transition-all">
                         </div>
                         
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tipe</label>
                             <div class="relative">
-                                <select name="type" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm py-3 px-4 font-bold text-slate-700 appearance-none cursor-pointer">
+                                <select name="type" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 px-4 font-bold text-elevate-dark appearance-none cursor-pointer">
                                     <option value="Pelanggaran">🔴 Pelanggaran</option>
                                     <option value="Kebaikan">🟢 Kebaikan</option>
                                 </select>
@@ -94,11 +96,11 @@
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Poin</label>
                             <input type="number" name="point_value" required min="1" 
-                                   class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-500 focus:ring-blue-500 text-sm py-3 px-4 font-bold text-center text-slate-700 transition-all">
+                                   class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 px-4 font-bold text-center text-elevate-dark transition-all">
                         </div>
                         
                         <div class="md:col-span-4 flex justify-end mt-2">
-                            <button type="submit" class="w-full md:w-auto bg-blue-900 text-white px-8 py-3.5 rounded-2xl font-bold hover:bg-slate-900 transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2 transform active:scale-95">
+                            <button type="submit" class="w-full md:w-auto bg-elevate-dark text-white px-8 py-3.5 rounded-2xl font-bold hover:bg-elevate-primary transition-all shadow-lg shadow-elevate-dark/20 flex items-center justify-center gap-2 transform active:scale-95">
                                 <i class="ph-bold ph-floppy-disk text-lg"></i>
                                 Simpan Data
                             </button>
@@ -129,12 +131,12 @@
                             <tbody class="divide-y divide-slate-50">
                                 @forelse ($violationTypes as $item)
                                     <tr class="hover:bg-rose-50/20 transition-colors group">
-                                        <td class="px-6 py-4 text-sm font-bold text-slate-700">{{ $item->name }}</td>
+                                        <td class="px-6 py-4 text-sm font-bold text-elevate-dark">{{ $item->name }}</td>
                                         <td class="px-6 py-4 text-center">
                                             <span class="inline-block px-2.5 py-1 rounded-lg bg-rose-100 text-rose-700 text-xs font-black">-{{ $item->point_value }}</span>
                                         </td>
                                         <td class="px-6 py-4 text-right">
-                                            {{-- MODIFIED: Menggunakan SweetAlert2 --}}
+                                            {{-- Menggunakan SweetAlert2 --}}
                                             <form action="{{ route('discipline-types.destroy', $item->id) }}" method="POST" 
                                                   onsubmit="event.preventDefault(); 
                                                             const form = this;
@@ -192,12 +194,12 @@
                             <tbody class="divide-y divide-slate-50">
                                 @forelse ($meritTypes as $item)
                                     <tr class="hover:bg-emerald-50/20 transition-colors group">
-                                        <td class="px-6 py-4 text-sm font-bold text-slate-700">{{ $item->name }}</td>
+                                        <td class="px-6 py-4 text-sm font-bold text-elevate-dark">{{ $item->name }}</td>
                                         <td class="px-6 py-4 text-center">
                                             <span class="inline-block px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-black">+{{ $item->point_value }}</span>
                                         </td>
                                         <td class="px-6 py-4 text-right">
-                                            {{-- MODIFIED: Menggunakan SweetAlert2 --}}
+                                            {{-- Menggunakan SweetAlert2 --}}
                                             <form action="{{ route('discipline-types.destroy', $item->id) }}" method="POST" 
                                                   onsubmit="event.preventDefault(); 
                                                             const form = this;

@@ -11,8 +11,8 @@
         </script>
     @endpush
 
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-[#2c3f61] leading-tight">
+     <x-slot name="header">
+        <h2 class="font-semibold text-xl text-elevate-dark leading-tight">
             {{ __('Bank Soal Terpusat') }}
         </h2>
     </x-slot>
@@ -74,41 +74,41 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
             {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
-            <div class="relative rounded-[2rem] bg-gradient-to-r from-[#56bbf1] via-[#e5eff5] to-[#f4d1c0] p-8 text-[#2c3f61] shadow-xl shadow-[#56bbf1]/10 overflow-hidden border border-white/60">
-                {{-- Abstract Shapes Ornaments --}}
-                <div class="absolute -top-10 -left-10 w-48 h-48 bg-[#0d52a1]/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-[#f9a282]/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
+             <div class="relative rounded-[2rem] bg-elevate-gradient-main p-8 text-elevate-dark shadow-xl shadow-elevate-accent/10 overflow-hidden border border-white/60">
+                 {{-- Abstract Shapes Ornaments --}}
+                <div class="absolute -top-10 -left-10 w-48 h-48 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
+                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
                 <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
                 
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+               <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                     <div>
                         <div class="flex items-center gap-2 mb-2">
-                            <a href="{{ route('cbt.index') }}" class="text-xs font-bold text-[#0d52a1] hover:text-[#2c3f61] transition flex items-center gap-1 bg-white/60 px-3 py-1 rounded-full border border-white backdrop-blur-sm shadow-sm">
+                            <a href="{{ route('cbt.index') }}" class="text-xs font-bold text-elevate-primary hover:text-elevate-dark transition flex items-center gap-1 bg-white/60 px-3 py-1 rounded-full border border-white backdrop-blur-sm shadow-sm">
                                 <i class="ph-bold ph-arrow-left"></i> Dashboard Ujian
                             </a>
-                            <span class="text-[#2c3f61]/30 text-xs">•</span>
-                            <span class="text-[10px] font-bold text-[#2c3f61]/70 uppercase tracking-wider">Gudang Soal</span>
+                            <span class="text-elevate-dark/30 text-xs">•</span>
+                            <span class="text-[10px] font-bold text-elevate-dark/70 uppercase tracking-wider">Gudang Soal</span>
                         </div>
-                        <h1 class="text-4xl font-extrabold tracking-tight leading-none text-[#2c3f61] mb-2">Bank Soal Sekolah</h1>
-                        <p class="text-[#2c3f61]/80 text-sm font-medium">Kelola repositori soal berdasarkan folder mata pelajaran.</p>
+                        <h1 class="text-4xl font-extrabold tracking-tight leading-none text-elevate-dark mb-2">Bank Soal Sekolah</h1>
+                        <p class="text-elevate-dark/80 text-sm font-medium">Kelola repositori soal berdasarkan folder mata pelajaran.</p>
                     </div>
                     
-                    {{-- Tombol Buat Bank Baru --}}
+                     {{-- Tombol Buat Bank Baru --}}
                     <div>
-                        <button @click="createModalOpen = true" class="group flex items-center gap-3 px-6 py-4 bg-white text-[#2c3f61] rounded-2xl font-bold hover:bg-slate-50 transition shadow-lg shadow-[#2c3f61]/10 active:scale-95 border border-white">
-                            <div class="w-8 h-8 rounded-full bg-[#56bbf1]/20 text-[#0d52a1] flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <button @click="createModalOpen = true" class="group flex items-center gap-3 px-6 py-4 bg-white text-elevate-dark rounded-2xl font-bold hover:bg-slate-50 transition shadow-lg shadow-elevate-dark/10 active:scale-95 border border-white">
+                            <div class="w-8 h-8 rounded-full bg-elevate-accent/20 text-elevate-primary flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <i class="ph-bold ph-folder-plus text-xl"></i>
                             </div>
                             <span>Buat Bank Soal</span>
                         </button>
                     </div>
                 </div>
-
+              
                 {{-- Input Pencarian dalam Hero --}}
                 <div class="mt-8 relative max-w-lg">
-                    <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-[#2c3f61]/50 text-lg"></i>
+                    <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-elevate-dark/50 text-lg"></i>
                     <input type="text" x-model="search" placeholder="Cari nama mapel, judul paket soal, atau kode..." 
-                        class="w-full pl-12 pr-4 py-3.5 bg-white/60 border border-white rounded-xl text-[#2c3f61] placeholder-[#2c3f61]/40 focus:bg-white focus:ring-[#56bbf1] focus:border-[#56bbf1] transition font-bold backdrop-blur-md shadow-sm">
+                        class="w-full pl-12 pr-4 py-3.5 bg-white/60 border border-white rounded-xl text-elevate-dark placeholder-elevate-dark/40 focus:bg-white focus:ring-elevate-accent focus:border-elevate-accent transition font-bold backdrop-blur-md shadow-sm">
                 </div>
             </div>
 
@@ -336,9 +336,9 @@
                         <div class="w-24 h-24 bg-[#56bbf1]/10 text-[#0d52a1] rounded-full flex items-center justify-center mx-auto mb-6">
                             <i class="ph-duotone ph-folder-dashed text-5xl"></i>
                         </div>
-                        <h3 class="text-[#2c3f61] font-bold text-xl mb-2">Gudang Soal Masih Kosong</h3>
+                       <h3 class="text-elevate-dark font-bold text-xl mb-2">Gudang Soal Masih Kosong</h3>
                         <p class="text-slate-500 text-sm max-w-sm mx-auto mb-6">Buat bank soal pertama Anda untuk mulai menabung butir soal berdasarkan mata pelajaran.</p>
-                        <button @click="createModalOpen = true" class="inline-flex items-center gap-2 px-6 py-3 bg-[#2c3f61] text-white rounded-xl font-bold hover:bg-[#1c2940] transition shadow-lg shadow-[#2c3f61]/20 text-sm">
+                        <button @click="createModalOpen = true" class="inline-flex items-center gap-2 px-6 py-3 bg-elevate-primary text-white rounded-xl font-bold hover:bg-elevate-dark transition shadow-lg shadow-elevate-primary/20 text-sm">
                             <i class="ph-bold ph-plus"></i> Buat Bank Soal
                         </button>
                     </div>
@@ -347,11 +347,11 @@
                 {{-- State Kosong Pencarian --}}
                 <div x-show="search !== '' && document.querySelectorAll('.bank-card[style*=\'display: none\']').length === document.querySelectorAll('.bank-card').length" 
                      class="col-span-full text-center py-16" style="display: none;">
-                    <div class="w-20 h-20 bg-[#e5eff5] text-[#0d52a1]/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div class="w-20 h-20 bg-elevate-accent/10 text-elevate-primary/50 rounded-full flex items-center justify-center mx-auto mb-4">
                          <i class="ph-duotone ph-magnifying-glass text-4xl"></i>
                     </div>
-                    <p class="text-[#2c3f61] font-bold text-lg mb-1">Hasil Tidak Ditemukan</p>
-                    <p class="text-slate-400 text-sm">Tidak ada folder atau paket soal yang sesuai dengan kata kunci tersebut.</p>
+                    <p class="text-elevate-dark font-bold text-lg mb-1">Hasil Tidak Ditemukan</p>
+                    <p class="text-slate-500 text-sm">Coba gunakan kata kunci pencarian yang lain.</p>
                 </div>
             </div>
         </div>
