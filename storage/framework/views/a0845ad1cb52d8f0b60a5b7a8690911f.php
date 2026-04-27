@@ -9,7 +9,7 @@
         
          <!-- PWA META TAGS -->
         <link rel="manifest" href="<?php echo e(asset('manifest-guru.json')); ?>">
-        <meta name="theme-color" content="#0284c7"> <!-- Sky 600 -->
+        <meta name="theme-color" content="#2c3f61"> <!-- Elevate Navy -->
         <link rel="apple-touch-icon" href="<?php echo e(asset('icons/icon-guru-192x192.png')); ?>">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -21,116 +21,107 @@
         
         <!-- Scripts -->
         <?php echo app('Illuminate\Foundation\Vite')(['resources/css/app.css', 'resources/js/app.js']); ?>        
-        <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
-
-        <!-- Styles untuk Animasi Blob -->
+        <script src="https://unpkg.com/@phosphor-icons/web"></script>
         <style>
-            body { font-family: 'Plus Jakarta Sans', sans-serif; }            
-            .animate-blob { animation: blob 7s infinite; }
-            .animation-delay-2000 { animation-delay: 2s; }
-            .animation-delay-4000 { animation-delay: 4s; }
-            
-            @keyframes blob {
-                0% { transform: translate(0px, 0px) scale(1); }
-                33% { transform: translate(30px, -50px) scale(1.1); }
-                66% { transform: translate(-20px, 20px) scale(0.9); }
-                100% { transform: translate(0px, 0px) scale(1); }
+            body { font-family: 'Plus Jakarta Sans', sans-serif; }
+            /* Efek Grid Halus untuk Background Login */
+            .bg-grid-pattern {
+                background-image: linear-gradient(to right, rgba(86, 187, 241, 0.05) 1px, transparent 1px),
+                                  linear-gradient(to bottom, rgba(86, 187, 241, 0.05) 1px, transparent 1px);
+                background-size: 30px 30px;
             }
         </style>
     </head>
-    <body class="font-sans text-slate-900 antialiased bg-slate-50 relative overflow-x-hidden selection:bg-blue-500 selection:text-white">
+    
+    <!-- PERBAIKAN: Mengganti overflow-hidden menjadi overflow-x-hidden agar bisa di-scroll vertikal di HP -->
+    <body class="font-sans text-[#2c3f61] antialiased min-h-screen bg-[#f8fafc] bg-grid-pattern relative overflow-x-hidden flex flex-col md:flex-row">
         
-        <!-- === BACKGROUND ANIMATION === -->
-       <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900">
-            <div class="absolute top-0 left-0 w-full md:w-[60%] h-full bg-cyan-300/30 rounded-full blur-[100px] -translate-x-1/4 -translate-y-1/4 animate-blob"></div>
-            <div class="absolute bottom-0 right-0 w-full md:w-[50%] h-[80%] bg-indigo-900/40 rounded-full blur-[120px] translate-x-1/4 translate-y-1/4 animate-blob animation-delay-2000"></div>
-            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.05] mix-blend-overlay"></div>
+        <!-- DEKORASI BACKGROUND (Elevate Ornaments) -->
+        <div class="absolute -top-32 -left-32 w-[500px] h-[500px] bg-[#56bbf1]/10 rounded-full blur-[80px] pointer-events-none"></div>
+        <div class="absolute bottom-0 right-0 w-[600px] h-[600px] bg-[#0d52a1]/5 rounded-tl-[100%] pointer-events-none"></div>
+
+        <!-- SPLIT LAYOUT UNTUK DESKTOP -->
+        
+        <!-- BAGIAN KIRI (Branding & Ilustrasi) -->
+        <div class="hidden md:flex md:w-1/2 lg:w-3/5 bg-gradient-to-br from-[#2c3f61] to-[#0d52a1] p-12 text-white flex-col justify-between relative shadow-2xl z-10 rounded-br-[4rem] min-h-screen">
+            <!-- Aksen Garis Elevate -->
+            <div class="absolute top-0 right-0 w-full h-full overflow-hidden pointer-events-none rounded-br-[4rem]">
+                <div class="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-gradient-to-bl from-[#56bbf1]/30 to-transparent rounded-full blur-3xl"></div>
+                <div class="absolute bottom-[10%] left-[10%] w-[30%] h-[30%] bg-gradient-to-tr from-[#f9a282]/20 to-transparent rounded-full blur-3xl"></div>
+            </div>
+
+            <div class="relative z-10">
+                <div class="flex items-center gap-4 mb-16">
+                    <!-- LOGO DESKTOP -->
+                    <img src="<?php echo e(asset('images/logo.png')); ?>" alt="Logo Netila" class="w-14 h-14 rounded-[1rem] object-cover border border-white/30 shadow-sm shrink-0">
+                    <div>
+                        <h1 class="font-black text-xl tracking-tight leading-none">SMP NEGERI 3 LAKBOK</h1>
+                        <p class="text-xs text-[#56bbf1] font-bold uppercase tracking-widest">Sistem Informasi Terpadu</p>
+                    </div>
+                </div>
+
+                <div class="max-w-lg">
+                    <h2 class="text-4xl lg:text-5xl font-black mb-6 leading-tight">
+                        Platform <br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#56bbf1] to-white">E-Presensi & Ujian</span> <br>
+                        Terintegrasi.
+                    </h2>
+                    <p class="text-[#e5eff5] text-lg font-medium leading-relaxed opacity-90">
+                        Selamat datang di SIMADU (Sistem Manajemen Terpadu). Silakan masuk untuk mengelola absensi, jadwal pelajaran, dan bank soal ujian dalam satu pintu.
+                    </p>
+                </div>
+            </div>
+
+            <div class="relative z-10 mt-12 flex items-center gap-4 text-xs font-bold text-[#56bbf1] uppercase tracking-widest">
+                <i class="ph-bold ph-shield-check text-xl"></i> Secure & Protected Environment
+            </div>
         </div>
 
-        <div class="min-h-screen flex items-center justify-center p-4 sm:p-6 relative z-10">
-            <div class="w-full max-w-4xl bg-white rounded-3xl md:rounded-[2rem] shadow-xl md:shadow-2xl shadow-blue-900/10 overflow-hidden flex flex-col md:flex-row border border-white/50 ring-1 ring-slate-100 md:max-h-[90vh]">
-
-                <!-- KOLOM KIRI (BRANDING) -->
-                <div class="w-full md:w-5/12 bg-slate-900 relative flex flex-col justify-between p-6 md:p-10 text-white overflow-hidden shrink-0 transition-all">
-                    
-                    <div class="absolute inset-0 bg-gradient-to-b from-blue-900 via-slate-900 to-slate-900 z-0"></div>
-                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 z-0"></div>
-                    <div class="absolute -top-24 -left-24 w-64 h-64 bg-blue-500 rounded-full mix-blend-overlay filter blur-[60px] opacity-30 animate-pulse"></div>
-
-                    <div class="relative z-10 h-full flex flex-row md:flex-col items-center md:items-start justify-between md:justify-start gap-4">
-                        
-                        <!-- Logo Section -->
-                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-lg shadow-blue-900/20 shrink-0">
-                                <img src="<?php echo e(asset('images/logo.png')); ?>" alt="Logo" class="w-6 h-6 object-contain" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                                <i class="ph-bold ph-buildings text-xl hidden"></i>
-                            </div>
-                            <div class="flex flex-col leading-tight">
-                                <span class="font-extrabold text-white text-lg tracking-tight">SMPN 3 LAKBOK</span>
-                                <span class="text-[10px] font-bold text-cyan-300 uppercase tracking-widest">Unggul & Berkarakter</span>
-                            </div>
-                        </div>
-
-                        <!-- Hero Text & Description -->
-                        <div class="hidden md:flex flex-col my-auto space-y-4">
-                           <div class="inline-flex self-start items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-cyan-100 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
-                                <span class="relative flex h-1.5 w-1.5">
-                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-300 opacity-75"></span>
-                                  <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-400"></span>
-                                </span>
-                               Sistem Informasi Terpadu ( SIMADU )
-                            </div>
-
-                             <h2 class="text-3xl font-extrabold leading-tight tracking-tight text-white">
-                                Kelola Akademik <br>
-                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-200">Lebih Efisien.</span>
-                            </h2>
-                            
-                              <p class="text-blue-100/80 text-sm leading-relaxed">
-                                SIMADU: Platform terintegrasi untuk manajemen presensi, penilaian, dan administrasi kesiswaan.
-                            </p>
-                        </div>
-                        
-                       <div class="hidden md:flex mt-auto pt-6 border-t border-white/20 w-full items-center justify-between text-[10px] text-cyan-100/70 font-medium">
-                            <span>&copy; <?php echo e(date('Y')); ?> Netila.</span>
-                            <a href="/" class="hover:text-white transition-colors flex items-center gap-1 group">
-                                <i class="ph-bold ph-globe"></i> Website
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- KOLOM KANAN (FORM) -->
-                 <div class="w-full md:w-7/12 p-6 sm:p-8 md:p-12 flex flex-col justify-center bg-white relative overflow-y-auto">
-                    <div class="w-full max-w-sm mx-auto">
-                        
-                        <div class="mb-6 md:mb-8">
-                            <h3 class="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">Selamat Datang!</h3>
-                            <p class="text-slate-500 text-sm mt-1 leading-relaxed">
-                                Silakan masuk untuk mengakses dashboard.
-                            </p>
-                        </div>
-
-                        <!-- Slot Form Login -->
-                        <div class="relative z-10">
-                            <?php echo e($slot); ?>
-
-                        </div>
-
-                      <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col items-center gap-4">
-                            <a href="/" class="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-cyan-600 transition-colors group">
-                                <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i>
-                                Kembali ke Halaman Depan
-                            </a>
-                            
-                            <p class="md:hidden text-[10px] text-slate-400 font-medium">
-                                &copy; <?php echo e(date('Y')); ?> SMP Negeri 3 Lakbok.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
+        <!-- BAGIAN KANAN (Form Login) -->
+        <div class="w-full md:w-1/2 lg:w-2/5 flex flex-col justify-center items-center p-6 sm:p-12 relative z-20 min-h-screen">
+            
+            <!-- Mobile Header Logo (Visible only on small screens) -->
+            <div class="md:hidden text-center mb-8 pt-4">
+                <!-- LOGO MOBILE -->
+                <img src="<?php echo e(asset('images/logo.png')); ?>" alt="Logo Netila" class="w-16 h-16 rounded-[1.25rem] object-cover mx-auto mb-4 shadow-sm border border-slate-200">
+                <h1 class="font-black text-2xl text-[#2c3f61] tracking-tight">SIMADU LAKBOK</h1>
+                <p class="text-xs text-[#0d52a1] font-bold uppercase tracking-widest">Portal Guru & Admin</p>
             </div>
+
+            <!-- Login Box -->
+            <div class="w-full max-w-md">
+                <div class="bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl shadow-[#56bbf1]/10 border border-slate-100 p-8 sm:p-10 relative overflow-hidden">
+                    
+                    <!-- Decorative Corner -->
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[#e5eff5] to-transparent rounded-bl-[3rem] pointer-events-none opacity-60"></div>
+
+                    <div class="mb-8 relative z-10">
+                        <h3 class="text-2xl font-black text-[#2c3f61] mb-1">Masuk ke Akun</h3>
+                        <p class="text-sm font-bold text-slate-400">Masukkan kredensial Anda untuk melanjutkan.</p>
+                    </div>
+
+                    <div class="relative z-10">
+                        <?php echo e($slot); ?>
+
+                    </div>
+
+                </div>
+
+                <!-- Footer / Back Link -->
+                <div class="mt-8 text-center pb-6">
+                    <div class="flex flex-col items-center gap-3">
+                        <a href="<?php echo e(url('/')); ?>" class="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-[#0d52a1] transition-colors group">
+                            <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+                            Kembali ke Halaman Depan
+                        </a>
+                        
+                        <p class="md:hidden text-[10px] text-slate-400 font-medium">
+                            &copy; <?php echo e(date('Y')); ?> SMP Negeri 3 Lakbok.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- ============================================== -->

@@ -211,106 +211,106 @@
     </div>
 
     <div class="container">
-        @foreach($students as $index => $student)
+        <?php $__currentLoopData = $students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
             <div class="card">
-                {{-- HEADER --}}
+                
                 <div class="header">
                     <div class="logo-box">
-                        <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Dinas" onerror="this.style.opacity=0">
+                        <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo Dinas" onerror="this.style.opacity=0">
                     </div> 
                     
                     <div class="school-info">
                         <h2>KARTU PESERTA UJIAN</h2>
                         <p>SMP NEGERI 3 LAKBOK</p>
-                        <p class="small">TAHUN AJARAN {{ date('Y') }}/{{ date('Y')+1 }}</p>
+                        <p class="small">TAHUN AJARAN <?php echo e(date('Y')); ?>/<?php echo e(date('Y')+1); ?></p>
                     </div>
 
                     <div class="logo-box">
-                        <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" onerror="this.style.opacity=0">
+                        <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo Sekolah" onerror="this.style.opacity=0">
                     </div>
                 </div>
 
-                {{-- BODY --}}
+                
                 <div class="body">
-                    {{-- FOTO --}}
+                    
                     <div class="photo-area">
-                        @php
+                        <?php
                             $photoPath = null;
                             if (!empty($student->photo_path)) $photoPath = $student->photo_path; 
                             elseif (!empty($student->image)) $photoPath = $student->image;
                             elseif (!empty($student->photo)) $photoPath = $student->photo;
-                        @endphp
+                        ?>
 
                         <div class="photo-placeholder">
                             <div style="font-size: 20px;">👤</div>
                             <div style="font-size: 8px;">FOTO</div>
                         </div>
 
-                        @if($photoPath)
-                            <img src="{{ asset('storage/' . $photoPath) }}" alt="Foto" onerror="this.style.display='none'">
-                        @endif
+                        <?php if($photoPath): ?>
+                            <img src="<?php echo e(asset('storage/' . $photoPath)); ?>" alt="Foto" onerror="this.style.display='none'">
+                        <?php endif; ?>
                     </div>
                     
-                    {{-- BIODATA --}}
+                    
                     <div class="student-info">
                         <table>
                             <tr>
                                 <td class="label">Nama</td>
                                 <td class="sep">:</td>
-                                <td><b>{{ strtoupper($student->name) }}</b></td>
+                                <td><b><?php echo e(strtoupper($student->name)); ?></b></td>
                             </tr>
                             <tr>
                                 <td class="label">NISN</td>
                                 <td class="sep">:</td>
-                                <td>{{ $student->nisn ?? $student->nis ?? '-' }}</td>
+                                <td><?php echo e($student->nisn ?? $student->nis ?? '-'); ?></td>
                             </tr>
                             <tr>
                                 <td class="label">Kelas</td>
                                 <td class="sep">:</td>
-                                <td>{{ $student->schoolClass->name ?? '-' }}</td>
+                                <td><?php echo e($student->schoolClass->name ?? '-'); ?></td>
                             </tr>
                             <tr>
                                 <td class="label">Username</td>
                                 <td class="sep">:</td>
-                                <td><b>{{ $student->student_id }}</b></td>
+                                <td><b><?php echo e($student->student_id); ?></b></td>
                             </tr>
                             <tr>
                                 <td class="label">Password</td>
                                 <td class="sep">:</td>
-                                <td><b>{{ $student->student_id }}</b></td>
+                                <td><b><?php echo e($student->student_id); ?></b></td>
                             </tr>
                         </table>
                     </div>
                 </div>
 
-                {{-- SEPARATOR --}}
+                
                 <div class="separator-line"></div>
 
-                {{-- FOOTER --}}
+                
                 <div class="footer">
-                    {{-- KIRI: QR CODE --}}
+                    
                     <div class="qr-area">
-                        <div id="qr-{{ $index }}" class="qr-code"></div>
+                        <div id="qr-<?php echo e($index); ?>" class="qr-code"></div>
                     </div>
 
-                    {{-- KANAN: TANDA TANGAN --}}
+                    
                     <div class="signature">
-                        <div class="date">Lakbok, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</div>
+                        <div class="date">Lakbok, <?php echo e(\Carbon\Carbon::now()->translatedFormat('d F Y')); ?></div>
                         <div class="role">Kepala Sekolah</div>
                             
-                        {{-- JARAK TANDA TANGAN --}}
+                        
                         <div class="space"></div>
 
-                        {{-- NAMA & NIP (Silakan Edit Di Sini) --}}
+                        
                         <div class="name">Tantan Sutandi N.,S.Pd.,M.Pd</div>
-                        <div class="nip">NIP. 19820928 201101 1 002</div>
+                        <div class="nip">NIP. 19820000 000000 1 000</div>
                     </div>
                 </div>
 
-                {{-- Generate QR --}}
+                
                 <script>
-                    new QRCode(document.getElementById("qr-{{ $index }}"), {
-                        text: "{{ $student->login_url ?? 'NoData' }}",
+                    new QRCode(document.getElementById("qr-<?php echo e($index); ?>"), {
+                        text: "<?php echo e($student->login_url ?? 'NoData'); ?>",
                         width: 55,
                         height: 55,
                         colorDark : "#000000",
@@ -319,8 +319,8 @@
                     });
                 </script>
             </div>
-        @endforeach
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </div>
 
 </body>
-</html>
+</html><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/cbt/cards/print.blade.php ENDPATH**/ ?>
