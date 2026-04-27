@@ -1,5 +1,5 @@
 <x-app-layout>
-   {{-- TAMBAHAN WAJIB: Kumpulan CDN Script agar semua fitur UI, Modal, dan Ikon berfungsi --}}
+    {{-- TAMBAHAN WAJIB: Kumpulan CDN Script agar semua fitur UI, Modal, dan Ikon berfungsi --}}
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -13,7 +13,7 @@
     <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-             {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
+            {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
             <div class="relative rounded-[2rem] bg-elevate-gradient-main p-8 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/10 overflow-hidden border border-white/60">
                 {{-- Abstract Shapes Ornaments --}}
                 <div class="absolute -top-10 -left-10 w-48 h-48 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
@@ -54,18 +54,18 @@
                     {{-- WRAPPER STICKY --}}
                     <div class="sticky top-24 space-y-6">
 
-                        <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
-                            {{-- Aksen Header Biru Tua --}}
-                            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-900 to-blue-700"></div>
+                        <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden relative group hover:border-elevate-accent/30 transition-colors">
+                            {{-- Aksen Header Elevate --}}
+                            <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-elevate-accent to-elevate-primary"></div>
                             
                             <div class="p-6 md:p-8">
-                                <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-100">
-                                    <div class="w-12 h-12 bg-blue-900 text-white rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-blue-900/20">
+                                <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-50">
+                                    <div class="w-12 h-12 bg-elevate-accent/10 text-elevate-primary rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-elevate-accent/20">
                                         <i class="ph-duotone ph-user-plus"></i>
                                     </div>
                                     <div>
-                                        <h3 class="text-lg font-black text-slate-800 leading-none">Registrasi Cepat</h3>
-                                        <p class="text-xs text-blue-600 font-bold mt-1 uppercase tracking-wider">Input Siswa Baru</p>
+                                        <h3 class="text-lg font-black text-elevate-dark leading-none">Registrasi Cepat</h3>
+                                        <p class="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wider">Input Siswa Baru</p>
                                     </div>
                                 </div>
 
@@ -75,22 +75,22 @@
                                     <div>
                                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">NIS / NISN <span class="text-rose-500">*</span></label>
                                         <div class="relative">
-                                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-900/50">
+                                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                                                 <i class="ph-bold ph-identification-card"></i>
                                             </div>
                                             <input type="text" name="student_id" value="{{ old('student_id') }}" required placeholder="Nomor Induk"
-                                                class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 font-bold text-slate-700 transition-all placeholder:font-normal">
+                                                class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all placeholder:font-normal">
                                         </div>
                                     </div>
 
                                     <div>
                                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Nama Lengkap <span class="text-rose-500">*</span></label>
                                         <div class="relative">
-                                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-blue-900/50">
+                                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
                                                 <i class="ph-bold ph-user"></i>
                                             </div>
                                             <input type="text" name="name" value="{{ old('name') }}" required placeholder="Nama Sesuai Ijazah"
-                                                class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 font-bold text-slate-700 transition-all placeholder:font-normal">
+                                                class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all placeholder:font-normal">
                                         </div>
                                     </div>
 
@@ -98,7 +98,7 @@
                                         <div>
                                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Kelas <span class="text-rose-500">*</span></label>
                                             <div class="relative">
-                                                <select name="class_id" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 font-bold text-slate-700 appearance-none px-4">
+                                                <select name="class_id" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark appearance-none px-4">
                                                     <option value="">Pilih</option>
                                                     @foreach ($classes as $class)
                                                         <option value="{{ $class->id }}" {{ old('class_id') == $class->id ? 'selected' : '' }}>
@@ -112,7 +112,7 @@
                                         <div>
                                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Gender <span class="text-rose-500">*</span></label>
                                             <div class="relative">
-                                                <select name="gender" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 font-bold text-slate-700 appearance-none px-4">
+                                                <select name="gender" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark appearance-none px-4">
                                                     <option value="L">Laki-laki</option>
                                                     <option value="P">Perempuan</option>
                                                 </select>
@@ -135,7 +135,7 @@
                                             </div>
                                             <input type="file" name="photo" accept="image/*" 
                                                 @change="const file = $event.target.files[0]; const reader = new FileReader(); reader.onload = (e) => { photoPreview = e.target.result }; reader.readAsDataURL(file)"
-                                                class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer"/>
+                                                class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-accent/20 file:text-elevate-primary hover:file:bg-elevate-accent/30 cursor-pointer"/>
                                         </div>
                                     </div>
 
@@ -146,7 +146,7 @@
                                             <div class="relative">
                                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-scan"></i></div>
                                                 <input type="text" name="rfid_id" value="{{ old('rfid_id') }}" placeholder="Scan..."
-                                                    class="w-full pl-9 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 font-mono font-bold text-slate-700">
+                                                    class="w-full pl-9 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-mono font-bold text-elevate-dark">
                                             </div>
                                         </div>
                                         <div>
@@ -154,12 +154,12 @@
                                             <div class="relative">
                                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-emerald-500"><i class="ph-bold ph-whatsapp-logo"></i></div>
                                                 <input type="text" name="parent_wa_number" value="{{ old('parent_wa_number') }}" placeholder="628..."
-                                                    class="w-full pl-9 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 font-mono font-bold text-slate-700">
+                                                    class="w-full pl-9 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-mono font-bold text-elevate-dark">
                                             </div>
                                         </div>
                                     </div>
 
-                                    <button type="submit" class="w-full py-3.5 bg-blue-900 text-white font-bold rounded-2xl hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2 transform active:scale-95 mt-4 group">
+                                    <button type="submit" class="w-full py-3.5 bg-elevate-dark text-white font-bold rounded-2xl hover:bg-elevate-primary transition-all shadow-lg shadow-elevate-dark/30 flex items-center justify-center gap-2 transform active:scale-95 mt-4 group">
                                         <i class="ph-bold ph-floppy-disk text-lg group-hover:scale-110 transition-transform"></i>
                                         <span>Simpan Data</span>
                                     </button>
@@ -167,6 +167,7 @@
                             </div>
                         </div>
 
+                        {{-- IMPORT EXCEL (Tetap menggunakan nuansa Emerald karena identik dengan excel/sukses) --}}
                         <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-[2.5rem] border border-emerald-100 p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                             <div class="relative z-10">
                                 <h3 class="text-sm font-black text-emerald-900 mb-1 flex items-center gap-2">
@@ -200,8 +201,8 @@
                         
                         {{-- Toolbar --}}
                         <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col xl:flex-row flex-wrap gap-4 justify-between items-center">
-                            <h3 class="font-black text-slate-800 text-lg flex items-center gap-2 w-full xl:w-auto shrink-0">
-                                <i class="ph-fill ph-users text-blue-900"></i> Daftar Siswa
+                            <h3 class="font-black text-elevate-dark text-lg flex items-center gap-2 w-full xl:w-auto shrink-0">
+                                <i class="ph-fill ph-users text-elevate-primary"></i> Daftar Siswa
                             </h3>
 
                             <div class="flex flex-col sm:flex-row flex-wrap gap-3 w-full xl:w-auto justify-start xl:justify-end items-center">
@@ -209,10 +210,10 @@
                                     <div class="relative flex-1 sm:w-48">
                                         <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
                                         <input type="text" name="search" placeholder="Cari nama / NISN..." value="{{ request('search') }}"
-                                               class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-white focus:border-blue-600 focus:ring-blue-600 text-xs font-bold text-slate-700 shadow-sm">
+                                               class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-white focus:border-elevate-primary focus:ring-elevate-primary text-xs font-bold text-elevate-dark shadow-sm">
                                     </div>
                                     
-                                    <select name="filter_class_id" onchange="this.form.submit()" class="rounded-xl border-slate-200 bg-white focus:border-blue-600 focus:ring-blue-600 text-xs font-bold text-slate-700 py-2.5 px-3 shadow-sm cursor-pointer w-full sm:w-32">
+                                    <select name="filter_class_id" onchange="this.form.submit()" class="rounded-xl border-slate-200 bg-white focus:border-elevate-primary focus:ring-elevate-primary text-xs font-bold text-elevate-dark py-2.5 px-3 shadow-sm cursor-pointer w-full sm:w-32">
                                         <option value="">Semua Kelas</option>
                                         @foreach ($classes as $class)
                                             <option value="{{ $class->id }}" {{ request('filter_class_id') == $class->id ? 'selected' : '' }}>
@@ -221,7 +222,7 @@
                                         @endforeach
                                     </select>
 
-                                    <select name="filter_status" onchange="this.form.submit()" class="rounded-xl border-slate-200 bg-white focus:border-blue-600 focus:ring-blue-600 text-xs font-bold text-slate-700 py-2.5 px-3 shadow-sm cursor-pointer w-full sm:w-36">
+                                    <select name="filter_status" onchange="this.form.submit()" class="rounded-xl border-slate-200 bg-white focus:border-elevate-primary focus:ring-elevate-primary text-xs font-bold text-elevate-dark py-2.5 px-3 shadow-sm cursor-pointer w-full sm:w-36">
                                         <option value="">Semua Status</option>
                                         <option value="lengkap" {{ request('filter_status') == 'lengkap' ? 'selected' : '' }}>Sudah Lengkap</option>
                                         <option value="belum_lengkap" {{ request('filter_status') == 'belum_lengkap' ? 'selected' : '' }}>Belum Lengkap</option>
@@ -237,11 +238,11 @@
                                         <i class="ph-bold ph-trash text-lg"></i> Hapus (<span id="delete-selected-count">0</span>)
                                     </button>
 
-                                    <button type="button" id="btn-print-selected" onclick="printSelectedCards()" class="hidden flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-purple-50 border border-purple-100 text-purple-700 rounded-xl hover:bg-purple-100 transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap">
+                                    <button type="button" id="btn-print-selected" onclick="printSelectedCards()" class="hidden flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-elevate-accent/10 border border-elevate-accent/20 text-elevate-primary rounded-xl hover:bg-elevate-accent/20 transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap">
                                         <i class="ph-bold ph-check-square-offset text-lg"></i> Cetak (<span id="print-selected-count">0</span>)
                                     </button>
                                     
-                                    <button type="button" onclick="printBatchCards()" class="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-blue-50 border border-blue-100 text-blue-700 rounded-xl hover:bg-blue-100 transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap">
+                                    <button type="button" onclick="printBatchCards()" class="flex-1 sm:flex-none flex items-center justify-center px-4 py-2.5 bg-elevate-dark border border-elevate-dark text-white rounded-xl hover:bg-elevate-primary transition-all shadow-sm font-bold text-xs gap-2 whitespace-nowrap">
                                         <i class="ph-bold ph-printer text-lg"></i> Cetak Kelas
                                     </button>
                                 </div>
@@ -251,31 +252,31 @@
                         {{-- Table --}}
                         <div class="flex-1 overflow-x-auto custom-scrollbar relative pb-12">
                             <table class="w-full text-left border-collapse">
-                                <thead class="bg-blue-900 text-blue-100 border-b border-blue-800 sticky top-0 z-20 shadow-sm">
+                                <thead class="bg-slate-50/50 border-b border-slate-100 sticky top-0 z-20">
                                     <tr>
                                         <th class="px-6 py-4 text-center w-10">
-                                            <input type="checkbox" id="selectAll" class="rounded border-blue-700 bg-blue-800 text-blue-500 focus:ring-blue-500 cursor-pointer">
+                                            <input type="checkbox" id="selectAll" class="rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary cursor-pointer">
                                         </th>
-                                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider w-1/3">Identitas Siswa</th>
-                                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider w-1/6">Kelas</th>
-                                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider w-1/6 text-center">Status Data</th>
-                                        <th class="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider w-1/6">Aksi</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider w-1/3">Identitas Siswa</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider w-1/6">Kelas</th>
+                                        <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider w-1/6 text-center">Status Data</th>
+                                        <th class="px-6 py-4 text-right text-xs font-bold text-slate-400 uppercase tracking-wider w-1/6">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-50">
                                     @forelse ($students as $student)
-                                        <tr class="hover:bg-blue-50/50 transition-colors group">
+                                        <tr class="hover:bg-slate-50/80 transition-colors group">
                                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                                <input type="checkbox" value="{{ $student->id }}" class="student-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-600 cursor-pointer">
+                                                <input type="checkbox" value="{{ $student->id }}" class="student-checkbox rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary cursor-pointer">
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center gap-4">
                                                     <div class="relative shrink-0">
-                                                        <div class="w-12 h-12 rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-white flex items-center justify-center group-hover:border-blue-200 transition-colors">
+                                                        <div class="w-12 h-12 rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-white flex items-center justify-center group-hover:border-elevate-accent/50 transition-colors">
                                                             @if($student->photo_path)
                                                                 <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->name }}" class="w-full h-full object-cover" loading="lazy">
                                                             @else
-                                                                <div class="font-black text-sm {{ $student->gender == 'L' ? 'text-blue-600' : 'text-pink-500' }}">{{ substr($student->name, 0, 2) }}</div>
+                                                                <div class="font-black text-sm {{ $student->gender == 'L' ? 'text-elevate-primary' : 'text-pink-500' }}">{{ substr($student->name, 0, 2) }}</div>
                                                             @endif
                                                         </div>
                                                         @if($student->rfid_id)
@@ -286,16 +287,16 @@
                                                     </div>
 
                                                     <div>
-                                                        <div class="font-bold text-slate-800 text-sm group-hover:text-blue-700 transition-colors">{{ $student->name }}</div>
+                                                        <div class="font-bold text-elevate-dark text-sm group-hover:text-elevate-primary transition-colors">{{ $student->name }}</div>
                                                         <div class="flex items-center gap-2 mt-1">
                                                             <span class="text-[10px] text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{{ $student->student_id }}</span>
-                                                            <span class="text-[10px] font-bold {{ $student->gender == 'L' ? 'text-blue-500' : 'text-pink-500' }}">{{ $student->gender }}</span>
+                                                            <span class="text-[10px] font-bold {{ $student->gender == 'L' ? 'text-elevate-primary' : 'text-pink-500' }}">{{ $student->gender }}</span>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <span class="inline-flex px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-50 text-slate-600 border border-slate-100 group-hover:bg-white group-hover:border-blue-100 transition-colors">
+                                                <span class="inline-flex px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-50 text-slate-600 border border-slate-100 group-hover:bg-white group-hover:border-elevate-accent/30 transition-colors">
                                                     {{ $student->schoolClass->name ?? 'Unassigned' }}
                                                 </span>
                                             </td>
@@ -313,11 +314,11 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right">
                                                 <div class="flex items-center justify-end gap-1">
-                                                    <a href="{{ route('students.show', $student->id) }}" target="_blank" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 flex items-center justify-center transition-all shadow-sm" title="Cetak Buku Induk">
+                                                    <a href="{{ route('students.show', $student->id) }}" target="_blank" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-elevate-primary hover:border-elevate-primary/30 hover:bg-elevate-accent/10 flex items-center justify-center transition-all shadow-sm" title="Cetak Buku Induk">
                                                         <i class="ph-bold ph-printer text-lg"></i>
                                                     </a>
 
-                                                    <a href="{{ route('students.card', $student->id) }}" target="_blank" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-purple-600 hover:border-purple-200 hover:bg-purple-50 flex items-center justify-center transition-all shadow-sm" title="Cetak Kartu OSIS">
+                                                    <a href="{{ route('students.card', $student->id) }}" target="_blank" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-elevate-primary hover:border-elevate-primary/30 hover:bg-elevate-accent/10 flex items-center justify-center transition-all shadow-sm" title="Cetak Kartu OSIS">
                                                         <i class="ph-bold ph-identification-card text-lg"></i>
                                                     </a>
 
@@ -325,16 +326,14 @@
                                                         <i class="ph-bold ph-pencil-simple text-lg"></i>
                                                     </a>
                                                     
-                                                    {{-- PERBAIKAN: Memindahkan @click.outside ke parent div agar menu tidak cepat tertutup --}}
-                                                    <div x-data="{ open: false }" @click.outside="open = false" class="relative">
-                                                        <button @click="open = !open" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-blue-900 hover:border-blue-300 hover:bg-blue-50 flex items-center justify-center transition-all shadow-sm">
+                                                    <div x-data="{ open: false }" class="relative">
+                                                        <button @click="open = !open" @click.outside="open = false" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-elevate-dark hover:border-elevate-primary/30 hover:bg-slate-50 flex items-center justify-center transition-all shadow-sm">
                                                             <i class="ph-bold ph-dots-three-vertical text-lg"></i>
                                                         </button>
                                                         
                                                         <div x-show="open" x-transition.origin.top.right class="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden py-1 ring-1 ring-black/5" style="display: none;">
                                                             
-                                                            {{-- Tambahkan @click="open = false" agar menu otomatis nutup saat opsi dipilih --}}
-                                                            <button type="button" @click="open = false" class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-2 open-absen-modal transition-colors"
+                                                            <button type="button" @click="open = false" class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-elevate-primary flex items-center gap-2 open-absen-modal transition-colors"
                                                                 data-student-id="{{ $student->id }}" data-student-name="{{ $student->name }}">
                                                                 <i class="ph-bold ph-user-check text-base"></i> Input Absen
                                                             </button>
@@ -380,9 +379,9 @@
     </div>
 
     {{-- MODAL ABSEN --}}
-    <div id="absen-manual-modal" class="fixed inset-0 bg-blue-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-opacity">
+    <div id="absen-manual-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-opacity">
         <div class="relative top-20 mx-auto p-0 border-0 w-full max-w-md shadow-2xl rounded-[2rem] bg-white overflow-hidden">
-            <div class="bg-blue-900 px-6 py-4 flex justify-between items-center">
+            <div class="bg-elevate-dark px-6 py-4 flex justify-between items-center">
                 <h3 class="font-bold text-white text-lg">Input Absensi Manual</h3>
                 <button type="button" id="absen-modal-close" class="text-white/70 hover:text-white text-2xl leading-none">&times;</button>
             </div>
@@ -393,17 +392,17 @@
                 
                 <div class="text-center mb-2">
                     <p class="text-xs text-slate-400 uppercase font-bold tracking-wide">Siswa</p>
-                    <h4 id="absen-modal-student-name" class="text-xl font-black text-slate-800">Nama Siswa</h4>
+                    <h4 id="absen-modal-student-name" class="text-xl font-black text-elevate-dark">Nama Siswa</h4>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Tanggal</label>
-                    <input type="text" name="date" value="{{ date('Y-m-d') }}" class="datepicker w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-blue-600 focus:border-blue-600 font-bold text-slate-700" placeholder="dd/mm/yyyy">
+                    <input type="text" name="date" value="{{ date('Y-m-d') }}" class="datepicker w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary font-bold text-elevate-dark" placeholder="dd/mm/yyyy">
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Status Kehadiran</label>
-                    <select name="status" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-blue-600 focus:border-blue-600 font-bold text-slate-700">
+                    <select name="status" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary font-bold text-elevate-dark">
                         <option value="Hadir">Hadir (Manual)</option>
                         <option value="Sakit">Sakit</option>
                         <option value="Izin">Izin</option>
@@ -415,38 +414,38 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Masuk</label>
-                        <input type="time" name="time_in" value="{{ now()->format('H:i') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-blue-600 focus:border-blue-600 text-center font-mono font-bold text-slate-700">
+                        <input type="time" name="time_in" value="{{ now()->format('H:i') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary text-center font-mono font-bold text-elevate-dark">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Pulang</label>
-                        <input type="time" name="time_out" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-blue-600 focus:border-blue-600 text-center font-mono font-bold text-slate-700">
+                        <input type="time" name="time_out" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary text-center font-mono font-bold text-elevate-dark">
                     </div>
                 </div>
                 
                 <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Keterangan (Opsional)</label>
-                    <textarea name="notes" rows="2" placeholder="Contoh: Datang terlambat karena ban bocor..." class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-blue-600 focus:border-blue-600 text-sm font-medium"></textarea>
+                    <textarea name="notes" rows="2" placeholder="Contoh: Datang terlambat karena ban bocor..." class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-elevate-primary focus:border-elevate-primary text-sm font-medium text-elevate-dark"></textarea>
                 </div>
 
-                <button type="submit" class="w-full py-3 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 shadow-lg shadow-blue-900/30 transition-transform active:scale-95">Simpan Data</button>
+                <button type="submit" class="w-full py-3 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/30 transition-transform active:scale-95">Simpan Data</button>
             </form>
         </div>
     </div>
 
     {{-- MODAL QR CODE LOKAL --}}
-    <div id="qr-code-modal" class="fixed inset-0 bg-blue-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-opacity">
+    <div id="qr-code-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-50 transition-opacity">
         <div class="relative top-20 mx-auto p-0 border-0 w-full max-w-sm shadow-2xl rounded-[2rem] bg-white overflow-hidden text-center p-8">
-            <h3 class="text-lg font-black text-slate-800 mb-1" id="qr-modal-student-name">QR Code</h3>
+            <h3 class="text-lg font-black text-elevate-dark mb-1" id="qr-modal-student-name">QR Code</h3>
             <p class="text-xs text-slate-400 font-bold uppercase mb-6">Identitas Digital Siswa</p>
-            <div class="bg-white p-4 border-2 border-dashed border-blue-200 rounded-2xl inline-block mb-6 relative group">
-                <div class="absolute inset-0 bg-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl pointer-events-none">
-                    <i class="ph-bold ph-download-simple text-blue-600 text-2xl"></i>
+            <div class="bg-white p-4 border-2 border-dashed border-elevate-accent/50 rounded-2xl inline-block mb-6 relative group">
+                <div class="absolute inset-0 bg-elevate-accent/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl pointer-events-none">
+                    <i class="ph-bold ph-download-simple text-elevate-primary text-2xl"></i>
                 </div>
                 <canvas id="qr-modal-canvas" class="mx-auto"></canvas>
             </div>
             <div class="flex gap-3 justify-center">
                 <button type="button" id="qr-modal-close" class="px-6 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 text-sm transition-colors">Tutup</button>
-                <a id="qr-modal-download" href="#" download="qrcode.png" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-500/30 text-sm transition-transform active:scale-95 flex items-center gap-2">
+                <a id="qr-modal-download" href="#" download="qrcode.png" class="px-6 py-2.5 bg-elevate-primary text-white font-bold rounded-xl hover:bg-elevate-dark shadow-lg shadow-elevate-primary/30 text-sm transition-transform active:scale-95 flex items-center gap-2">
                     <i class="ph-bold ph-download-simple"></i> Unduh
                 </a>
             </div>
@@ -479,9 +478,10 @@
                     icon: 'success',
                     title: 'Berhasil!',
                     text: '{{ session('success') }}',
-                    confirmButtonColor: '#1e3a8a',
+                    confirmButtonColor: '#3b5889',
                     timer: 3000,
-                    timerProgressBar: true
+                    timerProgressBar: true,
+                    customClass: { popup: 'rounded-[2rem]' }
                 });
             @endif
 
@@ -491,6 +491,7 @@
                     title: 'Gagal!',
                     text: '{{ session('error') }}',
                     confirmButtonColor: '#e11d48',
+                    customClass: { popup: 'rounded-[2rem]' }
                 });
             @endif
 
@@ -532,10 +533,16 @@
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#e11d48',
-                        cancelButtonColor: '#64748b',
+                        cancelButtonColor: '#94a3b8',
                         confirmButtonText: 'Ya, Hapus!',
                         cancelButtonText: 'Batal',
-                        reverseButtons: true
+                        reverseButtons: true,
+                        customClass: {
+                            popup: 'rounded-[2.5rem] font-sans border-0 shadow-2xl',
+                            confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
+                            cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                        },
+                        buttonsStyling: false
                     }).then((result) => {
                         if (result.isConfirmed) {
                             form.submit();
@@ -572,7 +579,7 @@
                             value: id,
                             size: 200,
                             background: 'white',
-                            foreground: '#1e3a8a',
+                            foreground: '#032b5b', // elevate-dark
                             level: 'H'
                         });
 
@@ -588,7 +595,6 @@
             document.getElementById('absen-modal-close').onclick = () => absenModal.classList.add('hidden');
             document.getElementById('qr-modal-close').onclick = () => qrModal.classList.add('hidden');
             
-            // Perbaikan menutup modal dengan aman jika di-klik di luar area
             window.addEventListener('click', function(event) {
                 if (event.target == absenModal) absenModal.classList.add('hidden');
                 if (event.target == qrModal) qrModal.classList.add('hidden');
@@ -639,8 +645,8 @@
                     icon: 'warning',
                     title: 'Pilih Kelas Dulu!',
                     text: 'Silakan filter/pilih kelas di kotak pencarian sebelum mencetak kartu massal.',
-                    confirmButtonColor: '#1e3a8a',
-                    customClass: { popup: 'rounded-3xl' }
+                    confirmButtonColor: '#3b5889',
+                    customClass: { popup: 'rounded-[2rem]' }
                 });
                 return;
             }
@@ -654,7 +660,7 @@
             const selectedIds = Array.from(checkboxes).map(cb => cb.value).join(',');
             window.open(`/students/print-batch?ids=${selectedIds}`, '_blank');
         }
-
+        
         // FUNGSI JS HAPUS SATUAN (BARU)
         function confirmDelete(button) {
             const id = button.getAttribute('data-id');
@@ -677,7 +683,6 @@
                 }
             });
         }
-
         // FUNGSI JS HAPUS TERPILIH (MASSAL)
         function deleteSelected() {
             const checkboxes = document.querySelectorAll('.student-checkbox:checked');
@@ -692,10 +697,16 @@
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#e11d48',
-                cancelButtonColor: '#64748b',
+                cancelButtonColor: '#94a3b8',
                 confirmButtonText: 'Ya, Hapus Semua!',
                 cancelButtonText: 'Batal',
-                reverseButtons: true
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-[2.5rem] font-sans border-0 shadow-2xl',
+                    confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
+                    cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                },
+                buttonsStyling: false
             }).then((result) => {
                 if (result.isConfirmed) {
                     document.getElementById('delete-batch-ids').value = selectedIds;

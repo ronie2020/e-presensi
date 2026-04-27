@@ -1,16 +1,25 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- Tombol Kembali --}}
-            <a href="{{ route('letters.incoming.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-elevate-primary mb-6 transition-colors group">
+            
+            <a href="<?php echo e(route('letters.incoming.index')); ?>" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-elevate-primary mb-6 transition-colors group">
                 <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar
             </a>
 
-            {{-- Card Container --}}
+            
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
                 
-                {{-- Card Header Microsoft Elevate --}}
+                
                 <div class="bg-gradient-to-r from-elevate-dark to-elevate-primary p-8 text-white relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-elevate-accent/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
                     <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
@@ -22,24 +31,24 @@
                     <p class="text-elevate-accent text-sm font-medium relative z-10 mt-1">Isi detail surat dinas yang diterima sekolah.</p>
                 </div>
 
-                {{-- Form Content --}}
+                
                 <div class="p-8">
-                    @if ($errors->any())
+                    <?php if($errors->any()): ?>
                         <div class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl text-sm flex items-start gap-3 shadow-sm">
                             <i class="ph-fill ph-warning-circle text-xl shrink-0 mt-0.5"></i>
                             <div>
                                 <strong class="font-bold block mb-1">Periksa kembali inputan Anda!</strong>
                                 <ul class="list-disc list-inside font-medium">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
+                                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($error); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </ul>
                             </div>
                         </div>
-                    @endif
+                    <?php endif; ?>
 
-                    <form action="{{ route('letters.incoming.store') }}" method="POST" enctype="multipart/form-data" class="space-y-8">
-                        @csrf
+                    <form action="<?php echo e(route('letters.incoming.store')); ?>" method="POST" enctype="multipart/form-data" class="space-y-8">
+                        <?php echo csrf_field(); ?>
 
                         <!-- SECTION 1: IDENTITAS SURAT -->
                         <div class="p-6 bg-elevate-accent/5 rounded-[2rem] border border-elevate-accent/20 relative group hover:border-elevate-accent/40 transition-colors">
@@ -50,27 +59,27 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nomor Agenda</label>
-                                    <input type="text" name="nomor_agenda" value="{{ old('nomor_agenda') }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="nomor_agenda" value="<?php echo e(old('nomor_agenda')); ?>" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Sifat Surat</label>
                                     <div class="relative">
                                         <select name="sifat_surat" required class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-bold text-elevate-dark appearance-none transition-all cursor-pointer">
-                                            <option value="Biasa" {{ old('sifat_surat') == 'Biasa' ? 'selected' : '' }}>Biasa</option>
-                                            <option value="Penting" {{ old('sifat_surat') == 'Penting' ? 'selected' : '' }}>Penting</option>
-                                            <option value="Segera" {{ old('sifat_surat') == 'Segera' ? 'selected' : '' }}>Segera</option>
-                                            <option value="Rahasia" {{ old('sifat_surat') == 'Rahasia' ? 'selected' : '' }}>Rahasia</option>
+                                            <option value="Biasa" <?php echo e(old('sifat_surat') == 'Biasa' ? 'selected' : ''); ?>>Biasa</option>
+                                            <option value="Penting" <?php echo e(old('sifat_surat') == 'Penting' ? 'selected' : ''); ?>>Penting</option>
+                                            <option value="Segera" <?php echo e(old('sifat_surat') == 'Segera' ? 'selected' : ''); ?>>Segera</option>
+                                            <option value="Rahasia" <?php echo e(old('sifat_surat') == 'Rahasia' ? 'selected' : ''); ?>>Rahasia</option>
                                         </select>
                                         <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400"><i class="ph-bold ph-caret-down"></i></div>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nomor Surat Asli</label>
-                                    <input type="text" name="nomor_surat" value="{{ old('nomor_surat') }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="nomor_surat" value="<?php echo e(old('nomor_surat')); ?>" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Asal / Pengirim Surat</label>
-                                    <input type="text" name="asal_surat" value="{{ old('asal_surat') }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="text" name="asal_surat" value="<?php echo e(old('asal_surat')); ?>" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                             </div>
                         </div>
@@ -84,15 +93,15 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tanggal Surat</label>
-                                    <input type="date" name="tgl_surat" value="{{ old('tgl_surat') }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="date" name="tgl_surat" value="<?php echo e(old('tgl_surat')); ?>" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tanggal Diterima</label>
-                                    <input type="date" name="tgl_diterima" value="{{ old('tgl_diterima', date('Y-m-d')) }}" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
+                                    <input type="date" name="tgl_diterima" value="<?php echo e(old('tgl_diterima', date('Y-m-d'))); ?>" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-bold text-elevate-dark transition-all">
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Perihal / Maksud Surat</label>
-                                    <textarea name="perihal" rows="3" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-medium text-elevate-dark transition-all">{{ old('perihal') }}</textarea>
+                                    <textarea name="perihal" rows="3" required class="w-full px-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 font-medium text-elevate-dark transition-all"><?php echo e(old('perihal')); ?></textarea>
                                 </div>
                             </div>
                         </div>
@@ -116,9 +125,9 @@
                             </div>
                         </div>
 
-                        {{-- Action Buttons --}}
+                        
                         <div class="pt-6 mt-4 border-t border-slate-100 flex items-center justify-end gap-4">
-                            <a href="{{ route('letters.incoming.index') }}" class="px-6 py-3.5 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-700 transition-colors">
+                            <a href="<?php echo e(route('letters.incoming.index')); ?>" class="px-6 py-3.5 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-700 transition-colors">
                                 Batal
                             </a>
                             <button type="submit" class="px-8 py-3.5 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all transform active:scale-95 flex items-center gap-2 group">
@@ -131,4 +140,13 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/letters/incoming/create.blade.php ENDPATH**/ ?>

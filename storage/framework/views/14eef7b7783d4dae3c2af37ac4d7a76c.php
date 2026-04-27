@@ -1,15 +1,24 @@
-<x-app-layout>
-    {{-- Alpine.js & SweetAlert2 --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- INJEKSI NILAI OLD() KE ALPINE JS --}}
-    <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen" x-data="promotionApp('{{ old('academic_year') }}', '{{ old('target_action') }}')">
+    
+    <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen" x-data="promotionApp('<?php echo e(old('academic_year')); ?>', '<?php echo e(old('target_action')); ?>')">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
+            
             <div class="relative rounded-[2rem] bg-elevate-gradient-main p-8 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/10 overflow-hidden border border-white/60">
-                {{-- Abstract Shapes Ornaments --}}
+                
                 <div class="absolute -top-10 -left-10 w-48 h-48 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
                 <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
                 <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
@@ -27,27 +36,27 @@
                 </div>
             </div>
 
-            {{-- ERROR VALIDATION DISPLAY --}}
-            @if($errors->any())
+            
+            <?php if($errors->any()): ?>
                 <div class="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-[1.5rem] flex items-start gap-3 shadow-sm animate-enter">
                     <i class="ph-fill ph-warning-circle text-xl mt-0.5"></i>
                     <div>
                         <p class="font-bold text-sm mb-1">Gagal memproses permintaan:</p>
                         <ul class="list-disc list-inside text-xs font-medium space-y-1">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
+                            <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><?php echo e($error); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </ul>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 
-                {{-- KOLOM KIRI: FILTER KELAS ASAL --}}
+                
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 sticky top-24">
-                        <form method="GET" action="{{ route('promotions.index') }}" id="filterForm">
+                        <form method="GET" action="<?php echo e(route('promotions.index')); ?>" id="filterForm">
                             <h3 class="font-black text-elevate-dark mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
                                 <i class="ph-bold ph-funnel text-elevate-primary"></i> Pilih Kelas Asal
                             </h3>
@@ -56,11 +65,12 @@
                                 <select name="from_class_id" onchange="document.getElementById('filterForm').submit()" 
                                         class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-sm text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary mb-4 py-3 px-4 appearance-none cursor-pointer">
                                     <option value="">-- Silakan Pilih --</option>
-                                    @foreach($classes as $class)
-                                        <option value="{{ $class->id }}" {{ request('from_class_id') == $class->id ? 'selected' : '' }}>
-                                            Kelas {{ $class->name }}
+                                    <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $class): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($class->id); ?>" <?php echo e(request('from_class_id') == $class->id ? 'selected' : ''); ?>>
+                                            Kelas <?php echo e($class->name); ?>
+
                                         </option>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                                 <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400 mb-4"><i class="ph-bold ph-caret-down"></i></div>
                             </div>
@@ -73,39 +83,39 @@
                     </div>
                 </div>
 
-                {{-- KOLOM KANAN: TABEL SISWA & AKSI --}}
+                
                 <div class="lg:col-span-3">
-                    @if(request('from_class_id') && count($students ?? []) > 0)
+                    <?php if(request('from_class_id') && count($students ?? []) > 0): ?>
                         
-                        <form action="{{ route('promotions.process') }}" method="POST" id="promotionForm">
-                            @csrf
-                            <input type="hidden" name="from_class_id" value="{{ request('from_class_id') }}">
+                        <form action="<?php echo e(route('promotions.process')); ?>" method="POST" id="promotionForm">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="from_class_id" value="<?php echo e(request('from_class_id')); ?>">
                             
-                            {{-- BAR AKSI TARGET --}}
+                            
                             <div class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 mb-6 flex flex-col md:flex-row items-end gap-4 relative overflow-hidden">
                                 
-                                {{-- INPUT TAHUN AJARAN --}}
+                                
                                  <div class="w-full md:w-48 relative z-10 shrink-0">
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tahun Ajaran Lanjutan</label>
                                     <input type="text" name="academic_year" x-model="academicYear" placeholder="Cth: 2024/2025" required 
                                             pattern="\d{4}/\d{4}" title="Gunakan format YYYY/YYYY, contoh: 2024/2025"
-                                            class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-sm text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary h-12 transition-all px-4 {{ $errors->has('academic_year') ? 'border-rose-500 bg-rose-50' : '' }}">
+                                            class="w-full rounded-xl border-slate-200 bg-slate-50 font-bold text-sm text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary h-12 transition-all px-4 <?php echo e($errors->has('academic_year') ? 'border-rose-500 bg-rose-50' : ''); ?>">
                                 </div>
 
-                                {{-- Target Action Dropdown (Pindah Kelas / Lulus) --}}
+                                
                                 <div class="flex-1 w-full relative z-10">
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Tujuan Pemindahan</label>
                                     <div class="flex gap-3 relative">
                                         <select name="target_action" x-model="targetAction" required 
-                                                class="flex-1 rounded-xl border-slate-200 bg-slate-50 font-bold text-sm text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary h-12 transition-all px-4 cursor-pointer appearance-none {{ $errors->has('target_action') ? 'border-rose-500 bg-rose-50' : '' }}">
+                                                class="flex-1 rounded-xl border-slate-200 bg-slate-50 font-bold text-sm text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary h-12 transition-all px-4 cursor-pointer appearance-none <?php echo e($errors->has('target_action') ? 'border-rose-500 bg-rose-50' : ''); ?>">
                                             <option value="">-- Pilih Kelas Tujuan --</option>
                                             
                                             <optgroup label="Tujuan: Pindah / Naik Kelas">
-                                                @foreach($classes as $class)
-                                                    @if($class->id != request('from_class_id'))
-                                                        <option value="{{ $class->id }}">Pindahkan ke {{ $class->name }}</option>
-                                                    @endif
-                                                @endforeach
+                                                <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $class): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <?php if($class->id != request('from_class_id')): ?>
+                                                        <option value="<?php echo e($class->id); ?>">Pindahkan ke <?php echo e($class->name); ?></option>
+                                                    <?php endif; ?>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </optgroup>
 
                                             <optgroup label="Kelulusan">
@@ -116,21 +126,21 @@
                                     </div>
                                 </div>
                                 
-                                {{-- Tombol Submit Eksekusi --}}
+                                
                                 <button type="button" @click="confirmProcess()" 
                                         class="w-full md:w-auto px-8 py-3 bg-elevate-dark hover:bg-elevate-primary text-white font-bold rounded-xl shadow-lg shadow-elevate-dark/20 transition-all flex items-center justify-center gap-2 h-12 shrink-0 relative z-10 active:scale-95 group">
                                     <i class="ph-bold ph-magic-wand group-hover:scale-110 transition-transform"></i> Eksekusi
                                 </button>
                                 
-                                {{-- Latar dinamis peringatan lulus (Alumni) --}}
+                                
                                 <div x-show="targetAction === 'alumni'" x-transition.opacity 
                                      class="absolute inset-0 bg-gradient-to-r from-amber-50 to-orange-50/50 pointer-events-none z-0"></div>
                             </div>
 
-                            {{-- TABEL DAFTAR SISWA --}}
+                            
                             <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col min-h-[600px]">
                                 
-                                {{-- Toolbar Pencarian --}}
+                                
                                 <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row gap-4 justify-between items-center">
                                     <h3 class="font-black text-elevate-dark text-lg flex items-center gap-2 shrink-0">
                                         <i class="ph-fill ph-users-three text-elevate-primary"></i> Daftar Siswa Terpilih
@@ -150,7 +160,7 @@
                                         <thead class="text-xs font-bold text-slate-400 uppercase bg-slate-50 border-b border-slate-100 sticky top-0 z-20 shadow-sm">
                                             <tr>
                                                 <th class="px-6 py-4 w-16 text-center">
-                                                    {{-- MASTER CHECKBOX --}}
+                                                    
                                                     <input type="checkbox" x-model="checkAll" @change="toggleAll()" 
                                                            class="rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary w-5 h-5 cursor-pointer shadow-sm">
                                                 </th>
@@ -160,61 +170,64 @@
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-slate-50">
-                                            @foreach($students as $student)
-                                            <tr class="hover:bg-slate-50/80 transition-colors cursor-pointer student-row group" @click="toggleRow('{{ $student->id }}')">
+                                            <?php $__currentLoopData = $students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <tr class="hover:bg-slate-50/80 transition-colors cursor-pointer student-row group" @click="toggleRow('<?php echo e($student->id); ?>')">
                                                 <td class="px-6 py-4 text-center">
-                                                    {{-- MEMPERTAHANKAN CHECKBOX SAAT ERROR VALIDASI --}}
-                                                    <input type="checkbox" name="student_ids[]" value="{{ $student->id }}" id="chk-{{ $student->id }}"
+                                                    
+                                                    <input type="checkbox" name="student_ids[]" value="<?php echo e($student->id); ?>" id="chk-<?php echo e($student->id); ?>"
                                                            class="student-checkbox rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary w-5 h-5 cursor-pointer shadow-sm"
-                                                           {{ (is_array(old('student_ids')) && in_array($student->id, old('student_ids'))) || !old('student_ids') ? 'checked' : '' }}
+                                                           <?php echo e((is_array(old('student_ids')) && in_array($student->id, old('student_ids'))) || !old('student_ids') ? 'checked' : ''); ?>
+
                                                            @click.stop="updateCheckAll()">
                                                 </td>
                                                 <td class="px-6 py-4">
                                                     <div class="flex items-center gap-3">
                                                         <div class="w-8 h-8 rounded-full bg-elevate-accent/10 border border-elevate-accent/20 flex items-center justify-center text-xs text-elevate-primary font-bold overflow-hidden shrink-0 group-hover:bg-elevate-primary group-hover:text-white transition-colors">
-                                                            @if($student->photo_path)
-                                                                <img src="{{ asset('storage/'.$student->photo_path) }}" class="w-full h-full object-cover">
-                                                            @else
-                                                                {{ substr($student->name, 0, 1) }}
-                                                            @endif
+                                                            <?php if($student->photo_path): ?>
+                                                                <img src="<?php echo e(asset('storage/'.$student->photo_path)); ?>" class="w-full h-full object-cover">
+                                                            <?php else: ?>
+                                                                <?php echo e(substr($student->name, 0, 1)); ?>
+
+                                                            <?php endif; ?>
                                                         </div>
-                                                        <span class="font-bold text-elevate-dark group-hover:text-elevate-primary transition-colors student-name">{{ $student->name }}</span>
+                                                        <span class="font-bold text-elevate-dark group-hover:text-elevate-primary transition-colors student-name"><?php echo e($student->name); ?></span>
                                                     </div>
                                                 </td>
                                                 <td class="px-6 py-4 font-mono text-xs text-slate-500">
-                                                    {{ $student->nisn ?? $student->student_id }}
+                                                    <?php echo e($student->nisn ?? $student->student_id); ?>
+
                                                 </td>
                                                 <td class="px-6 py-4">
-                                                    @if($student->gender === 'L')
+                                                    <?php if($student->gender === 'L'): ?>
                                                         <span class="inline-flex px-2 py-1 rounded-lg text-[10px] font-bold bg-elevate-accent/10 text-elevate-primary">
                                                             Laki-laki
                                                         </span>
-                                                    @elseif($student->gender === 'P')
+                                                    <?php elseif($student->gender === 'P'): ?>
                                                         <span class="inline-flex px-2 py-1 rounded-lg text-[10px] font-bold bg-rose-50 text-rose-600">
                                                             Perempuan
                                                         </span>
-                                                    @else
+                                                    <?php else: ?>
                                                         <span class="inline-flex px-2 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-500">
                                                             Belum Diisi
                                                         </span>
-                                                    @endif
+                                                    <?php endif; ?>
                                                 </td>
                                             </tr>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </tbody>
                                     </table>
                                 </div>
                                 
-                                {{-- Footer Info --}}
+                                
                                 <div class="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center text-xs font-bold text-slate-500">
-                                    <span>Total: {{ count($students ?? []) }} Siswa</span>
+                                    <span>Total: <?php echo e(count($students ?? [])); ?> Siswa</span>
                                     <span>Terpilih: <span id="selected-count" class="text-elevate-primary font-black">0</span></span>
                                 </div>
                             </div>
                         </form>
 
-                    @elseif(request('from_class_id'))
-                        {{-- KONDISI JIKA KELAS KOSONG --}}
+                    <?php elseif(request('from_class_id')): ?>
+                        
                         <div class="bg-white rounded-[2.5rem] p-16 text-center shadow-sm border border-slate-100 mt-6 lg:mt-0">
                             <div class="w-20 h-20 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
                                 <i class="ph-duotone ph-users-three text-4xl"></i>
@@ -222,21 +235,21 @@
                             <h3 class="text-lg font-black text-elevate-dark mb-2">Tidak Ada Siswa</h3>
                             <p class="text-slate-500 text-sm max-w-sm mx-auto">Tidak ada siswa aktif yang ditemukan di kelas ini. Mungkin sudah diluluskan atau dipindahkan semua.</p>
                         </div>
-                    @else
-                        {{-- KONDISI AWAL (BELUM PILIH KELAS) --}}
+                    <?php else: ?>
+                        
                         <div class="bg-slate-50/50 rounded-[2.5rem] p-16 text-center border-2 border-dashed border-slate-200 h-full min-h-[400px] flex flex-col items-center justify-center mt-6 lg:mt-0">
                             <i class="ph-duotone ph-arrow-left text-4xl text-elevate-accent mb-4 animate-bounce"></i>
                             <h3 class="text-base font-bold text-elevate-dark mb-1">Menunggu Pilihan Kelas</h3>
                             <p class="text-slate-500 text-sm font-medium">Pilih kelas asal di menu sebelah kiri untuk memulai.</p>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
 
             </div>
         </div>
     </div>
 
-    {{-- Script Logika Alpine JS & SweetAlert --}}
+    
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('promotionApp', (oldAcademicYear = '', oldTargetAction = '') => ({
@@ -346,25 +359,25 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             // Flash Messages Success/Error
-            @if(session('success'))
+            <?php if(session('success')): ?>
                 Swal.fire({
                     icon: 'success',
                     title: 'Berhasil!',
-                    text: "{{ session('success') }}",
+                    text: "<?php echo e(session('success')); ?>",
                     confirmButtonColor: '#3b5889',
                     customClass: { popup: 'rounded-[2.5rem] border border-slate-100 shadow-xl' }
                 });
-            @endif
+            <?php endif; ?>
 
-            @if(session('error'))
+            <?php if(session('error')): ?>
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
-                    text: "{{ session('error') }}",
+                    text: "<?php echo e(session('error')); ?>",
                     confirmButtonColor: '#e11d48',
                     customClass: { popup: 'rounded-[2.5rem] border border-slate-100 shadow-xl' }
                 });
-            @endif
+            <?php endif; ?>
 
             // Checkbox Select All Logic (Untuk menghitung jumlah saja)
             const selectAllBtn = document.getElementById('selectAll');
@@ -418,4 +431,13 @@
             }
         });
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/promotions/index.blade.php ENDPATH**/ ?>

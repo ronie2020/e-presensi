@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cetak SPT - {{ $spt->nomor_spt }}</title>
+    <title>Cetak SPT - <?php echo e($spt->nomor_spt); ?></title>
     
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -25,7 +25,7 @@
         }
     </script>
 
-    {{-- Menggunakan Phosphor Icons --}}
+    
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <style>
@@ -92,11 +92,11 @@
         </div>
 
         <div class="flex flex-wrap gap-3 items-center font-sans">
-            <a href="{{ route('letters.spt.index') }}" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-elevate-primary transition-colors shadow-sm flex items-center gap-2 group">
+            <a href="<?php echo e(route('letters.spt.index')); ?>" class="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-elevate-primary transition-colors shadow-sm flex items-center gap-2 group">
                 <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali
             </a>
             
-            <a href="{{ route('letters.spt.edit', $spt->id) }}" class="px-4 py-2.5 bg-elevate-accent/10 border border-elevate-accent/20 text-elevate-primary rounded-xl shadow-sm text-xs font-bold hover:bg-elevate-accent/20 hover:text-elevate-dark transition-colors flex items-center gap-2">
+            <a href="<?php echo e(route('letters.spt.edit', $spt->id)); ?>" class="px-4 py-2.5 bg-elevate-accent/10 border border-elevate-accent/20 text-elevate-primary rounded-xl shadow-sm text-xs font-bold hover:bg-elevate-accent/20 hover:text-elevate-dark transition-colors flex items-center gap-2">
                 <i class="ph-bold ph-pencil-simple text-sm"></i> Edit SPT
             </a>
 
@@ -111,14 +111,14 @@
         <!-- KOP SURAT -->
         <div class="text-center border-b-4 border-black pb-4 mb-4" style="border-bottom-style: double;">
             <div class="relative py-2">
-                <img src="{{ asset('img/logo_ciamis.png') }}" alt="Logo Ciamis" class="absolute left-0 top-1 w-16 h-auto object-contain" onerror="this.style.display='none'"> 
+                <img src="<?php echo e(asset('img/logo_ciamis.png')); ?>" alt="Logo Ciamis" class="absolute left-0 top-1 w-16 h-auto object-contain" onerror="this.style.display='none'"> 
                 <div class="text-center header-text mx-auto w-3/4">
                     <h3>PEMERINTAH KABUPATEN CIAMIS</h3>
                     <h3>DINAS PENDIDIKAN</h3>
                     <h4>SMP NEGERI 3 LAKBOK</h4>
                     <p>Jalan Mekarjaya No. 199 Sidaharja Kecamatan Lakbok Kabupaten Ciamis</p>
                 </div>
-                <img src="{{ asset('img/logo_sekolah.png') }}" alt="Logo Sekolah" class="absolute right-0 top-1 w-20 h-auto object-contain" onerror="this.style.display='none'">
+                <img src="<?php echo e(asset('img/logo_sekolah.png')); ?>" alt="Logo Sekolah" class="absolute right-0 top-1 w-20 h-auto object-contain" onerror="this.style.display='none'">
             </div>
             <div class="double-line"></div>
         </div>
@@ -126,7 +126,7 @@
         <!-- JUDUL SURAT -->
         <div class="text-center mb-6">
             <h2 class="text-lg font-bold uppercase underline underline-offset-4 mb-1">SURAT PERINTAH TUGAS</h2>
-            <p>Nomor : {{ $spt->nomor_spt }}</p>
+            <p>Nomor : <?php echo e($spt->nomor_spt); ?></p>
         </div>
 
         <!-- ISI SURAT -->
@@ -134,7 +134,7 @@
             <tr>
                 <td class="col-label">Dasar</td>
                 <td class="col-separator">:</td>
-                <td class="text-justify">{{ $spt->dasar ?? 'Peraturan / Undangan Terkait.' }}</td>
+                <td class="text-justify"><?php echo e($spt->dasar ?? 'Peraturan / Undangan Terkait.'); ?></td>
             </tr>            
         </table>
             <p class="mt-4 text-justify" style="text-indent: 3rem;">
@@ -146,14 +146,14 @@
                 <td class="col-separator">:</td>
                 <td>
                     <table class="w-full">
-                        <tr><td style="width: 15px;">1.</td><td style="width: 80px;">Nama</td><td>: <strong>{{ $spt->pejabat_nama }}</strong></td></tr>
-                        <tr><td></td><td>NIP</td><td>: {{ $spt->pejabat_nip ?? '-' }}</td></tr>
-                        <tr><td></td><td>Jabatan</td><td>: {{ $spt->pejabat_jabatan ?? 'Guru / Staff' }}</td></tr>
+                        <tr><td style="width: 15px;">1.</td><td style="width: 80px;">Nama</td><td>: <strong><?php echo e($spt->pejabat_nama); ?></strong></td></tr>
+                        <tr><td></td><td>NIP</td><td>: <?php echo e($spt->pejabat_nip ?? '-'); ?></td></tr>
+                        <tr><td></td><td>Jabatan</td><td>: <?php echo e($spt->pejabat_jabatan ?? 'Guru / Staff'); ?></td></tr>
                     </table>
                 </td>
             </tr>
             
-            @if(count($spt->pengikut ?? []) > 0)
+            <?php if(count($spt->pengikut ?? []) > 0): ?>
             <tr>
                 <td class="col-label">Pengikut</td>
                 <td class="col-separator">:</td>
@@ -168,38 +168,40 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($spt->pengikut as $idx => $pengikut)
+                            <?php $__currentLoopData = $spt->pengikut; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $idx => $pengikut): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td style="text-align: center;">{{ $idx + 1 }}</td>
-                                <td>{{ $pengikut['nama'] }}</td>
-                                <td>{{ $pengikut['nip'] ?? '-' }}</td>
-                                <td>{{ $pengikut['keterangan'] ?? '-' }}</td>
+                                <td style="text-align: center;"><?php echo e($idx + 1); ?></td>
+                                <td><?php echo e($pengikut['nama']); ?></td>
+                                <td><?php echo e($pengikut['nip'] ?? '-'); ?></td>
+                                <td><?php echo e($pengikut['keterangan'] ?? '-'); ?></td>
                             </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
                 </td>
             </tr>
-            @endif
+            <?php endif; ?>
 
             <tr>
                 <td class="col-label">Untuk</td>
                 <td class="col-separator">:</td>
-                <td class="text-justify">{{ $spt->perihal }}</td>
+                <td class="text-justify"><?php echo e($spt->perihal); ?></td>
             </tr>
             <tr>
                 <td class="col-label">Tempat</td>
                 <td class="col-separator">:</td>
-                <td><strong>{{ $spt->tempat_tujuan }}</strong></td>
+                <td><strong><?php echo e($spt->tempat_tujuan); ?></strong></td>
             </tr>
             <tr>
                 <td class="col-label">Waktu</td>
                 <td class="col-separator">:</td>
                 <td>
-                    {{ \Carbon\Carbon::parse($spt->tgl_berangkat)->isoFormat('dddd, D MMMM Y') }}
-                    @if($spt->lama_hari > 1)
-                        s.d. {{ \Carbon\Carbon::parse($spt->tgl_kembali)->isoFormat('dddd, D MMMM Y') }}
-                    @endif
+                    <?php echo e(\Carbon\Carbon::parse($spt->tgl_berangkat)->isoFormat('dddd, D MMMM Y')); ?>
+
+                    <?php if($spt->lama_hari > 1): ?>
+                        s.d. <?php echo e(\Carbon\Carbon::parse($spt->tgl_kembali)->isoFormat('dddd, D MMMM Y')); ?>
+
+                    <?php endif; ?>
                 </td>
             </tr>
         </table>
@@ -211,17 +213,17 @@
         <!-- TANDA TANGAN -->
         <div class="ttd-box print-break">
             <p>Ditetapkan di: Lakbok</p>
-            <p class="mb-6">Pada tanggal: {{ \Carbon\Carbon::parse($spt->created_at)->isoFormat('D MMMM Y') }}</p>
+            <p class="mb-6">Pada tanggal: <?php echo e(\Carbon\Carbon::parse($spt->created_at)->isoFormat('D MMMM Y')); ?></p>
             
             <p class="font-bold">Kepala Sekolah,</p>
             
             <div style="height: 70px;"></div>
             
-            <p class="font-bold underline whitespace-nowrap">{{ $spt->pejabat_nama ?? '(Nama Kepala Sekolah)' }}</p>
-            <p>NIP. {{ $spt->pejabat_nip ?? '------------------' }}</p>
+            <p class="font-bold underline whitespace-nowrap"><?php echo e($spt->pejabat_nama ?? '(Nama Kepala Sekolah)'); ?></p>
+            <p>NIP. <?php echo e($spt->pejabat_nip ?? '------------------'); ?></p>
         </div>
 
     </div> <!-- End Kertas -->
 
 </body>
-</html>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/letters/spt/print.blade.php ENDPATH**/ ?>

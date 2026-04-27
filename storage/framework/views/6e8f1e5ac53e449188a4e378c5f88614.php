@@ -1,13 +1,22 @@
-<x-app-layout>
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
     <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            {{-- Tombol Kembali --}}
-            <a href="{{ route('sppd.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-elevate-primary mb-6 transition-colors group">
+            
+            <a href="<?php echo e(route('sppd.index')); ?>" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-elevate-primary mb-6 transition-colors group">
                 <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Daftar
             </a>
 
-            {{-- Card Container --}}
+            
             <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative"
                  x-data="{ 
                     mode: 'manual', 
@@ -21,14 +30,14 @@
                     tanggal_kembali: '',
 
                     // Data Dinamis
-                    sptList: {{ Js::from($spt_json ?? []) }}, 
+                    sptList: <?php echo e(Js::from($spt_json ?? [])); ?>, 
                     availableUsers: [],
                     
                     // LIST PENGIKUT
                     followers: [], 
 
                     // Data User Lengkap
-                    allUsers: {{ Js::from($users->map(fn($u) => ['id'=>$u->id, 'name'=>$u->name, 'nip'=>$u->nip])) }},
+                    allUsers: <?php echo e(Js::from($users->map(fn($u) => ['id'=>$u->id, 'name'=>$u->name, 'nip'=>$u->nip]))); ?>,
 
                     init() {},
 
@@ -70,7 +79,7 @@
                     }
                  }">
                 
-                {{-- Card Header Microsoft Elevate --}}
+                
                 <div class="bg-gradient-to-r from-elevate-dark to-elevate-primary p-8 text-white relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-64 h-64 bg-elevate-accent/20 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/2"></div>
                     <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
@@ -82,24 +91,24 @@
                     <p class="text-elevate-accent text-sm font-medium relative z-10 mt-1">Lengkapi data SPPD di bawah ini secara teliti.</p>
                 </div>
 
-                {{-- Form Content --}}
+                
                 <div class="p-8">
-                    @if ($errors->any())
+                    <?php if($errors->any()): ?>
                         <div class="mb-6 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl text-sm flex items-start gap-3">
                             <i class="ph-fill ph-warning-circle text-xl shrink-0 mt-0.5"></i>
                             <div>
                                 <strong class="font-bold block mb-1">Periksa kembali inputan Anda!</strong>
                                 <ul class="list-disc list-inside">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
+                                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($error); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </ul>
                             </div>
                         </div>
-                    @endif
+                    <?php endif; ?>
 
-                    <form action="{{ route('sppd.store') }}" method="POST" class="space-y-8">
-                        @csrf
+                    <form action="<?php echo e(route('sppd.store')); ?>" method="POST" class="space-y-8">
+                        <?php echo csrf_field(); ?>
 
                         <!-- SECTION 1: DASAR & MODE INPUT -->
                         <div class="p-6 bg-elevate-accent/5 rounded-[2rem] border border-elevate-accent/20 relative group hover:border-elevate-accent/40 transition-colors">
@@ -147,7 +156,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pl-9">
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nomor SPPD (Otomatis)</label>
-                                    <input type="text" name="nomor_sppd" value="{{ $nomor_otomatis ?? '' }}" class="w-full px-4 rounded-2xl border-slate-200 bg-slate-100 text-slate-500 font-mono font-bold text-sm py-3" readonly>
+                                    <input type="text" name="nomor_sppd" value="<?php echo e($nomor_otomatis ?? ''); ?>" class="w-full px-4 rounded-2xl border-slate-200 bg-slate-100 text-slate-500 font-mono font-bold text-sm py-3" readonly>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pegawai Pelaksana</label>
@@ -156,9 +165,9 @@
                                         <div x-show="mode === 'manual'">
                                             <select name="pegawai_id" :disabled="mode === 'spt'" class="w-full pl-4 pr-10 py-3 rounded-2xl border-slate-200 bg-white shadow-sm focus:border-elevate-primary focus:ring-elevate-primary text-sm font-bold text-elevate-dark appearance-none transition-all">
                                                 <option value="">-- Pilih Pegawai --</option>
-                                                @foreach($users as $user)
-                                                    <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                                @endforeach
+                                                <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <option value="<?php echo e($user->id); ?>"><?php echo e($user->name); ?></option>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </select>
                                         </div>
                                         <!-- Select dari SPT -->
@@ -261,9 +270,9 @@
                             </div>
                         </div>
 
-                        {{-- Action Footer --}}
+                        
                         <div class="flex items-center justify-end gap-4 pt-6 mt-4 border-t border-slate-100">
-                            <a href="{{ route('sppd.index') }}" class="px-6 py-3.5 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-700 transition-colors">Batal</a>
+                            <a href="<?php echo e(route('sppd.index')); ?>" class="px-6 py-3.5 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-700 transition-colors">Batal</a>
                             <button type="submit" class="px-8 py-3.5 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all transform active:scale-95 flex items-center gap-2 group">
                                 <i class="ph-bold ph-floppy-disk text-lg group-hover:scale-110 transition-transform"></i> 
                                 <span>Simpan SPPD</span>
@@ -274,4 +283,13 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/sppd/create.blade.php ENDPATH**/ ?>
