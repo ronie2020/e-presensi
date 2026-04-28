@@ -16,16 +16,24 @@
         <div class="absolute inset-0 opacity-[0.02]" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
     </div>
 
+    <!-- BACKGROUND ART ELEVATE (Ditambah sentuhan Peach agar hangat) -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="absolute -top-[100px] -left-[100px] w-[300px] h-[300px] bg-elevate-accent/15 rounded-full blur-[80px]"></div>
+        <div class="absolute top-1/2 -left-[50px] w-[200px] h-[200px] bg-elevate-peach/10 rounded-full blur-[60px]"></div>
+        <div class="absolute bottom-0 right-0 w-[250px] h-[250px] bg-elevate-primary/30 rounded-full blur-[70px]"></div>
+        <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 24px 24px;"></div>
+    </div>
+
     <!-- TOMBOL PENGECIL SIDEBAR (TOGGLE BUTTON) - DESKTOP ONLY -->
     <button 
         @click="toggleSidebar()" 
-        class="absolute -right-3 top-20 z-50 hidden md:flex h-6 w-6 items-center justify-center rounded-full bg-white text-elevate-primary shadow-md border border-slate-200 hover:scale-110 transition-transform duration-300 focus:outline-none"
+        class="absolute -right-3 top-20 z-50 hidden md:flex h-6 w-6 items-center justify-center rounded-full bg-white text-elevate-dark shadow-lg shadow-elevate-dark/20 border border-slate-100 hover:scale-110 hover:text-elevate-primary transition-all duration-300 focus:outline-none"
         :title="sidebarExpanded ? 'Perkecil Sidebar' : 'Perbesar Sidebar'">
         <i class="ph-bold transition-transform duration-300" :class="sidebarExpanded ? 'ph-caret-left' : 'ph-caret-right'"></i>
     </button>
-    
+
     <!-- TOMBOL CLOSE (X) - MOBILE ONLY -->
-     <button 
+    <button 
         @click="sidebarOpen = false" 
         class="absolute right-4 top-4 z-50 md:hidden text-slate-400 hover:text-white transition-colors">
         <i class="ph-bold ph-x text-2xl"></i>
