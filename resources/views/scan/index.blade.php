@@ -19,7 +19,7 @@
         #qr-reader { 
             width: 100% !important; 
             border: none !important; 
-            border-radius: 0.75rem; 
+            border-radius: 1.5rem; 
             overflow: hidden; 
             background: #0f172a; 
             position: relative;
@@ -28,7 +28,7 @@
         #qr-reader video { 
             width: 100% !important; 
             object-fit: cover !important; 
-            border-radius: 0.75rem;
+            border-radius: 1.5rem;
             display: block !important;
         }
 
@@ -38,35 +38,36 @@
         #qr-reader__dashboard_section_csr div { display: none !important; }
         
         /* Scanner Styles */
-        .scanner-container { position: relative; overflow: hidden; border-radius: 0.75rem; transform: translateZ(0); }
+        .scanner-container { position: relative; overflow: hidden; border-radius: 1.5rem; transform: translateZ(0); }
         .scanner-overlay {
             position: absolute; inset: 0; pointer-events: none;
-            border: 0px solid transparent; border-radius: 0.75rem;
+            border: 0px solid transparent; border-radius: 1.5rem;
             transition: all 0.3s ease; z-index: 20;
         }
         
-        /* Scan Effects (Microsoft Semantic Colors) */
-        .scan-success-effect { box-shadow: inset 0 0 40px rgba(16, 124, 16, 0.5); border: 2px solid #107C10; }
-        .scan-warning-effect { box-shadow: inset 0 0 40px rgba(216, 59, 1, 0.5); border: 2px solid #D83B01; }
-        .scan-error-effect { box-shadow: inset 0 0 40px rgba(209, 52, 56, 0.5); border: 2px solid #D13438; }
-        .scan-makan-effect { box-shadow: inset 0 0 40px rgba(216, 59, 1, 0.5); border: 2px solid #D83B01; }
+        /* Scan Effects (Microsoft Semantic Colors - Tailored for Elevate) */
+        .scan-success-effect { box-shadow: inset 0 0 40px rgba(16, 185, 129, 0.5); border: 2px solid #10b981; } /* Emerald */
+        .scan-warning-effect { box-shadow: inset 0 0 40px rgba(245, 158, 11, 0.5); border: 2px solid #f59e0b; } /* Amber */
+        .scan-error-effect { box-shadow: inset 0 0 40px rgba(225, 29, 72, 0.5); border: 2px solid #e11d48; } /* Rose */
+        .scan-makan-effect { box-shadow: inset 0 0 40px rgba(245, 158, 11, 0.5); border: 2px solid #f59e0b; }
 
-        /* TEMA ELEVATE: Garis Scan diubah menjadi warna Elevate Blue (#5295FF) */
+        /* TEMA ELEVATE: Garis Scan diubah menjadi warna Elevate Accent (#38bdf8) */
         .scanner-line {
             position: absolute; width: 100%; height: 3px;
-            background: #5295FF; box-shadow: 0 0 15px #5295FF;
+            background: #38bdf8; box-shadow: 0 0 15px #38bdf8;
             top: 0; animation: scanMove 2.5s infinite linear;
             z-index: 10; opacity: 0.8;
         }
 
         /* Utility */
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
         .hidden-col { display: none !important; }
         .hidden-row { display: none !important; }
         
-        @keyframes highlightRow { 0% { background-color: #F3F9FD; } 100% { background-color: transparent; } } /* Efek highlight biru muda */
+        /* Efek highlight baris baru dengan warna Elevate Peach Light */
+        @keyframes highlightRow { 0% { background-color: #fff0e8; } 100% { background-color: transparent; } } 
         .new-row-entry { animation: highlightRow 2s ease-out; }
         
         .scan-type-btn.ring-2 .indicator-dot { transform: scale(1.2); background-color: currentColor; }
@@ -93,73 +94,77 @@
             })->toArray();
     @endphp
 
-    <div class="py-6 font-sans text-slate-800 bg-slate-50/50 min-h-screen selection:bg-[#F3F9FD] selection:text-[#5295FF]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-            
-            {{-- HERO SECTION (TEMA MICROSOFT ELEVATED) --}}
-            <div class="animate-enter relative rounded-xl bg-gradient-to-br from-[#25D0FF] via-[#5295FF] to-[#FFC9B9] p-6 md:p-8 text-[#2A3B52] shadow-[0_10px_40px_-10px_rgba(37,208,255,0.4)] overflow-hidden group border border-white/40">
-                
-                {{-- Background Decorations --}}
-                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
-                <div class="absolute top-0 right-0 w-80 h-80 bg-white/30 rounded-full blur-[80px] translate-x-1/2 -translate-y-1/2 pointer-events-none group-hover:bg-white/40 transition-all duration-700"></div>
+    <div class="py-6 sm:py-8 font-sans text-elevate-text bg-elevate-surface min-h-screen relative overflow-hidden">
+        
+        {{-- Efek Latar Belakang Halus --}}
+        <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-10 pointer-events-none -z-10 blur-3xl"></div>
 
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 relative z-10">
+            
+            {{-- HERO SECTION (TEMA MICROSOFT ELEVATE) --}}
+            <div class="animate-enter relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60">
+                
+                {{-- Abstract Shapes Ornaments ala Elevate --}}
+                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
+                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
+                
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div class="flex items-center gap-5 w-full md:w-auto">
-                        <div class="w-16 h-16 rounded-xl bg-white/40 backdrop-blur-md flex items-center justify-center border border-white/50 shadow-sm flex-shrink-0">
-                            <i class="ph-duotone ph-scan text-4xl text-[#2A3B52]"></i>
+                    <div class="flex flex-col md:flex-row items-center gap-6 w-full md:w-auto text-center md:text-left">
+                        <div class="w-20 h-20 rounded-[1.5rem] bg-white/40 backdrop-blur-md flex items-center justify-center border border-white/50 shadow-sm shrink-0">
+                            <i class="ph-duotone ph-scan text-5xl text-elevate-primary"></i>
                         </div>
                         <div>
-                            <div class="flex items-center gap-2 mb-1">
+                            <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
                                 @if(isset($scheduleConfig) && ($scheduleConfig['is_holiday'] ?? false))
-                                    <span class="px-2.5 py-0.5 rounded-md bg-[#D13438] text-white border border-[#D13438] text-[10px] font-bold uppercase tracking-wider shadow-sm">Libur: {{ $scheduleConfig['description'] }}</span>
+                                    <span class="px-3 py-1 rounded-full bg-rose-500 text-white border border-rose-600 text-[10px] font-bold uppercase tracking-wider shadow-sm">Libur: {{ $scheduleConfig['description'] }}</span>
                                 @else
-                                    <span class="px-2.5 py-0.5 rounded-md bg-white/40 text-[#2A3B52] border border-white/50 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">
+                                    <span class="px-3 py-1 rounded-full bg-white/60 text-elevate-dark border border-white/50 text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">
                                         {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
                                     </span>
                                 @endif
                             </div>
-                            <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight leading-none text-[#2A3B52]">
-                                Scanner <span class="text-white drop-shadow-sm">Aktivitas</span>
+                            <h2 class="text-3xl md:text-4xl font-black tracking-tight leading-tight text-elevate-dark">
+                                Mesin Kiosk <span class="text-transparent bg-clip-text bg-gradient-to-r from-elevate-primary to-elevate-dark">Absensi</span>
                             </h2>
-                            <p class="text-[#2A3B52]/80 text-sm mt-1 font-medium">Monitoring kehadiran, makan siang, dan ibadah.</p>
+                            <p class="text-elevate-dark/80 text-sm mt-1 font-bold">Monitoring kehadiran, makan siang, dan ibadah terintegrasi.</p>
                         </div>
                     </div>
                     
                     {{-- CLOCK WIDGET --}}
-                    <div class="bg-white/40 backdrop-blur-md border border-white/50 px-6 py-3 rounded-xl flex items-center gap-4 shadow-sm w-full md:w-auto justify-between md:justify-start">
+                    <div class="bg-white/60 backdrop-blur-md border border-white/50 px-6 py-4 rounded-[1.5rem] flex items-center gap-5 shadow-sm w-full md:w-auto justify-between md:justify-start">
                         <div class="text-right">
-                            <p class="text-[10px] font-bold text-[#2A3B52] uppercase tracking-widest mb-0.5">Waktu Server</p>
-                            <div id="clock" class="text-3xl font-black text-[#2A3B52] font-mono leading-none tracking-widest digital-clock">00:00:00</div>
+                            <p class="text-[10px] font-black text-elevate-primary uppercase tracking-widest mb-1">Waktu Server</p>
+                            <div id="clock" class="text-3xl font-black text-elevate-dark font-mono leading-none tracking-widest">00:00:00</div>
                         </div>
-                        <div class="w-10 h-10 rounded-lg bg-[#2A3B52] flex items-center justify-center text-white shadow-inner animate-pulse shrink-0">
-                            <i class="ph-bold ph-clock text-xl"></i>
+                        <div class="w-12 h-12 rounded-xl bg-elevate-dark flex items-center justify-center text-elevate-peach-light shadow-inner animate-pulse shrink-0">
+                            <i class="ph-bold ph-clock text-2xl"></i>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
                 {{-- KOLOM KIRI: SCANNER & CONTROLS --}}
                 <div class="lg:col-span-5 flex flex-col gap-6 animate-enter delay-100">
                     
                     {{-- SCANNER CARD --}}
-                    <div class="bg-white rounded-xl p-6 fluent-card relative overflow-hidden group">
-                        <div class="flex justify-between items-center mb-5 px-1">
-                            <h3 class="font-bold text-[#2A3B52] flex items-center gap-2 text-lg">
+                    <div class="bg-white rounded-[2rem] p-6 sm:p-8 shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden group">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-black text-elevate-dark flex items-center gap-2 text-lg">
                                 <span class="relative flex h-3 w-3">
-                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#5295FF] opacity-75"></span>
-                                  <span class="relative inline-flex rounded-full h-3 w-3 bg-[#5295FF]"></span>
+                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-elevate-accent opacity-75"></span>
+                                  <span class="relative inline-flex rounded-full h-3 w-3 bg-elevate-accent"></span>
                                 </span>
                                 Kamera Aktif
                             </h3>
                             <div class="flex items-center gap-2">
                                 {{-- GPS Badge Indicator --}}
-                                <div id="gps-badge" class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide bg-[#FFEFD6] text-[#D83B01] border border-[#FFD8A8] flex items-center gap-1 transition-all" title="Mencari Lokasi">
+                                <div id="gps-badge" class="px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-600 border border-amber-200 flex items-center gap-1.5 transition-all" title="Mencari Lokasi">
                                     <i class="ph-bold ph-map-pin animate-pulse"></i> <span class="hidden sm:inline">Mencari GPS</span>
                                 </div>
 
-                                <div id="mode-badge" class="pl-2 pr-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-2 transition-all">
+                                <div id="mode-badge" class="px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 border border-slate-200 flex items-center gap-2 transition-all">
                                     <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                                     <span id="mode-text">Standby</span>
                                 </div>
@@ -167,7 +172,7 @@
                         </div>
 
                         {{-- SCANNER ELEMENT --}}
-                        <div class="scanner-container relative bg-slate-900 w-full rounded-xl border-4 border-slate-900 shadow-inner overflow-hidden min-h-[300px]">
+                        <div class="scanner-container relative bg-slate-900 w-full rounded-[1.5rem] border-4 border-slate-900 shadow-inner overflow-hidden min-h-[300px]">
                             <div id="qr-reader" class="w-full"></div>
                             
                             {{-- Overlay Lines --}}
@@ -177,8 +182,8 @@
 
                             {{-- Status Text Overlay --}}
                             <div class="absolute top-4 inset-x-0 flex justify-center z-30 pointer-events-none">
-                                <div id="scan-status" class="bg-[#2A3B52]/80 backdrop-blur-md text-white text-xs py-2 px-5 rounded-lg font-bold border border-[#2A3B52] shadow-sm flex items-center gap-2 transition-all">
-                                    <i class="ph-bold ph-circle-notch animate-spin text-[#5295FF]"></i> Memuat Kamera...
+                                <div id="scan-status" class="bg-elevate-dark/80 backdrop-blur-md text-white text-xs py-2 px-5 rounded-xl font-bold border border-white/10 shadow-sm flex items-center gap-2 transition-all">
+                                    <i class="ph-bold ph-circle-notch animate-spin text-elevate-accent"></i> Memuat Kamera...
                                 </div>
                             </div>
                         </div>
@@ -187,77 +192,77 @@
                         <div id="scan-result" class="mt-4 p-4 rounded-xl font-bold text-sm text-center hidden transition-all duration-300 transform scale-95 opacity-0 border border-transparent shadow-sm"></div>
                         
                         {{-- Tombol Aksi Bawah Scanner --}}
-                        <div class="mt-4 flex flex-wrap gap-2 sm:gap-3">
+                        <div class="mt-5 grid grid-cols-2 gap-3">
                             <!-- 1. Tombol Ketik NISN -->
-                            <button onclick="showManualInput()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-[#F3F9FD] hover:text-[#5295FF] hover:border-[#D0E7F8] transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
-                                <i class="ph-bold ph-keyboard text-lg"></i> NISN
+                            <button onclick="showManualInput()" class="py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-elevate-peach-light hover:text-elevate-primary hover:border-elevate-peach/50 transition-all flex items-center justify-center gap-2 shadow-sm bg-white active:scale-95">
+                                <i class="ph-bold ph-keyboard text-lg"></i> Ketik NISN
                             </button>
                             
                             <!-- 2. Tombol Upload Gambar -->
-                            <button onclick="document.getElementById('qr-upload').click()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-[#F3F9FD] hover:text-[#5295FF] hover:border-[#D0E7F8] transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
-                                <i class="ph-bold ph-image text-lg"></i> Gambar
+                            <button onclick="document.getElementById('qr-upload').click()" class="py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-elevate-peach-light hover:text-elevate-primary hover:border-elevate-peach/50 transition-all flex items-center justify-center gap-2 shadow-sm bg-white active:scale-95">
+                                <i class="ph-bold ph-image text-lg"></i> Baca Gambar
                             </button>
                             <input type="file" id="qr-upload" class="hidden" accept="image/*">
 
                             <!-- 3. Tombol Balik Kamera -->
-                            <button onclick="switchCamera()" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-[#F3F9FD] hover:text-[#5295FF] hover:border-[#D0E7F8] transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
-                                <i class="ph-bold ph-camera-rotate text-lg"></i> Kamera
+                            <button onclick="switchCamera()" class="py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-elevate-peach-light hover:text-elevate-primary hover:border-elevate-peach/50 transition-all flex items-center justify-center gap-2 shadow-sm bg-white active:scale-95">
+                                <i class="ph-bold ph-camera-rotate text-lg"></i> Putar Kamera
                             </button>
 
-                            <!-- 4. Tombol Auto Mode -->
-                            <button id="btn-reset-auto" class="hidden w-full py-3 rounded-xl border-2 border-dashed border-[#D0E7F8] text-[#5295FF] font-bold text-[10px] uppercase tracking-wider hover:bg-[#F3F9FD] hover:border-[#5295FF] transition-all flex items-center justify-center gap-2 bg-white active:scale-95" onclick="resetAutoMode()">
-                                <i class="ph-bold ph-arrows-clockwise animate-spin-slow"></i> Kembali Auto
+                            <!-- 4. Tombol Izin / Sakit -->
+                            <button onclick="document.getElementById('absen-manual-modal').classList.remove('hidden');" class="py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all flex items-center justify-center gap-2 shadow-sm bg-white active:scale-95">
+                                <i class="ph-bold ph-user-focus text-lg"></i> Form Izin
                             </button>
 
-                            <!-- 5. Tombol Izin / Sakit -->
-                            <button onclick="document.getElementById('absen-manual-modal').classList.remove('hidden');" class="flex-1 min-w-[100px] py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider hover:bg-[#FDE7E9] hover:text-[#D13438] hover:border-[#F4C3C9] transition-all flex items-center justify-center gap-1.5 shadow-sm bg-white active:scale-95">
-                                <i class="ph-bold ph-user-focus text-lg"></i> Izin/Sakit
+                            <!-- Tombol Auto Mode (Full Width if visible) -->
+                            <button id="btn-reset-auto" class="hidden col-span-2 py-3 rounded-xl border-2 border-dashed border-elevate-accent/50 text-elevate-primary font-bold text-[10px] uppercase tracking-wider hover:bg-elevate-peach-light hover:border-elevate-primary transition-all flex items-center justify-center gap-2 bg-white active:scale-95" onclick="resetAutoMode()">
+                                <i class="ph-bold ph-arrows-clockwise animate-spin-slow"></i> Kembali ke Mode Auto
                             </button>
                         </div>
                     </div>
 
                     {{-- STATISTIK MAKAN --}}
                     <div id="makan-stats-panel" class="hidden grid-cols-2 gap-4">
-                        <div class="bg-[#D83B01] p-6 rounded-xl text-white shadow-sm relative overflow-hidden group">
+                        <div class="bg-elevate-primary p-6 rounded-[1.5rem] text-white shadow-lg shadow-elevate-primary/20 relative overflow-hidden group">
                             <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                                 <i class="ph-fill ph-check-circle text-6xl"></i>
                             </div>
-                            <p class="text-[10px] font-bold text-[#FFEFD6] uppercase tracking-widest mb-1">Sudah Ambil</p>
+                            <p class="text-[10px] font-bold text-elevate-peach-light uppercase tracking-widest mb-1">Sudah Ambil</p>
                             <h3 class="text-4xl font-black tracking-tight" id="stat-taken">{{ $currentTaken }}</h3>
                         </div>
-                        <div class="bg-white p-6 rounded-xl fluent-card relative overflow-hidden group">
+                        <div class="bg-white p-6 rounded-[1.5rem] border border-slate-100 shadow-sm relative overflow-hidden group">
                             <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                                <i class="ph-duotone ph-users text-6xl text-[#2A3B52]"></i>
+                                <i class="ph-duotone ph-users text-6xl text-elevate-dark"></i>
                             </div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Belum Ambil</p>
-                            <h3 class="text-4xl font-black text-[#2A3B52] tracking-tight" id="stat-remaining">{{ $totalTarget - $currentTaken }}</h3>
+                            <h3 class="text-4xl font-black text-elevate-dark tracking-tight" id="stat-remaining">{{ $totalTarget - $currentTaken }}</h3>
                         </div>
                     </div>
 
                     {{-- MODE SELECTOR GRID --}}
                     <div>
-                        <div class="flex items-center justify-between mb-3 px-2">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pilih Mode Manual</h4>
+                        <div class="flex items-center justify-between mb-4 px-2">
+                            <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">Pilih Mode Manual</h4>
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             @foreach([
-                                ['id'=>'harian', 'label'=>'Absen Harian', 'sub'=>'Masuk/Pulang', 'icon'=>'calendar-check', 'color_text'=>'text-[#5295FF]', 'color_bg'=>'bg-[#F3F9FD]', 'border_class'=>'border-[#D0E7F8]', 'hover_border'=>'hover:border-[#5295FF]', 'type'=>'Harian'],
-                                ['id'=>'makan', 'label'=>'Makan Siang', 'sub'=>'Scan Gizi', 'icon'=>'bowl-food', 'color_text'=>'text-[#D83B01]', 'color_bg'=>'bg-[#FFEFD6]', 'border_class'=>'border-[#FFD8A8]', 'hover_border'=>'hover:border-[#D83B01]', 'type'=>'Makan'],
-                                ['id'=>'dhuha', 'label'=>'Sholat Dhuha', 'sub'=>'Ibadah Pagi', 'icon'=>'sun-horizon', 'color_text'=>'text-[#107C10]', 'color_bg'=>'bg-[#DFF6DD]', 'border_class'=>'border-[#B7DFB9]', 'hover_border'=>'hover:border-[#107C10]', 'type'=>'Dhuha'],
-                                ['id'=>'dhuhur', 'label'=>'Sholat Dhuhur', 'sub'=>'Ibadah Siang', 'icon'=>'moon-stars', 'color_text'=>'text-[#2A3B52]', 'color_bg'=>'bg-slate-100', 'border_class'=>'border-slate-200', 'hover_border'=>'hover:border-[#2A3B52]', 'type'=>'Dhuhur'],
-                                ['id'=>'ekskul', 'label'=>'Ekstrakurikuler', 'sub'=>'Kegiatan Sore', 'icon'=>'basketball', 'color_text'=>'text-[#D13438]', 'color_bg'=>'bg-[#FDE7E9]', 'border_class'=>'border-[#F4C3C9]', 'hover_border'=>'hover:border-[#D13438]', 'type'=>'Ekstrakurikuler']
+                                ['id'=>'harian', 'label'=>'Absen Harian', 'sub'=>'Masuk/Pulang', 'icon'=>'calendar-check', 'color_text'=>'text-elevate-primary', 'color_bg'=>'bg-elevate-primary/10', 'border_class'=>'border-elevate-primary/30', 'hover_border'=>'hover:border-elevate-primary', 'type'=>'Harian'],
+                                ['id'=>'makan', 'label'=>'Makan Siang', 'sub'=>'Scan Gizi', 'icon'=>'bowl-food', 'color_text'=>'text-amber-600', 'color_bg'=>'bg-amber-50', 'border_class'=>'border-amber-200', 'hover_border'=>'hover:border-amber-500', 'type'=>'Makan'],
+                                ['id'=>'dhuha', 'label'=>'Sholat Dhuha', 'sub'=>'Ibadah Pagi', 'icon'=>'sun-horizon', 'color_text'=>'text-emerald-600', 'color_bg'=>'bg-emerald-50', 'border_class'=>'border-emerald-200', 'hover_border'=>'hover:border-emerald-500', 'type'=>'Dhuha'],
+                                ['id'=>'dhuhur', 'label'=>'Sholat Dhuhur', 'sub'=>'Ibadah Siang', 'icon'=>'moon-stars', 'color_text'=>'text-elevate-dark', 'color_bg'=>'bg-slate-100', 'border_class'=>'border-slate-200', 'hover_border'=>'hover:border-elevate-dark', 'type'=>'Dhuhur'],
+                                ['id'=>'ekskul', 'label'=>'Ekstrakurikuler', 'sub'=>'Kegiatan Sore', 'icon'=>'basketball', 'color_text'=>'text-rose-600', 'color_bg'=>'bg-rose-50', 'border_class'=>'border-rose-200', 'hover_border'=>'hover:border-rose-500', 'type'=>'Ekstrakurikuler']
                             ] as $mode)
-                            <button id="btn-{{ $mode['id'] }}" data-type="{{ $mode['type'] }}" data-color-class="{{ $mode['color_text'] }}" data-border-class="{{ str_replace('hover:', '', $mode['hover_border']) }}" class="scan-type-btn bg-white p-4 rounded-xl fluent-card {{ $mode['hover_border'] }} hover:shadow-md transition-all duration-300 text-left group active:scale-95 relative overflow-hidden">
+                            <button id="btn-{{ $mode['id'] }}" data-type="{{ $mode['type'] }}" data-color-class="{{ $mode['color_text'] }}" data-border-class="{{ str_replace('hover:', '', $mode['hover_border']) }}" class="scan-type-btn bg-white p-4 rounded-2xl border border-slate-100 {{ $mode['hover_border'] }} hover:shadow-md transition-all duration-300 text-left group active:scale-95 relative overflow-hidden">
                                 <div class="absolute top-0 right-0 p-2 opacity-0 group-hover:opacity-10 transition-opacity">
                                     <i class="ph-fill ph-{{ $mode['icon'] }} text-4xl {{ $mode['color_text'] }}"></i>
                                 </div>
-                                <div class="w-10 h-10 rounded-lg {{ $mode['color_bg'] }} {{ $mode['color_text'] }} flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
+                                <div class="w-10 h-10 rounded-xl {{ $mode['color_bg'] }} {{ $mode['color_text'] }} flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
                                     <i class="ph-bold ph-{{ $mode['icon'] }}"></i>
                                 </div>
-                                <h3 class="font-bold text-slate-700 text-xs leading-tight mb-1">{{ $mode['label'] }}</h3>
+                                <h3 class="font-bold text-elevate-dark text-xs leading-tight mb-1">{{ $mode['label'] }}</h3>
                                 <div class="flex items-center justify-between">
                                     <p class="text-[10px] text-slate-400 font-medium">{{ $mode['sub'] }}</p>
-                                    <div class="w-1.5 h-1.5 rounded-full border border-slate-300 indicator-dot transition-all"></div>
+                                    <div class="w-2 h-2 rounded-full border border-slate-300 indicator-dot transition-all"></div>
                                 </div>
                             </button>
                             @endforeach
@@ -265,10 +270,10 @@
                     </div>
 
                     {{-- EKSKUL DROPDOWN --}}
-                    <div id="extra-selector-container" class="hidden bg-white p-5 rounded-xl border border-slate-100 fluent-card mt-3">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-2 px-1">Pilih Kegiatan Ekskul</label>
+                    <div id="extra-selector-container" class="hidden bg-white p-6 rounded-2xl border border-slate-100 shadow-sm mt-2">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3 px-1">Pilih Kegiatan Ekskul</label>
                         <div class="relative">
-                            <select id="extra-activity-select" class="w-full rounded-xl border-slate-200 focus:border-[#5295FF] focus:ring-0 font-bold text-[#2A3B52] py-3 pl-4 pr-10 text-sm bg-slate-50 cursor-pointer hover:bg-white transition-colors">
+                            <select id="extra-activity-select" class="w-full rounded-xl border-slate-200 focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 pl-4 pr-10 text-sm bg-slate-50 cursor-pointer hover:bg-white transition-colors">
                                 <option value="">-- Pilih Ekstrakurikuler --</option>
                                 @if(isset($extracurriculars))
                                     @foreach($extracurriculars as $ekskul)
@@ -285,73 +290,73 @@
 
                 {{-- KOLOM KANAN: LOG RIWAYAT --}}
                 <div class="lg:col-span-7 flex flex-col h-full animate-enter delay-200">
-                    <div class="bg-white rounded-xl fluent-card flex flex-col min-h-[600px] overflow-hidden">
+                    <div class="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col min-h-[600px] overflow-hidden">
                         
                         {{-- Log Header --}}
-                        <div class="p-6 md:p-8 border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-20 flex justify-between items-center">
+                        <div class="p-6 md:p-8 border-b border-slate-100 bg-elevate-peach-light/30 sticky top-0 z-20 flex justify-between items-center">
                             <div>
-                                <h3 class="font-bold text-[#2A3B52] text-xl flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-lg bg-[#F3F9FD] text-[#5295FF] flex items-center justify-center border border-[#D0E7F8] shadow-sm">
-                                        <i class="ph-bold ph-list-dashes text-lg"></i>
+                                <h3 class="font-black text-elevate-dark text-xl flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-white text-elevate-primary flex items-center justify-center border border-elevate-peach/50 shadow-sm">
+                                        <i class="ph-bold ph-list-dashes text-xl"></i>
                                     </div>
                                     Log Aktivitas
                                 </h3>
-                                <p class="text-xs text-slate-500 font-medium mt-1 ml-10">Monitoring kehadiran realtime</p>
+                                <p class="text-xs text-elevate-text/60 font-medium mt-1 ml-14">Monitoring kehadiran realtime</p>
                             </div>
-                            <div class="flex items-center gap-2 px-3 py-1.5 bg-[#F3F9FD] border border-[#D0E7F8] rounded-md shadow-sm">
-                                <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#5295FF] opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-[#5295FF]"></span></span>
-                                <span class="text-[10px] font-black uppercase tracking-wider text-[#5295FF]">Live</span>
+                            <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-200 rounded-lg shadow-sm">
+                                <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span></span>
+                                <span class="text-[10px] font-black uppercase tracking-wider text-emerald-600">Live</span>
                             </div>
                         </div>
                         
                         {{-- Log Table --}}
-                        <div class="flex-1 overflow-hidden relative bg-slate-50/50">
-                            <div class="absolute inset-0 overflow-auto custom-scrollbar p-4">
+                        <div class="flex-1 overflow-hidden relative bg-white">
+                            <div class="absolute inset-0 overflow-auto custom-scrollbar p-0 sm:p-4">
                                 <table class="w-full text-left border-collapse">
                                     <thead class="sticky top-0 z-10">
                                         <tr>
-                                            <th class="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/90 backdrop-blur rounded-l-lg">Siswa</th>
-                                            <th class="col-harian px-4 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/90 backdrop-blur">Masuk</th>
-                                            <th class="col-harian px-4 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/90 backdrop-blur">Pulang</th>
-                                            <th class="col-waktu hidden-col px-4 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/90 backdrop-blur">Waktu</th>
-                                            <th class="col-kegiatan hidden-col px-4 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/90 backdrop-blur">Kegiatan</th>
-                                            <th class="px-6 py-4 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100/90 backdrop-blur rounded-r-lg">Status</th>
+                                            <th class="px-6 py-4 text-[10px] font-black text-elevate-primary uppercase tracking-widest bg-slate-50/90 backdrop-blur rounded-l-xl">Siswa</th>
+                                            <th class="col-harian px-4 py-4 text-center text-[10px] font-black text-elevate-primary uppercase tracking-widest bg-slate-50/90 backdrop-blur">Masuk</th>
+                                            <th class="col-harian px-4 py-4 text-center text-[10px] font-black text-elevate-primary uppercase tracking-widest bg-slate-50/90 backdrop-blur">Pulang</th>
+                                            <th class="col-waktu hidden-col px-4 py-4 text-center text-[10px] font-black text-elevate-primary uppercase tracking-widest bg-slate-50/90 backdrop-blur">Waktu</th>
+                                            <th class="col-kegiatan hidden-col px-4 py-4 text-center text-[10px] font-black text-elevate-primary uppercase tracking-widest bg-slate-50/90 backdrop-blur">Kegiatan</th>
+                                            <th class="px-6 py-4 text-right text-[10px] font-black text-elevate-primary uppercase tracking-widest bg-slate-50/90 backdrop-blur rounded-r-xl">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody id="scan-log" class="text-sm">
                                         @if(isset($recentScans))
                                             @foreach($recentScans as $scan)
-                                                <tr class="log-entry group hover:bg-white transition-all duration-300 rounded-xl border-b border-slate-100 last:border-0"
+                                                <tr class="log-entry group hover:bg-slate-50 transition-all duration-300 border-b border-slate-50 last:border-0"
                                                     data-type-raw="{{ $scan['type_raw'] }}">
                                                     
                                                     <td class="px-6 py-4 rounded-l-xl">
-                                                        <div class="font-bold text-[#2A3B52] group-hover:text-[#5295FF] transition-colors">{{ $scan['student_name'] }}</div>
+                                                        <div class="font-bold text-elevate-dark group-hover:text-elevate-primary transition-colors">{{ $scan['student_name'] }}</div>
                                                         <div class="text-[10px] text-slate-400 font-mono font-bold">{{ $scan['student_id'] }}</div>
                                                     </td>
                                                     
                                                     {{-- Kolom Harian --}}
                                                     <td class="col-harian px-4 py-4 text-center">
-                                                        @if($scan['time_in']) <span class="font-mono font-bold text-slate-600 bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">{{ $scan['time_in'] }}</span>
+                                                        @if($scan['time_in']) <span class="font-mono font-bold text-elevate-text bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">{{ $scan['time_in'] }}</span>
                                                         @else <span class="text-slate-300 font-bold">-</span> @endif
                                                     </td>
                                                     <td class="col-harian px-4 py-4 text-center">
-                                                        @if($scan['time_out']) <span class="font-mono font-bold text-slate-600 bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">{{ $scan['time_out'] }}</span>
+                                                        @if($scan['time_out']) <span class="font-mono font-bold text-elevate-text bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">{{ $scan['time_out'] }}</span>
                                                         @else <span class="text-slate-300 font-bold">-</span> @endif
                                                     </td>
 
                                                     {{-- Kolom Waktu Generic --}}
                                                     <td class="col-waktu hidden-col px-4 py-4 text-center">
-                                                         <span class="font-mono font-bold text-slate-600 bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">{{ $scan['time_in'] ?? now()->format('H:i') }}</span>
+                                                         <span class="font-mono font-bold text-elevate-text bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">{{ $scan['time_in'] ?? now()->format('H:i') }}</span>
                                                     </td>
 
                                                     {{-- Kolom Nama Kegiatan --}}
-                                                    <td class="col-kegiatan hidden-col px-4 py-4 text-center text-[#2A3B52] font-bold text-xs">
+                                                    <td class="col-kegiatan hidden-col px-4 py-4 text-center text-elevate-dark font-bold text-xs">
                                                         {{ $scan['ekskul_name'] ?? $scan['type_raw'] }}
                                                     </td>
 
                                                     <td class="px-6 py-4 text-right rounded-r-xl">
                                                         <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wide border shadow-sm
-                                                            {{ Str::contains($scan['status'], 'Terlambat') ? 'bg-[#FFEFD6] text-[#D83B01] border-[#FFD8A8]' : 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9]' }}">
+                                                            {{ Str::contains($scan['status'], 'Terlambat') ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-emerald-50 text-emerald-600 border-emerald-200' }}">
                                                             {{ $scan['status'] }}
                                                         </span>
                                                     </td>
@@ -362,12 +367,12 @@
                                 </table>
                                 
                                 {{-- Empty State --}}
-                                <div id="no-log-entry" class="{{ count($recentScans ?? []) > 0 ? 'hidden' : '' }} flex flex-col items-center justify-center py-20 text-center">
-                                    <div class="w-24 h-24 bg-white rounded-xl flex items-center justify-center mb-4 border border-slate-100 shadow-sm">
-                                        <i class="ph-duotone ph-qr-code text-4xl text-slate-300"></i>
+                                <div id="no-log-entry" class="{{ count($recentScans ?? []) > 0 ? 'hidden' : '' }} flex flex-col items-center justify-center py-24 text-center">
+                                    <div class="w-24 h-24 bg-elevate-peach-light rounded-[1.5rem] flex items-center justify-center mb-5 border border-elevate-peach/30 shadow-sm text-elevate-primary">
+                                        <i class="ph-duotone ph-qr-code text-5xl"></i>
                                     </div>
-                                    <p class="text-[#2A3B52] font-bold text-sm">Belum ada data scan hari ini.</p>
-                                    <p class="text-[10px] text-slate-400 mt-1">Data akan muncul otomatis setelah scan berhasil.</p>
+                                    <p class="text-elevate-dark font-black text-lg mb-1">Belum ada data scan.</p>
+                                    <p class="text-xs text-elevate-text/60 font-medium">Data kehadiran akan muncul otomatis di sini.</p>
                                 </div>
                             </div>
                         </div>
@@ -379,39 +384,39 @@
         {{-- ============================================================= --}}
         {{-- MODAL PENCARIAN SISWA & INPUT MANUAL (Sakit/Izin/Alfa)        --}}
         {{-- ============================================================= --}}
-        <div id="absen-manual-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full hidden z-[100] transition-opacity" x-data="manualAbsen">
-            <div class="relative top-10 md:top-20 mx-auto p-0 border-0 w-full max-w-md fluent-modal rounded-xl bg-white overflow-hidden">
+        <div id="absen-manual-modal" class="fixed inset-0 bg-elevate-dark/70 backdrop-blur-md overflow-y-auto h-full w-full hidden z-[100] transition-opacity" x-data="manualAbsen">
+            <div class="relative top-10 md:top-20 mx-auto p-0 border border-slate-100 w-full max-w-md rounded-[2rem] bg-white overflow-hidden shadow-2xl shadow-elevate-accent/20">
                 
                 {{-- Header Modal Input Manual --}}
-                <div class="bg-[#2A3B52] px-6 py-5 flex justify-between items-center">
-                    <h3 class="font-black text-white text-lg flex items-center gap-2"><i class="ph-bold ph-keyboard"></i> Input Manual & Izin</h3>
-                    <button type="button" @click="closeManualModal()" class="text-slate-300 hover:text-white transition-colors bg-white/10 hover:bg-white/20 w-8 h-8 rounded-lg flex items-center justify-center"><i class="ph-bold ph-x text-lg"></i></button>
+                <div class="bg-elevate-dark px-8 py-6 flex justify-between items-center">
+                    <h3 class="font-black text-white text-lg flex items-center gap-3"><i class="ph-bold ph-keyboard text-elevate-accent"></i> Input Form Manual</h3>
+                    <button type="button" @click="closeManualModal()" class="text-slate-400 hover:text-white transition-colors bg-white/10 hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center"><i class="ph-bold ph-x text-lg"></i></button>
                 </div>
 
-                <form action="{{ route('reports.storeManual') }}" method="POST" class="p-6 space-y-4" @submit="submitForm">
+                <form action="{{ route('reports.storeManual') }}" method="POST" class="p-8 space-y-5" @submit="submitForm">
                     @csrf
                     <input type="hidden" name="attendance_type" id="modal-attendance-type" value="Harian">
                     
                     {{-- 1. PENCARIAN SISWA (AUTOCOMPLETE) --}}
                     <div class="relative">
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Cari & Pilih Siswa</label>
+                        <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2">Cari & Pilih Siswa</label>
                         
                         <!-- Kolom Pencarian (Sembunyi Jika Siswa Sudah Terpilih) -->
                         <div x-show="!selectedStudent">
                             <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <i class="ph-bold ph-magnifying-glass text-slate-400"></i>
                                 </div>
-                                <input type="text" x-model="searchQuery" @input="searchStudents" @focus="showDropdown = true" @click.away="showDropdown = false" class="w-full pl-10 pr-4 py-3 rounded-xl border-slate-200 bg-slate-50 focus:ring-[#5295FF] focus:border-[#5295FF] font-bold text-slate-700 text-sm" placeholder="Ketik Nama, NISN, atau Kelas...">
+                                <input type="text" x-model="searchQuery" @input="searchStudents" @focus="showDropdown = true" @click.away="showDropdown = false" class="w-full pl-11 pr-4 py-3.5 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:ring-elevate-accent focus:border-elevate-accent font-bold text-elevate-dark text-sm transition-colors" placeholder="Ketik Nama, NISN...">
                             </div>
                             
                             <!-- Dropdown Hasil Pencarian -->
-                            <div x-show="showDropdown && searchQuery.length > 0" x-transition.opacity class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                            <div x-show="showDropdown && searchQuery.length > 0" x-transition.opacity class="absolute z-50 w-full mt-2 bg-white border border-slate-100 rounded-xl shadow-xl max-h-60 overflow-y-auto">
                                 <template x-if="filteredStudents.length > 0">
-                                    <ul class="py-1 text-sm text-slate-700 divide-y divide-slate-50">
+                                    <ul class="py-2 text-sm text-elevate-dark divide-y divide-slate-50">
                                         <template x-for="student in filteredStudents" :key="student.id">
                                             <li>
-                                                <button type="button" @click="selectStudent(student)" class="w-full text-left px-4 py-2 hover:bg-[#F3F9FD] hover:text-[#5295FF] focus:bg-[#F3F9FD] transition-colors flex flex-col">
+                                                <button type="button" @click="selectStudent(student)" class="w-full text-left px-5 py-2.5 hover:bg-elevate-peach-light hover:text-elevate-primary focus:bg-elevate-peach-light transition-colors flex flex-col">
                                                     <span class="font-bold" x-text="student.name"></span>
                                                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mt-0.5" x-text="student.nisn + ' • ' + student.class_name"></span>
                                                 </button>
@@ -420,20 +425,20 @@
                                     </ul>
                                 </template>
                                 <template x-if="filteredStudents.length === 0">
-                                    <div class="px-4 py-3 text-sm text-slate-500 text-center font-medium">Siswa tidak ditemukan.</div>
+                                    <div class="px-5 py-4 text-sm text-slate-500 text-center font-medium">Siswa tidak ditemukan.</div>
                                 </template>
                             </div>
                         </div>
 
                         <!-- Card Info Siswa Terpilih -->
-                        <div x-show="selectedStudent" class="p-3 bg-[#F3F9FD] border border-[#D0E7F8] rounded-xl flex justify-between items-center" style="display: none;">
+                        <div x-show="selectedStudent" class="p-4 bg-elevate-peach-light/50 border border-elevate-peach/30 rounded-xl flex justify-between items-center" style="display: none;">
                             <div>
-                                <p class="text-[10px] font-bold text-[#5295FF] uppercase tracking-wider mb-0.5">Siswa Terpilih</p>
-                                <p class="font-bold text-[#2A3B52] leading-tight" x-text="selectedStudent?.name"></p>
-                                <p class="text-xs text-slate-500 font-medium mt-0.5" x-text="selectedStudent?.nisn + ' • ' + selectedStudent?.class_name"></p>
+                                <p class="text-[10px] font-bold text-elevate-primary uppercase tracking-wider mb-1">Siswa Terpilih</p>
+                                <p class="font-black text-elevate-dark leading-tight" x-text="selectedStudent?.name"></p>
+                                <p class="text-xs text-elevate-text/70 font-bold mt-0.5" x-text="selectedStudent?.nisn + ' • ' + selectedStudent?.class_name"></p>
                             </div>
-                            <button type="button" @click="clearStudent()" class="w-8 h-8 rounded-lg bg-white border border-[#D0E7F8] text-[#5295FF] flex items-center justify-center hover:bg-[#5295FF] hover:text-white transition-colors shrink-0" title="Ganti Siswa">
-                                <i class="ph-bold ph-x"></i>
+                            <button type="button" @click="clearStudent()" class="w-10 h-10 rounded-xl bg-white border border-elevate-peach/30 text-elevate-primary flex items-center justify-center hover:bg-elevate-primary hover:text-white transition-colors shrink-0 shadow-sm" title="Ganti Siswa">
+                                <i class="ph-bold ph-x text-lg"></i>
                             </button>
                         </div>
                         
@@ -444,12 +449,12 @@
                     {{-- 2. FORM TANGGAL & STATUS --}}
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Tanggal</label>
-                            <input type="date" name="date" required value="{{ date('Y-m-d') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-[#5295FF] focus:border-[#5295FF] font-bold text-slate-700 text-sm">
+                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2">Tanggal</label>
+                            <input type="date" name="date" required value="{{ date('Y-m-d') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:ring-elevate-accent focus:border-elevate-accent font-bold text-elevate-dark py-3.5 text-sm transition-colors">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Status</label>
-                            <select name="status" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-[#5295FF] focus:border-[#5295FF] font-bold text-slate-700 text-sm cursor-pointer">
+                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2">Status</label>
+                            <select name="status" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:ring-elevate-accent focus:border-elevate-accent font-bold text-elevate-dark py-3.5 text-sm cursor-pointer transition-colors">
                                 <option value="Sakit">Sakit</option>
                                 <option value="Izin">Izin</option>
                                 <option value="Alfa">Alfa</option>
@@ -462,22 +467,22 @@
                     {{-- 3. FORM WAKTU & KETERANGAN --}}
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Masuk</label>
-                            <input type="time" name="time_in" value="{{ now()->format('H:i') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-[#5295FF] focus:border-[#5295FF] text-center font-mono font-bold text-slate-700">
+                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2">Masuk</label>
+                            <input type="time" name="time_in" value="{{ now()->format('H:i') }}" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:ring-elevate-accent focus:border-elevate-accent text-center font-mono font-bold text-elevate-dark py-3.5 transition-colors">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Waktu Pulang</label>
-                            <input type="time" name="time_out" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-[#5295FF] focus:border-[#5295FF] text-center font-mono font-bold text-slate-700">
+                            <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2">Pulang</label>
+                            <input type="time" name="time_out" class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:ring-elevate-accent focus:border-elevate-accent text-center font-mono font-bold text-elevate-dark py-3.5 transition-colors">
                         </div>
                     </div>
                     
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Keterangan (Opsional)</label>
-                        <textarea name="notes" rows="2" placeholder="Contoh: Surat dokter menyusul..." class="w-full rounded-xl border-slate-200 bg-slate-50 focus:ring-[#5295FF] focus:border-[#5295FF] text-sm font-medium resize-none"></textarea>
+                        <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2">Keterangan (Opsional)</label>
+                        <textarea name="notes" rows="2" placeholder="Contoh: Surat dokter menyusul..." class="w-full rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:ring-elevate-accent focus:border-elevate-accent text-sm font-medium resize-none p-4 transition-colors"></textarea>
                     </div>
 
-                    <button type="submit" class="w-full mt-2 py-3 bg-[#2A3B52] text-white font-bold rounded-xl hover:bg-[#182436] shadow-md transition-transform active:scale-95 flex items-center justify-center gap-2 border border-transparent">
-                        <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Data
+                    <button type="submit" class="w-full mt-4 py-3.5 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all active:scale-95 flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Data Manual
                     </button>
                 </form>
             </div>
@@ -568,14 +573,14 @@
                         state.long = position.coords.longitude;
                         state.gpsActive = true;
                         if(dom.gpsBadge) {
-                            dom.gpsBadge.className = "px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide bg-[#DFF6DD] text-[#107C10] border border-[#B7DFB9] flex items-center gap-1 transition-all";
+                            dom.gpsBadge.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center gap-1.5 transition-all";
                             dom.gpsBadge.innerHTML = `<i class="ph-fill ph-map-pin"></i> <span class="hidden sm:inline">GPS Aktif</span>`;
                         }
                     },
                     (error) => {
                         state.gpsActive = false;
                         if(dom.gpsBadge) {
-                            dom.gpsBadge.className = "px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide bg-[#FDE7E9] text-[#D13438] border border-[#F4C3C9] flex items-center gap-1 transition-all";
+                            dom.gpsBadge.className = "px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-200 flex items-center gap-1.5 transition-all";
                             dom.gpsBadge.innerHTML = `<i class="ph-bold ph-map-pin-line"></i> <span class="hidden sm:inline">GPS Nonaktif</span>`;
                         }
                         console.warn("Kamera GPS Alert:", error.message);
@@ -620,25 +625,23 @@
                 
                 document.querySelectorAll('.scan-type-btn').forEach(btn => {
                     const isActive = btn.dataset.type === mode;
-                    const colorText = btn.dataset.colorClass; // e.g., text-[#5295FF]
-                    const borderClass = btn.dataset.borderClass; // e.g., border-[#D0E7F8]
+                    const borderClass = btn.dataset.borderClass;
                     
                     if (isActive) {
                         btn.classList.add('ring-2', 'ring-slate-200');
                         btn.classList.replace('border-slate-100', borderClass);
                     } else {
                         btn.classList.remove('ring-2', 'ring-slate-200');
-                        // revert border
-                        btn.className = btn.className.replace(/border-\[[^\]]+\]/, 'border-slate-100');
+                        btn.className = btn.className.replace(/border-\[[^\]]+\]|border-amber-200|border-emerald-200|border-rose-200|border-elevate-primary\/30/, 'border-slate-100');
                     }
                     
                     const dot = btn.querySelector('.indicator-dot');
                     if(dot) {
                         if (isActive) {
-                            dot.className = `w-1.5 h-1.5 rounded-full indicator-dot transition-all scale-125`;
-                            dot.style.backgroundColor = 'currentColor'; // Inherit from text color
+                            dot.className = `w-2 h-2 rounded-full indicator-dot transition-all scale-125`;
+                            dot.style.backgroundColor = 'currentColor';
                         } else {
-                            dot.className = `w-1.5 h-1.5 rounded-full indicator-dot transition-all border border-slate-300`;
+                            dot.className = `w-2 h-2 rounded-full indicator-dot transition-all border border-slate-300`;
                             dot.style.backgroundColor = 'transparent';
                         }
                     }
@@ -647,8 +650,8 @@
                 const labels = { Harian: 'Absen Harian', Makan: 'Makan Siang', Dhuha: 'Sholat Dhuha', Dhuhur: 'Sholat Dhuhur', Ekstrakurikuler: 'Ekstrakurikuler' };
                 dom.modeText.innerText = isAuto ? `Auto: ${labels[mode]}` : labels[mode];
                 dom.scanStatus.innerHTML = mode === 'Ekstrakurikuler' 
-                    ? `<i class="ph-bold ph-warning text-[#D83B01]"></i> Pilih Kegiatan Dulu` 
-                    : `<i class="ph-bold ph-qr-code text-[#5295FF]"></i> Siap Scan ${labels[mode]}`;
+                    ? `<i class="ph-bold ph-warning text-amber-500"></i> Pilih Kegiatan Dulu` 
+                    : `<i class="ph-bold ph-qr-code text-elevate-accent"></i> Siap Scan ${labels[mode]}`;
                 
                 filterLogTable(mode);
             };
@@ -669,8 +672,8 @@
                 state.extraId = e.target.value;
                 const text = e.target.options[e.target.selectedIndex].text;
                 dom.scanStatus.innerHTML = state.extraId 
-                    ? `<i class="ph-bold ph-check text-[#107C10]"></i> Siap: ${text}` 
-                    : `<i class="ph-bold ph-warning text-[#D83B01]"></i> Pilih Kegiatan Dulu`;
+                    ? `<i class="ph-bold ph-check text-emerald-500"></i> Siap: ${text}` 
+                    : `<i class="ph-bold ph-warning text-amber-500"></i> Pilih Kegiatan Dulu`;
             });
 
             function filterLogTable(mode) {
@@ -709,13 +712,13 @@
 
                 if (state.mode === 'Ekstrakurikuler' && !state.extraId) {
                     playBeep('warning');
-                    Swal.fire({ toast: true, position: 'top', icon: 'warning', title: 'Pilih Ekskul dulu!', showConfirmButton: false, timer: 1500, customClass: { popup: 'rounded-xl fluent-modal' } });
+                    Swal.fire({ toast: true, position: 'top', icon: 'warning', title: 'Pilih Ekskul dulu!', showConfirmButton: false, timer: 1500, customClass: { popup: 'rounded-xl border border-slate-100 shadow-xl' } });
                     return;
                 }
 
                 state.isProcessing = true;
                 state.processedQr.add(studentId);
-                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-[#5295FF]"></i> Memproses...`;
+                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-elevate-accent"></i> Memproses...`;
 
                 try {
                     let finalType = state.mode;
@@ -767,7 +770,7 @@
                 initAudio(); 
                 Swal.fire({
                     title: 'Input Manual',
-                    html: '<p class="text-sm text-slate-500 mb-4">Masukkan NISN atau ID Siswa</p>',
+                    html: '<p class="text-sm text-slate-500 mb-4 font-medium">Masukkan NISN atau ID Siswa</p>',
                     input: 'text',
                     inputAttributes: {
                         autocapitalize: 'off',
@@ -779,10 +782,10 @@
                     cancelButtonText: 'Batal',
                     showLoaderOnConfirm: true,
                     customClass: {
-                        popup: 'rounded-xl fluent-modal font-sans border-0 shadow-2xl',
-                        confirmButton: 'bg-[#2A3B52] text-white px-6 py-3 rounded-xl font-bold hover:bg-[#182436] transition-colors mx-2 shadow-sm border border-transparent flex items-center gap-2',
-                        cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 border border-transparent transition-colors mx-2',
-                        input: 'rounded-xl border-slate-200 focus:border-[#5295FF] focus:ring-[#5295FF] text-center text-lg font-mono font-bold w-4/5 mx-auto py-3'
+                        popup: 'rounded-[2rem] border border-slate-100 shadow-2xl font-sans',
+                        confirmButton: 'bg-elevate-dark text-white px-6 py-3 rounded-xl font-bold hover:bg-elevate-primary transition-colors mx-2 shadow-lg flex items-center gap-2',
+                        cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2',
+                        input: 'rounded-xl border-slate-200 focus:border-elevate-accent focus:ring-elevate-accent text-center text-lg font-mono font-black w-4/5 mx-auto py-3'
                     },
                     buttonsStyling: false,
                     preConfirm: (inputValue) => {
@@ -802,9 +805,9 @@
                 playBeep(type === 'Makan' ? 'makan' : (isLate ? 'warning' : 'success'));
                 triggerOverlay(type === 'Makan' ? 'makan' : (isLate ? 'warning' : 'success'));
                 
-                dom.scanResult.innerHTML = `<span class="${isLate ? 'text-[#D83B01]' : 'text-[#107C10]'} flex items-center justify-center gap-2"><i class="ph-fill ph-check-circle"></i> ${data.message}</span>`;
+                dom.scanResult.innerHTML = `<span class="${isLate ? 'text-amber-600' : 'text-emerald-600'} flex items-center justify-center gap-2"><i class="ph-fill ph-check-circle"></i> ${data.message}</span>`;
                 dom.scanResult.classList.remove('hidden', 'opacity-0', 'scale-95');
-                dom.scanResult.className = `mt-4 p-4 rounded-xl font-bold text-sm text-center transition-all duration-300 transform scale-100 border ${isLate ? 'bg-[#FFEFD6] border-[#FFD8A8]' : 'bg-[#DFF6DD] border-[#B7DFB9]'} shadow-sm`;
+                dom.scanResult.className = `mt-4 p-4 rounded-xl font-bold text-sm text-center transition-all duration-300 transform scale-100 border ${isLate ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200'} shadow-sm`;
                 
                 setTimeout(() => {
                     dom.scanResult.classList.add('opacity-0', 'scale-95');
@@ -821,8 +824,8 @@
             function handleError(msg) {
                 playBeep('error');
                 triggerOverlay('error');
-                dom.scanResult.innerHTML = `<span class="text-[#D13438] flex items-center justify-center gap-2"><i class="ph-fill ph-x-circle"></i> ${msg}</span>`;
-                dom.scanResult.className = `mt-4 p-4 rounded-xl font-bold text-sm text-center transition-all duration-300 transform scale-100 border bg-[#FDE7E9] border-[#F4C3C9] shadow-sm`;
+                dom.scanResult.innerHTML = `<span class="text-rose-600 flex items-center justify-center gap-2"><i class="ph-fill ph-x-circle"></i> ${msg}</span>`;
+                dom.scanResult.className = `mt-4 p-4 rounded-xl font-bold text-sm text-center transition-all duration-300 transform scale-100 border bg-rose-50 border-rose-200 shadow-sm`;
                 dom.scanResult.classList.remove('hidden', 'opacity-0', 'scale-95');
                 setTimeout(() => dom.scanResult.classList.add('opacity-0', 'scale-95'), 3000);
             }
@@ -836,25 +839,25 @@
                 document.getElementById('no-log-entry').classList.add('hidden');
                 
                 const row = document.createElement('tr');
-                row.className = 'new-row-entry border-b border-slate-50 last:border-0 hover:bg-white transition-colors group';
+                row.className = 'new-row-entry border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors group';
                 row.dataset.typeRaw = scan.type_raw;
 
                 row.innerHTML = `
-                    <td class="px-6 py-4 rounded-l-lg">
-                        <div class="font-bold text-[#2A3B52] group-hover:text-[#5295FF] transition-colors">${scan.student_name}</div>
+                    <td class="px-6 py-4 rounded-l-xl">
+                        <div class="font-bold text-elevate-dark group-hover:text-elevate-primary transition-colors">${scan.student_name}</div>
                         <div class="text-[10px] text-slate-400 font-mono font-bold">${scan.student_id || '-'}</div>
                     </td>
                     <td class="col-harian px-4 py-4 text-center">
-                        ${(scan.type_raw === 'Masuk' || scan.type_raw === 'Harian' || scan.time_in) ? `<span class="font-mono font-bold text-slate-600 bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">${scan.time_in || '-'}</span>` : '<span class="text-slate-300 font-bold">-</span>'}
+                        ${(scan.type_raw === 'Masuk' || scan.type_raw === 'Harian' || scan.time_in) ? `<span class="font-mono font-bold text-elevate-text bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">${scan.time_in || '-'}</span>` : '<span class="text-slate-300 font-bold">-</span>'}
                     </td>
                     <td class="col-harian px-4 py-4 text-center">
-                        ${(scan.type_raw === 'Pulang' || scan.time_out) ? `<span class="font-mono font-bold text-slate-600 bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">${scan.time_out || scan.time_in}</span>` : '<span class="text-slate-300 font-bold">-</span>'}
+                        ${(scan.type_raw === 'Pulang' || scan.time_out) ? `<span class="font-mono font-bold text-elevate-text bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">${scan.time_out || scan.time_in}</span>` : '<span class="text-slate-300 font-bold">-</span>'}
                     </td>
                     <td class="col-waktu hidden-col px-4 py-4 text-center">
-                         <span class="font-mono font-bold text-slate-600 bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">${scan.time_in || '-'}</span>
+                         <span class="font-mono font-bold text-elevate-text bg-white border border-slate-200 px-2 py-1 rounded-md text-xs shadow-sm">${scan.time_in || '-'}</span>
                     </td>
-                    <td class="col-kegiatan hidden-col px-4 py-4 text-center text-[#2A3B52] font-bold text-xs">${scan.ekskul_name || '-'}</td>
-                    <td class="px-6 py-4 text-right rounded-r-lg"><span class="${scan.status.includes('Terlambat') ? 'bg-[#FFEFD6] text-[#D83B01] border-[#FFD8A8]' : 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9]'} border px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wide shadow-sm">${scan.status}</span></td>
+                    <td class="col-kegiatan hidden-col px-4 py-4 text-center text-elevate-dark font-bold text-xs">${scan.ekskul_name || '-'}</td>
+                    <td class="px-6 py-4 text-right rounded-r-xl"><span class="${scan.status.includes('Terlambat') ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-emerald-50 text-emerald-600 border-emerald-200'} border px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wide shadow-sm">${scan.status}</span></td>
                 `;
 
                 dom.tableBody.prepend(row);
@@ -877,10 +880,10 @@
 
             qrScanner.start(cameraConstraints, config, onScanSuccess)
                 .then(() => {
-                    dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-[#5295FF]"></i> Siap Scan`;
+                    dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-elevate-accent"></i> Siap Scan`;
                 })
                 .catch(err => {
-                    dom.scanStatus.innerHTML = `<span class="text-[#D13438]"><i class="ph-bold ph-warning"></i> Kamera Ditolak / Error</span>`;
+                    dom.scanStatus.innerHTML = `<span class="text-rose-500"><i class="ph-bold ph-warning"></i> Kamera Ditolak / Error</span>`;
                     console.warn(err);
                 });
 
@@ -889,14 +892,14 @@
                 const file = e.target.files[0];
                 
                 initAudio();
-                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-[#5295FF]"></i> Membaca Gambar...`;
+                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-elevate-accent"></i> Membaca Gambar...`;
 
                 try {
                     const decodedText = await qrScanner.scanFile(file, true);
                     onScanSuccess(decodedText);
                 } catch (err) {
                     handleError('QR Code tidak valid / tidak terbaca di gambar ini.');
-                    dom.scanStatus.innerHTML = `<i class="ph-bold ph-warning text-[#D83B01]"></i> Gagal Membaca QR`;
+                    dom.scanStatus.innerHTML = `<i class="ph-bold ph-warning text-rose-500"></i> Gagal Membaca QR`;
                     setTimeout(() => setMode(state.mode, !state.manualOverride), 2000);
                 } finally {
                     e.target.value = ''; 
@@ -908,7 +911,7 @@
             window.switchCamera = () => {
                 initAudio();
                 currentFacingMode = currentFacingMode === "environment" ? "user" : "environment";
-                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-[#5295FF]"></i> Memutar Kamera...`;
+                dom.scanStatus.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-elevate-accent"></i> Memutar Kamera...`;
 
                 qrScanner.stop().then(() => {
                     qrScanner.start(
@@ -916,7 +919,7 @@
                         config, 
                         onScanSuccess
                     ).then(() => {
-                        dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-[#5295FF]"></i> Siap Scan`;
+                        dom.scanStatus.innerHTML = `<i class="ph-bold ph-qr-code text-elevate-accent"></i> Siap Scan`;
                     }).catch(err => {
                         handleError('Gagal memuat kamera tujuan.');
                         console.warn(err);
@@ -946,7 +949,6 @@
                         return;
                     }
                     const q = this.searchQuery.toLowerCase();
-                    // Pencarian pintar dengan fallback string kosong untuk mencegah error 'toLowerCase' of null
                     this.filteredStudents = this.students.filter(s => {
                         const name = (s.name || '').toLowerCase();
                         const nisn = (s.nisn || '').toLowerCase();
@@ -982,7 +984,7 @@
                             toast: true, position: 'top', icon: 'warning', 
                             title: 'Pilih siswa terlebih dahulu!', 
                             showConfirmButton: false, timer: 2500, 
-                            customClass: { popup: 'rounded-xl fluent-modal font-sans border-0' }
+                            customClass: { popup: 'rounded-xl border border-slate-100 font-sans shadow-xl' }
                         });
                     } else {
                         const btn = e.target.querySelector('button[type="submit"]');

@@ -2,8 +2,15 @@
     {{-- Load SweetAlert --}}
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- TAMBAHAN: State AlpineJS untuk Modal Edit --}}
-    <div class="py-6 sm:py-8 font-sans text-slate-800"
+    {{-- CUSTOM STYLES FLUENT --}}
+    <style>
+        .fluent-card { box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.05), 0 0.3px 0.9px 0 rgba(0, 0, 0, 0.03); border: 1px solid rgba(0, 0, 0, 0.05); transition: all 0.3s ease; }
+        .fluent-card:hover { box-shadow: 0 6.4px 14.4px 0 rgba(0, 0, 0, 0.08), 0 1.2px 3.6px 0 rgba(0, 0, 0, 0.05); transform: translateY(-2px); }
+        .fluent-modal { box-shadow: 0 25.6px 57.6px 0 rgba(0, 0, 0, 0.15), 0 4.8px 14.4px 0 rgba(0, 0, 0, 0.1); border: 1px solid rgba(0, 0, 0, 0.05); }
+    </style>
+
+    {{-- State AlpineJS untuk Modal Edit --}}
+    <div class="py-6 sm:py-8 font-sans text-elevate-text bg-elevate-surface min-h-screen relative overflow-hidden"
          x-data="{ 
             editModalOpen: false, 
             editData: { id: '', title: '', description: '', video_url: '' },
@@ -20,52 +27,53 @@
             }
          }">
         
-        {{-- HERO SECTION --}}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10">
-            <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
+        {{-- Efek Latar Belakang Halus --}}
+        <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-10 pointer-events-none -z-10 blur-3xl"></div>
+
+        {{-- HERO SECTION (ELEVATE THEME) --}}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-10 relative z-10">
+            <div class="relative rounded-[2.5rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group fluent-card">
                 
                 {{-- Background Decorations --}}
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                <div class="absolute -top-24 -right-24 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-blue-500/30 transition-all duration-700"></div>
-                <div class="absolute bottom-0 right-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
+                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
+                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl group-hover:scale-105 transition-transform duration-700"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     
                     {{-- Text Content --}}
                     <div class="max-w-2xl">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm">
-                            <i class="ph-fill ph-image"></i> Dokumentasi Sekolah
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/40 border border-white/50 text-elevate-dark text-[10px] font-black uppercase tracking-widest mb-4 backdrop-blur-sm shadow-sm">
+                            <i class="ph-fill ph-image text-elevate-primary"></i> Dokumentasi Sekolah
                         </div>
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-white leading-tight">
+                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-elevate-dark leading-tight">
                             Galeri Kegiatan
                         </h1>
-                        <p class="text-blue-100/80 text-sm md:text-base font-medium leading-relaxed max-w-lg">
+                        <p class="text-elevate-dark/80 text-sm md:text-base font-bold leading-relaxed max-w-lg">
                             Abadikan dan publikasikan momen terbaik sekolah. Kelola foto dan video kegiatan untuk ditampilkan di halaman depan.
                         </p>
                     </div>
                     
                     {{-- Stats Cards --}}
-                    <div class="w-full md:w-auto mt-4 md:mt-0">
-                        <div class="grid grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                            <div class="bg-white/10 backdrop-blur-md px-5 py-5 rounded-2xl border border-white/10 text-center md:text-left hover:bg-white/15 transition-colors group/stat">
-                                <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center md:justify-start gap-2 mb-1 text-blue-300">
-                                    <i class="ph-duotone ph-images-square text-2xl md:text-xl lg:text-2xl group-hover/stat:scale-110 transition-transform"></i>
-                                    <span class="text-[10px] font-bold uppercase tracking-wider">Total Album</span>
-                                </div>
-                                <span class="block text-3xl font-black text-white tracking-tight mt-1">{{ $activities->total() ?? 0 }}</span>
+                    <div class="w-full md:w-auto mt-4 md:mt-0 flex gap-4">
+                        <div class="bg-white/40 backdrop-blur-md px-6 py-5 rounded-[1.5rem] border border-white/50 flex-1 md:flex-none min-w-[140px] text-center md:text-left hover:bg-white/60 transition-colors shadow-sm group/stat">
+                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-elevate-primary">
+                                <i class="ph-duotone ph-images-square text-2xl group-hover/stat:scale-110 transition-transform"></i>
+                                <span class="text-[10px] font-black uppercase tracking-wider text-elevate-dark/70">Total Album</span>
                             </div>
-
-                            <a href="{{ url('/activities') }}" target="_blank" class="bg-indigo-500/20 backdrop-blur-md px-5 py-5 rounded-2xl border border-indigo-400/20 text-center md:text-left hover:bg-indigo-500/30 transition-colors group/link cursor-pointer">
-                                <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center md:justify-start gap-2 mb-1 text-indigo-300">
-                                    <i class="ph-duotone ph-eye text-2xl md:text-xl lg:text-2xl"></i>
-                                    <span class="text-[10px] font-bold uppercase tracking-wider">Preview</span>
-                                </div>
-                                <div class="flex items-center justify-center md:justify-start gap-1 text-white font-bold text-sm mt-2 group-hover/link:translate-x-1 transition-transform">
-                                    <span>Lihat Web</span>
-                                    <i class="ph-bold ph-arrow-right"></i>
-                                </div>
-                            </a>
+                            <span class="block text-3xl md:text-4xl font-black text-elevate-dark tracking-tight mt-1">{{ $activities->total() ?? 0 }}</span>
                         </div>
+
+                        <a href="{{ url('/activities') }}" target="_blank" class="bg-elevate-dark px-6 py-5 rounded-[1.5rem] border border-elevate-dark text-center md:text-left hover:bg-elevate-primary transition-all duration-300 group/link cursor-pointer shadow-xl shadow-elevate-dark/30 flex flex-col justify-center hover:-translate-y-1">
+                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-elevate-accent">
+                                <i class="ph-duotone ph-eye text-2xl"></i>
+                                <span class="text-[10px] font-black uppercase tracking-wider hidden sm:inline">Preview</span>
+                            </div>
+                            <div class="flex items-center justify-center md:justify-start gap-1.5 text-white font-black text-sm mt-1">
+                                <span>Lihat Web</span>
+                                <i class="ph-bold ph-arrow-right group-hover/link:translate-x-1 transition-transform"></i>
+                            </div>
+                        </a>
                     </div>
 
                 </div>
@@ -73,7 +81,7 @@
         </div>
 
         {{-- Main Content --}}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
             {{-- Flash Messages (SweetAlert Style Toast) --}}
             @if(session('success'))
@@ -88,9 +96,9 @@
                             toast: true,
                             position: 'top-end',
                             background: '#ffffff',
-                            iconColor: '{{ str_contains(session("success"), "Gagal") || str_contains(session("success"), "Error") ? "#ef4444" : "#10b981" }}',
+                            iconColor: '{{ str_contains(session("success"), "Gagal") || str_contains(session("success"), "Error") ? "#e11d48" : "#10b981" }}',
                             customClass: {
-                                popup: 'shadow-lg border border-slate-100 rounded-2xl'
+                                popup: 'fluent-modal rounded-[1.5rem] font-sans'
                             }
                         });
                     });
@@ -101,56 +109,60 @@
                 
                 {{-- KOLOM KIRI (1/3): FORM INPUT --}}
                 <div class="lg:col-span-1 space-y-6">
-                    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden lg:sticky lg:top-24 relative group hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
-                        <div class="bg-gradient-to-r from-blue-900 to-blue-800 p-8 text-white relative overflow-hidden">
-                            <div class="absolute -right-6 -bottom-6 text-white/5 text-9xl pointer-events-none transform rotate-12">
-                                <i class="ph-fill ph-aperture"></i>
+                    <div class="bg-white rounded-[2rem] border border-slate-100 overflow-hidden lg:sticky lg:top-24 relative fluent-card">
+                        <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-elevate-primary to-elevate-accent"></div>
+                        
+                        <div class="p-6 md:p-8 relative z-10">
+                            <div class="flex items-center gap-4 mb-6 pb-4 border-b border-slate-50">
+                                <div class="w-12 h-12 bg-elevate-peach-light text-elevate-primary border border-elevate-peach/50 rounded-xl flex items-center justify-center text-2xl shadow-sm shrink-0">
+                                    <i class="ph-duotone ph-aperture"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-black text-elevate-dark">Upload Kegiatan</h3>
+                                    <p class="text-xs font-bold text-elevate-text/60 uppercase tracking-wide mt-1">Publikasi Galeri</p>
+                                </div>
                             </div>
-                            <h3 class="text-xl font-black relative z-10">Upload Kegiatan</h3>
-                            <p class="text-blue-200 text-sm font-medium relative z-10 mt-1">Bagikan momen terbaik sekolah.</p>
-                        </div>
 
-                        <div class="p-8 relative z-10">
                             <form action="{{ route('school-activities.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" x-data="{ imgPreviews: [] }">
                                 @csrf
                                 
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Judul Kegiatan</label>
+                                    <label class="block text-[10px] font-black text-elevate-primary uppercase tracking-widest mb-2 ml-1">Judul Kegiatan</label>
                                     <div class="relative">
                                         <i class="ph-bold ph-text-t absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                        <input type="text" name="title" value="{{ old('title') }}" required placeholder="Contoh: Perkemahan Sabtu Minggu" class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-800 py-3 transition-colors placeholder:font-normal">
+                                        <input type="text" name="title" value="{{ old('title') }}" required placeholder="Contoh: Perkemahan Sabtu Minggu" class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 transition-colors placeholder:font-medium">
                                     </div>
                                     @error('title') <span class="text-rose-500 text-xs mt-1 block font-bold ml-1">{{ $message }}</span> @enderror
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Deskripsi Singkat</label>
-                                    <textarea name="description" required rows="3" placeholder="Ceritakan sedikit tentang kegiatan ini..." class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm text-slate-700 placeholder:font-normal p-4 font-medium">{{ old('description') }}</textarea>
+                                    <label class="block text-[10px] font-black text-elevate-primary uppercase tracking-widest mb-2 ml-1">Deskripsi Singkat</label>
+                                    <textarea name="description" required rows="3" placeholder="Ceritakan sedikit tentang kegiatan ini..." class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 text-sm text-elevate-dark placeholder:font-medium p-4 font-medium transition-colors">{{ old('description') }}</textarea>
                                     @error('description') <span class="text-rose-500 text-xs mt-1 block font-bold ml-1">{{ $message }}</span> @enderror
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Foto Dokumentasi</label>
-                                    <div class="relative group">
+                                    <label class="block text-[10px] font-black text-elevate-primary uppercase tracking-widest mb-2 ml-1">Foto Dokumentasi</label>
+                                    <div class="relative group/upload">
                                         <input type="file" name="photos[]" accept="image/*" multiple
                                             @change="imgPreviews = []; Array.from($event.target.files).forEach(file => imgPreviews.push(URL.createObjectURL(file)))"
                                             class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" required>
                                         
-                                        <div class="border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center transition-all group-hover:border-blue-500 group-hover:bg-blue-50"
-                                             :class="{'border-blue-500 bg-blue-50': imgPreviews.length > 0}">
+                                        <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center transition-all group-hover/upload:border-elevate-primary group-hover/upload:bg-elevate-primary/5"
+                                             :class="{'border-elevate-primary bg-elevate-primary/5': imgPreviews.length > 0}">
                                             
                                             <div x-show="imgPreviews.length === 0" class="space-y-3 py-2">
-                                                <div class="mx-auto w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-blue-600 transition-colors shadow-sm">
+                                                <div class="mx-auto w-12 h-12 rounded-[1rem] bg-elevate-peach-light flex items-center justify-center text-elevate-primary border border-elevate-peach/30 transition-colors shadow-sm">
                                                     <i class="ph-fill ph-images text-2xl"></i>
                                                 </div>
                                                 <div>
-                                                    <p class="text-xs font-bold text-slate-600"><span class="text-blue-600 underline">Pilih banyak foto</span> sekaligus</p>
-                                                    <p class="text-[10px] text-slate-400 mt-1">Bisa blok lebih dari 1 file (Maks 10MB/foto)</p>
+                                                    <p class="text-xs font-bold text-elevate-dark"><span class="text-elevate-primary underline">Pilih banyak foto</span> sekaligus</p>
+                                                    <p class="text-[10px] text-slate-400 mt-1 font-bold">Bisa blok lebih dari 1 file (Maks 10MB/foto)</p>
                                                 </div>
                                             </div>
 
                                             <div x-show="imgPreviews.length > 0" class="w-full text-left" style="display: none;">
-                                                <p class="text-xs font-bold text-blue-600 mb-2">Terpilih: <span x-text="imgPreviews.length"></span> Foto</p>
+                                                <p class="text-[10px] font-black text-elevate-primary uppercase tracking-widest mb-2">Terpilih: <span x-text="imgPreviews.length"></span> Foto</p>
                                                 <div class="grid grid-cols-3 gap-2">
                                                     <template x-for="(src, index) in imgPreviews" :key="index">
                                                         <div class="relative h-16 sm:h-20 rounded-lg overflow-hidden shadow-sm border border-slate-200">
@@ -158,7 +170,7 @@
                                                         </div>
                                                     </template>
                                                 </div>
-                                                <p class="text-[10px] text-slate-400 mt-3 text-center">Klik atau Drop area ini untuk mengganti foto</p>
+                                                <p class="text-[10px] text-slate-400 mt-3 text-center font-bold">Klik atau Drop area ini untuk mengganti foto</p>
                                             </div>
                                         </div>
                                     </div>
@@ -166,19 +178,21 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Link Video (Opsional)</label>
+                                    <label class="block text-[10px] font-black text-elevate-primary uppercase tracking-widest mb-2 ml-1">Link Video (Opsional)</label>
                                     <div class="relative">
-                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-red-500">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-rose-500">
                                             <i class="ph-fill ph-youtube-logo text-lg"></i>
                                         </div>
-                                        <input type="url" name="video_url" value="{{ old('video_url') }}" placeholder="https://youtube.com/..." class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm text-slate-700 font-bold placeholder:font-normal py-3 transition-colors">
+                                        <input type="url" name="video_url" value="{{ old('video_url') }}" placeholder="https://youtube.com/..." class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 text-sm text-elevate-dark font-bold placeholder:font-medium py-3.5 transition-colors">
                                     </div>
                                 </div>
 
-                                <button type="submit" class="w-full py-3.5 px-4 bg-blue-900 text-white font-bold rounded-xl hover:bg-blue-800 transition-all shadow-lg shadow-blue-900/30 flex items-center justify-center gap-2 transform active:scale-[0.98]">
-                                    <i class="ph-bold ph-paper-plane-right text-lg"></i>
-                                    <span>Publikasikan Album</span>
-                                </button>
+                                <div class="pt-2">
+                                    <button type="submit" class="w-full py-3.5 px-4 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary transition-all shadow-lg shadow-elevate-dark/20 flex items-center justify-center gap-2 transform active:scale-95 border border-transparent">
+                                        <i class="ph-bold ph-paper-plane-right text-lg"></i>
+                                        <span>Publikasikan Album</span>
+                                    </button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -186,21 +200,24 @@
 
                 {{-- KOLOM KANAN (2/3): PREVIEW LIST --}}
                 <div class="lg:col-span-2">
-                    <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="bg-white rounded-[2rem] border border-slate-100 overflow-hidden flex flex-col h-full min-h-[600px] fluent-card">
                         
-                        <div class="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row gap-4 justify-between items-center">
-                            <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
-                                <i class="ph-fill ph-list-dashes text-blue-900"></i> Daftar Kegiatan
+                        <div class="p-6 md:p-8 border-b border-slate-50 bg-elevate-peach-light/30 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                            <h3 class="text-xl font-black text-elevate-dark flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-white text-elevate-primary flex items-center justify-center border border-elevate-peach/50 shadow-sm">
+                                    <i class="ph-bold ph-list-dashes text-xl"></i>
+                                </div>
+                                Daftar Kegiatan
                             </h3>
-                            <span class="bg-white border border-slate-200 text-[10px] font-black px-3 py-1.5 rounded-xl text-slate-500 shadow-sm">
+                            <span class="bg-white border border-slate-200 text-[10px] font-black px-3 py-1.5 rounded-full text-elevate-primary shadow-sm tracking-wider uppercase">
                                 Total: {{ $activities->total() ?? 0 }} Post
                             </span>
                         </div>
 
-                        <div class="p-6 bg-slate-50/30 min-h-[500px]">
+                        <div class="p-6 md:p-8 bg-white flex-1">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 @forelse($activities as $activity)
-                                    <div class="group bg-white rounded-[1.5rem] overflow-hidden border border-slate-100 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300 flex flex-col relative h-full">
+                                    <div class="group bg-white rounded-[1.5rem] overflow-hidden border border-slate-200 hover:border-elevate-accent/50 transition-all duration-300 flex flex-col relative h-full fluent-card">
                                         
                                         <div class="relative h-56 w-full bg-slate-100 overflow-hidden">
                                             @php
@@ -222,17 +239,17 @@
                                             @if($coverImage)
                                                 <img src="{{ asset('storage/' . $coverImage) }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
                                             @else
-                                                <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-50">
+                                                <div class="w-full h-full flex flex-col items-center justify-center text-elevate-primary bg-elevate-peach-light/50">
                                                     <i class="ph-duotone ph-image text-5xl mb-2 opacity-50"></i>
-                                                    <span class="text-xs font-bold uppercase tracking-wide">Tidak ada foto</span>
+                                                    <span class="text-[10px] font-black uppercase tracking-widest">Tidak ada foto</span>
                                                 </div>
                                             @endif
 
-                                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-80"></div>
+                                            <div class="absolute inset-0 bg-gradient-to-t from-elevate-dark/90 via-transparent to-transparent opacity-80"></div>
 
                                             @if($totalImages > 1)
                                                 <div class="absolute top-4 right-4 z-20">
-                                                    <span class="bg-white/90 backdrop-blur text-slate-800 text-[10px] font-bold px-2 py-1 rounded-md shadow-sm flex items-center gap-1 border border-white/50">
+                                                    <span class="bg-white/90 backdrop-blur-md text-elevate-primary text-[10px] font-black px-2.5 py-1.5 rounded-lg shadow-sm flex items-center gap-1.5 border border-white/50">
                                                         <i class="ph-fill ph-images"></i> +{{ $totalImages - 1 }} Foto
                                                     </span>
                                                 </div>
@@ -240,55 +257,55 @@
 
                                             @if($activity->video_url)
                                                 <div class="absolute top-4 left-4 z-20">
-                                                    <a href="{{ $activity->video_url }}" target="_blank" class="px-3 py-1.5 bg-red-600/90 backdrop-blur text-white text-[10px] font-bold uppercase rounded-lg shadow-lg flex items-center gap-1.5 hover:bg-red-500 transition-colors">
+                                                    <a href="{{ $activity->video_url }}" target="_blank" class="px-3 py-1.5 bg-rose-600/90 backdrop-blur-md text-white text-[10px] font-black uppercase rounded-lg shadow-lg flex items-center gap-1.5 hover:bg-rose-500 transition-colors border border-rose-500/50">
                                                         <i class="ph-fill ph-play-circle text-sm"></i> Tonton
                                                     </a>
                                                 </div>
                                             @endif
 
-                                            <!-- TAMBAHAN: Tombol Aksi (Edit & Hapus) Stack -->
-                                            <div class="absolute top-4 right-4 z-30 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 transform translate-x-2 group-hover:translate-x-0 {{ $totalImages > 1 ? 'mt-8' : '' }}">
+                                            <!-- Tombol Aksi (Edit & Hapus) Stack -->
+                                            <div class="absolute top-4 right-4 z-30 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 transform translate-x-2 group-hover:translate-x-0 {{ $totalImages > 1 ? 'mt-10' : '' }}">
                                                 
                                                 <!-- Tombol Edit -->
-                                                <button type="button" @click="openEditModal(@js($activity), '{{ route('school-activities.update', $activity->id) }}')" class="bg-white/90 backdrop-blur text-amber-500 p-2.5 rounded-xl shadow-lg hover:bg-amber-500 hover:text-white transition-all" title="Edit Kegiatan">
+                                                <button type="button" @click="openEditModal(@js($activity), '{{ route('school-activities.update', $activity->id) }}')" class="bg-white/90 backdrop-blur-md text-amber-500 p-2.5 rounded-xl shadow-sm border border-white/50 hover:bg-amber-500 hover:text-white transition-all" title="Edit Kegiatan">
                                                     <i class="ph-bold ph-pencil-simple text-lg"></i>
                                                 </button>
 
                                                 <!-- Tombol Hapus -->
                                                 <form action="{{ route('school-activities.destroy', $activity->id) }}" method="POST" class="delete-form">
                                                     @csrf @method('DELETE')
-                                                    <button type="button" class="btn-delete bg-white/90 backdrop-blur text-rose-500 p-2.5 rounded-xl shadow-lg hover:bg-rose-500 hover:text-white transition-all" title="Hapus Kegiatan">
+                                                    <button type="button" class="btn-delete bg-white/90 backdrop-blur-md text-rose-500 p-2.5 rounded-xl shadow-sm border border-white/50 hover:bg-rose-500 hover:text-white transition-all" title="Hapus Kegiatan">
                                                         <i class="ph-bold ph-trash text-lg"></i>
                                                     </button>
                                                 </form>
                                             </div>
 
                                             <div class="absolute bottom-4 left-4 z-20">
-                                                <span class="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-1.5 bg-black/30 backdrop-blur-md px-3 py-1 rounded-lg border border-white/10">
-                                                    <i class="ph-bold ph-calendar-blank"></i>
+                                                <span class="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/20 shadow-sm">
+                                                    <i class="ph-bold ph-calendar-blank text-elevate-accent"></i>
                                                     {{ $activity->created_at->format('d M Y') }}
                                                 </span>
                                             </div>
                                         </div>
 
-                                        <div class="p-6 flex-1 flex flex-col">
-                                            <div class="mb-4">
-                                                <h4 class="text-lg font-black text-slate-800 mb-2 line-clamp-2 leading-tight group-hover:text-blue-700 transition-colors">
+                                        <div class="p-6 flex-1 flex flex-col border-t border-slate-100">
+                                            <div class="mb-2">
+                                                <h4 class="text-lg font-black text-elevate-dark mb-2 line-clamp-2 leading-tight group-hover:text-elevate-primary transition-colors">
                                                     {{ $activity->title }}
                                                 </h4>
-                                                <p class="text-xs text-slate-500 leading-relaxed line-clamp-3 font-medium">
+                                                <p class="text-xs text-elevate-text/70 leading-relaxed line-clamp-3 font-medium">
                                                     {{ $activity->description }}
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="col-span-1 md:col-span-2 py-20 text-center bg-white rounded-[2rem] border-2 border-dashed border-slate-200">
-                                        <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300 shadow-sm">
+                                    <div class="col-span-1 md:col-span-2 py-24 text-center bg-slate-50/50 rounded-[2rem] border-2 border-dashed border-slate-200">
+                                        <div class="w-20 h-20 bg-elevate-peach-light rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 text-elevate-primary border border-elevate-peach/30 shadow-sm">
                                             <i class="ph-duotone ph-image-broken text-4xl"></i>
                                         </div>
-                                        <h4 class="text-slate-700 font-bold text-lg">Belum ada kegiatan</h4>
-                                        <p class="text-sm text-slate-400 mt-1 max-w-xs mx-auto">Mulai dengan mengupload foto dokumentasi kegiatan sekolah di formulir samping.</p>
+                                        <h4 class="text-elevate-dark font-black text-lg">Belum ada kegiatan</h4>
+                                        <p class="text-sm text-slate-500 font-medium mt-1 max-w-xs mx-auto">Mulai dengan mengupload foto dokumentasi kegiatan sekolah di formulir samping.</p>
                                     </div>
                                 @endforelse
                             </div>
@@ -301,60 +318,63 @@
                 </div>
             </div>
 
-            {{-- TAMBAHAN: Modal Edit Kegiatan --}}
-            <div x-show="editModalOpen" x-cloak class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6">
+            {{-- Modal Edit Kegiatan (ELEVATE THEME) --}}
+            <div x-show="editModalOpen" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
                 <!-- Backdrop -->
                 <div x-show="editModalOpen" 
-                     x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                     x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-                     class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" 
+                     x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 backdrop-blur-none" x-transition:enter-end="opacity-100 backdrop-blur-sm"
+                     x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 backdrop-blur-sm" x-transition:leave-end="opacity-0 backdrop-blur-none"
+                     class="fixed inset-0 bg-elevate-dark/70 backdrop-blur-sm" 
                      @click="closeEditModal()"></div>
 
                 <!-- Modal Panel -->
                 <div x-show="editModalOpen" 
-                     x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                     x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                     class="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl border border-slate-100 flex flex-col max-h-[90vh] overflow-hidden" 
+                     x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-8 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                     x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-8 sm:scale-95"
+                     class="relative bg-white rounded-[2rem] fluent-modal w-full max-w-2xl flex flex-col max-h-[90vh] overflow-hidden" 
                      @click.away="closeEditModal()">
                      
                     <!-- Modal Header -->
-                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
-                        <h3 class="text-lg font-black text-slate-800 flex items-center gap-2">
-                            <i class="ph-bold ph-pencil-simple text-blue-600"></i> Edit Album Kegiatan
+                    <div class="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-elevate-peach-light/30 shrink-0">
+                        <h3 class="text-xl font-black text-elevate-dark flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-white text-elevate-primary flex items-center justify-center border border-elevate-peach/50 shadow-sm">
+                                <i class="ph-bold ph-pencil-simple text-xl"></i>
+                            </div>
+                            Edit Album Kegiatan
                         </h3>
-                        <button @click="closeEditModal()" type="button" class="text-slate-400 hover:text-slate-600 bg-white hover:bg-slate-100 p-2 rounded-full transition-colors border border-slate-200">
-                            <i class="ph-bold ph-x"></i>
+                        <button @click="closeEditModal()" type="button" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-rose-600 bg-slate-50 hover:bg-rose-50 rounded-full transition-colors border border-transparent">
+                            <i class="ph-bold ph-x text-lg"></i>
                         </button>
                     </div>
 
                     <!-- Modal Form -->
-                    <form :action="editFormAction" method="POST" enctype="multipart/form-data" class="p-6 overflow-y-auto custom-scrollbar flex-1" x-data="{ editImgPreviews: [], isSubmitting: false }" @submit="isSubmitting = true">
+                    <form :action="editFormAction" method="POST" enctype="multipart/form-data" class="p-8 overflow-y-auto custom-scrollbar flex-1" x-data="{ editImgPreviews: [], isSubmitting: false }" @submit="isSubmitting = true">
                         @csrf
                         @method('PUT')
                         
-                        <div class="space-y-4">
+                        <div class="space-y-6">
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Judul Kegiatan</label>
-                                <input type="text" name="title" x-model="editData.title" required class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-600 focus:ring-blue-600 font-bold text-slate-800 py-3">
+                                <label class="block text-[10px] font-black text-elevate-primary uppercase tracking-widest mb-2 ml-1">Judul Kegiatan</label>
+                                <input type="text" name="title" x-model="editData.title" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 px-4 transition-colors">
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Deskripsi Singkat</label>
-                                <textarea name="description" x-model="editData.description" required rows="4" class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-600 focus:ring-blue-600 text-sm text-slate-700 font-medium"></textarea>
+                                <label class="block text-[10px] font-black text-elevate-primary uppercase tracking-widest mb-2 ml-1">Deskripsi Singkat</label>
+                                <textarea name="description" x-model="editData.description" required rows="4" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 text-sm text-elevate-dark font-medium p-4 transition-colors"></textarea>
                             </div>
 
-                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Ganti Foto / Tambah Foto Baru (Opsional)</label>
-                                <p class="text-[10px] text-slate-500 mb-3">Biarkan kosong jika tidak ingin mengubah foto. Perhatian: Mengupload foto baru akan <b>menghapus seluruh foto lama</b> pada album ini.</p>
+                            <div class="p-6 bg-slate-50/80 border border-slate-200 rounded-2xl">
+                                <label class="block text-[10px] font-black text-elevate-primary uppercase tracking-widest mb-2">Ganti Foto / Tambah Foto Baru (Opsional)</label>
+                                <p class="text-[10px] text-slate-500 mb-4 font-bold">Biarkan kosong jika tidak ingin mengubah foto. <span class="text-rose-500">Perhatian: Mengupload foto baru akan menghapus seluruh foto lama pada album ini.</span></p>
                                 
                                 <input type="file" name="photos[]" accept="image/*" multiple
                                     @change="editImgPreviews = []; Array.from($event.target.files).forEach(file => editImgPreviews.push(URL.createObjectURL(file)))"
-                                    class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 mb-3 bg-white">
+                                    class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-peach-light file:text-elevate-primary hover:file:bg-elevate-primary hover:file:text-white transition-all bg-white border border-slate-200 rounded-xl p-1.5 mb-3 shadow-sm">
                                 
                                 <!-- Preview Foto Baru -->
-                                <div x-show="editImgPreviews.length > 0" class="grid grid-cols-4 gap-2 mt-2" style="display: none;">
+                                <div x-show="editImgPreviews.length > 0" class="grid grid-cols-4 sm:grid-cols-5 gap-2 mt-4" style="display: none;">
                                     <template x-for="(src, index) in editImgPreviews" :key="index">
-                                        <div class="h-16 sm:h-20 rounded-lg overflow-hidden border border-slate-200 shadow-sm">
+                                        <div class="h-16 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
                                             <img :src="src" class="w-full h-full object-cover">
                                         </div>
                                     </template>
@@ -362,17 +382,22 @@
                             </div>
 
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Link Video (Opsional)</label>
-                                <input type="url" name="video_url" x-model="editData.video_url" placeholder="https://..." class="w-full rounded-2xl border-slate-200 bg-white focus:border-blue-600 focus:ring-blue-600 text-sm text-slate-700 font-bold py-3">
+                                <label class="block text-[10px] font-black text-elevate-primary uppercase tracking-widest mb-2 ml-1">Link Video (Opsional)</label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-rose-500">
+                                        <i class="ph-fill ph-youtube-logo text-lg"></i>
+                                    </div>
+                                    <input type="url" name="video_url" x-model="editData.video_url" placeholder="https://..." class="w-full pl-11 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 text-sm text-elevate-dark font-bold py-3.5 transition-colors">
+                                </div>
                             </div>
                         </div>
 
                         <!-- Footer Modal -->
-                        <div class="mt-8 pt-4 border-t border-slate-100 flex justify-end gap-3 shrink-0">
-                            <button type="button" @click="closeEditModal()" class="px-6 py-2.5 rounded-xl font-bold text-slate-500 hover:bg-slate-100 transition-colors">Batal</button>
-                            <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="px-6 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2">
-                                <span x-show="!isSubmitting"><i class="ph-bold ph-check"></i> Simpan Perubahan</span>
-                                <span x-show="isSubmitting" x-cloak><i class="ph-bold ph-spinner animate-spin"></i> Menyimpan...</span>
+                        <div class="mt-8 pt-6 border-t border-slate-100 flex justify-end gap-3 shrink-0">
+                            <button type="button" @click="closeEditModal()" class="px-6 py-3.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors text-sm border border-transparent">Batal</button>
+                            <button type="submit" :disabled="isSubmitting" :class="{'opacity-70 cursor-wait': isSubmitting}" class="px-8 py-3.5 rounded-xl font-bold text-white bg-elevate-dark hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all flex items-center gap-2 text-sm border border-transparent">
+                                <span x-show="!isSubmitting" class="flex items-center gap-2"><i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Perubahan</span>
+                                <span x-show="isSubmitting" x-cloak class="flex items-center gap-2"><i class="ph-bold ph-spinner animate-spin text-lg"></i> Menyimpan...</span>
                             </button>
                         </div>
                     </form>
@@ -395,15 +420,16 @@
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#e11d48',
-                        cancelButtonColor: '#64748b',
+                        cancelButtonColor: '#94a3b8',
                         confirmButtonText: 'Ya, Hapus!',
                         cancelButtonText: 'Batal',
                         borderRadius: '1.5rem',
                         customClass: {
-                            popup: 'rounded-[2rem]',
-                            confirmButton: 'rounded-xl px-6 py-2.5 font-bold',
-                            cancelButton: 'rounded-xl px-6 py-2.5 font-bold'
-                        }
+                            popup: 'fluent-modal rounded-[2rem] font-sans',
+                            confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg border border-transparent',
+                            cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2 border border-transparent'
+                        },
+                        buttonsStyling: false
                     }).then((result) => {
                         if (result.isConfirmed) {
                             form.submit();
