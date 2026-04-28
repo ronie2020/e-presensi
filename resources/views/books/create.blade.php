@@ -1,13 +1,16 @@
 <x-app-layout>
     {{-- Scripts External --}}
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <div class="py-8 sm:py-10 font-sans text-slate-800">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-8 sm:py-10 font-sans text-elevate-dark relative overflow-hidden">
+        {{-- Efek Latar Belakang Halus --}}
+        <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
+
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
             {{-- Tombol Kembali --}}
-            <a href="{{ route('library.books.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-cyan-600 mb-6 transition-colors group">
+            <a href="{{ route('library.books.index') }}" class="inline-flex items-center gap-2 text-sm font-bold text-elevate-dark/60 hover:text-elevate-primary mb-6 transition-colors group">
                 <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i> Kembali ke Katalog
             </a>
 
@@ -27,12 +30,12 @@
             @endif
 
             {{-- HEADER HALAMAN (ELEVATED THEME) --}}
-            <div class="bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 rounded-[2.5rem] p-8 mb-8 text-white shadow-xl shadow-cyan-900/30 relative overflow-hidden">
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                <div class="absolute top-0 right-0 w-64 h-64 bg-cyan-300/30 rounded-full blur-[60px] translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+            <div class="bg-elevate-gradient-main rounded-[2.5rem] p-8 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 relative overflow-hidden border border-white/60">
+                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white/40 rounded-full blur-[60px] translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
                 <div class="relative z-10">
                     <h1 class="text-3xl font-black tracking-tight mb-2">Tambah Buku Baru</h1>
-                    <p class="text-cyan-50 text-sm max-w-xl leading-relaxed">
+                    <p class="text-elevate-dark/80 text-sm max-w-xl leading-relaxed font-semibold">
                         Masukkan identitas buku induk. Sistem akan otomatis memproduksi barcode untuk masing-masing fisik buku sesuai jumlah yang Anda tentukan.
                     </p>
                 </div>
@@ -45,77 +48,80 @@
                     
                     {{-- KOLOM KIRI (7 Kolom) --}}
                     <div class="lg:col-span-7 space-y-6">
-                        <div class="bg-slate-50 p-6 rounded-[2rem] border border-slate-200">
-                            <h3 class="text-xs font-black text-slate-800 uppercase tracking-widest mb-6 flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center text-[10px]">1</span>
+                        <div class="bg-elevate-soft p-6 rounded-[2rem] border border-slate-200">
+                            <h3 class="text-xs font-black text-elevate-dark uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-white text-elevate-primary flex items-center justify-center text-[10px] shadow-sm">1</span>
                                 Identitas Buku Induk
                             </h3>
                             
                             <div class="space-y-5">
                                 {{-- Kode Buku / ISBN Induk --}}
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Kode Buku / ISBN (Induk) <span class="text-rose-500">*</span></label>
+                                    <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Kode Buku / ISBN (Induk) <span class="text-rose-500">*</span></label>
                                     <div class="flex gap-2">
                                         <div class="relative flex-1 group">
-                                            <i class="ph-bold ph-barcode absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-500 transition-colors"></i>
+                                            <i class="ph-bold ph-barcode absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
                                             <input type="text" name="book_code" id="book_code" required value="{{ old('book_code') }}"
-                                                class="w-full pl-11 pr-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-mono font-bold text-slate-700 shadow-sm" placeholder="Misal: 9786022828">
+                                                class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-mono font-bold text-elevate-dark shadow-sm transition-all" placeholder="Misal: 9786022828">
                                         </div>
-                                        <button type="button" onclick="startScanner()" class="px-4 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition tooltip" title="Scan pakai Kamera">
+                                        <button type="button" onclick="startScanner()" class="px-4 bg-white border border-slate-200 text-elevate-dark/60 hover:text-elevate-primary hover:border-elevate-primary rounded-2xl transition shadow-sm" title="Scan pakai Kamera">
                                             <i class="ph-bold ph-camera text-xl"></i>
                                         </button>
                                     </div>
-                                    <p class="text-[10px] text-slate-500 mt-2 ml-1 font-medium"><i class="ph-bold ph-info text-cyan-500"></i> Ketik manual atau scan barcode dari sampul buku. Sistem akan men-generate kode eksemplar tambahan (-01, -02).</p>
+                                    <p class="text-[10px] text-elevate-dark/50 mt-2 ml-1 font-medium"><i class="ph-bold ph-info text-elevate-primary"></i> Ketik manual atau scan barcode dari sampul buku. Sistem akan men-generate kode eksemplar tambahan (-01, -02).</p>
                                 </div>
 
                                 {{-- Judul Buku --}}
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Judul Buku <span class="text-rose-500">*</span></label>
+                                    <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Judul Buku <span class="text-rose-500">*</span></label>
                                     <input type="text" name="title" required value="{{ old('title') }}" placeholder="Contoh: Laskar Pelangi"
-                                        class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 transition-all shadow-sm">
+                                        class="w-full px-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm">
                                 </div>
 
                                 {{-- Kategori Buku --}}
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Kategori / DDC <span class="text-rose-500">*</span></label>
-                                    <select name="category_id" required class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 transition-all shadow-sm cursor-pointer">
-                                        <option value="">-- Pilih Kategori --</option>
-                                        @foreach($categories as $category)
-                                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                                {{ $category->code }} - {{ $category->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                    <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Kategori / DDC <span class="text-rose-500">*</span></label>
+                                    <div class="relative">
+                                        <select name="category_id" required class="w-full pl-4 pr-10 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm cursor-pointer appearance-none">
+                                            <option value="">-- Pilih Kategori --</option>
+                                            @foreach($categories as $category)
+                                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                                    {{ $category->code }} - {{ $category->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                                    </div>
                                 </div>
 
                                 {{-- Pengarang & Penerbit --}}
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Pengarang</label>
+                                        <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Pengarang</label>
                                         <input type="text" name="author" value="{{ old('author') }}" placeholder="Nama Penulis"
-                                            class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 transition-all shadow-sm">
+                                            class="w-full px-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm">
                                     </div>
                                     <div>
-                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Penerbit</label>
+                                        <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Penerbit</label>
                                         <input type="text" name="publisher" value="{{ old('publisher') }}" placeholder="Nama Penerbit"
-                                            class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 transition-all shadow-sm">
+                                            class="w-full px-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm">
                                     </div>
                                 </div>
 
                                 {{-- Tahun --}}
                                 <div>
-                                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tahun Terbit</label>
+                                    <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Tahun Terbit</label>
                                     <input type="number" name="year" value="{{ old('year') }}" placeholder="YYYY" min="1900" max="{{ date('Y') + 1 }}"
-                                        class="w-full px-4 py-3 rounded-2xl border-slate-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 transition-all shadow-sm">
+                                        class="w-full px-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm">
                                 </div>
 
                                 {{-- Buku Paket Checkbox --}}
                                 <div class="mt-4">
-                                    <label class="flex items-center gap-3 p-4 border border-cyan-200 bg-white rounded-xl cursor-pointer hover:bg-cyan-50 transition">
-                                        <input type="checkbox" name="is_textbook" value="1" {{ old('is_textbook') ? 'checked' : '' }} class="w-5 h-5 text-cyan-600 border-cyan-300 rounded focus:ring-cyan-500 cursor-pointer">
+                                    <label class="flex items-center gap-3 p-4 border border-slate-200 bg-white rounded-2xl cursor-pointer hover:border-elevate-accent transition shadow-sm">
+                                        <input type="checkbox" name="is_textbook" value="1" {{ old('is_textbook') ? 'checked' : '' }} class="w-5 h-5 text-elevate-primary border-slate-300 rounded focus:ring-elevate-accent cursor-pointer">
                                         <div>
-                                            <span class="block text-sm font-bold text-cyan-800">Ini Buku Paket / Pelajaran</span>
-                                            <span class="block text-xs text-cyan-600 mt-0.5">Buku paket bisa dipinjam massal selama 1 tahun.</span>
+                                            <span class="block text-sm font-bold text-elevate-dark">Ini Buku Paket / Pelajaran</span>
+                                            <span class="block text-xs text-elevate-dark/60 mt-0.5">Buku paket bisa dipinjam massal selama 1 tahun.</span>
                                         </div>
                                     </label>
                                 </div>
@@ -127,64 +133,64 @@
                     <div class="lg:col-span-5 space-y-6">
                         
                         {{-- Blok Eksemplar Fisik --}}
-                        <div class="bg-cyan-50/50 p-6 rounded-[2rem] border border-cyan-100">
-                            <h3 class="text-xs font-black text-cyan-900 uppercase tracking-widest mb-6 flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-full bg-cyan-200 text-cyan-700 flex items-center justify-center text-[10px]">2</span>
+                        <div class="bg-elevate-soft p-6 rounded-[2rem] border border-slate-200">
+                            <h3 class="text-xs font-black text-elevate-dark uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-white text-elevate-primary flex items-center justify-center text-[10px] shadow-sm">2</span>
                                 Fisik & Eksemplar
                             </h3>
                             
                             <div class="space-y-5">
                                 {{-- JUMLAH BUKU (Otomatis Generate Barcode Fisik) --}}
                                 <div>
-                                    <label class="block text-xs font-bold text-cyan-700 uppercase mb-2 ml-1">Jumlah Fisik Buku / Eksemplar <span class="text-rose-500">*</span></label>
-                                    <div class="relative">
-                                        <i class="ph-bold ph-stack absolute left-4 top-1/2 -translate-y-1/2 text-cyan-500"></i>
+                                    <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Jumlah Fisik Buku / Eksemplar <span class="text-rose-500">*</span></label>
+                                    <div class="relative group">
+                                        <i class="ph-bold ph-stack absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
                                         <input type="number" name="jumlah_buku" required min="1" max="500" value="{{ old('jumlah_buku', 1) }}"
-                                            class="w-full pl-11 pr-4 py-3 rounded-2xl border-cyan-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-cyan-700 shadow-sm transition-all" placeholder="Misal: 32">
+                                            class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark shadow-sm transition-all" placeholder="Misal: 32">
                                     </div>
-                                    <p class="text-[10px] text-cyan-600 mt-2 ml-1"><i class="ph-bold ph-info"></i> Sistem akan otomatis memproduksi barcode tambahan sebanyak ini untuk dicetak sebagai stiker label buku.</p>
+                                    <p class="text-[10px] text-elevate-dark/50 mt-2 ml-1"><i class="ph-bold ph-info"></i> Sistem otomatis memproduksi barcode tambahan sebanyak ini untuk stiker.</p>
                                 </div>
 
                                 {{-- Lokasi Rak --}}
                                 <div>
-                                    <label class="block text-xs font-bold text-cyan-700 uppercase mb-2 ml-1">Lokasi Rak <span class="text-rose-500">*</span></label>
+                                    <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Lokasi Rak <span class="text-rose-500">*</span></label>
                                     <div class="relative group">
-                                        <i class="ph-bold ph-bookshelf absolute left-4 top-1/2 -translate-y-1/2 text-cyan-500 group-focus-within:text-cyan-600 transition-colors"></i>
+                                        <i class="ph-bold ph-bookshelf absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
                                         <input type="text" name="shelf_location" required value="{{ old('shelf_location') }}" placeholder="Misal: Rak A1 / Fiksi 2"
-                                            class="w-full pl-11 pr-4 py-3 rounded-2xl border-cyan-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 transition-all shadow-sm">
+                                            class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm">
                                     </div>
                                 </div>
                                 
                                 {{-- Sinopsis / Deskripsi --}}
                                 <div>
-                                    <label class="block text-xs font-bold text-cyan-700 uppercase mb-2 ml-1">Sinopsis / Ringkasan</label>
+                                    <label class="block text-xs font-bold text-elevate-primary uppercase mb-2 ml-1">Sinopsis / Ringkasan</label>
                                     <textarea name="description" rows="3" placeholder="Tuliskan deskripsi singkat tentang isi buku..."
-                                        class="w-full px-4 py-3 rounded-2xl border-cyan-200 bg-white focus:border-cyan-500 focus:ring-cyan-500 font-medium text-slate-600 transition-all shadow-sm custom-scrollbar text-sm resize-none">{{ old('description') }}</textarea>
+                                        class="w-full px-4 py-3.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-medium text-elevate-dark transition-all shadow-sm custom-scrollbar text-sm resize-none">{{ old('description') }}</textarea>
                                 </div>
                             </div>
                         </div>
 
                         {{-- Blok Media (Cover & E-book) --}}
-                        <div class="bg-emerald-50/50 p-6 rounded-[2rem] border border-emerald-100">
-                            <h3 class="text-xs font-black text-emerald-900 uppercase tracking-widest mb-6 flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-full bg-emerald-200 text-emerald-700 flex items-center justify-center text-[10px]">3</span>
+                        <div class="bg-elevate-peach-light/40 p-6 rounded-[2rem] border border-elevate-peach/30">
+                            <h3 class="text-xs font-black text-elevate-peach-dark uppercase tracking-widest mb-6 flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-white text-elevate-peach-dark flex items-center justify-center text-[10px] shadow-sm border border-elevate-peach/50">3</span>
                                 Media & Digital
                             </h3>
                             
                             <div class="space-y-5">
                                 {{-- Upload Cover --}}
                                 <div>
-                                    <label class="block text-xs font-bold text-emerald-700 uppercase mb-2 ml-1">Foto Sampul (Maks 5MB)</label>
-                                    <div class="relative border-2 border-dashed border-emerald-200 rounded-2xl bg-white hover:bg-emerald-50/50 transition-colors group">
+                                    <label class="block text-xs font-bold text-elevate-peach-dark uppercase mb-2 ml-1">Foto Sampul (Maks 5MB)</label>
+                                    <div class="relative border-2 border-dashed border-elevate-peach rounded-2xl bg-white hover:bg-elevate-peach-light/50 transition-colors group">
                                         <input type="file" name="cover" id="cover" accept="image/*" onchange="previewCover(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                                         <div class="p-6 text-center" id="coverUploadArea">
-                                            <i class="ph-duotone ph-image text-3xl text-emerald-400 mb-2 group-hover:scale-110 transition-transform"></i>
-                                            <p class="text-xs font-bold text-emerald-600">Klik atau Drag foto kesini</p>
+                                            <i class="ph-duotone ph-image text-3xl text-elevate-peach mb-2 group-hover:scale-110 transition-transform"></i>
+                                            <p class="text-xs font-bold text-elevate-peach-dark">Klik atau Drag foto kesini</p>
                                         </div>
                                         <div id="coverPreviewArea" class="hidden relative p-2">
                                             <img id="coverImg" src="" class="w-full h-32 object-contain rounded-xl">
-                                            <div class="absolute inset-0 flex items-center justify-center bg-black/40 rounded-xl opacity-0 hover:opacity-100 transition-opacity">
-                                                <span class="text-white text-xs font-bold bg-black/50 px-3 py-1 rounded-full"><i class="ph-bold ph-arrows-clockwise"></i> Ganti</span>
+                                            <div class="absolute inset-0 flex items-center justify-center bg-elevate-dark/60 rounded-xl opacity-0 hover:opacity-100 transition-opacity">
+                                                <span class="text-white text-xs font-bold bg-elevate-dark/80 px-3 py-1 rounded-full"><i class="ph-bold ph-arrows-clockwise"></i> Ganti</span>
                                             </div>
                                         </div>
                                     </div>
@@ -192,11 +198,11 @@
 
                                 {{-- Upload E-Book --}}
                                 <div>
-                                    <label class="block text-xs font-bold text-emerald-700 uppercase mb-2 ml-1">File E-Book PDF (Opsional)</label>
-                                    <div class="relative">
-                                        <i class="ph-bold ph-file-pdf absolute left-4 top-1/2 -translate-y-1/2 text-emerald-400"></i>
+                                    <label class="block text-xs font-bold text-elevate-peach-dark uppercase mb-2 ml-1">File E-Book PDF (Opsional)</label>
+                                    <div class="relative group">
+                                        <i class="ph-bold ph-file-pdf absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-peach-dark transition-colors z-10"></i>
                                         <input type="file" name="ebook_file" accept=".pdf"
-                                            class="w-full pl-11 pr-4 py-2.5 rounded-2xl border-emerald-200 bg-white focus:border-emerald-500 focus:ring-emerald-500 font-medium text-slate-600 transition-all shadow-sm file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
+                                            class="w-full pl-11 pr-4 py-2.5 rounded-2xl border-slate-200 bg-white focus:border-elevate-peach focus:ring-4 focus:ring-elevate-peach/20 font-medium text-elevate-dark transition-all shadow-sm file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-elevate-peach/20 file:text-elevate-peach-dark hover:file:bg-elevate-peach/40 cursor-pointer relative z-20">
                                     </div>
                                 </div>
                             </div>
@@ -206,8 +212,8 @@
                 </div>
 
                 <div class="mt-10 pt-6 border-t border-slate-100 flex justify-end gap-3">
-                    <a href="{{ route('library.books.index') }}" class="px-6 py-3 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 transition-colors">Batal</a>
-                    <button type="submit" class="px-8 py-3 bg-cyan-600 text-white font-bold rounded-2xl hover:bg-cyan-700 shadow-xl shadow-cyan-500/30 transition-all transform hover:-translate-y-0.5 flex items-center gap-2">
+                    <a href="{{ route('library.books.index') }}" class="px-6 py-3.5 bg-slate-100 text-elevate-dark/60 font-bold rounded-2xl hover:bg-slate-200 hover:text-elevate-dark transition-colors">Batal</a>
+                    <button type="submit" class="px-8 py-3.5 bg-elevate-dark text-white font-bold rounded-2xl hover:bg-elevate-primary shadow-lg shadow-elevate-dark/30 transition-all transform hover:-translate-y-0.5 flex items-center gap-2 border border-transparent active:scale-95">
                         <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan ke Katalog
                     </button>
                 </div>
@@ -217,16 +223,16 @@
 
     {{-- MODAL SCANNER BARCODE --}}
     <div id="scannerModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center">
-        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="stopScanner()"></div>
+        <div class="absolute inset-0 bg-elevate-dark/80 backdrop-blur-sm" onclick="stopScanner()"></div>
         <div class="bg-white rounded-[2rem] shadow-2xl p-6 w-full max-w-sm relative z-10 animate-fade-in-down border border-slate-100">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-black text-slate-800 text-lg">Scan Barcode Buku</h3>
-                <button onclick="stopScanner()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-600 flex items-center justify-center transition-colors">
+                <h3 class="font-black text-elevate-dark text-lg">Scan Barcode Buku</h3>
+                <button onclick="stopScanner()" class="w-8 h-8 rounded-full bg-elevate-soft text-elevate-dark/60 hover:bg-rose-100 hover:text-rose-600 flex items-center justify-center transition-colors">
                     <i class="ph-bold ph-x"></i>
                 </button>
             </div>
-            <div id="reader" class="rounded-2xl overflow-hidden border-2 border-cyan-100"></div>
-            <p class="text-xs text-center text-slate-500 mt-4 font-medium"><i class="ph-bold ph-info"></i> Arahkan kamera ke barcode (ISBN) pada sampul belakang buku.</p>
+            <div id="reader" class="rounded-2xl overflow-hidden border-4 border-elevate-soft"></div>
+            <p class="text-xs text-center text-elevate-dark/60 mt-4 font-medium"><i class="ph-bold ph-info text-elevate-primary"></i> Arahkan kamera ke barcode (ISBN) pada sampul belakang buku.</p>
         </div>
     </div>
 
@@ -262,8 +268,8 @@
             html5QrcodeScanner.start({ facingMode: "environment" }, config, (decodedText) => {
                 document.getElementById('book_code').value = decodedText;
                 // Highlight input untuk indikasi sukses
-                document.getElementById('book_code').classList.add('ring-2', 'ring-cyan-500');
-                setTimeout(() => document.getElementById('book_code').classList.remove('ring-2', 'ring-cyan-500'), 1000);
+                document.getElementById('book_code').classList.add('ring-2', 'ring-elevate-accent');
+                setTimeout(() => document.getElementById('book_code').classList.remove('ring-2', 'ring-elevate-accent'), 1000);
                 
                 stopScanner();
             }).catch(err => console.error(err));

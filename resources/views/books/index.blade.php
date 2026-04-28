@@ -1,44 +1,46 @@
 <x-app-layout>
-    <div class="py-8 sm:py-10 font-sans text-slate-800">
-        
+    <div class="py-8 sm:py-10 font-sans text-elevate-dark relative overflow-hidden">
+        {{-- Efek Latar Belakang Halus --}}
+        <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
+
         {{-- HERO SECTION (ELEVATED THEME) --}}
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">                
-            <div class="relative rounded-[2.5rem] bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-8 sm:p-10 text-white shadow-2xl shadow-cyan-900/30 overflow-hidden border border-white/10 group">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 relative z-10">                
+            <div class="relative rounded-[2.5rem] bg-elevate-gradient-main p-8 sm:p-10 text-elevate-dark shadow-2xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
                 
                 {{-- Background Decorations --}}
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                <div class="absolute top-0 right-0 w-80 h-80 bg-cyan-300/30 rounded-full blur-[80px] translate-x-1/2 -translate-y-1/2 pointer-events-none group-hover:bg-cyan-300/40 transition-all duration-700"></div>
+                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
+                <div class="absolute top-0 right-0 w-80 h-80 bg-white/40 rounded-full blur-[80px] translate-x-1/2 -translate-y-1/2 pointer-events-none group-hover:bg-white/60 transition-all duration-700"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     
                     {{-- Text Content --}}
                     <div class="max-w-2xl">
                         <div class="flex items-center gap-3 mb-2">
-                            <a href="{{ route('library.dashboard') }}" class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-full text-xs font-bold text-cyan-100 transition flex items-center gap-2 border border-white/20 backdrop-blur-sm">
+                            <a href="{{ route('library.dashboard') }}" class="px-3 py-1 bg-white/50 hover:bg-white/80 rounded-full text-xs font-bold text-elevate-primary transition flex items-center gap-2 border border-white/60 backdrop-blur-sm shadow-sm">
                                 <i class="ph-bold ph-arrow-left"></i> Dashboard
                             </a>
-                            <span class="text-white/30 text-xs">•</span>
-                            <span class="text-cyan-100 bg-white/10 border border-white/10 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">Koleksi</span>
+                            <span class="text-elevate-dark/30 text-xs">•</span>
+                            <span class="text-elevate-primary bg-white/50 border border-white/60 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm shadow-sm">Koleksi</span>
                         </div>                      
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-900/50 border border-cyan-400/30 text-cyan-100 text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-elevate-soft border border-elevate-accent/30 text-elevate-primary text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm shadow-sm">
                             <i class="ph-fill ph-books"></i> Katalog Perpustakaan
                         </div>
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-white leading-tight">
+                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-elevate-dark leading-tight">
                             Koleksi Buku
                         </h1>
-                        <p class="text-cyan-50 text-sm md:text-base font-medium leading-relaxed max-w-lg">
+                        <p class="text-elevate-dark/80 text-sm md:text-base font-semibold leading-relaxed max-w-lg">
                             Kelola inventaris buku perpustakaan, pantau ketersediaan stok, dan baca koleksi E-Book digital.
                         </p>
                     </div>
                     
                     {{-- Stats Cards --}}
                     <div class="flex flex-row md:flex-col lg:flex-row gap-4 w-full md:w-auto">
-                        <div class="bg-white/10 backdrop-blur-md px-6 py-5 rounded-2xl border border-white/10 flex-1 md:flex-none min-w-[140px] text-center md:text-left hover:bg-white/15 transition-colors">
-                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-cyan-200">
+                        <div class="bg-white/60 backdrop-blur-md px-6 py-5 rounded-2xl border border-white/80 shadow-sm flex-1 md:flex-none min-w-[140px] text-center md:text-left hover:bg-white transition-colors">
+                            <div class="flex items-center justify-center md:justify-start gap-2 mb-1 text-elevate-primary">
                                 <i class="ph-duotone ph-book-open-text text-lg"></i>
                                 <span class="text-[10px] font-bold uppercase tracking-wider">Total Judul</span>
                             </div>
-                            <span class="block text-3xl font-black text-white tracking-tight">{{ $books->total() }}</span>
+                            <span class="block text-3xl font-black text-elevate-dark tracking-tight">{{ $books->total() }}</span>
                         </div>
                     </div>
 
@@ -46,7 +48,7 @@
             </div>
         </div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
             {{-- Toolbar: Filter & Actions --}}
             <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 mb-8 flex flex-col lg:flex-row gap-6 justify-between items-center relative overflow-hidden">
@@ -54,14 +56,14 @@
                 {{-- Form Pencarian --}}
                 <form method="GET" class="w-full lg:w-2/3 flex flex-col sm:flex-row gap-4 relative z-10">
                     <div class="relative flex-1 group">
-                        <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-600 transition-colors"></i>
+                        <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari judul, pengarang, atau kode buku..." 
-                            class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 transition-all shadow-sm">
+                            class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-slate-200 bg-elevate-soft focus:bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm">
                     </div>
                     <div class="relative sm:w-64 group">
-                        <i class="ph-bold ph-tag absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-600 transition-colors"></i>
+                        <i class="ph-bold ph-tag absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
                         <select name="category_id" onchange="this.form.submit()" 
-                            class="w-full pl-11 pr-10 py-3.5 rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-cyan-500 focus:ring-cyan-500 font-bold text-slate-700 transition-all shadow-sm appearance-none cursor-pointer">
+                            class="w-full pl-11 pr-10 py-3.5 rounded-2xl border-slate-200 bg-elevate-soft focus:bg-white focus:border-elevate-accent focus:ring-4 focus:ring-elevate-accent/20 font-bold text-elevate-dark transition-all shadow-sm appearance-none cursor-pointer">
                             <option value="">Semua Kategori</option>
                             @foreach($categories as $cat)
                                 <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
@@ -73,11 +75,11 @@
 
                 {{-- Action Buttons --}}
                 <div class="flex gap-3 w-full lg:w-auto relative z-10">
-                    <button onclick="document.getElementById('importModal').classList.remove('hidden')" class="flex-1 lg:flex-none px-6 py-3.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white border border-emerald-200 rounded-2xl font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2 group">
+                    <button onclick="document.getElementById('importModal').classList.remove('hidden')" class="flex-1 lg:flex-none px-6 py-3.5 bg-elevate-soft text-elevate-primary hover:bg-elevate-primary hover:text-white border border-slate-200 rounded-2xl font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2 group border-transparent hover:border-transparent">
                         <i class="ph-bold ph-microsoft-excel-logo text-lg"></i>
                         <span>Import</span>
                     </button>
-                    <a href="{{ route('library.books.create') }}" class="flex-1 lg:flex-none px-6 py-3.5 bg-cyan-600 text-white hover:bg-cyan-700 rounded-2xl font-bold text-sm transition-all shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 flex items-center justify-center gap-2 transform active:scale-95">
+                    <a href="{{ route('library.books.create') }}" class="flex-1 lg:flex-none px-6 py-3.5 bg-elevate-dark text-white hover:bg-elevate-primary rounded-2xl font-bold text-sm transition-all shadow-lg shadow-elevate-dark/30 flex items-center justify-center gap-2 transform active:scale-95 border border-transparent">
                         <i class="ph-bold ph-plus-circle text-lg"></i>
                         <span>Tambah Buku</span>
                     </a>
@@ -87,14 +89,14 @@
             {{-- Grid Buku --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 @forelse($books as $book)
-                    <div class="group bg-white rounded-[2rem] border border-slate-100 hover:border-cyan-300 hover:shadow-xl hover:shadow-cyan-900/10 transition-all duration-300 flex flex-col h-full overflow-hidden relative">
+                    <div class="group bg-elevate-gradient-card rounded-[2rem] border border-slate-200 hover:border-elevate-accent/50 hover:shadow-2xl hover:shadow-elevate-accent/10 transition-all duration-300 flex flex-col h-full overflow-hidden relative">
                         
                         {{-- Cover Image --}}
-                        <div class="h-64 bg-slate-100 relative overflow-hidden">
+                        <div class="h-64 bg-white relative overflow-hidden">
                             @if($book->cover_path)
                                 <img src="{{ asset('storage/' . $book->cover_path) }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="{{ $book->title }}">
                             @else
-                                <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-slate-50">
+                                <div class="w-full h-full flex flex-col items-center justify-center text-slate-300 bg-elevate-soft/50">
                                     <i class="ph-duotone ph-book-open text-5xl mb-2 opacity-50"></i>
                                     <span class="text-[10px] font-black uppercase tracking-widest opacity-50">No Cover</span>
                                 </div>
@@ -114,7 +116,7 @@
 
                             {{-- Badge Kategori --}}
                             <div class="absolute top-4 right-4">
-                                <span class="px-3 py-1.5 bg-white/90 backdrop-blur-md text-[10px] font-black uppercase tracking-wider rounded-xl text-cyan-900 shadow-sm border border-white/20">
+                                <span class="px-3 py-1.5 bg-white/90 backdrop-blur-md text-[10px] font-black uppercase tracking-wider rounded-xl text-elevate-dark shadow-sm border border-white/20">
                                     {{ $book->category->name ?? 'Umum' }}
                                 </span>
                             </div>
@@ -131,35 +133,35 @@
                         {{-- Content --}}
                         <div class="p-6 flex-1 flex flex-col">
                             <div class="mb-4">
-                                <h3 class="font-black text-slate-800 text-lg leading-snug line-clamp-2 mb-1 group-hover:text-cyan-700 transition-colors" title="{{ $book->title }}">
+                                <h3 class="font-black text-elevate-dark text-lg leading-snug line-clamp-2 mb-1 group-hover:text-elevate-primary transition-colors" title="{{ $book->title }}">
                                     {{ $book->title }}
                                 </h3>
-                                <p class="text-xs text-slate-500 font-bold flex items-center gap-1">
-                                    <i class="ph-fill ph-pen-nib text-cyan-400"></i> {{ $book->author ?? 'Tanpa Pengarang' }}
+                                <p class="text-xs text-elevate-dark/60 font-bold flex items-center gap-1">
+                                    <i class="ph-fill ph-pen-nib text-elevate-accent"></i> {{ $book->author ?? 'Tanpa Pengarang' }}
                                 </p>
                             </div>
 
-                            <div class="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
+                            <div class="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between">
                                 {{-- TOMBOL BACA / KODE BUKU --}}
                                 @if($book->ebook_path)
                                     <a href="{{ route('library.books.read', $book->id) }}" 
-                                       class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-bold shadow-lg shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-105 transition-all flex items-center gap-2 group/btn">
+                                       class="px-4 py-2.5 rounded-xl bg-elevate-dark text-white text-xs font-bold shadow-lg shadow-elevate-dark/20 hover:bg-elevate-primary hover:scale-105 transition-all flex items-center gap-2 group/btn border border-transparent">
                                         <i class="ph-bold ph-read-cv-logo text-lg group-hover/btn:animate-pulse"></i>
                                         <span>Baca</span>
                                     </a>
                                 @else
-                                    <div class="bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                                        <span class="text-[10px] font-mono font-bold text-slate-500">{{ $book->book_code }}</span>
+                                    <div class="bg-elevate-soft px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                                        <span class="text-[10px] font-mono font-bold text-elevate-dark/70">{{ $book->book_code }}</span>
                                     </div>
                                 @endif
 
                                 <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0 duration-300">
-                                    <a href="{{ route('library.books.edit', $book->id) }}" class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center hover:bg-cyan-600 hover:text-white transition-colors" title="Edit">
+                                    <a href="{{ route('library.books.edit', $book->id) }}" class="w-8 h-8 rounded-lg bg-elevate-soft text-elevate-primary flex items-center justify-center hover:bg-elevate-primary hover:text-white transition-colors border border-transparent" title="Edit">
                                         <i class="ph-bold ph-pencil-simple"></i>
                                     </a>
                                     <form action="{{ route('library.books.destroy', $book->id) }}" method="POST" class="delete-form">
                                         @csrf @method('DELETE')
-                                        <button type="button" onclick="confirmDelete(this)" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-colors" title="Hapus">
+                                        <button type="button" onclick="confirmDelete(this)" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-colors border border-transparent" title="Hapus">
                                             <i class="ph-bold ph-trash"></i>
                                         </button>
                                     </form>
@@ -168,13 +170,13 @@
                         </div>
                     </div>
                 @empty
-                    <div class="col-span-full py-20 text-center bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                        <div class="w-24 h-24 bg-cyan-50 rounded-full flex items-center justify-center mx-auto mb-6 text-cyan-500 shadow-inner">
+                    <div class="col-span-full py-20 text-center bg-white rounded-[2.5rem] border border-slate-200 shadow-sm">
+                        <div class="w-24 h-24 bg-elevate-soft rounded-full flex items-center justify-center mx-auto mb-6 text-elevate-primary shadow-inner">
                             <i class="ph-duotone ph-books text-5xl"></i>
                         </div>
-                        <h3 class="text-xl font-black text-slate-700 mb-2">Koleksi Masih Kosong</h3>
-                        <p class="text-slate-400 text-sm max-w-xs mx-auto mb-6">Belum ada data buku yang ditemukan. Mulai dengan menambahkan buku baru.</p>
-                        <a href="{{ route('library.books.create') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-cyan-600 text-white font-bold rounded-xl hover:bg-cyan-700 transition shadow-lg shadow-cyan-500/30">
+                        <h3 class="text-xl font-black text-elevate-dark mb-2">Koleksi Masih Kosong</h3>
+                        <p class="text-elevate-dark/60 text-sm max-w-xs mx-auto mb-6">Belum ada data buku yang ditemukan. Mulai dengan menambahkan buku baru.</p>
+                        <a href="{{ route('library.books.create') }}" class="inline-flex items-center gap-2 px-6 py-3.5 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary transition shadow-lg shadow-elevate-dark/20 border border-transparent active:scale-95">
                             <i class="ph-bold ph-plus"></i> Tambah Buku Pertama
                         </a>
                     </div>
@@ -189,30 +191,30 @@
 
     {{-- MODAL IMPORT EXCEL --}}
     <div id="importModal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="document.getElementById('importModal').classList.add('hidden')"></div>
+        <div class="fixed inset-0 bg-elevate-dark/60 backdrop-blur-sm transition-opacity" onclick="document.getElementById('importModal').classList.add('hidden')"></div>
         <div class="flex min-h-screen items-center justify-center p-4">
-            <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/20 relative z-10">
+            <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-slate-100 relative z-10">
                 
                 {{-- Header Modal --}}
-                <div class="bg-emerald-600 p-6 flex justify-between items-center">
-                    <h3 class="text-lg font-black text-white flex items-center gap-2">
-                        <i class="ph-bold ph-microsoft-excel-logo text-emerald-200"></i> Import Data Buku
+                <div class="bg-elevate-soft p-6 flex justify-between items-center border-b border-slate-200">
+                    <h3 class="text-lg font-black text-elevate-dark flex items-center gap-2">
+                        <i class="ph-bold ph-microsoft-excel-logo text-elevate-primary"></i> Import Data Buku
                     </h3>
-                    <button onclick="document.getElementById('importModal').classList.add('hidden')" class="text-emerald-200 hover:text-white transition-colors">
+                    <button onclick="document.getElementById('importModal').classList.add('hidden')" class="text-elevate-dark/50 hover:text-elevate-dark transition-colors bg-white hover:bg-slate-100 w-8 h-8 rounded-full flex items-center justify-center shadow-sm">
                         <i class="ph-bold ph-x text-xl"></i>
                     </button>
                 </div>
 
                 <div class="p-8">
                     <div class="text-center mb-6">
-                        <p class="text-sm text-slate-500 font-medium leading-relaxed">
+                        <p class="text-sm text-elevate-dark/70 font-medium leading-relaxed">
                             Upload file Excel (.xlsx / .csv) untuk menambahkan banyak buku sekaligus.
                         </p>
                     </div>
                     
                     <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 mb-6">
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Format Header Wajib:</p>
-                        <div class="font-mono text-xs text-slate-600 bg-white p-3 rounded-xl border border-slate-200 overflow-x-auto whitespace-nowrap">
+                        <div class="font-mono text-xs text-elevate-dark bg-white p-3 rounded-xl border border-slate-200 overflow-x-auto whitespace-nowrap shadow-sm">
                             kode_buku, judul, pengarang, penerbit, tahun, stok, rak, kategori
                         </div>
                     </div>
@@ -220,7 +222,7 @@
                     <form action="{{ route('library.books.import') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="relative group mb-6">
-                            <input type="file" name="file" required class="block w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 border border-dashed border-slate-300 rounded-2xl py-3 px-4 hover:border-emerald-400 transition-all cursor-pointer bg-white">
+                            <input type="file" name="file" required class="block w-full text-xs text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-soft file:text-elevate-primary hover:file:bg-elevate-primary/10 border border-dashed border-slate-300 rounded-2xl py-3 px-4 hover:border-elevate-primary transition-all cursor-pointer bg-white">
                             
                             {{-- ERROR MESSAGE INLINE --}}
                             @error('file')
@@ -232,8 +234,8 @@
                         </div>
                         
                         <div class="flex gap-3">
-                            <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')" class="flex-1 py-3.5 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-colors">Batal</button>
-                            <button type="submit" class="flex-1 py-3.5 rounded-xl bg-emerald-600 text-white font-bold text-sm hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all transform active:scale-95 flex items-center justify-center gap-2">
+                            <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')" class="flex-1 py-3.5 rounded-xl bg-slate-100 text-elevate-dark/60 font-bold text-sm hover:bg-slate-200 hover:text-elevate-dark transition-colors border border-transparent">Batal</button>
+                            <button type="submit" class="flex-1 py-3.5 rounded-xl bg-elevate-dark text-white font-bold text-sm hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all transform active:scale-95 flex items-center justify-center gap-2 border border-transparent">
                                 <i class="ph-bold ph-upload-simple"></i> Upload
                             </button>
                         </div>
@@ -252,8 +254,8 @@
                 text: "Data yang dihapus tidak dapat dikembalikan!",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#ef4444', // rose-500
-                cancelButtonColor: '#64748b',  // slate-500
+                confirmButtonColor: '#2c3f61', // elevate-dark
+                cancelButtonColor: '#94a3b8',  
                 confirmButtonText: 'Ya, Hapus!',
                 cancelButtonText: 'Batal',
                 customClass: { popup: 'rounded-[2rem]' }
@@ -269,13 +271,12 @@
     @if($errors->has('file'))
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. Buka Modal
             document.getElementById('importModal').classList.remove('hidden');
-            
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal Upload',
                 text: {!! json_encode($errors->first('file')) !!},
+                confirmButtonColor: '#2c3f61',
                 customClass: { popup: 'rounded-[2rem]' }
             });
         });

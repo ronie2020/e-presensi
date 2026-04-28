@@ -9,28 +9,30 @@
         .delay-100 { animation-delay: 100ms; }
         .delay-200 { animation-delay: 200ms; }
         .delay-300 { animation-delay: 300ms; }
-        
-        .fluent-card { box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.132), 0 0.3px 0.9px 0 rgba(0, 0, 0, 0.108); border: 1px solid rgba(0, 0, 0, 0.05); transition: all 0.3s ease; }
     </style>
     @endpush
 
-    <div class="py-6 font-sans text-slate-800 bg-slate-50/50 min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <div class="py-8 sm:py-10 font-sans text-elevate-dark relative overflow-hidden min-h-screen">
+        {{-- Efek Latar Belakang Halus --}}
+        <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-8 relative z-10">
 
             {{-- HERO SECTION (ELEVATED THEME) --}}
-            <div class="animate-enter relative rounded-xl bg-gradient-to-br from-[#25D0FF] via-[#5295FF] to-[#FFC9B9] p-6 md:p-10 text-[#2A3B52] shadow-[0_10px_40px_-10px_rgba(37,208,255,0.4)] overflow-hidden group border border-white/40 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div class="animate-enter relative rounded-[2.5rem] bg-elevate-gradient-main p-8 md:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden group border border-white/60 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 
                 <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay no-print"></div>
+                <div class="absolute top-0 right-0 w-80 h-80 bg-white/40 rounded-full blur-[80px] translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
             
                 <div class="relative z-10 flex items-center gap-5">
-                    <div class="w-16 h-16 rounded-xl bg-white/40 backdrop-blur-md flex items-center justify-center border border-white/50 shadow-sm shrink-0">
-                        <i class="ph-duotone ph-chart-polar text-4xl text-[#2A3B52]"></i>
+                    <div class="w-16 h-16 rounded-2xl bg-white/50 backdrop-blur-md flex items-center justify-center border border-white/60 shadow-sm shrink-0">
+                        <i class="ph-duotone ph-chart-polar text-4xl text-elevate-primary"></i>
                     </div>
                     <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 border border-white/50 text-[#2A3B52] text-[10px] font-bold uppercase tracking-wider mb-2 backdrop-blur-sm shadow-sm">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-elevate-soft/80 border border-elevate-accent/30 text-elevate-primary text-[10px] font-bold uppercase tracking-wider mb-2 backdrop-blur-sm shadow-sm">
                             <i class="ph-bold ph-trend-up"></i> Evaluasi Kedisiplinan
                         </div>
-                        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
+                        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight text-elevate-dark">
                             Statistik & Analitik
                         </h2>
                     </div>
@@ -39,60 +41,60 @@
                 {{-- FILTER BUTTON --}}
                 <div class="relative z-10 w-full md:w-auto mt-4 md:mt-0">
                     <form action="{{ route('permit.analytics') }}" method="GET" id="monthFilterForm" class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                        <label for="monthFilter" class="text-[#2A3B52] text-sm font-bold opacity-90 hidden sm:block">Pilih Bulan:</label>
-                        <div class="relative w-full sm:w-auto">
+                        <label for="monthFilter" class="text-elevate-dark/70 text-sm font-bold hidden sm:block">Pilih Bulan:</label>
+                        <div class="relative w-full sm:w-auto group">
                             <input type="month" name="month" id="monthFilter" value="{{ $selectedMonth }}" 
                                 onchange="document.getElementById('monthFilterForm').submit()"
-                                class="w-full bg-white/50 hover:bg-white border border-[#2A3B52]/20 text-[#2A3B52] text-sm rounded-lg px-4 py-2.5 focus:ring-0 focus:border-[#5295FF] backdrop-blur-md cursor-pointer transition-all shadow-sm font-bold">
+                                class="w-full bg-white/60 hover:bg-white border border-white/50 text-elevate-dark text-sm rounded-xl px-5 py-3.5 focus:ring-4 focus:ring-elevate-accent/20 focus:border-elevate-accent backdrop-blur-md cursor-pointer transition-all shadow-sm font-bold">
                         </div>
                     </form>
                 </div>
             </div>
 
             {{-- KPI CARDS --}}
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 animate-enter delay-100">
-                <div class="bg-white p-5 rounded-xl fluent-card hover:border-[#D0E7F8] hover:-translate-y-1 transition-all duration-300 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-[#F3F9FD] text-[#5295FF] border border-[#D0E7F8] flex items-center justify-center text-xl shrink-0"><i class="ph-bold ph-door-open"></i></div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 animate-enter delay-100">
+                <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-elevate-accent/10 hover:border-elevate-accent/30 transition-all duration-300 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-elevate-soft text-elevate-primary border border-elevate-accent/20 flex items-center justify-center text-2xl shrink-0"><i class="ph-bold ph-door-open"></i></div>
                     <div>
-                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Total Izin</div>
-                        <div class="text-2xl font-black text-[#2A3B52]">{{ $kpiTotalMonth ?? 0 }}</div>
+                        <div class="text-[10px] text-elevate-dark/50 font-bold uppercase tracking-widest">Total Izin</div>
+                        <div class="text-2xl font-black text-elevate-dark">{{ $kpiTotalMonth ?? 0 }}</div>
                     </div>
                 </div>
-                <div class="bg-white p-5 rounded-xl fluent-card hover:border-[#FFD8A8] hover:-translate-y-1 transition-all duration-300 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-[#FFEFD6] text-[#D83B01] border border-[#FFD8A8] flex items-center justify-center text-xl shrink-0"><i class="ph-bold ph-timer"></i></div>
+                <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-elevate-peach/10 hover:border-elevate-peach/30 transition-all duration-300 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-elevate-peach-light/40 text-elevate-peach-dark border border-elevate-peach/30 flex items-center justify-center text-2xl shrink-0"><i class="ph-bold ph-timer"></i></div>
                     <div>
-                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Rata-rata Durasi</div>
-                        <div class="text-2xl font-black text-[#2A3B52]">{{ $kpiAvgDuration ?? 0 }}<span class="text-sm text-slate-400 font-medium ml-1">mnt</span></div>
+                        <div class="text-[10px] text-elevate-dark/50 font-bold uppercase tracking-widest">Rata Durasi</div>
+                        <div class="text-2xl font-black text-elevate-dark">{{ $kpiAvgDuration ?? 0 }}<span class="text-sm text-elevate-dark/40 font-medium ml-1">mnt</span></div>
                     </div>
                 </div>
-                <div class="bg-white p-5 rounded-xl fluent-card hover:border-[#F4C3C9] hover:-translate-y-1 transition-all duration-300 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-[#FDE7E9] text-[#D13438] border border-[#F4C3C9] flex items-center justify-center text-xl shrink-0"><i class="ph-bold ph-warning"></i></div>
+                <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-rose-500/10 hover:border-rose-200 transition-all duration-300 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center text-2xl shrink-0"><i class="ph-bold ph-warning"></i></div>
                     <div>
-                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Siswa Telat</div>
-                        <div class="text-2xl font-black text-[#2A3B52]">{{ $kpiOverdue ?? 0 }}</div>
+                        <div class="text-[10px] text-elevate-dark/50 font-bold uppercase tracking-widest">Siswa Telat</div>
+                        <div class="text-2xl font-black text-elevate-dark">{{ $kpiOverdue ?? 0 }}</div>
                     </div>
                 </div>
-                <div class="bg-white p-5 rounded-xl fluent-card hover:border-[#B7DFB9] hover:-translate-y-1 transition-all duration-300 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-[#DFF6DD] text-[#107C10] border border-[#B7DFB9] flex items-center justify-center text-xl shrink-0"><i class="ph-bold ph-check-circle"></i></div>
+                <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-200 transition-all duration-300 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center text-2xl shrink-0"><i class="ph-bold ph-check-circle"></i></div>
                     <div>
-                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Penyelesaian</div>
-                        <div class="text-2xl font-black text-[#2A3B52]">{{ $kpiCompletionRate ?? 100 }}<span class="text-sm text-slate-400 font-medium ml-1">%</span></div>
+                        <div class="text-[10px] text-elevate-dark/50 font-bold uppercase tracking-widest">Penyelesaian</div>
+                        <div class="text-2xl font-black text-elevate-dark">{{ $kpiCompletionRate ?? 100 }}<span class="text-sm text-elevate-dark/40 font-medium ml-1">%</span></div>
                     </div>
                 </div>
             </div>
 
             {{-- CHART GRID --}}
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
                 
                 {{-- CHART 1: Jam Paling Sibuk --}}
-                <div class="lg:col-span-8 bg-white p-6 md:p-8 rounded-xl fluent-card animate-enter delay-200">
+                <div class="lg:col-span-8 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 animate-enter delay-200">
                     <div class="flex justify-between items-start mb-6">
                         <div>
-                            <h3 class="font-extrabold text-[#2A3B52] text-lg flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-md bg-[#F3F9FD] text-[#5295FF] border border-[#D0E7F8] flex items-center justify-center"><i class="ph-bold ph-clock"></i></div>
+                            <h3 class="font-extrabold text-elevate-dark text-lg flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-elevate-soft text-elevate-primary border border-elevate-accent/20 flex items-center justify-center"><i class="ph-bold ph-clock text-xl"></i></div>
                                 Jam Keluar Paling Sibuk
                             </h3>
-                            <p class="text-xs text-slate-500 mt-1 ml-10">Distribusi frekuensi izin siswa (Akumulasi Bulan {{ $parsedDate->translatedFormat('F Y') }}).</p>
+                            <p class="text-xs text-elevate-dark/60 font-medium mt-1 ml-12">Distribusi frekuensi izin siswa (Akumulasi Bulan {{ $parsedDate->translatedFormat('F Y') }}).</p>
                         </div>
                     </div>
                     <div class="relative h-[300px] w-full">
@@ -101,30 +103,30 @@
                 </div>
 
                 {{-- TOP 5 SISWA SERING IZIN --}}
-                <div class="lg:col-span-4 bg-white p-6 md:p-8 rounded-xl fluent-card animate-enter delay-200 flex flex-col">
+                <div class="lg:col-span-4 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 animate-enter delay-200 flex flex-col">
                     <div class="mb-4">
-                        <h3 class="font-extrabold text-[#2A3B52] text-lg flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-md bg-[#FDE7E9] text-[#D13438] border border-[#F4C3C9] flex items-center justify-center"><i class="ph-bold ph-siren"></i></div>
+                        <h3 class="font-extrabold text-elevate-dark text-lg flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center"><i class="ph-bold ph-siren text-xl"></i></div>
                             Top 5 Sering Izin
                         </h3>
-                        <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1 ml-10 font-bold">Bulan {{ $parsedDate->translatedFormat('F Y') }}</p>
+                        <p class="text-[10px] text-elevate-dark/50 uppercase tracking-widest mt-1 ml-12 font-bold">Bulan {{ $parsedDate->translatedFormat('F Y') }}</p>
                     </div>
                     
-                    <div class="flex-1 overflow-y-auto pr-2 space-y-3">
+                    <div class="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar mt-2">
                         @forelse($topStudents ?? [] as $index => $student)
-                            <div class="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-100 hover:border-[#F4C3C9] transition-colors">
+                            <div class="flex items-center justify-between p-4 rounded-2xl bg-elevate-soft/50 border border-slate-100 hover:border-elevate-accent/30 hover:bg-white transition-all shadow-sm">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-md flex items-center justify-center text-xs font-bold text-white shadow-sm
-                                        {{ $index == 0 ? 'bg-[#D13438]' : ($index == 1 ? 'bg-[#D83B01]' : 'bg-slate-400') }}">
+                                    <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black text-white shadow-sm
+                                        {{ $index == 0 ? 'bg-rose-600' : ($index == 1 ? 'bg-elevate-peach-dark' : 'bg-slate-400') }}">
                                         {{ $index + 1 }}
                                     </div>
                                     <div>
-                                        <div class="text-sm font-bold text-[#2A3B52] truncate max-w-[120px]" title="{{ $student->name }}">{{ $student->name }}</div>
-                                        <div class="text-[10px] text-slate-500 font-bold uppercase">{{ $student->class_name }}</div>
+                                        <div class="text-sm font-bold text-elevate-dark truncate max-w-[120px]" title="{{ $student->name }}">{{ $student->name }}</div>
+                                        <div class="text-[10px] text-elevate-dark/60 font-bold uppercase">{{ $student->class_name }}</div>
                                     </div>
                                 </div>
                                 <div class="text-center">
-                                    <span class="block text-lg font-black text-[#D13438] leading-none">{{ $student->total_izin }}</span>
+                                    <span class="block text-xl font-black text-rose-600 leading-none">{{ $student->total_izin }}</span>
                                     <span class="text-[9px] font-bold text-slate-400 uppercase">Kali</span>
                                 </div>
                             </div>
@@ -138,10 +140,10 @@
                 </div>
 
                 {{-- CHART 2: Alasan (Doughnut Chart) --}}
-                <div class="lg:col-span-4 bg-white p-6 md:p-8 rounded-xl fluent-card animate-enter delay-300">
+                <div class="lg:col-span-4 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 animate-enter delay-300">
                     <div class="mb-6">
-                        <h3 class="font-extrabold text-[#2A3B52] text-lg flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-md bg-[#FFEFD6] text-[#D83B01] border border-[#FFD8A8] flex items-center justify-center"><i class="ph-bold ph-question"></i></div>
+                        <h3 class="font-extrabold text-elevate-dark text-lg flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-elevate-peach-light/40 text-elevate-peach-dark border border-elevate-peach/30 flex items-center justify-center"><i class="ph-bold ph-question text-xl"></i></div>
                             Proporsi Alasan
                         </h3>
                     </div>
@@ -151,13 +153,13 @@
                 </div>
 
                 {{-- CHART 3: Kelas Terbanyak (Bar Chart) --}}
-                <div class="lg:col-span-8 bg-white p-6 md:p-8 rounded-xl fluent-card animate-enter delay-300">
+                <div class="lg:col-span-8 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 animate-enter delay-300">
                     <div class="mb-6">
-                        <h3 class="font-extrabold text-[#2A3B52] text-lg flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-md bg-[#DFF6DD] text-[#107C10] border border-[#B7DFB9] flex items-center justify-center"><i class="ph-bold ph-users-three"></i></div>
+                        <h3 class="font-extrabold text-elevate-dark text-lg flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center"><i class="ph-bold ph-users-three text-xl"></i></div>
                             Tingkat Izin Berdasarkan Kelas
                         </h3>
-                        <p class="text-xs text-slate-500 mt-1 ml-10">Membantu mengevaluasi kedisiplinan masing-masing kelas.</p>
+                        <p class="text-xs text-elevate-dark/60 font-medium mt-1 ml-12">Membantu mengevaluasi kedisiplinan masing-masing kelas.</p>
                     </div>
                     <div class="relative h-[250px] w-full">
                         <canvas id="classChart"></canvas>
@@ -170,7 +172,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+            Chart.defaults.font.family = "'Figtree', sans-serif";
             Chart.defaults.color = '#64748b'; 
             
             const timeLabels = {!! json_encode($timeLabels ?? []) !!};
@@ -179,6 +181,14 @@
             const reasonData = {!! json_encode($reasonData ?? []) !!};
             const classLabels = {!! json_encode($classLabels ?? []) !!};
             const classData = {!! json_encode($classData ?? []) !!};
+
+            // Tema Warna Elevate
+            const colorPrimary = '#0d52a1';
+            const colorAccent = '#56bbf1';
+            const colorPeach = '#f9a282';
+            const colorRose = '#e11d48';
+            const colorEmerald = '#10b981';
+            const colorDark = '#2c3f61';
 
             // 1. CHART JAM SIBUK
             if(document.getElementById('timeChart')) {
@@ -189,13 +199,13 @@
                         datasets: [{
                             label: 'Jumlah Izin',
                             data: timeData,
-                            borderColor: '#5295FF', // Elevate Blue
-                            backgroundColor: 'rgba(82, 149, 255, 0.1)', 
+                            borderColor: colorPrimary, 
+                            backgroundColor: 'rgba(13, 82, 161, 0.1)', 
                             borderWidth: 3,
                             tension: 0.4, 
                             fill: true,
                             pointBackgroundColor: '#ffffff',
-                            pointBorderColor: '#5295FF',
+                            pointBorderColor: colorPrimary,
                             pointBorderWidth: 2,
                             pointRadius: 4,
                             pointHoverRadius: 6
@@ -220,7 +230,7 @@
                         labels: reasonLabels,
                         datasets: [{
                             data: reasonData,
-                            backgroundColor: ['#5295FF', '#107C10', '#D83B01', '#2A3B52', '#D13438', '#8b5cf6'], 
+                            backgroundColor: [colorPrimary, colorEmerald, colorPeach, colorDark, colorRose, colorAccent], 
                             borderWidth: 0,
                             hoverOffset: 4
                         }]
@@ -245,8 +255,8 @@
                             label: 'Total Izin',
                             data: classData,
                             // Warna merah jika lebih dari 20 (terlalu banyak)
-                            backgroundColor: classData.map(val => val > 20 ? '#D13438' : '#5295FF'), 
-                            borderRadius: 6,
+                            backgroundColor: classData.map(val => val > 20 ? colorRose : colorPrimary), 
+                            borderRadius: 8,
                             barThickness: 30
                         }]
                     },

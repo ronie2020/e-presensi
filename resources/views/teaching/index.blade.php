@@ -1,66 +1,68 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-slate-800 leading-tight">
+        <h2 class="font-semibold text-xl text-elevate-dark leading-tight">
             {{ __('Jadwal Mengajar') }}
         </h2>
     </x-slot>
 
-    {{-- CUSTOM STYLES FLUENT --}}
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        
-        .fluent-card { box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.132), 0 0.3px 0.9px 0 rgba(0, 0, 0, 0.108); border: 1px solid rgba(0, 0, 0, 0.05); transition: all 0.3s ease; }
-        .fluent-card:hover { box-shadow: 0 6.4px 14.4px 0 rgba(0, 0, 0, 0.132), 0 1.2px 3.6px 0 rgba(0, 0, 0, 0.108); transform: translateY(-2px); }
-        .fluent-modal { box-shadow: 0 25.6px 57.6px 0 rgba(0, 0, 0, 0.22), 0 4.8px 14.4px 0 rgba(0, 0, 0, 0.18); border: 1px solid rgba(0, 0, 0, 0.05); }
+        @keyframes wave { 0% { transform: rotate(0deg); } 10% { transform: rotate(14deg); } 20% { transform: rotate(-8deg); } 30% { transform: rotate(14deg); } 40% { transform: rotate(-4deg); } 50% { transform: rotate(10deg); } 60% { transform: rotate(0deg); } 100% { transform: rotate(0deg); } }
+        .animate-wave { animation: wave 2.5s infinite; transform-origin: 70% 70%; }
     </style>
 
-    <div class="py-8 font-sans text-slate-800 pb-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-8 sm:py-10 font-sans text-elevate-dark bg-elevate-surface min-h-screen relative overflow-hidden pb-20">
+        
+        {{-- Efek Latar Belakang Halus --}}
+        <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
             {{-- NOTIFIKASI --}}
             @if(session('success'))
-                <div x-data="{ show: true }" x-show="show" x-transition class="mb-6 p-4 bg-[#DFF6DD] border border-[#B7DFB9] text-[#107C10] rounded-xl flex items-center justify-between shadow-sm">
+                <div x-data="{ show: true }" x-show="show" x-transition class="mb-6 p-5 bg-[#DFF6DD] border border-[#B7DFB9] text-[#107C10] rounded-[1.5rem] flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3">
                         <i class="ph-fill ph-check-circle text-xl"></i>
-                        <span class="font-bold">{{ session('success') }}</span>
+                        <span class="font-bold text-sm">{{ session('success') }}</span>
                     </div>
-                    <button @click="show = false" class="hover:bg-[#B7DFB9]/50 p-1 rounded-lg"><i class="ph-bold ph-x"></i></button>
+                    <button @click="show = false" class="hover:bg-[#B7DFB9]/50 p-2 rounded-full transition-colors"><i class="ph-bold ph-x"></i></button>
                 </div>
             @endif
 
             @if(session('error'))
-                <div x-data="{ show: true }" x-show="show" x-transition class="mb-6 p-4 bg-[#FDE7E9] border border-[#F4C3C9] text-[#D13438] rounded-xl flex items-center justify-between shadow-sm">
+                <div x-data="{ show: true }" x-show="show" x-transition class="mb-6 p-5 bg-[#FDE7E9] border border-[#F4C3C9] text-[#D13438] rounded-[1.5rem] flex items-center justify-between shadow-sm">
                     <div class="flex items-center gap-3">
                         <i class="ph-fill ph-warning-circle text-xl"></i>
-                        <span class="font-bold">{{ session('error') }}</span>
+                        <span class="font-bold text-sm">{{ session('error') }}</span>
                     </div>
-                    <button @click="show = false" class="hover:bg-[#F4C3C9]/50 p-1 rounded-lg"><i class="ph-bold ph-x"></i></button>
+                    <button @click="show = false" class="hover:bg-[#F4C3C9]/50 p-2 rounded-full transition-colors"><i class="ph-bold ph-x"></i></button>
                 </div>
             @endif
 
             {{-- HEADER DASHBOARD ELEVATE --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
                 
-                {{-- Kartu Hari Ini --}}
-                <div class="bg-gradient-to-br from-[#25D0FF] via-[#5295FF] to-[#FFC9B9] rounded-xl p-8 text-[#2A3B52] shadow-[0_10px_40px_-10px_rgba(37,208,255,0.4)] relative overflow-hidden group border border-white/40 animate-enter">
-                    <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
-                    <div class="absolute right-0 top-0 opacity-10 transform translate-x-8 -translate-y-8 group-hover:scale-110 transition-transform duration-500 text-white">
+                {{-- Kartu Hari Ini (Elevate Gradient) --}}
+                <div class="relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 animate-enter group">
+                    <div class="absolute -top-10 -left-10 w-40 h-40 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
+                    <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white/30 rounded-full blur-2xl pointer-events-none"></div>
+                    <div class="absolute right-0 top-0 opacity-10 transform translate-x-8 -translate-y-8 group-hover:scale-110 transition-transform duration-500 text-white pointer-events-none">
                         <i class="ph-fill ph-calendar-check text-[10rem]"></i>
                     </div>
                     
                     <div class="relative z-10 h-full flex flex-col justify-between">
-                        <a href="{{ route('dashboard') }}" class="group/btn bg-white/40 hover:bg-white/60 text-[#2A3B52] px-4 py-2 rounded-xl font-bold text-xs backdrop-blur-sm border border-white/50 transition-all flex items-center gap-2 shadow-sm w-fit mb-4">
+                        <a href="{{ route('dashboard') }}" class="group/btn bg-white/40 hover:bg-white text-elevate-dark px-4 py-2.5 rounded-xl font-bold text-xs backdrop-blur-sm border border-white/50 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 active:scale-95">
                             <i class="ph-bold ph-arrow-left group-hover/btn:-translate-x-1 transition-transform"></i>
                             <span>Dashboard</span>
                         </a>
                         <div>
-                            <p class="text-[#2A3B52]/80 font-bold text-sm mb-1 flex items-center gap-2 uppercase tracking-wider"><i class="ph-bold ph-calendar-blank"></i> Hari Ini</p>
+                            <p class="text-elevate-dark/80 font-black text-sm mb-1 flex items-center gap-2 uppercase tracking-wider"><i class="ph-bold ph-calendar-blank"></i> Hari Ini</p>
                             <h3 class="text-2xl sm:text-3xl font-black tracking-tight leading-tight">{{ \Carbon\Carbon::now()->locale('id')->translatedFormat('l, d F Y') }}</h3>
                         </div>
                         <div class="mt-6">
-                            <span class="bg-white/40 backdrop-blur-md px-4 py-2.5 rounded-xl text-sm font-bold border border-white/50 shadow-sm inline-flex items-center gap-2 text-[#2A3B52]">
-                                <span class="bg-[#107C10] w-2 h-2 rounded-full animate-pulse"></span>
+                            <span class="bg-white/60 backdrop-blur-md px-4 py-2.5 rounded-xl text-sm font-bold border border-white/50 shadow-sm inline-flex items-center gap-2 text-elevate-dark">
+                                <span class="bg-[#107C10] w-2.5 h-2.5 rounded-full animate-pulse"></span>
                                 {{ $schedules->count() }} Sesi Pelajaran
                             </span>
                         </div>
@@ -68,20 +70,18 @@
                 </div>
                 
                 {{-- Kartu Welcome --}}
-                <div class="lg:col-span-2 bg-white rounded-xl p-8 fluent-card flex items-center justify-between relative overflow-hidden animate-enter" style="animation-delay: 100ms">
-                    <div class="absolute inset-0 bg-slate-50/50 opacity-0 md:opacity-100 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:20px_20px]"></div>
-                    
+                <div class="lg:col-span-2 bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/40 flex items-center justify-between relative overflow-hidden animate-enter" style="animation-delay: 100ms">
                     <div class="relative z-10 max-w-lg">
-                        <h3 class="font-black text-[#2A3B52] text-2xl mb-2 flex items-center gap-2">
+                        <h3 class="font-black text-elevate-dark text-3xl mb-3 flex items-center gap-2">
                             Halo, {{ Auth::user()->name }}! <span class="animate-wave origin-bottom-right inline-block">👋</span>
                         </h3>
-                        <p class="text-slate-500 leading-relaxed font-medium text-sm">
+                        <p class="text-elevate-dark/70 leading-relaxed font-semibold text-sm">
                             Sudah siap mengajar hari ini? Pastikan jurnal terisi dan absensi siswa tercatat dengan baik.
                         </p>
                     </div>
                     
                     <div class="hidden md:block relative z-10">
-                        <div class="w-24 h-24 bg-[#F3F9FD] rounded-xl flex items-center justify-center text-[#5295FF] shadow-sm border border-[#D0E7F8] rotate-3 hover:rotate-6 transition-transform">
+                        <div class="w-24 h-24 bg-elevate-peach-light rounded-[2rem] flex items-center justify-center text-elevate-peach-dark shadow-sm border border-elevate-peach rotate-3 hover:rotate-6 transition-transform">
                             <i class="ph-duotone ph-chalkboard-teacher text-5xl"></i>
                         </div>
                     </div>
@@ -90,8 +90,8 @@
 
             {{-- LIST JADWAL --}}
             <div class="flex items-center justify-between mb-6 animate-enter" style="animation-delay: 200ms">
-                <h3 class="font-bold text-[#2A3B52] text-xl flex items-center gap-2">
-                    <div class="w-1.5 h-6 bg-[#5295FF] rounded-full"></div>
+                <h3 class="font-black text-elevate-dark text-xl flex items-center gap-3">
+                    <div class="w-2 h-6 bg-elevate-accent rounded-full"></div>
                     Agenda {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('l') }}
                 </h3>
             </div>
@@ -100,48 +100,45 @@
                 <div class="grid grid-cols-1 gap-5">
                     @foreach($schedules as $index => $schedule)
                         @php
-                            // OPTIMASI: Mengambil data session dari relasi yang sudah di-Eager Load
                             $session = $schedule->todaySession;
-                            
                             $startJP = $schedule->clean_start_time;
                             $endJP   = $schedule->clean_end_time;
 
                             if (!$session) {
                                 $status = 'waiting'; 
-                                $borderClass = 'border-l-4 border-l-[#5295FF]';
-                                $bgIcon = 'bg-[#F3F9FD] text-[#5295FF] border-[#D0E7F8]';
-                                $btnClass = 'bg-[#2A3B52] hover:bg-[#182436] text-white'; // Elevate Primary Navy
+                                $borderClass = 'border-l-[6px] border-l-elevate-accent';
+                                $bgIcon = 'bg-elevate-soft text-elevate-primary border-slate-200';
+                                $btnClass = 'bg-elevate-dark hover:bg-elevate-primary text-white shadow-elevate-dark/30'; 
                             } elseif ($session->status == 'open') {
                                 $status = 'ongoing';
-                                $borderClass = 'border-l-4 border-l-[#107C10] ring-2 ring-[#107C10]/20';
+                                $borderClass = 'border-l-[6px] border-l-[#107C10] ring-2 ring-[#107C10]/10';
                                 $bgIcon = 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9]';
-                                $btnClass = 'bg-[#107C10] hover:bg-[#0c5c0c] text-white'; // Elevate Success Green
+                                $btnClass = 'bg-[#107C10] hover:bg-[#0c5c0c] text-white shadow-[#107C10]/30'; 
                             } else {
                                 $status = 'done';
-                                $borderClass = 'border-l-4 border-l-slate-300 bg-slate-50/50';
+                                $borderClass = 'border-l-[6px] border-l-slate-300 bg-slate-50/50';
                                 $bgIcon = 'bg-white text-slate-400 border-slate-200';
                             }
                         @endphp
 
-                        <div class="bg-white rounded-xl fluent-card p-6 {{ $borderClass }} flex flex-col md:flex-row justify-between items-center gap-6 group relative overflow-hidden animate-enter" style="animation-delay: {{ ($index + 3) * 100 }}ms">
+                        <div class="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-6 {{ $borderClass }} flex flex-col md:flex-row justify-between items-center gap-6 group relative overflow-hidden animate-enter" style="animation-delay: {{ ($index + 3) * 100 }}ms">
                             
                             <div class="flex items-center gap-5 w-full md:w-auto z-10">
-                                <div class="flex flex-col items-center justify-center w-20 h-20 rounded-xl {{ $bgIcon }} shrink-0 shadow-sm border">
-                                    <span class="text-[10px] font-bold uppercase tracking-wider opacity-60">Jam Ke</span>
+                                <div class="flex flex-col items-center justify-center w-20 h-20 rounded-2xl {{ $bgIcon }} shrink-0 shadow-sm border transition-colors">
+                                    <span class="text-[10px] font-bold uppercase tracking-wider opacity-70">Jam Ke</span>
                                     <span class="text-3xl font-black leading-none">{{ $startJP }}</span>
                                     @if($startJP != $endJP)
-                                        <span class="text-xs font-bold -mt-1 opacity-60">- {{ $endJP }}</span>
+                                        <span class="text-xs font-bold -mt-1 opacity-70">- {{ $endJP }}</span>
                                     @endif
                                 </div>
                                 <div>
-                                    <h4 class="font-black text-[#2A3B52] text-xl group-hover:text-[#5295FF] transition-colors">{{ $schedule->subject->name }}</h4>
+                                    <h4 class="font-black text-elevate-dark text-xl md:text-2xl group-hover:text-elevate-primary transition-colors">{{ $schedule->subject->name }}</h4>
                                     <div class="flex flex-wrap gap-2 mt-2">
-                                        <span class="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                                        <span class="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
                                             <i class="ph-bold ph-users-three"></i> Kelas {{ $schedule->schoolClass->name }}
                                         </span>
-                                        <span class="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-                                            <i class="ph-bold ph-clock"></i> 
-                                            JP {{ $startJP }} - {{ $endJP }}
+                                        <span class="flex items-center gap-1.5 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                                            <i class="ph-bold ph-clock"></i> JP {{ $startJP }} - {{ $endJP }}
                                         </span>
                                     </div>
                                 </div>
@@ -151,25 +148,25 @@
                                 @if($status == 'waiting')
                                     <form action="{{ route('teaching.start', $schedule->id) }}" method="POST">
                                         @csrf
-                                        <button type="submit" class="w-full md:w-auto px-8 py-3.5 {{ $btnClass }} font-bold rounded-xl shadow-md transition transform flex items-center justify-center gap-2 active:scale-95 border border-transparent">
+                                        <button type="submit" class="w-full md:w-auto px-8 py-3.5 {{ $btnClass }} font-bold rounded-2xl shadow-lg transition transform flex items-center justify-center gap-2 active:scale-95 text-sm border border-transparent">
                                             <i class="ph-bold ph-play-circle text-xl"></i> Mulai Mengajar
                                         </button>
                                     </form>
                                 @elseif($status == 'ongoing')
-                                    <div class="flex flex-col md:items-end gap-2">
-                                        <div class="flex items-center gap-2 text-[#107C10] font-bold text-xs uppercase tracking-wide animate-pulse">
-                                            <span class="w-2 h-2 rounded-full bg-[#107C10]"></span> Sedang Berlangsung
+                                    <div class="flex flex-col md:items-end gap-3">
+                                        <div class="flex items-center justify-center md:justify-end gap-2 text-[#107C10] font-black text-[10px] uppercase tracking-widest bg-[#DFF6DD] px-3 py-1.5 rounded-full border border-[#B7DFB9]">
+                                            <span class="w-2 h-2 rounded-full bg-[#107C10] animate-pulse"></span> Sedang Berlangsung
                                         </div>
-                                        <a href="{{ route('teaching.show', $session->id) }}" class="w-full md:w-auto px-8 py-3.5 {{ $btnClass }} font-bold rounded-xl shadow-md transition transform flex items-center justify-center gap-2 active:scale-95 border border-transparent">
-                                            Lanjutkan Kelas <i class="ph-bold ph-arrow-right"></i>
+                                        <a href="{{ route('teaching.show', $session->id) }}" class="w-full md:w-auto px-8 py-3.5 {{ $btnClass }} font-bold rounded-2xl shadow-lg transition transform flex items-center justify-center gap-2 active:scale-95 text-sm border border-transparent">
+                                            Buka Kelas <i class="ph-bold ph-arrow-right"></i>
                                         </a>
                                     </div>
                                 @else
                                     <div class="flex items-center gap-3">
-                                        <span class="px-5 py-2.5 bg-slate-100 text-slate-400 font-bold text-sm rounded-xl flex items-center gap-2 border border-slate-200 cursor-not-allowed">
+                                        <span class="px-5 py-3.5 bg-slate-100 text-slate-400 font-bold text-sm rounded-2xl flex items-center gap-2 border border-slate-200 cursor-not-allowed">
                                             <i class="ph-fill ph-check-circle"></i> Selesai
                                         </span>
-                                        <a href="{{ route('teaching.show', $session->id) }}" class="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-[#5295FF] hover:border-[#D0E7F8] hover:bg-[#F3F9FD] transition shadow-sm active:scale-95" title="Lihat Detail">
+                                        <a href="{{ route('teaching.show', $session->id) }}" class="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-elevate-primary hover:border-elevate-accent/50 hover:bg-elevate-soft transition-all shadow-sm active:scale-95" title="Lihat Detail">
                                             <i class="ph-bold ph-eye text-xl"></i>
                                         </a>
                                     </div>
@@ -179,20 +176,16 @@
                     @endforeach
                 </div>
             @else
-                <div class="text-center py-20 bg-white rounded-xl fluent-card border-2 border-dashed border-slate-200 animate-enter delay-200">
-                    <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300 border border-slate-100">
+                <div class="text-center py-24 bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200 animate-enter delay-200">
+                    <div class="w-24 h-24 bg-elevate-soft rounded-full flex items-center justify-center mx-auto mb-6 text-elevate-primary border border-slate-100">
                         <i class="ph-duotone ph-coffee text-5xl"></i>
                     </div>
-                    <h3 class="text-[#2A3B52] font-black text-xl mb-2">Tidak Ada Jadwal Hari Ini</h3>
-                    <p class="text-slate-500 max-w-xs mx-auto text-sm leading-relaxed">
+                    <h3 class="text-elevate-dark font-black text-xl mb-2">Tidak Ada Jadwal Hari Ini</h3>
+                    <p class="text-slate-500 max-w-xs mx-auto text-sm font-medium leading-relaxed">
                         Hari ini ({{ \Carbon\Carbon::now()->locale('id')->translatedFormat('l') }}) Anda tidak memiliki jadwal kelas.
                     </p>
                 </div>
             @endif
         </div>
     </div>
-    <style>
-        @keyframes wave { 0% { transform: rotate(0deg); } 10% { transform: rotate(14deg); } 20% { transform: rotate(-8deg); } 30% { transform: rotate(14deg); } 40% { transform: rotate(-4deg); } 50% { transform: rotate(10deg); } 60% { transform: rotate(0deg); } 100% { transform: rotate(0deg); } }
-        .animate-wave { animation: wave 2.5s infinite; transform-origin: 70% 70%; }
-    </style>
 </x-app-layout>

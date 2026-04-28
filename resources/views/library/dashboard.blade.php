@@ -1,6 +1,6 @@
 <x-app-layout>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     {{-- CUSTOM STYLES --}}
     <style>
@@ -11,12 +11,12 @@
         @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-10px, -15px); } }
         .animate-float { animation: float 6s ease-in-out infinite; }
         
-        /* Shimmer Effect */
+        /* Shimmer Effect Dark (Diadaptasi untuk latar terang Elevate) */
         @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
         .text-shimmer {
-            background: linear-gradient(to right, #ffffff 0%, #cffafe 20%, #ffffff 40%, #ffffff 100%);
+            background: linear-gradient(to right, #2c3f61 0%, #0d52a1 20%, #2c3f61 40%, #2c3f61 100%);
             background-size: 200% auto;
-            color: #fff;
+            color: #2c3f61;
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -24,44 +24,46 @@
         }
     </style>
 
-    <div class="py-6 sm:py-8 font-sans text-slate-800">
+    <div class="py-6 sm:py-8 font-sans text-elevate-dark relative overflow-hidden">
+        {{-- Efek Latar Belakang Halus --}}
+        <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
         
         {{-- HERO SECTION (ELEVATED THEME) --}}
-         <div class="animate-enter max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-            <div class="relative rounded-[2.5rem] bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900 p-8 sm:p-10 text-white shadow-2xl shadow-cyan-900/30 overflow-hidden border border-white/10 group">
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                <div class="absolute -top-24 -right-24 w-80 h-80 bg-cyan-300/30 rounded-full blur-3xl pointer-events-none group-hover:bg-cyan-300/40 transition-all duration-700 animate-float"></div>
+         <div class="animate-enter max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 relative z-10">
+            <div class="relative rounded-[2.5rem] bg-elevate-gradient-main p-8 sm:p-10 text-elevate-dark shadow-2xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
+                <div class="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
+                <div class="absolute -top-24 -right-24 w-80 h-80 bg-white/40 rounded-full blur-3xl pointer-events-none group-hover:bg-white/60 transition-all duration-700 animate-float"></div>
                 
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                     <div class="max-w-2xl">
-                        <a href="{{ route('dashboard') }}" class="group bg-white/10 hover:bg-white/20 text-white px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
+                        <a href="{{ route('dashboard') }}" class="group bg-white/50 hover:bg-white/80 text-elevate-primary px-5 py-3 rounded-2xl font-bold text-sm backdrop-blur-sm border border-white/60 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 mx-auto xl:mx-0">
                             <i class="ph-bold ph-arrow-left text-sm group-hover:-translate-x-1 transition-transform"></i>
                             <span>Kembali ke Dashboard Utama</span>
                         </a>
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-900/50 border border-cyan-400/30 text-cyan-100 text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm animate-pulse">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-elevate-soft/80 border border-elevate-accent/30 text-elevate-primary text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm shadow-sm animate-pulse">
                             <i class="ph-fill ph-books"></i> Sistem Perpustakaan Digital
                         </div>
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-white drop-shadow-lg">Dashboard Pustaka</h1>
-                        <p class="text-cyan-50 text-sm md:text-base font-medium leading-relaxed max-w-lg">
+                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 text-elevate-dark">Dashboard Pustaka</h1>
+                        <p class="text-elevate-dark/80 text-sm md:text-base font-medium leading-relaxed max-w-lg">
                             Pusat kontrol manajemen buku, sirkulasi peminjaman, dan statistik kunjungan siswa secara real-time.
                         </p>
                     </div>
                     
                     <div class="w-full md:w-auto grid grid-cols-2 gap-4">
-                        <div class="bg-white/10 backdrop-blur-md px-5 py-5 rounded-2xl border border-white/20 hover:bg-white/15 transition-all hover:scale-105 duration-300">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-200">Koleksi Buku</span>
+                        <div class="bg-white/60 backdrop-blur-md px-5 py-5 rounded-2xl border border-white/80 shadow-sm hover:bg-white transition-all hover:scale-105 duration-300">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-elevate-primary">Koleksi Buku</span>
                             <span class="block text-3xl font-black text-shimmer count-up" data-target="{{ $totalBooks }}">0</span>
                         </div>
-                        <div class="bg-orange-500/20 backdrop-blur-md px-5 py-5 rounded-2xl border border-orange-400/30 hover:bg-orange-500/30 transition-all hover:scale-105 duration-300">
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-orange-300">Pengunjung</span>
-                            <span class="block text-3xl font-black text-shimmer count-up" data-target="{{ $todayVisits }}">0</span>
+                        <div class="bg-elevate-peach/20 backdrop-blur-md px-5 py-5 rounded-2xl border border-elevate-peach/30 shadow-sm hover:bg-elevate-peach/30 transition-all hover:scale-105 duration-300">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-elevate-peach-dark">Pengunjung</span>
+                            <span class="block text-3xl font-black text-elevate-dark count-up" data-target="{{ $todayVisits }}">0</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 <!-- KOLOM UTAMA (KIRI - 2/3) -->
@@ -69,60 +71,63 @@
 
                     <!-- Menu Akses Cepat -->
                     <div class="animate-enter delay-100 bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
-                        <h2 class="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
-                            <i class="ph-fill ph-lightning text-yellow-500 text-xl"></i> Akses Cepat
+                        <h2 class="text-lg font-black text-elevate-dark mb-6 flex items-center gap-2">
+                            <i class="ph-fill ph-lightning text-amber-500 text-xl"></i> Akses Cepat
                         </h2>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <a href="{{ route('library.circulation.index') }}" class="flex flex-col items-center justify-center p-4 bg-cyan-50/50 hover:bg-cyan-600 border border-cyan-100 hover:border-cyan-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
-                                <i class="ph-duotone ph-arrows-left-right text-3xl text-cyan-600 group-hover:text-white mb-2 transition-colors"></i>
-                                <span class="font-bold text-slate-600 text-xs group-hover:text-white transition-colors">Sirkulasi</span>
+                            <a href="{{ route('library.circulation.index') }}" class="flex flex-col items-center justify-center p-4 bg-elevate-soft hover:bg-elevate-primary border border-slate-100 hover:border-elevate-primary rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
+                                <i class="ph-duotone ph-arrows-left-right text-3xl text-elevate-primary group-hover:text-white mb-2 transition-colors"></i>
+                                <span class="font-bold text-elevate-dark/70 text-xs group-hover:text-white transition-colors">Sirkulasi</span>
                             </a>
-                            <button onclick="searchMemberPopup()" class="flex flex-col items-center justify-center p-4 bg-purple-50/50 hover:bg-purple-600 border border-purple-100 hover:border-purple-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
-                                <i class="ph-duotone ph-user-focus text-3xl text-purple-600 group-hover:text-white mb-2 transition-colors"></i>
-                                <span class="font-bold text-slate-600 text-xs group-hover:text-white transition-colors">Cari Siswa</span>
+                            <button onclick="searchMemberPopup()" class="flex flex-col items-center justify-center p-4 bg-elevate-soft hover:bg-elevate-primary border border-slate-100 hover:border-elevate-primary rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
+                                <i class="ph-duotone ph-user-focus text-3xl text-elevate-primary group-hover:text-white mb-2 transition-colors"></i>
+                                <span class="font-bold text-elevate-dark/70 text-xs group-hover:text-white transition-colors">Cari Siswa</span>
                             </button>
-                            <a href="{{ route('library.books.create') }}" class="flex flex-col items-center justify-center p-4 bg-emerald-50/50 hover:bg-emerald-600 border border-emerald-100 hover:border-emerald-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
-                                <i class="ph-duotone ph-plus-circle text-3xl text-emerald-600 group-hover:text-white mb-2 transition-colors"></i>
-                                <span class="font-bold text-slate-600 text-xs group-hover:text-white transition-colors">Input Buku</span>
+                            <a href="{{ route('library.books.create') }}" class="flex flex-col items-center justify-center p-4 bg-elevate-soft hover:bg-elevate-primary border border-slate-100 hover:border-elevate-primary rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
+                                <i class="ph-duotone ph-plus-circle text-3xl text-elevate-primary group-hover:text-white mb-2 transition-colors"></i>
+                                <span class="font-bold text-elevate-dark/70 text-xs group-hover:text-white transition-colors">Input Buku</span>
                             </a>
-                            <a href="{{ route('library.kiosk.index') }}" target="_blank" class="flex flex-col items-center justify-center p-4 bg-orange-50/50 hover:bg-orange-600 border border-orange-100 hover:border-orange-500 rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
-                                <i class="ph-duotone ph-desktop text-3xl text-orange-600 group-hover:text-white mb-2 transition-colors"></i>
-                                <span class="font-bold text-slate-600 text-xs group-hover:text-white transition-colors">Mode Kiosk</span>
+                            <a href="{{ route('library.kiosk.index') }}" target="_blank" class="flex flex-col items-center justify-center p-4 bg-elevate-peach-light/40 hover:bg-elevate-peach border border-slate-100 hover:border-elevate-peach rounded-[2rem] transition-all duration-300 hover:shadow-lg group">
+                                <i class="ph-duotone ph-desktop text-3xl text-elevate-peach-dark group-hover:text-white mb-2 transition-colors"></i>
+                                <span class="font-bold text-elevate-dark/70 text-xs group-hover:text-white transition-colors">Mode Kiosk</span>
                             </a>
                         </div>   
                     </div>     
 
                     <!-- E-Book Stats -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-enter delay-100">
-                        <div class="bg-gradient-to-br from-indigo-600 to-violet-600 rounded-[2rem] p-6 text-white shadow-xl shadow-indigo-600/20 relative overflow-hidden">
+                        <div class="bg-elevate-dark rounded-[2rem] p-6 text-white shadow-xl shadow-elevate-dark/20 relative overflow-hidden">
+                            <div class="absolute -right-4 -bottom-4 text-white/5 text-[8rem] pointer-events-none">
+                                <i class="ph-fill ph-book-bookmark"></i>
+                            </div>
                             <div class="relative z-10">
-                                <div class="flex items-center gap-2 mb-2 opacity-80">
+                                <div class="flex items-center gap-2 mb-2 text-elevate-accent">
                                     <i class="ph-fill ph-read-cv-logo"></i>
                                     <span class="text-[10px] font-bold uppercase tracking-wider">Literasi Digital</span>
                                 </div>
                                 <h2 class="text-4xl font-black mb-1 count-up" data-target="{{ $ebookReadsThisMonth ?? 0 }}">0</h2>
-                                <p class="text-xs text-indigo-200">Total baca E-Book bulan ini</p>
+                                <p class="text-xs text-white/70">Total baca E-Book bulan ini</p>
                             </div>
                         </div>
 
-                        <div class="lg:col-span-2 bg-white rounded-[2rem] border border-slate-100 shadow-sm p-6">
-                            <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+                        <div class="lg:col-span-2 bg-elevate-gradient-card rounded-[2rem] border border-slate-200 shadow-sm p-6">
+                            <h3 class="font-bold text-elevate-dark text-sm mb-3 flex items-center gap-2">
                                 <i class="ph-fill ph-crown text-amber-500"></i> Top E-Book
                             </h3>
                             @if(isset($popularEbooks) && count($popularEbooks) > 0)
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     @foreach($popularEbooks as $index => $book)
-                                        <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-default">
-                                            <div class="w-5 h-5 flex items-center justify-center text-xs font-black bg-slate-100 rounded text-slate-500">{{ $index + 1 }}</div>
+                                        <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-white transition-colors cursor-default border border-transparent hover:border-slate-100">
+                                            <div class="w-5 h-5 flex items-center justify-center text-xs font-black bg-elevate-soft rounded text-elevate-primary">{{ $index + 1 }}</div>
                                             <div class="flex-1 min-w-0">
-                                                <h4 class="font-bold text-slate-700 text-xs truncate">{{ $book->title }}</h4>
-                                                <span class="text-[10px] text-slate-400">{{ $book->ebook_reads_count }}x Baca</span>
+                                                <h4 class="font-bold text-elevate-dark text-xs truncate">{{ $book->title }}</h4>
+                                                <span class="text-[10px] text-elevate-dark/60">{{ $book->ebook_reads_count }}x Baca</span>
                                             </div>
                                         </div>
                                     @endforeach
                                 </div>
                             @else
-                                <p class="text-xs text-slate-400 text-center py-4">Belum ada data bacaan digital.</p>
+                                <p class="text-xs text-elevate-dark/50 text-center py-4">Belum ada data bacaan digital.</p>
                             @endif
                         </div>
                     </div>  
@@ -134,13 +139,13 @@
                         <div class="bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
                             <div class="flex items-center justify-between mb-6">
                                 <div>
-                                    <h2 class="text-lg font-black text-slate-800 flex items-center gap-2">
-                                        <i class="ph-fill ph-chart-line-up text-cyan-600"></i> Tren Aktivitas
+                                    <h2 class="text-lg font-black text-elevate-dark flex items-center gap-2">
+                                        <i class="ph-fill ph-chart-line-up text-elevate-primary"></i> Tren Aktivitas
                                     </h2>
-                                    <p class="text-xs text-slate-400 font-bold mt-1 uppercase">7 Hari Terakhir</p>
+                                    <p class="text-xs text-elevate-dark/50 font-bold mt-1 uppercase">7 Hari Terakhir</p>
                                 </div>
                                 <div class="flex gap-2">
-                                    <button onclick="downloadChart('mainChart')" class="p-2 text-slate-400 hover:text-cyan-600 transition" title="Download Gambar"><i class="ph-bold ph-download-simple"></i></button>
+                                    <button onclick="downloadChart('mainChart')" class="p-2 text-slate-400 hover:text-elevate-primary transition" title="Download Gambar"><i class="ph-bold ph-download-simple"></i></button>
                                 </div>
                             </div>
                             <div class="h-64 w-full relative">
@@ -150,8 +155,8 @@
 
                         <!-- Grafik Jam Sibuk -->
                         <div class="bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
-                            <h2 class="text-lg font-black text-slate-800 flex items-center gap-2 mb-4">
-                                <i class="ph-fill ph-clock text-orange-500"></i> Analitik Jam Sibuk
+                            <h2 class="text-lg font-black text-elevate-dark flex items-center gap-2 mb-4">
+                                <i class="ph-fill ph-clock text-elevate-peach-dark"></i> Analitik Jam Sibuk
                             </h2>
                             <div class="h-48 w-full relative">
                                 <canvas id="busyHoursChart"></canvas>
@@ -167,24 +172,24 @@
                      
                      <!-- Status Sirkulasi -->
                      <div class="animate-enter delay-300 bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
-                        <h3 class="font-black text-slate-800 text-lg mb-4">Status Sirkulasi</h3>
+                        <h3 class="font-black text-elevate-dark text-lg mb-4">Status Sirkulasi</h3>
                         <div class="grid grid-cols-2 gap-4 mb-4">
-                            <div class="p-4 bg-indigo-50 rounded-2xl text-center border border-indigo-100">
-                                <i class="ph-duotone ph-book-open-text text-2xl text-indigo-600 mb-1 block"></i>
-                                <p class="text-2xl font-black text-slate-800 count-up" data-target="{{ $borrowedBooks }}">0</p>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase">Dipinjam</p>
+                            <div class="p-4 bg-elevate-soft rounded-2xl text-center border border-slate-200">
+                                <i class="ph-duotone ph-book-open-text text-2xl text-elevate-primary mb-1 block"></i>
+                                <p class="text-2xl font-black text-elevate-dark count-up" data-target="{{ $borrowedBooks }}">0</p>
+                                <p class="text-[10px] font-bold text-elevate-dark/60 uppercase">Dipinjam</p>
                             </div>
                             <div class="p-4 bg-rose-50 rounded-2xl text-center border border-rose-100">
-                                <i class="ph-duotone ph-warning-circle text-2xl text-rose-600 mb-1 block"></i>
-                                <p class="text-2xl font-black text-slate-800 count-up" data-target="{{ $overdueBooks }}">0</p>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase">Terlambat</p>
+                                <i class="ph-duotone ph-warning-circle text-2xl text-rose-500 mb-1 block"></i>
+                                <p class="text-2xl font-black text-elevate-dark count-up" data-target="{{ $overdueBooks }}">0</p>
+                                <p class="text-[10px] font-bold text-elevate-dark/60 uppercase">Terlambat</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Widget Perlu Perhatian (Stok Habis) -->
                     <div class="animate-enter delay-300 bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
-                        <h3 class="font-black text-slate-800 text-lg mb-4 flex items-center gap-2">
+                        <h3 class="font-black text-elevate-dark text-lg mb-4 flex items-center gap-2">
                             <i class="ph-fill ph-warning text-amber-500"></i> Stok Menipis
                         </h3>
                         @if(isset($attentionBooks) && $attentionBooks->count() > 0)
@@ -195,48 +200,48 @@
                                         <i class="ph-bold ph-book"></i>
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-bold text-slate-800 truncate">{{ $book->title }}</p>
+                                        <p class="text-xs font-bold text-elevate-dark truncate">{{ $book->title }}</p>
                                         <p class="text-[10px] text-amber-600 font-bold">Stok: {{ $book->stock }}</p>
                                     </div>
                                 </div>
                                 @endforeach
                             </div>
                         @else
-                            <div class="text-center py-4 text-slate-400 text-xs">Semua stok buku aman.</div>
+                            <div class="text-center py-4 text-elevate-dark/50 text-xs">Semua stok buku aman.</div>
                         @endif
                     </div>
 
                     <!-- Log Aktivitas -->
                     <div class="animate-enter delay-400 bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col h-[500px]">
                         <div class="p-6 border-b border-slate-50 flex justify-between items-center">
-                            <h3 class="font-black text-slate-800 text-lg flex items-center gap-2">
-                                <i class="ph-fill ph-clock-counter-clockwise text-cyan-600"></i> Log Aktivitas
+                            <h3 class="font-black text-elevate-dark text-lg flex items-center gap-2">
+                                <i class="ph-fill ph-clock-counter-clockwise text-elevate-primary"></i> Log Aktivitas
                             </h3>
-                            <span class="text-[10px] bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-bold animate-pulse">Live</span>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-600 px-2 py-0.5 rounded-full font-bold animate-pulse border border-emerald-200">Live</span>
                         </div>
                         <div class="overflow-y-auto flex-1 p-0 custom-scrollbar">
                             <div class="divide-y divide-slate-50">
                                 @forelse($recentActivities as $activity)
-                                    <div class="p-4 hover:bg-slate-50 transition-colors flex gap-3 items-start">
+                                    <div class="p-4 hover:bg-elevate-soft/50 transition-colors flex gap-3 items-start">
                                         <div class="shrink-0 mt-1">
                                             @if($activity->type == 'visit')
-                                                <div class="w-8 h-8 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-sm">
+                                                <div class="w-8 h-8 rounded-xl bg-elevate-peach/20 text-elevate-peach-dark flex items-center justify-center text-sm border border-elevate-peach/30">
                                                     <i class="ph-duotone ph-door-open"></i>
                                                 </div>
                                             @else
-                                                <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm {{ $activity->status == 'returned' ? 'bg-emerald-100 text-emerald-600' : 'bg-cyan-100 text-cyan-600' }}">
+                                                <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm border {{ $activity->status == 'returned' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-elevate-soft text-elevate-primary border-slate-200' }}">
                                                     <i class="{{ $activity->status == 'returned' ? 'ph-duotone ph-arrow-u-down-left' : 'ph-duotone ph-arrow-u-right-up' }}"></i>
                                                 </div>
                                             @endif
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-xs font-bold text-slate-800 truncate">{{ $activity->student->name ?? 'Siswa' }}</p>
-                                            <p class="text-[10px] text-slate-500 truncate">{{ $activity->type == 'visit' ? 'Absensi Masuk' : ($activity->book->title ?? '-') }}</p>
-                                            <p class="text-[9px] font-bold text-slate-400 mt-1">{{ $activity->updated_at->diffForHumans() }}</p>
+                                            <p class="text-xs font-bold text-elevate-dark truncate">{{ $activity->student->name ?? 'Siswa' }}</p>
+                                            <p class="text-[10px] text-elevate-dark/60 truncate">{{ $activity->type == 'visit' ? 'Absensi Masuk' : ($activity->book->title ?? '-') }}</p>
+                                            <p class="text-[9px] font-bold text-elevate-dark/40 mt-1">{{ $activity->updated_at->diffForHumans() }}</p>
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="text-center py-10 text-slate-400">
+                                    <div class="text-center py-10 text-elevate-dark/50">
                                         <p class="text-xs">Belum ada aktivitas.</p>
                                     </div>
                                 @endforelse
@@ -255,8 +260,8 @@
                 
                 {{-- Grafik Peminjaman per Kelas --}}
                 <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <i class="ph-fill ph-chart-pie-slice text-purple-500"></i> Distribusi Kelas
+                    <h3 class="font-bold text-elevate-dark mb-4 flex items-center gap-2">
+                        <i class="ph-fill ph-chart-pie-slice text-elevate-accent"></i> Distribusi Kelas
                     </h3>
                     <div class="h-64 w-full">
                         <canvas id="classChart"></canvas>
@@ -265,20 +270,20 @@
 
                 {{-- Buku Fisik Terpopuler --}}
                 <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <i class="ph-fill ph-trophy text-yellow-500"></i> Buku Fisik Terpopuler
+                    <h3 class="font-bold text-elevate-dark mb-4 flex items-center gap-2">
+                        <i class="ph-fill ph-trophy text-amber-500"></i> Buku Fisik Terpopuler
                     </h3>
                     <div class="space-y-3">
                         @forelse($popularBooks as $index => $book)
-                            <div class="flex items-center gap-4 p-2 hover:bg-slate-50 rounded-xl transition-colors">
+                            <div class="flex items-center gap-4 p-2 hover:bg-elevate-soft rounded-xl transition-colors">
                                 <span class="font-black text-slate-300 text-lg w-6 text-center">{{ $index + 1 }}</span>
                                 <div class="flex-1 min-w-0">
-                                    <h4 class="text-sm font-bold text-slate-800 truncate" title="{{ $book->title }}">{{ $book->title }}</h4>
-                                    <p class="text-xs text-slate-500">{{ $book->borrowings_count }}x Dipinjam</p>
+                                    <h4 class="text-sm font-bold text-elevate-dark truncate" title="{{ $book->title }}">{{ $book->title }}</h4>
+                                    <p class="text-xs text-elevate-dark/60">{{ $book->borrowings_count }}x Dipinjam</p>
                                 </div>
                             </div>
                         @empty
-                            <div class="flex flex-col items-center justify-center h-40 text-slate-400">
+                            <div class="flex flex-col items-center justify-center h-40 text-elevate-dark/40">
                                 <i class="ph-duotone ph-books text-3xl mb-2 opacity-50"></i>
                                 <p class="text-xs font-bold">Belum ada data peminjaman.</p>
                             </div>
@@ -289,17 +294,18 @@
             </div>
 
             {{-- SEARCH SISWA KIOSK --}}
-            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 p-8 text-center flex flex-col justify-center">
-                <i class="ph-duotone ph-barcode text-5xl text-cyan-200 mb-4 block mx-auto"></i>
-                <h3 class="text-xl font-black text-slate-800 mb-2">Cek Status Siswa</h3>
-                <p class="text-slate-500 mb-6 text-sm max-w-xs mx-auto">Scan kartu atau masukkan NISN untuk cek peminjaman aktif.</p>
+            <div class="bg-elevate-gradient-card rounded-[2rem] shadow-sm border border-slate-200 p-8 text-center flex flex-col justify-center relative overflow-hidden">
+                <div class="absolute inset-0 opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none mix-blend-overlay"></div>
+                <i class="ph-duotone ph-barcode text-5xl text-elevate-primary mb-4 block mx-auto relative z-10"></i>
+                <h3 class="text-xl font-black text-elevate-dark mb-2 relative z-10">Cek Status Siswa</h3>
+                <p class="text-elevate-dark/60 mb-6 text-sm max-w-xs mx-auto relative z-10">Scan kartu atau masukkan NISN untuk cek peminjaman aktif.</p>
                 
-                <div class="w-full relative group max-w-xl mx-auto">
+                <div class="w-full relative group max-w-xl mx-auto z-10">
                     <input type="text" id="studentSearchInput" placeholder="Scan Barcode / NISN..." 
-                        class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-cyan-100 focus:border-cyan-500 font-mono font-bold text-slate-800 transition-all text-center">
-                    <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-500 transition-colors"></i>
+                        class="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-elevate-accent/30 focus:border-elevate-accent font-mono font-bold text-elevate-dark transition-all text-center shadow-sm">
+                    <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
                     <div id="loadingIndicator" class="absolute right-4 top-1/2 -translate-y-1/2 hidden">
-                        <i class="ph-bold ph-spinner animate-spin text-cyan-500"></i>
+                        <i class="ph-bold ph-spinner animate-spin text-elevate-primary"></i>
                     </div>
                 </div>
             </div>
@@ -331,7 +337,7 @@
             // 2. MAIN CHART LOGIC (Time Series)
             const ctx = document.getElementById('mainChart').getContext('2d');
             const bgGradient = ctx.createLinearGradient(0, 0, 0, 300);
-            bgGradient.addColorStop(0, 'rgba(8, 145, 178, 0.2)'); // Cyan 600 Opacity
+            bgGradient.addColorStop(0, 'rgba(13, 82, 161, 0.2)'); // elevate-primary Opacity
             bgGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
             new Chart(ctx, {
@@ -343,7 +349,7 @@
                             label: 'Kunjungan',
                             data: @json($visitChartData ?? []),
                             backgroundColor: bgGradient,
-                            borderColor: '#0891b2', // Cyan 600
+                            borderColor: '#0d52a1', // elevate-primary
                             borderWidth: 3,
                             fill: true,
                             tension: 0.4,
@@ -353,7 +359,7 @@
                         {
                             label: 'Peminjaman',
                             data: @json($loanChartData ?? []),
-                            borderColor: '#8b5cf6', // Violet 500 (Contrasting color)
+                            borderColor: '#56bbf1', // elevate-accent
                             borderWidth: 2,
                             borderDash: [5, 5],
                             fill: false,
@@ -386,7 +392,7 @@
                         datasets: [{
                             label: 'Peminjaman',
                             data: classData,
-                            backgroundColor: '#8b5cf6',
+                            backgroundColor: '#2c3f61', // elevate-dark
                             borderRadius: 6,
                         }]
                     },
@@ -415,7 +421,7 @@
                         datasets: [{
                             label: 'Kunjungan',
                             data: busyHoursData,
-                            backgroundColor: '#f97316',
+                            backgroundColor: '#f9a282', // elevate-peach
                             borderRadius: 4
                         }]
                     },
@@ -462,21 +468,22 @@
                             text: `${s.student_id} - ${s.school_class ? s.school_class.name : ''}`,
                             icon: data.has_overdue ? 'warning' : 'success',
                             html: `
-                                <div class="mt-2 p-3 bg-slate-50 rounded-lg text-left text-sm">
+                                <div class="mt-2 p-3 bg-slate-50 rounded-lg text-left text-sm border border-slate-200">
                                     <div class="flex justify-between mb-1">
-                                        <span>Status:</span>
+                                        <span class="text-elevate-dark">Status:</span>
                                         <span class="font-bold ${data.has_overdue ? 'text-rose-500' : 'text-emerald-500'}">
                                             ${data.has_overdue ? 'Terblokir (Denda)' : 'Aktif'}
                                         </span>
                                     </div>
                                     <div class="flex justify-between">
-                                        <span>Buku Dipinjam:</span>
-                                        <span class="font-bold">${data.active_loans} Buku</span>
+                                        <span class="text-elevate-dark">Buku Dipinjam:</span>
+                                        <span class="font-bold text-elevate-primary">${data.active_loans} Buku</span>
                                     </div>
                                 </div>
                             `,
-                            confirmButtonColor: '#0891b2', // Menggunakan warna Cyan
-                            timer: 5000
+                            confirmButtonColor: '#2c3f61', // elevate-dark
+                            timer: 5000,
+                            customClass: { popup: 'rounded-[2rem]' }
                         });
                         searchInput.value = '';
                     } else {
@@ -510,8 +517,9 @@
                 title: 'Cari Siswa',
                 input: 'text',
                 inputPlaceholder: 'Nama atau NISN...',
-                confirmButtonColor: '#0891b2', // Menggunakan warna Cyan
-                showCancelButton: true
+                confirmButtonColor: '#2c3f61', // elevate-dark
+                showCancelButton: true,
+                customClass: { popup: 'rounded-[2rem]' }
             });
             if (query) {
                 const searchInput = document.getElementById('studentSearchInput');

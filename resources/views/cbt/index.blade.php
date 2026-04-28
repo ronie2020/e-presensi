@@ -6,7 +6,7 @@
     </x-slot>
 
     {{-- Tambahkan state untuk Edit Modal pada x-data --}}
-    <div class="py-8 sm:py-10 font-sans text-elevate-text bg-elevate-surface min-h-screen relative overflow-hidden" 
+    <div class="py-8 sm:py-10 font-sans text-elevate-dark bg-elevate-surface min-h-screen relative overflow-hidden" 
          x-data="{ 
             openModal: false, 
             editModal: false,
@@ -59,7 +59,7 @@
                         <i class="ph-bold ph-folder-plus text-3xl"></i>
                     </div>
                     <h3 class="text-lg font-black text-elevate-dark mb-1">Kategori Baru</h3>
-                    <p class="text-xs text-elevate-text/70 font-medium mb-5">Buat folder ujian baru.</p>
+                    <p class="text-xs text-elevate-dark/70 font-medium mb-5">Buat folder ujian baru.</p>
                     
                     {{-- Tombol (Dikembalikan ke gaya rounded-xl) --}}
                     <button @click="openModal = true" class="w-full px-5 py-3.5 bg-elevate-dark text-white rounded-xl font-bold hover:bg-elevate-primary transition-all shadow-lg shadow-elevate-dark/30 active:scale-95">
@@ -90,7 +90,7 @@
             {{-- GRID CARD EVENT/FOLDER --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse($events as $event)
-                    <div class="bg-white border border-slate-200 rounded-[2rem] hover:shadow-2xl hover:shadow-elevate-accent/10 hover:border-elevate-accent/50 transition-all duration-300 group relative block overflow-hidden">
+                    <div class="bg-elevate-gradient-card border border-slate-200 rounded-[2rem] hover:shadow-2xl hover:shadow-elevate-accent/10 hover:border-elevate-accent/50 transition-all duration-300 group relative block overflow-hidden">
                         
                         <!-- Pattern Background on Hover -->
                         <div class="absolute inset-0 bg-elevate-peach-light/0 group-hover:bg-elevate-peach-light/40 transition-colors pointer-events-none z-0"></div>
@@ -126,7 +126,7 @@
                                 </h4>
                             </div>
                             
-                            <p class="text-elevate-text/70 text-sm font-medium line-clamp-2 mb-4 h-10">
+                            <p class="text-elevate-dark/70 text-sm font-medium line-clamp-2 mb-4 h-10">
                                 {{ $event->description ?? 'Tidak ada deskripsi kegiatan.' }}
                             </p>
 
@@ -134,7 +134,7 @@
                                 <div class="flex items-center gap-2 text-elevate-primary font-bold text-sm bg-elevate-primary/10 px-4 py-2 rounded-full">
                                     <i class="ph-bold ph-files"></i> {{ $event->exams_count ?? 0 }} Jadwal
                                 </div>
-                                <div class="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-elevate-dark group-hover:text-white transition-all">
+                                <div class="w-8 h-8 rounded-full bg-elevate-soft flex items-center justify-center text-elevate-primary/60 group-hover:bg-elevate-dark group-hover:text-white transition-all">
                                     <i class="ph-bold ph-arrow-right"></i>
                                 </div>
                             </div>
@@ -146,7 +146,7 @@
                             <i class="ph-duotone ph-folder-dashed text-5xl"></i>
                         </div>
                         <h3 class="text-elevate-dark font-bold text-xl mb-2">Belum Ada Kegiatan CBT</h3>
-                        <p class="text-elevate-text/70 max-w-xs mx-auto mb-8 text-sm">Buat Folder/Kegiatan pertama Anda, seperti "PSAT Genap 2026".</p>
+                        <p class="text-elevate-dark/70 max-w-xs mx-auto mb-8 text-sm">Buat Folder/Kegiatan pertama Anda, seperti "PSAT Genap 2026".</p>
                         <button @click="openModal = true" class="inline-flex items-center gap-2 px-6 py-3 bg-elevate-dark text-white rounded-full font-bold hover:bg-elevate-primary transition shadow-lg shadow-elevate-dark/30 text-sm">
                             <i class="ph-bold ph-plus"></i> Buat Kegiatan Baru
                         </button>
@@ -169,7 +169,7 @@
 
                 <div x-show="openModal" x-transition.scale.origin.bottom class="relative inline-block w-full max-w-md p-6 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-[2rem] sm:my-8 sm:p-8 border border-slate-100">
                     <div class="absolute top-0 right-0 pt-6 pr-6">
-                        <button @click="openModal = false" class="text-slate-400 hover:text-elevate-dark bg-slate-50 hover:bg-elevate-peach-light rounded-full p-2 transition">
+                        <button @click="openModal = false" class="text-elevate-dark/60 hover:text-elevate-dark bg-elevate-soft hover:bg-elevate-peach-light rounded-full p-2 transition">
                             <i class="ph-bold ph-x text-lg"></i>
                         </button>
                     </div>
@@ -181,7 +181,7 @@
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                             <h3 class="text-xl font-black leading-6 text-elevate-dark" id="modal-title">Buat Kegiatan CBT Baru</h3>
                             <div class="mt-2">
-                                <p class="text-sm text-elevate-text/70 font-medium">Contoh: Penilaian Sumatif Akhir Tahun, Try Out UNBK, dll.</p>
+                                <p class="text-sm text-elevate-dark/70 font-medium">Contoh: Penilaian Sumatif Akhir Tahun, Try Out UNBK, dll.</p>
                             </div>
                         </div>
                     </div>
@@ -191,16 +191,16 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Nama Kegiatan <span class="text-rose-500">*</span></label>
-                                <input type="text" name="name" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 px-5 transition-all" placeholder="Misal: PSAT Kelas 7, 8, 9">
+                                <input type="text" name="name" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 px-5 transition-all" placeholder="Misal: PSAT Kelas 7, 8, 9">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Deskripsi Singkat (Opsional)</label>
-                                <textarea name="description" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-medium text-elevate-dark py-3.5 px-5 transition-all" placeholder="Tahun Ajaran 2025/2026..."></textarea>
+                                <textarea name="description" rows="2" class="w-full rounded-2xl border-slate-200 bg-elevate-soft focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-medium text-elevate-dark py-3.5 px-5 transition-all" placeholder="Tahun Ajaran 2025/2026..."></textarea>
                             </div>
                         </div>
 
                         <div class="mt-8 flex gap-3">
-                            <button type="button" @click="openModal = false" class="w-full inline-flex justify-center px-4 py-3.5 border-2 border-slate-100 shadow-sm text-sm font-bold rounded-full text-elevate-text bg-white hover:bg-slate-50 transition-colors">Batal</button>
+                            <button type="button" @click="openModal = false" class="w-full inline-flex justify-center px-4 py-3.5 border-2 border-slate-100 shadow-sm text-sm font-bold rounded-full text-elevate-dark bg-white hover:bg-elevate-soft transition-colors">Batal</button>
                             <button type="submit" class="w-full inline-flex justify-center px-4 py-3.5 border border-transparent shadow-lg shadow-elevate-dark/20 text-sm font-bold rounded-full text-white bg-elevate-dark hover:bg-elevate-primary transition-colors">Simpan Kegiatan</button>
                         </div>
                     </form>
@@ -215,7 +215,7 @@
 
                 <div x-show="editModal" x-transition.scale.origin.bottom class="relative inline-block w-full max-w-md p-6 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-[2rem] sm:my-8 sm:p-8 border border-slate-100">
                     <div class="absolute top-0 right-0 pt-6 pr-6">
-                        <button @click="editModal = false" class="text-slate-400 hover:text-elevate-dark bg-slate-50 hover:bg-elevate-peach-light rounded-full p-2 transition">
+                        <button @click="editModal = false" class="text-elevate-dark/60 hover:text-elevate-dark bg-elevate-soft hover:bg-elevate-peach-light rounded-full p-2 transition">
                             <i class="ph-bold ph-x text-lg"></i>
                         </button>
                     </div>
@@ -227,7 +227,7 @@
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                             <h3 class="text-xl font-black leading-6 text-elevate-dark">Edit Kegiatan CBT</h3>
                             <div class="mt-2">
-                                <p class="text-sm text-elevate-text/70 font-medium">Perbarui nama atau deskripsi dari folder kegiatan ini.</p>
+                                <p class="text-sm text-elevate-dark/70 font-medium">Perbarui nama atau deskripsi dari folder kegiatan ini.</p>
                             </div>
                         </div>
                     </div>
@@ -238,16 +238,16 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Nama Kegiatan <span class="text-rose-500">*</span></label>
-                                <input type="text" name="name" x-model="editName" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 px-5 transition-all" placeholder="Misal: PSAT Kelas 7, 8, 9">
+                                <input type="text" name="name" x-model="editName" required class="w-full rounded-2xl border-slate-200 bg-elevate-soft focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-3.5 px-5 transition-all" placeholder="Misal: PSAT Kelas 7, 8, 9">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Deskripsi Singkat (Opsional)</label>
-                                <textarea name="description" x-model="editDesc" rows="2" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-medium text-elevate-dark py-3.5 px-5 transition-all" placeholder="Tahun Ajaran 2025/2026..."></textarea>
+                                <textarea name="description" x-model="editDesc" rows="2" class="w-full rounded-2xl border-slate-200 bg-elevate-soft focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-medium text-elevate-dark py-3.5 px-5 transition-all" placeholder="Tahun Ajaran 2025/2026..."></textarea>
                             </div>
                         </div>
 
                         <div class="mt-8 flex gap-3">
-                            <button type="button" @click="editModal = false" class="w-full inline-flex justify-center px-4 py-3.5 border-2 border-slate-100 shadow-sm text-sm font-bold rounded-full text-elevate-text bg-white hover:bg-slate-50 transition-colors">Batal</button>
+                            <button type="button" @click="editModal = false" class="w-full inline-flex justify-center px-4 py-3.5 border-2 border-slate-100 shadow-sm text-sm font-bold rounded-full text-elevate-dark bg-white hover:bg-elevate-soft transition-colors">Batal</button>
                             <button type="submit" class="w-full inline-flex justify-center px-4 py-3.5 border border-transparent shadow-lg shadow-elevate-dark/20 text-sm font-bold rounded-full text-white bg-elevate-dark hover:bg-elevate-primary transition-colors">Simpan Perubahan</button>
                         </div>
                     </form>

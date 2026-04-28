@@ -131,17 +131,18 @@ class TeachingController extends Controller
     }
 
     // --- RIWAYAT MENGAJAR ---
-    public function history(Request $request)
+   public function history(Request $request)
     {
         $teacherId = Auth::id();
         $month = $request->input('month', Carbon::now()->format('Y-m'));
 
         $histories = TeachingSession::with(['schedule.schoolClass', 'schedule.subject'])
                     ->withCount([
-                        'attendances as hadir' => function($q){ $q->whereIn('status', ['present', 'late']); },
-                        'attendances as alpha' => function($q){ $q->where('status', 'alpha'); },
-                        'attendances as sakit' => function($q){ $q->where('status', 'sick'); },
-                        'attendances as izin' => function($q){ $q->where('status', 'permission'); },
+                        'attendances as hadir' => function($q){ $q->whereIn('status', ['present', 'Hadir']); },
+                        'attendances as terlambat' => function($q){ $q->whereIn('status', ['late', 'Terlambat']); },
+                        'attendances as alpha' => function($q){ $q->whereIn('status', ['alpha', 'Alfa', 'Alpha']); },
+                        'attendances as sakit' => function($q){ $q->whereIn('status', ['sick', 'Sakit']); },
+                        'attendances as izin' => function($q){ $q->whereIn('status', ['permission', 'Izin']); },
                     ])
                     ->where('teacher_id', $teacherId)
                     ->where('status', 'closed')
