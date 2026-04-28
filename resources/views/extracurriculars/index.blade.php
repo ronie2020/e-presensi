@@ -2,69 +2,57 @@
     {{-- Load SweetAlert --}}
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <div class="py-6 sm:py-8" x-data="{ addModalOpen: false, editModalOpen: false, editData: {} }">
+    <div class="py-8 sm:py-10 font-sans text-elevate-text bg-slate-50 min-h-screen" x-data="{ addModalOpen: false, editModalOpen: false, editData: {} }">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {{-- HERO SECTION --}}
-        <div class="mb-10 px-4 sm:px-0">
-            <div class="relative rounded-[2.5rem] bg-gray-900 bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 p-8 sm:p-10 text-white shadow-2xl shadow-blue-900/40 overflow-hidden border border-white/10 group">
-                
-                {{-- Background Decorations --}}
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
-                <div class="absolute -top-24 -right-24 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl pointer-events-none group-hover:bg-blue-500/30 transition-all duration-700"></div>
-                <div class="absolute bottom-0 right-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+          {{-- HERO SECTION MICROSOFT ELEVATE THEME --}}
+            <div class="relative rounded-[2rem] bg-elevate-gradient-main p-8 mb-10 text-elevate-dark shadow-xl shadow-elevate-accent/10 overflow-hidden border border-white/60">
+                <div class="absolute -top-10 -left-10 w-48 h-48 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-3xl"></div>
+                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/20 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-2xl"></div>
+                <div class="absolute top-10 right-32 w-24 h-24 bg-white/40 rounded-2xl rotate-45 pointer-events-none shadow-sm"></div>
                 
                 {{-- Content Container --}}
                 <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                    
+
                     {{-- Left Text --}}
                     <div class="max-w-2xl">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-200 text-[10px] font-bold uppercase tracking-widest mb-4 backdrop-blur-sm">
-                            <i class="ph-fill ph-star"></i> Modul Kesiswaan
+                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/50 border border-white/60 text-elevate-dark text-[10px] font-bold uppercase tracking-widest mb-3 shadow-sm backdrop-blur-sm">
+                            <i class="ph-fill ph-star text-elevate-primary"></i> Modul Kesiswaan
                         </div>
-                        <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-3 flex items-center gap-3 text-white leading-tight">
+                        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-3 flex items-center gap-3 text-elevate-dark leading-tight">
                             Manajemen Ekstrakurikuler
                         </h1>
-                        <p class="text-blue-100/80 text-sm md:text-base font-medium leading-relaxed max-w-lg">
+                        <p class="text-elevate-dark/80 text-sm md:text-base font-medium leading-relaxed max-w-lg">
                             Wadahi bakat dan minat siswa. Kelola jadwal latihan, pantau keanggotaan, dan rekap kehadiran kegiatan dalam satu panel.
                         </p>
 
-                        {{-- Action Button --}}
+                         {{-- Action Button --}}
                         <div class="mt-8 flex flex-wrap gap-3">
-                            <button @click="addModalOpen = true" class="px-6 py-3 bg-white text-blue-900 font-bold rounded-xl shadow-lg hover:bg-blue-50 hover:scale-105 transition-all flex items-center gap-2 transform active:scale-95">
-                                <div class="bg-blue-100 p-1 rounded-md">
-                                    <i class="ph-bold ph-plus"></i>
+                            <button @click="addModalOpen = true" class="group bg-white text-elevate-dark px-5 py-3 rounded-2xl font-bold text-sm transition-all hover:bg-slate-50 flex items-center gap-2 shadow-lg shadow-elevate-dark/5 border border-white active:scale-95">
+                                <div class="w-7 h-7 rounded-full bg-elevate-accent/20 text-elevate-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <i class="ph-bold ph-plus text-sm"></i>
                                 </div>
                                 <span>Tambah Ekskul</span>
                             </button>
-                            <a href="{{ route('extracurriculars.reports') }}" class="px-6 py-3 bg-blue-800/50 border border-blue-400/30 text-white font-bold rounded-xl hover:bg-blue-800 hover:border-blue-400 transition-all flex items-center gap-2 backdrop-blur-sm">
-                                <i class="ph-bold ph-files"></i> Laporan Absensi
+                            <a href="{{ route('extracurriculars.reports') }}" class="group bg-white/60 backdrop-blur-md hover:bg-white text-elevate-dark px-5 py-3 rounded-2xl font-bold text-sm border border-white transition-all flex items-center gap-2 shadow-sm active:scale-95">
+                                <i class="ph-bold ph-files text-lg text-elevate-primary group-hover:rotate-12 transition-transform"></i>
+                                <span>Laporan Absensi</span>
                             </a>
                         </div>
                     </div>
                     
-                    {{-- Right Stats Cards (FIXED RESPONSIVE) --}}
-                    <div class="w-full md:w-auto mt-2 md:mt-0">
-                        <div class="grid grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                            {{-- Stat 1: Total Ekskul --}}
-                            <div class="bg-white/10 backdrop-blur-md px-5 py-5 rounded-2xl border border-white/10 text-center md:text-left hover:bg-white/15 transition-colors">
-                                <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center md:justify-start gap-2 mb-1 text-blue-300">
-                                    <i class="ph-duotone ph-trophy text-2xl md:text-xl lg:text-2xl shrink-0"></i>
-                                    <span class="text-[10px] font-bold uppercase tracking-wider">Total Kegiatan</span>
-                                </div>
-                                <span class="block text-3xl font-black text-white tracking-tight mt-1">{{ $extracurriculars->count() }}</span>
-                            </div>
-
-                            {{-- Stat 2: Total Siswa --}}
-                            @php
-                                $totalMembers = $extracurriculars->sum('members_count');
-                            @endphp
-                            <div class="bg-white/10 backdrop-blur-md px-5 py-5 rounded-2xl border border-white/10 text-center md:text-left hover:bg-white/15 transition-colors">
-                                <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center md:justify-start gap-2 mb-1 text-emerald-300">
-                                    <i class="ph-duotone ph-users-three text-2xl md:text-xl lg:text-2xl shrink-0"></i>
-                                    <span class="text-[10px] font-bold uppercase tracking-wider">Siswa Aktif</span>
-                                </div>
-                                <span class="block text-3xl font-black text-white tracking-tight mt-1">{{ $totalMembers }}</span>
-                            </div>
+                    {{-- Right Stats Cards --}}
+                    <div class="w-full md:w-auto mt-2 md:mt-0 flex gap-3">
+                        <div class="bg-white/60 backdrop-blur-md px-6 py-5 rounded-[2rem] border border-white shadow-sm text-center flex-1 md:flex-none min-w-[140px]">
+                            <span class="block text-3xl font-black text-elevate-dark mb-1">{{ $extracurriculars->count() }}</span>
+                            <span class="text-[10px] uppercase font-bold text-elevate-primary tracking-wider">Total Kegiatan</span>
+                        </div>
+                        @php
+                            $totalMembers = $extracurriculars->sum('members_count');
+                        @endphp
+                        <div class="bg-white/60 backdrop-blur-md px-6 py-5 rounded-[2rem] border border-white shadow-sm text-center flex-1 md:flex-none min-w-[140px] hidden sm:block">
+                            <span class="block text-3xl font-black text-elevate-primary mb-1">{{ $totalMembers }}</span>
+                            <span class="text-[10px] text-elevate-dark/70 uppercase font-bold tracking-wider">Siswa Aktif</span>
                         </div>
                     </div>
 
@@ -264,55 +252,55 @@
             </div>
         </div>
 
-        {{-- MODAL EDIT --}}
+         {{-- MODAL EDIT --}}
         <div x-show="editModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="fixed inset-0 bg-blue-950/60 backdrop-blur-sm transition-opacity" @click="editModalOpen = false"></div>
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" @click="editModalOpen = false"></div>
             <div class="flex min-h-screen items-center justify-center p-4">
-                <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all border border-white/20">
-                    <div class="bg-blue-900 p-6 flex justify-between items-center">
+                <div x-show="editModalOpen" x-transition.scale.95 class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden border border-white/20">
+                    <div class="bg-gradient-to-r from-elevate-dark to-elevate-primary p-6 flex justify-between items-center">
                         <h3 class="text-lg font-black text-white flex items-center gap-2">
-                            <i class="ph-bold ph-pencil-simple text-blue-300"></i> Edit Ekstrakurikuler
+                            <i class="ph-bold ph-pencil-simple text-elevate-accent"></i> Edit Ekstrakurikuler
                         </h3>
-                        <button @click="editModalOpen = false" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"><i class="ph-bold ph-x"></i></button>
+                        <button @click="editModalOpen = false" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors focus:outline-none"><i class="ph-bold ph-x"></i></button>
                     </div>
-                    <form id="editForm" method="POST" enctype="multipart/form-data" class="p-8 space-y-5">
+                   <form id="editForm" method="POST" enctype="multipart/form-data" class="p-8 space-y-5">
                         @csrf @method('PUT')
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nama Ekskul</label>
-                            <input type="text" name="name" id="edit_name" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 px-4 font-bold text-slate-700 transition-all">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Ekskul</label>
+                            <input type="text" name="name" id="edit_name" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 px-4 font-bold text-elevate-dark transition-all">
                         </div>
                         <div class="grid grid-cols-2 gap-5">
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Nama Pembina</label>
-                                <input type="text" name="coach_name" id="edit_coach" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 px-4 font-bold text-slate-700 transition-all">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Nama Pembina</label>
+                                <input type="text" name="coach_name" id="edit_coach" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 px-4 font-bold text-elevate-dark transition-all">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Jadwal</label>
-                                <input type="text" name="schedule" id="edit_schedule" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-blue-600 text-sm py-3 px-4 font-bold text-slate-700 transition-all">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Jadwal</label>
+                                <input type="text" name="schedule" id="edit_schedule" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-primary focus:ring-elevate-primary text-sm py-3 px-4 font-bold text-elevate-dark transition-all">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Update Tampilan</label>
+                             <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Update Tampilan</label>
                             <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200">
                                 <div class="mb-4">
                                     <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Ganti Gambar (Opsional)</label>
-                                    <input type="file" name="image_file" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 transition-colors cursor-pointer"/>
+                                    <input type="file" name="image_file" accept="image/*" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-elevate-accent/10 file:text-elevate-primary hover:file:bg-elevate-accent/20 transition-colors cursor-pointer border border-dashed border-slate-300 bg-white"/>
                                 </div>
                                 <div class="border-t border-slate-200 my-4 relative">
                                     <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-50 px-2 text-[10px] font-bold text-slate-400">ATAU</span>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Ganti Kode Ikon</label>
+                                   <label class="block text-[10px] font-bold text-slate-500 uppercase mb-2">Ganti Kode Ikon</label>
                                     <div class="relative">
                                         <i class="ph-bold ph-code absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                        <input type="text" name="icon_text" id="edit_icon_text" placeholder="Contoh: ph-fill ph-trophy" class="w-full rounded-xl border-slate-300 pl-9 text-sm py-2.5 bg-white focus:border-blue-600 focus:ring-blue-600 font-mono text-slate-600">
+                                        <input type="text" name="icon_text" id="edit_icon_text" placeholder="Contoh: ph-fill ph-trophy" class="w-full rounded-xl border-slate-300 pl-9 text-sm py-2.5 bg-white focus:border-elevate-primary focus:ring-elevate-primary font-mono text-elevate-dark shadow-sm">
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="pt-2 flex gap-3">
                             <button type="button" @click="editModalOpen = false" class="flex-1 py-3.5 rounded-xl bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-colors">Batal</button>
-                            <button type="submit" class="flex-1 py-3.5 rounded-xl bg-blue-900 text-white text-sm font-bold hover:bg-blue-800 shadow-lg shadow-blue-900/20 transition-all transform active:scale-95">Update Data</button>
+                            <button type="submit" class="flex-1 py-3.5 rounded-xl bg-elevate-dark text-white text-sm font-bold hover:bg-elevate-primary shadow-lg shadow-elevate-dark/20 transition-all transform active:scale-95">Update Data</button>
                         </div>
                     </form>
                 </div>
@@ -323,7 +311,7 @@
 
     <script>
         function setupEditForm(ekskul) {
-            if(!ekskul) return; // Guard clause
+            if(!ekskul) return; 
 
             document.getElementById('edit_name').value = ekskul.name;
             document.getElementById('edit_coach').value = ekskul.coach_name;
@@ -335,7 +323,6 @@
                 document.getElementById('edit_icon_text').value = '';
             }
 
-            // Replace URL ID dummy '0'
             let url = "{{ route('extracurriculars.update', 0) }}";
             let form = document.getElementById('editForm');
             form.action = url.replace('/0', '/' + ekskul.id);
@@ -343,7 +330,6 @@
 
         // Handle Delete with SweetAlert
         document.addEventListener('DOMContentLoaded', function() {
-            // Gunakan event delegation untuk element yang mungkin dinamis, atau init ulang
             const deleteButtons = document.querySelectorAll('.btn-delete');
             deleteButtons.forEach(button => {
                 button.addEventListener('click', function(e) {
@@ -353,16 +339,17 @@
                         text: "Data ekskul beserta riwayat absensinya akan dihapus permanen.",
                         icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonColor: '#e11d48', // Rose-600
-                        cancelButtonColor: '#64748b', // Slate-500
+                        confirmButtonColor: '#e11d48',
+                        cancelButtonColor: '#94a3b8',
                         confirmButtonText: 'Ya, Hapus!',
                         cancelButtonText: 'Batal',
-                        borderRadius: '1.5rem',
+                        reverseButtons: true,
                         customClass: {
-                            popup: 'rounded-[2rem]',
-                            confirmButton: 'rounded-xl px-6 py-2.5 font-bold',
-                            cancelButton: 'rounded-xl px-6 py-2.5 font-bold'
-                        }
+                            popup: 'rounded-[2.5rem] font-sans border-0 shadow-2xl',
+                            confirmButton: 'bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-colors mx-2 shadow-lg shadow-rose-900/20',
+                            cancelButton: 'bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-bold hover:bg-slate-200 transition-colors mx-2'
+                        },
+                        buttonsStyling: false
                     }).then((result) => {
                         if (result.isConfirmed) {
                             form.submit();

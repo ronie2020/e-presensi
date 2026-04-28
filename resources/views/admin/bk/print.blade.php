@@ -6,6 +6,25 @@
     <title>Laporan BK - {{ \Carbon\Carbon::now()->format('d-m-Y') }}</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- INJEKSI TEMA MICROSOFT ELEVATE UNTUK HALAMAN STANDALONE -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        elevate: {
+                            dark: '#032b5b',
+                            primary: '#3b5889',
+                            accent: '#38bdf8',
+                            text: '#1e293b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     {{-- Phosphor Icons --}}
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
@@ -19,7 +38,7 @@
         body {
             font-family: 'Times New Roman', serif;
             font-size: 11pt;
-            background-color: #f1f5f9; /* Slate-100 */
+            background-color: #f8fafc; /* Slate-50 */
             -webkit-print-color-adjust: exact;
         }
 
@@ -37,7 +56,7 @@
         
         /* MODE PRINT */
         @media print {
-            body { background: none; margin: 0; }
+            body { background: none; margin: 0; padding: 0; }
             .sheet { width: 100%; margin: 0; padding: 1cm 1.5cm; box-shadow: none; border: none; page-break-after: always; }
             .sheet:last-child { page-break-after: auto; }
             .no-print { display: none !important; }
@@ -65,34 +84,36 @@
         /* FOOTER TTD */
         .footer-section { margin-top: 30px; width: 100%; }
         .ttd-container { display: flex; justify-content: space-between; margin-top: 20px; }
-        .ttd-box { width: 40%; text-align: center; }
+        .ttd-box { width: 48%; text-align: center; }
         
         .clear { clear: both; }
     </style>
 </head>
-<body>
+<body class="relative">
 
-    <!-- TOOLBAR (Floating) -->
-    <div class="no-print fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm p-4 flex justify-between items-center z-50">
-        <div class="flex items-center gap-4">
-            <div class="bg-blue-900 p-2.5 rounded-xl text-white shadow-lg shadow-blue-900/20">
+    <!-- DEKORASI BACKGROUND (Hanya tampil di layar) -->
+    <div class="fixed top-0 left-0 w-full h-64 bg-gradient-to-b from-elevate-primary/10 to-transparent pointer-events-none no-print -z-10"></div>
+
+    <!-- TOOLBAR (Floating) - TEMA ELEVATE -->
+    <div class="no-print w-[33cm] mx-auto mt-6 mb-6 bg-white/80 backdrop-blur-md border border-white/60 shadow-lg shadow-elevate-dark/5 p-4 flex justify-between items-center rounded-2xl sticky top-4 z-50">
+        <div class="flex items-center gap-4 font-sans">
+            <div class="bg-elevate-primary p-2.5 rounded-xl text-white shadow-lg shadow-elevate-primary/20">
                 <i class="ph-bold ph-printer text-xl"></i>
             </div>
             <div>
-                <h1 class="font-black text-slate-800 text-sm md:text-base font-sans">Pratinjau Laporan Konseling</h1>
-                <p class="text-xs text-slate-500 font-sans font-bold">Format: Kedinasan (Folio Landscape)</p>
+                <h1 class="font-black text-elevate-dark text-sm md:text-base">Pratinjau Laporan Konseling</h1>
+                <p class="text-xs text-slate-500 font-bold">Format: Kedinasan (Folio Landscape)</p>
             </div>
         </div>
-        <div class="flex gap-3">
-            <button onclick="window.close()" class="px-5 py-2.5 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition shadow-sm font-sans flex items-center gap-2">
-                <i class="ph-bold ph-x"></i> Tutup
+        <div class="flex gap-3 font-sans">
+            <button onclick="window.close()" class="px-5 py-2.5 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2 group">
+                <i class="ph-bold ph-x group-hover:scale-110 transition-transform"></i> Tutup
             </button>
-            <button onclick="window.print()" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-900 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/30 font-sans flex items-center gap-2">
-                <i class="ph-bold ph-printer"></i> Cetak Laporan
+            <button onclick="window.print()" class="px-5 py-2.5 text-xs font-bold text-white bg-elevate-primary rounded-xl hover:bg-elevate-dark transition-all shadow-lg shadow-elevate-primary/30 flex items-center gap-2 active:scale-95 group">
+                <i class="ph-bold ph-printer group-hover:scale-110 transition-transform"></i> Cetak Laporan
             </button>
         </div>
     </div>
-    <div class="no-print h-24"></div>
 
     <!-- HALAMAN REKAPITULASI -->
     <div class="sheet">
@@ -115,7 +136,7 @@
         </div>
 
         <!-- INFO FILTER -->
-        <div class="mb-4 grid grid-cols-2 text-xs font-bold uppercase">
+        <div class="mb-4 grid grid-cols-2 text-xs font-bold uppercase" style="font-family: sans-serif;">
             <div>
                 <p>Status: {{ request('status') ? ucfirst(request('status')) : 'SEMUA STATUS' }}</p>
                 <p>Tipe: {{ request('type') ? ucfirst(request('type')) : 'SEMUA TIPE' }}</p>
@@ -166,19 +187,19 @@
             </tbody>
         </table>
 
-        <!-- BAGIAN TANDA TANGAN (Sesuai Konsep SPPD) -->
+        <!-- BAGIAN TANDA TANGAN -->
         <div class="footer-section">
             <div class="ttd-container">
                 <div class="ttd-box">
                     <p>Mengetahui,</p>
                     <p class="mb-16">Kepala Sekolah</p>
-                    <p style="font-weight: bold; text-decoration: underline;">TANTAN SUTANDI N., S.Pd., M.Pd</p>
+                    <p style="font-weight: bold; text-decoration: underline; white-space: nowrap;">TANTAN SUTANDI N., S.Pd., M.Pd</p>
                     <p>NIP. 19820928 201101 1 002</p>
                 </div>
                 <div class="ttd-box">
                     <p>Lakbok, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</p>
                     <p class="mb-16">Guru Bimbingan Konseling</p>
-                    <p style="font-weight: bold; text-decoration: underline;">{{ auth()->user()->name ?? '( ........................................... )' }}</p>
+                    <p style="font-weight: bold; text-decoration: underline; white-space: nowrap;">{{ auth()->user()->name ?? '( ........................................... )' }}</p>
                     <p>NIP. .....................................</p>
                 </div>
             </div>
