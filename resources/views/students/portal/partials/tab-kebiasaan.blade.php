@@ -35,34 +35,35 @@
 
         $progressPercent = ($completedHabits / $totalHabits) * 100;
         
-        // Penentuan Warna Progress
+        // Penentuan Warna Progress (Elevate Adaptation)
         $progressColor = 'from-rose-400 to-rose-600';
         $iconColor = 'text-rose-500';
         $statusText = 'Belum Maksimal';
         if ($progressPercent == 100) { 
-            $progressColor = 'from-emerald-400 to-emerald-600'; 
-            $iconColor = 'text-emerald-500';
+            // 100% menggunakan warna Elevate Primary-Accent
+            $progressColor = 'from-elevate-primary to-elevate-accent'; 
+            $iconColor = 'text-elevate-primary';
             $statusText = 'Luar Biasa!';
         }
         elseif ($progressPercent >= 50) { 
-            $progressColor = 'from-amber-400 to-amber-600'; 
-            $iconColor = 'text-amber-500';
+            $progressColor = 'from-elevate-peach to-elevate-peach-dark'; 
+            $iconColor = 'text-elevate-peach-dark';
             $statusText = 'Cukup Baik';
         }
     @endphp
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {{-- Status Card --}}
-        <div class="lg:col-span-2 bg-white dark:bg-slate-800/80 p-6 sm:p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700/50 flex flex-col justify-center relative overflow-hidden group">
-            <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition transform group-hover:scale-110">
-                <i class="ph-fill ph-check-square-offset text-9xl text-cyan-500"></i>
+        <div class="lg:col-span-2 bg-white dark:bg-slate-800/80 p-6 sm:p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700/50 flex flex-col justify-center relative overflow-hidden group hover:border-elevate-accent/30 transition-colors">
+            <div class="absolute top-0 right-0 p-6 opacity-[0.03] group-hover:opacity-[0.08] transition transform group-hover:scale-110 pointer-events-none">
+                <i class="ph-fill ph-check-square-offset text-9xl text-elevate-primary"></i>
             </div>
             
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 relative z-10">
                 <div>
-                    <h3 class="text-2xl font-black text-slate-800 dark:text-slate-100">Jurnal Hari Ini</h3>
+                    <h3 class="text-2xl font-black text-elevate-dark dark:text-slate-100">Jurnal Hari Ini</h3>
                     <p class="text-sm font-bold text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-1">
-                        <i class="ph-bold ph-calendar-blank"></i> {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
+                        <i class="ph-bold ph-calendar-blank text-elevate-accent"></i> {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
                     </p>
                 </div>
                 <div class="bg-slate-50 dark:bg-slate-700/50 px-4 py-2 rounded-2xl border border-slate-100 dark:border-slate-600 flex items-center gap-3">
@@ -79,7 +80,7 @@
             <div class="relative z-10 mt-2">
                 <div class="flex justify-between items-end mb-2">
                     <span class="text-sm font-bold text-slate-600 dark:text-slate-300">Progress Penyelesaian</span>
-                    <span class="text-lg font-black text-slate-800 dark:text-slate-100">{{ $completedHabits }} <span class="text-sm text-slate-400 dark:text-slate-500">/ 7 Selesai</span></span>
+                    <span class="text-lg font-black text-elevate-dark dark:text-slate-100">{{ $completedHabits }} <span class="text-sm text-slate-400 dark:text-slate-500">/ 7 Selesai</span></span>
                 </div>
                 <div class="w-full h-4 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden shadow-inner">
                     <div class="h-full rounded-full bg-gradient-to-r {{ $progressColor }} transition-all duration-1000 relative" style="width: {{ $progressPercent }}%">
@@ -90,24 +91,24 @@
         </div>
 
         {{-- Feedback Guru --}}
-        <div class="bg-indigo-50 dark:bg-indigo-900/20 p-6 rounded-[2.5rem] border border-indigo-100 dark:border-indigo-800/50 flex flex-col justify-center relative overflow-hidden">
-            <div class="absolute top-0 right-0 p-4 opacity-5"><i class="ph-fill ph-chat-centered-text text-8xl text-indigo-600 dark:text-indigo-400"></i></div>
-            <h3 class="font-bold text-indigo-800 dark:text-indigo-300 text-sm mb-3 relative z-10 flex items-center gap-2">
-                <i class="ph-fill ph-chalkboard-teacher"></i> Catatan Guru Wali
+        <div class="bg-elevate-soft/50 dark:bg-elevate-dark/20 p-6 rounded-[2.5rem] border border-elevate-accent/20 dark:border-elevate-primary/30 flex flex-col justify-center relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none"><i class="ph-fill ph-chat-centered-text text-8xl text-elevate-primary dark:text-elevate-accent"></i></div>
+            <h3 class="font-bold text-elevate-dark dark:text-elevate-accent text-sm mb-3 relative z-10 flex items-center gap-2">
+                <i class="ph-fill ph-chalkboard-teacher text-elevate-primary"></i> Catatan Guru Wali
             </h3>
             
             @if(isset($todayEntry) && $todayEntry->teacher_feedback)
                 <div class="relative z-10">
-                    <i class="ph-fill ph-quotes text-indigo-200 dark:text-indigo-700 text-3xl absolute -top-2 -left-2"></i>
-                    <p class="text-sm text-indigo-700 dark:text-indigo-200 italic leading-relaxed pl-6 relative z-10">
+                    <i class="ph-fill ph-quotes text-elevate-accent/30 dark:text-elevate-primary/40 text-3xl absolute -top-2 -left-2"></i>
+                    <p class="text-sm text-elevate-dark dark:text-slate-200 italic leading-relaxed pl-6 relative z-10">
                         "{{ $todayEntry->teacher_feedback }}"
                     </p>
-                    <p class="text-[10px] font-bold text-indigo-400 dark:text-indigo-500 uppercase mt-3 text-right">
+                    <p class="text-[10px] font-bold text-elevate-primary dark:text-elevate-accent uppercase mt-3 text-right">
                         — {{ \Carbon\Carbon::parse($todayEntry->report_date)->translatedFormat('d F Y') }}
                     </p>
                 </div>
             @else
-                <div class="text-center text-indigo-300 dark:text-indigo-600 relative z-10 py-4">
+                <div class="text-center text-slate-400 dark:text-slate-500 relative z-10 py-4">
                     <p class="text-xs font-medium">Belum ada catatan dari guru wali untuk hari ini.</p>
                 </div>
             @endif
@@ -115,13 +116,13 @@
     </div>
 
     {{-- 2. GRID 7 KEBIASAAN --}}
-    <div class="bg-white dark:bg-slate-800/80 rounded-[2.5rem] border border-slate-100 dark:border-slate-700/50 shadow-sm p-6 sm:p-8">
+    <div class="bg-white dark:bg-slate-800/80 rounded-[2.5rem] border border-slate-100 dark:border-slate-700/50 shadow-sm p-6 sm:p-8 hover:shadow-md transition-shadow">
         <div class="flex justify-between items-center mb-6">
-            <h3 class="text-lg font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <i class="ph-fill ph-list-checks text-cyan-500"></i> Detail Kebiasaan
+            <h3 class="text-lg font-black text-elevate-dark dark:text-slate-100 flex items-center gap-2">
+                <i class="ph-fill ph-list-checks text-elevate-primary"></i> Detail Kebiasaan
             </h3>
             
-            <a href="{{ route('student.habits.index') }}" class="px-5 py-2 bg-slate-800 dark:bg-cyan-600 text-white rounded-xl text-xs font-bold hover:bg-slate-900 dark:hover:bg-cyan-700 transition shadow-lg flex items-center gap-2">
+            <a href="{{ route('student.habits.index') }}" class="px-5 py-2 bg-elevate-dark dark:bg-elevate-primary text-white rounded-xl text-xs font-bold hover:bg-elevate-primary dark:hover:bg-elevate-dark transition shadow-lg shadow-elevate-dark/10 flex items-center gap-2">
                 <i class="ph-bold ph-pencil-simple"></i> <span class="hidden sm:inline">Isi Jurnal Sekarang</span><span class="sm:hidden">Isi</span>
             </a>
         </div>
@@ -130,7 +131,7 @@
             
             {{-- HABIT 1: Bangun & Mandi --}}
             @php $isDone = isset($todayEntry) && $todayEntry->habit_1 && $todayEntry->habit_2; @endphp
-            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700' }}">
+            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 hover:border-elevate-accent/30 dark:border-slate-700' }}">
                 <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 {{ $isDone ? 'bg-emerald-500 text-white shadow-md' : 'bg-white dark:bg-slate-700 text-slate-300 dark:text-slate-500 border border-slate-200 dark:border-slate-600' }}">
                     <i class="ph-fill ph-sun-horizon"></i>
                 </div>
@@ -154,7 +155,7 @@
                 }
                 $isDone = $shalatCount > 0;
             @endphp
-            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700' }}">
+            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 hover:border-elevate-accent/30 dark:border-slate-700' }}">
                 <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 {{ $isDone ? 'bg-emerald-500 text-white shadow-md' : 'bg-white dark:bg-slate-700 text-slate-300 dark:text-slate-500 border border-slate-200 dark:border-slate-600' }}">
                     <i class="ph-fill ph-hands-praying"></i>
                 </div>
@@ -168,7 +169,7 @@
 
             {{-- HABIT 3: Olahraga --}}
             @php $isDone = isset($todayEntry) && $todayEntry->habit_3; @endphp
-            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700' }}">
+            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 hover:border-elevate-accent/30 dark:border-slate-700' }}">
                 <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 {{ $isDone ? 'bg-emerald-500 text-white shadow-md' : 'bg-white dark:bg-slate-700 text-slate-300 dark:text-slate-500 border border-slate-200 dark:border-slate-600' }}">
                     <i class="ph-fill ph-sneaker"></i>
                 </div>
@@ -182,7 +183,7 @@
 
             {{-- HABIT 4: Makan Bersama Keluarga --}}
             @php $isDone = isset($todayEntry) && $todayEntry->habit_5; @endphp
-            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700' }}">
+            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 hover:border-elevate-accent/30 dark:border-slate-700' }}">
                 <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 {{ $isDone ? 'bg-emerald-500 text-white shadow-md' : 'bg-white dark:bg-slate-700 text-slate-300 dark:text-slate-500 border border-slate-200 dark:border-slate-600' }}">
                     <i class="ph-fill ph-fork-knife"></i>
                 </div>
@@ -196,7 +197,7 @@
 
             {{-- HABIT 5: Mengulang Pelajaran --}}
             @php $isDone = isset($todayEntry) && $todayEntry->habit_4; @endphp
-            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700' }}">
+            <div class="p-4 rounded-2xl border transition-all flex items-center gap-4 {{ $isDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 hover:border-elevate-accent/30 dark:border-slate-700' }}">
                 <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0 {{ $isDone ? 'bg-emerald-500 text-white shadow-md' : 'bg-white dark:bg-slate-700 text-slate-300 dark:text-slate-500 border border-slate-200 dark:border-slate-600' }}">
                     <i class="ph-fill ph-books"></i>
                 </div>
@@ -211,7 +212,7 @@
             {{-- HABIT 6 & 7: Sosialisasi & Tidur Cepat --}}
             <div class="grid grid-rows-2 gap-4">
                 @php $isSocialDone = isset($todayEntry) && $todayEntry->habit_6; @endphp
-                <div class="p-3 rounded-2xl border transition-all flex items-center gap-3 {{ $isSocialDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700' }}">
+                <div class="p-3 rounded-2xl border transition-all flex items-center gap-3 {{ $isSocialDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 hover:border-elevate-accent/30 dark:border-slate-700' }}">
                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 {{ $isSocialDone ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-slate-700 text-slate-300 dark:text-slate-500 border border-slate-200 dark:border-slate-600' }}">
                         <i class="ph-fill ph-users"></i>
                     </div>
@@ -220,7 +221,7 @@
                 </div>
 
                 @php $isSleepDone = isset($todayEntry) && $todayEntry->habit_7; @endphp
-                <div class="p-3 rounded-2xl border transition-all flex items-center gap-3 {{ $isSleepDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700' }}">
+                <div class="p-3 rounded-2xl border transition-all flex items-center gap-3 {{ $isSleepDone ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800/50' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 hover:border-elevate-accent/30 dark:border-slate-700' }}">
                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0 {{ $isSleepDone ? 'bg-emerald-500 text-white' : 'bg-white dark:bg-slate-700 text-slate-300 dark:text-slate-500 border border-slate-200 dark:border-slate-600' }}">
                         <i class="ph-fill ph-moon-stars"></i>
                     </div>
