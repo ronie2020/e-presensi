@@ -10,6 +10,22 @@
     {{-- Phosphor Icons --}}
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        elevate: {
+                            dark: '#2c3f61',
+                            primary: '#0d52a1',
+                            accent: '#56bbf1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
@@ -101,21 +117,21 @@
 <body>
 
     <!-- TOOLBAR (Hanya di Layar) -->
-    <div class="no-print fixed top-0 left-0 right-0 bg-slate-900 text-white shadow-lg p-4 flex justify-between items-center z-50">
+    <div class="no-print fixed top-0 left-0 right-0 bg-elevate-dark text-white shadow-lg p-4 flex justify-between items-center z-50">
         <div class="flex items-center gap-4">
-            <div class="bg-blue-600 p-2 rounded-lg">
+            <div class="bg-elevate-primary p-2 rounded-xl border border-white/10">
                 <i class="ph-bold ph-files text-xl"></i>
             </div>
             <div>
                 <h1 class="font-bold text-lg">Mode Cetak Massal</h1>
-                <p class="text-xs text-slate-300">Siap mencetak {{ count($registrants) }} surat sekaligus.</p>
+                <p class="text-xs text-white/70">Siap mencetak {{ count($registrants) }} surat sekaligus.</p>
             </div>
         </div>
         <div class="flex gap-3">
-            <button onclick="window.close()" class="px-5 py-2 text-sm font-bold bg-slate-700 hover:bg-slate-600 rounded-lg transition">
+            <button onclick="window.close()" class="px-5 py-2 text-sm font-bold bg-white/10 hover:bg-white/20 rounded-xl transition">
                 Tutup
             </button>
-            <button onclick="window.print()" class="px-5 py-2 text-sm font-bold bg-blue-600 hover:bg-blue-500 rounded-lg transition shadow-lg flex items-center gap-2">
+            <button onclick="window.print()" class="px-5 py-2 text-sm font-bold bg-elevate-primary hover:bg-elevate-accent rounded-xl transition shadow-lg flex items-center gap-2">
                 <i class="ph-bold ph-printer"></i> Print Semua
             </button>
         </div>

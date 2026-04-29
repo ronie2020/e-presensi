@@ -32,85 +32,84 @@
 
     <div class="w-full max-w-lg z-10 animate-enter">
         
-        {{-- Tombol Kembali --}}
-        <a href="{{ url('/') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/60 border border-white/60 text-elevate-dark font-bold text-sm hover:bg-white transition-all shadow-sm backdrop-blur-md mb-6 active:scale-95">
-            <i class="ph-bold ph-arrow-left text-lg"></i> Kembali ke Beranda
-        </a>
-
-        {{-- MAIN CARD --}}
-        <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
-            
-            {{-- Header Card --}}
-            <div class="bg-elevate-gradient-card px-8 py-10 text-center border-b border-slate-100 relative overflow-hidden">
-                <div class="absolute -right-10 -top-10 w-32 h-32 bg-elevate-primary/10 rounded-full blur-xl pointer-events-none"></div>
-                <div class="w-20 h-20 bg-white shadow-sm border border-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-5 rotate-3 text-elevate-primary">
-                    <i class="ph-duotone ph-magnifying-glass text-4xl"></i>
-                </div>
-                <h2 class="text-2xl md:text-3xl font-black text-elevate-dark tracking-tight mb-2">Cek Status PPDB</h2>
-                <p class="text-sm text-elevate-dark/70 font-semibold max-w-xs mx-auto">
-                    Masukkan nomor pendaftaran Anda untuk melihat hasil seleksi.
-                </p>
+        {{-- Header --}}
+        <div class="text-center mb-12 animate-enter">
+            <div class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-white border border-elevate-accent/30 mb-6 shadow-sm">
+                <span class="relative flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-elevate-accent opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-elevate-primary"></span>
+                </span>
+                <span class="text-xs font-black text-slate-600 tracking-wider uppercase">Portal Pengumuman</span>
             </div>
+            
+            <h1 class="text-4xl md:text-6xl font-black text-elevate-dark tracking-tight mb-4">
+                Hasil Seleksi <span class="text-transparent bg-clip-text bg-gradient-to-r from-elevate-primary to-elevate-accent">PPDB {{ date('Y') }}</span>
+            </h1>
+        </div>
 
-            <div class="p-8 md:p-10">
-                @if(isset($customError) || session('error'))
-                    <div class="mb-6 p-4 bg-[#FDE7E9] border border-[#F4C3C9] text-[#D13438] rounded-2xl text-sm font-bold flex items-start gap-3 shadow-sm">
-                        <i class="ph-fill ph-warning-circle text-xl shrink-0 mt-0.5"></i>
-                        <p>{{ $customError ?? session('error') }}</p>
-                    </div>
-                @endif
-
-                @if(!$isOpen && isset($announcementDate))
-                    {{-- COUNTDOWN MODE --}}
-                    <div class="text-center">
-                        <div class="inline-block px-4 py-2 bg-elevate-soft text-elevate-primary rounded-xl text-xs font-black uppercase tracking-widest mb-6 border border-slate-200 shadow-sm">
-                            Pengumuman Belum Dibuka
-                        </div>
-                        <p class="text-elevate-dark/80 font-bold mb-6">Hasil seleksi akan diumumkan dalam:</p>
-                        
-                        <div class="grid grid-cols-4 gap-3 mb-4">
-                            <div class="countdown-box p-3">
-                                <div id="days" class="text-2xl font-black text-elevate-dark leading-none">00</div>
-                                <div class="text-[10px] font-bold text-slate-400 mt-1 uppercase">Hari</div>
-                            </div>
-                            <div class="countdown-box p-3">
-                                <div id="hours" class="text-2xl font-black text-elevate-dark leading-none">00</div>
-                                <div class="text-[10px] font-bold text-slate-400 mt-1 uppercase">Jam</div>
-                            </div>
-                            <div class="countdown-box p-3">
-                                <div id="minutes" class="text-2xl font-black text-elevate-dark leading-none">00</div>
-                                <div class="text-[10px] font-bold text-slate-400 mt-1 uppercase">Menit</div>
-                            </div>
-                            <div class="countdown-box p-3">
-                                <div id="seconds" class="text-2xl font-black text-elevate-primary leading-none">00</div>
-                                <div class="text-[10px] font-bold text-slate-400 mt-1 uppercase">Detik</div>
-                            </div>
-                        </div>
-                        <p class="text-xs text-slate-400 font-medium italic mt-4">Tanggal: {{ $announcementDate->translatedFormat('d F Y, H:i') }} WIB</p>
-                    </div>
-                @else
-                    {{-- FORM PENCARIAN --}}
-                    <form action="{{ route('ppdb.search') }}" method="POST" class="space-y-6">
-                        @csrf
-                        <div>
-                            <label for="registration_number" class="block text-xs font-black text-elevate-primary uppercase tracking-widest mb-2 ml-1">Nomor Registrasi</label>
-                            <div class="relative group">
-                                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-elevate-primary transition-colors">
-                                    <i class="ph-bold ph-identification-card text-xl"></i>
+        <div class="bg-white rounded-[2.5rem] overflow-hidden relative shadow-2xl shadow-elevate-dark/10 border border-slate-100 animate-enter" style="animation-delay: 100ms">
+            
+            <div class="p-8 md:p-16">
+                
+                {{-- MODE 1: HITUNG MUNDUR --}}
+                <div id="countdown-wrapper" class="{{ $isOpen ? 'hidden' : 'block' }}">
+                    <div class="text-center max-w-3xl mx-auto">
+                        <div class="mb-10">
+                            <h2 class="text-2xl font-black text-elevate-dark mb-2">Pengumuman Segera Dibuka</h2>
+                            @if(isset($announcementDate))
+                                <p class="text-slate-500 font-medium mb-6">Hasil seleksi dapat diakses secara online pada:</p>
+                                <div class="inline-block px-6 py-3 rounded-2xl bg-elevate-soft border border-elevate-accent/30">
+                                    <p class="text-xl text-elevate-primary font-black font-mono">{{ $announcementDate->translatedFormat('l, d F Y - H:i') }} WIB</p>
                                 </div>
-                                <input type="text" name="registration_number" id="registration_number" required
-                                       class="w-full pl-12 pr-5 py-4 bg-elevate-soft focus:bg-white border border-slate-200 rounded-2xl text-elevate-dark font-black tracking-wider focus:ring-elevate-accent/30 focus:border-elevate-accent transition-all shadow-sm placeholder:text-slate-400 placeholder:font-medium" 
-                                       placeholder="PPDB-2024-XXXX">
-                            </div>
-                            <p class="mt-2 text-xs text-slate-500 font-semibold ml-1">Cek nomor pada bukti pendaftaran Anda.</p>
+                            @endif
                         </div>
 
-                        <button type="submit" class="w-full bg-elevate-dark hover:bg-elevate-primary text-white font-bold rounded-2xl py-4 flex items-center justify-center gap-2 shadow-lg shadow-elevate-dark/30 transition-all active:scale-95 border border-transparent">
-                            <i class="ph-bold ph-magnifying-glass text-lg"></i>
-                            <span>Cek Hasil Seleksi</span>
-                        </button>
-                    </form>
-                @endif
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            @foreach(['Hari' => 'days', 'Jam' => 'hours', 'Menit' => 'minutes', 'Detik' => 'seconds'] as $label => $id)
+                                <div class="countdown-box rounded-2xl p-6 flex flex-col items-center justify-center aspect-square md:aspect-auto group hover:border-elevate-accent/50 transition-colors">
+                                    <span id="{{ $id }}" class="text-4xl md:text-5xl font-black text-elevate-dark font-mono tracking-tighter mb-2 group-hover:text-elevate-primary transition-colors">00</span>
+                                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{{ $label }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+
+                {{-- MODE 2: FORM PENCARIAN --}}
+                <div id="main-content" class="{{ $isOpen ? 'block animate-enter' : 'hidden' }}">
+                    <div class="max-w-xl mx-auto">
+                        <div class="text-center mb-10">
+                            <h2 class="text-2xl font-black text-elevate-dark mb-2">Cek Status Kelulusan</h2>
+                            <p class="text-slate-500 font-medium text-sm">Masukkan Nomor Pendaftaran (Format: REG-xxxx) atau NISN Siswa.</p>
+                        </div>
+
+                        <form action="{{ route('ppdb.search') }}" method="POST" class="relative group">
+                            @csrf
+                            <div class="relative mb-6">
+                                <div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+                                    <i class="ph-duotone ph-magnifying-glass text-3xl text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
+                                </div>
+                                <input type="text" name="search" class="search-input block w-full pl-16 pr-6 py-5 text-elevate-dark text-lg font-bold rounded-2xl placeholder:text-slate-400 placeholder:font-normal outline-none focus:ring-4 focus:ring-elevate-accent/20 focus:border-elevate-accent border border-slate-200 transition-all" placeholder="Cari data siswa..." required autocomplete="off">
+                            </div>
+                            
+                            <button type="submit" class="w-full bg-elevate-dark hover:bg-elevate-primary text-white font-bold py-5 rounded-2xl shadow-lg shadow-elevate-dark/20 hover:shadow-elevate-primary/30 transform hover:-translate-y-1 transition-all flex items-center justify-center gap-3 text-lg">
+                                <span>Lihat Hasil Seleksi</span>
+                                <i class="ph-bold ph-arrow-right"></i>
+                            </button>
+                        </form>
+
+                        @if(session('error') || isset($customError))
+                            <div class="mt-8 p-5 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-4">
+                                <div class="bg-rose-100 p-2 rounded-xl text-rose-600 mt-0.5"><i class="ph-fill ph-warning-circle text-xl"></i></div>
+                                <div>
+                                    <h4 class="font-bold text-rose-700 text-sm mb-1">Data Tidak Ditemukan</h4>
+                                    <p class="text-xs text-rose-600/80 font-medium leading-relaxed">{{ session('error') ?? $customError }}</p>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
             </div>
             
             <div class="bg-slate-50 border-t border-slate-100 p-6 text-center">
@@ -143,9 +142,10 @@
 
         if (distance < 0) {
             clearInterval(x);
-            window.location.reload();
+            location.reload();
         }
     }, 1000);
 </script>
 @endif
+
 @endsection

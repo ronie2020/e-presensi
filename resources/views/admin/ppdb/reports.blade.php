@@ -1,11 +1,5 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-elevate-dark leading-tight">
-            {{ __('Laporan PPDB') }}
-        </h2>
-    </x-slot>
-
-    {{-- CUSTOM STYLES ELEVATE --}}
+    {{-- CUSTOM STYLES & MICROSOFT FLUENT ELEVATION --}}
     <style>
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { opacity: 0; animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -13,183 +7,214 @@
         .delay-200 { animation-delay: 200ms; }
         @keyframes wiggle { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
         .group:hover .animate-wiggle { animation: wiggle 0.5s ease-in-out; }
+        
+        .fluent-card {
+            box-shadow: 0 1.6px 3.6px 0 rgba(0, 0, 0, 0.132), 0 0.3px 0.9px 0 rgba(0, 0, 0, 0.108);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        .fluent-card:hover {
+            box-shadow: 0 6.4px 14.4px 0 rgba(0, 0, 0, 0.132), 0 1.2px 3.6px 0 rgba(0, 0, 0, 0.108);
+            transform: translateY(-2px);
+        }
     </style>
 
-    <div class="py-8 sm:py-10 font-sans text-elevate-dark bg-elevate-surface min-h-screen relative overflow-hidden pb-20">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <div class="relative space-y-6 md:space-y-8 min-h-screen pb-10 font-sans text-elevate-dark bg-elevate-surface">
         
-        {{-- Efek Latar Belakang Halus --}}
-        <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 py-6 md:py-8">
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-
-            {{-- HEADER ELEVATE --}}
-            <div class="animate-enter relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-8 md:p-10 mb-8 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden border border-white/60 group">
-                <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
-                <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
+            {{-- HERO SECTION --}}
+            <div class="animate-enter relative rounded-[2rem] bg-elevate-gradient-main overflow-hidden p-6 md:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 group border border-white/60">
                 
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div>
-                        <a href="{{ route('ppdb.index') }}" class="group/btn bg-white/60 hover:bg-white text-elevate-dark px-5 py-3 rounded-xl font-bold text-sm backdrop-blur-md border border-white/60 transition-all flex items-center gap-2 shadow-sm w-fit mb-4 active:scale-95">
-                            <i class="ph-bold ph-arrow-left text-lg group-hover/btn:-translate-x-1 transition-transform"></i>
-                            <span>Kembali ke Data</span>
-                        </a>
-                        <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
-                            Laporan & Analitik PPDB
-                        </h2>
-                        <p class="text-elevate-dark/80 text-sm font-semibold max-w-lg leading-relaxed">
-                            Ringkasan statistik pendaftaran siswa baru secara real-time.
-                        </p>
+                {{-- Background Pattern --}}
+                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
+                <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-white/30 rounded-full blur-[100px] pointer-events-none group-hover:opacity-70 transition-opacity"></div>
+                
+                <div class="relative z-10">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 border border-white/50 text-elevate-dark text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm">
+                        <i class="ph-fill ph-chart-bar text-elevate-primary"></i> Pusat Data & Laporan
                     </div>
+                    <h1 class="text-3xl md:text-5xl font-extrabold text-elevate-dark tracking-tight mb-3">
+                        Laporan & Unduhan
+                    </h1>
+                    <p class="text-elevate-dark/80 text-sm md:text-base font-medium leading-relaxed max-w-xl">
+                        Pantau statistik pendaftar secara real-time dan unduh rekapitulasi data untuk keperluan arsip sekolah.
+                    </p>
                 </div>
             </div>
 
-            {{-- STATISTIK UTAMA (GRID 4) --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {{-- 1. STATISTIK VISUAL --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
-                <div class="animate-enter bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col justify-between group hover:-translate-y-1 transition-transform">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-12 h-12 rounded-2xl bg-elevate-soft text-elevate-primary flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-sm">
-                            <i class="ph-duotone ph-users-three"></i>
+                {{-- Chart Jalur --}}
+                <div class="animate-enter delay-100 bg-white rounded-2xl p-6 md:p-8 fluent-card relative overflow-hidden group">
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="w-12 h-12 rounded-xl bg-elevate-soft text-elevate-primary border border-elevate-accent/30 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                            <i class="ph-duotone ph-chart-pie-slice animate-wiggle"></i>
                         </div>
-                        <span class="px-2 py-1 bg-elevate-soft text-elevate-primary text-[10px] font-bold rounded-lg uppercase">Total</span>
-                    </div>
-                    <div>
-                        <h3 class="text-4xl font-black text-elevate-dark mb-1">{{ $stats['total'] }}</h3>
-                        <p class="text-sm font-bold text-slate-500">Pendaftar Masuk</p>
-                    </div>
-                </div>
-
-                <div class="animate-enter delay-100 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col justify-between group hover:-translate-y-1 transition-transform">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-12 h-12 rounded-2xl bg-[#DFF6DD] text-[#107C10] flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-sm">
-                            <i class="ph-duotone ph-check-circle"></i>
-                        </div>
-                        <span class="px-2 py-1 bg-[#DFF6DD] text-[#107C10] text-[10px] font-bold rounded-lg uppercase">Lolos</span>
-                    </div>
-                    <div>
-                        <h3 class="text-4xl font-black text-[#107C10] mb-1">{{ $stats['diterima'] }}</h3>
-                        <p class="text-sm font-bold text-slate-500">Siswa Diterima</p>
-                    </div>
-                </div>
-
-                <div class="animate-enter delay-200 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col justify-between group hover:-translate-y-1 transition-transform">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-12 h-12 rounded-2xl bg-[#FFEFD6] text-[#D83B01] flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-sm animate-pulse">
-                            <i class="ph-duotone ph-clock-countdown"></i>
-                        </div>
-                        <span class="px-2 py-1 bg-[#FFEFD6] text-[#D83B01] text-[10px] font-bold rounded-lg uppercase">Pending</span>
-                    </div>
-                    <div>
-                        <h3 class="text-4xl font-black text-[#D83B01] mb-1">{{ $stats['menunggu'] }}</h3>
-                        <p class="text-sm font-bold text-slate-500">Belum Verifikasi</p>
-                    </div>
-                </div>
-
-                <div class="animate-enter delay-200 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col justify-between group hover:-translate-y-1 transition-transform">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-12 h-12 rounded-2xl bg-[#FDE7E9] text-[#D13438] flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-sm">
-                            <i class="ph-duotone ph-x-circle"></i>
-                        </div>
-                        <span class="px-2 py-1 bg-[#FDE7E9] text-[#D13438] text-[10px] font-bold rounded-lg uppercase">Gagal</span>
-                    </div>
-                    <div>
-                        <h3 class="text-4xl font-black text-[#D13438] mb-1">{{ $stats['ditolak'] }}</h3>
-                        <p class="text-sm font-bold text-slate-500">Siswa Ditolak</p>
-                    </div>
-                </div>
-
-            </div>
-
-            {{-- CHART & ACTIONS --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                {{-- Donut Chart --}}
-                <div class="animate-enter delay-200 lg:col-span-2 bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-xl shadow-slate-200/40 flex flex-col">
-                    <h3 class="text-xl font-black text-elevate-dark flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded-xl bg-elevate-soft text-elevate-primary flex items-center justify-center shadow-sm border border-slate-100"><i class="ph-bold ph-chart-pie-slice"></i></div>
-                        Sebaran Jalur Pendaftaran
-                    </h3>
-                    <div class="flex-1 w-full relative min-h-[300px]">
-                        <canvas id="trackChart"></canvas>
-                    </div>
-                </div>
-
-                {{-- Action Export --}}
-                <div class="animate-enter delay-200 bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-xl shadow-slate-200/40 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-xl font-black text-elevate-dark flex items-center gap-3 mb-2">
-                            <div class="w-10 h-10 rounded-xl bg-elevate-peach-light/40 text-elevate-peach-dark flex items-center justify-center shadow-sm border border-elevate-peach/30"><i class="ph-bold ph-download-simple"></i></div>
-                            Export Data
-                        </h3>
-                        <p class="text-sm text-slate-500 font-semibold mb-6">Unduh data pendaftar dalam format Excel (.xlsx) untuk keperluan arsip atau pencetakan surat massal.</p>
-                        
-                        <div class="space-y-4">
-                            <a href="{{ route('ppdb.export', ['status' => 'Diterima']) }}" class="w-full bg-[#DFF6DD] text-[#107C10] border border-[#B7DFB9] py-3.5 px-4 rounded-2xl flex items-center justify-between font-bold hover:bg-[#107C10] hover:text-white transition-colors shadow-sm active:scale-95">
-                                <span class="flex items-center gap-2"><i class="ph-bold ph-check-circle"></i> Data Diterima</span>
-                                <i class="ph-bold ph-download"></i>
-                            </a>
-                            <a href="{{ route('ppdb.export') }}" class="w-full bg-elevate-soft text-elevate-primary border border-slate-200 py-3.5 px-4 rounded-2xl flex items-center justify-between font-bold hover:bg-elevate-primary hover:text-white transition-colors shadow-sm active:scale-95">
-                                <span class="flex items-center gap-2"><i class="ph-bold ph-users"></i> Semua Pendaftar</span>
-                                <i class="ph-bold ph-download"></i>
-                            </a>
+                        <div>
+                            <h3 class="font-bold text-elevate-dark text-lg">Sebaran Pendaftar</h3>
+                            <p class="text-xs text-slate-400 font-bold uppercase tracking-wide">Berdasarkan jalur masuk</p>
                         </div>
                     </div>
                     
-                    <div class="mt-8 pt-6 border-t border-slate-100">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Dokumen</p>
-                        <a href="#" class="w-full flex justify-center items-center gap-2 py-3.5 bg-white border-2 border-slate-200 text-elevate-dark font-bold rounded-2xl hover:bg-elevate-soft transition-all shadow-sm active:scale-95 text-sm">
-                            <i class="ph-bold ph-files"></i> Cetak Surat Massal
-                        </a>
+                    <div class="flex flex-col sm:flex-row items-center gap-8">
+                        <div class="relative w-40 h-40 md:w-48 md:h-48 flex-shrink-0">
+                            <canvas id="trackChart"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                <span class="text-3xl font-black text-elevate-dark">{{ $totalRegistrants }}</span>
+                                <span class="text-[10px] uppercase font-bold text-slate-400">Siswa</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-1 w-full space-y-3">
+                            @foreach([
+                                ['label' => 'Zonasi', 'val' => $trackStats['zonasi'], 'color' => 'bg-elevate-primary', 'bg' => 'bg-elevate-soft', 'text' => 'text-elevate-primary', 'border' => 'border-elevate-accent/30'],
+                                ['label' => 'Prestasi', 'val' => $trackStats['prestasi'], 'color' => 'bg-emerald-600', 'bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'border' => 'border-emerald-200'],
+                                ['label' => 'Afirmasi', 'val' => $trackStats['afirmasi'], 'color' => 'bg-amber-500', 'bg' => 'bg-amber-50', 'text' => 'text-amber-700', 'border' => 'border-amber-200'],
+                                ['label' => 'Pindah', 'val' => $trackStats['pindah_tugas'], 'color' => 'bg-elevate-dark', 'bg' => 'bg-slate-50', 'text' => 'text-elevate-dark', 'border' => 'border-slate-200']
+                            ] as $stat)
+                            <div class="flex justify-between items-center p-3 rounded-xl border {{ $stat['bg'] }} {{ $stat['border'] }} hover:shadow-sm transition-shadow">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-3 h-3 rounded-full {{ $stat['color'] }} shadow-sm border border-white"></span>
+                                    <span class="text-xs font-bold {{ $stat['text'] }}">{{ $stat['label'] }}</span>
+                                </div>
+                                <span class="font-black text-elevate-dark text-sm">{{ $stat['val'] }}</span>
+                            </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
 
+                {{-- Demografi & Status --}}
+                <div class="animate-enter delay-100 bg-white rounded-2xl p-6 md:p-8 fluent-card relative overflow-hidden flex flex-col group">
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="w-12 h-12 rounded-xl bg-elevate-peach-light/50 text-elevate-peach-dark border border-elevate-peach flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                            <i class="ph-duotone ph-users-three animate-wiggle"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-elevate-dark text-lg">Ringkasan Data</h3>
+                            <p class="text-xs text-slate-400 font-bold uppercase tracking-wide">Gender & Kelulusan</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 flex-1">
+                        {{-- Card Laki-laki --}}
+                        <div class="bg-elevate-soft border border-elevate-accent/30 rounded-xl p-5 flex flex-col justify-center hover:bg-elevate-accent/10 transition-colors shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-white text-elevate-primary border border-elevate-accent/30 flex items-center justify-center shadow-sm">
+                                    <i class="ph-fill ph-gender-male text-xl"></i>
+                                </div>
+                            </div>
+                            <span class="text-3xl font-extrabold text-elevate-dark">{{ $genderStats['L'] }}</span>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">Laki-laki</span>
+                        </div>
+
+                        {{-- Card Perempuan --}}
+                        <div class="bg-rose-50 border border-rose-200 rounded-xl p-5 flex flex-col justify-center hover:bg-rose-100 transition-colors shadow-sm">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="w-10 h-10 rounded-lg bg-white text-rose-500 border border-rose-200 flex items-center justify-center shadow-sm">
+                                    <i class="ph-fill ph-gender-female text-xl"></i>
+                                </div>
+                            </div>
+                            <span class="text-3xl font-extrabold text-elevate-dark">{{ $genderStats['P'] }}</span>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">Perempuan</span>
+                        </div>
+                        
+                        {{-- Card Total Diterima --}}
+                        <div class="col-span-2 bg-emerald-50 border border-emerald-200 rounded-xl p-6 text-emerald-700 relative overflow-hidden flex items-center justify-between fluent-card">
+                            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+                            <div class="absolute -right-10 -top-10 w-32 h-32 bg-white/40 rounded-full blur-xl"></div>
+                            <div class="relative z-10">
+                                <p class="text-xs font-bold text-emerald-700 uppercase mb-1 tracking-wider">Total Diterima</p>
+                                <p class="text-4xl font-black text-emerald-700 tracking-tight">{{ $totalAccepted }} <span class="text-sm font-bold text-emerald-700/80">Siswa</span></p>
+                            </div>
+                            <i class="ph-duotone ph-check-circle text-6xl text-emerald-600/20 relative z-10"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- 2. DOWNLOAD CENTER --}}
+            <div class="animate-enter delay-200 border-t border-slate-200 pt-8">
+                <h3 class="text-sm font-bold text-elevate-dark mb-5 flex items-center gap-2">
+                    <i class="ph-bold ph-download-simple"></i> Area Unduhan Dokumen
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    
+                    {{-- Excel --}}
+                    <div class="bg-white rounded-2xl p-6 fluent-card group flex flex-col h-full hover:border-emerald-600">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-all duration-300 shadow-sm">
+                            <i class="ph-duotone ph-microsoft-excel-logo"></i>
+                        </div>
+                        <h4 class="font-bold text-elevate-dark text-lg mb-2">Export Data (CSV)</h4>
+                        <p class="text-xs text-slate-500 mb-6 flex-1 font-medium leading-relaxed">Download data lengkap seluruh pendaftar untuk diolah di Excel.</p>
+                        <a href="{{ route('admin.ppdb.export.excel') }}" class="flex items-center justify-center gap-2 w-full py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition-all shadow-sm">
+                            <i class="ph-bold ph-download-simple"></i> Download CSV
+                        </a>
+                    </div>
+
+                    {{-- PDF Laporan --}}
+                    <div class="bg-white rounded-2xl p-6 fluent-card group flex flex-col h-full hover:border-rose-600">
+                        <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-all duration-300 shadow-sm">
+                            <i class="ph-duotone ph-file-pdf"></i>
+                        </div>
+                        <h4 class="font-bold text-elevate-dark text-lg mb-2">Laporan Rekap</h4>
+                        <p class="text-xs text-slate-500 mb-6 flex-1 font-medium leading-relaxed">Cetak rekapitulasi penerimaan siswa dengan Kop Resmi Dinas.</p>
+                        <a href="{{ route('admin.ppdb.print.recap') }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-2.5 bg-rose-600 text-white font-bold rounded-xl text-sm hover:bg-rose-700 transition-all shadow-sm">
+                            <i class="ph-bold ph-printer"></i> Preview Laporan
+                        </a>
+                    </div>
+
+                    {{-- Surat Lulus --}}
+                    <div class="bg-white rounded-2xl p-6 fluent-card group flex flex-col h-full hover:border-elevate-primary">
+                        <div class="w-12 h-12 rounded-xl bg-elevate-soft text-elevate-primary border border-elevate-accent/30 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-all duration-300 shadow-sm">
+                            <i class="ph-duotone ph-envelope-open"></i>
+                        </div>
+                        <h4 class="font-bold text-elevate-dark text-lg mb-2">Cetak SKL Massal</h4>
+                        <p class="text-xs text-slate-500 mb-6 flex-1 font-medium leading-relaxed">Cetak Surat Keterangan Lulus untuk semua siswa yang Diterima.</p>
+                        <a href="{{ route('admin.ppdb.print.mass_letters') }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-2.5 bg-elevate-primary text-white font-bold rounded-xl text-sm hover:bg-elevate-dark transition-all shadow-sm">
+                            <i class="ph-bold ph-files"></i> Cetak Massal
+                        </a>
+                    </div>
+
+                </div>
             </div>
         </div>
     </div>
 
     {{-- Script Chart.js --}}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('trackChart');
-            if(ctx) {
-                const trackData = {
-                    zonasi: {{ $trackStats['zonasi'] ?? 0 }},
-                    prestasi: {{ $trackStats['prestasi'] ?? 0 }},
-                    afirmasi: {{ $trackStats['afirmasi'] ?? 0 }},
-                    pindah: {{ $trackStats['pindah_tugas'] ?? 0 }}
-                };
+            const ctx = document.getElementById('trackChart').getContext('2d');
+            const trackData = {
+                zonasi: {{ $trackStats['zonasi'] }},
+                prestasi: {{ $trackStats['prestasi'] }},
+                afirmasi: {{ $trackStats['afirmasi'] }},
+                pindah: {{ $trackStats['pindah_tugas'] }}
+            };
 
-                new Chart(ctx.getContext('2d'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Zonasi', 'Prestasi', 'Afirmasi', 'Pindah Tugas'],
-                        datasets: [{
-                            data: [trackData.zonasi, trackData.prestasi, trackData.afirmasi, trackData.pindah],
-                            // Menggunakan Palette Elevate
-                            backgroundColor: ['#0d52a1', '#107C10', '#D83B01', '#2c3f61'], 
-                            borderWidth: 0, 
-                            hoverOffset: 10
-                        }]
-                    },
-                    options: {
-                        cutout: '75%',
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { 
-                            legend: { 
-                                position: 'right',
-                                labels: {
-                                    font: { family: 'Figtree, sans-serif', size: 12, weight: 'bold' },
-                                    color: '#2c3f61',
-                                    usePointStyle: true,
-                                    padding: 20
-                                }
-                            } 
-                        }
-                    }
-                });
-            }
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Zonasi', 'Prestasi', 'Afirmasi', 'Pindah Tugas'],
+                    datasets: [{
+                        data: [trackData.zonasi, trackData.prestasi, trackData.afirmasi, trackData.pindah],
+                        // Diselaraskan dengan hex dari tema Elevate & Semantic
+                        backgroundColor: ['#0d52a1', '#10b981', '#f59e0b', '#2c3f61'], 
+                        borderWidth: 0, hoverOffset: 10
+                    }]
+                },
+                options: {
+                    cutout: '75%',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
         });
     </script>
 </x-app-layout>

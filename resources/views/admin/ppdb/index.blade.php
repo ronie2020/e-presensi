@@ -31,10 +31,10 @@
         $isPast = $isSet && \Carbon\Carbon::now()->greaterThanOrEqualTo($announcementTime);
     @endphp
 
-    <div class="relative space-y-6 md:space-y-8 min-h-screen pb-10 font-sans text-[#2A3B52] bg-[#f8fafc]">
+    <div class="relative space-y-6 md:space-y-8 min-h-screen pb-10 font-sans text-elevate-dark bg-elevate-surface">
         
-        {{-- HERO SECTION (Tema Microsoft Elevate dari Dashboard) --}}
-        <div class="animate-enter relative rounded-xl bg-gradient-to-br from-[#25D0FF] via-[#5295FF] to-[#FFC9B9] p-6 md:p-10 text-[#2A3B52] shadow-[0_10px_40px_-10px_rgba(37,208,255,0.4)] overflow-hidden group border border-white/40">
+        {{-- HERO SECTION (Tema Elevate) --}}
+        <div class="animate-enter relative rounded-[2rem] bg-elevate-gradient-main p-6 md:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden group border border-white/60">
             
             {{-- Background Pattern & Blobs --}}
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
@@ -45,56 +45,56 @@
                 
                 {{-- KIRI: JUDUL & INTRO --}}
                 <div>
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 border border-white/50 text-[#2A3B52] text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 border border-white/50 text-elevate-dark text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm">
                         <span class="relative flex h-2 w-2">
-                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D83B01] opacity-75"></span>
-                          <span class="relative inline-flex rounded-full h-2 w-2 bg-[#D83B01]"></span>
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-elevate-peach-dark opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-elevate-peach-dark"></span>
                         </span>
                         Portal Penerimaan Siswa Baru
                     </div>
                     
-                    <h1 class="text-3xl md:text-5xl font-extrabold text-[#2A3B52] tracking-tight mb-4 leading-tight">
+                    <h1 class="text-3xl md:text-5xl font-extrabold text-elevate-dark tracking-tight mb-4 leading-tight">
                         Manajemen <br>
-                        <span class="text-[#2A3B52]">PPDB Online</span> 
+                        <span class="text-elevate-dark">PPDB Online</span> 
                     </h1>
-                    <p class="text-[#2A3B52]/80 text-sm md:text-base max-w-xl leading-relaxed mb-8 font-medium">
+                    <p class="text-elevate-dark/80 text-sm md:text-base max-w-xl leading-relaxed mb-8 font-medium">
                         Kelola data calon siswa, verifikasi berkas, dan atur jadwal pengumuman hasil seleksi secara terpusat.
                     </p>
 
                     <div class="flex flex-wrap gap-3">
-                        <a href="{{ route('dashboard') }}" class="px-6 py-3 bg-[#2A3B52] hover:bg-[#182436] text-white text-sm font-bold rounded-lg transition-all shadow-md flex items-center gap-2">
+                        <a href="{{ route('dashboard') }}" class="px-6 py-3 bg-elevate-dark hover:bg-elevate-primary text-white text-sm font-bold rounded-xl transition-all shadow-md shadow-elevate-dark/20 flex items-center gap-2">
                             <i class="ph-bold ph-squares-four"></i> Dashboard Utama
                         </a>
                     </div>
                 </div>
 
                 {{-- KANAN: WIDGET JADWAL (GLASS LIGHT) --}}
-                <div class="bg-white/30 backdrop-blur-md p-6 sm:p-8 rounded-[1.5rem] border border-white/40 shadow-sm relative overflow-hidden">
-                    <div class="absolute -top-10 -right-10 p-4 opacity-10 text-[#2A3B52] pointer-events-none transform rotate-12">
+                <div class="bg-white/40 backdrop-blur-md p-6 sm:p-8 rounded-[1.5rem] border border-white/50 shadow-sm relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 p-4 opacity-10 text-elevate-primary pointer-events-none transform rotate-12">
                         <i class="ph-fill ph-calendar-check text-[10rem]"></i>
                     </div>
 
-                    <h3 class="text-xl font-black text-[#2A3B52] mb-2 flex items-center gap-2 relative z-10">
-                        <i class="ph-duotone ph-clock text-[#5295FF]"></i> Jadwal Pengumuman
+                    <h3 class="text-xl font-black text-elevate-dark mb-2 flex items-center gap-2 relative z-10">
+                        <i class="ph-duotone ph-clock text-elevate-primary"></i> Jadwal Pengumuman
                     </h3>
-                    <p class="text-[#2A3B52]/80 text-sm font-medium mb-6 relative z-10">Atur kapan hasil seleksi dapat dilihat publik.</p>
+                    <p class="text-elevate-dark/80 text-sm font-medium mb-6 relative z-10">Atur kapan hasil seleksi dapat dilihat publik.</p>
                     
                     {{-- Status Indikator --}}
-                    <div class="mb-6 p-4 rounded-xl bg-white/50 border border-white/50 relative z-10 shadow-sm">
+                    <div class="mb-6 p-4 rounded-xl bg-white/60 border border-white/60 relative z-10 shadow-sm">
                         @if($isSet)
                             <div class="flex items-center gap-3 mb-2">
-                                <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md border {{ $isPast ? 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9]' : 'bg-[#F3F9FD] text-[#5295FF] border-[#D0E7F8]' }}">
+                                <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md border {{ $isPast ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-elevate-soft text-elevate-primary border-elevate-accent/30' }}">
                                     {{ $isPast ? '● Sudah Dibuka' : '● Terjadwal' }}
                                 </span>
                             </div>
-                            <p class="text-[#2A3B52] text-lg font-bold tracking-wide font-mono">
+                            <p class="text-elevate-dark text-lg font-bold tracking-wide font-mono">
                                 {{ $announcementTime->translatedFormat('d M Y, H:i') }} WIB
                             </p>
                         @else
                             <div class="flex items-center gap-3 mb-2">
-                                <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md border bg-[#FFEFD6] text-[#D83B01] border-[#FFD8A8]">● Belum Diatur</span>
+                                <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md border bg-amber-100 text-amber-700 border-amber-200">● Belum Diatur</span>
                             </div>
-                            <p class="text-[#2A3B52]/70 text-sm">Siswa belum dapat melihat hasil.</p>
+                            <p class="text-elevate-dark/70 text-sm">Siswa belum dapat melihat hasil.</p>
                         @endif
                     </div>
 
@@ -104,8 +104,8 @@
                         <div class="flex flex-col sm:flex-row gap-3">
                             <input type="datetime-local" name="announcement_date" required 
                                    value="{{ $isSet ? $announcementTime->format('Y-m-d\TH:i') : '' }}"
-                                   class="block w-full px-4 py-3 rounded-lg border-white/60 bg-white/60 focus:bg-white text-[#2A3B52] text-sm font-bold shadow-sm focus:ring-[#5295FF] focus:border-[#5295FF] transition-all cursor-pointer">
-                            <button type="submit" class="px-6 py-3 bg-[#5295FF] hover:bg-[#3b7ee6] text-white font-bold rounded-lg shadow-md transition-all flex items-center justify-center gap-2 whitespace-nowrap" title="Simpan">
+                                   class="block w-full px-4 py-3 rounded-xl border-white/60 bg-white/70 focus:bg-white text-elevate-dark text-sm font-bold shadow-sm focus:ring-elevate-accent/30 focus:border-elevate-accent transition-all cursor-pointer">
+                            <button type="submit" class="px-6 py-3 bg-elevate-primary hover:bg-elevate-dark text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 whitespace-nowrap" title="Simpan">
                                 <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan
                             </button>
                         </div>
@@ -117,78 +117,78 @@
         {{-- STATS CARDS --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 animate-enter" style="animation-delay: 100ms">
             <!-- Total Pendaftar -->
-            <div class="group bg-white rounded-xl p-5 fluent-card relative overflow-hidden flex items-center gap-5 hover:border-[#5295FF]">
-                <div class="w-14 h-14 rounded-lg flex items-center justify-center shadow-sm border transition-all duration-300 bg-[#F3F9FD] text-[#5295FF] border-[#D0E7F8] group-hover:bg-[#5295FF] group-hover:text-white group-hover:scale-110">
+            <div class="group bg-white rounded-2xl p-5 fluent-card relative overflow-hidden flex items-center gap-5 hover:border-elevate-primary">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center shadow-sm border transition-all duration-300 bg-elevate-soft text-elevate-primary border-elevate-accent/20 group-hover:bg-elevate-primary group-hover:text-white group-hover:scale-110">
                     <i class="ph-duotone ph-users-three text-3xl animate-wiggle"></i>
                 </div>
                 <div>
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 group-hover:text-[#5295FF] transition-colors">Total Pendaftar</p>
-                    <h3 class="text-3xl font-black text-[#2A3B52] tracking-tight count-up" data-target="{{ $stats['total'] }}">0</h3>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 group-hover:text-elevate-primary transition-colors">Total Pendaftar</p>
+                    <h3 class="text-3xl font-black text-elevate-dark tracking-tight count-up" data-target="{{ $stats['total'] }}">0</h3>
                 </div>
             </div>
 
             <!-- Diterima -->
-            <div class="group bg-white rounded-xl p-5 fluent-card relative overflow-hidden flex items-center gap-5 hover:border-[#107C10]">
-                <div class="w-14 h-14 rounded-lg flex items-center justify-center shadow-sm border transition-all duration-300 bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9] group-hover:bg-[#107C10] group-hover:text-white group-hover:scale-110">
+            <div class="group bg-white rounded-2xl p-5 fluent-card relative overflow-hidden flex items-center gap-5 hover:border-emerald-600">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center shadow-sm border transition-all duration-300 bg-emerald-50 text-emerald-600 border-emerald-200 group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-110">
                     <i class="ph-duotone ph-medal text-3xl animate-wiggle"></i>
                 </div>
                 <div>
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 group-hover:text-[#107C10] transition-colors">Lulus Seleksi</p>
-                    <h3 class="text-3xl font-black text-[#2A3B52] tracking-tight count-up" data-target="{{ $stats['accepted'] }}">0</h3>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 group-hover:text-emerald-600 transition-colors">Lulus Seleksi</p>
+                    <h3 class="text-3xl font-black text-elevate-dark tracking-tight count-up" data-target="{{ $stats['accepted'] }}">0</h3>
                 </div>
             </div>
 
             <!-- Pending -->
-            <div class="group bg-white rounded-xl p-5 fluent-card relative overflow-hidden flex items-center gap-5 hover:border-[#D83B01]">
-                <div class="w-14 h-14 rounded-lg flex items-center justify-center shadow-sm border transition-all duration-300 bg-[#FFEFD6] text-[#D83B01] border-[#FFD8A8] group-hover:bg-[#D83B01] group-hover:text-white group-hover:scale-110">
+            <div class="group bg-white rounded-2xl p-5 fluent-card relative overflow-hidden flex items-center gap-5 hover:border-amber-500">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center shadow-sm border transition-all duration-300 bg-amber-50 text-amber-600 border-amber-200 group-hover:bg-amber-500 group-hover:text-white group-hover:scale-110">
                     <i class="ph-duotone ph-clock-countdown text-3xl animate-wiggle"></i>
                 </div>
                 <div>
-                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 group-hover:text-[#D83B01] transition-colors">Perlu Verifikasi</p>
-                    <h3 class="text-3xl font-black text-[#2A3B52] tracking-tight count-up" data-target="{{ $stats['pending'] }}">0</h3>
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 group-hover:text-amber-600 transition-colors">Perlu Verifikasi</p>
+                    <h3 class="text-3xl font-black text-elevate-dark tracking-tight count-up" data-target="{{ $stats['pending'] }}">0</h3>
                 </div>
             </div>
         </div>
 
         {{-- MAIN CONTENT: TABEL DATA --}}
-        <div class="animate-enter bg-white rounded-xl fluent-card overflow-hidden flex flex-col min-h-[600px]" style="animation-delay: 200ms">
+        <div class="animate-enter bg-white rounded-2xl fluent-card overflow-hidden flex flex-col min-h-[600px]" style="animation-delay: 200ms">
             
             {{-- Toolbar --}}
             <div class="p-5 md:p-6 border-b border-slate-100 flex flex-col xl:flex-row xl:items-center justify-between gap-5">
                 
                 {{-- Tabs Filter --}}
-                <div class="bg-slate-50 p-1.5 rounded-lg flex flex-wrap gap-1 w-full md:w-auto overflow-x-auto border border-slate-200 no-scrollbar">
+                <div class="bg-slate-50 p-1.5 rounded-xl flex flex-wrap gap-1 w-full md:w-auto overflow-x-auto border border-slate-200 no-scrollbar">
                     @php
-                        $tabClass = "px-4 py-2 rounded-md text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap";
-                        $activeClass = "bg-white text-[#5295FF] shadow-sm border border-slate-200";
-                        $inactiveClass = "text-slate-500 hover:text-[#2A3B52] hover:bg-slate-100";
+                        $tabClass = "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap";
+                        $activeClass = "bg-white text-elevate-primary shadow-sm border border-slate-200";
+                        $inactiveClass = "text-slate-500 hover:text-elevate-dark hover:bg-slate-100";
                     @endphp
 
                     <a href="{{ route('admin.ppdb.index') }}" class="{{ $tabClass }} {{ !request('status') ? $activeClass : $inactiveClass }}">
                        <i class="ph-bold ph-squares-four"></i> Semua
                     </a>
-                    <a href="{{ route('admin.ppdb.index', ['status' => 'pending']) }}" class="{{ $tabClass }} {{ request('status') == 'pending' ? 'bg-[#D83B01] text-white shadow-sm' : $inactiveClass }}">
+                    <a href="{{ route('admin.ppdb.index', ['status' => 'pending']) }}" class="{{ $tabClass }} {{ request('status') == 'pending' ? 'bg-amber-500 text-white shadow-sm' : $inactiveClass }}">
                        <i class="ph-bold ph-clock"></i> Pending
                     </a>
-                    <a href="{{ route('admin.ppdb.index', ['status' => 'verified']) }}" class="{{ $tabClass }} {{ request('status') == 'verified' ? 'bg-[#5295FF] text-white shadow-sm' : $inactiveClass }}">
+                    <a href="{{ route('admin.ppdb.index', ['status' => 'verified']) }}" class="{{ $tabClass }} {{ request('status') == 'verified' ? 'bg-elevate-primary text-white shadow-sm' : $inactiveClass }}">
                        <i class="ph-bold ph-check-circle"></i> Verified
                     </a>
-                    <a href="{{ route('admin.ppdb.index', ['status' => 'accepted']) }}" class="{{ $tabClass }} {{ request('status') == 'accepted' ? 'bg-[#107C10] text-white shadow-sm' : $inactiveClass }}">
+                    <a href="{{ route('admin.ppdb.index', ['status' => 'accepted']) }}" class="{{ $tabClass }} {{ request('status') == 'accepted' ? 'bg-emerald-600 text-white shadow-sm' : $inactiveClass }}">
                        <i class="ph-bold ph-medal"></i> Diterima
                     </a>
                 </div>
                 
                 {{-- Search & Bulk Actions --}}
                 <div class="flex flex-col md:flex-row gap-3 w-full xl:w-auto">
-                    <button type="button" onclick="submitBulk()" class="px-5 py-2.5 bg-[#2A3B52] text-white rounded-lg font-bold text-xs hover:bg-[#182436] transition flex items-center justify-center gap-2 shadow-sm">
+                    <button type="button" onclick="submitBulk()" class="px-5 py-2.5 bg-elevate-dark text-white rounded-xl font-bold text-xs hover:bg-elevate-primary transition flex items-center justify-center gap-2 shadow-sm">
                         <i class="ph-bold ph-user-plus"></i> Promote Terpilih
                     </button>
 
                     <form method="GET" class="relative group w-full md:w-64">
                         <input type="hidden" name="status" value="{{ request('status') }}">
-                        <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#5295FF] transition-colors"></i>
+                        <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-elevate-primary transition-colors"></i>
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Siswa..." 
-                               class="w-full pl-10 pr-4 py-2.5 rounded-lg border-slate-200 bg-slate-50 focus:bg-white focus:border-[#5295FF] focus:ring-[#5295FF] text-sm font-bold text-[#2A3B52] transition-all shadow-sm placeholder:font-medium">
+                               class="w-full pl-10 pr-4 py-2.5 rounded-xl border-slate-200 bg-slate-50 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 text-sm font-bold text-elevate-dark transition-all shadow-sm placeholder:font-medium">
                     </form>
                 </div>
             </div>
@@ -197,11 +197,11 @@
             <div class="overflow-x-auto flex-1">
                 <form action="{{ route('admin.ppdb.bulk_promote') }}" method="POST" id="bulkForm">
                     @csrf
-                    <table class="w-full text-sm text-left text-[#2A3B52]">
+                    <table class="w-full text-sm text-left text-elevate-dark">
                         <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider sticky top-0 z-10 border-b border-slate-100">
                             <tr>
                                 <th class="px-5 py-4 w-10 text-center">
-                                    <input type="checkbox" id="checkAll" class="rounded border-slate-300 text-[#5295FF] focus:ring-[#5295FF] w-4 h-4 cursor-pointer bg-white">
+                                    <input type="checkbox" id="checkAll" class="rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary w-4 h-4 cursor-pointer bg-white">
                                 </th>
                                 <th class="px-5 py-4">Data Siswa</th>
                                 <th class="px-5 py-4 text-center">Jalur & Nilai</th>
@@ -214,7 +214,7 @@
                             <tr class="hover:bg-slate-50/50 transition-colors group">
                                 <td class="px-5 py-4 text-center">
                                     @if($item->status == 'accepted')
-                                        <input type="checkbox" name="selected_ids[]" value="{{ $item->id }}" class="check-item rounded border-slate-300 text-[#5295FF] focus:ring-[#5295FF] w-4 h-4 cursor-pointer">
+                                        <input type="checkbox" name="selected_ids[]" value="{{ $item->id }}" class="check-item rounded border-slate-300 text-elevate-primary focus:ring-elevate-primary w-4 h-4 cursor-pointer">
                                     @else
                                         <i class="ph-bold ph-minus text-slate-300"></i>
                                     @endif
@@ -222,11 +222,11 @@
                                 
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-black text-sm group-hover:scale-110 group-hover:border-[#5295FF] group-hover:text-[#5295FF] transition-all shadow-sm">
+                                        <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-black text-sm group-hover:scale-110 group-hover:border-elevate-primary group-hover:text-elevate-primary transition-all shadow-sm">
                                             {{ substr($item->full_name, 0, 1) }}
                                         </div>
                                         <div>
-                                            <div class="font-bold text-[#2A3B52] mb-0.5 group-hover:text-[#5295FF] transition-colors">{{ $item->full_name }}</div>
+                                            <div class="font-bold text-elevate-dark mb-0.5 group-hover:text-elevate-primary transition-colors">{{ $item->full_name }}</div>
                                             <div class="text-[11px] text-slate-400 font-mono flex items-center gap-1.5">
                                                 <i class="ph-bold ph-identification-card"></i> {{ $item->registration_number }}
                                             </div>
@@ -237,7 +237,7 @@
                                 <td class="px-5 py-4 text-center">
                                     <div class="flex flex-col items-center gap-1.5">
                                         <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border 
-                                            {{ $item->track == 'prestasi' ? 'bg-[#DFF6DD] text-[#107C10] border-[#B7DFB9]' : 'bg-[#F3F9FD] text-[#5295FF] border-[#D0E7F8]' }}">
+                                            {{ $item->track == 'prestasi' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-elevate-soft text-elevate-primary border-elevate-accent/30' }}">
                                             {{ $item->track }}
                                         </span>
                                         <span class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-2 py-0.5 rounded shadow-sm">{{ $item->average_grade }}</span>
@@ -246,19 +246,19 @@
 
                                 <td class="px-5 py-4 text-center">
                                     @if($item->status == 'pending')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-[#FFEFD6] text-[#D83B01] border border-[#FFD8A8]">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-[#D83B01] animate-pulse"></span> Pending
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Pending
                                         </span>
                                     @elseif($item->status == 'accepted')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-[#DFF6DD] text-[#107C10] border border-[#B7DFB9]">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
                                             <i class="ph-fill ph-check-circle"></i> Diterima
                                         </span>
                                     @elseif($item->status == 'verified')
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-[#F3F9FD] text-[#5295FF] border border-[#D0E7F8]">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-elevate-soft text-elevate-primary border border-elevate-accent/30">
                                             <i class="ph-fill ph-shield-check"></i> Terverifikasi
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-[#FDE7E9] text-[#D13438] border border-[#F4C3C9]">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200">
                                             <i class="ph-fill ph-x-circle"></i> Ditolak
                                         </span>
                                     @endif
@@ -266,10 +266,10 @@
 
                                 <td class="px-5 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
-                                        <a href="{{ route('admin.ppdb.show', $item->id) }}" class="p-2 rounded-lg text-slate-400 hover:text-[#5295FF] hover:bg-[#F3F9FD] hover:border-[#D0E7F8] border border-transparent transition-all" title="Detail">
+                                        <a href="{{ route('admin.ppdb.show', $item->id) }}" class="p-2 rounded-lg text-slate-400 hover:text-elevate-primary hover:bg-elevate-soft hover:border-elevate-accent/30 border border-transparent transition-all" title="Detail">
                                             <i class="ph-bold ph-eye text-lg"></i>
                                         </a>
-                                        <button type="button" onclick="confirmDelete('{{ $item->id }}', '{{ $item->full_name }}')" class="p-2 rounded-lg text-slate-400 hover:text-[#D13438] hover:bg-[#FDE7E9] hover:border-[#F4C3C9] border border-transparent transition-all" title="Hapus">
+                                        <button type="button" onclick="confirmDelete('{{ $item->id }}', '{{ $item->full_name }}')" class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 border border-transparent transition-all" title="Hapus">
                                             <i class="ph-bold ph-trash text-lg"></i>
                                         </button>
                                     </div>
@@ -278,10 +278,10 @@
                             @empty
                             <tr>
                                 <td colspan="5" class="py-16 text-center">
-                                    <div class="w-16 h-16 bg-slate-50 rounded-xl flex items-center justify-center mx-auto mb-4 border border-slate-100 text-slate-300">
+                                    <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100 text-slate-300">
                                         <i class="ph-duotone ph-folder-notch-open text-3xl"></i>
                                     </div>
-                                    <p class="text-sm font-bold text-[#2A3B52]">Belum ada data pendaftar</p>
+                                    <p class="text-sm font-bold text-elevate-dark">Belum ada data pendaftar</p>
                                     <p class="text-xs text-slate-400 mt-1">Silakan sesuaikan filter pencarian.</p>
                                 </td>
                             </tr>
@@ -324,12 +324,12 @@
             @if(session('success'))
                 Swal.fire({
                     icon: 'success', title: 'Berhasil!', text: '{{ session('success') }}',
-                    confirmButtonColor: '#107C10',
-                    customClass: { popup: 'fluent-modal rounded-xl', confirmButton: 'px-6 py-2 rounded-lg font-bold' }
+                    confirmButtonColor: '#10b981', // Tailwind Emerald 500
+                    customClass: { popup: 'rounded-[2rem]', confirmButton: 'px-6 py-2 rounded-xl font-bold' }
                 });
             @endif
             @if(session('error'))
-                Swal.fire({ icon: 'error', title: 'Error', text: '{{ session('error') }}', customClass: { popup: 'fluent-modal rounded-xl'} });
+                Swal.fire({ icon: 'error', title: 'Error', text: '{{ session('error') }}', customClass: { popup: 'rounded-[2rem]'} });
             @endif
 
             const checkAll = document.getElementById('checkAll');
@@ -344,7 +344,7 @@
         function submitBulk() {
             const selected = document.querySelectorAll('.check-item:checked').length;
             if(selected === 0) {
-                Swal.fire({ icon: 'warning', title: 'Pilih Data', text: 'Centang minimal satu siswa.', customClass: { popup: 'fluent-modal rounded-xl' }, confirmButtonColor: '#2A3B52' });
+                Swal.fire({ icon: 'warning', title: 'Pilih Data', text: 'Centang minimal satu siswa.', customClass: { popup: 'rounded-[2rem]' }, confirmButtonColor: '#2c3f61' });
                 return;
             }
             Swal.fire({
@@ -353,9 +353,9 @@
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Proses',
-                confirmButtonColor: '#5295FF',
+                confirmButtonColor: '#0d52a1', // Elevate Primary
                 cancelButtonColor: '#64748b',
-                customClass: { popup: 'fluent-modal rounded-xl', confirmButton: 'rounded-lg font-bold', cancelButton: 'rounded-lg font-bold' }
+                customClass: { popup: 'rounded-[2rem]', confirmButton: 'rounded-xl font-bold', cancelButton: 'rounded-xl font-bold' }
             }).then((res) => {
                 if(res.isConfirmed) document.getElementById('bulkForm').submit();
             });
@@ -368,8 +368,8 @@
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Hapus',
-                confirmButtonColor: '#D13438',
-                customClass: { popup: 'fluent-modal rounded-xl', confirmButton: 'rounded-lg font-bold', cancelButton: 'rounded-lg font-bold' }
+                confirmButtonColor: '#e11d48', // Tailwind Rose 600
+                customClass: { popup: 'rounded-[2rem]', confirmButton: 'rounded-xl font-bold', cancelButton: 'rounded-xl font-bold' }
             }).then((res) => {
                 if(res.isConfirmed) document.getElementById('delete-form-'+id).submit();
             });

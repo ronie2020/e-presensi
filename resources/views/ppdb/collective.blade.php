@@ -11,143 +11,141 @@
         background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='24' ry='24' stroke='%23cbd5e1' stroke-width='2' stroke-dasharray='12%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
         transition: all 0.3s ease;
     }
-    .file-drop-zone:hover, .file-drop-zone.active {
-        background-color: #e5eff5;
-        background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='24' ry='24' stroke='%2356bbf1' stroke-width='2' stroke-dasharray='12%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+    .file-drop-zone:hover {
+        background-color: #e5eff5; /* elevate-soft */
+        background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='24' ry='24' stroke='%230d52a1' stroke-width='2' stroke-dasharray='12%2c 12' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e"); /* elevate-primary stroke */
     }
 </style>
 
-<div class="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-elevate-surface font-sans py-12 px-4 sm:px-6" x-data="{ step: 1, fileName: '' }">
+<div class="min-h-screen w-full relative overflow-hidden bg-elevate-surface font-sans pb-20 flex flex-col items-center justify-center py-10">
     
-    {{-- Background Pattern & Glow --}}
-    <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
-    <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-elevate-peach-light/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
+    {{-- Background --}}
+    <div class="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] bg-elevate-primary/10 rounded-full blur-[100px] opacity-60 mix-blend-multiply"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-elevate-peach-light/40 rounded-full blur-[100px] opacity-60 mix-blend-multiply"></div>
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-30"></div>
+    </div>
 
-    <div class="w-full max-w-2xl z-10 animate-enter">
+    <div class="relative z-10 w-full max-w-5xl px-4">
         
-        {{-- Header Navigation --}}
-        <div class="flex justify-between items-center mb-6">
-            <a href="{{ url('/') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/60 border border-white/60 text-elevate-dark font-bold text-sm hover:bg-white transition-all shadow-sm backdrop-blur-md active:scale-95">
-                <i class="ph-bold ph-arrow-left"></i> Beranda
-            </a>
+        {{-- Header --}}
+        <div class="text-center mb-10 animate-enter">
+            <div class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-white border border-elevate-accent/30 mb-6 shadow-sm">
+                <span class="w-2.5 h-2.5 rounded-full bg-elevate-primary animate-pulse"></span>
+                <span class="text-xs font-black text-elevate-primary tracking-wider uppercase">Mode Guru / Kolektif</span>
+            </div>
+            <h1 class="text-3xl md:text-5xl font-black text-elevate-dark tracking-tight mb-4">
+                Pendaftaran <span class="text-transparent bg-clip-text bg-gradient-to-r from-elevate-primary to-elevate-accent">Massal</span>
+            </h1>
+            <p class="text-slate-500 text-sm font-medium max-w-xl mx-auto">
+                Fitur khusus pembimbing untuk mempercepat proses input data siswa secara kolektif via Excel.
+            </p>
         </div>
 
-        <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
+        <div class="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl shadow-elevate-dark/10 border border-slate-100 animate-enter" style="animation-delay: 100ms" x-data="{ step: 1 }">
             
-            {{-- Banner Header --}}
-            <div class="bg-elevate-gradient-card p-8 md:p-10 border-b border-slate-100 relative overflow-hidden">
-                <div class="absolute -right-10 -top-10 w-40 h-40 bg-elevate-primary/10 rounded-full blur-xl pointer-events-none"></div>
-                
-                <div class="flex flex-col md:flex-row gap-6 items-center md:items-start relative z-10 text-center md:text-left">
-                    <div class="w-20 h-20 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center shrink-0 rotate-3 text-elevate-primary">
-                        <i class="ph-duotone ph-file-xls text-4xl"></i>
-                    </div>
-                    <div>
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest bg-white border border-slate-100 text-elevate-primary mb-3 shadow-sm">
-                            <i class="ph-bold ph-users-three"></i> Khusus Sekolah Asal
-                        </div>
-                        <h2 class="text-2xl md:text-3xl font-black text-elevate-dark tracking-tight mb-2">Pendaftaran Kolektif</h2>
-                        <p class="text-sm text-elevate-dark/70 font-semibold leading-relaxed">
-                            Mendaftarkan banyak siswa sekaligus menggunakan format file Excel (.xlsx). Mempercepat proses pendaftaran dari SD/MI Asal.
-                        </p>
-                    </div>
+            {{-- Modern Stepper --}}
+            <div class="border-b border-slate-100 bg-slate-50/50 p-2">
+                <div class="flex gap-2">
+                    <button @click="step = 1" class="flex-1 py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-all"
+                        :class="step === 1 ? 'bg-white text-elevate-primary shadow-sm ring-1 ring-slate-200' : 'text-slate-400 hover:bg-white hover:text-elevate-dark'">
+                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold" 
+                              :class="step === 1 ? 'bg-elevate-primary text-white' : 'bg-slate-200 text-slate-500'">1</span>
+                        <span class="text-sm font-bold">Unduh Template</span>
+                    </button>
+                    <button @click="step = 2" class="flex-1 py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-all"
+                        :class="step === 2 ? 'bg-white text-elevate-primary shadow-sm ring-1 ring-slate-200' : 'text-slate-400 hover:bg-white hover:text-elevate-dark'">
+                        <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold" 
+                              :class="step === 2 ? 'bg-elevate-primary text-white' : 'bg-slate-200 text-slate-500'">2</span>
+                        <span class="text-sm font-bold">Unggah Data</span>
+                    </button>
                 </div>
             </div>
 
-            <div class="p-8 md:p-10">
+            <div class="p-8 md:p-12 min-h-[400px]">
                 
-                {{-- Error/Success Messages --}}
-                @if (session('success'))
-                    <div class="mb-8 p-5 bg-[#DFF6DD] border border-[#B7DFB9] text-[#107C10] rounded-2xl font-bold flex gap-3 shadow-sm animate-enter">
-                        <i class="ph-fill ph-check-circle text-xl shrink-0 mt-0.5"></i>
-                        <p>{{ session('success') }}</p>
-                    </div>
-                @endif
-
-                @if ($errors->any())
-                    <div class="mb-8 p-5 bg-[#FDE7E9] border border-[#F4C3C9] text-[#D13438] rounded-2xl shadow-sm animate-enter">
-                        <div class="flex items-center gap-2 font-black mb-2 uppercase tracking-wider text-xs">
-                            <i class="ph-fill ph-warning-octagon text-lg"></i> Terdapat Kesalahan:
+                {{-- STEP 1: DOWNLOAD --}}
+                <div x-show="step === 1" class="animate-enter h-full flex flex-col justify-between">
+                    <div class="max-w-3xl mx-auto w-full">
+                        <div class="mb-8 text-center md:text-left">
+                            <h3 class="text-2xl font-black text-elevate-dark mb-2">Persiapan Data</h3>
+                            <p class="text-slate-500 leading-relaxed text-sm font-medium">
+                                Unduh template Excel berikut. <strong>Jangan ubah header kolom</strong> agar sistem dapat membaca data dengan akurat.
+                            </p>
                         </div>
-                        <ul class="list-disc list-inside text-sm font-bold opacity-90 space-y-1">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+                        
+                        <div class="bg-slate-50 border border-slate-200 rounded-[2rem] p-6 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100/50 transition-all group">
+                            <div class="flex items-center gap-5">
+                                <div class="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 border border-emerald-100 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                                    <i class="ph-duotone ph-microsoft-excel-logo text-5xl"></i>
+                                </div>
+                                <div class="text-center md:text-left">
+                                    <h4 class="text-elevate-dark font-black text-lg">Template_PPDB_2025.xlsx</h4>
+                                    <p class="text-slate-400 text-xs uppercase tracking-wider font-bold mt-1">Format Resmi Sekolah</p>
+                                </div>
+                            </div>
+                            <a href="{{ route('ppdb.download_template') }}" class="px-8 py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all flex items-center gap-2 shadow-lg shadow-emerald-600/20 transform hover:-translate-y-1">
+                                <i class="ph-bold ph-download-simple text-xl"></i> Unduh File
+                            </a>
+                        </div>
                     </div>
-                @endif
 
-                {{-- STEP 1: Download Template --}}
-                <div x-show="step === 1" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
-                    <h3 class="text-lg font-black text-elevate-dark mb-4 flex items-center gap-3">
-                        <span class="w-8 h-8 rounded-full bg-elevate-soft text-elevate-primary flex items-center justify-center text-sm border border-slate-200 shadow-sm">1</span> 
-                        Download Format
-                    </h3>
-                    <div class="bg-elevate-soft/50 border border-slate-100 p-6 rounded-2xl mb-6">
-                        <p class="text-sm text-elevate-dark/80 font-medium leading-relaxed mb-5">
-                            Silakan unduh template Excel resmi kami. Isi data siswa sesuai dengan kolom yang telah disediakan, jangan mengubah struktur header pada template tersebut.
-                        </p>
-                        {{-- PERBAIKAN ROUTE DISINI (download_template) --}}
-                        <a href="{{ route('ppdb.download_template') }}" class="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white border border-slate-200 text-elevate-primary font-bold rounded-xl shadow-sm hover:bg-elevate-soft hover:border-elevate-accent transition-all active:scale-95 w-full sm:w-auto">
-                            <i class="ph-bold ph-download-simple text-lg"></i> Unduh Template Excel
-                        </a>
-                    </div>
-                    
-                    <div class="flex justify-end pt-4 border-t border-slate-100">
-                        <button type="button" @click="step = 2" class="px-8 py-4 bg-elevate-dark text-white font-bold rounded-2xl shadow-lg shadow-elevate-dark/30 hover:bg-elevate-primary transform active:scale-95 transition-all flex items-center gap-2 border border-transparent">
-                            Lanjut Upload <i class="ph-bold ph-arrow-right"></i>
+                    <div class="flex justify-end pt-8 mt-4 border-t border-slate-100">
+                        <button type="button" @click="step = 2" class="px-8 py-4 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-primary transition-all flex items-center gap-2 shadow-lg shadow-elevate-dark/20 hover:shadow-elevate-primary/30">
+                            Lanjut Unggah <i class="ph-bold ph-arrow-right"></i>
                         </button>
                     </div>
                 </div>
 
-                {{-- STEP 2: Upload File --}}
-                <div x-show="step === 2" style="display: none;" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
-                    <h3 class="text-lg font-black text-elevate-dark mb-4 flex items-center gap-3">
-                        <span class="w-8 h-8 rounded-full bg-elevate-soft text-elevate-primary flex items-center justify-center text-sm border border-slate-200 shadow-sm">2</span> 
-                        Upload Data
-                    </h3>
-                    
-                    <form action="{{ route('ppdb.import') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="mb-8">
-                            <div class="relative file-drop-zone rounded-[2rem] p-10 flex flex-col items-center justify-center cursor-pointer group"
-                                 @dragover.prevent="$el.classList.add('active')"
-                                 @dragleave.prevent="$el.classList.remove('active')"
-                                 @drop.prevent="$el.classList.remove('active'); $refs.fileInput.files = $event.dataTransfer.files; fileName = $refs.fileInput.files[0].name">
-                                
-                                <input type="file" name="excel_file" accept=".xlsx, .xls" required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" x-ref="fileInput" @change="fileName = $event.target.files[0].name">
-                                
-                                <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center text-elevate-primary mb-4 shadow-sm group-hover:scale-110 transition-transform duration-300">
-                                    <i class="ph-duotone ph-upload-simple text-4xl"></i>
-                                </div>
-                                <h4 class="text-lg font-black text-elevate-dark mb-2">Pilih File Excel</h4>
-                                <p class="text-sm text-slate-500 font-medium text-center">Tarik file ke sini atau klik untuk mencari.</p>
-                                
-                                <div x-show="fileName" style="display: none;" class="mt-6 px-4 py-2 bg-white border border-[#B7DFB9] rounded-xl flex items-center gap-2 text-[#107C10] shadow-sm">
-                                    <i class="ph-fill ph-file-xls text-lg"></i>
-                                    <span class="font-bold text-sm" x-text="fileName"></span>
+                {{-- STEP 2: UPLOAD --}}
+                <div x-show="step === 2" class="animate-enter h-full flex flex-col justify-between" style="display: none;">
+                    <div class="max-w-2xl mx-auto w-full">
+                        <div class="text-center mb-8">
+                            <h3 class="text-2xl font-black text-elevate-dark mb-2">Import Data Siswa</h3>
+                            <p class="text-slate-500 text-sm font-medium">Upload file Excel yang sudah diisi.</p>
+                        </div>
+                        
+                        @if(session('success'))
+                            <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 text-xs font-bold flex items-center gap-3">
+                                <i class="ph-fill ph-check-circle text-xl shrink-0"></i> {{ session('success') }}
+                            </div>
+                        @endif
+
+                        @if(session('error'))
+                            <div class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 text-xs font-bold flex items-center gap-3">
+                                <i class="ph-fill ph-warning-circle text-xl shrink-0"></i> {!! session('error') !!}
+                            </div>
+                        @endif
+
+                        <form action="{{ route('ppdb.import') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                            @csrf
+                            
+                            <div class="relative group">
+                                <div class="file-drop-zone h-48 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer relative overflow-hidden">
+                                    <input type="file" name="file_excel" accept=".xlsx, .xls" required 
+                                           class="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                           onchange="document.getElementById('file-name').textContent = this.files[0].name">
+                                    
+                                    <div class="text-center pointer-events-none transition-transform group-hover:scale-110 duration-300">
+                                        <i class="ph-duotone ph-cloud-arrow-up text-5xl text-slate-400 mb-3 group-hover:text-elevate-primary transition-colors"></i>
+                                        <p class="text-elevate-dark font-bold text-sm">Klik atau geser file ke sini</p>
+                                        <p class="text-slate-400 text-xs mt-1 font-medium" id="file-name">Format .xlsx / .xls (Max 5MB)</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="p-4 bg-[#FFEFD6] border border-[#FFD8A8] rounded-xl flex gap-3 mb-8 shadow-sm">
-                            <i class="ph-fill ph-info text-[#D83B01] text-xl shrink-0 mt-0.5"></i>
-                            <p class="text-xs text-[#D83B01] font-bold leading-relaxed">
-                                Pastikan file yang diunggah sesuai format. Proses import mungkin memakan waktu beberapa saat tergantung jumlah data siswa.
-                            </p>
-                        </div>
-
-                        <button type="submit" class="w-full py-4 bg-elevate-dark text-white font-bold rounded-2xl shadow-lg shadow-elevate-dark/30 hover:bg-elevate-primary transform active:scale-95 transition-all flex items-center justify-center gap-3 border border-transparent">
-                            <span>Proses Import Data</span>
-                            <i class="ph-bold ph-rocket-launch text-xl"></i>
-                        </button>
-                    </form>
+                            <button type="submit" class="w-full py-4 bg-elevate-dark hover:bg-elevate-primary text-white font-bold rounded-xl shadow-lg shadow-elevate-dark/20 hover:shadow-elevate-primary/30 transform hover:-translate-y-1 transition-all flex items-center justify-center gap-3">
+                                <span>Proses Import Data</span>
+                                <i class="ph-bold ph-rocket-launch text-xl"></i>
+                            </button>
+                        </form>
+                    </div>
                     
                     <div class="flex justify-between pt-8 mt-4 border-t border-slate-100">
-                        <button type="button" @click="step = 1" class="px-6 py-4 text-slate-400 font-bold hover:text-elevate-dark transition-all flex items-center gap-2 rounded-xl hover:bg-elevate-soft">
+                        <button type="button" @click="step = 1" class="px-6 py-4 text-slate-400 font-bold hover:text-elevate-dark transition-all flex items-center gap-2 rounded-xl hover:bg-slate-50">
                             <i class="ph-bold ph-arrow-left"></i> Kembali
                         </button>
-                        <a href="{{ route('ppdb.create') }}" class="px-6 py-4 text-xs font-bold text-elevate-primary hover:text-white transition-colors flex items-center gap-2 bg-elevate-soft rounded-xl border border-slate-200 hover:bg-elevate-primary hover:border-elevate-primary">
+                        <a href="{{ route('ppdb.create') }}" class="px-6 py-4 text-xs font-bold text-elevate-primary hover:text-elevate-dark transition-colors flex items-center gap-2 bg-elevate-soft rounded-xl border border-elevate-accent/30 hover:border-elevate-primary">
                             Pendaftaran Reguler <i class="ph-bold ph-arrow-right"></i>
                         </a>
                     </div>

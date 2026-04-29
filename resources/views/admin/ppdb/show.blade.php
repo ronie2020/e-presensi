@@ -17,20 +17,20 @@
         }
     </style>
 
-    <div class="py-8 sm:py-12 font-sans text-[#2A3B52] bg-[#f8fafc] min-h-screen">
+    <div class="py-8 sm:py-12 font-sans text-elevate-dark bg-elevate-surface min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {{-- Navigasi Top --}}
             <div class="animate-enter flex items-center justify-between mb-6">
-                <a href="{{ route('admin.ppdb.index') }}" class="group inline-flex items-center gap-3 text-slate-500 font-bold text-sm hover:text-[#5295FF] transition-colors">
-                    <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center shadow-sm group-hover:border-[#D0E7F8] group-hover:bg-[#F3F9FD] group-hover:text-[#5295FF] transition-all">
+                <a href="{{ route('admin.ppdb.index') }}" class="group inline-flex items-center gap-3 text-slate-500 font-bold text-sm hover:text-elevate-primary transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm group-hover:border-elevate-accent/30 group-hover:bg-elevate-soft group-hover:text-elevate-primary transition-all">
                         <i class="ph-bold ph-arrow-left"></i>
                     </div>
                     Kembali
                 </a>
                 
                 <div class="flex gap-3">
-                    <a href="{{ route('admin.ppdb.print', $registrant->id) }}" target="_blank" class="px-5 py-2.5 bg-white border border-slate-200 text-[#2A3B52] font-bold rounded-lg text-sm hover:bg-slate-50 transition shadow-sm flex items-center gap-2">
+                    <a href="{{ route('admin.ppdb.print', $registrant->id) }}" target="_blank" class="px-5 py-2.5 bg-white border border-slate-200 text-elevate-dark font-bold rounded-xl text-sm hover:bg-slate-50 transition shadow-sm flex items-center gap-2">
                         <i class="ph-bold ph-printer"></i> Cetak Bukti
                     </a>
                 </div>
@@ -42,14 +42,14 @@
                 <div class="space-y-6 animate-enter delay-100">
                     
                     {{-- PROFILE CARD --}}
-                    <div class="bg-white rounded-xl fluent-card overflow-hidden relative group">
+                    <div class="bg-white rounded-2xl fluent-card overflow-hidden relative group">
                         {{-- Banner Header --}}
-                        <div class="h-28 bg-gradient-to-r from-[#25D0FF] via-[#5295FF] to-[#FFC9B9] relative overflow-hidden">
+                        <div class="h-28 bg-elevate-gradient-main relative overflow-hidden border-b border-slate-100/50">
                              <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
                              <div class="absolute -right-10 top-0 w-32 h-32 bg-white/30 rounded-full blur-2xl"></div>
                         </div>
                         <div class="px-6 pb-8 text-center relative">
-                            <div class="w-28 h-28 mx-auto rounded-full bg-white p-1.5 shadow-md -mt-14 mb-4 relative z-10">
+                            <div class="w-28 h-28 mx-auto rounded-full bg-white p-1.5 shadow-md -mt-14 mb-4 relative z-10 border border-slate-50">
                                 <div class="w-full h-full rounded-full bg-slate-50 overflow-hidden flex items-center justify-center border border-slate-200">
                                     @if($registrant->file_photo)
                                         <img src="{{ asset('storage/' . $registrant->file_photo) }}" class="w-full h-full object-cover">
@@ -61,7 +61,7 @@
                                 </div>
                             </div>
                             
-                            <h2 class="text-xl font-black text-[#2A3B52] leading-tight mb-1">{{ $registrant->full_name }}</h2>
+                            <h2 class="text-xl font-black text-elevate-dark leading-tight mb-1">{{ $registrant->full_name }}</h2>
                             <p class="text-xs font-bold text-slate-500 mb-4">{{ $registrant->school_origin }}</p>
                             
                             <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs font-bold text-slate-600 shadow-sm">
@@ -71,9 +71,9 @@
                     </div>
 
                     {{-- CONTROL PANEL (Status) --}}
-                    <div class="bg-white rounded-xl fluent-card p-6">
-                        <h3 class="text-sm font-bold text-[#2A3B52] mb-5 flex items-center gap-2">
-                             <i class="ph-fill ph-sliders-horizontal text-[#5295FF]"></i> Panel Kelulusan
+                    <div class="bg-white rounded-2xl fluent-card p-6">
+                        <h3 class="text-sm font-bold text-elevate-dark mb-5 flex items-center gap-2">
+                             <i class="ph-fill ph-sliders-horizontal text-elevate-primary"></i> Panel Kelulusan
                         </h3>
                         
                         <form action="{{ route('admin.ppdb.update_status', $registrant->id) }}" method="POST" class="space-y-4">
@@ -81,7 +81,7 @@
                             
                             <div>
                                 <label class="text-xs font-bold text-slate-500 mb-2 block">Status Seleksi</label>
-                                <select name="status" class="w-full px-4 py-2.5 rounded-lg border-slate-200 bg-slate-50 text-sm font-bold focus:ring-[#5295FF] focus:border-[#5295FF] transition-all cursor-pointer">
+                                <select name="status" class="w-full px-4 py-3 rounded-xl border-slate-200 bg-slate-50 text-sm font-bold focus:ring-elevate-accent/30 focus:border-elevate-accent transition-all cursor-pointer">
                                     <option value="pending" {{ $registrant->status == 'pending' ? 'selected' : '' }}>⏳ Menunggu (Pending)</option>
                                     <option value="verified" {{ $registrant->status == 'verified' ? 'selected' : '' }}>✅ Terverifikasi</option>
                                     <option value="accepted" {{ $registrant->status == 'accepted' ? 'selected' : '' }}>🏆 DITERIMA</option>
@@ -91,10 +91,10 @@
                             
                             <div>
                                 <label class="text-xs font-bold text-slate-500 mb-2 block">Catatan Panitia</label>
-                                <textarea name="admin_note" rows="3" class="w-full px-4 py-2.5 rounded-lg border-slate-200 bg-white text-sm focus:ring-[#5295FF] focus:border-[#5295FF] placeholder:text-slate-400 placeholder:font-normal font-bold" placeholder="Contoh: Lulus jalur prestasi...">{{ $registrant->admin_note }}</textarea>
+                                <textarea name="admin_note" rows="3" class="w-full px-4 py-3 rounded-xl border-slate-200 bg-white text-sm focus:ring-elevate-accent/30 focus:border-elevate-accent placeholder:text-slate-400 placeholder:font-normal font-bold transition-all" placeholder="Contoh: Lulus jalur prestasi...">{{ $registrant->admin_note }}</textarea>
                             </div>
 
-                            <button type="submit" class="w-full py-2.5 bg-[#2A3B52] text-white font-bold rounded-lg text-sm hover:bg-[#182436] transition shadow-sm flex items-center justify-center gap-2">
+                            <button type="submit" class="w-full py-3 bg-elevate-dark text-white font-bold rounded-xl text-sm hover:bg-elevate-primary transition shadow-sm flex items-center justify-center gap-2">
                                 <i class="ph-bold ph-floppy-disk"></i> Simpan Perubahan
                             </button>
                         </form>
@@ -104,12 +104,12 @@
                                 @if(!$isPromoted)
                                     <form id="promoteForm" action="{{ route('admin.ppdb.promote', $registrant->id) }}" method="POST">
                                         @csrf
-                                        <button type="button" onclick="confirmPromote()" class="w-full py-2.5 bg-[#107C10] text-white font-bold rounded-lg text-sm hover:bg-[#0c5e0c] transition shadow-sm flex items-center justify-center gap-2 group">
+                                        <button type="button" onclick="confirmPromote()" class="w-full py-3 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition shadow-sm flex items-center justify-center gap-2 group">
                                             <i class="ph-bold ph-user-plus text-lg group-hover:scale-110 transition-transform"></i> Pindahkan ke Siswa Aktif
                                         </button>
                                     </form>
                                 @else
-                                    <div class="w-full py-2.5 bg-[#DFF6DD] text-[#107C10] font-bold rounded-lg text-sm border border-[#B7DFB9] flex items-center justify-center gap-2">
+                                    <div class="w-full py-3 bg-emerald-50 text-emerald-700 font-bold rounded-xl text-sm border border-emerald-200 flex items-center justify-center gap-2">
                                         <i class="ph-fill ph-check-circle text-lg"></i> Sudah Dipindahkan
                                     </div>
                                 @endif
@@ -118,19 +118,19 @@
                     </div>
 
                     {{-- INFO JALUR --}}
-                    <div class="bg-[#F3F9FD] rounded-xl p-6 border border-[#D0E7F8] fluent-card">
+                    <div class="bg-elevate-soft rounded-2xl p-6 border border-elevate-accent/30 fluent-card">
                         <div class="flex items-start justify-between mb-6">
                             <div>
-                                <p class="text-[10px] font-bold text-[#5295FF] uppercase tracking-widest mb-1">Jalur Masuk</p>
-                                <p class="text-2xl font-black text-[#2A3B52] capitalize">{{ $registrant->track }}</p>
+                                <p class="text-[10px] font-bold text-elevate-primary uppercase tracking-widest mb-1">Jalur Masuk</p>
+                                <p class="text-2xl font-black text-elevate-dark capitalize">{{ $registrant->track }}</p>
                             </div>
-                            <div class="w-12 h-12 rounded-lg bg-white text-[#5295FF] border border-[#D0E7F8] flex items-center justify-center shadow-sm">
+                            <div class="w-12 h-12 rounded-xl bg-white text-elevate-primary border border-elevate-accent/30 flex items-center justify-center shadow-sm">
                                 <i class="ph-fill ph-path text-2xl"></i>
                             </div>
                         </div>
-                        <div class="bg-white rounded-lg p-4 border border-[#D0E7F8] flex items-center justify-between shadow-sm">
+                        <div class="bg-white rounded-xl p-4 border border-elevate-accent/30 flex items-center justify-between shadow-sm">
                             <span class="text-xs font-bold text-slate-500 uppercase">Nilai Rapor</span>
-                            <span class="text-xl font-black text-[#2A3B52]">{{ $registrant->average_grade }}</span>
+                            <span class="text-xl font-black text-elevate-dark">{{ $registrant->average_grade }}</span>
                         </div>
                     </div>
                 </div>
@@ -139,9 +139,9 @@
                 <div class="lg:col-span-2 space-y-6 animate-enter delay-200">
                     
                     {{-- BIODATA --}}
-                    <div class="bg-white rounded-xl fluent-card p-6 md:p-8 relative overflow-hidden group">
-                        <h3 class="text-lg font-bold text-[#2A3B52] mb-6 flex items-center gap-3 relative z-10 border-b border-slate-100 pb-4">
-                            <div class="w-10 h-10 rounded-lg bg-[#F3F9FD] text-[#5295FF] flex items-center justify-center text-xl border border-[#D0E7F8]">
+                    <div class="bg-white rounded-2xl fluent-card p-6 md:p-8 relative overflow-hidden group">
+                        <h3 class="text-lg font-bold text-elevate-dark mb-6 flex items-center gap-3 relative z-10 border-b border-slate-100 pb-4">
+                            <div class="w-10 h-10 rounded-xl bg-elevate-soft text-elevate-primary flex items-center justify-center text-xl border border-elevate-accent/30">
                                 <i class="ph-duotone ph-identification-badge"></i>
                             </div>
                             Identitas Siswa
@@ -156,22 +156,22 @@
                                 'Agama' => $registrant->religion,
                                 'No. HP' => $registrant->student_phone ?? '-'
                             ] as $label => $val)
-                            <div class="border-l-2 border-[#D0E7F8] pl-3">
+                            <div class="border-l-2 border-elevate-accent/30 pl-3">
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{{ $label }}</p>
-                                <p class="font-bold text-[#2A3B52] text-sm">{{ $val }}</p>
+                                <p class="font-bold text-elevate-dark text-sm">{{ $val }}</p>
                             </div>
                             @endforeach
-                            <div class="sm:col-span-2 border-l-2 border-[#D0E7F8] pl-3">
+                            <div class="sm:col-span-2 border-l-2 border-elevate-accent/30 pl-3">
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Alamat Lengkap</p>
-                                <p class="font-bold text-[#2A3B52] text-sm leading-relaxed">{{ $registrant->address }}</p>
+                                <p class="font-bold text-elevate-dark text-sm leading-relaxed">{{ $registrant->address }}</p>
                             </div>
                         </div>
                     </div>
 
                     {{-- ORANG TUA --}}
-                    <div class="bg-white rounded-xl fluent-card p-6 md:p-8 relative overflow-hidden group">
-                        <h3 class="text-lg font-bold text-[#2A3B52] mb-6 flex items-center gap-3 relative z-10 border-b border-slate-100 pb-4">
-                             <div class="w-10 h-10 rounded-lg bg-[#FFEFD6] text-[#D83B01] flex items-center justify-center text-xl border border-[#FFD8A8]">
+                    <div class="bg-white rounded-2xl fluent-card p-6 md:p-8 relative overflow-hidden group">
+                        <h3 class="text-lg font-bold text-elevate-dark mb-6 flex items-center gap-3 relative z-10 border-b border-slate-100 pb-4">
+                             <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl border border-amber-200">
                                 <i class="ph-duotone ph-users-three"></i>
                             </div>
                             Data Orang Tua / Wali
@@ -184,18 +184,18 @@
                                 'Penghasilan' => $registrant->parent_income ?? '-',
                                 'No. WhatsApp' => $registrant->parent_phone
                             ] as $label => $val)
-                            <div class="border-l-2 border-[#FFD8A8] pl-3">
+                            <div class="border-l-2 border-amber-200 pl-3">
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{{ $label }}</p>
-                                <p class="font-bold text-[#2A3B52] text-sm">{{ $val }}</p>
+                                <p class="font-bold text-elevate-dark text-sm">{{ $val }}</p>
                             </div>
                             @endforeach
                         </div>
                     </div>
 
                     {{-- DOKUMEN --}}
-                    <div class="bg-white rounded-xl fluent-card p-6 md:p-8">
-                        <h3 class="text-lg font-bold text-[#2A3B52] mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
-                             <div class="w-10 h-10 rounded-lg bg-slate-100 text-[#2A3B52] flex items-center justify-center text-xl border border-slate-200">
+                    <div class="bg-white rounded-2xl fluent-card p-6 md:p-8">
+                        <h3 class="text-lg font-bold text-elevate-dark mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
+                             <div class="w-10 h-10 rounded-xl bg-slate-50 text-elevate-dark flex items-center justify-center text-xl border border-slate-200">
                                 <i class="ph-duotone ph-files"></i>
                             </div>
                             Berkas Lampiran Dokumen
@@ -209,13 +209,13 @@
                                 'file_achievement' => 'Sertifikat Prestasi'
                             ] as $field => $label)
                                 @if($registrant->$field)
-                                    <a href="{{ asset('storage/' . $registrant->$field) }}" target="_blank" class="flex items-center gap-4 p-4 rounded-lg border border-slate-200 bg-slate-50 hover:bg-white hover:border-[#5295FF] hover:shadow-md transition-all duration-300 group">
-                                        <div class="w-10 h-10 rounded-md bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-[#F3F9FD] group-hover:text-[#5295FF] group-hover:border-[#D0E7F8] transition-colors shadow-sm">
+                                    <a href="{{ asset('storage/' . $registrant->$field) }}" target="_blank" class="flex items-center gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50 hover:bg-white hover:border-elevate-accent hover:shadow-md transition-all duration-300 group">
+                                        <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-elevate-soft group-hover:text-elevate-primary group-hover:border-elevate-accent/30 transition-colors shadow-sm">
                                             <i class="ph-fill ph-file-text text-xl"></i>
                                         </div>
                                         <div>
-                                            <p class="font-bold text-[#2A3B52] group-hover:text-[#5295FF] transition-colors text-sm">{{ $label }}</p>
-                                            <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5 flex items-center gap-1 group-hover:text-[#5295FF]">
+                                            <p class="font-bold text-elevate-dark group-hover:text-elevate-primary transition-colors text-sm">{{ $label }}</p>
+                                            <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5 flex items-center gap-1 group-hover:text-elevate-primary">
                                                 <i class="ph-bold ph-eye"></i> Lihat Berkas
                                             </p>
                                         </div>
@@ -239,9 +239,9 @@
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Pindahkan',
-                confirmButtonColor: '#107C10',
-                cancelButtonColor: '#2A3B52',
-                customClass: { popup: 'fluent-modal rounded-xl', confirmButton: 'rounded-lg font-bold', cancelButton: 'rounded-lg font-bold' }
+                confirmButtonColor: '#10b981', // Tailwind Emerald
+                cancelButtonColor: '#2c3f61', // Elevate Dark
+                customClass: { popup: 'rounded-[2rem]', confirmButton: 'rounded-xl font-bold', cancelButton: 'rounded-xl font-bold' }
             }).then((res) => { if(res.isConfirmed) document.getElementById('promoteForm').submit(); });
         }
     </script>

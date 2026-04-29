@@ -13,6 +13,15 @@
         th { background-color: #f0f0f0; text-align: center; }
         .status-accepted { font-weight: bold; }
         .footer { margin-top: 40px; float: right; text-align: center; width: 200px; }
+        
+        /* Tombol Modern untuk Mode Tampilan */
+        .no-print { margin-bottom: 20px; padding: 15px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; gap: 10px; }
+        .btn { padding: 8px 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; transition: 0.2s;}
+        .btn-primary { background: #0d52a1; color: white; }
+        .btn-primary:hover { background: #2c3f61; }
+        .btn-secondary { background: #e2e8f0; color: #334155; }
+        .btn-secondary:hover { background: #cbd5e1; }
+
         @media print {
             @page { size: landscape; margin: 1cm; }
             .no-print { display: none; }
@@ -21,9 +30,9 @@
 </head>
 <body onload="window.print()">
 
-    <div class="no-print" style="margin-bottom: 20px;">
-        <button onclick="window.print()">Cetak Dokumen</button>
-        <button onclick="window.close()">Tutup</button>
+    <div class="no-print">
+        <button class="btn btn-primary" onclick="window.print()">Cetak Dokumen</button>
+        <button class="btn btn-secondary" onclick="window.close()">Tutup</button>
     </div>
 
     <div class="header">
@@ -67,7 +76,7 @@
         <p>Kepala Sekolah,</p>
         <br><br><br>
         <p><strong>TANTAN SUTANDI NUGRAHA, S.Si, M.Pd.</strong></p>
-        <p>NIP. 197xxxxxx...</p>
+        <p>NIP. 198209282011011002</p>
     </div>
 
 </body>

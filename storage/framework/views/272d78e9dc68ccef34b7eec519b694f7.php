@@ -30,25 +30,25 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <div class="relative space-y-6 md:space-y-8 min-h-screen pb-10 font-sans text-[#2A3B52] bg-[#f8fafc]">
+    <div class="relative space-y-6 md:space-y-8 min-h-screen pb-10 font-sans text-elevate-dark bg-elevate-surface">
         
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 py-6 md:py-8">
 
             
-            <div class="animate-enter relative rounded-xl bg-gradient-to-br from-[#25D0FF] via-[#5295FF] to-[#FFC9B9] overflow-hidden p-6 md:p-10 text-[#2A3B52] shadow-[0_10px_40px_-10px_rgba(37,208,255,0.4)] group border border-white/40">
+            <div class="animate-enter relative rounded-[2rem] bg-elevate-gradient-main overflow-hidden p-6 md:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 group border border-white/60">
                 
                 
                 <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none mix-blend-overlay"></div>
                 <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-white/30 rounded-full blur-[100px] pointer-events-none group-hover:opacity-70 transition-opacity"></div>
                 
                 <div class="relative z-10">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 border border-white/50 text-[#2A3B52] text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm">
-                        <i class="ph-fill ph-chart-bar text-[#5295FF]"></i> Pusat Data & Laporan
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 border border-white/50 text-elevate-dark text-xs font-bold uppercase tracking-wider mb-4 backdrop-blur-sm shadow-sm">
+                        <i class="ph-fill ph-chart-bar text-elevate-primary"></i> Pusat Data & Laporan
                     </div>
-                    <h1 class="text-3xl md:text-5xl font-extrabold text-[#2A3B52] tracking-tight mb-3">
+                    <h1 class="text-3xl md:text-5xl font-extrabold text-elevate-dark tracking-tight mb-3">
                         Laporan & Unduhan
                     </h1>
-                    <p class="text-[#2A3B52]/80 text-sm md:text-base font-medium leading-relaxed max-w-xl">
+                    <p class="text-elevate-dark/80 text-sm md:text-base font-medium leading-relaxed max-w-xl">
                         Pantau statistik pendaftar secara real-time dan unduh rekapitulasi data untuk keperluan arsip sekolah.
                     </p>
                 </div>
@@ -58,13 +58,13 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
                 
-                <div class="animate-enter delay-100 bg-white rounded-xl p-6 md:p-8 fluent-card relative overflow-hidden group">
+                <div class="animate-enter delay-100 bg-white rounded-2xl p-6 md:p-8 fluent-card relative overflow-hidden group">
                     <div class="flex items-center gap-4 mb-8">
-                        <div class="w-12 h-12 rounded-lg bg-[#F3F9FD] text-[#5295FF] border border-[#D0E7F8] flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                        <div class="w-12 h-12 rounded-xl bg-elevate-soft text-elevate-primary border border-elevate-accent/30 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm">
                             <i class="ph-duotone ph-chart-pie-slice animate-wiggle"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-[#2A3B52] text-lg">Sebaran Pendaftar</h3>
+                            <h3 class="font-bold text-elevate-dark text-lg">Sebaran Pendaftar</h3>
                             <p class="text-xs text-slate-400 font-bold uppercase tracking-wide">Berdasarkan jalur masuk</p>
                         </div>
                     </div>
@@ -73,24 +73,24 @@
                         <div class="relative w-40 h-40 md:w-48 md:h-48 flex-shrink-0">
                             <canvas id="trackChart"></canvas>
                             <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                <span class="text-3xl font-black text-[#2A3B52]"><?php echo e($totalRegistrants); ?></span>
+                                <span class="text-3xl font-black text-elevate-dark"><?php echo e($totalRegistrants); ?></span>
                                 <span class="text-[10px] uppercase font-bold text-slate-400">Siswa</span>
                             </div>
                         </div>
                         
                         <div class="flex-1 w-full space-y-3">
                             <?php $__currentLoopData = [
-                                ['label' => 'Zonasi', 'val' => $trackStats['zonasi'], 'color' => 'bg-[#5295FF]', 'bg' => 'bg-[#F3F9FD]', 'text' => 'text-[#5295FF]', 'border' => 'border-[#D0E7F8]'],
-                                ['label' => 'Prestasi', 'val' => $trackStats['prestasi'], 'color' => 'bg-[#107C10]', 'bg' => 'bg-[#DFF6DD]', 'text' => 'text-[#107C10]', 'border' => 'border-[#B7DFB9]'],
-                                ['label' => 'Afirmasi', 'val' => $trackStats['afirmasi'], 'color' => 'bg-[#D83B01]', 'bg' => 'bg-[#FFEFD6]', 'text' => 'text-[#D83B01]', 'border' => 'border-[#FFD8A8]'],
-                                ['label' => 'Pindah', 'val' => $trackStats['pindah_tugas'], 'color' => 'bg-[#2A3B52]', 'bg' => 'bg-slate-100', 'text' => 'text-[#2A3B52]', 'border' => 'border-slate-200']
+                                ['label' => 'Zonasi', 'val' => $trackStats['zonasi'], 'color' => 'bg-elevate-primary', 'bg' => 'bg-elevate-soft', 'text' => 'text-elevate-primary', 'border' => 'border-elevate-accent/30'],
+                                ['label' => 'Prestasi', 'val' => $trackStats['prestasi'], 'color' => 'bg-emerald-600', 'bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'border' => 'border-emerald-200'],
+                                ['label' => 'Afirmasi', 'val' => $trackStats['afirmasi'], 'color' => 'bg-amber-500', 'bg' => 'bg-amber-50', 'text' => 'text-amber-700', 'border' => 'border-amber-200'],
+                                ['label' => 'Pindah', 'val' => $trackStats['pindah_tugas'], 'color' => 'bg-elevate-dark', 'bg' => 'bg-slate-50', 'text' => 'text-elevate-dark', 'border' => 'border-slate-200']
                             ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $stat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <div class="flex justify-between items-center p-3 rounded-lg border <?php echo e($stat['bg']); ?> <?php echo e($stat['border']); ?> hover:shadow-sm transition-shadow">
+                            <div class="flex justify-between items-center p-3 rounded-xl border <?php echo e($stat['bg']); ?> <?php echo e($stat['border']); ?> hover:shadow-sm transition-shadow">
                                 <div class="flex items-center gap-3">
                                     <span class="w-3 h-3 rounded-full <?php echo e($stat['color']); ?> shadow-sm border border-white"></span>
                                     <span class="text-xs font-bold <?php echo e($stat['text']); ?>"><?php echo e($stat['label']); ?></span>
                                 </div>
-                                <span class="font-black text-[#2A3B52] text-sm"><?php echo e($stat['val']); ?></span>
+                                <span class="font-black text-elevate-dark text-sm"><?php echo e($stat['val']); ?></span>
                             </div>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
@@ -98,49 +98,49 @@
                 </div>
 
                 
-                <div class="animate-enter delay-100 bg-white rounded-xl p-6 md:p-8 fluent-card relative overflow-hidden flex flex-col group">
+                <div class="animate-enter delay-100 bg-white rounded-2xl p-6 md:p-8 fluent-card relative overflow-hidden flex flex-col group">
                     <div class="flex items-center gap-4 mb-8">
-                        <div class="w-12 h-12 rounded-lg bg-[#FFEFD6] text-[#D83B01] border border-[#FFD8A8] flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                        <div class="w-12 h-12 rounded-xl bg-elevate-peach-light/50 text-elevate-peach-dark border border-elevate-peach flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300 shadow-sm">
                             <i class="ph-duotone ph-users-three animate-wiggle"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-[#2A3B52] text-lg">Ringkasan Data</h3>
+                            <h3 class="font-bold text-elevate-dark text-lg">Ringkasan Data</h3>
                             <p class="text-xs text-slate-400 font-bold uppercase tracking-wide">Gender & Kelulusan</p>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 flex-1">
                         
-                        <div class="bg-[#F3F9FD] border border-[#D0E7F8] rounded-xl p-5 flex flex-col justify-center hover:bg-[#E3F2FD] transition-colors shadow-sm">
+                        <div class="bg-elevate-soft border border-elevate-accent/30 rounded-xl p-5 flex flex-col justify-center hover:bg-elevate-accent/10 transition-colors shadow-sm">
                             <div class="flex items-center justify-between mb-2">
-                                <div class="w-10 h-10 rounded-md bg-white text-[#5295FF] border border-[#D0E7F8] flex items-center justify-center shadow-sm">
+                                <div class="w-10 h-10 rounded-lg bg-white text-elevate-primary border border-elevate-accent/30 flex items-center justify-center shadow-sm">
                                     <i class="ph-fill ph-gender-male text-xl"></i>
                                 </div>
                             </div>
-                            <span class="text-3xl font-extrabold text-[#2A3B52]"><?php echo e($genderStats['L']); ?></span>
+                            <span class="text-3xl font-extrabold text-elevate-dark"><?php echo e($genderStats['L']); ?></span>
                             <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">Laki-laki</span>
                         </div>
 
                         
-                        <div class="bg-[#FDE7E9] border border-[#F4C3C9] rounded-xl p-5 flex flex-col justify-center hover:bg-[#FCE0E3] transition-colors shadow-sm">
+                        <div class="bg-rose-50 border border-rose-200 rounded-xl p-5 flex flex-col justify-center hover:bg-rose-100 transition-colors shadow-sm">
                             <div class="flex items-center justify-between mb-2">
-                                <div class="w-10 h-10 rounded-md bg-white text-[#D13438] border border-[#F4C3C9] flex items-center justify-center shadow-sm">
+                                <div class="w-10 h-10 rounded-lg bg-white text-rose-500 border border-rose-200 flex items-center justify-center shadow-sm">
                                     <i class="ph-fill ph-gender-female text-xl"></i>
                                 </div>
                             </div>
-                            <span class="text-3xl font-extrabold text-[#2A3B52]"><?php echo e($genderStats['P']); ?></span>
+                            <span class="text-3xl font-extrabold text-elevate-dark"><?php echo e($genderStats['P']); ?></span>
                             <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">Perempuan</span>
                         </div>
                         
                         
-                        <div class="col-span-2 bg-[#DFF6DD] border border-[#B7DFB9] rounded-xl p-6 text-[#107C10] relative overflow-hidden flex items-center justify-between fluent-card">
+                        <div class="col-span-2 bg-emerald-50 border border-emerald-200 rounded-xl p-6 text-emerald-700 relative overflow-hidden flex items-center justify-between fluent-card">
                             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
                             <div class="absolute -right-10 -top-10 w-32 h-32 bg-white/40 rounded-full blur-xl"></div>
                             <div class="relative z-10">
-                                <p class="text-xs font-bold text-[#107C10] uppercase mb-1 tracking-wider">Total Diterima</p>
-                                <p class="text-4xl font-black text-[#107C10] tracking-tight"><?php echo e($totalAccepted); ?> <span class="text-sm font-bold text-[#107C10]/80">Siswa</span></p>
+                                <p class="text-xs font-bold text-emerald-700 uppercase mb-1 tracking-wider">Total Diterima</p>
+                                <p class="text-4xl font-black text-emerald-700 tracking-tight"><?php echo e($totalAccepted); ?> <span class="text-sm font-bold text-emerald-700/80">Siswa</span></p>
                             </div>
-                            <i class="ph-duotone ph-check-circle text-6xl text-[#107C10]/20 relative z-10"></i>
+                            <i class="ph-duotone ph-check-circle text-6xl text-emerald-600/20 relative z-10"></i>
                         </div>
                     </div>
                 </div>
@@ -148,44 +148,44 @@
 
             
             <div class="animate-enter delay-200 border-t border-slate-200 pt-8">
-                <h3 class="text-sm font-bold text-[#2A3B52] mb-5 flex items-center gap-2">
+                <h3 class="text-sm font-bold text-elevate-dark mb-5 flex items-center gap-2">
                     <i class="ph-bold ph-download-simple"></i> Area Unduhan Dokumen
                 </h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                     
                     
-                    <div class="bg-white rounded-xl p-6 fluent-card group flex flex-col h-full hover:border-[#107C10]">
-                        <div class="w-12 h-12 rounded-lg bg-[#DFF6DD] text-[#107C10] border border-[#B7DFB9] flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-all duration-300 shadow-sm">
+                    <div class="bg-white rounded-2xl p-6 fluent-card group flex flex-col h-full hover:border-emerald-600">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-all duration-300 shadow-sm">
                             <i class="ph-duotone ph-microsoft-excel-logo"></i>
                         </div>
-                        <h4 class="font-bold text-[#2A3B52] text-lg mb-2">Export Data (CSV)</h4>
+                        <h4 class="font-bold text-elevate-dark text-lg mb-2">Export Data (CSV)</h4>
                         <p class="text-xs text-slate-500 mb-6 flex-1 font-medium leading-relaxed">Download data lengkap seluruh pendaftar untuk diolah di Excel.</p>
-                        <a href="<?php echo e(route('admin.ppdb.export.excel')); ?>" class="flex items-center justify-center gap-2 w-full py-2.5 bg-[#107C10] text-white font-bold rounded-lg text-sm hover:bg-[#0c5e0c] transition-all shadow-sm">
+                        <a href="<?php echo e(route('admin.ppdb.export.excel')); ?>" class="flex items-center justify-center gap-2 w-full py-2.5 bg-emerald-600 text-white font-bold rounded-xl text-sm hover:bg-emerald-700 transition-all shadow-sm">
                             <i class="ph-bold ph-download-simple"></i> Download CSV
                         </a>
                     </div>
 
                     
-                    <div class="bg-white rounded-xl p-6 fluent-card group flex flex-col h-full hover:border-[#D13438]">
-                        <div class="w-12 h-12 rounded-lg bg-[#FDE7E9] text-[#D13438] border border-[#F4C3C9] flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-all duration-300 shadow-sm">
+                    <div class="bg-white rounded-2xl p-6 fluent-card group flex flex-col h-full hover:border-rose-600">
+                        <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-all duration-300 shadow-sm">
                             <i class="ph-duotone ph-file-pdf"></i>
                         </div>
-                        <h4 class="font-bold text-[#2A3B52] text-lg mb-2">Laporan Rekap</h4>
+                        <h4 class="font-bold text-elevate-dark text-lg mb-2">Laporan Rekap</h4>
                         <p class="text-xs text-slate-500 mb-6 flex-1 font-medium leading-relaxed">Cetak rekapitulasi penerimaan siswa dengan Kop Resmi Dinas.</p>
-                        <a href="<?php echo e(route('admin.ppdb.print.recap')); ?>" target="_blank" class="flex items-center justify-center gap-2 w-full py-2.5 bg-[#D13438] text-white font-bold rounded-lg text-sm hover:bg-[#a62529] transition-all shadow-sm">
+                        <a href="<?php echo e(route('admin.ppdb.print.recap')); ?>" target="_blank" class="flex items-center justify-center gap-2 w-full py-2.5 bg-rose-600 text-white font-bold rounded-xl text-sm hover:bg-rose-700 transition-all shadow-sm">
                             <i class="ph-bold ph-printer"></i> Preview Laporan
                         </a>
                     </div>
 
                     
-                    <div class="bg-white rounded-xl p-6 fluent-card group flex flex-col h-full hover:border-[#5295FF]">
-                        <div class="w-12 h-12 rounded-lg bg-[#F3F9FD] text-[#5295FF] border border-[#D0E7F8] flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-all duration-300 shadow-sm">
+                    <div class="bg-white rounded-2xl p-6 fluent-card group flex flex-col h-full hover:border-elevate-primary">
+                        <div class="w-12 h-12 rounded-xl bg-elevate-soft text-elevate-primary border border-elevate-accent/30 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-all duration-300 shadow-sm">
                             <i class="ph-duotone ph-envelope-open"></i>
                         </div>
-                        <h4 class="font-bold text-[#2A3B52] text-lg mb-2">Cetak SKL Massal</h4>
+                        <h4 class="font-bold text-elevate-dark text-lg mb-2">Cetak SKL Massal</h4>
                         <p class="text-xs text-slate-500 mb-6 flex-1 font-medium leading-relaxed">Cetak Surat Keterangan Lulus untuk semua siswa yang Diterima.</p>
-                        <a href="<?php echo e(route('admin.ppdb.print.mass_letters')); ?>" target="_blank" class="flex items-center justify-center gap-2 w-full py-2.5 bg-[#5295FF] text-white font-bold rounded-lg text-sm hover:bg-[#3b7ee6] transition-all shadow-sm">
+                        <a href="<?php echo e(route('admin.ppdb.print.mass_letters')); ?>" target="_blank" class="flex items-center justify-center gap-2 w-full py-2.5 bg-elevate-primary text-white font-bold rounded-xl text-sm hover:bg-elevate-dark transition-all shadow-sm">
                             <i class="ph-bold ph-files"></i> Cetak Massal
                         </a>
                     </div>
@@ -213,7 +213,8 @@
                     labels: ['Zonasi', 'Prestasi', 'Afirmasi', 'Pindah Tugas'],
                     datasets: [{
                         data: [trackData.zonasi, trackData.prestasi, trackData.afirmasi, trackData.pindah],
-                        backgroundColor: ['#5295FF', '#107C10', '#D83B01', '#2A3B52'],
+                        // Diselaraskan dengan hex dari tema Elevate & Semantic
+                        backgroundColor: ['#0d52a1', '#10b981', '#f59e0b', '#2c3f61'], 
                         borderWidth: 0, hoverOffset: 10
                     }]
                 },

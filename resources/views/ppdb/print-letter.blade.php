@@ -7,6 +7,23 @@
     
     {{-- Menggunakan Tailwind CSS via CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        elevate: {
+                            dark: '#2c3f61',
+                            primary: '#0d52a1',
+                            accent: '#56bbf1',
+                            surface: '#ffffff',
+                            soft: '#e5eff5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -119,19 +136,19 @@
     <!-- TOOLBAR -->
     <div class="no-print fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm p-4 flex justify-between items-center z-50">
         <div class="flex items-center gap-4">
-            <div class="bg-blue-900 p-2.5 rounded-xl text-white shadow-lg shadow-blue-900/20">
+            <div class="bg-elevate-dark p-2.5 rounded-xl text-white shadow-lg shadow-elevate-dark/20">
                 <i class="ph-bold ph-printer text-xl"></i>
             </div>
             <div>
-                <h1 class="font-black text-slate-800 text-sm md:text-base font-sans">Pratinjau Surat Kelulusan</h1>
+                <h1 class="font-black text-elevate-dark text-sm md:text-base font-sans">Pratinjau Surat Kelulusan</h1>
                 <p class="text-xs text-slate-500 font-sans font-bold">Ref: {{ $registrant->registration_number }}</p>
             </div>
         </div>
         <div class="flex gap-3">
-            <a href="{{ route('ppdb.check') }}" class="px-5 py-2.5 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-slate-800 transition shadow-sm font-sans flex items-center gap-2">
+            <a href="{{ route('ppdb.check') }}" class="px-5 py-2.5 text-xs font-bold text-slate-600 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 hover:text-elevate-dark transition shadow-sm font-sans flex items-center gap-2">
                 <i class="ph-bold ph-arrow-left"></i> Kembali
             </a>
-            <button onclick="window.print()" class="px-5 py-2.5 text-xs font-bold text-white bg-blue-900 rounded-xl hover:bg-blue-800 transition shadow-lg shadow-blue-900/30 font-sans flex items-center gap-2">
+            <button onclick="window.print()" class="px-5 py-2.5 text-xs font-bold text-white bg-elevate-dark rounded-xl hover:bg-elevate-primary transition shadow-lg shadow-elevate-dark/30 font-sans flex items-center gap-2">
                 <i class="ph-bold ph-printer"></i> Cetak Sekarang
             </button>
         </div>
