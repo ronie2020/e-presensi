@@ -7,13 +7,11 @@
     
     {{-- Menggunakan Tailwind CSS via CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
-    {{-- Phosphor Icons --}}
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-        /* PENGATURAN KERTAS A4 */
+        /* PENGATURAN KERTAS A4 & ELEVATE CLEAN FONT */
         @page { 
             size: 21cm 29.7cm; 
             margin: 0; 
@@ -21,7 +19,7 @@
         
         body {
             font-family: 'Times New Roman', serif;
-            background-color: #f1f5f9; 
+            background-color: #e5eff5; /* Elevate Soft background for screen */
             -webkit-print-color-adjust: exact;
             color: #000;
         }
@@ -33,59 +31,86 @@
             min-height: 29.7cm;
             margin: 30px auto;
             padding: 1.5cm 2cm;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(44, 63, 97, 0.25); /* Elevate Dark shadow */
+            border-radius: 4px;
         }
-
-        /* PRINT MODE */
+        
         @media print {
-            body { background: none; margin: 0; }
+            body { background-color: white; }
             .sheet { 
-                width: 100%; 
                 margin: 0; 
-                padding: 2cm 2.5cm; 
+                padding: 1.5cm 2cm; 
                 box-shadow: none; 
-                border: none; 
+                width: 100%;
+                border-radius: 0;
             }
             .no-print { display: none !important; }
         }
 
-        /* TYPOGRAPHY */
-        .header-text h3 { margin: 0; font-size: 14pt; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-        .header-text h4 { margin: 0; font-size: 12pt; font-weight: bold; text-transform: uppercase; }
-        .header-text p { margin: 0; font-size: 10pt; }
+        /* KOP SURAT */
+        .kop-surat {
+            text-align: center;
+            border-bottom: 3px double #000;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+            position: relative;
+        }
         
-        .double-line { 
-            border-top: 4px double #000; 
-            margin-top: 8px; 
-            margin-bottom: 24px; 
+        .logo {
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 80px;
+            height: auto;
         }
 
-        .judul-surat { text-align: center; margin-bottom: 24px; }
-        .judul-surat h2 { margin: 0; font-size: 14pt; font-weight: bold; text-decoration: underline; text-transform: uppercase; }
-        .judul-surat p { font-size: 11pt; margin-top: 4px; }
+        /* TIPOGRAFI SURAT */
+        .surat-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14pt;
+            text-decoration: underline;
+            margin-bottom: 5px;
+        }
+        
+        .surat-number {
+            text-align: center;
+            font-size: 11pt;
+            margin-bottom: 30px;
+        }
 
-        .content-text { font-size: 11pt; line-height: 1.5; text-align: justify; margin-bottom: 12px; }
+        .content-text {
+            text-align: justify;
+            font-size: 12pt;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
 
-        .content-table { width: 100%; border-collapse: collapse; font-size: 11pt; margin-bottom: 16px; margin-left: 10px; }
-        .content-table td { vertical-align: top; padding: 4px 0; }
-        .col-label { width: 180px; font-weight: normal; }
-        .col-separator { width: 20px; text-align: center; }
-        .col-value { font-weight: bold; }
+        .data-table {
+            width: 100%;
+            margin: 20px 0;
+            margin-left: 20px;
+            font-size: 12pt;
+        }
+        .data-table td {
+            padding: 5px 0;
+            vertical-align: top;
+        }
 
         .status-box {
             border: 2px solid #000;
-            padding: 12px;
-            margin: 20px 0;
+            padding: 15px;
             text-align: center;
+            margin: 30px 40px;
+            border-radius: 8px; /* Slightly rounded per elevate clean style */
         }
 
-        .ttd-box { 
-            float: right; 
-            width: 40%; 
-            margin-top: 40px; 
-            text-align: left; 
-            font-size: 11pt; 
+        .ttd-box {
+            float: right;
+            width: 300px;
+            text-align: left;
+            margin-top: 40px;
+            font-size: 12pt;
         }
     </style>
 </head>

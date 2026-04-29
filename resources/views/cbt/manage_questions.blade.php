@@ -973,7 +973,7 @@
                             importMode: 'all',
                             bankQuestions: [],
                             selectedBankQuestions: [],
-                            banksData: {{ Js::from(\App\Models\CbtQuestionBank::with('questions')->where('class_level', $exam->class_level)->orWhere('subject_name', 'like', '%'.$exam->subject_name.'%')->get()) }},
+                            banksData: {{ Js::from(\App\Models\CbtQuestionBank::with('questions')->latest()->get()) }},
                             
                             updateQuestionList() {
                                 let bank = this.banksData.find(b => b.id == this.selectedBankId);
