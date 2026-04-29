@@ -1,8 +1,6 @@
-@extends('layouts.public')
+<?php $__env->startSection('title', 'Galeri Kegiatan - ' . config('app.name', 'SMP Negeri 3 Lakbok')); ?>
 
-@section('title', 'Galeri Kegiatan - ' . config('app.name', 'SMP Negeri 3 Lakbok'))
-
-@push('styles')
+<?php $__env->startPush('styles'); ?>
     <style>
         [x-cloak] { display: none !important; }
 
@@ -23,9 +21,9 @@
         .mini-scroll::-webkit-scrollbar-track { background: transparent; }
         .mini-scroll::-webkit-scrollbar-thumb { background: #56bbf1; border-radius: 10px; } /* Menggunakan warna elevate-accent */
     </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
     <!-- HEADER SECTION (Tema Diselaraskan: Elevate Gradient Light) -->
     <div class="pt-32 pb-32 relative overflow-hidden -mt-24 bg-elevate-gradient-main border-b border-white/60 shadow-sm">
         <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] mix-blend-overlay"></div>
@@ -53,8 +51,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 pb-20">
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            @forelse($activities ?? [] as $index => $activity)
-                @php
+            <?php $__empty_1 = true; $__currentLoopData = $activities ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $activity): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                <?php
                     // EKSTRAKSI ARRAY FOTO YANG ROBUST
                     $rawImage = $activity->image_path;
                     $images = [];
@@ -69,22 +67,22 @@
                     $images = array_filter($images);
                     $coverImage = !empty($images) ? array_values($images)[0] : null;
                     $totalImages = count($images);
-                @endphp
+                ?>
 
                 <!-- Card dengan Alpine.js Data -->
-                <div x-data="{ activeImg: '{{ $coverImage ? asset('storage/' . $coverImage) : '' }}' }" 
+                <div x-data="{ activeImg: '<?php echo e($coverImage ? asset('storage/' . $coverImage) : ''); ?>' }" 
                      class="group bg-elevate-surface rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-elevate-accent/10 hover:border-elevate-accent/50 hover:-translate-y-2 transition-all duration-300 border border-slate-100 flex flex-col h-full animate-enter" 
-                     style="animation-delay: {{ ($index % 6) * 100 }}ms">
+                     style="animation-delay: <?php echo e(($index % 6) * 100); ?>ms">
                     
                     <!-- Area Gambar Utama -->
                     <div class="relative h-60 overflow-hidden bg-elevate-soft shrink-0">
-                        @if($coverImage)
-                            <img :src="activeImg" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="{{ $activity->title }}">
-                        @else
+                        <?php if($coverImage): ?>
+                            <img :src="activeImg" loading="lazy" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="<?php echo e($activity->title); ?>">
+                        <?php else: ?>
                             <div class="w-full h-full flex flex-col items-center justify-center text-elevate-primary bg-elevate-soft">
                                 <i class="ph-duotone ph-image text-5xl mb-2 opacity-50"></i>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                         <!-- Overlay Gelap di bawah (dipertahankan untuk keterbacaan teks/tombol tambahan jika ada) -->
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent opacity-80 pointer-events-none"></div>
@@ -92,67 +90,70 @@
                         <!-- Tanggal -->
                         <div class="absolute top-4 left-4 z-10">
                             <span class="bg-white/95 backdrop-blur text-elevate-dark text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
-                                {{ isset($activity->created_at) ? $activity->created_at->translatedFormat('d M Y') : '-' }}
+                                <?php echo e(isset($activity->created_at) ? $activity->created_at->translatedFormat('d M Y') : '-'); ?>
+
                             </span>
                         </div>
 
                         <!-- Label Video -->
-                        @if(!empty($activity->video_url))
+                        <?php if(!empty($activity->video_url)): ?>
                             <div class="absolute top-4 right-4 z-10">
                                 <span class="bg-elevate-peach-dark text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg shadow-lg flex items-center gap-1.5 animate-pulse uppercase tracking-wider border border-elevate-peach">
                                     <i class="ph-fill ph-play-circle text-sm"></i> Video
                                 </span>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
 
                     <!-- Area Teks -->
                     <div class="p-6 flex-1 flex flex-col bg-elevate-surface">
                         <h4 class="text-xl font-black text-elevate-dark mb-3 group-hover:text-elevate-primary transition-colors line-clamp-2 leading-tight">
-                            {{ $activity->title }}
+                            <?php echo e($activity->title); ?>
+
                         </h4>
                         <p class="text-sm text-elevate-dark/70 leading-relaxed line-clamp-3 mb-4 flex-1 font-medium">
-                            {{ $activity->description }}
+                            <?php echo e($activity->description); ?>
+
                         </p>
 
                         <!-- MINI GALLERY THUMBNAILS (Hanya Muncul Jika Foto > 1) -->
-                        @if($totalImages > 1)
+                        <?php if($totalImages > 1): ?>
                             <div class="mb-4 pt-4 border-t border-slate-100">
-                                <p class="text-[10px] font-bold text-elevate-dark/50 uppercase tracking-widest mb-2"><i class="ph-fill ph-images text-elevate-primary"></i> {{ $totalImages }} Foto Tersedia</p>
+                                <p class="text-[10px] font-bold text-elevate-dark/50 uppercase tracking-widest mb-2"><i class="ph-fill ph-images text-elevate-primary"></i> <?php echo e($totalImages); ?> Foto Tersedia</p>
                                 <div class="flex gap-2 overflow-x-auto pb-2 mini-scroll">
-                                    @foreach($images as $img)
-                                        <button @click="activeImg = '{{ asset('storage/' . $img) }}'" 
+                                    <?php $__currentLoopData = $images; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $img): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <button @click="activeImg = '<?php echo e(asset('storage/' . $img)); ?>'" 
                                                 class="w-14 h-14 shrink-0 rounded-xl overflow-hidden border-2 transition-all"
-                                                :class="activeImg === '{{ asset('storage/' . $img) }}' ? 'border-elevate-primary opacity-100 shadow-md' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'">
-                                            <img src="{{ asset('storage/' . $img) }}" class="w-full h-full object-cover">
+                                                :class="activeImg === '<?php echo e(asset('storage/' . $img)); ?>' ? 'border-elevate-primary opacity-100 shadow-md' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'">
+                                            <img src="<?php echo e(asset('storage/' . $img)); ?>" class="w-full h-full object-cover">
                                         </button>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                         <!-- Area Tombol Aksi -->
                         <div class="mt-auto pt-4 border-t border-slate-100 flex gap-2">
                             <!-- Tombol Lihat Foto Full -->
-                            @if($coverImage)
+                            <?php if($coverImage): ?>
                                 <a :href="activeImg" target="_blank" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-elevate-soft text-elevate-primary hover:bg-elevate-primary hover:text-white rounded-xl text-sm font-bold transition-colors">
                                     <i class="ph-bold ph-arrows-out text-lg"></i>
                                     <span>Zoom Foto</span>
                                 </a>
-                            @endif
+                            <?php endif; ?>
 
                             <!-- Tombol Lihat Video -->
-                            @if(!empty($activity->video_url))
-                                <a href="{{ $activity->video_url }}" target="_blank" class="{{ empty($coverImage) ? 'w-full' : 'flex-1' }} flex items-center justify-center gap-2 px-4 py-2.5 bg-elevate-peach/10 text-elevate-peach-dark hover:bg-elevate-peach-dark hover:text-white rounded-xl text-sm font-bold transition-colors">
+                            <?php if(!empty($activity->video_url)): ?>
+                                <a href="<?php echo e($activity->video_url); ?>" target="_blank" class="<?php echo e(empty($coverImage) ? 'w-full' : 'flex-1'); ?> flex items-center justify-center gap-2 px-4 py-2.5 bg-elevate-peach/10 text-elevate-peach-dark hover:bg-elevate-peach-dark hover:text-white rounded-xl text-sm font-bold transition-colors">
                                     <i class="ph-bold ph-youtube-logo text-lg"></i>
                                     <span>Tonton Video</span>
                                 </a>
-                            @endif
+                            <?php endif; ?>
                         </div>
                     </div>
 
                 </div>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <!-- Empty State -->
                 <div class="col-span-full py-24 text-center animate-enter bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200">
                     <div class="inline-flex bg-elevate-soft p-6 rounded-full mb-6 text-elevate-primary ring-8 ring-elevate-soft/50">
@@ -161,15 +162,17 @@
                     <h3 class="text-xl font-bold text-elevate-dark mb-2">Belum Ada Galeri</h3>
                     <p class="text-elevate-dark/60 text-sm max-w-md mx-auto">Saat ini belum ada dokumentasi kegiatan sekolah yang dipublikasikan.</p>
                 </div>
-            @endforelse
+            <?php endif; ?>
         </div>
 
         <!-- Pagination -->
         <div class="mt-16 px-4 animate-enter">
-            @if(isset($activities) && method_exists($activities, 'links'))
-                {{ $activities->links() }}
-            @endif
+            <?php if(isset($activities) && method_exists($activities, 'links')): ?>
+                <?php echo e($activities->links()); ?>
+
+            <?php endif; ?>
         </div>
         
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.public', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/activities.blade.php ENDPATH**/ ?>

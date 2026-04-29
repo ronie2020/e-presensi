@@ -23,20 +23,22 @@
     <!-- Konten Utama -->
     <div class="relative z-10 w-full max-w-3xl px-6 py-12 flex flex-col items-center">
         
-        <!-- Logo Sekolah / Icon -->
-        <div class="mb-8 w-20 h-20 md:w-24 md:h-24 rounded-3xl flex items-center justify-center shadow-xl border-2 border-white backdrop-blur-md transition-all duration-500"
+        <!-- LOGO SEKOLAH (Menggunakan Gambar Elevate Star) -->
+        <div class="mb-8 w-24 h-24 md:w-28 md:h-28 rounded-3xl flex items-center justify-center shadow-xl border-2 border-white backdrop-blur-md transition-all duration-500 overflow-hidden"
              :class="{
-                'bg-white text-elevate-dark shadow-elevate-dark/10': mode === 'portal',
-                'bg-elevate-primary text-white shadow-elevate-primary/30': mode === 'lms',
-                'bg-elevate-peach-dark text-white shadow-elevate-peach/30': mode === 'cbt'
+                'bg-white shadow-elevate-dark/10': mode === 'portal',
+                'bg-elevate-soft shadow-elevate-primary/30': mode === 'lms',
+                'bg-elevate-peach-light/30 shadow-elevate-peach/30': mode === 'cbt'
              }" data-aos="fade-down">
             
-             <i class="ph-fill text-4xl md:text-5xl transition-all duration-300 transform"
-                :class="{
-                    'ph-buildings': mode === 'portal',
-                    'ph-books': mode === 'lms',
-                    'ph-desktop': mode === 'cbt'
-                }"></i>
+             <!-- Tag Image untuk memanggil gambar yang Anda upload -->
+             <img src="{{ asset('images/logo.png') }}" 
+                  alt="Logo Sekolah" 
+                  class="w-full h-full object-contain p-3 transition-transform duration-500"
+                  :class="{
+                      'scale-100': mode === 'portal',
+                      'scale-110': mode === 'lms' || mode === 'cbt'
+                  }">
         </div>
 
         <!-- Judul & Deskripsi -->

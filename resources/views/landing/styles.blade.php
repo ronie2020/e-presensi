@@ -31,10 +31,10 @@
     /* Custom Scrollbar Diselaraskan Ke Tema Elevate */
     ::-webkit-scrollbar { width: 10px; }
     ::-webkit-scrollbar-track { background: #f8fafc; }
-    /* Menggunakan elevate-accent (#38bdf8) */
-    ::-webkit-scrollbar-thumb { background: #38bdf8; border-radius: 5px; border: 2px solid #f8fafc; }
-    /* Menggunakan elevate-primary (#3b5889) */
-    ::-webkit-scrollbar-thumb:hover { background: #3b5889; }
+    /* Menggunakan elevate-accent (#56bbf1) */
+    ::-webkit-scrollbar-thumb { background: #56bbf1; border-radius: 5px; border: 2px solid #f8fafc; }
+    /* Menggunakan elevate-primary (#0d52a1) */
+    ::-webkit-scrollbar-thumb:hover { background: #0d52a1; }
     
     /* Utility Animations */
     .animate-blob { animation: blob 7s infinite; }
@@ -56,7 +56,8 @@
         border: 1px solid rgba(255, 255, 255, 0.5);
     }
     .glass-dark {
-        background: rgba(15, 23, 42, 0.6);
+        /* Disesuaikan dengan tone Navy (elevate-dark: RGB 44, 63, 97) */
+        background: rgba(44, 63, 97, 0.6);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.05);
@@ -68,10 +69,12 @@
     .book-card:hover .book-inner { transform: rotateY(-10deg) scale(1.05); }
     .book-glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); }
 
-    /* Preloader */
-    #preloader { position: fixed; inset: 0; z-index: 9999; background: #032b5b; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s ease-out; }
-    /* Preloader Spinner: Elevate Accent */
-    .loader { width: 48px; height: 48px; border: 5px solid #FFF; border-bottom-color: #38bdf8; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
+    /* Preloader (Sesuai dengan Elevate Theme) */
+    /* Background elevate-dark (#2c3f61) */
+    #preloader { position: fixed; inset: 0; z-index: 9999; background: #2c3f61; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s ease-out, visibility 0.5s ease-out; }
+    
+    /* Preloader Spinner: Elevate Soft (#e5eff5) & Elevate Accent (#56bbf1) */
+    .loader { width: 48px; height: 48px; border: 5px solid #e5eff5; border-bottom-color: #56bbf1; border-radius: 50%; display: inline-block; box-sizing: border-box; animation: rotation 1s linear infinite; }
     @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .hide-preloader { opacity: 0; visibility: hidden; }
 </style>

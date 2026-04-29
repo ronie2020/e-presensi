@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- PERBAIKAN: Kunci lebar maksimal tepat pada 100% viewport (layar) -->
+<!-- Kunci lebar maksimal tepat pada 100% viewport (layar) -->
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth overflow-x-hidden w-full max-w-[100vw]">
 <head>
     <meta charset="utf-8">
@@ -18,22 +18,34 @@
 
     <style>
         [x-cloak] { display: none !important; }
+        /* Style Preloader Elevate */
+        #preloader {
+            position: fixed; inset: 0; z-index: 9999;
+            background: #2c3f61; /* elevate-dark */
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+        }
+        #preloader.hide-preloader { opacity: 0; visibility: hidden; }
+        .loader {
+            width: 48px; height: 48px;
+            border: 5px solid #e5eff5; /* elevate-soft */
+            border-bottom-color: #56bbf1; /* elevate-accent */
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 
     @php
-        // PERBAIKAN: Logika Pop-up Dinamis
+        // Logika Pop-up Dinamis
         $hasPopup = isset($popupAnnouncement) && !empty($popupAnnouncement);
 
         if ($hasPopup) {
-            // Gunakan ID pengumuman agar cache di browser spesifik per pengumuman
             $popupId = 'pengumuman_' . $popupAnnouncement->id;
-            
-            // Cek apakah pengumuman memiliki gambar, jika tidak gunakan gambar default/logo sekolah
-            $popupImage = !empty($popupAnnouncement->image) ? asset('storage/' . $popupAnnouncement->image) : asset('images/simadu.jpg');
-            
+            $popupImage = !empty($popupAnnouncement->image) ? asset('storage/' . $popupAnnouncement->image) : asset('images/logo-sekolah.png');
             $popupTitle = $popupAnnouncement->title;
-            
-            // Buang tag HTML dan batasi teks agar tidak kepanjangan di dalam Pop-up
             $popupMessage = Str::limit(strip_tags($popupAnnouncement->content), 200);
         }
 
@@ -48,8 +60,9 @@
         ];
     @endphp
 </head>
-<!-- PERBAIKAN: Tambahkan overflow-x-hidden, w-full, dan class Dark Mode (dark:bg-slate-900 dark:text-slate-100) pada tag body -->
-<body class="antialiased text-elevate-text bg-slate-50 dark:bg-slate-900 dark:text-slate-100 overflow-x-hidden w-full selection:bg-elevate-accent selection:text-white" 
+
+<!-- TEMA ELEVATE: Background terang (slate-50), text navy (elevate-dark), tanpa dark mode class -->
+<body class="antialiased text-elevate-dark bg-slate-50 overflow-x-hidden w-full selection:bg-elevate-accent selection:text-white" 
     x-data="{ 
         mobileMenuOpen: false,
         modalOpen: false, 
@@ -60,11 +73,9 @@
         initPopup() {
             @if($hasPopup)
                 const popupId = '{{ $popupId }}';
-                // Cek localStorage apakah user sudah pernah klik 'Jangan tampilkan lagi'
                 const hasSeen = localStorage.getItem('seen_' + popupId);
                 
                 if (!hasSeen) {
-                    // Beri jeda 1 detik agar website selesai memuat sebelum pop-up muncul
                     setTimeout(() => {
                         this.infoPopupOpen = true;
                         document.body.style.overflow = 'hidden'; 
@@ -123,7 +134,7 @@
         }
     ">
 
-    <!-- PRELOADER -->
+    <!-- PRELOADER (Elevate Navy) -->
     <div id="preloader">
         <div class="flex flex-col items-center gap-4">
             <span class="loader"></span>
@@ -131,27 +142,26 @@
         </div>
     </div>
 
-    <!-- INFO POPUP MODAL (Hanya dirender jika ada data pengumuman) -->
+    <!-- INFO POPUP MODAL (Elevate Style) -->
     @if($hasPopup)
     <div x-cloak x-show="infoPopupOpen" @keydown.escape.window="if(infoPopupOpen) closeInfoPopup(false)" class="fixed inset-0 z-[100] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-        <div x-show="infoPopupOpen" x-transition.opacity class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm transition-opacity" @click="closeInfoPopup(false)"></div>
+        <div x-show="infoPopupOpen" x-transition.opacity class="fixed inset-0 bg-elevate-dark/70 backdrop-blur-sm transition-opacity" @click="closeInfoPopup(false)"></div>
         <div class="flex min-h-full p-4 sm:p-6">
-            <div x-show="infoPopupOpen" x-transition class="m-auto relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all w-full sm:max-w-2xl border border-white/20">
-                <button @click="closeInfoPopup(false)" class="absolute top-3 right-3 z-20 text-slate-500 hover:text-slate-800 transition-colors bg-white/90 backdrop-blur shadow-sm rounded-full p-1.5"><i class="ph-bold ph-x text-xl"></i></button>
+            <div x-show="infoPopupOpen" x-transition class="m-auto relative transform overflow-hidden rounded-[2.5rem] bg-white text-left shadow-2xl transition-all w-full sm:max-w-2xl border border-slate-100">
+                <button @click="closeInfoPopup(false)" class="absolute top-4 right-4 z-20 w-10 h-10 bg-slate-50 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors shadow-sm rounded-full flex items-center justify-center"><i class="ph-bold ph-x text-lg"></i></button>
                 <div class="flex flex-col md:flex-row w-full">
-                    <div class="md:w-5/12 h-48 sm:h-56 md:h-auto shrink-0 relative bg-slate-200">
-                        <img src="{{ $popupImage }}" alt="Info Sekolah" class="absolute inset-0 w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent md:bg-gradient-to-r md:from-transparent md:to-black/10"></div>
+                    <div class="md:w-5/12 h-48 sm:h-56 md:h-auto shrink-0 relative bg-slate-100 p-6 flex items-center justify-center">
+                        <img src="{{ $popupImage }}" alt="Info Sekolah" class="w-full h-full object-contain drop-shadow-lg">
                     </div>
                     <div class="md:w-7/12 p-6 md:p-8 flex flex-col justify-center bg-white relative">
                         <div class="mb-4">
-                            <span class="inline-flex items-center rounded-md {{ $colorTheme['badge_bg'] }} px-2 py-1 text-xs font-medium {{ $colorTheme['badge_text'] }} ring-1 ring-inset {{ $colorTheme['badge_ring'] }} mb-3">Pengumuman Terbaru</span>
-                            <h3 id="modal-title" class="text-xl font-black text-elevate-dark leading-tight">{{ $popupTitle }}</h3>
+                            <span class="inline-flex items-center rounded-lg {{ $colorTheme['badge_bg'] }} px-3 py-1.5 text-[10px] font-black uppercase tracking-widest {{ $colorTheme['badge_text'] }} ring-1 ring-inset {{ $colorTheme['badge_ring'] }} mb-3"><i class="ph-fill ph-megaphone mr-1.5"></i> Pengumuman</span>
+                            <h3 id="modal-title" class="text-2xl font-black text-elevate-dark leading-tight">{{ $popupTitle }}</h3>
                         </div>
-                        <div class="prose prose-sm text-slate-500 mb-6 leading-relaxed"><p>{{ $popupMessage }}</p></div>
-                        <div class="flex flex-col sm:flex-row gap-3 items-center mt-6">
-                            <button @click="closeInfoPopup(false)" class="w-full sm:w-auto text-center inline-flex justify-center items-center gap-2 rounded-xl {{ $colorTheme['btn_bg'] }} px-5 py-2.5 text-sm font-semibold text-white shadow-sm {{ $colorTheme['btn_hover'] }} transition-all">Tutup Pengumuman</button>
-                            <button @click="closeInfoPopup(true)" class="text-xs font-semibold text-slate-400 hover:text-elevate-primary underline decoration-slate-300 underline-offset-4 transition-colors">Jangan tampilkan lagi</button>
+                        <div class="prose prose-sm text-slate-500 mb-6 font-medium leading-relaxed"><p>{{ $popupMessage }}</p></div>
+                        <div class="flex flex-col gap-3 mt-auto">
+                            <button @click="closeInfoPopup(false)" class="w-full text-center justify-center items-center rounded-xl {{ $colorTheme['btn_bg'] }} px-5 py-3.5 text-xs font-black text-white shadow-lg shadow-elevate-primary/20 {{ $colorTheme['btn_hover'] }} transition-all">SAYA MENGERTI</button>
+                            <button @click="closeInfoPopup(true)" class="text-xs font-bold text-slate-400 hover:text-elevate-peach transition-colors text-center py-2">Jangan tampilkan pengumuman ini lagi</button>
                         </div>
                     </div>
                 </div>
@@ -163,6 +173,7 @@
     <!-- NAVBAR -->
     @include('landing.navbar')
 
+    <!-- KONTEN UTAMA (STRUKTUR ASLI ANDA) -->
     <div class="w-full overflow-x-hidden relative">
         @include('landing.hero')
         @include('landing.ppdb')
@@ -189,7 +200,7 @@
     @include('landing.modals')
 
     <!-- VISITOR COUNTER -->
-    <div class="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 bg-white/90 backdrop-blur-sm border border-slate-200 shadow-lg p-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2 sm:gap-3 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 group cursor-default max-w-[calc(100vw-40px)] overflow-hidden" title="Total pengunjung website">
+    <div class="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-40 bg-white/90 backdrop-blur-md border border-slate-200 shadow-xl p-1.5 sm:px-4 sm:py-2 rounded-full flex items-center gap-2 sm:gap-3 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 group cursor-default max-w-[calc(100vw-40px)] overflow-hidden" title="Total pengunjung website">
         <div class="bg-elevate-accent/10 text-elevate-primary p-1.5 sm:p-2 rounded-full shrink-0 group-hover:bg-elevate-primary group-hover:text-white transition-colors duration-300">
             <i class="ph-fill ph-users text-sm sm:text-lg"></i>
         </div>
@@ -207,8 +218,8 @@
     </div>
 
     <!-- BACK TO TOP -->
-    <button x-cloak x-show="showBackToTop" x-transition @click="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Kembali ke atas" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 bg-elevate-primary text-white p-2 sm:p-3 rounded-full shadow-lg hover:bg-elevate-dark hover:-translate-y-1 transition-all duration-300 focus:outline-none">
-        <i class="ph-bold ph-arrow-up text-base sm:text-xl"></i>
+    <button x-cloak x-show="showBackToTop" x-transition @click="window.scrollTo({top: 0, behavior: 'smooth'})" aria-label="Kembali ke atas" class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 bg-elevate-dark text-white w-12 h-12 rounded-2xl shadow-xl shadow-elevate-dark/20 flex items-center justify-center hover:bg-elevate-primary hover:-translate-y-1 transition-all duration-300 focus:outline-none border border-elevate-accent/30">
+        <i class="ph-bold ph-arrow-up text-lg sm:text-xl"></i>
     </button>
 
     {{-- Scripts JS --}}
