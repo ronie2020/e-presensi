@@ -79,10 +79,14 @@ class UserController extends Controller
             $photoPath = $request->file('photo')->store('teachers', 'public');
         }
 
+        // FIX: Ambil role pertama dari array sebagai role utama
+        $primaryRole = is_array($request->role) ? $request->role[0] : $request->role;
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $primaryRole, // FIX UTAMA: Simpan role ke kolom database!
             'position' => $request->position,
             'pangkat' => $request->pangkat,
             'bio' => $request->bio,
@@ -94,6 +98,7 @@ class UserController extends Controller
             'facebook' => $request->facebook,
         ]);
 
+        // Simpan juga ke sistem Spatie Permission
         $user->assignRole($request->role);
 
         return redirect()->route('users.index')->with('success', 'Pengguna baru berhasil ditambahkan.');
@@ -182,6 +187,11 @@ class UserController extends Controller
         
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
+        }
+
+        // FIX UTAMA: Jika Admin mengedit Role, simpan juga ke kolom 'role' di tabel users
+        if ($imAdmin && $request->has('role')) {
+            $data['role'] = is_array($request->role) ? $request->role[0] : $request->role;
         }
 
         if ($request->hasFile('photo')) {
