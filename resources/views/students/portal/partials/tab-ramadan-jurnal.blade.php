@@ -56,16 +56,16 @@
 
         $progressPercent = $totalTarget > 0 ? ($currentScore / $totalTarget) * 100 : 0;
         
-        // Warna Progress
-        $progressColor = 'text-emerald-500';
-        $barColor = 'bg-emerald-500';
+        // Warna Progress (Elevate Theme)
+        $progressColor = 'text-elevate-primary';
+        $barColor = 'bg-elevate-primary';
         if($progressPercent < 30) { $progressColor = 'text-rose-500'; $barColor = 'bg-rose-500'; }
-        elseif($progressPercent < 70) { $progressColor = 'text-amber-500'; $barColor = 'bg-amber-500'; }
+        elseif($progressPercent < 70) { $progressColor = 'text-elevate-peach'; $barColor = 'bg-elevate-peach'; }
     @endphp
 
     @if(!$isRamadanEnded)
     {{-- 
-        === WIDGET JADWAL SHALAT (THEME: MOSQUE ARCH) === 
+        === WIDGET JADWAL SHALAT (THEME: MOSQUE ARCH ELEVATE) === 
     --}}
     <div x-data="portalPrayerWidget()" x-init="init()" class="relative">
         
@@ -83,41 +83,41 @@
 
         {{-- CONTENT WIDGET --}}
         <div x-show="!isLoading" 
-             class="bg-gradient-to-b from-[#0F2027] via-[#203A43] to-[#2C5364] rounded-t-[3rem] rounded-b-[2rem] p-6 text-white shadow-xl shadow-slate-200 relative overflow-hidden group border-b-4 border-amber-500"
+             class="bg-gradient-to-b from-elevate-dark to-elevate-primary rounded-t-[3rem] rounded-b-[2rem] p-6 text-white shadow-xl shadow-elevate-dark/20 relative overflow-hidden group border-b-4 border-elevate-peach"
              style="display: none;">
             
             <!-- Ornament Background (Islamic Pattern) -->
             <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
             
             <!-- Mosque Silhouette (Bottom) -->
-            <div class="absolute bottom-0 left-0 right-0 h-24 bg-repeat-x opacity-20 pointer-events-none" 
+            <div class="absolute bottom-0 left-0 right-0 h-24 bg-repeat-x opacity-10 pointer-events-none" 
                  style="background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNDQwIDMyMCI+PHBhdGggZmlsbD0iI2ZmZmZmZiIgZmlsbC1vcGFjaXR5PSIxIiBkPSJNMCAyMjR4NDggMjEzLjN4OTYgMjAyLjd4MTQ0IDE5MnMxOTIgMzIgMjQwIDMyIDI0MC0zMiAyNDAtMzJzMTkyIDMyIDI0MCAzMiAyNDAtMzIgMjQwLTMyVjMyMEgwWiIvPjwvc3ZnPg=='); background-position: bottom;">
             </div>
             
             <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
                 {{-- Kiri: Informasi Waktu --}}
                 <div class="text-center md:text-left">
-                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider mb-2 backdrop-blur-sm cursor-pointer hover:bg-amber-500/30 transition-colors"
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-elevate-peach/20 border border-elevate-peach/30 text-elevate-peach text-[10px] font-bold uppercase tracking-wider mb-2 backdrop-blur-sm cursor-pointer hover:bg-elevate-peach/30 transition-colors"
                          @click="checkLocation()" 
                          title="Klik untuk refresh lokasi">
                         <i class="ph-fill ph-map-pin"></i> 
                         <span x-text="locationName">...</span>
                         <!-- Indikator GPS Aktif -->
                         <template x-if="usingGeolocation">
-                            <span class="flex items-center gap-1 ml-1 text-emerald-300">
+                            <span class="flex items-center gap-1 ml-1 text-elevate-accent">
                                 <i class="ph-bold ph-crosshair text-[10px]"></i> GPS
                             </span>
                         </template>
                         <!-- Indikator Manual/Fallback -->
                         <template x-if="!usingGeolocation && !isLoading">
-                            <span class="flex items-center gap-1 ml-1 text-slate-400" title="Lokasi Default">
+                            <span class="flex items-center gap-1 ml-1 text-slate-300" title="Lokasi Default">
                                 (Manual)
                             </span>
                         </template>
                     </div>
-                    <h3 class="text-2xl md:text-4xl font-serif text-amber-50 tracking-wide mb-1" x-text="nextEventName">...</h3>
+                    <h3 class="text-2xl md:text-4xl font-serif text-white tracking-wide mb-1" x-text="nextEventName">...</h3>
                     <p class="text-slate-300 text-xs font-medium font-mono">
-                        <i class="ph-bold ph-hourglass-medium text-amber-400"></i> <span x-text="countdown">00:00:00</span>
+                        <i class="ph-bold ph-hourglass-medium text-elevate-peach"></i> <span x-text="countdown">00:00:00</span>
                     </p>
                 </div>
 
@@ -128,16 +128,16 @@
                             <div class="flex flex-col items-center group/item">
                                 <!-- Arch Shape Container -->
                                 <div class="w-14 h-20 rounded-t-full flex flex-col items-center justify-end pb-2 transition-all duration-300 relative overflow-hidden border-b-2"
-                                     :class="currentEvent === name ? 'bg-amber-100 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)] -translate-y-1' : 'bg-white/5 border-white/10 hover:bg-white/10'">
+                                     :class="currentEvent === name ? 'bg-elevate-peach-light/20 border-elevate-peach shadow-[0_0_15px_rgba(249,162,130,0.5)] -translate-y-1' : 'bg-white/5 border-white/10 hover:bg-white/10'">
                                     
                                     <span class="text-[9px] uppercase tracking-wider mb-1" 
-                                          :class="currentEvent === name ? 'text-amber-800 font-bold' : 'text-slate-300'" x-text="name"></span>
+                                          :class="currentEvent === name ? 'text-elevate-peach font-bold' : 'text-slate-300'" x-text="name"></span>
                                     
                                     <span class="text-xs font-mono" 
-                                          :class="currentEvent === name ? 'text-slate-900 font-black' : 'text-white font-medium'" x-text="time"></span>
+                                          :class="currentEvent === name ? 'text-white font-black' : 'text-white font-medium'" x-text="time"></span>
                                           
                                     <!-- Active Dot -->
-                                    <div x-show="currentEvent === name" class="absolute top-2 w-1.5 h-1.5 rounded-full bg-amber-500 shadow-sm animate-pulse"></div>
+                                    <div x-show="currentEvent === name" class="absolute top-2 w-1.5 h-1.5 rounded-full bg-elevate-peach shadow-sm animate-pulse"></div>
                                 </div>
                             </div>
                         </template>
@@ -148,28 +148,28 @@
     </div>
     @endif
 
-    {{-- 2. SUMMARY CARD (THEME: KITAB/CALENDAR) --}}
-    <div class="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-xl border border-slate-100 relative overflow-hidden">
+    {{-- 2. SUMMARY CARD (THEME: KITAB/CALENDAR ELEVATE) --}}
+    <div class="bg-white rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-slate-100 hover:shadow-md hover:border-elevate-accent/30 transition-colors relative overflow-hidden">
         
         {{-- Ornament Corners --}}
-        <div class="absolute top-0 left-0 w-24 h-24 border-l-4 border-t-4 border-amber-100 rounded-tl-[2rem]"></div>
-        <div class="absolute bottom-0 right-0 w-24 h-24 border-r-4 border-b-4 border-amber-100 rounded-br-[2rem]"></div>
+        <div class="absolute top-0 left-0 w-24 h-24 border-l-4 border-t-4 border-elevate-soft rounded-tl-[2rem]"></div>
+        <div class="absolute bottom-0 right-0 w-24 h-24 border-r-4 border-b-4 border-elevate-soft rounded-br-[2rem]"></div>
 
         <div class="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-12">
             
             {{-- VISUAL KALENDER HIJRIYAH (LEFT SIDE) --}}
             <div class="shrink-0 relative group">
                 <!-- Frame Kalender -->
-                <div class="w-40 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform group-hover:rotate-2 transition-transform duration-500">
-                    <!-- Bagian Atas (Header Merah/Hijau) -->
-                    <div class="bg-emerald-700 h-12 flex items-center justify-center relative">
+                <div class="w-40 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden transform group-hover:rotate-2 transition-transform duration-500">
+                    <!-- Bagian Atas -->
+                    <div class="bg-elevate-dark h-12 flex items-center justify-center relative">
                         <div class="absolute top-[-10px] w-4 h-4 rounded-full bg-slate-800 border-2 border-white z-20"></div> <!-- Lubang paku -->
-                        <span class="text-amber-50 font-black uppercase tracking-[0.2em] text-[10px] mt-2">RAMADHAN</span>
+                        <span class="text-elevate-peach font-black uppercase tracking-[0.2em] text-[10px] mt-2">RAMADHAN</span>
                     </div>
                     
                     <!-- Bagian Tengah (Angka Tanggal) -->
                     <div class="h-32 flex flex-col items-center justify-center bg-white relative">
-                        <span class="text-7xl font-serif font-black text-slate-800 leading-none tracking-tighter">
+                        <span class="text-7xl font-serif font-black text-elevate-dark leading-none tracking-tighter">
                             {{ $isBeforeRamadan ? '-' : ($isRamadanEnded ? '✓' : $ramadanDay) }}
                         </span>
                         <span class="text-xs font-serif italic text-slate-400 mt-1">
@@ -178,7 +178,7 @@
                         
                         <!-- Watermark -->
                         <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
-                            <i class="ph-fill ph-moon-stars text-8xl"></i>
+                            <i class="ph-fill ph-moon-stars text-8xl text-elevate-primary"></i>
                         </div>
                     </div>
 
@@ -198,11 +198,11 @@
             <div class="flex-1 text-center md:text-left space-y-4">
                 @if($isRamadanEnded)
                     <div>
-                        <h2 class="text-3xl font-serif font-bold text-slate-800 mb-2">
-                            Sampai Jumpa, <span class="text-emerald-600">{{ $student->name }}</span>
+                        <h2 class="text-3xl font-serif font-bold text-elevate-dark mb-2">
+                            Sampai Jumpa, <span class="text-elevate-primary">{{ $student->name }}</span>
                         </h2>
                         <p class="text-slate-500 text-sm leading-relaxed max-w-lg font-serif">
-                            <i class="ph-fill ph-check-circle text-emerald-400"></i>
+                            <i class="ph-fill ph-check-circle text-elevate-primary"></i>
                             Bulan suci Ramadhan telah berlalu. Terima kasih telah mengisi jurnal mutabaah dengan tekun. Semoga istiqomah selalu.
                         </p>
                     </div>
@@ -211,19 +211,19 @@
                     @if(isset($topRamadanStudents) && $topRamadanStudents->isNotEmpty())
                     <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 max-w-lg mt-4 shadow-inner">
                         <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                            <i class="ph-fill ph-medal text-amber-500 text-lg"></i> Top 3 Pahlawan Kebaikan
+                            <i class="ph-fill ph-medal text-elevate-peach text-lg"></i> Top 3 Pahlawan Kebaikan
                         </h4>
                         <div class="space-y-2">
                             @foreach($topRamadanStudents->take(3) as $index => $topStudent)
-                                <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm transition hover:-translate-y-0.5">
+                                <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-100 shadow-sm transition hover:-translate-y-0.5 hover:border-elevate-accent/30">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs
-                                            {{ $index == 0 ? 'bg-amber-100 text-amber-600' : ($index == 1 ? 'bg-slate-200 text-slate-600' : 'bg-orange-100 text-orange-600') }}">
+                                            {{ $index == 0 ? 'bg-elevate-peach-light/30 text-elevate-peach-dark' : ($index == 1 ? 'bg-slate-200 text-slate-600' : 'bg-orange-100 text-orange-600') }}">
                                             #{{ $index + 1 }}
                                         </div>
-                                        <div class="text-sm font-bold text-slate-700 capitalize">{{ strtolower($topStudent->name) }}</div>
+                                        <div class="text-sm font-bold text-elevate-dark capitalize">{{ strtolower($topStudent->name) }}</div>
                                     </div>
-                                    <div class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100/50">
+                                    <div class="text-[10px] font-black text-elevate-primary bg-elevate-soft px-2.5 py-1 rounded-lg border border-elevate-primary/10">
                                         {{ number_format($topStudent->ramadan_points ?? 0) }} Pts
                                     </div>
                                 </div>
@@ -233,18 +233,18 @@
                     @endif
 
                     <div class="pt-4">
-                        <a href="{{ route('portal.show', Auth::guard('student')->id() ?? $student->id) }}?tab=ramadan_rank" class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-200 hover:-translate-y-0.5">
-                            <i class="ph-bold ph-trophy"></i>
+                        <a href="{{ route('portal.show', Auth::guard('student')->id() ?? $student->id) }}?tab=ramadan_rank" class="inline-flex items-center gap-2 px-6 py-3 bg-elevate-dark hover:bg-elevate-primary text-white rounded-xl font-bold transition-all shadow-lg shadow-elevate-dark/20 hover:-translate-y-0.5">
+                            <i class="ph-bold ph-trophy text-elevate-peach"></i>
                             <span>Lihat Papan Peringkat Lengkap</span>
                         </a>
                     </div>
                 @else
                     <div>
-                        <h2 class="text-3xl font-serif font-bold text-slate-800 mb-2">
-                            Ahlan Wa Sahlan, <span class="text-emerald-600">{{ $student->name }}</span>
+                        <h2 class="text-3xl font-serif font-bold text-elevate-dark mb-2">
+                            Ahlan Wa Sahlan, <span class="text-elevate-primary">{{ $student->name }}</span>
                         </h2>
                         <p class="text-slate-500 text-sm leading-relaxed max-w-lg font-serif">
-                            <i class="ph-fill ph-quotes text-amber-400"></i>
+                            <i class="ph-fill ph-quotes text-elevate-accent"></i>
                             Semoga Ramadhan ini menjadi ladang pahala. Jangan lupa isi jurnal ibadahmu hari ini untuk mencatat setiap kebaikan.
                         </p>
                     </div>
@@ -265,13 +265,13 @@
 
                     <div class="pt-2">
                         @if(!$todayRamadanLog)
-                            <a href="{{ route('student.ramadan.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-200 hover:-translate-y-0.5">
-                                <i class="ph-bold ph-pencil-simple"></i>
+                            <a href="{{ route('student.ramadan.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-elevate-primary hover:bg-elevate-dark text-white rounded-xl font-bold transition-all shadow-lg shadow-elevate-primary/20 hover:-translate-y-0.5">
+                                <i class="ph-bold ph-pencil-simple text-elevate-accent"></i>
                                 <span>Isi Jurnal Hari Ini</span>
                             </a>
                         @else
-                             <a href="{{ route('student.ramadan.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-600 hover:text-emerald-600 hover:border-emerald-200 rounded-xl font-bold transition-all">
-                                <i class="ph-bold ph-check-circle text-emerald-500"></i>
+                             <a href="{{ route('student.ramadan.index') }}" class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 text-slate-600 hover:text-elevate-primary hover:border-elevate-primary/50 rounded-xl font-bold transition-all">
+                                <i class="ph-bold ph-check-circle text-elevate-primary"></i>
                                 <span>Sudah Diisi (Edit)</span>
                             </a>
                         @endif
@@ -282,16 +282,16 @@
     </div>
 
     @if(!$isRamadanEnded)
-    {{-- 3. THE GRID (STATUS IBADAH - WITH COMPLETE LOGIC) --}}
+    {{-- 3. THE GRID (STATUS IBADAH - ELEVATE STYLED) --}}
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         @php
             $log = $todayRamadanLog;
 
-            // Helper untuk status UI agar konsisten
+            // Helper untuk status UI menggunakan warna Elevate Primary (selesai) & Elevate Soft (belum)
             $getStatusUI = function($condition) {
                 return $condition 
-                    ? ['class' => 'border-emerald-200 bg-emerald-50/50', 'icon_bg' => 'bg-emerald-100 text-emerald-600', 'text' => 'text-emerald-700', 'check' => true]
-                    : ['class' => 'border-slate-100 bg-white', 'icon_bg' => 'bg-slate-100 text-slate-400', 'text' => 'text-slate-500', 'check' => false];
+                    ? ['class' => 'border-elevate-primary/30 bg-elevate-soft/50 hover:bg-elevate-soft', 'icon_bg' => 'bg-elevate-primary text-white', 'text' => 'text-elevate-primary', 'check' => true]
+                    : ['class' => 'border-slate-100 bg-white hover:border-elevate-accent/30', 'icon_bg' => 'bg-slate-100 text-slate-400', 'text' => 'text-slate-500', 'check' => false];
             };
 
             $gridItems = [];
@@ -300,11 +300,11 @@
             if ($isFriday) {
                 $fridayFilled = !empty($log->friday_khotib);
                 $ui = $getStatusUI($fridayFilled);
-                // Override khusus Jumat jika belum diisi (Amber warning)
+                // Override khusus Jumat jika belum diisi (Peach warning)
                 if(!$fridayFilled) {
-                    $ui['class'] = 'border-amber-200 bg-amber-50/50';
-                    $ui['icon_bg'] = 'bg-amber-100 text-amber-500';
-                    $ui['text'] = 'text-amber-700 font-bold';
+                    $ui['class'] = 'border-elevate-peach/30 bg-elevate-peach-light/10';
+                    $ui['icon_bg'] = 'bg-elevate-peach-light/50 text-elevate-peach-dark';
+                    $ui['text'] = 'text-elevate-peach-dark font-bold';
                 }
                 
                 $gridItems[] = [
@@ -361,20 +361,18 @@
             ];
 
             // ITEM 7: SUNNAH LAINNYA (Aggregate)
-            // Menghitung total sunnah lain selain tarawih
             $sunnahCount = 0;
             if ($log && isset($log->sunnah_deeds)) {
                  $sunnahCount = ($log->sunnah_deeds['sedekah']??0) + ($log->sunnah_deeds['dhuha']??0) + ($log->sunnah_deeds['witir']??0) + ($log->sunnah_deeds['rawatib']??0);
             }
-            // Style khusus untuk aggregate (selalu info, bukan checklist)
             $gridItems[] = [
                 'label' => 'Sunnah Lain',
                 'icon' => 'sparkle',
                 'sub' => $sunnahCount . ' Amalan',
                 'ui' => [
-                    'class' => 'border-indigo-100 bg-indigo-50/30',
-                    'icon_bg' => 'bg-indigo-100 text-indigo-500',
-                    'text' => 'text-indigo-700',
+                    'class' => 'border-elevate-accent/20 bg-elevate-soft/30 hover:bg-elevate-soft/50',
+                    'icon_bg' => 'bg-elevate-accent/20 text-elevate-primary',
+                    'text' => 'text-elevate-dark',
                     'check' => false
                 ]
             ];
@@ -382,8 +380,8 @@
         @endphp
 
         @foreach($gridItems as $item)
-            <div class="p-4 rounded-2xl border flex flex-col items-center text-center justify-center gap-2 transition-all hover:shadow-md relative {{ $item['ui']['class'] }}">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center {{ $item['ui']['icon_bg'] }}">
+            <div class="p-4 rounded-2xl border flex flex-col items-center text-center justify-center gap-2 transition-all hover:shadow-sm relative {{ $item['ui']['class'] }}">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center shadow-sm {{ $item['ui']['icon_bg'] }}">
                     <i class="ph-fill ph-{{ $item['icon'] }} text-xl"></i>
                 </div>
                 <div>
@@ -393,7 +391,7 @@
                     </p>
                 </div>
                 @if($item['ui']['check'])
-                    <div class="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full shadow-sm"></div>
+                    <div class="absolute top-2 right-2 w-2 h-2 bg-elevate-primary rounded-full shadow-sm"></div>
                 @endif
             </div>
         @endforeach
@@ -401,16 +399,16 @@
 
     {{-- 4. FEEDBACK GURU --}}
     @if(isset($lastVerifiedLog) && $lastVerifiedLog && $lastVerifiedLog->teacher_verified_at)
-    <div class="bg-amber-50 rounded-2xl border border-amber-100 p-6 flex gap-4 items-start">
+    <div class="bg-elevate-soft/50 rounded-2xl border border-elevate-primary/20 p-6 flex gap-4 items-start">
         <div class="shrink-0">
-            <div class="w-12 h-12 bg-white rounded-full border-2 border-amber-200 flex items-center justify-center text-amber-500 text-2xl shadow-sm">
+            <div class="w-12 h-12 bg-white rounded-full border-2 border-elevate-accent/30 flex items-center justify-center text-elevate-primary text-2xl shadow-sm">
                 <i class="ph-fill ph-star"></i>
             </div>
         </div>
         <div>
             <div class="flex items-center gap-2 mb-1">
-                <h3 class="font-bold text-slate-800">Catatan Guru</h3>
-                <span class="px-2 py-0.5 bg-amber-200 text-amber-800 text-[10px] font-bold rounded">Nilai: {{ $lastVerifiedLog->teacher_score }}</span>
+                <h3 class="font-bold text-elevate-dark">Catatan Guru</h3>
+                <span class="px-2 py-0.5 bg-elevate-primary text-white text-[10px] font-bold rounded">Nilai: {{ $lastVerifiedLog->teacher_score }}</span>
             </div>
             <p class="text-sm text-slate-600 italic font-serif">"{{ $lastVerifiedLog->teacher_note }}"</p>
             <div class="mt-2 text-[10px] text-slate-400 uppercase font-bold tracking-wide">
@@ -433,13 +431,13 @@
                 text: "{!! session('success') !!}",
                 icon: 'success',
                 confirmButtonText: 'Lanjutkan untuk melihat Peringkat',
-                confirmButtonColor: '#10b981', // emerald-500
-                background: '#f0fdf4', // emerald-50
-                color: '#064e3b', // emerald-900
-                iconColor: '#10b981',
+                confirmButtonColor: '#0d52a1', // elevate-primary
+                background: '#ffffff', 
+                color: '#2c3f61', // elevate-dark
+                iconColor: '#56bbf1', // elevate-accent
                 customClass: {
-                    popup: 'rounded-[2rem] border-2 border-emerald-100 font-sans',
-                    title: 'font-serif text-2xl font-bold'
+                    popup: 'rounded-[2rem] border-2 border-elevate-soft font-sans shadow-2xl',
+                    title: 'font-serif text-2xl font-black'
                 }
             });
         @endif

@@ -9,6 +9,9 @@
                 @endif
             });
         </script>
+        <style>
+            [x-cloak] { display: none !important; }
+        </style>
     @endpush
 
      <x-slot name="header">
@@ -18,8 +21,8 @@
     </x-slot>
 
     {{-- Root Alpine Data untuk Search & Modal --}}
-    <div class="py-8 sm:py-10 font-sans text-[#2c3f61]" 
-         x-data="{ 
+    <div class="py-8 sm:py-10 font-sans text-elevate-dark"
+         x-data="{
             search: '',
             createModalOpen: false,
             
@@ -103,17 +106,17 @@
                         </button>
                     </div>
                 </div>
-              
+             
                 {{-- Input Pencarian dalam Hero --}}
                 <div class="mt-8 relative max-w-lg">
                     <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-elevate-dark/50 text-lg"></i>
-                    <input type="text" x-model="search" placeholder="Cari nama mapel, judul paket soal, atau kode..." 
+                    <input type="text" x-model="search" placeholder="Cari nama mapel, judul paket soal, atau kode..."
                         class="w-full pl-12 pr-4 py-3.5 bg-white/60 border border-white rounded-xl text-elevate-dark placeholder-elevate-dark/40 focus:bg-white focus:ring-elevate-accent focus:border-elevate-accent transition font-bold backdrop-blur-md shadow-sm">
                 </div>
             </div>
 
             {{-- MODAL BUAT BANK --}}
-            <div x-show="createModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" 
+            <div x-cloak x-show="createModalOpen" class="fixed inset-0 z-50 overflow-y-auto"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
@@ -128,21 +131,21 @@
                          x-transition:enter-start="opacity-0 scale-95 translate-y-4"
                          x-transition:enter-end="opacity-100 scale-100 translate-y-0">
                         
-                        <h3 class="text-xl font-black text-[#2c3f61] mb-6 flex items-center gap-2">
-                            <div class="w-10 h-10 bg-[#56bbf1]/20 text-[#0d52a1] rounded-full flex items-center justify-center shrink-0"><i class="ph-fill ph-folder-plus text-xl"></i></div>
+                        <h3 class="text-xl font-black text-elevate-dark mb-6 flex items-center gap-2">
+                            <div class="w-10 h-10 bg-elevate-accent/20 text-elevate-primary rounded-full flex items-center justify-center shrink-0"><i class="ph-fill ph-folder-plus text-xl"></i></div>
                             Bank Soal Baru
                         </h3>
                         <form action="{{ route('bank.store') }}" method="POST" class="space-y-4">
                             @csrf
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Judul Paket Soal</label>
-                                <input type="text" name="title" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-[#2c3f61] py-3.5 px-4 focus:ring-[#56bbf1] focus:border-[#56bbf1] transition-colors" placeholder="Contoh: PTS Ganjil Tahun Ini">
+                                <input type="text" name="title" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-elevate-dark py-3.5 px-4 focus:ring-elevate-accent focus:border-elevate-accent transition-colors" placeholder="Contoh: PTS Ganjil Tahun Ini">
                             </div>
                             
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Mata Pelajaran (Folder)</label>
                                 <div class="relative">
-                                    <select name="subject_name" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-[#2c3f61] py-3.5 px-4 focus:ring-[#56bbf1] focus:border-[#56bbf1] appearance-none cursor-pointer transition-colors">
+                                    <select name="subject_name" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-elevate-dark py-3.5 px-4 focus:ring-elevate-accent focus:border-elevate-accent appearance-none cursor-pointer transition-colors">
                                         <option value="" disabled selected>Pilih Mapel...</option>
                                         @if(isset($subjects) && $subjects->count() > 0)
                                             @foreach($subjects as $subject)
@@ -162,11 +165,11 @@
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tingkat Kelas</label>
                                 <div class="relative">
-                                    <select name="class_level" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-[#2c3f61] py-3.5 px-4 focus:ring-[#56bbf1] focus:border-[#56bbf1] appearance-none cursor-pointer transition-colors">
+                                    <select name="class_level" class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-elevate-dark py-3.5 px-4 focus:ring-elevate-accent focus:border-elevate-accent appearance-none cursor-pointer transition-colors">
                                         <option value="" disabled selected>Pilih Tingkat Kelas...</option>
                                         <option value="7">Kelas 7</option>
                                         <option value="8">Kelas 8</option>
-                                        <option value="9">Kelas 9</option>                                                                                                           
+                                        <option value="9">Kelas 9</option>                                                                     
                                     </select>
                                     <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
                                 </div>
@@ -174,7 +177,7 @@
 
                             <div class="pt-6 flex gap-3">
                                 <button type="button" @click="createModalOpen = false" class="flex-1 py-3.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">Batal</button>
-                                <button type="submit" class="flex-1 py-3.5 rounded-xl bg-[#2c3f61] text-white font-bold hover:bg-[#1c2940] shadow-lg shadow-[#2c3f61]/30 transition-colors">Simpan</button>
+                                <button type="submit" class="flex-1 py-3.5 rounded-xl bg-elevate-dark text-white font-bold hover:bg-elevate-dark/90 shadow-lg shadow-elevate-dark/30 transition-colors">Simpan</button>
                             </div>
                         </form>
                     </div>
@@ -182,7 +185,7 @@
             </div>
 
             {{-- MODAL EDIT BANK --}}
-            <div x-show="editModalOpen" style="display: none;" class="fixed inset-0 z-50 overflow-y-auto" 
+            <div x-cloak x-show="editModalOpen" class="fixed inset-0 z-50 overflow-y-auto"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
@@ -197,8 +200,8 @@
                          x-transition:enter-start="opacity-0 scale-95 translate-y-4"
                          x-transition:enter-end="opacity-100 scale-100 translate-y-0">
                         
-                        <h3 class="text-xl font-black text-[#2c3f61] mb-6 flex items-center gap-2">
-                            <div class="w-10 h-10 bg-[#f9a282]/20 text-[#c86845] rounded-full flex items-center justify-center shrink-0"><i class="ph-fill ph-pencil-simple text-xl"></i></div>
+                        <h3 class="text-xl font-black text-elevate-dark mb-6 flex items-center gap-2">
+                            <div class="w-10 h-10 bg-elevate-peach/20 text-elevate-peach-dark rounded-full flex items-center justify-center shrink-0"><i class="ph-fill ph-pencil-simple text-xl"></i></div>
                             Edit Bank Soal
                         </h3>
                         <form :action="editUrl" method="POST" class="space-y-4">
@@ -206,13 +209,13 @@
                             @method('PUT')
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Judul Paket Soal</label>
-                                <input type="text" name="title" x-model="editData.title" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-[#2c3f61] py-3.5 px-4 focus:ring-[#56bbf1] focus:border-[#56bbf1] transition-colors">
+                                <input type="text" name="title" x-model="editData.title" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-elevate-dark py-3.5 px-4 focus:ring-elevate-accent focus:border-elevate-accent transition-colors">
                             </div>
                             
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Mata Pelajaran (Folder)</label>
                                 <div class="relative">
-                                    <select name="subject_name" x-model="editData.subject_name" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-[#2c3f61] py-3.5 px-4 focus:ring-[#56bbf1] focus:border-[#56bbf1] appearance-none cursor-pointer transition-colors">
+                                    <select name="subject_name" x-model="editData.subject_name" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-elevate-dark py-3.5 px-4 focus:ring-elevate-accent focus:border-elevate-accent appearance-none cursor-pointer transition-colors">
                                         <option value="" disabled>Pilih Mapel...</option>
                                         @if(isset($subjects) && $subjects->count() > 0)
                                             @foreach($subjects as $subject)
@@ -229,11 +232,11 @@
                             <div>
                                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Tingkat Kelas</label>
                                 <div class="relative">
-                                    <select name="class_level" x-model="editData.class_level" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-[#2c3f61] py-3.5 px-4 focus:ring-[#56bbf1] focus:border-[#56bbf1] appearance-none cursor-pointer transition-colors">
+                                    <select name="class_level" x-model="editData.class_level" required class="w-full rounded-2xl border-slate-200 bg-slate-50 focus:bg-white font-bold text-elevate-dark py-3.5 px-4 focus:ring-elevate-accent focus:border-elevate-accent appearance-none cursor-pointer transition-colors">
                                         <option value="" disabled>Pilih Tingkat Kelas...</option>
                                         <option value="7">Kelas 7</option>
                                         <option value="8">Kelas 8</option>
-                                        <option value="9">Kelas 9</option>                                                                                                           
+                                        <option value="9">Kelas 9</option>                                                                     
                                     </select>
                                     <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-500"><i class="ph-bold ph-caret-down"></i></div>
                                 </div>
@@ -241,7 +244,7 @@
 
                             <div class="pt-6 flex gap-3">
                                 <button type="button" @click="editModalOpen = false" class="flex-1 py-3.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">Batal</button>
-                                <button type="submit" class="flex-1 py-3.5 rounded-xl bg-[#2c3f61] text-white font-bold hover:bg-[#1c2940] shadow-lg shadow-[#2c3f61]/30 transition-colors">Simpan Perubahan</button>
+                                <button type="submit" class="flex-1 py-3.5 rounded-xl bg-elevate-dark text-white font-bold hover:bg-elevate-dark/90 shadow-lg shadow-elevate-dark/30 transition-colors">Simpan Perubahan</button>
                             </div>
                         </form>
                     </div>
@@ -264,13 +267,13 @@
                         {{-- HEADER FOLDER --}}
                         <div class="flex items-center gap-4 mb-5">
                             <div class="bg-white border border-slate-200 rounded-[1rem] p-3 pr-5 flex items-center gap-3 shadow-sm w-max hover:shadow-md transition-shadow cursor-default group/folder">
-                                <div class="w-10 h-10 rounded-[0.75rem] flex items-center justify-center shadow-sm border bg-[#e5eff5] border-[#56bbf1]/30 text-[#0d52a1] group-hover/folder:bg-[#0d52a1] group-hover/folder:text-white transition-colors">
+                                <div class="w-10 h-10 rounded-[0.75rem] flex items-center justify-center shadow-sm border bg-elevate-soft border-elevate-accent/30 text-elevate-primary group-hover/folder:bg-elevate-primary group-hover/folder:text-white transition-colors">
                                     <i class="ph-fill ph-folder-open text-xl"></i>
                                 </div>
                                 <div>
                                     <p class="text-[10px] uppercase font-black tracking-wider text-slate-400 mb-0.5">Folder Mata Pelajaran</p>
                                     <div class="flex items-center gap-2">
-                                        <h3 class="text-sm font-black text-[#2c3f61]">{{ $subjectName }}</h3>
+                                        <h3 class="text-sm font-black text-elevate-dark">{{ $subjectName }}</h3>
                                         <span class="text-[10px] bg-slate-100 text-slate-500 font-bold px-1.5 py-0.5 rounded-md">{{ count($subjectBanks) }} File</span>
                                     </div>
                                 </div>
@@ -281,7 +284,7 @@
                         {{-- GRID KARTU DALAM FOLDER --}}
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             @foreach($subjectBanks as $bank)
-                                <div class="bank-card bg-white border border-slate-100 rounded-[2rem] p-6 hover:shadow-xl hover:shadow-[#56bbf1]/10 hover:border-[#56bbf1]/50 transition-all duration-300 group relative flex flex-col h-full"
+                                <div class="bank-card bg-elevate-surface border border-slate-100 rounded-[2rem] p-6 hover:shadow-xl hover:shadow-elevate-accent/10 hover:border-elevate-accent/50 transition-all duration-300 group relative flex flex-col h-full"
                                      data-search="{{ strtolower($bank->title . ' ' . $bank->subject_name . ' ' . $bank->code) }}"
                                      x-show="search === '' || $el.dataset.search.includes(search.toLowerCase()) || $el.closest('.folder-group').dataset.folderName.toLowerCase().includes(search.toLowerCase())"
                                      x-transition.duration.300ms>
@@ -289,32 +292,32 @@
                                     {{-- Info Atas (Kelas & Kode) --}}
                                     <div class="mb-4">
                                         <div class="flex justify-between items-start mb-3">
-                                            <span class="inline-block px-3 py-1 bg-[#56bbf1]/10 text-[#0d52a1] border border-[#56bbf1]/20 rounded-lg text-[10px] font-black uppercase tracking-wide">
+                                            <span class="inline-block px-3 py-1 bg-elevate-accent/10 text-elevate-primary border border-elevate-accent/20 rounded-lg text-[10px] font-black uppercase tracking-wide">
                                                 Kelas {{ $bank->class_level }}
                                             </span>
-                                            <span class="text-[10px] bg-slate-50 px-2 py-0.5 rounded border border-slate-100 font-mono text-slate-400 group-hover:text-[#0d52a1] transition" title="Kode Bank Soal">#{{ $bank->code }}</span>
+                                            <span class="text-[10px] bg-slate-50 px-2 py-0.5 rounded border border-slate-100 font-mono text-slate-400 group-hover:text-elevate-primary transition" title="Kode Bank Soal">#{{ $bank->code }}</span>
                                         </div>
-                                        <h4 class="font-black text-xl text-[#2c3f61] leading-tight group-hover:text-[#0d52a1] transition-colors line-clamp-2">
+                                        <h4 class="font-black text-xl text-elevate-dark leading-tight group-hover:text-elevate-primary transition-colors line-clamp-2">
                                             {{ $bank->title }}
                                         </h4>
                                     </div>
                                     
                                     {{-- File Tally --}}
                                     <div class="flex-1 flex items-end mb-5">
-                                        <div class="flex items-center gap-2 text-slate-500 text-xs font-bold bg-[#e5eff5]/40 group-hover:bg-[#e5eff5] px-4 py-2.5 rounded-xl w-full border border-slate-100 transition-colors">
-                                            <i class="ph-duotone ph-files text-[#0d52a1] text-lg shrink-0"></i>
-                                            <span class="text-[#2c3f61] text-sm">{{ $bank->questions_count }}</span> Soal Tersedia
+                                        <div class="flex items-center gap-2 text-slate-500 text-xs font-bold bg-elevate-soft/40 group-hover:bg-elevate-soft px-4 py-2.5 rounded-xl w-full border border-slate-100 transition-colors">
+                                            <i class="ph-duotone ph-files text-elevate-primary text-lg shrink-0"></i>
+                                            <span class="text-elevate-dark text-sm">{{ $bank->questions_count }}</span> Soal Tersedia
                                         </div>
                                     </div>
 
                                     {{-- Footer Actions --}}
                                     <div class="pt-4 border-t border-slate-50 flex gap-2">
-                                        <a href="{{ route('bank.manage', $bank->id) }}" class="flex-1 flex items-center justify-center p-2.5 bg-[#2c3f61] text-white rounded-xl text-xs font-bold hover:bg-[#1c2940] transition-all shadow-lg shadow-[#2c3f61]/20 active:scale-95" title="Kelola Soal">
+                                        <a href="{{ route('bank.manage', $bank->id) }}" class="flex-1 flex items-center justify-center p-2.5 bg-elevate-dark text-white rounded-xl text-xs font-bold hover:bg-elevate-dark/90 transition-all shadow-lg shadow-elevate-dark/20 active:scale-95" title="Kelola Soal">
                                             <i class="ph-bold ph-list-plus text-lg mr-2"></i> Isi Soal
                                         </a>
                                         
                                         {{-- Button Edit --}}
-                                        <button type="button" @click="openEditModal({{ json_encode(['id' => $bank->id, 'title' => $bank->title, 'subject_name' => $bank->subject_name, 'class_level' => $bank->class_level]) }}, '{{ route('bank.update', $bank->id) }}')" class="w-10 h-10 flex items-center justify-center bg-white border border-[#f9a282]/50 text-[#c86845] rounded-xl hover:bg-[#f9a282]/10 hover:border-[#f9a282] transition-all active:scale-95" title="Edit Identitas Bank Soal">
+                                        <button type="button" @click="openEditModal({{ json_encode(['id' => $bank->id, 'title' => $bank->title, 'subject_name' => $bank->subject_name, 'class_level' => $bank->class_level]) }}, '{{ route('bank.update', $bank->id) }}')" class="w-10 h-10 flex items-center justify-center bg-white border border-elevate-peach/50 text-elevate-peach-dark rounded-xl hover:bg-elevate-peach/10 hover:border-elevate-peach transition-all active:scale-95" title="Edit Identitas Bank Soal">
                                             <i class="ph-bold ph-pencil-simple text-lg"></i>
                                         </button>
 
@@ -333,7 +336,7 @@
                 @empty
                     {{-- EMPTY STATE --}}
                     <div class="col-span-full text-center py-20 bg-white rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                        <div class="w-24 h-24 bg-[#56bbf1]/10 text-[#0d52a1] rounded-full flex items-center justify-center mx-auto mb-6">
+                        <div class="w-24 h-24 bg-elevate-accent/10 text-elevate-primary rounded-full flex items-center justify-center mx-auto mb-6">
                             <i class="ph-duotone ph-folder-dashed text-5xl"></i>
                         </div>
                        <h3 class="text-elevate-dark font-bold text-xl mb-2">Gudang Soal Masih Kosong</h3>
@@ -345,8 +348,8 @@
                 @endforelse
                 
                 {{-- State Kosong Pencarian --}}
-                <div x-show="search !== '' && document.querySelectorAll('.bank-card[style*=\'display: none\']').length === document.querySelectorAll('.bank-card').length" 
-                     class="col-span-full text-center py-16" style="display: none;">
+                <div x-cloak x-show="search !== '' && document.querySelectorAll('.bank-card[style*=\'display: none\']').length === document.querySelectorAll('.bank-card').length"
+                     class="col-span-full text-center py-16">
                     <div class="w-20 h-20 bg-elevate-accent/10 text-elevate-primary/50 rounded-full flex items-center justify-center mx-auto mb-4">
                          <i class="ph-duotone ph-magnifying-glass text-4xl"></i>
                     </div>

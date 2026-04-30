@@ -8,18 +8,26 @@
         Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
         Chart.defaults.color = '#64748b'; // Teks disesuaikan ke abu-abu medium agar terbaca di background putih
         
-        // Warna Elevate untuk JS/Chart.js
-        const elevateAccent = '#38bdf8'; // Hex elevate-accent
-        const elevatePrimary = '#3b5889'; // Hex elevate-primary
-        const elevateDark = '#032b5b'; // Hex elevate-dark
+        // WARNA ELEVATE DISINKRONKAN DENGAN tailwind.config.js
+        const elevateAccent = '#56bbf1'; // Hex elevate-accent
+        const elevatePrimary = '#0d52a1'; // Hex elevate-primary
+        const elevateDark = '#2c3f61'; // Hex elevate-dark
+        
+        // RGB referensi untuk gradient Elevate Accent (#56bbf1)
+        const elevateAccentRgb = '86, 187, 241';
         
         // --- 1. CHART ATTENDANCE (HERO SECTION) ---
         const ctx = document.getElementById('publicWeeklyChart');
         if(ctx) {
             const chartData = @json($barChartData ?? ['labels'=>[],'datasets'=>[]]); 
             
-            // Opsional: Jika datasets membawa warna hardcoded dari backend, kita bisa map/timpa disini
-            // chartData.datasets.forEach(ds => { ds.backgroundColor = elevateAccent; ... });
+            // Menimpa warna dari backend (opsional) agar seragam dengan tema Elevate
+            if(chartData.datasets && chartData.datasets.length > 0) {
+                chartData.datasets.forEach((ds, index) => { 
+                    if(index === 0) ds.backgroundColor = elevateAccent; 
+                    if(index === 1) ds.backgroundColor = elevatePrimary; 
+                });
+            }
 
             new Chart(ctx.getContext('2d'), {
                 type: 'bar',
@@ -84,8 +92,8 @@
                         backgroundColor: (context) => {
                             const ctx = context.chart.ctx;
                             const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                            gradient.addColorStop(0, 'rgba(56, 189, 248, 0.15)'); // Elevate Accent (RGB)
-                            gradient.addColorStop(1, 'rgba(56, 189, 248, 0)');
+                            gradient.addColorStop(0, `rgba(${elevateAccentRgb}, 0.15)`); // Sinkron RGB Elevate
+                            gradient.addColorStop(1, `rgba(${elevateAccentRgb}, 0)`);
                             return gradient;
                         },
                         borderWidth: 3,
@@ -142,8 +150,8 @@
                         backgroundColor: (context) => {
                             const ctx = context.chart.ctx;
                             const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                            gradient.addColorStop(0, 'rgba(56, 189, 248, 0.2)');
-                            gradient.addColorStop(1, 'rgba(56, 189, 248, 0)');
+                            gradient.addColorStop(0, `rgba(${elevateAccentRgb}, 0.2)`); // Sinkron RGB Elevate
+                            gradient.addColorStop(1, `rgba(${elevateAccentRgb}, 0)`);
                             return gradient;
                         },
                         borderWidth: 4,

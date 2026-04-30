@@ -1,7 +1,7 @@
 <!-- NAVBAR SECTION -->
-<!-- PERBAIKAN: Menambahkan x-data lokal untuk mengontrol Search Modal dan status Dark Mode -->
 <nav x-data="{
         searchOpen: false,
+        mobileMenuOpen: false,
         isDark: localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
         toggleTheme() {
             this.isDark = !this.isDark;
@@ -17,93 +17,102 @@
     x-init="
         if(isDark) document.documentElement.classList.add('dark');
         $watch('searchOpen', value => {
-            if(value) {
-                setTimeout(() => $refs.searchInput.focus(), 100);
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = '';
+            if(value) { 
+                setTimeout(() => $refs.searchInput.focus(), 100); 
+                document.body.style.overflow = 'hidden'; 
+            } else { 
+                document.body.style.overflow = ''; 
             }
         });
     "
-    :class="{ 'bg-elevate-dark/95 backdrop-blur-md shadow-xl border-b border-elevate-primary/50': scrolled, 'bg-transparent border-transparent': !scrolled }" 
+    :class="{ 'py-4': !scrolled, 'py-2': scrolled }" 
     class="fixed top-0 w-full z-50 transition-all duration-300">
     
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-20 items-center">
+        <!-- Floating Pill Style on Scroll -->
+        <div class="flex justify-between items-center transition-all duration-500"
+             :class="{ 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-white/80 dark:border-slate-800 shadow-xl shadow-elevate-dark/5 rounded-[2.5rem] px-4 md:px-6 py-3': scrolled, 'px-2 py-2': !scrolled }">
             
             <!-- Logo Brand -->
             <a href="{{ url('/') }}" class="flex items-center gap-3 shrink-0 group z-50">
-                <div class="relative w-10 h-10 bg-white rounded-xl flex items-center justify-center text-elevate-primary shadow-lg shadow-elevate-dark/20 group-hover:rotate-6 transition-transform overflow-hidden border border-white/20">
-                        <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-7 h-7 object-contain z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                        <i class="ph-bold ph-buildings text-xl hidden z-10"></i>
+                <div class="relative w-10 h-10 md:w-12 md:h-12 bg-white dark:bg-slate-800 rounded-xl md:rounded-2xl flex items-center justify-center text-elevate-primary shadow-sm border border-slate-100 dark:border-slate-700 group-hover:scale-105 group-hover:rotate-3 transition-transform overflow-hidden">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-7 h-7 md:w-8 md:h-8 object-contain z-10" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+                    <i class="ph-bold ph-buildings text-xl hidden z-10"></i>
                 </div>
                 
                 <div class="flex flex-col leading-tight">
-                    <span class="font-bold text-white text-lg tracking-tight group-hover:text-elevate-accent transition-colors">SMPN 3 LAKBOK</span>
-                    <span class="font-bold text-elevate-accent uppercase tracking-widest group-hover:text-white transition-colors">Berjaya </span>
-                    <span class="text-[8px] font-bold text-slate-300 uppercase tracking-widest group-hover:text-white transition-colors">Unggul & Berkarakter </span>
+                    <span class="font-black text-elevate-dark dark:text-white text-base md:text-lg tracking-tight group-hover:text-elevate-primary dark:group-hover:text-elevate-accent transition-colors">SMPN 3 LAKBOK</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-bold text-elevate-accent uppercase tracking-widest text-[9px] md:text-[10px]">Berjaya</span>
+                        <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600 hidden sm:block"></span>
+                        <span class="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest hidden sm:block">Unggul & Berkarakter</span>
+                    </div>
                 </div>
             </a>
 
             <!-- Desktop Menu -->
-            <div class="hidden md:flex items-center gap-8">
-                <div class="flex gap-6 text-sm font-medium text-slate-100">
-                    <a href="#" class="hover:text-elevate-accent transition-colors">Beranda</a>
-                    <a href="#profil" class="hover:text-elevate-accent transition-colors">Profil</a>
-                    <a href="#akademik" class="hover:text-elevate-accent transition-colors">Akademik</a>                        
-                    <a href="#galeri" class="hover:text-elevate-accent transition-colors">Galeri</a>
-                    <a href="#kontak" class="hover:text-elevate-accent transition-colors">Kontak</a>   
-                </div>                    
+            <div class="hidden lg:flex items-center gap-1 bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-md px-2 py-1.5 rounded-full border border-slate-200/60 dark:border-slate-700/50 shadow-inner">
+                <!-- State Aktif (Beranda) -->
+                <a href="#" class="px-5 py-2 rounded-full text-xs font-bold bg-white dark:bg-slate-700 text-elevate-primary dark:text-elevate-accent shadow-sm transition-all">Beranda</a>
+                <!-- Link Normal -->
+                <a href="#profil" class="px-5 py-2 rounded-full text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm transition-all">Profil</a>
+                <a href="#akademik" class="px-5 py-2 rounded-full text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm transition-all">Akademik</a>                        
+                <a href="#galeri" class="px-5 py-2 rounded-full text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:shadow-sm transition-all">Galeri</a>               
+            </div>                    
 
-                <!-- Divider -->
-                <div class="h-6 w-px bg-elevate-primary/50"></div>                   
-                    
+            <!-- Right Actions (Desktop) -->
+            <div class="hidden md:flex items-center gap-4">
+                
                 @if(Auth::guard('student')->check())
-                    <a href="{{ route('students.learning.index') }}" class="px-5 py-2.5 rounded-full bg-elevate-accent text-elevate-dark text-xs font-bold shadow-lg shadow-elevate-accent/40 hover:bg-elevate-accent/80 transition border border-elevate-accent flex items-center gap-2 group">
-                        <span>Dashboard</span>
+                    <a href="{{ route('students.learning.index') }}" class="px-6 py-2.5 rounded-full bg-elevate-accent hover:bg-elevate-accent/80 text-elevate-dark text-xs font-bold shadow-lg shadow-elevate-accent/20 transition-all flex items-center gap-2 group">
+                        <span>Dashboard Siswa</span>
                         <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </a>
                 @else
-                    <a href="{{ route('library.catalogue')}}" class="text-sm font-bold text-elevate-accent hover:text-white transition flex items-center gap-2">
-                        Katalog Buku
-                    </a>
-                    <a href="{{ route('ppdb.create') }}" class="text-sm font-bold text-elevate-accent hover:text-white transition flex items-center gap-2">
-                        PPDB
-                    </a> 
-                    <a href="{{ route('portal.index') }}" class="mr-2 text-sm font-bold text-slate-100 hover:text-white transition">
-                        Portal Siswa
-                    </a>
-                    <!-- Tombol Staff -->
-                    <a href="{{ route('login') }}" class="px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md text-white text-xs font-bold hover:bg-white hover:text-elevate-primary transition border border-white/20 flex items-center gap-2">
-                        <i class="ph-bold ph-lock-key"></i> Staff
-                    </a>
+                    <div class="flex items-center gap-3 mr-2">
+                        <a href="{{ route('library.catalogue')}}" class="text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-elevate-primary dark:hover:text-elevate-accent transition flex items-center gap-1.5">
+                            <i class="ph-bold ph-books text-sm"></i> Katalog
+                        </a>
+                        <a href="{{ route('ppdb.create') }}" class="text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-elevate-primary dark:hover:text-elevate-accent transition flex items-center gap-1.5">
+                            <i class="ph-bold ph-student text-sm"></i> PPDB
+                        </a> 
+                    </div>
+                    
+                    <!-- PERBAIKAN: Tombol Portal & Login Staff di Desktop -->
+                    <div class="flex items-center gap-2">
+                        <a href="{{ route('login') }}" class="px-4 py-2.5 rounded-full bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-bold border border-slate-200 dark:border-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent hover:bg-slate-50 transition-all shadow-sm flex items-center gap-1.5">
+                            <i class="ph-bold ph-lock-key"></i> Akses Guru
+                        </a>
+                        <a href="{{ route('portal.index') }}" class="px-5 py-2.5 rounded-full bg-elevate-dark dark:bg-elevate-primary text-white text-xs font-black hover:bg-elevate-primary dark:hover:bg-elevate-accent dark:hover:text-elevate-dark transition-all shadow-lg shadow-elevate-dark/20 flex items-center gap-1.5">
+                            <i class="ph-bold ph-sign-in"></i> Portal Siswa
+                        </a>
+                    </div>
                 @endif
 
-                <!-- Divider Tools -->
-                <div class="h-6 w-px bg-elevate-primary/50 ml-2"></div>
-
+                <!-- Divider -->
+                <div class="h-6 w-px bg-slate-300 dark:bg-slate-700 mx-1"></div>                  
+                    
                 <!-- Tools (Search & Dark Mode) -->
-                <div class="flex items-center gap-1">
-                    <button @click="searchOpen = true" class="p-2 text-elevate-accent hover:text-white hover:bg-white/10 rounded-full transition-colors focus:outline-none" title="Pencarian Global">
-                        <i class="ph-bold ph-magnifying-glass text-xl"></i>
+                <div class="flex items-center gap-1.5">
+                    <button @click="searchOpen = true" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 text-elevate-dark dark:text-slate-200 flex items-center justify-center shadow-sm border border-slate-100 dark:border-slate-700 hover:bg-elevate-soft dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent transition-all focus:outline-none" title="Pencarian Global">
+                        <i class="ph-bold ph-magnifying-glass text-lg"></i>
                     </button>
-                    <button @click="toggleTheme()" class="p-2 text-elevate-accent hover:text-white hover:bg-white/10 rounded-full transition-colors focus:outline-none" title="Mode Gelap / Terang">
-                        <!-- Mengganti icon Matahari/Bulan secara dinamis -->
-                        <i class="ph-bold text-xl" :class="isDark ? 'ph-sun' : 'ph-moon'"></i>
+                    <button @click="toggleTheme()" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 text-elevate-dark dark:text-slate-200 flex items-center justify-center shadow-sm border border-slate-100 dark:border-slate-700 hover:bg-elevate-soft dark:hover:bg-slate-700 hover:text-elevate-primary dark:hover:text-elevate-accent transition-all focus:outline-none" title="Mode Gelap / Terang">
+                        <i class="ph-bold text-lg" :class="isDark ? 'ph-sun' : 'ph-moon'"></i>
                     </button>
                 </div>
             </div>
 
             <!-- Mobile Menu Button & Tools -->
-            <div class="flex md:hidden items-center gap-1 z-50">
-                <button @click="searchOpen = true" class="p-2 text-slate-100 hover:text-white bg-white/10 rounded-lg transition-colors focus:outline-none backdrop-blur-sm">
-                    <i class="ph-bold ph-magnifying-glass text-[22px]"></i>
+            <div class="flex md:hidden items-center gap-1.5 z-50">
+                <button @click="searchOpen = true" class="w-9 h-9 rounded-xl bg-white/80 dark:bg-slate-800/80 text-elevate-dark dark:text-slate-200 flex items-center justify-center shadow-sm border border-slate-100 dark:border-slate-700 backdrop-blur-sm focus:outline-none">
+                    <i class="ph-bold ph-magnifying-glass text-lg"></i>
                 </button>
-                <button @click="toggleTheme()" class="p-2 text-slate-100 hover:text-white bg-white/10 rounded-lg transition-colors focus:outline-none backdrop-blur-sm">
-                    <i class="ph-bold text-[22px]" :class="isDark ? 'ph-sun' : 'ph-moon'"></i>
+                <button @click="toggleTheme()" class="w-9 h-9 rounded-xl bg-white/80 dark:bg-slate-800/80 text-elevate-dark dark:text-slate-200 flex items-center justify-center shadow-sm border border-slate-100 dark:border-slate-700 backdrop-blur-sm focus:outline-none">
+                    <i class="ph-bold text-lg" :class="isDark ? 'ph-sun' : 'ph-moon'"></i>
                 </button>
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="p-2 text-slate-100 hover:text-white bg-white/10 rounded-lg transition-colors focus:outline-none backdrop-blur-sm ml-1">
-                    <i class="ph-bold text-[22px]" :class="mobileMenuOpen ? 'ph-x' : 'ph-list'"></i>
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="w-9 h-9 rounded-xl bg-elevate-dark text-white flex items-center justify-center shadow-md focus:outline-none ml-1">
+                    <i class="ph-bold text-xl" :class="mobileMenuOpen ? 'ph-x' : 'ph-list'"></i>
                 </button>
             </div>
         </div>
@@ -117,28 +126,37 @@
             x-transition:leave="transition ease-in duration-200"
             x-transition:leave-start="opacity-100 translate-x-0"
             x-transition:leave-end="opacity-0 translate-x-full"
-            class="fixed inset-0 bg-elevate-dark/98 backdrop-blur-xl z-[60] md:hidden flex flex-col pt-24 px-6 overflow-y-auto">
+            class="fixed inset-0 bg-white/98 dark:bg-slate-950/98 backdrop-blur-xl z-[60] md:hidden flex flex-col pt-24 px-6 overflow-y-auto pb-10">
             
-        <nav class="flex flex-col items-center space-y-6 text-center w-full px-8">
+        <nav class="flex flex-col items-center space-y-6 text-center w-full px-4">
             <!-- Mobile PPDB Link -->
-            <a href="{{ route('ppdb.create') }}" class="w-full py-3 bg-elevate-accent rounded-xl text-elevate-dark font-bold text-lg shadow-lg shadow-elevate-accent/30">
+            <a href="{{ route('ppdb.create') }}" class="w-full py-4 bg-elevate-primary hover:bg-elevate-dark rounded-2xl text-white font-black text-lg shadow-xl shadow-elevate-primary/30 flex justify-center items-center transition-colors">
                 <i class="ph-bold ph-student mr-2"></i> Info PPDB 2025
             </a>
             
-            <a href="#profil" @click="mobileMenuOpen = false" class="text-2xl font-bold text-slate-100 hover:text-elevate-accent transition">Profil Sekolah</a>
-            <a href="#guru" @click="mobileMenuOpen = false" class="text-2xl font-bold text-slate-100 hover:text-elevate-accent transition">Guru & Staff</a>
-            <a href="#kegiatan" @click="mobileMenuOpen = false" class="text-2xl font-bold text-slate-100 hover:text-elevate-accent transition">Kegiatan</a>
-            <a href="#prestasi" @click="mobileMenuOpen = false" class="text-2xl font-bold text-slate-100 hover:text-elevate-accent transition">Prestasi</a>
-            <a href="#ekskul" @click="mobileMenuOpen = false" class="text-2xl font-bold text-slate-100 hover:text-elevate-accent transition">Ekskul</a>
+            <a href="#profil" @click="mobileMenuOpen = false" class="text-xl font-black text-elevate-dark dark:text-slate-100 hover:text-elevate-primary transition-colors">Profil Sekolah</a>
+            <a href="#akademik" @click="mobileMenuOpen = false" class="text-xl font-black text-elevate-dark dark:text-slate-100 hover:text-elevate-primary transition-colors">Akademik</a>
+            <a href="#kegiatan" @click="mobileMenuOpen = false" class="text-xl font-black text-elevate-dark dark:text-slate-100 hover:text-elevate-primary transition-colors">Galeri Kegiatan</a>
+            <a href="#prestasi" @click="mobileMenuOpen = false" class="text-xl font-black text-elevate-dark dark:text-slate-100 hover:text-elevate-primary transition-colors">Prestasi</a>
+            <a href="#kontak" @click="mobileMenuOpen = false" class="text-xl font-black text-elevate-dark dark:text-slate-100 hover:text-elevate-primary transition-colors">Kontak</a>
             
-            <hr class="w-16 border-elevate-primary/50">
+            <div class="w-16 h-1 rounded-full bg-slate-200 dark:bg-slate-800 my-4"></div>
 
-            <div class="flex flex-col gap-4 w-full pb-10">
-                <a href="{{ route('portal.index') }}" class="text-lg font-bold text-elevate-accent">Portal Siswa</a>
+            <div class="flex flex-col gap-4 w-full mt-2">
+                <a href="{{ route('portal.index') }}" class="text-lg font-black text-elevate-accent text-center mb-2">Pusat Portal Siswa</a>
+                
                 @if(Auth::guard('student')->check())
-                    <a href="{{ route('students.learning.index') }}" class="block w-full py-3 rounded-xl bg-elevate-primary text-white font-bold shadow-lg shadow-elevate-dark/30">Dashboard Siswa</a>
+                    <a href="{{ route('students.learning.index') }}" class="block w-full py-3.5 rounded-xl bg-elevate-dark text-white font-black shadow-lg shadow-elevate-dark/30">Dashboard Siswa</a>
                 @else
-                    <a href="{{ route('login') }}" class="block w-full py-3 rounded-xl bg-white/10 border border-white/20 text-white font-bold">Login Staff</a>
+                    <a href="{{ route('portal.index') }}" class="block w-full py-3.5 rounded-xl bg-elevate-dark text-white font-black shadow-lg shadow-elevate-dark/20 flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-sign-in text-elevate-accent"></i> Portal Siswa
+                    </a>
+                    <a href="{{ route('login') }}" class="block w-full py-3.5 rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold flex items-center justify-center gap-2 mt-2">
+                        <i class="ph-bold ph-lock-key text-elevate-primary"></i> Login Staff / Guru
+                    </a>
+                    <a href="{{ route('library.catalogue') }}" class="block w-full py-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-300 font-bold flex items-center justify-center gap-2 mt-2">
+                        <i class="ph-bold ph-books"></i> Katalog Perpustakaan
+                    </a>
                 @endif
             </div>
         </nav>
@@ -163,24 +181,24 @@
              x-transition:leave="transition ease-in duration-150"
              x-transition:leave-start="opacity-100 scale-100 translate-y-0"
              x-transition:leave-end="opacity-0 scale-95 -translate-y-4"
-             class="relative bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col"
+             class="relative bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 flex flex-col"
              @click.stop>
 
             <!-- Area Input Pencarian -->
             <!-- Form dummy: Nantinya Anda bisa mengarahkan action form ini ke Controller pencarian -->
-            <form action="#" method="GET" class="flex items-center px-4 py-4 border-b border-slate-100 dark:border-slate-800">
-                <i class="ph-bold ph-magnifying-glass text-xl text-slate-400 dark:text-slate-500"></i>
-                <input x-ref="searchInput" type="text" name="q" class="w-full bg-transparent border-0 focus:ring-0 text-slate-900 dark:text-white px-4 text-lg placeholder-slate-400 dark:placeholder-slate-500 outline-none" placeholder="Cari guru, e-book, atau informasi...">
-                <button type="button" @click="searchOpen = false" class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider px-2 transition-colors">ESC</button>
+            <form action="#" method="GET" class="flex items-center px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                <i class="ph-bold ph-magnifying-glass text-2xl text-elevate-primary dark:text-elevate-accent"></i>
+                <input x-ref="searchInput" type="text" name="q" class="w-full bg-transparent border-0 focus:ring-0 text-elevate-dark dark:text-white px-4 text-xl font-bold placeholder-slate-400 dark:placeholder-slate-500 outline-none" placeholder="Cari guru, e-book, atau informasi...">
+                <button type="button" @click="searchOpen = false" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 bg-slate-100 dark:bg-slate-800 text-[10px] font-black uppercase tracking-widest px-3 transition-colors border border-slate-200 dark:border-slate-700">ESC</button>
             </form>
 
             <!-- Area Pintasan (Quick Links) -->
-            <div class="p-5 bg-slate-50 dark:bg-slate-800/30">
-                <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Pencarian Populer & Cepat</h4>
-                <div class="flex flex-wrap gap-2">
-                    <a href="{{ route('ppdb.create') }}" class="px-3 py-1.5 bg-white dark:bg-slate-800 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-elevate-accent dark:hover:border-elevate-accent hover:text-elevate-primary dark:hover:text-elevate-accent transition shadow-sm">🎓 Pendaftaran PPDB</a>
-                    <a href="{{ route('library.catalogue') }}" class="px-3 py-1.5 bg-white dark:bg-slate-800 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-elevate-accent dark:hover:border-elevate-accent hover:text-elevate-primary dark:hover:text-elevate-accent transition shadow-sm">📚 Katalog E-Book</a>
-                    <a href="#guru" @click="searchOpen = false" class="px-3 py-1.5 bg-white dark:bg-slate-800 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-elevate-accent dark:hover:border-elevate-accent hover:text-elevate-primary dark:hover:text-elevate-accent transition shadow-sm">👨‍🏫 Direktori Guru</a>
+            <div class="p-6 bg-slate-50 dark:bg-slate-800/30">
+                <h4 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">Pencarian Populer & Cepat</h4>
+                <div class="flex flex-wrap gap-2.5">
+                    <a href="{{ route('ppdb.create') }}" class="px-4 py-2 bg-white dark:bg-slate-800 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-elevate-accent dark:hover:border-elevate-accent hover:text-elevate-primary dark:hover:text-elevate-accent transition shadow-sm">🎓 Pendaftaran PPDB</a>
+                    <a href="{{ route('library.catalogue') }}" class="px-4 py-2 bg-white dark:bg-slate-800 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-elevate-accent dark:hover:border-elevate-accent hover:text-elevate-primary dark:hover:text-elevate-accent transition shadow-sm">📚 Katalog E-Book</a>
+                    <a href="#guru" @click="searchOpen = false" class="px-4 py-2 bg-white dark:bg-slate-800 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-elevate-accent dark:hover:border-elevate-accent hover:text-elevate-primary dark:hover:text-elevate-accent transition shadow-sm">👨‍🏫 Direktori Guru</a>
                 </div>
             </div>
         </div>

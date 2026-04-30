@@ -10,29 +10,37 @@
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .animate-enter { animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
         
+        .animate-blob { animation: blob 7s infinite; }
+        @keyframes blob { 
+            0% { transform: translate(0px, 0px) scale(1); } 
+            33% { transform: translate(30px, -50px) scale(1.1); } 
+            66% { transform: translate(-20px, 20px) scale(0.9); } 
+            100% { transform: translate(0px, 0px) scale(1); } 
+        }
+        
         /* Custom Scrollbar */
         .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #56bbf1; border-radius: 10px; } /* Warna elevate-accent */
     </style>
 @endpush
 
 @section('content')
-    <!-- HEADER PROFIL (Hero Section - Tema Cyan-Blue) -->
-    <div class="pt-32 pb-24 relative overflow-hidden -mt-24 bg-gradient-to-br from-cyan-500 via-blue-600 to-blue-900">
-        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.05] mix-blend-overlay"></div>
+    <!-- HEADER PROFIL (Hero Section - Tema Elevate Light) -->
+    <div class="pt-32 pb-24 relative overflow-hidden -mt-24 bg-elevate-gradient-main border-b border-white/60 shadow-sm">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] mix-blend-overlay"></div>
         
-        <!-- Animated Blobs (Sama dengan halaman utama) -->
-        <div class="absolute top-0 left-0 w-full md:w-[60%] h-full bg-cyan-300/20 rounded-full blur-[100px] -translate-x-1/4 -translate-y-1/4 pointer-events-none animate-blob"></div>
-        <div class="absolute bottom-0 right-0 w-full md:w-[50%] h-[80%] bg-indigo-900/30 rounded-full blur-[120px] translate-x-1/4 translate-y-1/4 pointer-events-none animate-blob" style="animation-delay: 2s;"></div>
+        <!-- Animated Blobs Elevate Colors -->
+        <div class="absolute top-0 left-0 w-full md:w-[60%] h-full bg-elevate-primary/10 rounded-full blur-[100px] -translate-x-1/4 -translate-y-1/4 pointer-events-none animate-blob"></div>
+        <div class="absolute bottom-0 right-0 w-full md:w-[50%] h-[80%] bg-elevate-peach/20 rounded-full blur-[120px] translate-x-1/4 translate-y-1/4 pointer-events-none animate-blob" style="animation-delay: 2s;"></div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 animate-enter">
             <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
                 <!-- Foto -->
-                <div class="w-40 h-40 md:w-48 md:h-48 rounded-full p-2 bg-white/20 backdrop-blur-md border border-white/30 shadow-[0_0_30px_rgba(34,211,238,0.3)] shrink-0">
-                    <img src="{{ !empty($teacher->photo_path) ? asset('storage/' . $teacher->photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($teacher->name ?? 'Guru').'&background=random' }}" 
+                <div class="w-40 h-40 md:w-48 md:h-48 rounded-full p-2 bg-white/60 backdrop-blur-md border border-white shadow-xl shadow-elevate-primary/10 shrink-0">
+                    <img src="{{ !empty($teacher->photo_path) ? asset('storage/' . $teacher->photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($teacher->name ?? 'Guru').'&background=e5eff5&color=0d52a1' }}" 
                          alt="{{ $teacher->name ?? 'Foto Guru' }}" 
-                         class="w-full h-full rounded-full object-cover bg-blue-900">
+                         class="w-full h-full rounded-full object-cover bg-elevate-soft">
                 </div>
 
                 <!-- Info Utama -->
@@ -45,38 +53,38 @@
                             $displayRole = is_array($decodedRoles) ? implode(', ', $decodedRoles) : $teacher->role;
                         }
                     @endphp
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/30 text-cyan-100 text-xs font-bold uppercase tracking-wider mb-4 shadow-sm backdrop-blur-sm">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/60 border border-white text-elevate-primary text-xs font-bold uppercase tracking-wider mb-4 shadow-sm backdrop-blur-sm">
                         <i class="ph-fill ph-briefcase"></i> {{ $displayRole ?: 'Tenaga Pendidik' }}
                     </div>
-                    <h1 class="text-3xl md:text-5xl font-black text-white mb-2 tracking-tight">{{ $teacher->name ?? 'Nama Tidak Diketahui' }}</h1>
-                    <p class="text-cyan-100 font-mono text-sm mb-6">{{ !empty($teacher->nip) ? 'NIP. ' . $teacher->nip : 'Non-NIP' }}</p>
+                    <h1 class="text-3xl md:text-5xl font-black text-elevate-dark mb-2 tracking-tight">{{ $teacher->name ?? 'Nama Tidak Diketahui' }}</h1>
+                    <p class="text-elevate-dark/60 font-mono text-sm mb-6 font-bold">{{ !empty($teacher->nip) ? 'NIP. ' . $teacher->nip : 'Non-NIP' }}</p>
                     
-                    <p class="text-blue-50 max-w-2xl leading-relaxed text-sm md:text-base italic mb-6 opacity-90">
+                    <p class="text-elevate-dark/80 max-w-2xl leading-relaxed text-sm md:text-base italic mb-6">
                         "{{ $teacher->bio ?? 'Terus belajar dan menginspirasi generasi bangsa.' }}"
                     </p>
 
-                   <!-- Sosial Media (Warna tombol diubah menyesuaikan background terang) -->
+                   <!-- Sosial Media -->
                     <div class="flex items-center justify-center md:justify-start gap-4">
                         @if(!empty($teacher->instagram))
-                        <a href="{{ $teacher->instagram }}" target="_blank" class="w-11 h-11 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-gradient-to-tr hover:from-pink-500 hover:to-purple-500 flex items-center justify-center transition-all duration-300 shadow-lg hover:-translate-y-1 backdrop-blur-sm">
+                        <a href="{{ $teacher->instagram }}" target="_blank" class="w-11 h-11 rounded-xl bg-elevate-surface border border-slate-100 text-elevate-dark/50 hover:bg-elevate-primary hover:text-white hover:border-elevate-primary flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-lg hover:-translate-y-1 backdrop-blur-sm">
                             <i class="ph ph-instagram-logo text-2xl"></i>
                         </a>
                         @endif
 
                         @if(!empty($teacher->facebook))
-                        <a href="{{ $teacher->facebook }}" target="_blank" class="w-11 h-11 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-blue-600 flex items-center justify-center transition-all duration-300 shadow-lg hover:-translate-y-1 backdrop-blur-sm">
+                        <a href="{{ $teacher->facebook }}" target="_blank" class="w-11 h-11 rounded-xl bg-elevate-surface border border-slate-100 text-elevate-dark/50 hover:bg-elevate-primary hover:text-white hover:border-elevate-primary flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-lg hover:-translate-y-1 backdrop-blur-sm">
                             <i class="ph ph-facebook-logo text-2xl"></i>
                         </a>
                         @endif
 
                         @if(!empty($teacher->tiktok))
-                        <a href="{{ $teacher->tiktok }}" target="_blank" class="w-11 h-11 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-slate-900 flex items-center justify-center transition-all duration-300 shadow-lg hover:-translate-y-1 backdrop-blur-sm">
+                        <a href="{{ $teacher->tiktok }}" target="_blank" class="w-11 h-11 rounded-xl bg-elevate-surface border border-slate-100 text-elevate-dark/50 hover:bg-elevate-primary hover:text-white hover:border-elevate-primary flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-lg hover:-translate-y-1 backdrop-blur-sm">
                             <i class="ph ph-tiktok-logo text-2xl"></i>
                         </a>
                         @endif
 
                         @if(!empty($teacher->phone))
-                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $teacher->phone) }}" target="_blank" class="w-11 h-11 rounded-xl bg-white/10 border border-white/20 text-white hover:bg-emerald-500 flex items-center justify-center transition-all duration-300 shadow-lg hover:-translate-y-1 backdrop-blur-sm">
+                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $teacher->phone) }}" target="_blank" class="w-11 h-11 rounded-xl bg-elevate-surface border border-slate-100 text-elevate-dark/50 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-lg hover:-translate-y-1 backdrop-blur-sm">
                             <i class="ph ph-whatsapp-logo text-2xl"></i>
                         </a>
                         @endif
@@ -84,16 +92,16 @@
 
                     <!-- Keahlian & Hobi -->
                     @if(!empty($teacher->keahlian) || !empty($teacher->hobi))
-                        <div class="mt-8 flex flex-col md:flex-row gap-6 border-t border-cyan-400/20 pt-6 text-left">
+                        <div class="mt-8 flex flex-col md:flex-row gap-6 border-t border-slate-200/50 pt-6 text-left">
                             @if(!empty($teacher->keahlian))
                             <div class="flex-1">
-                                <h3 class="text-xs font-bold text-cyan-200 uppercase tracking-widest mb-3 flex items-center justify-center md:justify-start gap-2">
-                                    <i class="ph-bold ph-star text-amber-300"></i> Keahlian Utama
+                                <h3 class="text-xs font-bold text-elevate-dark/60 uppercase tracking-widest mb-3 flex items-center justify-center md:justify-start gap-2">
+                                    <i class="ph-bold ph-star text-amber-500"></i> Keahlian Utama
                                 </h3>
                                 <div class="flex flex-wrap justify-center md:justify-start gap-2">
                                     @foreach(array_map('trim', explode(',', $teacher->keahlian ?? '')) as $keahlian)
                                         @if(!empty($keahlian))
-                                        <span class="px-3 py-1 bg-white/10 text-white border border-white/20 rounded-lg text-xs font-medium shadow-sm backdrop-blur-sm">{{ $keahlian }}</span>
+                                        <span class="px-3 py-1 bg-white/60 text-elevate-dark border border-white rounded-lg text-xs font-bold shadow-sm backdrop-blur-sm">{{ $keahlian }}</span>
                                         @endif
                                     @endforeach
                                 </div>
@@ -102,13 +110,13 @@
 
                             @if(!empty($teacher->hobi))
                             <div class="flex-1">
-                                <h3 class="text-xs font-bold text-cyan-200 uppercase tracking-widest mb-3 flex items-center justify-center md:justify-start gap-2">
-                                    <i class="ph-bold ph-heart text-rose-300"></i> Minat & Hobi
+                                <h3 class="text-xs font-bold text-elevate-dark/60 uppercase tracking-widest mb-3 flex items-center justify-center md:justify-start gap-2">
+                                    <i class="ph-bold ph-heart text-elevate-peach-dark"></i> Minat & Hobi
                                 </h3>
                                 <div class="flex flex-wrap justify-center md:justify-start gap-2">
                                     @foreach(array_map('trim', explode(',', $teacher->hobi ?? '')) as $hobi)
                                         @if(!empty($hobi))
-                                        <span class="px-3 py-1 bg-white/10 text-white border border-white/20 rounded-lg text-xs font-medium shadow-sm backdrop-blur-sm">{{ $hobi }}</span>
+                                        <span class="px-3 py-1 bg-white/60 text-elevate-dark border border-white rounded-lg text-xs font-bold shadow-sm backdrop-blur-sm">{{ $hobi }}</span>
                                         @endif
                                     @endforeach
                                 </div>
@@ -129,20 +137,21 @@
             <div class="lg:w-1/4">
                 <div class="bg-white rounded-3xl p-4 shadow-xl shadow-slate-200/50 sticky top-24 border border-slate-100 animate-enter" style="animation-delay: 100ms;">
                     <nav class="flex flex-row lg:flex-col gap-2 overflow-x-auto custom-scroll pb-2 lg:pb-0">
-                        <button @click="activeTab = 'pendidikan'" :class="activeTab === 'pendidikan' ? 'bg-cyan-50 text-cyan-600 font-bold border-cyan-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent'" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all text-sm whitespace-nowrap lg:whitespace-normal text-left">
-                            <i class="ph-duotone ph-graduation-cap text-xl" :class="activeTab === 'pendidikan' ? 'text-cyan-500' : ''"></i> Pendidikan Formal
+                        <!-- Pola Tab Seragam Menggunakan Tema Elevate -->
+                        <button @click="activeTab = 'pendidikan'" :class="activeTab === 'pendidikan' ? 'bg-elevate-soft text-elevate-primary font-bold border-elevate-accent/30' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent'" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all text-sm whitespace-nowrap lg:whitespace-normal text-left">
+                            <i class="ph-duotone ph-graduation-cap text-xl" :class="activeTab === 'pendidikan' ? 'text-elevate-primary' : ''"></i> Pendidikan Formal
                         </button>
-                        <button @click="activeTab = 'pengalaman'" :class="activeTab === 'pengalaman' ? 'bg-blue-50 text-blue-600 font-bold border-blue-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent'" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all text-sm whitespace-nowrap lg:whitespace-normal text-left">
-                            <i class="ph-duotone ph-student text-xl" :class="activeTab === 'pengalaman' ? 'text-blue-500' : ''"></i> Pengalaman & Pelatihan
+                        <button @click="activeTab = 'pengalaman'" :class="activeTab === 'pengalaman' ? 'bg-elevate-soft text-elevate-primary font-bold border-elevate-accent/30' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent'" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all text-sm whitespace-nowrap lg:whitespace-normal text-left">
+                            <i class="ph-duotone ph-student text-xl" :class="activeTab === 'pengalaman' ? 'text-elevate-primary' : ''"></i> Pengalaman & Pelatihan
                         </button>
-                        <button @click="activeTab = 'materi'" :class="activeTab === 'materi' ? 'bg-purple-50 text-purple-600 font-bold border-purple-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent'" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all text-sm whitespace-nowrap lg:whitespace-normal text-left">
-                            <i class="ph-duotone ph-book-open-text text-xl" :class="activeTab === 'materi' ? 'text-purple-500' : ''"></i> Materi & Media
+                        <button @click="activeTab = 'materi'" :class="activeTab === 'materi' ? 'bg-elevate-soft text-elevate-primary font-bold border-elevate-accent/30' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent'" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all text-sm whitespace-nowrap lg:whitespace-normal text-left">
+                            <i class="ph-duotone ph-book-open-text text-xl" :class="activeTab === 'materi' ? 'text-elevate-primary' : ''"></i> Materi & Media
                         </button>
-                        <button @click="activeTab = 'portofolio'" :class="activeTab === 'portofolio' ? 'bg-emerald-50 text-emerald-600 font-bold border-emerald-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent'" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all text-sm whitespace-nowrap lg:whitespace-normal text-left">
-                            <i class="ph-duotone ph-medal text-xl" :class="activeTab === 'portofolio' ? 'text-emerald-500' : ''"></i> Portofolio Guru
+                        <button @click="activeTab = 'portofolio'" :class="activeTab === 'portofolio' ? 'bg-elevate-soft text-elevate-primary font-bold border-elevate-accent/30' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent'" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all text-sm whitespace-nowrap lg:whitespace-normal text-left">
+                            <i class="ph-duotone ph-medal text-xl" :class="activeTab === 'portofolio' ? 'text-elevate-primary' : ''"></i> Portofolio Guru
                         </button>
-                        <button @click="activeTab = 'artikel'" :class="activeTab === 'artikel' ? 'bg-orange-50 text-orange-600 font-bold border-orange-200' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent'" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all text-sm whitespace-nowrap lg:whitespace-normal text-left">
-                            <i class="ph-duotone ph-article text-xl" :class="activeTab === 'artikel' ? 'text-orange-500' : ''"></i> Artikel Terpublikasi
+                        <button @click="activeTab = 'artikel'" :class="activeTab === 'artikel' ? 'bg-elevate-soft text-elevate-primary font-bold border-elevate-accent/30' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800 border-transparent'" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all text-sm whitespace-nowrap lg:whitespace-normal text-left">
+                            <i class="ph-duotone ph-article text-xl" :class="activeTab === 'artikel' ? 'text-elevate-primary' : ''"></i> Artikel Terpublikasi
                         </button>
                     </nav>
 
@@ -159,17 +168,16 @@
                 
                 <!-- TAB PENDIDIKAN -->
                 <div x-show="activeTab === 'pendidikan'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 min-h-[400px]">
-                    <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3">
-                        <span class="p-2 bg-cyan-100 text-cyan-600 rounded-lg"><i class="ph-bold ph-graduation-cap"></i></span> Riwayat Pendidikan Formal
+                    <h2 class="text-2xl font-black text-elevate-dark mb-6 flex items-center gap-3">
+                        <span class="p-2 bg-elevate-soft text-elevate-primary rounded-lg"><i class="ph-bold ph-graduation-cap"></i></span> Riwayat Pendidikan Formal
                     </h2>
                     
                     <div class="relative border-l-2 border-slate-100 ml-4 space-y-8 pb-4">
-                        {{-- Aman: sudah menggunakan ?? [] --}}
                         @forelse($teacher->educations ?? [] as $edu)
                             <div class="relative pl-6">
-                                <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-cyan-500 border-4 border-white shadow"></div>
-                                <span class="text-xs font-bold text-cyan-500 mb-1 block">{{ $edu->start_year ?? '-' }} - {{ $edu->end_year ?? 'Sekarang' }}</span>
-                                <h3 class="text-lg font-bold text-slate-800">{{ $edu->institution ?? 'Institusi Tidak Diketahui' }}</h3>
+                                <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-elevate-primary border-4 border-white shadow"></div>
+                                <span class="text-xs font-bold text-elevate-primary mb-1 block">{{ $edu->start_year ?? '-' }} - {{ $edu->end_year ?? 'Sekarang' }}</span>
+                                <h3 class="text-lg font-bold text-elevate-dark">{{ $edu->institution ?? 'Institusi Tidak Diketahui' }}</h3>
                                 <p class="text-slate-500 text-sm mt-1">{{ $edu->degree ?? '-' }}</p>
                             </div>
                         @empty
@@ -183,22 +191,20 @@
 
                 <!-- TAB 1: PENGALAMAN & PELATIHAN -->
                <div x-cloak x-show="activeTab === 'pengalaman'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 min-h-[400px]">
-                    <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3">
-                        <span class="p-2 bg-blue-100 text-blue-600 rounded-lg"><i class="ph-bold ph-student"></i></span> Riwayat Pelatihan & Sertifikasi
+                    <h2 class="text-2xl font-black text-elevate-dark mb-6 flex items-center gap-3">
+                        <span class="p-2 bg-elevate-accent/20 text-elevate-primary rounded-lg"><i class="ph-bold ph-student"></i></span> Riwayat Pelatihan & Sertifikasi
                     </h2>
                     
                     <div class="relative border-l-2 border-slate-100 ml-4 space-y-8 pb-4">
-                        {{-- Aman: Ditambahkan ?? [] untuk menghindari error jika variabel belum dikirim --}}
                         @forelse($experiences ?? [] as $exp)
                             <div class="relative pl-6">
-                                <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-blue-500 border-4 border-white shadow"></div>
-                                <span class="text-xs font-bold text-blue-500 mb-1 block">Tahun {{ $exp->year ?? 'N/A' }}</span>
-                                <h3 class="text-lg font-bold text-slate-800">{{ $exp->title ?? 'Tanpa Judul' }}</h3>
+                                <div class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-elevate-accent border-4 border-white shadow"></div>
+                                <span class="text-xs font-bold text-elevate-primary mb-1 block">Tahun {{ $exp->year ?? 'N/A' }}</span>
+                                <h3 class="text-lg font-bold text-elevate-dark">{{ $exp->title ?? 'Tanpa Judul' }}</h3>
                                 <p class="text-slate-500 text-sm mt-1 mb-2">{{ $exp->organizer ?? '-' }}</p>
                                 
-                                {{-- TAMBAHAN: Tombol Lihat Sertifikat --}}
                                 @if(!empty($exp->certificate_path))
-                                    <a href="{{ asset('storage/' . $exp->certificate_path) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg text-xs font-bold transition-colors">
+                                    <a href="{{ asset('storage/' . $exp->certificate_path) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-elevate-soft text-elevate-primary hover:bg-elevate-primary hover:text-white rounded-lg text-xs font-bold transition-colors">
                                         <i class="ph-bold ph-certificate"></i> Lihat Sertifikat
                                     </a>
                                 @endif
@@ -214,20 +220,19 @@
 
                 <!-- TAB 2: MATERI & MEDIA -->
                 <div x-cloak x-show="activeTab === 'materi'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 min-h-[400px]">
-                    <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3">
-                        <span class="p-2 bg-purple-100 text-purple-600 rounded-lg"><i class="ph-bold ph-presentation-chart"></i></span> Materi & Media Pembelajaran
+                    <h2 class="text-2xl font-black text-elevate-dark mb-6 flex items-center gap-3">
+                        <span class="p-2 bg-slate-100 text-elevate-dark rounded-lg"><i class="ph-bold ph-presentation-chart"></i></span> Materi & Media Pembelajaran
                     </h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {{-- Aman: Ditambahkan ?? [] --}}
                         @forelse($materials ?? [] as $material)
-                            <a href="{{ !empty($material->file_url) ? $material->file_url : '#' }}" target="_blank" class="group block p-4 border border-slate-200 rounded-2xl hover:border-purple-300 hover:shadow-lg hover:shadow-purple-100 transition-all bg-slate-50/50">
+                            <a href="{{ !empty($material->file_url) ? $material->file_url : '#' }}" target="_blank" class="group block p-4 border border-slate-200 rounded-2xl hover:border-elevate-accent hover:shadow-lg hover:shadow-elevate-accent/10 transition-all bg-slate-50/50">
                                 <div class="flex items-start gap-4">
-                                    <div class="w-12 h-12 shrink-0 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                                    <div class="w-12 h-12 shrink-0 rounded-xl bg-elevate-soft text-elevate-primary flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
                                         <i class="ph-fill {{ $material->icon ?? 'ph-file-text' }}"></i>
                                     </div>
                                     <div>
-                                        <h4 class="font-bold text-slate-800 group-hover:text-purple-600 transition-colors line-clamp-2">{{ $material->title ?? 'Dokumen' }}</h4>
+                                        <h4 class="font-bold text-elevate-dark group-hover:text-elevate-primary transition-colors line-clamp-2">{{ $material->title ?? 'Dokumen' }}</h4>
                                         <p class="text-xs text-slate-500 mt-1">{{ $material->type ?? 'Materi' }}</p>
                                     </div>
                                 </div>
@@ -243,8 +248,8 @@
 
                 <!-- TAB 3: PORTOFOLIO -->
                 <div x-cloak x-show="activeTab === 'portofolio'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 min-h-[400px]">
-                    <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3">
-                        <span class="p-2 bg-emerald-100 text-emerald-600 rounded-lg"><i class="ph-bold ph-medal"></i></span> Portofolio & Pencapaian
+                    <h2 class="text-2xl font-black text-elevate-dark mb-6 flex items-center gap-3">
+                        <span class="p-2 bg-elevate-peach/20 text-elevate-peach-dark rounded-lg"><i class="ph-bold ph-medal"></i></span> Portofolio & Pencapaian
                     </h2>
 
                     {{-- Wrapper AlpineJS untuk Galeri Interaktif --}}
@@ -268,7 +273,7 @@
                                 
                                 {{-- Kartu Portofolio (Bisa Diklik) --}}
                                 <div @click="if({{ count($imageUrls) }} > 0) { galleryOpen = true; galleryImages = @js($imageUrls); currentIdx = 0; galleryTitle = '{{ addslashes($portfolio->title ?? 'Portofolio') }}' }" 
-                                     class="group rounded-2xl overflow-hidden border border-slate-200 relative cursor-pointer hover:shadow-xl hover:-translate-y-1 hover:border-emerald-300 transition-all duration-300 bg-white">
+                                     class="group rounded-2xl overflow-hidden border border-slate-200 relative cursor-pointer hover:shadow-xl hover:-translate-y-1 hover:border-elevate-peach transition-all duration-300 bg-white">
                                     
                                     <div class="aspect-video bg-slate-100 flex items-center justify-center relative">
                                         @if(count($images) > 0)
@@ -281,8 +286,8 @@
                                             @endif
 
                                             {{-- Overlay "Lihat Galeri" --}}
-                                            <div class="absolute inset-0 bg-emerald-900/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
-                                                <span class="bg-white/95 text-emerald-800 px-4 py-2 rounded-xl text-sm font-black flex items-center gap-2 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                            <div class="absolute inset-0 bg-elevate-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                                                <span class="bg-white/95 text-elevate-primary px-4 py-2 rounded-xl text-sm font-black flex items-center gap-2 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
                                                     <i class="ph-bold ph-magnifying-glass-plus text-lg"></i> Lihat Galeri
                                                 </span>
                                             </div>
@@ -292,7 +297,7 @@
                                     </div>
                                     
                                     <div class="p-4 relative z-10 border-t border-slate-100">
-                                        <h4 class="font-bold text-slate-800 mb-1 group-hover:text-emerald-600 transition-colors line-clamp-1">{{ $portfolio->title ?? 'Portofolio' }}</h4>
+                                        <h4 class="font-bold text-elevate-dark mb-1 group-hover:text-elevate-primary transition-colors line-clamp-1">{{ $portfolio->title ?? 'Portofolio' }}</h4>
                                         <p class="text-xs font-medium text-slate-500">Tahun {{ $portfolio->year ?? '-' }}</p>
                                     </div>
                                 </div>
@@ -319,7 +324,7 @@
                                 <!-- Judul Galeri -->
                                 <div class="text-center mb-6 mt-12 md:mt-0 px-4">
                                     <h3 class="text-xl md:text-2xl font-black text-white drop-shadow-md" x-text="galleryTitle"></h3>
-                                    <p class="text-xs font-bold text-emerald-300 mt-2 bg-emerald-500/20 border border-emerald-500/30 px-3 py-1 rounded-full inline-block">
+                                    <p class="text-xs font-bold text-elevate-primary mt-2 bg-elevate-soft border border-elevate-primary/20 px-3 py-1 rounded-full inline-block">
                                         Foto <span x-text="currentIdx + 1"></span> dari <span x-text="galleryImages.length"></span>
                                     </p>
                                 </div>
@@ -332,14 +337,14 @@
                                     </template>
                                     
                                     <!-- Navigasi -->
-                                    <button x-show="galleryImages.length > 1" @click.stop="currentIdx = currentIdx === 0 ? galleryImages.length - 1 : currentIdx - 1" class="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 border border-white/20 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-md opacity-80 hover:opacity-100 md:opacity-0 md:group-hover:opacity-100"><i class="ph-bold ph-caret-left text-2xl"></i></button>
-                                    <button x-show="galleryImages.length > 1" @click.stop="currentIdx = currentIdx === galleryImages.length - 1 ? 0 : currentIdx + 1" class="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 border border-white/20 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-md opacity-80 hover:opacity-100 md:opacity-0 md:group-hover:opacity-100"><i class="ph-bold ph-caret-right text-2xl"></i></button>
+                                    <button x-show="galleryImages.length > 1" @click.stop="currentIdx = currentIdx === 0 ? galleryImages.length - 1 : currentIdx - 1" class="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 border border-white/20 hover:bg-elevate-primary text-white rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-md opacity-80 hover:opacity-100 md:opacity-0 md:group-hover:opacity-100"><i class="ph-bold ph-caret-left text-2xl"></i></button>
+                                    <button x-show="galleryImages.length > 1" @click.stop="currentIdx = currentIdx === galleryImages.length - 1 ? 0 : currentIdx + 1" class="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 border border-white/20 hover:bg-elevate-primary text-white rounded-full flex items-center justify-center transition-all shadow-lg backdrop-blur-md opacity-80 hover:opacity-100 md:opacity-0 md:group-hover:opacity-100"><i class="ph-bold ph-caret-right text-2xl"></i></button>
                                 </div>
 
                                 <!-- Thumbnail -->
                                 <div class="flex gap-3 overflow-x-auto max-w-full custom-scroll py-2 px-2" x-show="galleryImages.length > 1">
                                     <template x-for="(img, index) in galleryImages">
-                                        <button @click.stop="currentIdx = index" class="shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden border-2 transition-all duration-300 ease-out" :class="currentIdx === index ? 'border-amber-400 opacity-100 scale-110 shadow-lg shadow-amber-500/40' : 'border-white/10 opacity-40 hover:opacity-100 hover:border-white/40'">
+                                        <button @click.stop="currentIdx = index" class="shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden border-2 transition-all duration-300 ease-out" :class="currentIdx === index ? 'border-elevate-primary opacity-100 scale-110 shadow-lg shadow-elevate-primary/40' : 'border-white/10 opacity-40 hover:opacity-100 hover:border-white/40'">
                                             <img :src="img" class="w-full h-full object-cover">
                                         </button>
                                     </template>
@@ -352,12 +357,11 @@
 
                 <!-- TAB 4: ARTIKEL -->
                 <div x-cloak x-show="activeTab === 'artikel'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 min-h-[400px]">
-                    <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3">
-                        <span class="p-2 bg-orange-100 text-orange-600 rounded-lg"><i class="ph-bold ph-article"></i></span> Artikel & Opini
+                    <h2 class="text-2xl font-black text-elevate-dark mb-6 flex items-center gap-3">
+                        <span class="p-2 bg-elevate-peach/10 text-elevate-peach-dark rounded-lg"><i class="ph-bold ph-article"></i></span> Artikel & Opini
                     </h2>
 
                     <div class="space-y-4">
-                        {{-- Aman: Ditambahkan ?? [] --}}
                         @forelse($articles ?? [] as $article)
                             <a href="{{ !empty($article->url) ? $article->url : '#' }}" class="flex flex-col sm:flex-row gap-4 p-4 rounded-2xl border border-slate-100 hover:bg-slate-50 hover:border-slate-200 transition-all group">
                                 @if(!empty($article->image_path))
@@ -366,12 +370,11 @@
                                 </div>
                                 @endif
                                 <div class="flex flex-col justify-center">
-                                    <span class="text-xs font-bold text-orange-500 mb-1">{{ $article->category ?? 'Pendidikan' }}</span>
-                                    <h4 class="text-lg font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{{ $article->title ?? 'Tanpa Judul' }}</h4>
+                                    <span class="text-xs font-bold text-elevate-peach-dark mb-1">{{ $article->category ?? 'Pendidikan' }}</span>
+                                    <h4 class="text-lg font-bold text-elevate-dark group-hover:text-elevate-primary transition-colors">{{ $article->title ?? 'Tanpa Judul' }}</h4>
                                     <p class="text-sm text-slate-500 mt-2 line-clamp-2">{{ $article->excerpt ?? '' }}</p>
                                     <span class="text-xs text-slate-400 mt-3">
                                         <i class="ph-regular ph-calendar-blank"></i> 
-                                        {{-- Pencegahan Error jika tanggal null --}}
                                         {{ !empty($article->published_at) ? \Carbon\Carbon::parse($article->published_at)->translatedFormat('d F Y') : 'Belum dipublikasi' }}
                                     </span>
                                 </div>
