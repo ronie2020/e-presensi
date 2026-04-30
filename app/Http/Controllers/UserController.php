@@ -38,10 +38,28 @@ class UserController extends Controller
         return Auth::user()->hasRole('Admin');
     }
 
-    public function index()
+    /**
+     * Menampilkan daftar pengguna dengan fitur pencarian.
+     */
+    public function index(Request $request)
     {
-        $users = User::with('roles')->latest()->paginate(10);
-        return view('users.index', ['users' => $users]);
+        $search = $request->input('search');
+
+        $users = User::with('roles')
+            // Logika Pencarian: Cek Nama, Email, atau NIP
+            ->when($search, function($query, $search) {
+                return $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('nip', 'like', "%{$search}%");
+                });
+            })
+            ->latest()
+            ->paginate(10)
+            // Penting: Memastikan parameter search tidak hilang saat pindah halaman paginasi
+            ->withQueryString();
+
+        return view('users.index', compact('users', 'search'));
     }
 
     public function create()
@@ -124,6 +142,9 @@ class UserController extends Controller
             abort(403, 'Anda tidak memiliki akses untuk mengubah profil ini.');
         }
 
+        // FIX 1: Deteksi apakah form yang disubmit memiliki field 'role' (Halaman Kelola User vs Profil Saya)
+        $isUpdatingRole = $imAdmin && $request->has('role');
+
         // Aturan validasi dasar (berlaku untuk semuanya)
         $rules = [
             'name' => ['required', 'string', 'max:255'],
@@ -149,8 +170,8 @@ class UserController extends Controller
             'hobi' => ['nullable', 'string'],
         ];
 
-        // Jika yang login Admin, tambahkan validasi untuk Role
-        if ($imAdmin) {
+        // Jika yang login Admin DAN form mengirimkan role, tambahkan validasi untuk Role
+        if ($isUpdatingRole) {
             $rules['role'] = ['required', 'array'];
             $rules['role.*'] = ['string', 'in:' . implode(',', $this->availableRoles)];
         }
@@ -158,8 +179,8 @@ class UserController extends Controller
         $request->validate($rules);
 
         // Cegah Admin menghapus role Admin-nya sendiri (Anti Lockout)
-        if ($imAdmin && Auth::id() == $user->id) {
-            if (!$request->has('role') || !in_array('Admin', $request->role)) {
+        if ($isUpdatingRole && Auth::id() == $user->id) {
+            if (!in_array('Admin', $request->role)) {
                 return redirect()->back()->with('error', 'Anda tidak boleh menghapus role Admin dari akun Anda sendiri.');
             }
         }
@@ -190,7 +211,7 @@ class UserController extends Controller
         }
 
         // FIX UTAMA: Jika Admin mengedit Role, simpan juga ke kolom 'role' di tabel users
-        if ($imAdmin && $request->has('role')) {
+        if ($isUpdatingRole) {
             $data['role'] = is_array($request->role) ? $request->role[0] : $request->role;
         }
 
@@ -205,7 +226,7 @@ class UserController extends Controller
         $user->update($data);
 
         // SYNC ROLES SPATIE (Hanya izinkan Admin yang bisa memodifikasi Role)
-        if ($imAdmin && $request->has('role')) {
+        if ($isUpdatingRole) {
             $user->syncRoles($request->role);
         }
 
