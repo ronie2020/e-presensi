@@ -31,12 +31,30 @@
         }
 
         @media print {
+            @page {
+                size: A4;
+                margin: 10mm; /* Memaksa margin printer 1cm di semua sisi */
+            }
             body { background: white; margin: 0; padding: 0; }
-            .page { margin: 0; box-shadow: none; padding: 10mm; }
+            .page { 
+                margin: 0; 
+                box-shadow: none; 
+                padding: 0; 
+                width: 100%;
+                gap: 0; 
+                justify-content: space-between;
+            }
+            
+            .sticker {
+                margin-bottom: 4mm; /* Pengganti gap vertical saat print */
+            }
+
             .no-print { display: none !important; }
             /* Garis potong agak digelapkan sedikit saat di-print agar terlihat jelas */
             .show-border { border: 1px dashed #94a3b8 !important; } 
+            .show-border .spine-label { border-right: 1px dashed #94a3b8 !important; }
             .no-border { border: none !important; }
+            .no-border .spine-label { border-right: none !important; }
         }
 
         /* STIKER CONTAINER (DIPERKECIL) */
@@ -48,6 +66,11 @@
             box-sizing: border-box;
             border: 1px dashed #cbd5e1;
             overflow: hidden;
+            
+            /* FIX UTAMA: Mencegah stiker terpotong di tengah saat ganti halaman */
+            page-break-inside: avoid;
+            break-inside: avoid;
+            -webkit-column-break-inside: avoid;
         }
 
         /* BAGIAN PUNGGUNG BUKU (Spine) */
@@ -171,4 +194,4 @@
     </div>
 
 </body>
-</html><?php /**PATH C:\Users\ronie\Documents\aplikasi terpadu\sistem_absensi_sekolah\resources\views/library/tools/print-book-label.blade.php ENDPATH**/ ?>
+</html><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/library/tools/print-book-label.blade.php ENDPATH**/ ?>

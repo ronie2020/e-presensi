@@ -31,12 +31,30 @@
         }
 
         @media print {
+            @page {
+                size: A4;
+                margin: 10mm; /* Memaksa margin printer 1cm di semua sisi */
+            }
             body { background: white; margin: 0; padding: 0; }
-            .page { margin: 0; box-shadow: none; padding: 10mm; }
+            .page { 
+                margin: 0; 
+                box-shadow: none; 
+                padding: 0; 
+                width: 100%;
+                gap: 0; 
+                justify-content: space-between;
+            }
+            
+            .sticker {
+                margin-bottom: 4mm; /* Pengganti gap vertical saat print */
+            }
+
             .no-print { display: none !important; }
             /* Garis potong agak digelapkan sedikit saat di-print agar terlihat jelas */
             .show-border { border: 1px dashed #94a3b8 !important; } 
+            .show-border .spine-label { border-right: 1px dashed #94a3b8 !important; }
             .no-border { border: none !important; }
+            .no-border .spine-label { border-right: none !important; }
         }
 
         /* STIKER CONTAINER (DIPERKECIL) */
@@ -48,6 +66,11 @@
             box-sizing: border-box;
             border: 1px dashed #cbd5e1;
             overflow: hidden;
+            
+            /* FIX UTAMA: Mencegah stiker terpotong di tengah saat ganti halaman */
+            page-break-inside: avoid;
+            break-inside: avoid;
+            -webkit-column-break-inside: avoid;
         }
 
         /* BAGIAN PUNGGUNG BUKU (Spine) */
@@ -146,17 +169,21 @@
             {{-- 2. BAGIAN KANAN: BARCODE KOTAK / QR CODE EKSEMPLAR --}}
             <div class="cover-label">
                 {{-- Judul Buku Induk (DIPERBESAR & LEBIH TEBAL) --}}
-                <p class="text-[11px] font-extrabold text-slate-800 text-center leading-tight mb-1.5 w-full line-clamp-2 px-1">
+                <p class="text-[11px] font-extrabold text-slate-800 text-center leading-tight mb-1 w-full line-clamp-2 px-1">
                     {{ $copy->book->title ?? 'Judul Tidak Diketahui' }}
                 </p>
                 
-                {{-- QR CODE SPESIFIK EKSEMPLAR (OFFLINE TANPA API) --}}
+                {{-- QR CODE SPESIFIK EKSEMPLAR (DIPERBAIKI AGAR MUDAH DISCAN) --}}
                 <div class="flex-1 flex items-center justify-center w-full">
-                    {!! QrCode::size(55)->margin(0)->generate($copyCode) !!}
+                    {{-- 
+                        Ubah margin(0) menjadi margin(1) untuk "Quiet Zone". 
+                        Scanner SANGAT membutuhkan batas putih ini agar bisa membaca dengan cepat.
+                    --}}
+                    {!! QrCode::size(50)->margin(1)->generate($copyCode) !!}
                 </div>
                 
                 {{-- Kode Teks di Bawah QR Code --}}
-                <p class="text-[9.5px] font-mono font-bold text-slate-600 mt-1 truncate w-full text-center px-1">
+                <p class="text-[9.5px] font-mono font-bold text-slate-600 mt-0.5 truncate w-full text-center px-1">
                     {{ $copyCode }}
                 </p>
             </div>

@@ -355,4 +355,150 @@ class LibraryCirculationController extends Controller
             return back()->with('error', 'Gagal memproses: ' . $e->getMessage());
         }
     }
+
+     /**
+     * MENAMPILKAN HALAMAN PEMINJAMAN PAKET INDIVIDU (1 Siswa Banyak Buku)
+     */
+    public function studentBorrow()
+    {
+        // Ambil semua data siswa yang aktif beserta relasi kelasnya
+        // (Ditambahkan mapping class_name agar sesuai dengan format di Blade UI)
+        $students = Student::with('schoolClass')->orderBy('name', 'asc')->get()->map(function($student) {
+            $student->class_name = $student->schoolClass ? $student->schoolClass->name : 'Tanpa Kelas';
+            return $student;
+        });
+        
+        return view('library.circulation.student-borrow', compact('students'));
+    }
+
+    /**
+     * API: Cari Detail Fisik Eksemplar Berdasarkan Barcode Unik (AJAX Keranjang)
+     */
+    public function getBookByCode(Request $request)
+    {
+        try {
+            $code = $request->code;
+            
+            // Cari fisik buku berdasarkan kode barcode stiker
+            $copy = \App\Models\BookCopy::with(['book.category'])->where('copy_code', $code)->first();
+
+            if (!$copy) {
+                return response()->json(['success' => false, 'message' => 'Barcode tidak ditemukan di database.']);
+            }
+
+            // Cek apakah buku sedang dipinjam orang lain (Status = borrowed)
+            $isUsed = Borrowing::where('item_code', $code)->where('status', 'borrowed')->exists();
+            if ($isUsed) {
+                return response()->json(['success' => false, 'message' => 'Buku ini masih berstatus dipinjam siswa lain!']);
+            }
+
+            return response()->json([
+                'success' => true,
+                'book' => [
+                    'title' => $copy->book->title ?? 'Judul Tidak Diketahui',
+                    'category' => $copy->book->category->name ?? 'Umum',
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error Server: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * PROSES PEMINJAMAN PAKET INDIVIDU (Banyak Buku ke 1 Siswa)
+     */
+    public function storeStudentBulk(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $request->validate([
+                'student_id' => 'required|exists:students,id',
+                'due_date' => 'required|date',
+                'item_codes' => 'required|array'
+            ]);
+
+            $studentId = $request->student_id;
+            $itemCodesData = array_filter($request->item_codes);
+            $validCount = count($itemCodesData);
+
+            if ($validCount == 0) {
+                return back()->with('error', 'Tidak ada stiker barcode yang dipindai di keranjang.');
+            }
+
+            // --- TAMBAHAN: CEK BATAS MAKSIMAL 11 BUKU PAKET ---
+            // Hitung berapa banyak buku paket yang SEDANG dipinjam oleh siswa ini
+            $activeTextbookLoansCount = Borrowing::where('student_id', $studentId)
+                ->where('status', 'borrowed')
+                ->where('type', 'textbook')
+                ->count();
+
+            // Jika jumlah buku paket di tangan + jumlah buku yang baru di-scan lebih dari 11
+            if (($activeTextbookLoansCount + $validCount) > 11) {
+                DB::rollBack();
+                $sisaKuota = 11 - $activeTextbookLoansCount;
+                return back()->with('error', "Batas maksimal peminjaman buku paket adalah 11 buku per siswa. Siswa ini telah meminjam {$activeTextbookLoansCount} buku paket (Sisa kuota: {$sisaKuota}).");
+            }
+            // --------------------------------------------------
+
+            $borrowingsData = [];
+            $now = now();
+            $assignedCount = 0;
+
+            foreach ($itemCodesData as $itemCode) {
+                $copy = \App\Models\BookCopy::with('book')->where('copy_code', $itemCode)->first();
+                
+                if (!$copy) {
+                    DB::rollBack();
+                    return back()->with('error', "Barcode '{$itemCode}' tidak dikenali sistem.");
+                }
+
+                // 1. Cek Fisik Buku sedang dipinjam?
+                $isUsed = Borrowing::where('item_code', $itemCode)->where('status', 'borrowed')->exists();
+                if ($isUsed) {
+                    DB::rollBack();
+                    return back()->with('error', "Eksemplar '{$itemCode}' sedang dipinjam oleh siswa lain!");
+                }
+
+                // 2. Cek apakah siswa ini sudah pinjam JUDUL buku ini? 
+                // (Mencegah 1 anak secara tidak sengaja dipinjamkan 2 buah buku Matematika)
+                $hasBook = Borrowing::where('student_id', $studentId)
+                            ->where('book_id', $copy->book_id)
+                            ->where('status', 'borrowed')
+                            ->exists();
+                if ($hasBook) {
+                    DB::rollBack();
+                    $bookTitle = $copy->book->title ?? 'Buku ini';
+                    return back()->with('error', "Siswa ini sudah meminjam judul '{$bookTitle}'. Tidak boleh ada judul ganda!");
+                }
+
+                $borrowingsData[] = [
+                    'student_id' => $studentId,
+                    'book_id' => $copy->book_id,
+                    'item_code' => $itemCode,
+                    'borrow_date' => $now,
+                    'due_date' => $request->due_date,
+                    'status' => 'borrowed',
+                    'type' => 'textbook', // Penanda bahwa ini peminjaman paket
+                    'served_by' => Auth::id(),
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+                
+                // Kurangi stok di buku induk
+                Book::where('id', $copy->book_id)->decrement('stock', 1);
+                $assignedCount++;
+            }
+
+            if ($assignedCount > 0) {
+                Borrowing::insert($borrowingsData);
+            }
+
+            DB::commit();
+            return back()->with('success', "Berhasil memproses peminjaman {$assignedCount} buku paket untuk siswa terpilih.");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal memproses peminjaman: ' . $e->getMessage());
+        }
+    }
 }

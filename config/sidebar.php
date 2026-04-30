@@ -368,6 +368,13 @@ return [
                 'icon' => 'ph-stack',
                 'roles' => ['Admin', 'TU'] 
             ],
+                [
+                'name' => 'Pinjam Individu',
+                'route' => 'library.circulation.student_borrow',
+                'active_check' => 'library.circulation.student_borrow',
+                'icon' => 'ph-user-focus', // Ikon user untuk menandakan individu
+                'roles' => ['Admin', 'TU'] 
+            ],
             [
                 'name' => 'Data Buku',
                 'route' => 'library.books.index',

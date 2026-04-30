@@ -524,6 +524,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/circulation/bulk', [LibraryCirculationController::class, 'bulkBorrow'])->name('circulation.bulk_borrow');
         Route::post('/circulation/bulk', [LibraryCirculationController::class, 'storeBulk'])->name('circulation.storeBulk');
      
+         // ROUTE PEMINJAMAN PAKET INDIVIDU (1 Siswa -> Banyak Buku)
+        Route::get('/circulation/student-bulk', [LibraryCirculationController::class, 'studentBorrow'])->name('circulation.student_borrow');
+        Route::post('/circulation/student-bulk', [LibraryCirculationController::class, 'storeStudentBulk'])->name('circulation.storeStudentBulk');
+
         // ALAT BANTU & CETAK
         Route::controller(LibraryToolsController::class)->prefix('tools')->name('tools.')->group(function () {
             Route::get('/', 'index')->name('index');             
@@ -536,7 +540,10 @@ Route::middleware('auth')->group(function () {
             Route::get('/api/check-clearance', 'checkClearanceApi')->name('checkClearanceApi');
             Route::get('/print-clearance/{id}', 'printClearance')->name('printClearance');
             Route::get('/api/students-by-class/{class_id}', 'getStudentsByClass')->name('getStudentsByClass');
-        });       
+        });   
+        
+        // API TAMBAHAN UNTUK SCANNER KERANJANG PADA PEMINJAMAN INDIVIDU
+        Route::get('/tools/api/book-by-code', [LibraryCirculationController::class, 'getBookByCode'])->name('tools.bookByCode');
     });
         
         // ROUTE ADMIN LITERASI (MONITORING)      
