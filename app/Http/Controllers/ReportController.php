@@ -659,10 +659,17 @@ class ReportController extends Controller
         }
 
         // TAMPILAN WEB (Dengan Pagination)
-        $sessions = $query->paginate(20)->withQueryString();
+       $sessions = $query->paginate(20)->withQueryString();
 
-        $teachers = \App\Models\User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Mata Pelajaran'])->orderBy('name')->get();
-        if($teachers->isEmpty()) $teachers = \App\Models\User::all();
+        // FIX: Tambahkan 'Admin', 'Guru Piket', dan 'TU' ke dalam array pencarian
+        $teachers = \App\Models\User::whereIn('role', [
+            'Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Mata Pelajaran', 
+            'Admin', 'Guru Piket', 'TU' 
+        ])->orderBy('name')->get();
+        
+        if($teachers->isEmpty()) {
+            $teachers = \App\Models\User::all();
+        }
         
         $classes = \App\Models\SchoolClass::orderBy('name')->get();
         $subjects = \App\Models\Subject::orderBy('name')->get();
@@ -672,7 +679,7 @@ class ReportController extends Controller
             'startDate', 'endDate', 'teacherId', 'classId', 'subjectId'
         ));
     }
-
+    
     // =========================================================================
     // 5. OPERASI CRUD & HELPERS (LOGIKA LAMA UTUH)
     // =========================================================================
