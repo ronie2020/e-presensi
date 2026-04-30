@@ -599,50 +599,73 @@ class ReportController extends Controller
         return $this->indexClass($request); 
     }
 
-    // =========================================================================
-    // 4. TEACHING JOURNAL (LOGIKA LAMA UTUH)
+  // =========================================================================
+    // 4. TEACHING JOURNAL (LOGIKA LAMA + FIX FILTER & PRINT)
     // =========================================================================
 
     public function teachingJournal(Request $request)
     {
-        $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
-        $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
+        $startDate = $request->input('start_date', \Carbon\Carbon::now()->startOfMonth()->toDateString());
+        $endDate = $request->input('end_date', \Carbon\Carbon::now()->endOfMonth()->toDateString());
         
         $teacherId = $request->input('teacher_id');
         $classId = $request->input('class_id');
         $subjectId = $request->input('subject_id');
 
-        $query = TeachingSession::with(['teacher', 'schedule.schoolClass', 'schedule.subject'])
+        $query = \App\Models\TeachingSession::with(['teacher', 'schedule.schoolClass', 'schedule.subject'])
             ->withCount([
-                'attendances as hadir_count' => function ($q) { $q->where('status', 'present'); },
-                'attendances as late_count' => function ($q) { $q->where('status', 'late'); },
-                'attendances as alpha_count' => function ($q) { $q->where('status', 'alpha'); },
+                'attendances as hadir_count' => function ($q) { $q->whereIn('status', ['present', 'Hadir']); },
+                'attendances as late_count' => function ($q) { $q->whereIn('status', ['late', 'Terlambat']); },
+                'attendances as alpha_count' => function ($q) { $q->whereIn('status', ['alpha', 'Alfa']); },
+                // Tambahan: Menghitung Sakit dan Izin agar laporan cetak lebih lengkap
+                'attendances as sick_count' => function ($q) { $q->whereIn('status', ['sick', 'Sakit']); },
+                'attendances as permission_count' => function ($q) { $q->whereIn('status', ['permission', 'Izin']); },
             ])
             ->whereBetween('date', [$startDate, $endDate])
             ->orderBy('date', 'desc')
             ->orderBy('started_at', 'desc');
 
-        if ($teacherId) {
-            $query->where('teacher_id', $teacherId);
+       if ($teacherId) {
+            $query->where(function($q) use ($teacherId) {
+                // 1. Cek langsung di tabel jurnal (teaching_sessions)
+                $q->where('teacher_id', $teacherId)
+                  // 2. ATAU cek berdasarkan guru yang terdaftar di jadwal asli (schedules)
+                  ->orWhereHas('schedule', function($q2) use ($teacherId) {
+                      $q2->where('teacher_id', $teacherId);
+                  });
+            });
         }
+              
         if ($classId) {
             $query->whereHas('schedule', function($q) use ($classId) {
                 $q->where('school_class_id', $classId);
             });
         }
+        
         if ($subjectId) {
             $query->whereHas('schedule', function($q) use ($subjectId) {
                 $q->where('subject_id', $subjectId);
             });
         }
 
+        // ==========================================================
+        // LOGIKA CETAK PDF / LAPORAN (Semua Data Tanpa Pagination)
+        // ==========================================================
+        if ($request->has('print')) {
+            $sessions = $query->get(); // Ambil semua data yang difilter
+            return view('reports.print-teaching-journal', compact(
+                'sessions', 'startDate', 'endDate', 'teacherId', 'classId', 'subjectId'
+            ));
+        }
+
+        // TAMPILAN WEB (Dengan Pagination)
         $sessions = $query->paginate(20)->withQueryString();
 
-        $teachers = User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah'])->orderBy('name')->get();
-        if($teachers->isEmpty()) $teachers = User::all();
+        $teachers = \App\Models\User::whereIn('role', ['Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Mata Pelajaran'])->orderBy('name')->get();
+        if($teachers->isEmpty()) $teachers = \App\Models\User::all();
         
-        $classes = SchoolClass::orderBy('name')->get();
-        $subjects = Subject::orderBy('name')->get();
+        $classes = \App\Models\SchoolClass::orderBy('name')->get();
+        $subjects = \App\Models\Subject::orderBy('name')->get();
 
         return view('reports.teaching_journal', compact(
             'sessions', 'teachers', 'classes', 'subjects', 
