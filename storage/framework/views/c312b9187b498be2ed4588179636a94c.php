@@ -153,7 +153,7 @@
                                                     <?php $__currentLoopData = $groupedStudents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $className => $classStudents): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                         <optgroup label="=== Kelas <?php echo e($className); ?> ===">
                                                             <?php $__currentLoopData = $classStudents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                                <option value="<?php echo e($student->id); ?>"><?php echo e($student->name); ?> (NISN: <?php echo e($student->id); ?>)</option>
+                                                                <option value="<?php echo e($student->id); ?>"><?php echo e($student->name); ?> (NISN: <?php echo e($student->student_id); ?>)</option>
                                                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                         </optgroup>
                                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

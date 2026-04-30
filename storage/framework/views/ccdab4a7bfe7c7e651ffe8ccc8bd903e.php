@@ -1,5 +1,14 @@
-<x-app-layout>
-    @push('styles')
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    <?php $__env->startPush('styles'); ?>
     <style>
         /* FIX KAMERA RESPONSIVE (ANTI GEPENG & ANTI LOMPAT) */
         #reader { 
@@ -31,41 +40,43 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
     </style>
-    @endpush
+    <?php $__env->stopPush(); ?>
 
-    @push('scripts')
+    <?php $__env->startPush('scripts'); ?>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    @endpush
+    <?php $__env->stopPush(); ?>
 
     <div class="py-6 sm:py-10 font-sans text-elevate-dark bg-elevate-surface min-h-screen relative overflow-hidden pb-20" 
-         x-data="teachingSession({ sessionId: {{ $session->id }}, stats: {{ json_encode($stats) }} })">
+         x-data="teachingSession({ sessionId: <?php echo e($session->id); ?>, stats: <?php echo e(json_encode($stats)); ?> })">
          
-        {{-- Efek Latar Belakang Halus --}}
+        
         <div class="absolute top-0 left-0 w-full h-[400px] bg-elevate-gradient-main opacity-20 pointer-events-none -z-10 blur-3xl"></div>
 
         <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             
-            {{-- 1. HEADER NAVIGASI --}}
+            
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6">
-                <a href="{{ route('teaching.index') }}" class="group inline-flex items-center gap-2 text-sm text-elevate-dark hover:text-elevate-primary transition font-bold bg-white/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/60 shadow-sm w-fit">
+                <a href="<?php echo e(route('teaching.index')); ?>" class="group inline-flex items-center gap-2 text-sm text-elevate-dark hover:text-elevate-primary transition font-bold bg-white/60 backdrop-blur-md px-4 py-2.5 rounded-xl border border-white/60 shadow-sm w-fit">
                     <i class="ph-bold ph-arrow-left group-hover:-translate-x-1 transition-transform"></i>
                     Kembali ke Jadwal
                 </a>
 
-                @if(session('error'))
+                <?php if(session('error')): ?>
                     <div class="bg-[#FDE7E9] text-[#D13438] px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-2 border border-[#F4C3C9] animate-pulse shadow-sm">
-                        <i class="ph-fill ph-warning-circle text-lg"></i> {{ session('error') }}
+                        <i class="ph-fill ph-warning-circle text-lg"></i> <?php echo e(session('error')); ?>
+
                     </div>
-                @endif
-                @if(session('success'))
+                <?php endif; ?>
+                <?php if(session('success')): ?>
                     <div class="bg-[#DFF6DD] text-[#107C10] px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-2 border border-[#B7DFB9] shadow-sm">
-                        <i class="ph-fill ph-check-circle text-lg"></i> {{ session('success') }}
+                        <i class="ph-fill ph-check-circle text-lg"></i> <?php echo e(session('success')); ?>
+
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
 
-            {{-- 2. HEADER SESI KELAS ELEVATE --}}
+            
             <div class="relative rounded-[2rem] bg-gradient-to-r from-elevate-accent via-elevate-peach-light to-elevate-peach p-6 sm:p-10 text-elevate-dark shadow-xl shadow-elevate-accent/20 mb-8 overflow-hidden group border border-white/60">
                 <div class="absolute -top-10 -left-10 w-56 h-56 bg-elevate-primary/10 rounded-3xl rotate-12 pointer-events-none backdrop-blur-xl"></div>
                 <div class="absolute -bottom-20 -right-10 w-64 h-64 bg-elevate-peach/40 rounded-[3rem] -rotate-12 pointer-events-none backdrop-blur-xl"></div>
@@ -74,30 +85,33 @@
                     <div class="space-y-3 w-full">
                         <div class="flex flex-wrap items-center gap-2">
                             <span class="bg-elevate-dark shadow-sm text-white text-[10px] font-black px-4 py-2 rounded-xl uppercase tracking-widest border border-transparent">
-                                {{ $session->schedule->schoolClass->name }}
+                                <?php echo e($session->schedule->schoolClass->name); ?>
+
                             </span>
                             <span class="bg-white/60 backdrop-blur-md border border-white/60 text-elevate-dark text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm">
-                                <i class="ph-bold ph-clock"></i> {{ \Carbon\Carbon::parse($session->started_at)->format('H:i') }}
+                                <i class="ph-bold ph-clock"></i> <?php echo e(\Carbon\Carbon::parse($session->started_at)->format('H:i')); ?>
+
                             </span>
 
-                            @if(!$isOpen)
+                            <?php if(!$isOpen): ?>
                                 <span class="bg-slate-100/90 backdrop-blur text-slate-500 text-xs font-bold px-4 py-2 rounded-xl uppercase border border-slate-200 flex items-center gap-1.5 shadow-sm">
                                     <i class="ph-fill ph-lock-key"></i> Selesai
                                 </span>
-                            @else
+                            <?php else: ?>
                                 <span class="bg-[#107C10]/90 backdrop-blur text-white text-xs font-bold px-4 py-2 rounded-xl uppercase border border-[#B7DFB9] flex items-center gap-1.5 shadow-sm">
                                     <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span> Live Session
                                 </span>
-                            @endif
+                            <?php endif; ?>
                         </div>
                         <h1 class="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight text-elevate-dark break-words">
-                            {{ $session->schedule->subject->name }}
+                            <?php echo e($session->schedule->subject->name); ?>
+
                         </h1>
                     </div>
                     
-                    @if($isOpen)
-                        <form id="close-session-form" action="{{ route('teaching.close', $session->id) }}" method="POST" class="w-full md:w-auto">
-                            @csrf
+                    <?php if($isOpen): ?>
+                        <form id="close-session-form" action="<?php echo e(route('teaching.close', $session->id)); ?>" method="POST" class="w-full md:w-auto">
+                            <?php echo csrf_field(); ?>
                             <button type="button" onclick="confirmCloseClass()" class="w-full md:w-auto group/btn relative overflow-hidden bg-white hover:bg-[#FDE7E9] text-[#D13438] pl-4 pr-6 py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-95 flex items-center justify-center md:justify-start gap-3 border border-white/60">
                                 <div class="bg-[#FDE7E9] p-2.5 rounded-xl group-hover/btn:bg-[#F4C3C9] transition-colors border border-[#F4C3C9]">
                                     <i class="ph-bold ph-power text-xl"></i>
@@ -108,8 +122,8 @@
                                 </div>
                             </button>
                         </form>
-                    @else
-                        <a href="{{ route('teaching.edit', $session->id) }}" class="w-full md:w-auto group/btn relative overflow-hidden bg-elevate-dark hover:bg-elevate-primary text-white pl-4 pr-6 py-3 rounded-2xl font-bold shadow-lg shadow-elevate-dark/30 transition-all active:scale-95 flex items-center justify-center md:justify-start gap-3 border border-transparent">
+                    <?php else: ?>
+                        <a href="<?php echo e(route('teaching.edit', $session->id)); ?>" class="w-full md:w-auto group/btn relative overflow-hidden bg-elevate-dark hover:bg-elevate-primary text-white pl-4 pr-6 py-3 rounded-2xl font-bold shadow-lg shadow-elevate-dark/30 transition-all active:scale-95 flex items-center justify-center md:justify-start gap-3 border border-transparent">
                             <div class="bg-white/20 p-2.5 rounded-xl group-hover/btn:bg-white/30 transition-colors">
                                 <i class="ph-bold ph-pencil-simple text-xl"></i>
                             </div>
@@ -118,17 +132,17 @@
                                 <div class="text-sm font-black">Edit Data</div>
                             </div>
                         </a>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 xl:gap-8">
                 
-                {{-- KOLOM KIRI (SCANNER & JURNAL) --}}
+                
                 <div class="xl:col-span-4 space-y-6 h-fit xl:sticky xl:top-6 order-1">
                     
-                    {{-- 3. BOX SCANNER --}}
-                    @if($isOpen)
+                    
+                    <?php if($isOpen): ?>
                         <div class="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 p-6 sm:p-8 relative overflow-hidden group">
                             <div class="relative z-10">
                                 <div class="flex items-center justify-between mb-5">
@@ -157,22 +171,22 @@
                                 </button>
 
                                 <div x-show="showCamera" x-transition class="mt-4 bg-slate-900 rounded-[1.5rem] overflow-hidden border border-slate-200 relative shadow-inner">
-                                    {{-- PERBAIKAN: Menghapus class h-64 (height) --}}
+                                    
                                     <div id="reader" class="w-full bg-slate-900"></div>
                                 </div>
 
                                 <p class="mt-4 text-xs font-mono font-bold text-slate-500 text-center bg-elevate-soft p-3 rounded-xl border border-slate-100" x-text="statusMessage">Menunggu input...</p>
                             </div>
                         </div>
-                    @else
+                    <?php else: ?>
                         <div class="bg-white border border-slate-100 rounded-[2rem] p-8 text-center shadow-xl shadow-slate-200/40">
                             <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-3"><i class="ph-bold ph-lock-key text-2xl"></i></div>
                             <h3 class="font-black text-elevate-dark text-lg mb-1">Absensi Terkunci</h3>
                             <p class="text-xs font-medium text-slate-500">Sesi kelas telah berakhir. Gunakan tombol Edit di atas jika ada kesalahan.</p>
                         </div>
-                    @endif
+                    <?php endif; ?>
 
-                    {{-- 4. FORM JURNAL MENGAJAR --}}
+                    
                     <div class="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden" x-data="{ photoPreview: null }">
                          <div class="px-6 sm:px-8 py-5 border-b border-slate-100 bg-elevate-gradient-card flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-white text-elevate-primary flex items-center justify-center text-xl shadow-sm border border-slate-100">
@@ -181,13 +195,13 @@
                             <h3 class="font-black text-elevate-dark text-lg">Jurnal Mengajar</h3>
                         </div>
                         <div class="p-6 sm:p-8">
-                            <fieldset {{ !$isOpen ? 'disabled' : '' }}>
-                                <form action="{{ route('teaching.update', $session->id) }}" method="POST" enctype="multipart/form-data">
-                                    @csrf @method('PUT')
+                            <fieldset <?php echo e(!$isOpen ? 'disabled' : ''); ?>>
+                                <form action="<?php echo e(route('teaching.update', $session->id)); ?>" method="POST" enctype="multipart/form-data">
+                                    <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
                                     <div class="space-y-5">
                                         <div>
                                             <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Topik / Materi <span class="text-[#D13438]">*</span></label>
-                                            <input type="text" name="topic" value="{{ old('topic', $session->topic) }}" 
+                                            <input type="text" name="topic" value="<?php echo e(old('topic', $session->topic)); ?>" 
                                                 class="journal-input w-full rounded-2xl border-slate-200 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 font-bold text-elevate-dark py-4 px-5 text-sm bg-elevate-soft transition-all" 
                                                 placeholder="Contoh: Aljabar Linear" required>
                                         </div>
@@ -195,26 +209,26 @@
                                             <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Catatan</label>
                                             <textarea name="activities" rows="3" 
                                                 class="journal-input w-full rounded-2xl border-slate-200 focus:bg-white focus:border-elevate-accent focus:ring-elevate-accent/30 text-sm text-elevate-dark font-medium py-4 px-5 bg-elevate-soft transition-all" 
-                                                placeholder="Deskripsi kegiatan...">{{ old('activities', $session->activities) }}</textarea>
+                                                placeholder="Deskripsi kegiatan..."><?php echo e(old('activities', $session->activities)); ?></textarea>
                                         </div>
                                         
                                         <div>
                                             <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Foto Dokumentasi</label>
-                                            @if($session->photo_proof)
+                                            <?php if($session->photo_proof): ?>
                                                 <div class="relative group h-40 rounded-2xl overflow-hidden border border-slate-200 mb-4 shadow-sm" x-show="!photoPreview">
-                                                    <img src="{{ asset('storage/' . $session->photo_proof) }}" class="w-full h-full object-cover">
-                                                    <a href="{{ asset('storage/' . $session->photo_proof) }}" target="_blank" class="absolute inset-0 bg-elevate-dark/60 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 text-white font-bold text-sm gap-2">
+                                                    <img src="<?php echo e(asset('storage/' . $session->photo_proof)); ?>" class="w-full h-full object-cover">
+                                                    <a href="<?php echo e(asset('storage/' . $session->photo_proof)); ?>" target="_blank" class="absolute inset-0 bg-elevate-dark/60 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300 text-white font-bold text-sm gap-2">
                                                         <i class="ph-bold ph-eye text-xl"></i> Lihat Foto
                                                     </a>
                                                 </div>
-                                            @endif
+                                            <?php endif; ?>
 
                                             <div class="relative h-40 rounded-2xl overflow-hidden border border-elevate-accent/50 mb-4 shadow-sm bg-elevate-primary/10" x-show="photoPreview" x-cloak>
                                                 <img :src="photoPreview" class="w-full h-full object-cover">
                                                 <div class="absolute bottom-0 left-0 right-0 bg-elevate-primary/90 text-white text-[10px] font-bold py-2 text-center backdrop-blur-sm">Foto Baru</div>
                                             </div>
 
-                                            @if($isOpen)
+                                            <?php if($isOpen): ?>
                                                 <label class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-300 rounded-2xl cursor-pointer hover:bg-elevate-peach-light/20 hover:border-elevate-peach transition-all group/upload bg-elevate-soft/50">
                                                     <div class="flex flex-col items-center justify-center pt-2">
                                                         <i class="ph-duotone ph-image text-3xl text-slate-400 group-hover/upload:text-elevate-peach-dark mb-2 transition-colors"></i>
@@ -222,14 +236,14 @@
                                                     </div>
                                                     <input type="file" name="photo_proof" accept="image/*" class="hidden" @change="photoPreview = URL.createObjectURL($event.target.files[0])" />
                                                 </label>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                         
-                                        @if($isOpen)
+                                        <?php if($isOpen): ?>
                                             <button type="submit" class="w-full bg-elevate-dark text-white hover:bg-elevate-primary font-bold py-4 rounded-2xl shadow-lg shadow-elevate-dark/30 transition-all active:scale-95 flex items-center justify-center gap-2 border border-transparent">
                                                 <i class="ph-bold ph-floppy-disk text-lg"></i> Simpan Jurnal
                                             </button>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                 </form>
                             </fieldset>
@@ -237,18 +251,18 @@
                     </div>
                 </div>
 
-                {{-- KOLOM KANAN (DAFTAR SISWA) --}}
+                
                 <div class="xl:col-span-8 order-2" x-data="{ searchQuery: '' }">
                     <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/40 flex flex-col h-full min-h-[600px] overflow-hidden">
                         
-                        {{-- Header List & Search --}}
+                        
                         <div class="p-6 md:p-8 border-b border-slate-100 flex flex-col gap-6 bg-elevate-gradient-card">
                             <div>
                                 <h3 class="font-black text-elevate-dark text-2xl mb-1">Kehadiran Siswa</h3>
                                 <p class="text-sm text-elevate-dark/70 font-semibold">Kelola absensi siswa secara manual atau melalui scan.</p>
                             </div>
                             
-                            {{-- Statistik Ringkas (Real-time via Alpine) --}}
+                            
                             <div class="grid grid-cols-4 gap-3 md:gap-4">
                                 <div class="px-2 py-4 bg-[#DFF6DD] text-[#107C10] rounded-2xl text-center border border-[#B7DFB9] shadow-sm">
                                     <div class="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-1">Hadir</div>
@@ -268,7 +282,7 @@
                                 </div>
                             </div>
 
-                            {{-- Search Bar --}}
+                            
                             <div class="relative group">
                                 <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                                     <i class="ph-bold ph-magnifying-glass text-slate-400 group-focus-within:text-elevate-primary transition-colors text-lg"></i>
@@ -277,20 +291,20 @@
                             </div>
                         </div>
 
-                        {{-- 5. LIST SISWA --}}
+                        
                         <div class="flex-1 p-6 md:p-8 bg-white overflow-y-auto max-h-[800px] custom-scrollbar">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
-                                @foreach($allStudents as $student)
-                                    @php
+                                <?php $__currentLoopData = $allStudents; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
                                         $att = $attendances[$student->id] ?? null;
                                         $initialStatus = $att ? $att->status : null; 
                                         $initials = Str::upper(Str::substr(trim($student->name), 0, 1));
-                                    @endphp
+                                    ?>
 
                                     <div class="relative border-2 rounded-2xl p-4 md:p-5 flex items-center gap-4 transition-all duration-300" 
-                                         id="student-row-{{ $student->id }}"
-                                         x-data="{ name: '{{ strtolower($student->name) }}', id: '{{ $student->student_id }}', status: '{{ $initialStatus }}' }"
-                                         @update-status-{{ $student->id }}.window="status = $event.detail.status"
+                                         id="student-row-<?php echo e($student->id); ?>"
+                                         x-data="{ name: '<?php echo e(strtolower($student->name)); ?>', id: '<?php echo e($student->student_id); ?>', status: '<?php echo e($initialStatus); ?>' }"
+                                         @update-status-<?php echo e($student->id); ?>.window="status = $event.detail.status"
                                          x-show="name.includes(searchQuery.toLowerCase()) || id.includes(searchQuery.toLowerCase())"
                                          :class="{
                                             'bg-[#DFF6DD]/20 border-[#B7DFB9]': status === 'Hadir' || status === 'present',
@@ -300,7 +314,7 @@
                                             'bg-white border-slate-100 hover:border-slate-300 shadow-sm': !status
                                          }">
                                         
-                                        {{-- Avatar Status --}}
+                                        
                                         <div class="w-12 h-12 rounded-xl flex items-center justify-center font-black text-sm shrink-0 shadow-sm transition-all border"
                                              :class="{ 
                                                  'bg-[#107C10] text-white border-[#107C10]': status === 'Hadir' || status === 'present',
@@ -313,24 +327,24 @@
                                              <template x-if="status === 'Sakit' || status === 'sick'"> <span>S</span> </template>
                                              <template x-if="status === 'Izin' || status === 'permission'"> <span>I</span> </template>
                                              <template x-if="status === 'Alfa' || status === 'alpha'"> <span>A</span> </template>
-                                             <template x-if="!status"> <span>{{ $initials }}</span> </template>
+                                             <template x-if="!status"> <span><?php echo e($initials); ?></span> </template>
                                         </div>
 
                                         <div class="flex-1 min-w-0">
-                                            <p class="font-black text-elevate-dark text-base leading-tight truncate">{{ $student->name }}</p>
-                                            <p class="text-xs text-slate-500 font-bold tracking-wide mt-1">{{ $student->student_id }}</p>
+                                            <p class="font-black text-elevate-dark text-base leading-tight truncate"><?php echo e($student->name); ?></p>
+                                            <p class="text-xs text-slate-500 font-bold tracking-wide mt-1"><?php echo e($student->student_id); ?></p>
                                         </div>
 
-                                        @if($isOpen)
+                                        <?php if($isOpen): ?>
                                             <div class="flex items-center gap-2 shrink-0">
-                                                {{-- Tombol Hadir Cepat --}}
-                                                <button @click="setManual({{ $student->id }}, 'present')" 
+                                                
+                                                <button @click="setManual(<?php echo e($student->id); ?>, 'present')" 
                                                         class="w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95 border border-transparent"
                                                         :class="status === 'Hadir' || status === 'present' ? 'bg-[#107C10] text-white' : 'bg-slate-100 text-slate-400 hover:bg-[#DFF6DD] hover:text-[#107C10]'">
                                                     <i class="ph-bold ph-check text-lg"></i>
                                                 </button>
                                                 
-                                                {{-- Dropdown Pilihan --}}
+                                                
                                                 <div class="relative" x-data="{ open: false }">
                                                     <button @click="open = !open" @click.outside="open = false"
                                                             class="w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95 border border-transparent"
@@ -339,17 +353,17 @@
                                                     </button>
                                                     
                                                     <div x-show="open" style="display: none;" x-transition class="absolute right-0 mt-2 w-40 bg-white rounded-2xl shadow-xl shadow-elevate-dark/20 border border-slate-100 z-50 p-2 overflow-hidden">
-                                                        <button @click="setManual({{ $student->id }}, 'sick'); open=false" class="w-full text-left px-4 py-2.5 text-xs font-bold text-elevate-primary hover:bg-elevate-soft rounded-lg flex items-center gap-2"><div class="w-2 h-2 bg-elevate-primary rounded-full"></div> Sakit</button>
-                                                        <button @click="setManual({{ $student->id }}, 'permission'); open=false" class="w-full text-left px-4 py-2.5 text-xs font-bold text-[#D83B01] hover:bg-[#FFEFD6] rounded-lg flex items-center gap-2"><div class="w-2 h-2 bg-[#D83B01] rounded-full"></div> Izin</button>
-                                                        <button @click="setManual({{ $student->id }}, 'alpha'); open=false" class="w-full text-left px-4 py-2.5 text-xs font-bold text-[#D13438] hover:bg-[#FDE7E9] rounded-lg flex items-center gap-2"><div class="w-2 h-2 bg-[#D13438] rounded-full"></div> Alpha</button>
+                                                        <button @click="setManual(<?php echo e($student->id); ?>, 'sick'); open=false" class="w-full text-left px-4 py-2.5 text-xs font-bold text-elevate-primary hover:bg-elevate-soft rounded-lg flex items-center gap-2"><div class="w-2 h-2 bg-elevate-primary rounded-full"></div> Sakit</button>
+                                                        <button @click="setManual(<?php echo e($student->id); ?>, 'permission'); open=false" class="w-full text-left px-4 py-2.5 text-xs font-bold text-[#D83B01] hover:bg-[#FFEFD6] rounded-lg flex items-center gap-2"><div class="w-2 h-2 bg-[#D83B01] rounded-full"></div> Izin</button>
+                                                        <button @click="setManual(<?php echo e($student->id); ?>, 'alpha'); open=false" class="w-full text-left px-4 py-2.5 text-xs font-bold text-[#D13438] hover:bg-[#FDE7E9] rounded-lg flex items-center gap-2"><div class="w-2 h-2 bg-[#D13438] rounded-full"></div> Alpha</button>
                                                         <div class="border-t border-slate-100 my-1"></div>
-                                                        <button @click="setManual({{ $student->id }}, null); open=false" class="w-full text-left px-4 py-2.5 text-xs text-slate-500 hover:bg-slate-100 font-bold rounded-lg">Reset Status</button>
+                                                        <button @click="setManual(<?php echo e($student->id); ?>, null); open=false" class="w-full text-left px-4 py-2.5 text-xs text-slate-500 hover:bg-slate-100 font-bold rounded-lg">Reset Status</button>
                                                     </div>
                                                 </div>
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
                         </div>
                     </div>
@@ -358,8 +372,8 @@
         </div>
     </div>
 
-    {{-- LOGIKA JAVASCRIPT --}}
-    @push('scripts')
+    
+    <?php $__env->startPush('scripts'); ?>
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playBeep(type) {
@@ -429,7 +443,7 @@
 
                 async setManual(studentId, status) {
                     try {
-                        const response = await fetch('{{ route("teaching.manual") }}', {
+                        const response = await fetch('<?php echo e(route("teaching.manual")); ?>', {
                             method: 'POST',
                             headers: { 
                                 'Content-Type': 'application/json', 
@@ -485,7 +499,7 @@
                     if(this.rfidCode.length < 3) return;
                     this.statusMessage = 'Memproses...';
                     try {
-                        const response = await fetch('{{ route("teaching.scan") }}', {
+                        const response = await fetch('<?php echo e(route("teaching.scan")); ?>', {
                             method: 'POST',
                             headers: { 
                                 'Content-Type': 'application/json', 
@@ -566,5 +580,14 @@
             }));
         });
     </script>
-    @endpush
-</x-app-layout>
+    <?php $__env->stopPush(); ?>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/teaching/show.blade.php ENDPATH**/ ?>

@@ -156,7 +156,7 @@ return [
                 'route' => 'reports.teaching_journal',
                 'active_check' => 'reports.teaching_journal',
                 'icon' => 'ph-monitor',
-                'roles' => ['Admin', 'Kepala Sekolah', 'TU']
+                'roles' => ['Admin', 'Kepala Sekolah','Guru Mata Pelajaran', 'TU']
             ],
             [
                 'name' => 'Input Nilai & Rapor',
@@ -372,7 +372,7 @@ return [
                 'name' => 'Pinjam Individu',
                 'route' => 'library.circulation.student_borrow',
                 'active_check' => 'library.circulation.student_borrow',
-                'icon' => 'ph-user-focus', // Ikon user untuk menandakan individu
+                'icon' => 'ph-user-focus', 
                 'roles' => ['Admin', 'TU'] 
             ],
             [

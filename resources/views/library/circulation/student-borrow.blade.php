@@ -144,7 +144,7 @@
                                                     @foreach($groupedStudents as $className => $classStudents)
                                                         <optgroup label="=== Kelas {{ $className }} ===">
                                                             @foreach($classStudents as $student)
-                                                                <option value="{{ $student->id }}">{{ $student->name }} (NISN: {{ $student->id }})</option>
+                                                                <option value="{{ $student->id }}">{{ $student->name }} (NISN: {{ $student->student_id }})</option>
                                                             @endforeach
                                                         </optgroup>
                                                     @endforeach
