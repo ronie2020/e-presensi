@@ -41,11 +41,13 @@
                     <form method="GET" action="{{ route('reports.teaching_journal') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 items-end">
                         <div>
                             <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Dari Tanggal</label>
-                            <input type="date" name="start_date" value="{{ $startDate }}" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 transition-colors">
+                            {{-- Tambahkan ?? '' --}}
+                            <input type="date" name="start_date" value="{{ $startDate ?? '' }}" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 transition-colors">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Sampai Tanggal</label>
-                            <input type="date" name="end_date" value="{{ $endDate }}" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 transition-colors">
+                            {{-- Tambahkan ?? '' --}}
+                            <input type="date" name="end_date" value="{{ $endDate ?? '' }}" class="w-full rounded-2xl border-slate-200 bg-elevate-soft font-bold text-elevate-dark focus:bg-white focus:ring-elevate-accent/30 focus:border-elevate-accent h-14 px-5 transition-colors">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-elevate-primary uppercase tracking-wider mb-2 ml-1">Guru</label>

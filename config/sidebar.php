@@ -156,7 +156,7 @@ return [
                 'route' => 'reports.teaching_journal',
                 'active_check' => 'reports.teaching_journal',
                 'icon' => 'ph-monitor',
-                'roles' => ['Admin', 'Kepala Sekolah','Guru Mata Pelajaran', 'TU']
+                'roles' => ['Admin', 'Guru', 'Guru Mata Pelajaran', 'Wali Kelas', 'Kepala Sekolah']
             ],
             [
                 'name' => 'Input Nilai & Rapor',

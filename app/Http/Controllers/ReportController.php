@@ -402,6 +402,7 @@ class ReportController extends Controller
      */
      public function indexClass(Request $request)
     {
+        // KEMBALIKAN KE LOGIKA ASLI UNTUK KELAS
         // Default tanggal: 1 bulan terakhir atau bulan berjalan
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
         $endDate = $request->input('end_date', Carbon::now()->toDateString());
@@ -600,30 +601,46 @@ class ReportController extends Controller
     }
 
   // =========================================================================
-    // 4. TEACHING JOURNAL (LOGIKA LAMA + FIX FILTER & PRINT)
+    // 4. TEACHING JOURNAL (INI YANG SEHARUSNYA DIPERBARUI)
     // =========================================================================
 
     public function teachingJournal(Request $request)
     {
-        $startDate = $request->input('start_date', \Carbon\Carbon::now()->startOfMonth()->toDateString());
-        $endDate = $request->input('end_date', \Carbon\Carbon::now()->endOfMonth()->toDateString());
-        
         $teacherId = $request->input('teacher_id');
         $classId = $request->input('class_id');
         $subjectId = $request->input('subject_id');
+
+        // Ambil input tanggal (tanpa default mutlak)
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        // LOGIKA BARU: 
+        // Berikan default awal/akhir bulan HANYA jika halaman pertama kali dimuat 
+        // (tidak ada request pencarian sama sekali).
+        if (!$request->has('start_date') && !$request->has('end_date') && !$request->has('teacher_id') && !$request->has('class_id') && !$request->has('subject_id')) {
+            $startDate = \Carbon\Carbon::now()->startOfMonth()->toDateString();
+            $endDate = \Carbon\Carbon::now()->endOfMonth()->toDateString();
+        }
 
         $query = \App\Models\TeachingSession::with(['teacher', 'schedule.schoolClass', 'schedule.subject'])
             ->withCount([
                 'attendances as hadir_count' => function ($q) { $q->whereIn('status', ['present', 'Hadir']); },
                 'attendances as late_count' => function ($q) { $q->whereIn('status', ['late', 'Terlambat']); },
                 'attendances as alpha_count' => function ($q) { $q->whereIn('status', ['alpha', 'Alfa']); },
-                // Tambahan: Menghitung Sakit dan Izin agar laporan cetak lebih lengkap
                 'attendances as sick_count' => function ($q) { $q->whereIn('status', ['sick', 'Sakit']); },
                 'attendances as permission_count' => function ($q) { $q->whereIn('status', ['permission', 'Izin']); },
             ])
-            ->whereBetween('date', [$startDate, $endDate])
             ->orderBy('date', 'desc')
             ->orderBy('started_at', 'desc');
+
+        // Terapkan filter tanggal HANYA jika variabelnya terisi
+        if ($startDate && $endDate) {
+            $query->whereBetween('date', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $query->whereDate('date', '>=', $startDate);
+        } elseif ($endDate) {
+            $query->whereDate('date', '<=', $endDate);
+        }
 
        if ($teacherId) {
             $query->where(function($q) use ($teacherId) {
