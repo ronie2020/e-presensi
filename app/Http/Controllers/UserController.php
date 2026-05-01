@@ -97,14 +97,10 @@ class UserController extends Controller
             $photoPath = $request->file('photo')->store('teachers', 'public');
         }
 
-        // FIX: Ambil role pertama dari array sebagai role utama
-        $primaryRole = is_array($request->role) ? $request->role[0] : $request->role;
-
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $primaryRole, // FIX UTAMA: Simpan role ke kolom database!
+            'password' => Hash::make($request->password),   
             'position' => $request->position,
             'pangkat' => $request->pangkat,
             'bio' => $request->bio,
@@ -116,7 +112,7 @@ class UserController extends Controller
             'facebook' => $request->facebook,
         ]);
 
-        // Simpan juga ke sistem Spatie Permission
+        // Simpan langsung ke sistem Spatie Permission (tanpa duplikasi ke tabel users)
         $user->assignRole($request->role);
 
         return redirect()->route('users.index')->with('success', 'Pengguna baru berhasil ditambahkan.');
@@ -142,8 +138,8 @@ class UserController extends Controller
             abort(403, 'Anda tidak memiliki akses untuk mengubah profil ini.');
         }
 
-        // FIX 1: Deteksi apakah form yang disubmit memiliki field 'role' (Halaman Kelola User vs Profil Saya)
-        $isUpdatingRole = $imAdmin && $request->has('role');
+        // FIX 1: Jika yang login Admin, dia berhak memperbarui role. Validasi wajib isi berjalan.
+        $isUpdatingRole = $imAdmin;
 
         // Aturan validasi dasar (berlaku untuk semuanya)
         $rules = [
@@ -170,7 +166,7 @@ class UserController extends Controller
             'hobi' => ['nullable', 'string'],
         ];
 
-        // Jika yang login Admin DAN form mengirimkan role, tambahkan validasi untuk Role
+        // Jika form mengupdate Role, wajib diisi minimal satu
         if ($isUpdatingRole) {
             $rules['role'] = ['required', 'array'];
             $rules['role.*'] = ['string', 'in:' . implode(',', $this->availableRoles)];
@@ -180,7 +176,8 @@ class UserController extends Controller
 
         // Cegah Admin menghapus role Admin-nya sendiri (Anti Lockout)
         if ($isUpdatingRole && Auth::id() == $user->id) {
-            if (!in_array('Admin', $request->role)) {
+            $rolesSubmitted = $request->input('role', []);
+            if (!in_array('Admin', $rolesSubmitted)) {
                 return redirect()->back()->with('error', 'Anda tidak boleh menghapus role Admin dari akun Anda sendiri.');
             }
         }
@@ -210,11 +207,6 @@ class UserController extends Controller
             $data['password'] = Hash::make($request->password);
         }
 
-        // FIX UTAMA: Jika Admin mengedit Role, simpan juga ke kolom 'role' di tabel users
-        if ($isUpdatingRole) {
-            $data['role'] = is_array($request->role) ? $request->role[0] : $request->role;
-        }
-
         if ($request->hasFile('photo')) {
             if ($user->photo_path) {
                 Storage::disk('public')->delete($user->photo_path);
@@ -222,12 +214,12 @@ class UserController extends Controller
             $data['photo_path'] = $request->file('photo')->store('teachers', 'public');
         }
 
-        // Update data utama
+        // Update data profil utama
         $user->update($data);
 
         // SYNC ROLES SPATIE (Hanya izinkan Admin yang bisa memodifikasi Role)
         if ($isUpdatingRole) {
-            $user->syncRoles($request->role);
+            $user->syncRoles($request->input('role', []));
         }
 
         // Arahkan kembali (redirect) dengan cerdas

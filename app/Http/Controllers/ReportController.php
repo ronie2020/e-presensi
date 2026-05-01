@@ -678,14 +678,17 @@ class ReportController extends Controller
         // TAMPILAN WEB (Dengan Pagination)
        $sessions = $query->paginate(20)->withQueryString();
 
-        // FIX: Tambahkan 'Admin', 'Guru Piket', dan 'TU' ke dalam array pencarian
-        $teachers = \App\Models\User::whereIn('role', [
-            'Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Mata Pelajaran', 
-            'Admin', 'Guru Piket', 'TU' 
-        ])->orderBy('name')->get();
+        // FIX: Gunakan whereHas() standar Laravel agar aman dari masalah cache Spatie di Hosting
+        $teachers = \App\Models\User::whereHas('roles', function($q) {
+            $q->whereIn('name', [
+                'Guru', 'Wali Kelas', 'Kepala Sekolah', 'Guru Mata Pelajaran', 
+                'Admin', 'Guru Piket', 'TU' 
+            ]);
+        })->orderBy('name')->get();
         
         if($teachers->isEmpty()) {
-            $teachers = \App\Models\User::all();
+            // Jika relasi role masih kosong di hosting, fallback ambil semua user
+            $teachers = \App\Models\User::orderBy('name')->get();
         }
         
         $classes = \App\Models\SchoolClass::orderBy('name')->get();
