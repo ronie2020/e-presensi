@@ -12,13 +12,53 @@ use Illuminate\Support\Facades\Schema;
 class TeacherHabitController extends Controller
 {
     /**
+     * Fungsi Helper untuk Mengubah Tipe Periode menjadi Rentang Tanggal (Start & End)
+     */
+    private function getPeriodRange($periodType, $periodValue)
+    {
+        try {
+            if ($periodType === 'weekly' && strpos($periodValue, 'W') !== false) {
+                // Format: "YYYY-W##" (contoh: 2026-W18)
+                $year = (int) substr($periodValue, 0, 4);
+                $week = (int) substr($periodValue, 6);
+                $startDate = Carbon::now()->setISODate($year, $week)->startOfWeek();
+                $endDate = $startDate->copy()->endOfWeek();
+            } elseif ($periodType === 'monthly') {
+                // Format: "YYYY-MM" (contoh: 2026-05)
+                $year = (int) substr($periodValue, 0, 4);
+                $month = (int) substr($periodValue, 5, 2);
+                $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+                $endDate = $startDate->copy()->endOfMonth();
+            } else {
+                // Default: Harian (Format: YYYY-MM-DD)
+                $startDate = Carbon::parse($periodValue)->startOfDay();
+                $endDate = Carbon::parse($periodValue)->endOfDay();
+            }
+        } catch (\Exception $e) {
+            // Fallback jika format tanggal tidak valid
+            $startDate = Carbon::now()->startOfDay();
+            $endDate = Carbon::now()->endOfDay();
+        }
+
+        return [$startDate, $endDate];
+    }
+
+    /**
      * Halaman Monitoring Utama
      */
     public function index(Request $request)
     {
-        // 1. Ambil Filter (Default hari ini)
-        $date = $request->input('date', Carbon::now()->format('Y-m-d'));
+        // 1. Ambil Filter Periode & Kelas
+        $periodType = $request->input('period_type', 'daily');
+        // JS mengubah nama input menjadi 'period_value', fallback ke 'date' jika JS tidak berjalan
+        $periodValue = $request->input('period_value', $request->input('date', Carbon::now()->format('Y-m-d')));
         $classId = $request->input('class_id');
+
+        // Terjemahkan string periode menjadi range tanggal menggunakan Helper
+        [$startDate, $endDate] = $this->getPeriodRange($periodType, $periodValue);
+        
+        // Simpan nilai inputan asli untuk dikirim balik ke View (agar input form tidak kosong)
+        $date = $periodValue; 
 
         // 2. Ambil Daftar Kelas untuk Dropdown
         $classes = SchoolClass::orderBy('name')->get();
@@ -39,16 +79,16 @@ class TeacherHabitController extends Controller
             // Mengambil data siswa
             $students = Student::where('class_id', $classId)->orderBy('name')->get();
             
-            // [OPTIMASI N+1 QUERY]: Ambil semua habit untuk siswa di kelas ini dalam 1 kali query
+            // [OPTIMASI N+1 QUERY]: Ambil semua habit menggunakan whereBetween untuk mendukung Harian/Mingguan/Bulanan
             $studentIds = $students->pluck('id');
             $habits = StudentHabit::whereIn('student_id', $studentIds)
-                        ->whereDate('report_date', $date)
+                        ->whereBetween('report_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+                        ->orderBy('report_date', 'asc') // Urutkan asc agar keyBy menimpa data dan menyisakan entri terbaru
                         ->get()
-                        ->keyBy('student_id'); // Jadikan student_id sebagai key array agar mudah dicari
+                        ->keyBy('student_id'); 
 
             // Gabungkan data habit ke masing-masing siswa
             $students->map(function ($student) use ($habits) {
-                // Cek apakah ada data habit berdasarkan ID siswa
                 $habit = $habits->get($student->id); 
                 
                 $student->habit_status = $habit ? 'submitted' : 'missing';
@@ -69,25 +109,28 @@ class TeacherHabitController extends Controller
             
             $totalStudentsAll = Student::whereHas('schoolClass')->count();
 
-            $submittedAll = StudentHabit::whereDate('report_date', $date)
+            // Hitung berapa siswa unik yang sudah lapor di rentang waktu tersebut
+            $submittedAll = StudentHabit::whereBetween('report_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
                                 ->whereHas('student.schoolClass') 
-                                ->count();
+                                ->distinct('student_id') // Gunakan distinct agar tidak menghitung dobel di mode mingguan/bulanan
+                                ->count('student_id');
 
             $stats['submitted'] = $submittedAll;
             $stats['missing'] = max(0, $totalStudentsAll - $submittedAll);
             $stats['percentage'] = $totalStudentsAll > 0 ? round(($submittedAll / $totalStudentsAll) * 100) : 0;
 
+            // Hitung jurnal yang belum dinilai (pending feedback)
             $stats['pending_feedback'] = StudentHabit::whereHas('student.schoolClass')
-                                            ->whereDate('report_date', $date)
+                                            ->whereBetween('report_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
                                             ->whereNull('teacher_feedback')
                                             ->count();
 
-            // 2. Ambil Feed Aktivitas Terbaru (DENGAN FILTER & PAGINATION)
+            // 5. Ambil Feed Aktivitas Terbaru
             $statusFilter = $request->input('status');
             
             $query = StudentHabit::with(['student', 'student.schoolClass'])
                 ->whereHas('student.schoolClass') 
-                ->whereDate('report_date', $date);
+                ->whereBetween('report_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')]);
 
             if ($statusFilter === 'pending') {
                 $query->whereNull('teacher_feedback');
@@ -138,12 +181,17 @@ class TeacherHabitController extends Controller
      */
     public function print(Request $request)
     {
-        $date = $request->date ?? now()->toDateString();
-        $classId = $request->class_id;
+        $periodType = $request->input('period_type', 'daily');
+        $periodValue = $request->input('period_value', $request->input('date', Carbon::now()->format('Y-m-d')));
+        $classId = $request->input('class_id');
 
         if (!$classId) {
             return redirect()->back()->with('error', 'Silakan pilih kelas terlebih dahulu.');
         }
+
+        // Terapkan helper yang sama untuk halaman PDF
+        [$startDate, $endDate] = $this->getPeriodRange($periodType, $periodValue);
+        $date = $periodValue; // Teruskan ke view sebagai nilai asli
 
         $class = SchoolClass::findOrFail($classId);
         
@@ -153,16 +201,19 @@ class TeacherHabitController extends Controller
         // [OPTIMASI N+1 QUERY UNTUK HALAMAN CETAK]
         $studentIds = $students->pluck('id');
         $habits = StudentHabit::whereIn('student_id', $studentIds)
-                    ->whereDate('report_date', $date)
+                    ->whereBetween('report_date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+                    ->orderBy('report_date', 'asc')
                     ->get()
                     ->keyBy('student_id');
 
         // Gabungkan data
         $students->each(function($student) use ($habits) {
             $student->habit_data = $habits->get($student->id);
+            // Anda juga bisa tambahkan status agar view PDF mudah mengelola warnanya
+            $student->habit_status = $student->habit_data ? 'submitted' : 'missing';
         });
 
-        return view('habits.print', compact('students', 'date', 'class'));
+        return view('habits.print', compact('students', 'date', 'class', 'periodType'));
     }
 
     /**

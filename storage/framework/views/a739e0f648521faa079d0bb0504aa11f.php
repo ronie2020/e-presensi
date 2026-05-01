@@ -1,5 +1,14 @@
-<x-app-layout>
-    {{-- IMPORT FONT & CUSTOM STYLES MICROSOFT FLUENT --}}
+<?php if (isset($component)) { $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54 = $attributes; } ?>
+<?php $component = App\View\Components\AppLayout::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('app-layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\App\View\Components\AppLayout::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes([]); ?>
+    
     <style>
         @import url('https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap');
 
@@ -55,9 +64,9 @@
 
     <div class="page-container p-4 md:p-8 space-y-8 min-h-screen bg-slate-50 font-jakarta text-elevate-dark">
         
-        {{-- HERO SECTION (TEMA MICROSOFT ELEVATE) --}}
+        
         <div class="animate-enter relative rounded-[2rem] md:rounded-[3rem] bg-elevate-gradient-main p-8 md:p-12 text-elevate-dark shadow-xl shadow-elevate-accent/20 overflow-hidden group border border-white/40">
-            {{-- Decorative Background Elements --}}
+            
             <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] pointer-events-none mix-blend-overlay z-0"></div>
             <div class="absolute top-0 right-0 -mt-20 -mr-20 w-[400px] h-[400px] bg-white/30 rounded-full blur-[100px] group-hover:opacity-70 transition-opacity duration-1000 z-0"></div>
             <div class="absolute bottom-0 left-0 -mb-20 -ml-20 w-[300px] h-[300px] bg-white/20 rounded-full blur-[80px] z-0"></div>
@@ -65,15 +74,15 @@
             <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-10">
                 <div class="flex-1">
                     
-                    {{-- KUMPULAN TOMBOL NAVIGASI ATAS --}}
+                    
                     <div class="flex flex-wrap gap-3 mb-6 justify-center lg:justify-start">
-                        <a href="{{ route('dashboard') }}" class="group bg-white/40 hover:bg-white/60 text-elevate-dark px-5 py-3 rounded-xl font-bold text-sm backdrop-blur-md border border-white/50 transition-all flex items-center gap-2 shadow-sm w-fit">
+                        <a href="<?php echo e(route('dashboard')); ?>" class="group bg-white/40 hover:bg-white/60 text-elevate-dark px-5 py-3 rounded-xl font-bold text-sm backdrop-blur-md border border-white/50 transition-all flex items-center gap-2 shadow-sm w-fit">
                             <i class="ph-bold ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
                             <span>Kembali ke Dashboard</span>
                         </a>
                         
-                        {{-- TOMBOL LEADERBOARD SISWA TERAJIN --}}
-                        <a href="{{ route('teacher.habits.leaderboard') }}" class="group bg-elevate-peach-dark hover:bg-elevate-peach text-white px-5 py-3 rounded-xl font-bold text-sm backdrop-blur-md border border-elevate-peach-dark/50 transition-all flex items-center gap-2 shadow-lg shadow-elevate-peach-dark/20 w-fit">
+                        
+                        <a href="<?php echo e(route('teacher.habits.leaderboard')); ?>" class="group bg-elevate-peach-dark hover:bg-elevate-peach text-white px-5 py-3 rounded-xl font-bold text-sm backdrop-blur-md border border-elevate-peach-dark/50 transition-all flex items-center gap-2 shadow-lg shadow-elevate-peach-dark/20 w-fit">
                             <i class="ph-fill ph-trophy text-lg group-hover:scale-110 transition-transform"></i>
                             <span>Siswa Terajin</span>
                         </a>
@@ -94,18 +103,18 @@
                     </p>
                 </div>
 
-                {{-- FILTER FORM & PRINT BUTTON --}}
+                
                 <div class="w-full lg:w-[480px] xl:w-auto shrink-0 flex flex-col gap-4">
                     
-                     <form id="filterForm" action="{{ route('teacher.habits.index') }}" method="GET" class="bg-white/30 backdrop-blur-md p-6 rounded-[2rem] border border-white/40 shadow-sm flex flex-col gap-5 relative">
+                     <form id="filterForm" action="<?php echo e(route('teacher.habits.index')); ?>" method="GET" class="bg-white/30 backdrop-blur-md p-6 rounded-[2rem] border border-white/40 shadow-sm flex flex-col gap-5 relative">
                         <div id="formLoading" class="hidden absolute inset-0 bg-white/50 backdrop-blur-[2px] z-10 rounded-[2rem] flex items-center justify-center">
                             <i class="ph-bold ph-circle-notch animate-spin text-elevate-primary text-3xl"></i>
                         </div>
 
-                        {{-- GRID 2 KOLOM KONSISTEN (Anti Terpotong) --}}
+                        
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             
-                            {{-- FILTER TIPE PERIODE --}}
+                            
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black text-elevate-dark uppercase tracking-widest ml-1 block">Tipe Periode</label>
                                 <div class="relative group">
@@ -113,27 +122,27 @@
                                     <select id="filterPeriodType" name="period_type" 
                                         class="block w-full pl-11 pr-8 py-3 bg-white/60 border-white/50 rounded-xl text-xs font-bold text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all appearance-none shadow-sm cursor-pointer" 
                                         onchange="changePeriodInput()">
-                                        <option value="daily" {{ request('period_type', 'daily') == 'daily' ? 'selected' : '' }}>Harian</option>
-                                        <option value="weekly" {{ request('period_type') == 'weekly' ? 'selected' : '' }}>Mingguan</option>
-                                        <option value="monthly" {{ request('period_type') == 'monthly' ? 'selected' : '' }}>Bulanan</option>
+                                        <option value="daily" <?php echo e(request('period_type', 'daily') == 'daily' ? 'selected' : ''); ?>>Harian</option>
+                                        <option value="weekly" <?php echo e(request('period_type') == 'weekly' ? 'selected' : ''); ?>>Mingguan</option>
+                                        <option value="monthly" <?php echo e(request('period_type') == 'monthly' ? 'selected' : ''); ?>>Bulanan</option>
                                     </select>
                                     <i class="ph-bold ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                                 </div>
                             </div>
 
-                            {{-- FILTER WAKTU (DINAMIS) --}}
+                            
                             <div class="space-y-2">
                                 <label class="text-[10px] font-black text-elevate-dark uppercase tracking-widest ml-1 block">Waktu</label>
                                 <div class="relative group">
                                     <i class="ph-bold ph-calendar absolute left-4 top-1/2 -translate-y-1/2 text-elevate-primary"></i>
                                     <input type="date" id="filterDateValue" name="date" 
-                                        value="{{ request('period_value', $date) }}" 
+                                        value="<?php echo e(request('period_value', $date)); ?>" 
                                         class="block w-full pl-11 pr-3 py-3 bg-white/60 border-white/50 rounded-xl text-xs font-bold text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all shadow-sm cursor-pointer uppercase"
                                         onchange="submitFilter()">
                                 </div>
                             </div>
 
-                            {{-- FILTER KELAS (Memanjang Penuh di bawah) --}}
+                            
                             <div class="space-y-2 sm:col-span-2">
                                 <label class="text-[10px] font-black text-elevate-dark uppercase tracking-widest ml-1 block">Kelas</label>
                                 <div class="relative group">
@@ -142,9 +151,9 @@
                                         class="block w-full pl-11 pr-10 py-3 bg-white/60 border-white/50 rounded-xl text-xs font-bold text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all appearance-none shadow-sm cursor-pointer" 
                                         onchange="submitFilter()">
                                         <option value="">Pilih Kelas</option>
-                                        @foreach($classes as $class)
-                                            <option value="{{ $class->id }}" {{ $classId == $class->id ? 'selected' : '' }}>{{ $class->name }}</option>
-                                        @endforeach
+                                        <?php $__currentLoopData = $classes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $class): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <option value="<?php echo e($class->id); ?>" <?php echo e($classId == $class->id ? 'selected' : ''); ?>><?php echo e($class->name); ?></option>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </select>
                                     <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                                 </div>
@@ -152,32 +161,32 @@
                         </div>
                     </form>
 
-                    {{-- TOMBOL ACTION GRID --}}
-                    @if($classId)
+                    
+                    <?php if($classId): ?>
                         <div class="grid grid-cols-2 gap-3">
-                            {{-- Tombol Rekap --}}
+                            
                             <button onclick="openRecap()" 
                                 class="group w-full py-4 bg-white hover:bg-slate-50 text-elevate-dark hover:text-emerald-600 rounded-xl font-bold shadow-sm flex flex-col items-center justify-center gap-2 transition-all border border-slate-200">
                                 <i class="ph-duotone ph-whatsapp-logo text-2xl mb-1 group-hover:scale-110 transition-transform text-emerald-600"></i>
                                 <span class="uppercase tracking-wider text-[9px] font-black">Lihat Rekap</span>
                             </button>
 
-                            {{-- Tombol Cetak --}}
+                            
                             <button onclick="printReport()" 
                                 class="group w-full py-4 bg-elevate-primary hover:bg-elevate-dark text-white rounded-xl font-bold shadow-sm flex flex-col items-center justify-center gap-2 transition-all">
                                 <i class="ph-bold ph-printer text-2xl mb-1 group-hover:rotate-12 transition-transform"></i>
                                 <span class="uppercase tracking-wider text-[9px] font-black">Cetak PDF</span>
                             </button>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>    
             </div>
         </div>
 
-        {{-- === BAGIAN 1: STATISTIK CARD (SELALU MUNCUL) === --}}
+        
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 animate-enter" style="animation-delay: 100ms">
-            {{-- Sudah Lapor Card --}}
+            
             <div class="bg-white p-8 rounded-2xl fluent-card flex items-center gap-6 group hover:border-emerald-500 transition-all duration-300">
                 <div class="w-16 h-16 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-sm border border-emerald-200">
                     <i class="ph-fill ph-shield-check"></i>
@@ -185,15 +194,15 @@
                 <div>
                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Sudah Melapor</p>
                     <p class="text-4xl font-black text-elevate-dark tracking-tighter">
-                        {{ $stats['submitted'] ?? 0 }} <span class="text-sm font-bold text-slate-400">SISWA</span>
+                        <?php echo e($stats['submitted'] ?? 0); ?> <span class="text-sm font-bold text-slate-400">SISWA</span>
                     </p>
-                    @if(!$classId)
+                    <?php if(!$classId): ?>
                         <span class="text-[9px] text-emerald-600 font-bold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md mt-1 inline-block">Total Sekolah</span>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
 
-            {{-- Belum Lapor Card --}}
+            
             <div class="bg-white p-8 rounded-2xl fluent-card flex items-center gap-6 group hover:border-rose-500 transition-all duration-300">
                 <div class="w-16 h-16 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform shadow-sm border border-rose-200">
                     <i class="ph-fill ph-clock-countdown"></i>
@@ -201,12 +210,12 @@
                 <div>
                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Belum Melapor</p>
                     <p class="text-4xl font-black text-elevate-dark tracking-tighter">
-                        {{ $stats['missing'] ?? 0 }} <span class="text-sm font-bold text-slate-400">SISWA</span>
+                        <?php echo e($stats['missing'] ?? 0); ?> <span class="text-sm font-bold text-slate-400">SISWA</span>
                     </p>
                 </div>
             </div>
 
-            {{-- Partisipasi Card --}}
+            
             <div class="bg-elevate-soft p-8 rounded-2xl fluent-card flex items-center gap-6 group hover:bg-slate-100 hover:border-elevate-primary transition-all duration-300 border border-elevate-accent/30 relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-24 h-24 bg-white/40 rounded-full blur-2xl"></div>
                 <div class="w-16 h-16 rounded-xl bg-white text-elevate-primary border border-elevate-accent/30 flex items-center justify-center text-3xl group-hover:rotate-12 transition-transform shadow-sm">
@@ -214,16 +223,16 @@
                 </div>
                 <div class="relative z-10">
                     <p class="text-[10px] font-black text-elevate-primary uppercase tracking-widest mb-1">Tingkat Partisipasi</p>
-                    <p class="text-4xl font-black text-elevate-dark tracking-tighter">{{ $stats['percentage'] ?? 0 }}%</p>
+                    <p class="text-4xl font-black text-elevate-dark tracking-tighter"><?php echo e($stats['percentage'] ?? 0); ?>%</p>
                 </div>
             </div>
         </div>
 
 
-        {{-- === BAGIAN 2: KONTEN UTAMA === --}}
         
-        @if($classId)
-            {{-- === JIKA KELAS DIPILIH: TAMPILKAN TABEL DAFTAR SISWA === --}}
+        
+        <?php if($classId): ?>
+            
             <div class="animate-enter bg-white rounded-[2rem] fluent-card overflow-hidden mb-12" style="animation-delay: 200ms">
                 <div class="px-6 md:px-8 py-6 border-b border-slate-100 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                     <h2 class="text-xl font-black text-elevate-dark flex items-center gap-3">
@@ -233,7 +242,7 @@
                     
                     <div class="flex flex-col md:flex-row items-center gap-3 w-full xl:w-auto">
                         
-                        {{-- FILTER STATUS BARU --}}
+                        
                         <div class="relative w-full md:w-48 shrink-0">
                             <select id="statusFilter" onchange="searchTable()" class="w-full pl-4 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-elevate-dark focus:ring-elevate-primary focus:border-elevate-primary transition-all appearance-none cursor-pointer">
                                 <option value="all">Semua Status</option>
@@ -244,7 +253,7 @@
                             <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                         </div>
 
-                        {{-- Kolom Pencarian Cepat --}}
+                        
                         <div class="relative w-full md:w-64 shrink-0">
                             <i class="ph-bold ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
                             <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Cari nama siswa..." 
@@ -253,7 +262,8 @@
 
                          <div class="flex gap-2 w-full md:w-auto shrink-0">
                              <span class="px-4 py-2.5 rounded-xl bg-elevate-soft border border-elevate-accent/30 text-elevate-primary text-[10px] font-black uppercase tracking-wider flex-1 text-center whitespace-nowrap shadow-sm">
-                                Kelas: {{ $classes->find($classId)->name ?? '-' }}
+                                Kelas: <?php echo e($classes->find($classId)->name ?? '-'); ?>
+
                              </span>
                          </div>
                     </div>
@@ -271,85 +281,87 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            @forelse($students as $student)
-                                @php
+                            <?php $__empty_1 = true; $__currentLoopData = $students; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $student): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <?php
                                     // Menentukan Status Row untuk filter JavaScript
                                     $rowStatus = 'missing';
                                     if ($student->habit_status == 'submitted') {
                                         $rowStatus = ($student->habit_data && !empty($student->habit_data->teacher_feedback)) ? 'graded' : 'pending';
                                     }
-                                @endphp
+                                ?>
 
-                                <tr class="hover:bg-slate-50/80 transition-colors group student-row" data-status="{{ $rowStatus }}">
+                                <tr class="hover:bg-slate-50/80 transition-colors group student-row" data-status="<?php echo e($rowStatus); ?>">
                                     <td class="px-6 md:px-8 py-4">
                                         <div class="flex items-center gap-4">
                                             <div class="w-12 h-12 rounded-xl bg-elevate-soft border border-elevate-accent/30 flex items-center justify-center text-elevate-primary font-black text-lg group-hover:bg-elevate-primary group-hover:text-white transition-all duration-300 shadow-sm">
-                                                {{ substr($student->name, 0, 1) }}
+                                                <?php echo e(substr($student->name, 0, 1)); ?>
+
                                             </div>
                                             <div>
-                                                <div class="student-name font-bold text-elevate-dark group-hover:text-elevate-primary transition-colors text-sm">{{ $student->name }}</div>
-                                                <div class="text-[10px] text-slate-400 font-bold uppercase mt-0.5 tracking-wider">{{ $student->student_id }}</div>
+                                                <div class="student-name font-bold text-elevate-dark group-hover:text-elevate-primary transition-colors text-sm"><?php echo e($student->name); ?></div>
+                                                <div class="text-[10px] text-slate-400 font-bold uppercase mt-0.5 tracking-wider"><?php echo e($student->student_id); ?></div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 text-center">
-                                        @if($student->habit_status == 'submitted')
+                                        <?php if($student->habit_status == 'submitted'): ?>
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200 text-[10px] font-bold uppercase tracking-widest shadow-sm">
                                                 <i class="ph-fill ph-check-circle text-sm"></i> Sudah Lapor
                                             </span>
-                                        @else
+                                        <?php else: ?>
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-slate-200">
                                                 <i class="ph-bold ph-minus text-sm"></i> Belum Ada
                                             </span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td class="px-6 py-4 text-center">
-                                        @if($student->habit_data)
+                                        <?php if($student->habit_data): ?>
                                             <div class="flex items-center justify-center gap-1.5 text-slate-500 font-bold text-xs bg-white px-2 py-1 rounded-md border border-slate-200 w-fit mx-auto shadow-sm">
                                                 <i class="ph-bold ph-clock text-elevate-primary"></i>
-                                                {{ $student->habit_data->created_at->format('H:i') }}
+                                                <?php echo e($student->habit_data->created_at->format('H:i')); ?>
+
                                             </div>
-                                        @else
+                                        <?php else: ?>
                                             <span class="text-slate-300 text-[10px] font-bold uppercase tracking-widest italic">MENUNGGU...</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td class="px-6 py-4 text-center">
-                                        @if($student->habit_data && $student->habit_data->habit_5) 
+                                        <?php if($student->habit_data && $student->habit_data->habit_5): ?> 
                                             <span class="inline-flex w-8 h-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-200 shadow-sm" title="Sudah Mengambil Makan">
                                                 <i class="ph-bold ph-check text-lg"></i>
                                             </span>
-                                        @else
+                                        <?php else: ?>
                                             <span class="inline-flex w-8 h-8 items-center justify-center rounded-lg bg-slate-50 text-slate-300 border border-slate-200" title="Belum Mengambil">
                                                 <i class="ph-bold ph-minus text-lg"></i>
                                             </span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td class="px-6 md:px-8 py-4 text-right">
-                                        @if($student->habit_data)
+                                        <?php if($student->habit_data): ?>
                                             <div class="flex items-center justify-end gap-3">
-                                                <div id="badge-feedback-{{ $student->habit_data->id }}" class="mr-1 hidden lg:block">
-                                                    @if($student->habit_data->teacher_feedback)
+                                                <div id="badge-feedback-<?php echo e($student->habit_data->id); ?>" class="mr-1 hidden lg:block">
+                                                    <?php if($student->habit_data->teacher_feedback): ?>
                                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 text-[10px] font-bold uppercase tracking-wider shadow-sm">
                                                             <i class="ph-fill ph-check-circle"></i> Dinilai
                                                         </span>
-                                                    @else
+                                                    <?php else: ?>
                                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-600 text-[10px] font-bold uppercase tracking-wider animate-pulse shadow-sm">
                                                             <i class="ph-bold ph-clock"></i> Menunggu
                                                         </span>
-                                                    @endif
+                                                    <?php endif; ?>
                                                 </div>
 
-                                                <button onclick="openDetail({{ $student->habit_data->id }})" 
+                                                <button onclick="openDetail(<?php echo e($student->habit_data->id); ?>)" 
                                                     class="inline-flex items-center gap-2 text-white font-bold text-[10px] uppercase tracking-widest bg-elevate-dark hover:bg-elevate-primary px-5 py-2.5 rounded-xl transition-all shadow-sm active:scale-95 group/btn">
                                                     Tinjau Laporan <i class="ph-bold ph-caret-right text-sm group-hover/btn:translate-x-1 transition-transform"></i>
                                                 </button>
                                             </div>
-                                        @else
+                                        <?php else: ?>
                                             <span class="text-slate-300 text-[10px] font-bold uppercase tracking-widest italic opacity-80">Laporan Kosong</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="5" class="px-8 py-20 text-center">
                                         <div class="w-16 h-16 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-400 shadow-sm">
@@ -358,7 +370,7 @@
                                         <p class="text-elevate-dark font-bold text-sm">Tidak ada data siswa yang ditemukan</p>
                                     </td>
                                 </tr>
-                            @endforelse
+                            <?php endif; ?>
                             <tr id="noResultsRow" class="hidden">
                                 <td colspan="5" class="px-8 py-16 text-center text-slate-500 font-medium text-sm">
                                     <i class="ph-duotone ph-magnifying-glass mb-2 text-3xl text-slate-300"></i><br>
@@ -370,11 +382,11 @@
                 </div>
             </div>
 
-        @else
-            {{-- === JIKA BELUM PILIH KELAS: TAMPILKAN FEED AKTIVITAS === --}}
+        <?php else: ?>
+            
             <div class="animate-enter space-y-6" style="animation-delay: 100ms">
                 
-                {{-- Header Feed & Tabs --}}
+                
                 <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
                     <div>
                         <h3 class="text-2xl font-black text-elevate-dark tracking-tight flex items-center gap-2">
@@ -384,128 +396,134 @@
                         <p class="text-slate-500 text-sm font-medium mt-1">Daftar siswa yang baru saja mengirimkan laporan kebiasaan hari ini.</p>
                     </div>
 
-                    {{-- TABS FILTER STATUS --}}
+                    
                     <div class="flex flex-wrap items-center gap-2 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm">
-                        <a href="{{ request()->fullUrlWithQuery(['status' => null, 'page' => 1]) }}" 
-                           class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all {{ !request('status') ? 'bg-elevate-primary text-white shadow-sm' : 'text-slate-500 hover:text-elevate-dark hover:bg-slate-50' }}">
+                        <a href="<?php echo e(request()->fullUrlWithQuery(['status' => null, 'page' => 1])); ?>" 
+                           class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all <?php echo e(!request('status') ? 'bg-elevate-primary text-white shadow-sm' : 'text-slate-500 hover:text-elevate-dark hover:bg-slate-50'); ?>">
                             <i class="ph-bold ph-list-dashes"></i> Semua
                         </a>
                         
-                        <a href="{{ request()->fullUrlWithQuery(['status' => 'pending', 'page' => 1]) }}" 
-                           class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 {{ request('status') == 'pending' ? 'bg-amber-50 text-amber-600 shadow-sm border border-amber-200' : 'text-slate-500 hover:text-elevate-dark hover:bg-slate-50' }}">
+                        <a href="<?php echo e(request()->fullUrlWithQuery(['status' => 'pending', 'page' => 1])); ?>" 
+                           class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 <?php echo e(request('status') == 'pending' ? 'bg-amber-50 text-amber-600 shadow-sm border border-amber-200' : 'text-slate-500 hover:text-elevate-dark hover:bg-slate-50'); ?>">
                             <i class="ph-bold ph-clock-countdown"></i> Antrean Penilaian
-                            @if(isset($stats['pending_feedback']) && $stats['pending_feedback'] > 0)
-                                <span class="bg-amber-600 text-white px-2 py-0.5 rounded-md text-[9px] shadow-sm">{{ $stats['pending_feedback'] }}</span>
-                            @endif
+                            <?php if(isset($stats['pending_feedback']) && $stats['pending_feedback'] > 0): ?>
+                                <span class="bg-amber-600 text-white px-2 py-0.5 rounded-md text-[9px] shadow-sm"><?php echo e($stats['pending_feedback']); ?></span>
+                            <?php endif; ?>
                         </a>
                         
-                        <a href="{{ request()->fullUrlWithQuery(['status' => 'graded', 'page' => 1]) }}" 
-                           class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 {{ request('status') == 'graded' ? 'bg-emerald-50 text-emerald-600 shadow-sm border border-emerald-200' : 'text-slate-500 hover:text-elevate-dark hover:bg-slate-50' }}">
+                        <a href="<?php echo e(request()->fullUrlWithQuery(['status' => 'graded', 'page' => 1])); ?>" 
+                           class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 <?php echo e(request('status') == 'graded' ? 'bg-emerald-50 text-emerald-600 shadow-sm border border-emerald-200' : 'text-slate-500 hover:text-elevate-dark hover:bg-slate-50'); ?>">
                             <i class="ph-bold ph-check-circle"></i> Sudah Dinilai
                         </a>
                     </div>
                 </div>
 
-                {{-- Grid Card Siswa --}}
-                @if($latestSubmissions->count() > 0)
+                
+                <?php if($latestSubmissions->count() > 0): ?>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        @foreach($latestSubmissions as $submission)
+                        <?php $__currentLoopData = $latestSubmissions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $submission): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="group bg-white rounded-2xl p-6 fluent-card hover:border-elevate-primary transition-all duration-300 relative overflow-hidden">
                             
-                            {{-- Dekorasi Background --}}
+                            
                             <div class="absolute top-0 right-0 w-32 h-32 bg-elevate-soft rounded-bl-[4rem] -mr-6 -mt-6 transition-transform group-hover:scale-110 opacity-50"></div>
 
                             <div class="relative z-10">
-                                {{-- Profil Siswa --}}
+                                
                                 <div class="flex items-center gap-4 mb-6">
                                     <div class="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 font-bold text-lg shadow-sm group-hover:bg-elevate-primary group-hover:text-white group-hover:border-elevate-primary transition-all duration-300">
-                                        {{ substr($submission->student->name, 0, 1) }}
+                                        <?php echo e(substr($submission->student->name, 0, 1)); ?>
+
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <h4 class="font-bold text-elevate-dark text-sm truncate group-hover:text-elevate-primary transition-colors">
-                                            {{ $submission->student->name }}
+                                            <?php echo e($submission->student->name); ?>
+
                                         </h4>
                                         <div class="flex items-center gap-2 mt-1">
                                             <span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-[9px] font-bold text-slate-500 uppercase truncate max-w-[80px]">
-                                                {{ $submission->student->schoolClass->name ?? 'N/A' }}
+                                                <?php echo e($submission->student->schoolClass->name ?? 'N/A'); ?>
+
                                             </span>
                                             <span class="text-[9px] text-slate-400 font-bold flex items-center gap-1 shrink-0">
-                                                <i class="ph-bold ph-clock"></i> {{ $submission->updated_at->format('H:i') }} WIB
+                                                <i class="ph-bold ph-clock"></i> <?php echo e($submission->updated_at->format('H:i')); ?> WIB
                                             </span>
                                         </div>
                                     </div>
                                 </div>
 
-                                {{-- Quick Stats (Berdasarkan Habit 7 Elevate) --}}
+                                
                                 <div class="flex gap-2 mb-6">
                                     <div class="flex-1 py-2 px-1 rounded-xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm" title="Status Shalat">
-                                        @php $isPrayerDone = $submission->prayer_subuh || $submission->prayer_dzuhur || $submission->prayer_ashar || $submission->prayer_maghrib || $submission->prayer_isya || $submission->is_udzur_syar_i; @endphp
-                                        <i class="ph-fill ph-mosque text-lg {{ $isPrayerDone ? 'text-emerald-600' : 'text-slate-300' }} mb-1 block"></i>
+                                        <?php $isPrayerDone = $submission->prayer_subuh || $submission->prayer_dzuhur || $submission->prayer_ashar || $submission->prayer_maghrib || $submission->prayer_isya || $submission->is_udzur_syar_i; ?>
+                                        <i class="ph-fill ph-mosque text-lg <?php echo e($isPrayerDone ? 'text-emerald-600' : 'text-slate-300'); ?> mb-1 block"></i>
                                         <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Ibadah</span>
                                     </div>
                                     <div class="flex-1 py-2 px-1 rounded-xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm" title="One Day One Ayat">
-                                        <i class="ph-fill ph-microphone-stage text-lg {{ $submission->odoa_audio_path ? 'text-elevate-primary' : 'text-slate-300' }} mb-1 block"></i>
+                                        <i class="ph-fill ph-microphone-stage text-lg <?php echo e($submission->odoa_audio_path ? 'text-elevate-primary' : 'text-slate-300'); ?> mb-1 block"></i>
                                         <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Odoa</span>
                                     </div>
                                     <div class="flex-1 py-2 px-1 rounded-xl bg-slate-50 border border-slate-100 text-center transition-colors group-hover:bg-white group-hover:shadow-sm" title="Makan Bergizi">
-                                        <i class="ph-fill ph-carrot text-lg {{ $submission->habit_5 ? 'text-elevate-peach-dark' : 'text-slate-300' }} mb-1 block"></i>
+                                        <i class="ph-fill ph-carrot text-lg <?php echo e($submission->habit_5 ? 'text-elevate-peach-dark' : 'text-slate-300'); ?> mb-1 block"></i>
                                         <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Gizi</span>
                                     </div>
                                 </div>
 
-                                {{-- Tombol Action --}}
+                                
                                 <div class="flex items-center justify-between gap-3 pt-4 border-t border-slate-100">
                                     
                                     <!-- WRAPPER BADGE FEEDBACK -->
-                                    <div id="badge-feedback-{{ $submission->id }}">
-                                        @if($submission->teacher_feedback)
+                                    <div id="badge-feedback-<?php echo e($submission->id); ?>">
+                                        <?php if($submission->teacher_feedback): ?>
                                             <div class="flex items-center gap-1.5 text-emerald-600 text-[10px] font-bold uppercase tracking-wide bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-md shadow-sm">
                                                 <i class="ph-bold ph-check-circle"></i> Dinilai
                                             </div>
-                                        @else
+                                        <?php else: ?>
                                             <div class="flex items-center gap-1.5 text-amber-600 text-[10px] font-bold uppercase tracking-wide bg-amber-50 border border-amber-200 px-2 py-1 rounded-md shadow-sm animate-pulse">
                                                 <i class="ph-bold ph-clock"></i> Menunggu
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
 
-                                    <button onclick="openDetail({{ $submission->id }})" 
+                                    <button onclick="openDetail(<?php echo e($submission->id); ?>)" 
                                         class="pl-4 pr-3 py-2 bg-elevate-dark hover:bg-elevate-primary text-white rounded-lg text-[10px] font-bold uppercase tracking-widest shadow-sm transition-all active:scale-95 flex items-center gap-2 group-hover:translate-x-1">
                                         Tinjau <i class="ph-bold ph-caret-right"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
 
-                    {{-- TAMBAHAN: PAGINATION LINKS --}}
+                    
                     <div class="mt-8">
-                        {{ $latestSubmissions->links() }}
+                        <?php echo e($latestSubmissions->links()); ?>
+
                     </div>
-                @else
-                    {{-- Empty State jika Feed Kosong --}}
+                <?php else: ?>
+                    
                     <div class="text-center py-24 bg-white fluent-card rounded-[2rem]">
                         <div class="w-20 h-20 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-5 text-slate-300 rotate-3 transition-transform hover:rotate-0 shadow-sm">
                             <i class="ph-duotone ph-coffee text-4xl"></i>
                         </div>
                         <h3 class="text-lg font-bold text-elevate-dark tracking-tight">
-                            {{ request('status') == 'pending' ? 'Hore! Antrean Kosong' : 'Belum Ada Aktivitas' }}
+                            <?php echo e(request('status') == 'pending' ? 'Hore! Antrean Kosong' : 'Belum Ada Aktivitas'); ?>
+
                         </h3>
                         <p class="text-slate-500 text-sm mt-2 max-w-sm mx-auto">
-                            {{ request('status') == 'pending' ? 'Semua jurnal kebiasaan untuk hari ini sudah kamu nilai.' : 'Tampaknya belum ada siswa yang mengisi jurnal dengan filter ini.' }}
+                            <?php echo e(request('status') == 'pending' ? 'Semua jurnal kebiasaan untuk hari ini sudah kamu nilai.' : 'Tampaknya belum ada siswa yang mengisi jurnal dengan filter ini.'); ?>
+
                         </p>
-                        @if(request('status'))
-                            <a href="{{ route('teacher.habits.index') }}" class="inline-block mt-6 px-5 py-2.5 bg-slate-100 border border-slate-200 text-elevate-dark rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-slate-200 transition-colors shadow-sm">Reset Filter</a>
-                        @endif
+                        <?php if(request('status')): ?>
+                            <a href="<?php echo e(route('teacher.habits.index')); ?>" class="inline-block mt-6 px-5 py-2.5 bg-slate-100 border border-slate-200 text-elevate-dark rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-slate-200 transition-colors shadow-sm">Reset Filter</a>
+                        <?php endif; ?>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
-        @endif
+        <?php endif; ?>
 
     </div>
 
-    {{-- MODAL DETAIL (FLUENT MODAL) --}}
+    
     <div id="detailModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300" onclick="closeDetail()"></div>
         <div class="flex items-center justify-center min-h-screen p-4 sm:p-6">
@@ -517,7 +535,7 @@
         </div>
     </div>
     
-    {{-- MODAL REKAP (FLUENT MODAL) --}}
+    
     <div id="recapModal" class="fixed inset-0 z-[100] hidden overflow-y-auto">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300" onclick="closeRecap()"></div>
         <div class="flex items-center justify-center min-h-screen p-4 sm:p-6">
@@ -525,7 +543,7 @@
                 <div class="p-6 border-b border-slate-200 flex items-center justify-between bg-white z-10">
                     <div>
                         <h3 class="text-xl font-bold text-elevate-dark flex items-center gap-2"><i class="ph-fill ph-whatsapp-logo text-emerald-600"></i> Rekap WhatsApp</h3>
-                        <p class="text-xs text-slate-500 font-bold mt-1">Data rekap siswa per {{ \Carbon\Carbon::parse($date)->translatedFormat('d F Y') }}</p>
+                        <p class="text-xs text-slate-500 font-bold mt-1">Data rekap siswa per <?php echo e(\Carbon\Carbon::parse($date)->translatedFormat('d F Y')); ?></p>
                     </div>
                     <div class="flex gap-2">
                          <button onclick="copyRecap()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs uppercase tracking-widest shadow-sm flex items-center gap-2 transition-all"><i class="ph-bold ph-copy"></i> Salin</button>
@@ -538,21 +556,21 @@
                         <div class="bg-white p-6 rounded-2xl border border-emerald-200 shadow-sm">
                             <div class="flex items-center justify-between mb-5 pb-4 border-b border-slate-100">
                                 <h4 class="font-bold text-emerald-600 uppercase tracking-widest text-xs flex items-center gap-2"><i class="ph-fill ph-check-circle text-lg"></i> Sudah Lapor</h4>
-                                <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-lg text-xs font-bold border border-emerald-200">{{ $stats['submitted'] ?? 0 }} Siswa</span>
+                                <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-lg text-xs font-bold border border-emerald-200"><?php echo e($stats['submitted'] ?? 0); ?> Siswa</span>
                             </div>
                             <ol class="list-decimal list-inside space-y-2 text-sm font-bold text-elevate-dark marker:text-emerald-600">
-                                @forelse($students->where('habit_status', 'submitted') as $s) <li class="pl-1">{{ $s->name }}</li>
-                                @empty <p class="text-slate-400 italic text-center py-4 text-xs font-medium">Belum ada siswa yang melapor.</p> @endforelse
+                                <?php $__empty_1 = true; $__currentLoopData = $students->where('habit_status', 'submitted'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?> <li class="pl-1"><?php echo e($s->name); ?></li>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?> <p class="text-slate-400 italic text-center py-4 text-xs font-medium">Belum ada siswa yang melapor.</p> <?php endif; ?>
                             </ol>
                         </div>
                         <div class="bg-white p-6 rounded-2xl border border-rose-200 shadow-sm">
                             <div class="flex items-center justify-between mb-5 pb-4 border-b border-slate-100">
                                 <h4 class="font-bold text-rose-600 uppercase tracking-widest text-xs flex items-center gap-2"><i class="ph-fill ph-x-circle text-lg"></i> Belum Lapor</h4>
-                                <span class="bg-rose-50 text-rose-600 px-3 py-1 rounded-lg text-xs font-bold border border-rose-200">{{ $stats['missing'] ?? 0 }} Siswa</span>
+                                <span class="bg-rose-50 text-rose-600 px-3 py-1 rounded-lg text-xs font-bold border border-rose-200"><?php echo e($stats['missing'] ?? 0); ?> Siswa</span>
                             </div>
                             <ol class="list-decimal list-inside space-y-2 text-sm font-bold text-elevate-dark marker:text-rose-600">
-                                @forelse($students->where('habit_status', 'missing') as $s) <li class="pl-1">{{ $s->name }}</li>
-                                @empty <p class="text-slate-400 italic text-center py-4 text-xs font-medium">Semua siswa sudah melapor!</p> @endforelse
+                                <?php $__empty_1 = true; $__currentLoopData = $students->where('habit_status', 'missing'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?> <li class="pl-1"><?php echo e($s->name); ?></li>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?> <p class="text-slate-400 italic text-center py-4 text-xs font-medium">Semua siswa sudah melapor!</p> <?php endif; ?>
                             </ol>
                         </div>
                     </div>
@@ -561,28 +579,32 @@
         </div>
     </div>
 
-    @if($classId)
+    <?php if($classId): ?>
     <textarea id="recapText" class="hidden">
 *LAPORAN MONITORING KEBIASAAN BAIK*
-Kelas: {{ $classes->find($classId)->name ?? '-' }}
-Tanggal: {{ \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y') }}
+Kelas: <?php echo e($classes->find($classId)->name ?? '-'); ?>
 
-✅ *SUDAH LAPOR ({{ $stats['submitted'] ?? 0 }}):*
-@foreach($students->where('habit_status', 'submitted') as $index => $s)
-{{ $loop->iteration }}. {{ $s->name }}
-@endforeach
+Tanggal: <?php echo e(\Carbon\Carbon::parse($date)->translatedFormat('l, d F Y')); ?>
 
-❌ *BELUM LAPOR ({{ $stats['missing'] ?? 0 }}):*
-@foreach($students->where('habit_status', 'missing') as $index => $s)
-{{ $loop->iteration }}. {{ $s->name }}
-@endforeach
+
+✅ *SUDAH LAPOR (<?php echo e($stats['submitted'] ?? 0); ?>):*
+<?php $__currentLoopData = $students->where('habit_status', 'submitted'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+<?php echo e($loop->iteration); ?>. <?php echo e($s->name); ?>
+
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
+❌ *BELUM LAPOR (<?php echo e($stats['missing'] ?? 0); ?>):*
+<?php $__currentLoopData = $students->where('habit_status', 'missing'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $s): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+<?php echo e($loop->iteration); ?>. <?php echo e($s->name); ?>
+
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
 _Mohon segera mengisi jurnal kebiasaan baik._
 Terima kasih. 🙏
     </textarea>
-    @endif
+    <?php endif; ?>
 
-    {{-- SWEETALERT --}}
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
@@ -673,7 +695,7 @@ Terima kasih. 🙏
             }
             
             // Membuka tab baru untuk print report dengan parameter dinamis
-            window.open(`{{ route('teacher.habits.print') }}?period_type=${periodType}&period_value=${periodValue}&class_id=${classId}`, '_blank');
+            window.open(`<?php echo e(route('teacher.habits.print')); ?>?period_type=${periodType}&period_value=${periodValue}&class_id=${classId}`, '_blank');
         }
 
         // =========================================================================
@@ -688,7 +710,7 @@ Terima kasih. 🙏
             
             content.innerHTML = `<div class="flex flex-col items-center justify-center py-20"><div class="relative"><div class="w-16 h-16 border-4 border-slate-200 rounded-full"></div><div class="w-16 h-16 border-4 border-elevate-primary border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div></div><p class="mt-4 text-elevate-primary text-[10px] font-black uppercase tracking-widest">Mengambil Jurnal...</p></div>`;
             
-            fetch(`{{ url('/teacher/habits/detail') }}/${id}`)
+            fetch(`<?php echo e(url('/teacher/habits/detail')); ?>/${id}`)
                 .then(response => { if (!response.ok) throw new Error('Network error'); return response.text(); })
                 .then(html => { content.innerHTML = html; })
                 .catch(err => { content.innerHTML = `<div class="text-center py-20"><div class="w-16 h-16 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-rose-200"><i class="ph-bold ph-warning-circle text-3xl"></i></div><h3 class="text-lg font-bold text-elevate-dark">Gagal Memuat Jurnal</h3><p class="text-slate-500 text-xs mb-6 font-medium">Koneksi bermasalah.</p><button onclick="openDetail(${id})" class="bg-elevate-primary text-white px-8 py-3 rounded-xl font-bold text-xs shadow-sm hover:bg-elevate-dark transition-colors">Muat Ulang</button></div>`; });
@@ -824,4 +846,13 @@ Terima kasih. 🙏
             });
         }
     </script>
-</x-app-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $attributes = $__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__attributesOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54)): ?>
+<?php $component = $__componentOriginal9ac128a9029c0e4701924bd2d73d7f54; ?>
+<?php unset($__componentOriginal9ac128a9029c0e4701924bd2d73d7f54); ?>
+<?php endif; ?><?php /**PATH E:\aplikasi terpadu\sistem_absensi_sekolah\resources\views/habits/teacher_index.blade.php ENDPATH**/ ?>
