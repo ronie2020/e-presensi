@@ -219,18 +219,24 @@ class TeacherHabitController extends Controller
     /**
      * Papan Peringkat Siswa Terajin
      */
-    public function leaderboard()
+    public function leaderboard(Request $request)
     {
+        // Ambil input bulan (default: bulan ini)
+        // Format input bertipe 'month' adalah "YYYY-MM" (contoh: "2026-05")
+        $filterMonth = $request->input('month', Carbon::now()->format('Y-m'));
+        $year = (int) substr($filterMonth, 0, 4);
+        $month = (int) substr($filterMonth, 5, 2);
+
         // [PERBAIKAN MVC]: Memindahkan Query dari file Blade ke Controller
         $leaderboard = StudentHabit::with(['student', 'student.schoolClass'])
             ->selectRaw('student_id, count(*) as total_days')
-            ->whereMonth('report_date', Carbon::now()->month)
-            ->whereYear('report_date', Carbon::now()->year)
+            ->whereMonth('report_date', $month)
+            ->whereYear('report_date', $year)
             ->groupBy('student_id')
             ->orderByDesc('total_days')
             ->take(50) 
             ->get();
 
-        return view('habits.teacher_leaderboard', compact('leaderboard')); 
+        return view('habits.teacher_leaderboard', compact('leaderboard', 'filterMonth')); 
     }
 }
