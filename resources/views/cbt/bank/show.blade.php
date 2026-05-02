@@ -26,26 +26,26 @@
                     <h1 class="text-2xl font-black text-elevate-dark tracking-tight">Daftar Mata Pelajaran</h1>
                 </div>
                 <div class="flex gap-2 w-full md:w-auto">
-                    <a href="{{ route('bank.create', ['folder_id' => $folder->id]) }}" class="w-full md:w-auto px-6 py-3 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-dark/90 transition shadow-lg shadow-elevate-dark/20 flex items-center justify-center gap-2">
-                        <i class="ph-bold ph-plus-circle text-lg"></i> Buat Bank Soal Mapel
-                    </a>
-                </div>
+                <a href="{{ route('bank.create', ['folder_id' => $folder->id]) }}" class="w-full md:w-auto px-6 py-3 bg-elevate-dark text-white font-bold rounded-xl hover:bg-elevate-dark/90 transition shadow-lg shadow-elevate-dark/20 flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-plus-circle text-lg"></i> Buat Bank Soal Mapel
+                </a>
             </div>
+        </div>
 
-            {{-- STATISTIK (Elevate Colors) --}}
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="col-span-1 md:col-span-2 bg-white rounded-[2rem] p-5 border border-slate-100 shadow-xl shadow-elevate-accent/5 flex items-center gap-4 hover:-translate-y-1 transition-transform">
-                    <div class="w-12 h-12 bg-elevate-accent/20 text-elevate-primary rounded-[1rem] flex items-center justify-center text-xl shrink-0 border border-elevate-accent/30"><i class="ph-bold ph-books"></i></div>
-                    <div><p class="text-[10px] text-slate-400 font-bold uppercase mb-0.5 tracking-wider">Total Mapel</p><h4 class="text-2xl font-black text-elevate-dark">{{ $folder->banks_count ?? 0 }}</h4></div>
-                </div>
-                <div class="col-span-1 md:col-span-2 bg-white rounded-[2rem] p-5 border border-slate-100 shadow-xl shadow-elevate-accent/5 flex items-center gap-4 hover:-translate-y-1 transition-transform">
-                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-[1rem] flex items-center justify-center text-xl shrink-0"><i class="ph-bold ph-list-numbers"></i></div>
-                    <div><p class="text-[10px] text-slate-400 font-bold uppercase mb-0.5 tracking-wider">Total Butir Soal</p><h4 class="text-2xl font-black text-elevate-dark">{{ number_format($totalQuestions ?? 0) }}</h4></div>
-                </div>
+        {{-- STATISTIK (Elevate Colors) --}}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="col-span-1 md:col-span-2 bg-white rounded-[2rem] p-5 border border-slate-100 shadow-xl shadow-elevate-accent/5 flex items-center gap-4 hover:-translate-y-1 transition-transform">
+                <div class="w-12 h-12 bg-elevate-accent/20 text-elevate-primary rounded-[1rem] flex items-center justify-center text-xl shrink-0 border border-elevate-accent/30"><i class="ph-bold ph-books"></i></div>
+                <div><p class="text-[10px] text-slate-400 font-bold uppercase mb-0.5 tracking-wider">Total Mapel</p><h4 class="text-2xl font-black text-elevate-dark">{{ $banks->count() }}</h4></div>
             </div>
+            <div class="col-span-1 md:col-span-2 bg-white rounded-[2rem] p-5 border border-slate-100 shadow-xl shadow-elevate-accent/5 flex items-center gap-4 hover:-translate-y-1 transition-transform">
+                <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-[1rem] flex items-center justify-center text-xl shrink-0"><i class="ph-bold ph-list-numbers"></i></div>
+                <div><p class="text-[10px] text-slate-400 font-bold uppercase mb-0.5 tracking-wider">Total Butir Soal</p><h4 class="text-2xl font-black text-elevate-dark">{{ number_format($totalQuestions ?? 0) }}</h4></div>
+            </div>
+        </div>
 
-            {{-- GRID BANK SOAL MAPEL --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {{-- GRID BANK SOAL MAPEL --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @forelse($banks as $bank)
                     <div class="bg-white border border-slate-100 rounded-[2.5rem] p-6 hover:shadow-xl hover:shadow-elevate-accent/10 hover:border-elevate-accent/50 transition-all duration-300 group relative flex flex-col h-full">
                         
